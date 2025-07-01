@@ -10,7 +10,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Calculator, TrendingDown, Info } from 'lucide-react';
+import { 
+  CalendarIcon, 
+  Calculator, 
+  TrendingDown, 
+  Info, 
+  User, 
+  Car, 
+  RefreshCw,
+  Save,
+  AlertTriangle
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -43,6 +53,15 @@ interface QuotationFormProps {
   onSuccess?: () => void;
 }
 
+// الشروط والأحكام المحددة مسبقاً
+const predefinedTerms = [
+  'العميل مسؤول عن أي أضرار تحدث للمركبة أثناء فترة الإيجار',
+  'يجب إرجاع المركبة بنفس حالة التسليم',
+  'التأخير في إرجاع المركبة يستوجب رسوم إضافية',
+  'العميل مسؤول عن جميع المخالفات المرورية',
+  'يحق للشركة استرداد المركبة فوراً في حالة الاستخدام غير المشروع',
+];
+
 export const QuotationForm: React.FC<QuotationFormProps> = ({
   open,
   onOpenChange,
@@ -51,7 +70,9 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({
   onSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [pricingDetails, setPricingDetails] = useState<any>(null);
+  const [selectedTerms, setSelectedTerms] = useState<string[]>([]);
+  const [customTerm, setCustomTerm] = useState('');
+  const [showCustomTermInput, setShowCustomTermInput] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<QuotationFormData>({
@@ -146,256 +167,489 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({
     return data;
   };
 
+  const handleClearForm = () => {
+    form.reset();
+    setSelectedTerms([]);
+    setCustomTerm('');
+    setShowCustomTermInput(false);
+  };
+
+  const addCustomTerm = () => {
+    if (customTerm.trim()) {
+      setSelectedTerms([...selectedTerms, customTerm.trim()]);
+      setCustomTerm('');
+      setShowCustomTermInput(false);
+    }
+  };
+
+  const removeTerm = (index: number) => {
+    setSelectedTerms(selectedTerms.filter((_, i) => i !== index));
+  };
+
+  // التحقق من صحة التواريخ
+  const validateDates = () => {
+    if (watchedValues.start_date && watchedValues.end_date) {
+      if (watchedValues.end_date <= watchedValues.start_date) {
+        return 'تاريخ النهاية يجب أن يكون بعد تاريخ البداية';
+      }
+    }
+    return null;
+  };
+
+  const dateError = validateDates();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>إنشاء عرض سعر جديد</DialogTitle>
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto font-cairo">
+        <DialogHeader className="text-right">
+          <DialogTitle className="text-2xl font-bold text-primary flex items-center gap-2">
+            <Calculator className="w-6 h-6" />
+            إنشاء عرض سعر جديد
+          </DialogTitle>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="customer_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>العميل</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر العميل" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {customers.map((customer) => (
-                          <SelectItem key={customer.id} value={customer.id}>
-                            {customer.name} - {customer.customer_number}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="vehicle_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>المركبة</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر المركبة" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {vehicles.map((vehicle) => (
-                          <SelectItem key={vehicle.id} value={vehicle.id}>
-                            {vehicle.make} {vehicle.model} - {vehicle.vehicle_number}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="start_date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>تاريخ البداية</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
+        <div className="bg-[#f9f9f9] p-6 rounded-lg">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* الشبكة الرئيسية: 2 عمود × 4 صفوف */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* الصف الأول - العميل والمركبة */}
+                <FormField
+                  control={form.control}
+                  name="customer_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <User className="w-4 h-4 text-primary" />
+                        العميل
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP", { locale: ar })
-                            ) : (
-                              <span>اختر التاريخ</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
+                          <SelectTrigger className="bg-white border-border">
+                            <SelectValue placeholder="اختر العميل من القائمة" />
+                          </SelectTrigger>
                         </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date < new Date()}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <SelectContent className="bg-white">
+                          {customers.map((customer) => (
+                            <SelectItem key={customer.id} value={customer.id}>
+                              <div className="flex items-center justify-between w-full">
+                                <span>{customer.name}</span>
+                                <Badge variant="outline" className="mr-2">
+                                  {customer.customer_number}
+                                </Badge>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="end_date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>تاريخ النهاية</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
+                <FormField
+                  control={form.control}
+                  name="vehicle_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <Car className="w-4 h-4 text-primary" />
+                        المركبة
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP", { locale: ar })
-                            ) : (
-                              <span>اختر التاريخ</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
+                          <SelectTrigger className="bg-white border-border">
+                            <SelectValue placeholder="اختر المركبة المطلوبة" />
+                          </SelectTrigger>
                         </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date < (form.getValues('start_date') || new Date())}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <SelectContent className="bg-white">
+                          {vehicles.map((vehicle) => (
+                            <SelectItem key={vehicle.id} value={vehicle.id}>
+                              <div className="flex items-center justify-between w-full">
+                                <span>{vehicle.make} {vehicle.model}</span>
+                                <div className="flex gap-2 mr-2">
+                                  <Badge variant="outline">{vehicle.vehicle_number}</Badge>
+                                  <Badge className="bg-success text-success-foreground">
+                                    {vehicle.daily_rate.toFixed(3)} د.ك
+                                  </Badge>
+                                </div>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="daily_rate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>السعر اليومي (د.ك)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                {/* الصف الثاني - التواريخ */}
+                <FormField
+                  control={form.control}
+                  name="start_date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <CalendarIcon className="w-4 h-4 text-primary" />
+                        تاريخ البداية
+                      </FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full bg-white border-border text-right font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP", { locale: ar })
+                              ) : (
+                                <span>اختر تاريخ البداية</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="discount_amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>قيمة الخصم (د.ك)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="end_date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <CalendarIcon className="w-4 h-4 text-primary" />
+                        تاريخ النهاية
+                      </FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full bg-white border-border text-right font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP", { locale: ar })
+                              ) : (
+                                <span>اختر تاريخ النهاية</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < (form.getValues('start_date') || new Date())}
+                            initialFocus
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                      {dateError && (
+                        <Alert className="mt-2 border-warning">
+                          <AlertTriangle className="h-4 w-4" />
+                          <AlertDescription className="text-warning">
+                            {dateError}
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="tax_amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>قيمة الضريبة (د.ك)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                {/* الصف الثالث - الأسعار */}
+                <FormField
+                  control={form.control}
+                  name="daily_rate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-foreground">
+                        السعر اليومي
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            step="0.001"
+                            placeholder="0.000"
+                            className="bg-white border-border pr-12"
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          />
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm">
+                            د.ك
+                          </span>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {/* Calculation Summary */}
-            {rentalDays > 0 && (
-              <div className="bg-muted p-4 rounded-lg">
-                <h4 className="font-medium mb-2">ملخص الحساب</h4>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>عدد الأيام: {rentalDays}</div>
-                  <div>المجموع الفرعي: {totalAmount.toFixed(3)} د.ك</div>
-                  <div>الخصم: {(watchedValues.discount_amount || 0).toFixed(3)} د.ك</div>
-                  <div>الضريبة: {(watchedValues.tax_amount || 0).toFixed(3)} د.ك</div>
-                  <div className="font-bold">المجموع الإجمالي: {finalAmount.toFixed(3)} د.ك</div>
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="discount_amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground flex items-center gap-2">
+                          <TrendingDown className="w-4 h-4 text-success" />
+                          قيمة الخصم
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type="number"
+                              step="0.001"
+                              placeholder="0.000"
+                              className="bg-white border-border pr-12"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm">
+                              د.ك
+                            </span>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* الصف الرابع - الضريبة وحقل إضافي */}
+                <FormField
+                  control={form.control}
+                  name="tax_amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-foreground">
+                        قيمة الضريبة
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            step="0.001"
+                            placeholder="0.000"
+                            className="bg-white border-border pr-12"
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          />
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm">
+                            د.ك
+                          </span>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* حساب المبلغ النهائي التلقائي */}
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                  <h4 className="font-medium text-primary mb-2 flex items-center gap-2">
+                    <Calculator className="w-4 h-4" />
+                    المبلغ النهائي
+                  </h4>
+                  {rentalDays > 0 ? (
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>عدد الأيام:</span>
+                        <span className="font-medium">{rentalDays} يوم</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>المجموع الفرعي:</span>
+                        <span className="font-medium">{totalAmount.toFixed(3)} د.ك</span>
+                      </div>
+                      <div className="flex justify-between text-success">
+                        <span>الخصم:</span>
+                        <span className="font-medium">-{(watchedValues.discount_amount || 0).toFixed(3)} د.ك</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>الضريبة:</span>
+                        <span className="font-medium">+{(watchedValues.tax_amount || 0).toFixed(3)} د.ك</span>
+                      </div>
+                      <hr className="border-border" />
+                      <div className="flex justify-between text-lg font-bold text-primary">
+                        <span>المجموع الإجمالي:</span>
+                        <span>{finalAmount.toFixed(3)} د.ك</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground text-sm">
+                      اختر التواريخ والمركبة لعرض التفاصيل المالية
+                    </p>
+                  )}
                 </div>
               </div>
-            )}
 
-            <FormField
-              control={form.control}
-              name="special_conditions"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>شروط خاصة</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              {/* الحقول العريضة - colSpan=2 */}
+              <div className="space-y-6">
+                {/* الشروط الخاصة */}
+                <FormField
+                  control={form.control}
+                  name="special_conditions"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-foreground">
+                        الشروط الخاصة
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field} 
+                          placeholder="اكتب أي شروط خاصة للعقد (اختياري)"
+                          className="bg-white border-border min-h-[80px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="terms_and_conditions"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الشروط والأحكام</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                {/* الشروط والأحكام المحددة مسبقاً */}
+                <div>
+                  <h4 className="text-sm font-medium text-foreground mb-3">الشروط والأحكام</h4>
+                  <div className="space-y-3">
+                    {predefinedTerms.map((term, index) => (
+                      <div key={index} className="flex items-center space-x-2 space-x-reverse">
+                        <input
+                          type="checkbox"
+                          id={`term-${index}`}
+                          className="rounded border-border"
+                          checked={selectedTerms.includes(term)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedTerms([...selectedTerms, term]);
+                            } else {
+                              setSelectedTerms(selectedTerms.filter(t => t !== term));
+                            }
+                          }}
+                        />
+                        <label htmlFor={`term-${index}`} className="text-sm text-foreground">
+                          {term}
+                        </label>
+                      </div>
+                    ))}
+                    
+                    {/* الشروط المخصصة */}
+                    {selectedTerms.filter(term => !predefinedTerms.includes(term)).map((term, index) => (
+                      <div key={`custom-${index}`} className="flex items-center justify-between bg-accent/10 p-2 rounded">
+                        <span className="text-sm">{term}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeTerm(selectedTerms.indexOf(term))}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    ))}
 
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                إلغاء
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? 'جاري الإنشاء...' : 'إنشاء العرض'}
-              </Button>
-            </div>
-          </form>
-        </Form>
+                    {/* إضافة شرط مخصص */}
+                    {showCustomTermInput ? (
+                      <div className="flex gap-2">
+                        <Input
+                          value={customTerm}
+                          onChange={(e) => setCustomTerm(e.target.value)}
+                          placeholder="اكتب شرط مخصص"
+                          className="bg-white"
+                          onKeyPress={(e) => e.key === 'Enter' && addCustomTerm()}
+                        />
+                        <Button type="button" onClick={addCustomTerm} size="sm">
+                          إضافة
+                        </Button>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setShowCustomTermInput(false);
+                            setCustomTerm('');
+                          }}
+                        >
+                          إلغاء
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowCustomTermInput(true)}
+                        className="text-primary border-primary hover:bg-primary/10"
+                      >
+                        + إضافة شرط مخصص
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* حقل مخفي للشروط المختارة */}
+                  <FormField
+                    control={form.control}
+                    name="terms_and_conditions"
+                    render={({ field }) => {
+                      // تحديث القيمة تلقائياً عند تغيير الشروط المختارة
+                      React.useEffect(() => {
+                        field.onChange(selectedTerms.join('\n• '));
+                      }, [selectedTerms, field]);
+
+                      return <input type="hidden" {...field} />;
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* أزرار الإجراءات */}
+              <div className="flex justify-end gap-3 pt-6 border-t border-border">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={handleClearForm}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  تفريغ النموذج
+                </Button>
+                
+                <Button 
+                  type="submit" 
+                  disabled={isLoading || !!dateError}
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  {isLoading ? 'جاري إنشاء العرض...' : 'إنشاء عرض السعر'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );
