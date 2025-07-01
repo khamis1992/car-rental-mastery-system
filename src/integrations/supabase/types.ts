@@ -229,12 +229,168 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_maintenance: {
+        Row: {
+          completed_date: string | null
+          cost: number | null
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          invoice_number: string | null
+          maintenance_type: string
+          mileage_at_service: number | null
+          next_service_date: string | null
+          scheduled_date: string | null
+          service_provider: string | null
+          status: string | null
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          completed_date?: string | null
+          cost?: number | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          invoice_number?: string | null
+          maintenance_type: string
+          mileage_at_service?: number | null
+          next_service_date?: string | null
+          scheduled_date?: string | null
+          service_provider?: string | null
+          status?: string | null
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          completed_date?: string | null
+          cost?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          invoice_number?: string | null
+          maintenance_type?: string
+          mileage_at_service?: number | null
+          next_service_date?: string | null
+          scheduled_date?: string | null
+          service_provider?: string | null
+          status?: string | null
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_maintenance_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicles: {
+        Row: {
+          color: string
+          created_at: string
+          created_by: string | null
+          daily_rate: number
+          engine_size: string | null
+          fuel_type: string | null
+          id: string
+          insurance_company: string | null
+          insurance_expiry: string | null
+          insurance_policy_number: string | null
+          last_maintenance_date: string | null
+          license_plate: string
+          make: string
+          mileage: number | null
+          model: string
+          monthly_rate: number | null
+          next_maintenance_due: string | null
+          notes: string | null
+          registration_expiry: string | null
+          status: Database["public"]["Enums"]["vehicle_status"]
+          transmission: string | null
+          updated_at: string
+          vehicle_number: string
+          vehicle_type: Database["public"]["Enums"]["vehicle_type"]
+          vin_number: string | null
+          weekly_rate: number | null
+          year: number
+        }
+        Insert: {
+          color: string
+          created_at?: string
+          created_by?: string | null
+          daily_rate: number
+          engine_size?: string | null
+          fuel_type?: string | null
+          id?: string
+          insurance_company?: string | null
+          insurance_expiry?: string | null
+          insurance_policy_number?: string | null
+          last_maintenance_date?: string | null
+          license_plate: string
+          make: string
+          mileage?: number | null
+          model: string
+          monthly_rate?: number | null
+          next_maintenance_due?: string | null
+          notes?: string | null
+          registration_expiry?: string | null
+          status?: Database["public"]["Enums"]["vehicle_status"]
+          transmission?: string | null
+          updated_at?: string
+          vehicle_number: string
+          vehicle_type: Database["public"]["Enums"]["vehicle_type"]
+          vin_number?: string | null
+          weekly_rate?: number | null
+          year: number
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          created_by?: string | null
+          daily_rate?: number
+          engine_size?: string | null
+          fuel_type?: string | null
+          id?: string
+          insurance_company?: string | null
+          insurance_expiry?: string | null
+          insurance_policy_number?: string | null
+          last_maintenance_date?: string | null
+          license_plate?: string
+          make?: string
+          mileage?: number | null
+          model?: string
+          monthly_rate?: number | null
+          next_maintenance_due?: string | null
+          notes?: string | null
+          registration_expiry?: string | null
+          status?: Database["public"]["Enums"]["vehicle_status"]
+          transmission?: string | null
+          updated_at?: string
+          vehicle_number?: string
+          vehicle_type?: Database["public"]["Enums"]["vehicle_type"]
+          vin_number?: string | null
+          weekly_rate?: number | null
+          year?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       generate_customer_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_vehicle_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
@@ -259,6 +415,15 @@ export type Database = {
         | "accountant"
         | "technician"
         | "receptionist"
+      vehicle_status: "available" | "rented" | "maintenance" | "out_of_service"
+      vehicle_type:
+        | "sedan"
+        | "suv"
+        | "hatchback"
+        | "coupe"
+        | "pickup"
+        | "van"
+        | "luxury"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -382,6 +547,16 @@ export const Constants = {
         "accountant",
         "technician",
         "receptionist",
+      ],
+      vehicle_status: ["available", "rented", "maintenance", "out_of_service"],
+      vehicle_type: [
+        "sedan",
+        "suv",
+        "hatchback",
+        "coupe",
+        "pickup",
+        "van",
+        "luxury",
       ],
     },
   },

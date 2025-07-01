@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, Search, LogOut, Settings, Shield, Bell, Users } from "lucide-react";
+import { Calendar, User, Search, LogOut, Settings, Shield, Bell, Users, Car } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -96,6 +96,16 @@ const Navbar = () => {
               >
                 <Users className="w-4 h-4" />
                 <span className="hidden md:inline">العملاء</span>
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/fleet')}
+                className="flex items-center gap-2"
+              >
+                <Car className="w-4 h-4" />
+                <span className="hidden md:inline">الأسطول</span>
               </Button>
             </div>
           </div>
