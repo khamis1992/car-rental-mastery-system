@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Car, Calendar, CreditCard, Settings, Gauge, FileText, Shield, RotateCcw } from 'lucide-react';
 
 const vehicleSchema = z.object({
   make: z.string().min(2, 'يجب إدخال الصانع'),
@@ -138,270 +139,452 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     }
   };
 
+  const resetForm = () => {
+    form.reset({
+      fuel_type: 'بنزين',
+      transmission: 'أوتوماتيك',
+      mileage: 0,
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>إضافة مركبة جديدة</DialogTitle>
+      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-background to-muted/20">
+        <DialogHeader className="text-center border-b border-border/50 pb-4">
+          <DialogTitle className="text-2xl font-bold text-primary flex items-center justify-center gap-2">
+            <Car className="w-6 h-6" />
+            إضافة مركبة جديدة
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="make"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الصانع</FormLabel>
-                    <FormControl>
-                      <Input placeholder="مثال: تويوتا" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* القسم الأول: المعلومات الأساسية */}
+            <div className="bg-muted/30 rounded-xl p-6 border border-border/50">
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Car className="w-5 h-5 text-primary" />
+                المعلومات الأساسية
+              </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* العمود الأيسر */}
+                <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="vehicle_type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground">نوع المركبة</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-12 bg-background/60 border-border/60 text-right">
+                              <div className="flex items-center gap-2">
+                                <Car className="w-4 h-4 text-muted-foreground" />
+                                <SelectValue placeholder="اختر نوع المركبة" />
+                              </div>
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {vehicleTypes.map((type) => (
+                              <SelectItem key={type.value} value={type.value}>
+                                {type.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="model"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الموديل</FormLabel>
-                    <FormControl>
-                      <Input placeholder="مثال: كامري" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="make"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground">الصانع</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Car className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              placeholder="مثال: تويوتا" 
+                              className="h-12 pr-10 bg-background/60 border-border/60" 
+                              {...field} 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="year"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>سنة الصنع</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="2024" 
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="year"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground">سنة الصنع</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              type="number" 
+                              placeholder="2024" 
+                              className="h-12 pr-10 bg-background/60 border-border/60"
+                              {...field}
+                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="color"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>اللون</FormLabel>
-                    <FormControl>
-                      <Input placeholder="مثال: أبيض" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="license_plate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground">رقم اللوحة</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <FileText className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              placeholder="مثال: أ ب ج ١٢٣٤" 
+                              className="h-12 pr-10 bg-background/60 border-border/60"
+                              {...field} 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-              <FormField
-                control={form.control}
-                name="vehicle_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>نوع المركبة</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                {/* العمود الأيمن */}
+                <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="model"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground">الموديل</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Car className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              placeholder="مثال: كامري" 
+                              className="h-12 pr-10 bg-background/60 border-border/60"
+                              {...field} 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="color"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground">اللون</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="مثال: أبيض" 
+                            className="h-12 bg-background/60 border-border/60"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="mileage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground">عداد المسافة</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Gauge className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              type="number" 
+                              placeholder="0" 
+                              className="h-12 pr-10 pl-12 bg-background/60 border-border/60"
+                              {...field}
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                            />
+                            <span className="absolute left-3 top-3 text-sm text-muted-foreground">كم</span>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="transmission"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground">نوع الناقل</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Settings className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              placeholder="أوتوماتيك" 
+                              className="h-12 pr-10 bg-background/60 border-border/60"
+                              {...field} 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* القسم الثاني: الأسعار */}
+            <div className="bg-muted/30 rounded-xl p-6 border border-border/50">
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-primary" />
+                الأسعار
+              </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <FormField
+                  control={form.control}
+                  name="daily_rate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-foreground">السعر اليومي</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر نوع المركبة" />
-                        </SelectTrigger>
+                        <div className="relative">
+                          <CreditCard className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            type="number" 
+                            placeholder="200" 
+                            className="h-12 pr-10 pl-16 bg-background/60 border-border/60"
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                          />
+                          <span className="absolute left-3 top-3 text-sm text-muted-foreground">ريال</span>
+                        </div>
                       </FormControl>
-                      <SelectContent>
-                        {vehicleTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
+                <FormField
+                  control={form.control}
+                  name="weekly_rate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-foreground">السعر الأسبوعي</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <CreditCard className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            type="number" 
+                            placeholder="1200" 
+                            className="h-12 pr-10 pl-16 bg-background/60 border-border/60"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                          />
+                          <span className="absolute left-3 top-3 text-sm text-muted-foreground">ريال</span>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="monthly_rate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-foreground">السعر الشهري</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <CreditCard className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            type="number" 
+                            placeholder="4800" 
+                            className="h-12 pr-10 pl-16 bg-background/60 border-border/60"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                          />
+                          <span className="absolute left-3 top-3 text-sm text-muted-foreground">ريال</span>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* القسم الثالث: التأمين والترخيص */}
+            <div className="bg-muted/30 rounded-xl p-6 border border-border/50">
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Shield className="w-5 h-5 text-primary" />
+                التأمين والترخيص
+              </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="insurance_company"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground">شركة التأمين</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Shield className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              placeholder="مثال: التعاونية للتأمين" 
+                              className="h-12 pr-10 bg-background/60 border-border/60"
+                              {...field} 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="insurance_policy_number"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground">رقم وثيقة التأمين</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <FileText className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              placeholder="رقم الوثيقة" 
+                              className="h-12 pr-10 bg-background/60 border-border/60"
+                              {...field} 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="fuel_type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground">نوع الوقود</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="بنزين" 
+                            className="h-12 bg-background/60 border-border/60"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="insurance_expiry"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground">تاريخ انتهاء التأمين</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              type="date" 
+                              className="h-12 pr-10 bg-background/60 border-border/60"
+                              {...field} 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="registration_expiry"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground">تاريخ انتهاء الترخيص</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              type="date" 
+                              className="h-12 pr-10 bg-background/60 border-border/60"
+                              {...field} 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="engine_size"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-foreground">حجم المحرك</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Settings className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              placeholder="مثال: 2.0L" 
+                              className="h-12 pr-10 bg-background/60 border-border/60"
+                              {...field} 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* القسم الرابع: ملاحظات */}
+            <div className="bg-muted/30 rounded-xl p-6 border border-border/50">
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" />
+                ملاحظات إضافية
+              </h3>
               <FormField
                 control={form.control}
-                name="license_plate"
+                name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>رقم اللوحة</FormLabel>
                     <FormControl>
-                      <Input placeholder="مثال: ا ب ج 1234" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="daily_rate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>السعر اليومي (ريال)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="200" 
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      <Textarea 
+                        placeholder="أي ملاحظات إضافية حول المركبة..." 
+                        className="min-h-[120px] bg-background/60 border-border/60 resize-none"
+                        {...field} 
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="weekly_rate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>السعر الأسبوعي (ريال)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="1200" 
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="monthly_rate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>السعر الشهري (ريال)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="4800" 
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="mileage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>عداد المسافة (كم)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="0" 
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="fuel_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>نوع الوقود</FormLabel>
-                    <FormControl>
-                      <Input placeholder="بنزين" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="transmission"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>نوع الناقل</FormLabel>
-                    <FormControl>
-                      <Input placeholder="أوتوماتيك" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="insurance_company"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>شركة التأمين</FormLabel>
-                    <FormControl>
-                      <Input placeholder="مثال: التعاونية للتأمين" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="insurance_policy_number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>رقم وثيقة التأمين</FormLabel>
-                    <FormControl>
-                      <Input placeholder="رقم الوثيقة" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="insurance_expiry"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>تاريخ انتهاء التأمين</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="registration_expiry"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>تاريخ انتهاء الترخيص</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -409,31 +592,35 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>ملاحظات</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="أي ملاحظات إضافية..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end gap-2">
+            {/* الأزرار */}
+            <div className="flex justify-between gap-4 pt-4 border-t border-border/50">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
+                onClick={resetForm}
+                className="flex items-center gap-2 h-12 px-6"
               >
-                إلغاء
+                <RotateCcw className="w-4 h-4" />
+                تفريغ النموذج
               </Button>
-              <Button type="submit" className="btn-primary">
-                إضافة المركبة
-              </Button>
+              
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  className="h-12 px-6"
+                >
+                  إلغاء
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="h-12 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all"
+                >
+                  <Car className="w-4 h-4 mr-2" />
+                  إضافة المركبة
+                </Button>
+              </div>
             </div>
           </form>
         </Form>
