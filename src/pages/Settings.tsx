@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
+import OfficeLocationManager from '@/components/Settings/OfficeLocationManager';
 
 const Settings = () => {
   const { profile } = useAuth();
@@ -125,10 +126,11 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue="company" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="company">بيانات الشركة</TabsTrigger>
           <TabsTrigger value="system">إعدادات النظام</TabsTrigger>
           <TabsTrigger value="users">إدارة المستخدمين</TabsTrigger>
+          <TabsTrigger value="locations">مواقع المكاتب</TabsTrigger>
           <TabsTrigger value="notifications">الإشعارات</TabsTrigger>
         </TabsList>
 
@@ -328,6 +330,20 @@ const Settings = () => {
                   </div>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="locations" className="space-y-4">
+          <Card className="card-elegant">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building className="w-5 h-5" />
+                إدارة مواقع المكاتب
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <OfficeLocationManager />
             </CardContent>
           </Card>
         </TabsContent>
