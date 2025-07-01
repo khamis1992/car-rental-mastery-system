@@ -9,6 +9,166 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      customer_evaluations: {
+        Row: {
+          comments: string | null
+          communication: number | null
+          contract_id: string | null
+          created_at: string
+          customer_id: string
+          evaluated_by: string | null
+          id: string
+          overall_rating: number | null
+          payment_reliability: number | null
+          vehicle_care: number | null
+        }
+        Insert: {
+          comments?: string | null
+          communication?: number | null
+          contract_id?: string | null
+          created_at?: string
+          customer_id: string
+          evaluated_by?: string | null
+          id?: string
+          overall_rating?: number | null
+          payment_reliability?: number | null
+          vehicle_care?: number | null
+        }
+        Update: {
+          comments?: string | null
+          communication?: number | null
+          contract_id?: string | null
+          created_at?: string
+          customer_id?: string
+          evaluated_by?: string | null
+          id?: string
+          overall_rating?: number | null
+          payment_reliability?: number | null
+          vehicle_care?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_evaluations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_history: {
+        Row: {
+          action_type: string
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          description: string
+          id: string
+          notes: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          description: string
+          id?: string
+          notes?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          description?: string
+          id?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_history_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          address: string | null
+          city: string | null
+          company_contact_person: string | null
+          company_registration_number: string | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          customer_number: string
+          customer_type: Database["public"]["Enums"]["customer_type"]
+          email: string | null
+          id: string
+          last_contract_date: string | null
+          name: string
+          national_id: string | null
+          notes: string | null
+          phone: string
+          rating: number | null
+          status: Database["public"]["Enums"]["customer_status"]
+          tax_number: string | null
+          total_contracts: number | null
+          total_revenue: number | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          company_contact_person?: string | null
+          company_registration_number?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_number: string
+          customer_type?: Database["public"]["Enums"]["customer_type"]
+          email?: string | null
+          id?: string
+          last_contract_date?: string | null
+          name: string
+          national_id?: string | null
+          notes?: string | null
+          phone: string
+          rating?: number | null
+          status?: Database["public"]["Enums"]["customer_status"]
+          tax_number?: string | null
+          total_contracts?: number | null
+          total_revenue?: number | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          company_contact_person?: string | null
+          company_registration_number?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_number?: string
+          customer_type?: Database["public"]["Enums"]["customer_type"]
+          email?: string | null
+          id?: string
+          last_contract_date?: string | null
+          name?: string
+          national_id?: string | null
+          notes?: string | null
+          phone?: string
+          rating?: number | null
+          status?: Database["public"]["Enums"]["customer_status"]
+          tax_number?: string | null
+          total_contracts?: number | null
+          total_revenue?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           branch_id: string | null
@@ -74,6 +234,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_customer_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -87,6 +251,8 @@ export type Database = {
       }
     }
     Enums: {
+      customer_status: "active" | "inactive" | "blocked"
+      customer_type: "individual" | "company"
       user_role:
         | "admin"
         | "manager"
@@ -208,6 +374,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      customer_status: ["active", "inactive", "blocked"],
+      customer_type: ["individual", "company"],
       user_role: [
         "admin",
         "manager",

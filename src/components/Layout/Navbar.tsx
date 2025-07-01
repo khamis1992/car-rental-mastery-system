@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, Search, LogOut, Settings, Shield, Bell } from "lucide-react";
+import { Calendar, User, Search, LogOut, Settings, Shield, Bell, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -74,15 +74,30 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* شريط البحث */}
+        {/* شريط البحث والتنقل */}
         <div className="flex-1 max-w-md mx-8">
-          <div className="relative">
-            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <input 
-              type="text"
-              placeholder="البحث في النظام..."
-              className="w-full pr-10 pl-4 py-2 bg-muted border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-            />
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <input 
+                type="text"
+                placeholder="البحث في النظام..."
+                className="w-full pr-10 pl-4 py-2 bg-muted border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              />
+            </div>
+            
+            {/* أزرار التنقل السريع */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/customers')}
+                className="flex items-center gap-2"
+              >
+                <Users className="w-4 h-4" />
+                <span className="hidden md:inline">العملاء</span>
+              </Button>
+            </div>
           </div>
         </div>
 
