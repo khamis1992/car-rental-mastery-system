@@ -8,25 +8,25 @@ const QuickActions = () => {
       title: "عقد جديد",
       description: "إنشاء عقد تأجير جديد",
       icon: <Plus className="w-5 h-5" />,
-      className: "btn-primary"
+      className: "btn-royal"
     },
     {
       title: "عميل جديد",
       description: "إضافة عميل للنظام",
       icon: <User className="w-5 h-5" />,
-      className: "btn-accent"
+      className: "btn-emerald"
     },
     {
       title: "حجز سريع",
       description: "حجز سيارة بسرعة",
       icon: <Calendar className="w-5 h-5" />,
-      className: "btn-primary"
+      className: "btn-purple"
     },
     {
       title: "تقرير يومي",
       description: "إنشاء تقرير اليوم",
       icon: <FileText className="w-5 h-5" />,
-      className: "btn-accent"
+      className: "btn-orange"
     }
   ];
 

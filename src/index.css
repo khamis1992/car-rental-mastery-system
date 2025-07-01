@@ -163,6 +163,35 @@
     @apply bg-danger text-danger-foreground hover:opacity-90 font-medium transition-all duration-200;
     box-shadow: var(--shadow-soft);
   }
+
+  /* ألوان مخصصة للإجراءات السريعة */
+  .btn-emerald {
+    background-color: #2ECC71;
+    color: #FFFFFF;
+    @apply hover:opacity-90 font-medium transition-all duration-200;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .btn-royal {
+    background-color: #1F618D;
+    color: #FFFFFF;
+    @apply hover:opacity-90 font-medium transition-all duration-200;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .btn-orange {
+    background-color: #F39C12;
+    color: #FFFFFF;
+    @apply hover:opacity-90 font-medium transition-all duration-200;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .btn-purple {
+    background-color: #8E44AD;
+    color: #FFFFFF;
+    @apply hover:opacity-90 font-medium transition-all duration-200;
+    box-shadow: var(--shadow-soft);
+  }
   
   /* بطاقات مخصصة */
   .card-elegant {
