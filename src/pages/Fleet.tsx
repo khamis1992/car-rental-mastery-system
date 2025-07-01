@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Car, Plus, Wrench, AlertTriangle, Search } from 'lucide-react';
+import { Car, Plus, Wrench, AlertTriangle, Search, Upload } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { AddVehicleForm } from '@/components/Fleet/AddVehicleForm';
 import { VehicleCard } from '@/components/Fleet/VehicleCard';
+import { CSVImportDialog } from '@/components/Fleet/CSVImportDialog';
 import { Tables } from '@/integrations/supabase/types';
 
 type Vehicle = Tables<'vehicles'>;
@@ -17,6 +18,7 @@ const Fleet = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showCSVImport, setShowCSVImport] = useState(false);
   const { toast } = useToast();
 
   const fetchVehicles = async () => {
@@ -83,13 +85,23 @@ const Fleet = () => {
           <p className="text-muted-foreground">إدارة وتتبع جميع مركبات الأسطول</p>
         </div>
         
-        <Button 
-          className="btn-primary flex items-center gap-2"
-          onClick={() => setShowAddForm(true)}
-        >
-          <Plus className="w-4 h-4" />
-          إضافة مركبة جديدة
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline"
+            onClick={() => setShowCSVImport(true)}
+            className="flex items-center gap-2"
+          >
+            <Upload className="w-4 h-4" />
+            استيراد CSV
+          </Button>
+          <Button 
+            className="btn-primary flex items-center gap-2"
+            onClick={() => setShowAddForm(true)}
+          >
+            <Plus className="w-4 h-4" />
+            إضافة مركبة جديدة
+          </Button>
+        </div>
       </div>
 
       {/* إحصائيات سريعة */}
@@ -206,6 +218,12 @@ const Fleet = () => {
       <AddVehicleForm
         open={showAddForm}
         onOpenChange={setShowAddForm}
+        onSuccess={fetchVehicles}
+      />
+
+      <CSVImportDialog
+        open={showCSVImport}
+        onOpenChange={setShowCSVImport}
         onSuccess={fetchVehicles}
       />
     </div>

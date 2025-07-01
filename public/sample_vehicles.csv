@@ -1,0 +1,4 @@
+make,model,year,color,vehicle_type,license_plate,daily_rate,weekly_rate,monthly_rate,engine_size,fuel_type,transmission,mileage,insurance_company,insurance_policy_number,insurance_expiry,registration_expiry,notes
+تويوتا,كامري,2023,أبيض,sedan,ك ص د 123,25.000,150.000,500.000,2.5L,بنزين,أوتوماتيك,15000,شركة التأمين الكويتية,POL123456,2025-12-31,2025-06-30,مركبة جديدة بحالة ممتازة
+نيسان,التيما,2022,أسود,sedan,ك ص د 456,22.000,140.000,450.000,2.0L,بنزين,أوتوماتيك,25000,شركة الخليج للتأمين,POL789123,2025-08-15,2025-04-20,
+فورد,إكسبلورر,2023,أزرق,suv,ك ص د 789,35.000,220.000,750.000,3.5L,بنزين,أوتوماتيك,8000,شركة الكويت للتأمين,POL456789,2026-01-10,2025-09-15,سيارة عائلية واسعة
