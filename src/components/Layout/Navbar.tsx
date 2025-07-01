@@ -5,12 +5,45 @@ import {
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuTrigger,
-  DropdownMenuSeparator 
+  DropdownMenuSeparator,
+  DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, Search } from "lucide-react";
+import { Calendar, User, Search, LogOut, Settings, Shield, Bell } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  const getRoleLabel = (role: string) => {
+    const roleLabels: Record<string, string> = {
+      admin: 'مدير النظام',
+      manager: 'مدير',
+      accountant: 'محاسب',
+      technician: 'فني',
+      receptionist: 'موظف استقبال'
+    };
+    return roleLabels[role] || role;
+  };
+
+  const getRoleColor = (role: string) => {
+    const roleColors: Record<string, string> = {
+      admin: 'bg-red-500',
+      manager: 'bg-blue-500',
+      accountant: 'bg-green-500',
+      technician: 'bg-orange-500',
+      receptionist: 'bg-gray-500'
+    };
+    return roleColors[role] || 'bg-gray-500';
+  };
+
   const currentDate = new Date().toLocaleDateString('ar-EG', {
     weekday: 'long',
     year: 'numeric',
@@ -34,6 +67,11 @@ const Navbar = () => {
               {currentDate}
             </p>
           </div>
+          {profile && (
+            <Badge className={`text-white ${getRoleColor(profile.role)}`}>
+              {getRoleLabel(profile.role)}
+            </Badge>
+          )}
         </div>
 
         {/* شريط البحث */}
@@ -50,8 +88,16 @@ const Navbar = () => {
 
         {/* منطقة المستخدم والإشعارات */}
         <div className="flex items-center gap-4">
+          {/* زر الإشعارات */}
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="w-5 h-5" />
+            <Badge className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+              3
+            </Badge>
+          </Button>
+
           {/* إشعارات سريعة */}
-          <div className="flex gap-2">
+          <div className="hidden lg:flex gap-2">
             <Badge variant="secondary" className="bg-warning text-warning-foreground">
               5 عقود تنتهي اليوم
             </Badge>
@@ -70,17 +116,51 @@ const Navbar = () => {
                     <User className="w-4 h-4" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="text-right">
-                  <p className="text-sm font-medium">أحمد المدير</p>
-                  <p className="text-xs text-muted-foreground">مدير النظام</p>
+                <div className="text-right hidden md:block">
+                  <p className="text-sm font-medium">
+                    {profile?.full_name || user?.email || 'المستخدم'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {profile ? getRoleLabel(profile.role) : 'مستخدم'}
+                  </p>
                 </div>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem>الملف الشخصي</DropdownMenuItem>
-              <DropdownMenuItem>الإعدادات</DropdownMenuItem>
+              <DropdownMenuLabel className="text-right">
+                <div className="flex flex-col">
+                  <span className="font-medium">
+                    {profile?.full_name || 'المستخدم'}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {user?.email}
+                  </span>
+                </div>
+              </DropdownMenuLabel>
+              
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-danger">تسجيل الخروج</DropdownMenuItem>
+              
+              <DropdownMenuItem className="cursor-pointer">
+                <Settings className="w-4 h-4 ml-2" />
+                الإعدادات
+              </DropdownMenuItem>
+              
+              {(profile?.role === 'admin' || profile?.role === 'manager') && (
+                <DropdownMenuItem className="cursor-pointer">
+                  <Shield className="w-4 h-4 ml-2" />
+                  إدارة المستخدمين
+                </DropdownMenuItem>
+              )}
+              
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem 
+                className="cursor-pointer text-red-600"
+                onClick={handleSignOut}
+              >
+                <LogOut className="w-4 h-4 ml-2" />
+                تسجيل الخروج
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
