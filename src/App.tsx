@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Customers from "./pages/Customers";
 import Fleet from "./pages/Fleet";
+import Quotations from "./pages/Quotations";
 import Contracts from "./pages/Contracts";
 import Accounting from "./pages/Accounting";
 import Settings from "./pages/Settings";
@@ -50,6 +51,13 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <Fleet />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/quotations" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Quotations />
                 </Layout>
               </ProtectedRoute>
             } />

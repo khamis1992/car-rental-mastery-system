@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, Eye, Calendar, DollarSign } from 'lucide-react';
+import { FileText, Plus, Calendar, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { QuotationForm } from '@/components/Contracts/QuotationForm';
 import { ContractForm } from '@/components/Contracts/ContractForm';
-import { QuotationsList } from '@/components/Contracts/QuotationsList';
 import { ContractsList } from '@/components/Contracts/ContractsList';
-import { quotationService } from '@/services/quotationService';
 import { contractService } from '@/services/contractService';
+import { quotationService } from '@/services/quotationService';
 
 const Contracts = () => {
-  const [quotationFormOpen, setQuotationFormOpen] = useState(false);
   const [contractFormOpen, setContractFormOpen] = useState(false);
   const [selectedQuotationForContract, setSelectedQuotationForContract] = useState<string>('');
   const [quotations, setQuotations] = useState<any[]>([]);
@@ -27,14 +22,18 @@ const Contracts = () => {
     endingToday: 0,
     monthlyRevenue: 0,
   });
-  const [quotationStats, setQuotationStats] = useState({
-    total: 0,
-    active: 0,
-    expired: 0,
-    totalValue: 0,
-  });
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  // التحقق من وجود quotation parameter في URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const quotationId = urlParams.get('quotation');
+    if (quotationId) {
+      setSelectedQuotationForContract(quotationId);
+      setContractFormOpen(true);
+    }
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -44,10 +43,10 @@ const Contracts = () => {
     try {
       setLoading(true);
       await Promise.all([
-        loadQuotations(),
         loadContracts(),
         loadCustomers(),
         loadVehicles(),
+        loadQuotations(),
         loadStats(),
       ]);
     } catch (error: any) {
@@ -62,8 +61,9 @@ const Contracts = () => {
   };
 
   const loadQuotations = async () => {
-    const data = await quotationService.getQuotationsWithDetails();
-    setQuotations(data);
+    // تحميل العروض النشطة فقط للاستخدام في العقود
+    const activeQuotations = await quotationService.getActiveQuotations();
+    setQuotations(activeQuotations);
   };
 
   const loadContracts = async () => {
@@ -93,13 +93,8 @@ const Contracts = () => {
   };
 
   const loadStats = async () => {
-    const [contractStatsData, quotationStatsData] = await Promise.all([
-      contractService.getContractStats(),
-      quotationService.getQuotationStats(),
-    ]);
-    
+    const contractStatsData = await contractService.getContractStats();
     setContractStats(contractStatsData);
-    setQuotationStats(quotationStatsData);
   };
 
   const handleConvertToContract = (quotationId: string) => {
@@ -120,14 +115,6 @@ const Contracts = () => {
         </div>
         
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2"
-            onClick={() => setQuotationFormOpen(true)}
-          >
-            <Eye className="w-4 h-4" />
-            عرض سعر جديد
-          </Button>
           <Button 
             className="btn-primary flex items-center gap-2"
             onClick={() => setContractFormOpen(true)}
@@ -191,98 +178,16 @@ const Contracts = () => {
         </Card>
       </div>
 
-      {/* التبويبات */}
-      <Tabs defaultValue="contracts" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="contracts">العقود</TabsTrigger>
-          <TabsTrigger value="quotations">عروض الأسعار</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="contracts" className="space-y-4">
-          <ContractsList
-            contracts={contracts}
-            onView={(id) => console.log('View contract:', id)}
-            onEdit={(id) => console.log('Edit contract:', id)}
-            onActivate={(id) => console.log('Activate contract:', id)}
-            onComplete={(id) => console.log('Complete contract:', id)}
-          />
-        </TabsContent>
-
-        <TabsContent value="quotations" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-8 h-8 text-primary" />
-                  <div>
-                    <p className="text-2xl font-bold">{quotationStats.total}</p>
-                    <p className="text-sm text-muted-foreground">إجمالي العروض</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                    <FileText className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{quotationStats.active}</p>
-                    <p className="text-sm text-muted-foreground">عروض نشطة</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-8 h-8 text-red-500" />
-                  <div>
-                    <p className="text-2xl font-bold">{quotationStats.expired}</p>
-                    <p className="text-sm text-muted-foreground">منتهية الصلاحية</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="w-8 h-8 text-green-600" />
-                  <div>
-                    <p className="text-2xl font-bold">{quotationStats.totalValue.toFixed(3)} د.ك</p>
-                    <p className="text-sm text-muted-foreground">إجمالي قيمة العروض</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <QuotationsList
-            quotations={quotations}
-            customers={customers}
-            vehicles={vehicles}
-            onView={(id) => console.log('View quotation:', id)}
-            onEdit={(id) => console.log('Edit quotation:', id)}
-            onDelete={(id) => console.log('Delete quotation:', id)}
-            onConvertToContract={handleConvertToContract}
-            onGetQuotationDetails={quotationService.getQuotationById}
-          />
-        </TabsContent>
-      </Tabs>
-
-      {/* Dialogs */}
-      <QuotationForm
-        open={quotationFormOpen}
-        onOpenChange={setQuotationFormOpen}
-        customers={customers}
-        vehicles={vehicles}
-        onSuccess={handleFormSuccess}
+      {/* التبويبات - العقود فقط */}
+      <ContractsList
+        contracts={contracts}
+        onView={(id) => console.log('View contract:', id)}
+        onEdit={(id) => console.log('Edit contract:', id)}
+        onActivate={(id) => console.log('Activate contract:', id)}
+        onComplete={(id) => console.log('Complete contract:', id)}
       />
 
+      {/* نموذج إنشاء عقد */}
       <ContractForm
         open={contractFormOpen}
         onOpenChange={(open) => {

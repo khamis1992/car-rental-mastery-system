@@ -44,6 +44,11 @@ const mainItems = [
     icon: Car 
   },
   { 
+    title: "عروض الأسعار", 
+    url: "/quotations", 
+    icon: FileText 
+  },
+  { 
     title: "العقود", 
     url: "/contracts", 
     icon: FileText 

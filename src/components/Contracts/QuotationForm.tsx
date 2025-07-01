@@ -10,12 +10,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Calculator, TrendingDown, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { pricingService } from '@/services/pricingService';
 
 const quotationSchema = z.object({
   customer_id: z.string().min(1, 'العميل مطلوب'),
@@ -34,8 +38,8 @@ type QuotationFormData = z.infer<typeof quotationSchema>;
 interface QuotationFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  customers: Array<{ id: string; name: string; customer_number: string }>;
-  vehicles: Array<{ id: string; make: string; model: string; vehicle_number: string; daily_rate: number }>;
+  customers: Array<{ id: string; name: string; customer_number: string; rating?: number; total_contracts?: number }>;
+  vehicles: Array<{ id: string; make: string; model: string; vehicle_number: string; daily_rate: number; weekly_rate?: number; monthly_rate?: number }>;
   onSuccess?: () => void;
 }
 
@@ -47,6 +51,7 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({
   onSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [pricingDetails, setPricingDetails] = useState<any>(null);
   const { toast } = useToast();
 
   const form = useForm<QuotationFormData>({
