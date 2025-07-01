@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, Search, LogOut, Settings, Shield, Bell, Users, Car, FileText, Calculator, BarChart3 } from "lucide-react";
+import { Calendar, User, Search, LogOut, Settings, Shield, Bell, Users, Car, FileText, Calculator, BarChart3, Wrench } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { useNavigate } from "react-router-dom";
@@ -138,6 +138,16 @@ const Navbar = () => {
               >
                 <BarChart3 className="w-4 h-4" />
                 <span className="hidden md:inline">التحليلات</span>
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/maintenance')}
+                className="flex items-center gap-2"
+              >
+                <Wrench className="w-4 h-4" />
+                <span className="hidden md:inline">الصيانة</span>
               </Button>
             </div>
           </div>
