@@ -31,6 +31,8 @@ const contractSchema = z.object({
   insurance_amount: z.number().min(0).optional(),
   pickup_location: z.string().optional(),
   return_location: z.string().optional(),
+  fuel_level_pickup: z.string().optional(),
+  pickup_mileage: z.number().min(0).optional(),
   special_conditions: z.string().optional(),
   terms_and_conditions: z.string().optional(),
   notes: z.string().optional(),
@@ -137,6 +139,8 @@ export const ContractForm: React.FC<ContractFormProps> = ({
         final_amount: finalAmount,
         pickup_location: data.pickup_location,
         return_location: data.return_location,
+        fuel_level_pickup: data.fuel_level_pickup,
+        pickup_mileage: data.pickup_mileage,
         special_conditions: data.special_conditions,
         terms_and_conditions: data.terms_and_conditions,
         notes: data.notes,
@@ -517,21 +521,70 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="return_location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>موقع الإرجاع</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
+                 <FormField
+                   control={form.control}
+                   name="return_location"
+                   render={({ field }) => (
+                     <FormItem>
+                       <FormLabel>موقع الإرجاع</FormLabel>
+                       <FormControl>
+                         <Input {...field} />
+                       </FormControl>
+                       <FormMessage />
+                     </FormItem>
+                   )}
+                 />
+               </div>
+             </div>
+
+             {/* Vehicle Details */}
+             <div className="space-y-4">
+               <h3 className="text-lg font-medium">تفاصيل المركبة</h3>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <FormField
+                   control={form.control}
+                   name="fuel_level_pickup"
+                   render={({ field }) => (
+                     <FormItem>
+                       <FormLabel>مستوى الوقود عند الاستلام</FormLabel>
+                       <Select onValueChange={field.onChange} defaultValue={field.value}>
+                         <FormControl>
+                           <SelectTrigger>
+                             <SelectValue placeholder="اختر مستوى الوقود" />
+                           </SelectTrigger>
+                         </FormControl>
+                         <SelectContent>
+                           <SelectItem value="full">ممتلئ</SelectItem>
+                           <SelectItem value="3/4">3/4</SelectItem>
+                           <SelectItem value="1/2">1/2</SelectItem>
+                           <SelectItem value="1/4">1/4</SelectItem>
+                           <SelectItem value="empty">فارغ</SelectItem>
+                         </SelectContent>
+                       </Select>
+                       <FormMessage />
+                     </FormItem>
+                   )}
+                 />
+
+                 <FormField
+                   control={form.control}
+                   name="pickup_mileage"
+                   render={({ field }) => (
+                     <FormItem>
+                       <FormLabel>قراءة العداد عند الاستلام (كم)</FormLabel>
+                       <FormControl>
+                         <Input
+                           type="number"
+                           {...field}
+                           onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                         />
+                       </FormControl>
+                       <FormMessage />
+                     </FormItem>
+                   )}
+                 />
+               </div>
+             </div>
 
             {/* Additional Information */}
             <div className="space-y-4">

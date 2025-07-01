@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { FileText, Eye, Edit, Calendar, MapPin } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, isToday, isThisWeek, isThisMonth, isThisQuarter, isThisYear } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { ContractActions } from './ContractActions';
 import { ContractDetailsDialog } from './ContractDetailsDialog';
+import { ContractFiltersComponent, ContractFilters } from './ContractFilters';
 
 interface Contract {
   id: string;
@@ -42,6 +43,56 @@ export const ContractsList: React.FC<ContractsListProps> = ({
 }) => {
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [filters, setFilters] = useState<ContractFilters>({
+    search: '',
+    status: '',
+    contractType: '',
+    dateRange: '',
+  });
+
+  const filteredContracts = useMemo(() => {
+    return contracts.filter(contract => {
+      // البحث في النص
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        const searchMatch = 
+          contract.contract_number.toLowerCase().includes(searchLower) ||
+          contract.customer_name.toLowerCase().includes(searchLower) ||
+          contract.vehicle_info.toLowerCase().includes(searchLower);
+        if (!searchMatch) return false;
+      }
+
+      // فلتر الحالة
+      if (filters.status && contract.status !== filters.status) return false;
+
+      // فلتر نوع العقد
+      if (filters.contractType && contract.contract_type !== filters.contractType) return false;
+
+      // فلتر الفترة الزمنية
+      if (filters.dateRange) {
+        const contractDate = new Date(contract.created_at);
+        switch (filters.dateRange) {
+          case 'today':
+            if (!isToday(contractDate)) return false;
+            break;
+          case 'week':
+            if (!isThisWeek(contractDate)) return false;
+            break;
+          case 'month':
+            if (!isThisMonth(contractDate)) return false;
+            break;
+          case 'quarter':
+            if (!isThisQuarter(contractDate)) return false;
+            break;
+          case 'year':
+            if (!isThisYear(contractDate)) return false;
+            break;
+        }
+      }
+
+      return true;
+    });
+  }, [contracts, filters]);
   const getStatusBadge = (status: string) => {
     const statusMap = {
       draft: { label: 'مسودة', variant: 'secondary' as const },
@@ -81,14 +132,21 @@ export const ContractsList: React.FC<ContractsListProps> = ({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="w-5 h-5" />
-          العقود ({contracts.length})
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="space-y-4">
+      <ContractFiltersComponent
+        filters={filters}
+        onFiltersChange={setFilters}
+        onClearFilters={() => setFilters({ search: '', status: '', contractType: '', dateRange: '' })}
+      />
+      
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            العقود ({filteredContracts.length} من {contracts.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -104,7 +162,7 @@ export const ContractsList: React.FC<ContractsListProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {contracts.map((contract) => (
+              {filteredContracts.map((contract) => (
                 <TableRow key={contract.id}>
                   <TableCell className="font-medium">
                     {contract.contract_number}
@@ -171,11 +229,13 @@ export const ContractsList: React.FC<ContractsListProps> = ({
         </div>
       </CardContent>
 
+      </Card>
+
       <ContractDetailsDialog
         contractId={selectedContractId}
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
       />
-    </Card>
+    </div>
   );
 };
