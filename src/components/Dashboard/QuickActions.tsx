@@ -42,8 +42,7 @@ const QuickActions = () => {
           {actions.map((action, index) => (
             <Button
               key={index}
-              variant="outline"
-              className={`h-auto p-4 flex flex-col items-center gap-2 hover:scale-105 transition-all ${action.className}`}
+              className={`h-auto p-4 flex flex-col items-center gap-2 hover:scale-105 transition-all border-0 ${action.className}`}
             >
               {action.icon}
               <div className="text-center">
