@@ -10,7 +10,9 @@ import {
   AlertTriangle,
   MessageCircle,
   Bell,
-  Settings
+  Settings,
+  Clock,
+  Calendar
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -73,6 +75,26 @@ const mainItems = [
     title: "المخالفات المرورية", 
     url: "/violations", 
     icon: AlertTriangle 
+  },
+  { 
+    title: "الموظفين", 
+    url: "/employees", 
+    icon: Users 
+  },
+  { 
+    title: "الحضور والغياب", 
+    url: "/attendance", 
+    icon: Clock 
+  },
+  { 
+    title: "الإجازات", 
+    url: "/leaves", 
+    icon: Calendar 
+  },
+  { 
+    title: "الرواتب", 
+    url: "/payroll", 
+    icon: Calculator 
   },
 ];
 

@@ -21,6 +21,10 @@ import Analytics from "./pages/Analytics";
 import Communications from "./pages/Communications";
 import Maintenance from "./pages/Maintenance";
 import TrafficViolations from "./pages/TrafficViolations";
+import Employees from "./pages/Employees";
+import Attendance from "./pages/Attendance";
+import Leaves from "./pages/Leaves";
+import Payroll from "./pages/Payroll";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -123,6 +127,34 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <TrafficViolations />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/employees" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Employees />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/attendance" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Attendance />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/leaves" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Leaves />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/payroll" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Payroll />
                 </Layout>
               </ProtectedRoute>
             } />
