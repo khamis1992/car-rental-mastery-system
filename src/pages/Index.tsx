@@ -3,19 +3,12 @@ import QuickActions from "@/components/Dashboard/QuickActions";
 import RecentContracts from "@/components/Dashboard/RecentContracts";
 import FleetOverview from "@/components/Dashboard/FleetOverview";
 import { AlertsOverview } from '@/components/Dashboard/AlertsOverview';
-import IncidentsViolationsCard from "@/components/Dashboard/IncidentsViolationsCard";
-import UpcomingMaintenanceCard from "@/components/Dashboard/UpcomingMaintenanceCard";
-import CustomerRatingsCard from "@/components/Dashboard/CustomerRatingsCard";
-import DailyReportCard from "@/components/Dashboard/DailyReportCard";
-import SmartSearch from "@/components/Dashboard/SmartSearch";
 import { 
   User, 
   Calendar, 
   FileText,
-  Plus,
-  BarChart3
+  Plus
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const Index = () => {
   return (
@@ -60,27 +53,6 @@ const Index = () => {
             icon={<Calendar className="w-5 h-5" />}
             trend={{ value: "2 متأخرة", type: "down" }}
           />
-        </div>
-
-        {/* البحث الذكي */}
-        <div className="mb-6">
-          <SmartSearch />
-        </div>
-
-        {/* البطاقات الجديدة */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <IncidentsViolationsCard />
-          <UpcomingMaintenanceCard />
-          <CustomerRatingsCard />
-          <DailyReportCard />
-        </div>
-
-        {/* زر التقارير والتحليلات */}
-        <div className="flex justify-center mb-8">
-          <Button className="btn-royal flex items-center gap-2" size="lg">
-            <BarChart3 className="w-5 h-5" />
-            التقارير والتحليلات الشاملة
-          </Button>
         </div>
 
         {/* المحتوى الرئيسي */}
