@@ -7,7 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MapPin, Loader2, AlertCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { MapPin, Loader2, AlertCircle, Navigation, InfoIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { officeLocationService, CreateOfficeLocationData, UpdateOfficeLocationData, OfficeLocation } from '@/services/officeLocationService';
 
@@ -58,7 +59,7 @@ const OfficeLocationForm: React.FC<OfficeLocationFormProps> = ({
         }));
         setIsGettingLocation(false);
         toast({
-          title: "نجح",
+          title: "تم بنجاح ✅",
           description: "تم الحصول على موقعك الحالي"
         });
       },
@@ -135,7 +136,7 @@ const OfficeLocationForm: React.FC<OfficeLocationFormProps> = ({
       }
 
       toast({
-        title: "نجح",
+        title: "تم بنجاح ✅",
         description: editingLocation ? "تم تحديث موقع المكتب بنجاح" : "تم إضافة موقع المكتب بنجاح"
       });
 
@@ -184,154 +185,215 @@ const OfficeLocationForm: React.FC<OfficeLocationFormProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MapPin className="w-5 h-5" />
-            {editingLocation ? 'تعديل موقع المكتب' : 'إضافة موقع مكتب جديد'}
+      <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col font-cairo">
+        <DialogHeader className="text-right border-b pb-4">
+          <DialogTitle className="flex items-center justify-end gap-3 text-xl font-semibold">
+            <span>{editingLocation ? 'تعديل موقع المكتب' : 'إضافة موقع مكتب جديد'}</span>
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <MapPin className="w-6 h-6 text-primary" />
+            </div>
           </DialogTitle>
         </DialogHeader>
 
         <ScrollArea className="flex-1 pr-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
-          {/* اسم الموقع */}
-          <div className="space-y-2">
-            <Label htmlFor="name">اسم الموقع *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              placeholder="مثال: المكتب الرئيسي"
-              required
-            />
-          </div>
-
-          {/* العنوان */}
-          <div className="space-y-2">
-            <Label htmlFor="address">العنوان</Label>
-            <Textarea
-              id="address"
-              value={formData.address}
-              onChange={(e) => handleInputChange('address', e.target.value)}
-              placeholder="مثال: الكويت العاصمة، شارع الخليج العربي"
-              rows={2}
-            />
-          </div>
-
-          {/* الإحداثيات */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="latitude">خط العرض</Label>
+          <form onSubmit={handleSubmit} className="space-y-6 py-4">
+            
+            {/* اسم الموقع */}
+            <div className="space-y-3">
+              <Label htmlFor="name" className="text-right text-base font-medium flex items-center gap-2">
+                <span className="text-lg">🏢</span>
+                اسم الموقع *
+              </Label>
               <Input
-                id="latitude"
-                type="number"
-                step="any"
-                value={formData.latitude}
-                onChange={(e) => handleInputChange('latitude', parseFloat(e.target.value) || 0)}
+                id="name"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                placeholder="مثال: المكتب الرئيسي"
                 required
+                className="text-right h-12 text-base border-2 focus:border-primary/50 transition-colors"
+                dir="rtl"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="longitude">خط الطول</Label>
-              <Input
-                id="longitude"
-                type="number"
-                step="any"
-                value={formData.longitude}
-                onChange={(e) => handleInputChange('longitude', parseFloat(e.target.value) || 0)}
-                required
+
+            {/* العنوان */}
+            <div className="space-y-3">
+              <Label htmlFor="address" className="text-right text-base font-medium flex items-center gap-2">
+                <span className="text-lg">📍</span>
+                العنوان
+              </Label>
+              <Textarea
+                id="address"
+                value={formData.address}
+                onChange={(e) => handleInputChange('address', e.target.value)}
+                placeholder="مثال: الكويت، العاصمة، شارع الخليج العربي"
+                rows={3}
+                className="text-right text-base border-2 focus:border-primary/50 transition-colors resize-none"
+                dir="rtl"
               />
             </div>
-          </div>
 
-          {/* زر الحصول على الموقع الحالي */}
+            {/* الإحداثيات في عمودين */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label htmlFor="longitude" className="text-right text-base font-medium flex items-center gap-2">
+                  <span className="text-lg">🌐</span>
+                  خط الطول
+                </Label>
+                <Input
+                  id="longitude"
+                  type="number"
+                  step="any"
+                  value={formData.longitude}
+                  onChange={(e) => handleInputChange('longitude', parseFloat(e.target.value) || 0)}
+                  placeholder="مثال: 47.9744"
+                  required
+                  className="text-right h-12 text-base border-2 focus:border-primary/50 transition-colors"
+                  dir="rtl"
+                />
+              </div>
+              
+              <div className="space-y-3">
+                <Label htmlFor="latitude" className="text-right text-base font-medium flex items-center gap-2">
+                  <span className="text-lg">🌐</span>
+                  خط العرض
+                </Label>
+                <Input
+                  id="latitude"
+                  type="number"
+                  step="any"
+                  value={formData.latitude}
+                  onChange={(e) => handleInputChange('latitude', parseFloat(e.target.value) || 0)}
+                  placeholder="مثال: 29.3375"
+                  required
+                  className="text-right h-12 text-base border-2 focus:border-primary/50 transition-colors"
+                  dir="rtl"
+                />
+              </div>
+            </div>
+
+            {/* زر الحصول على الموقع الحالي */}
+            <div className="flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={getCurrentLocation}
+                disabled={isGettingLocation}
+                className="h-12 px-8 text-base font-medium border-2 border-primary/20 hover:border-primary/50 hover:bg-primary/5 transition-all"
+              >
+                {isGettingLocation ? (
+                  <>
+                    <Loader2 className="w-5 h-5 ml-2 animate-spin" />
+                    جاري تحديد الموقع...
+                  </>
+                ) : (
+                  <>
+                    <Navigation className="w-5 h-5 ml-2" />
+                    <span className="text-lg ml-2">📌</span>
+                    استخدام موقعي الحالي
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {/* نطاق الموقع */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <InfoIcon className="w-4 h-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs text-right">
+                      <p>النطاق هو المسافة المسموحة للموظفين لتسجيل الحضور من هذا الموقع</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <Label htmlFor="radius" className="text-right text-base font-medium flex items-center gap-2">
+                  <span className="text-lg">📏</span>
+                  نطاق الموقع (بالمتر)
+                </Label>
+              </div>
+              <Input
+                id="radius"
+                type="number"
+                min="10"
+                max="1000"
+                value={formData.radius}
+                onChange={(e) => handleInputChange('radius', parseInt(e.target.value) || 100)}
+                placeholder="مثال: 100"
+                required
+                className="text-right h-12 text-base border-2 focus:border-primary/50 transition-colors"
+                dir="rtl"
+              />
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span className="text-base">ℹ️</span>
+                <p className="text-right">
+                  المسافة المسموحة للموظفين لتسجيل الحضور (10 - 1000 متر)
+                </p>
+              </div>
+            </div>
+
+            {/* حالة التفعيل */}
+            <div className="bg-muted/30 rounded-lg p-4 border border-muted">
+              <div className="flex items-center justify-between">
+                <Switch
+                  id="is_active"
+                  checked={formData.is_active}
+                  onCheckedChange={(checked) => handleInputChange('is_active', checked)}
+                  className="data-[state=checked]:bg-primary"
+                />
+                <div className="text-right">
+                  <Label htmlFor="is_active" className="text-base font-medium cursor-pointer">
+                    نشط
+                  </Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    السماح للموظفين بتسجيل الحضور من هذا الموقع
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* تنبيه مهم */}
+            <Alert className="border-primary/20 bg-primary/5">
+              <AlertCircle className="h-5 w-5 text-primary" />
+              <AlertDescription className="text-right text-base">
+                تأكد من دقة الإحداثيات والنطاق لضمان عمل نظام الحضور بشكل صحيح
+              </AlertDescription>
+            </Alert>
+
+          </form>
+        </ScrollArea>
+
+        {/* أزرار الحفظ والإلغاء */}
+        <div className="flex gap-4 pt-4 border-t">
           <Button
             type="button"
             variant="outline"
-            onClick={getCurrentLocation}
-            disabled={isGettingLocation}
-            className="w-full"
+            onClick={onClose}
+            disabled={isLoading}
+            className="flex-1 h-12 text-base font-medium border-2"
           >
-            {isGettingLocation ? (
+            إلغاء
+          </Button>
+          
+          <Button
+            onClick={handleSubmit}
+            disabled={isLoading}
+            className="flex-1 h-12 text-base font-medium bg-primary hover:bg-primary/90 text-primary-foreground"
+          >
+            {isLoading ? (
               <>
-                <Loader2 className="w-4 h-4 ml-2 animate-spin" />
-                جاري تحديد الموقع...
+                <Loader2 className="w-5 h-5 ml-2 animate-spin" />
+                جاري الحفظ...
               </>
             ) : (
               <>
-                <MapPin className="w-4 h-4 ml-2" />
-                استخدام موقعي الحالي
+                <span className="ml-2">💾</span>
+                {editingLocation ? 'تحديث الموقع' : 'حفظ الموقع'}
               </>
             )}
           </Button>
-
-          {/* نطاق الموقع */}
-          <div className="space-y-2">
-            <Label htmlFor="radius">نطاق الموقع (متر)</Label>
-            <Input
-              id="radius"
-              type="number"
-              min="10"
-              max="1000"
-              value={formData.radius}
-              onChange={(e) => handleInputChange('radius', parseInt(e.target.value) || 100)}
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              المسافة المسموحة للموظفين لتسجيل الحضور (10-1000 متر)
-            </p>
-          </div>
-
-          {/* حالة التفعيل */}
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="is_active">نشط</Label>
-              <p className="text-sm text-muted-foreground">
-                السماح للموظفين بتسجيل الحضور من هذا الموقع
-              </p>
-            </div>
-            <Switch
-              id="is_active"
-              checked={formData.is_active}
-              onCheckedChange={(checked) => handleInputChange('is_active', checked)}
-            />
-          </div>
-
-          {/* معلومات إضافية */}
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              تأكد من دقة الإحداثيات والنطاق لضمان عمل نظام الحضور بشكل صحيح
-            </AlertDescription>
-          </Alert>
-
-          {/* أزرار الحفظ والإلغاء */}
-          <div className="flex gap-2 pt-4">
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 ml-2 animate-spin" />
-                  جاري الحفظ...
-                </>
-              ) : (
-                editingLocation ? 'تحديث' : 'إضافة'
-              )}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isLoading}
-            >
-              إلغاء
-            </Button>
-          </div>
-          </form>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
