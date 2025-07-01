@@ -868,6 +868,146 @@ export type Database = {
           },
         ]
       }
+      traffic_violations: {
+        Row: {
+          closed_at: string | null
+          contract_id: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          customer_notified_at: string | null
+          description: string | null
+          documents: string[] | null
+          evidence_photos: string[] | null
+          fine_amount: number
+          follow_up_date: string | null
+          id: string
+          issuing_authority: string | null
+          liability_determination: string | null
+          liability_determined_at: string | null
+          liability_determined_by: string | null
+          liability_percentage: number | null
+          liability_reason: string | null
+          location: string | null
+          notes: string | null
+          officer_name: string | null
+          official_violation_number: string | null
+          paid_amount: number | null
+          payment_due_date: string | null
+          payment_status: string | null
+          processing_fee: number | null
+          status: string | null
+          total_amount: number
+          updated_at: string
+          vehicle_id: string
+          violation_date: string
+          violation_number: string
+          violation_time: string | null
+          violation_type_id: string
+        }
+        Insert: {
+          closed_at?: string | null
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          customer_notified_at?: string | null
+          description?: string | null
+          documents?: string[] | null
+          evidence_photos?: string[] | null
+          fine_amount: number
+          follow_up_date?: string | null
+          id?: string
+          issuing_authority?: string | null
+          liability_determination?: string | null
+          liability_determined_at?: string | null
+          liability_determined_by?: string | null
+          liability_percentage?: number | null
+          liability_reason?: string | null
+          location?: string | null
+          notes?: string | null
+          officer_name?: string | null
+          official_violation_number?: string | null
+          paid_amount?: number | null
+          payment_due_date?: string | null
+          payment_status?: string | null
+          processing_fee?: number | null
+          status?: string | null
+          total_amount: number
+          updated_at?: string
+          vehicle_id: string
+          violation_date: string
+          violation_number: string
+          violation_time?: string | null
+          violation_type_id: string
+        }
+        Update: {
+          closed_at?: string | null
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          customer_notified_at?: string | null
+          description?: string | null
+          documents?: string[] | null
+          evidence_photos?: string[] | null
+          fine_amount?: number
+          follow_up_date?: string | null
+          id?: string
+          issuing_authority?: string | null
+          liability_determination?: string | null
+          liability_determined_at?: string | null
+          liability_determined_by?: string | null
+          liability_percentage?: number | null
+          liability_reason?: string | null
+          location?: string | null
+          notes?: string | null
+          officer_name?: string | null
+          official_violation_number?: string | null
+          paid_amount?: number | null
+          payment_due_date?: string | null
+          payment_status?: string | null
+          processing_fee?: number | null
+          status?: string | null
+          total_amount?: number
+          updated_at?: string
+          vehicle_id?: string
+          violation_date?: string
+          violation_number?: string
+          violation_time?: string | null
+          violation_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "traffic_violations_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "traffic_violations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "traffic_violations_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "traffic_violations_violation_type_id_fkey"
+            columns: ["violation_type_id"]
+            isOneToOne: false
+            referencedRelation: "violation_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           granted_at: string
@@ -1044,6 +1184,160 @@ export type Database = {
         }
         Relationships: []
       }
+      violation_history: {
+        Row: {
+          action_type: string
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          new_value: string | null
+          notes: string | null
+          old_value: string | null
+          violation_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          new_value?: string | null
+          notes?: string | null
+          old_value?: string | null
+          violation_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          new_value?: string | null
+          notes?: string | null
+          old_value?: string | null
+          violation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "violation_history_violation_id_fkey"
+            columns: ["violation_id"]
+            isOneToOne: false
+            referencedRelation: "traffic_violations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      violation_payments: {
+        Row: {
+          amount: number
+          bank_name: string | null
+          check_number: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string
+          payment_number: string
+          receipt_url: string | null
+          status: string | null
+          transaction_reference: string | null
+          updated_at: string
+          violation_id: string
+        }
+        Insert: {
+          amount: number
+          bank_name?: string | null
+          check_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          payment_number: string
+          receipt_url?: string | null
+          status?: string | null
+          transaction_reference?: string | null
+          updated_at?: string
+          violation_id: string
+        }
+        Update: {
+          amount?: number
+          bank_name?: string | null
+          check_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          payment_number?: string
+          receipt_url?: string | null
+          status?: string | null
+          transaction_reference?: string | null
+          updated_at?: string
+          violation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "violation_payments_violation_id_fkey"
+            columns: ["violation_id"]
+            isOneToOne: false
+            referencedRelation: "traffic_violations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      violation_types: {
+        Row: {
+          base_fine_amount: number
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          points: number | null
+          severity_level: string | null
+          updated_at: string
+          violation_code: string
+          violation_name_ar: string
+          violation_name_en: string | null
+        }
+        Insert: {
+          base_fine_amount?: number
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          points?: number | null
+          severity_level?: string | null
+          updated_at?: string
+          violation_code: string
+          violation_name_ar: string
+          violation_name_en?: string | null
+        }
+        Update: {
+          base_fine_amount?: number
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          points?: number | null
+          severity_level?: string | null
+          updated_at?: string
+          violation_code?: string
+          violation_name_ar?: string
+          violation_name_en?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1070,6 +1364,14 @@ export type Database = {
         Returns: string
       }
       generate_vehicle_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_violation_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_violation_payment_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
