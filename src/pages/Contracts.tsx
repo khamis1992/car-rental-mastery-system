@@ -1,30 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, Calendar, DollarSign } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { ContractForm } from '@/components/Contracts/ContractForm';
 import { ContractsList } from '@/components/Contracts/ContractsList';
 import { ContractMonitoring } from '@/components/Contracts/ContractMonitoring';
-import { contractService } from '@/services/contractService';
-import { quotationService } from '@/services/quotationService';
+import { ContractStats } from '@/components/Contracts/ContractStats';
+import { useContractsData } from '@/hooks/useContractsData';
 
 const Contracts = () => {
   const [contractFormOpen, setContractFormOpen] = useState(false);
   const [selectedQuotationForContract, setSelectedQuotationForContract] = useState<string>('');
-  const [quotations, setQuotations] = useState<any[]>([]);
-  const [contracts, setContracts] = useState<any[]>([]);
-  const [customers, setCustomers] = useState<any[]>([]);
-  const [vehicles, setVehicles] = useState<any[]>([]);
-  const [contractStats, setContractStats] = useState({
-    total: 0,
-    active: 0,
-    endingToday: 0,
-    monthlyRevenue: 0,
-  });
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  
+  const {
+    quotations,
+    contracts,
+    customers,
+    vehicles,
+    contractStats,
+    loading,
+    loadData,
+  } = useContractsData();
 
   // التحقق من وجود quotation parameter في URL
   useEffect(() => {
@@ -36,79 +31,11 @@ const Contracts = () => {
     }
   }, []);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      await Promise.all([
-        loadContracts(),
-        loadCustomers(),
-        loadVehicles(),
-        loadQuotations(),
-        loadStats(),
-      ]);
-    } catch (error: any) {
-      toast({
-        title: 'خطأ في تحميل البيانات',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadQuotations = async () => {
-    // تحميل العروض النشطة فقط للاستخدام في العقود
-    const activeQuotations = await quotationService.getActiveQuotations();
-    setQuotations(activeQuotations);
-  };
-
-  const loadContracts = async () => {
-    const data = await contractService.getContractsWithDetails();
-    setContracts(data);
-  };
-
-  const loadCustomers = async () => {
-    const { data, error } = await supabase
-      .from('customers')
-      .select('id, name, customer_number')
-      .eq('status', 'active')
-      .order('name');
-    
-    if (error) throw error;
-    setCustomers(data || []);
-  };
-
-  const loadVehicles = async () => {
-    const { data, error } = await supabase
-      .from('vehicles')
-      .select('id, make, model, vehicle_number, daily_rate, status')
-      .order('vehicle_number');
-    
-    if (error) throw error;
-    setVehicles(data || []);
-  };
-
-  const loadStats = async () => {
-    const contractStatsData = await contractService.getContractStats();
-    setContractStats(contractStatsData);
-  };
-
-  const handleConvertToContract = (quotationId: string) => {
-    setSelectedQuotationForContract(quotationId);
-    setContractFormOpen(true);
-  };
-
   const handleFormSuccess = () => {
     loadData();
   };
 
   const handleAlertClick = (alert: any) => {
-    // Handle alert click - could navigate to specific contract or show details
     console.log('Alert clicked:', alert);
   };
 
@@ -132,57 +59,7 @@ const Contracts = () => {
       </div>
 
       {/* إحصائيات سريعة */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <FileText className="w-8 h-8 text-primary" />
-              <div>
-                <p className="text-2xl font-bold">{contractStats.total}</p>
-                <p className="text-sm text-muted-foreground">إجمالي العقود</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                <FileText className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{contractStats.active}</p>
-                <p className="text-sm text-muted-foreground">عقود نشطة</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-8 h-8 text-orange-500" />
-              <div>
-                <p className="text-2xl font-bold">{contractStats.endingToday}</p>
-                <p className="text-sm text-muted-foreground">تنتهي اليوم</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <DollarSign className="w-8 h-8 text-green-600" />
-              <div>
-                <p className="text-2xl font-bold">{contractStats.monthlyRevenue.toFixed(3)} د.ك</p>
-                <p className="text-sm text-muted-foreground">إيرادات الشهر</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <ContractStats stats={contractStats} />
 
       {/* لوحة مراقبة العقود */}
       <ContractMonitoring onAlertClick={handleAlertClick} />
