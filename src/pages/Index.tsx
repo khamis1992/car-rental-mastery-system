@@ -3,7 +3,7 @@ import QuickActions from "@/components/Dashboard/QuickActions";
 import RecentContracts from "@/components/Dashboard/RecentContracts";
 import FleetOverview from "@/components/Dashboard/FleetOverview";
 import { AlertsOverview } from '@/components/Dashboard/AlertsOverview';
-import QuickAttendance from '@/components/Dashboard/QuickAttendance';
+
 import ImportantNotifications from '@/components/Dashboard/ImportantNotifications';
 import DailyTasksChecklist from '@/components/Dashboard/DailyTasksChecklist';
 import { 
@@ -71,9 +71,8 @@ const Index = () => {
           />
         </div>
 
-        {/* قسم سريع للحضور والتنبيهات */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 animate-fade-in">
-          <QuickAttendance />
+        {/* قسم التنبيهات والمهام */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8 animate-fade-in">
           <ImportantNotifications />
           <DailyTasksChecklist />
           <QuickActions />
