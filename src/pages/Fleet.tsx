@@ -69,9 +69,9 @@ const Fleet = () => {
         
         <div className="flex items-center gap-3">
           <Button 
-            variant="outline"
+            variant="secondary"
             onClick={() => setShowCSVImport(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
           >
             <Upload className="w-4 h-4" />
             استيراد CSV

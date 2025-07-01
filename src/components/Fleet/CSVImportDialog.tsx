@@ -220,10 +220,10 @@ export const CSVImportDialog: React.FC<CSVImportDialogProps> = ({
                 <span className="font-medium">ملف CSV نموذجي</span>
               </div>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={downloadSampleCSV}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white border-green-600"
               >
                 <Download className="w-4 h-4" />
                 تحميل النموذج
