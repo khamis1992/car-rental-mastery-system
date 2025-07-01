@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNotifications } from '@/contexts/NotificationContext';
 
@@ -16,9 +16,18 @@ interface ContractAlert {
 export const useContractMonitoring = () => {
   const [alerts, setAlerts] = useState<ContractAlert[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastCheckTime, setLastCheckTime] = useState<Date | null>(null);
   const { addNotification } = useNotifications();
 
-  const checkContractAlerts = async () => {
+  const checkContractAlerts = useCallback(async (forceRefresh = false) => {
+    // تجنب الاستعلامات المكررة إذا تم الفحص مؤخراً
+    const now = new Date();
+    const CACHE_DURATION = 5 * 60 * 1000; // 5 دقائق
+    
+    if (!forceRefresh && lastCheckTime && (now.getTime() - lastCheckTime.getTime()) < CACHE_DURATION) {
+      return;
+    }
+
     setLoading(true);
     try {
       const today = new Date().toISOString().split('T')[0];
@@ -170,31 +179,32 @@ export const useContractMonitoring = () => {
       });
 
       setAlerts(newAlerts);
+      setLastCheckTime(now);
     } catch (error) {
       console.error('Error checking contract alerts:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [lastCheckTime, addNotification]);
 
-  const dismissAlert = (alertId: string) => {
+  const dismissAlert = useCallback((alertId: string) => {
     setAlerts(prev => prev.filter(alert => alert.id !== alertId));
-  };
+  }, []);
 
-  const getAlertsByPriority = () => {
+  const getAlertsByPriority = useCallback(() => {
     const urgent = alerts.filter(alert => alert.priority === 'urgent');
     const high = alerts.filter(alert => alert.priority === 'high');
     const medium = alerts.filter(alert => alert.priority === 'medium');
     const normal = alerts.filter(alert => alert.priority === 'normal');
 
     return { urgent, high, medium, normal };
-  };
+  }, [alerts]);
 
   useEffect(() => {
-    checkContractAlerts();
+    checkContractAlerts(true); // فحص أولي فوري
 
     // تحديث التنبيهات كل 5 دقائق
-    const interval = setInterval(checkContractAlerts, 5 * 60 * 1000);
+    const interval = setInterval(() => checkContractAlerts(true), 5 * 60 * 1000);
 
     // تحديث عند تغيير التاريخ
     const checkAtMidnight = () => {
@@ -216,7 +226,7 @@ export const useContractMonitoring = () => {
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [checkContractAlerts]);
 
   return {
     alerts,
@@ -226,6 +236,7 @@ export const useContractMonitoring = () => {
     getAlertsByPriority,
     totalAlerts: alerts.length,
     urgentCount: alerts.filter(a => a.priority === 'urgent').length,
-    highCount: alerts.filter(a => a.priority === 'high').length
+    highCount: alerts.filter(a => a.priority === 'high').length,
+    lastCheckTime
   };
 };

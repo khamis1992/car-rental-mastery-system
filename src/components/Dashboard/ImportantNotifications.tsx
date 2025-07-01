@@ -2,44 +2,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bell, AlertTriangle, Info, CheckCircle, X } from "lucide-react";
-import { useState } from "react";
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: 'warning' | 'info' | 'success' | 'error';
-  time: string;
-  priority: 'high' | 'medium' | 'low';
-}
+import { useUnifiedNotifications } from "@/hooks/useUnifiedNotifications";
 
 const ImportantNotifications = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "1",
-      title: "عقود منتهية الصلاحية",
-      message: "يوجد 3 عقود تنتهي خلال 24 ساعة",
-      type: "warning",
-      time: "منذ 10 دقائق",
-      priority: "high"
-    },
-    {
-      id: "2", 
-      title: "سيارة تحتاج صيانة",
-      message: "المركبة VEH0023 تجاوزت 5000 كم",
-      type: "warning",
-      time: "منذ ساعة",
-      priority: "medium"
-    },
-    {
-      id: "3",
-      title: "دفعة جديدة",
-      message: "تم استلام دفعة 500 د.ك من العميل أحمد",
-      type: "success",
-      time: "منذ ساعتين",
-      priority: "low"
-    }
-  ]);
+  const { notifications, handleDismiss, stats } = useUnifiedNotifications();
+  
+  // عرض الإشعارات ذات الأولوية العالية فقط (أول 5)
+  const importantNotifications = notifications
+    .filter(n => n.priority === 'urgent' || n.priority === 'high')
+    .slice(0, 5);
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -52,15 +23,22 @@ const ImportantNotifications = () => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-danger text-danger-foreground';
-      case 'medium': return 'bg-warning text-warning-foreground';
-      default: return 'bg-info text-info-foreground';
+      case 'urgent': return 'bg-destructive text-destructive-foreground';
+      case 'high': return 'bg-orange-500 text-white';
+      case 'medium': return 'bg-yellow-500 text-white';
+      default: return 'bg-blue-500 text-white';
     }
   };
 
-  const dismissNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'urgent': return 'عاجل';
+      case 'high': return 'مرتفع';
+      case 'medium': return 'متوسط';
+      default: return 'عادي';
+    }
   };
+
 
   return (
     <Card className="card-elegant">
@@ -70,17 +48,17 @@ const ImportantNotifications = () => {
           التنبيهات المهمة
         </CardTitle>
         <Badge variant="secondary" className="text-xs">
-          {notifications.length}
+          {importantNotifications.length}
         </Badge>
       </CardHeader>
       <CardContent className="space-y-3">
-        {notifications.length === 0 ? (
+        {importantNotifications.length === 0 ? (
           <div className="text-center py-4 text-muted-foreground">
             <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p className="text-sm">لا توجد تنبيهات جديدة</p>
           </div>
         ) : (
-          notifications.map((notification) => (
+          importantNotifications.map((notification) => (
             <div 
               key={notification.id}
               className="p-3 border rounded-lg hover:bg-muted/50 transition-colors animate-fade-in"
@@ -98,8 +76,7 @@ const ImportantNotifications = () => {
                       variant="secondary" 
                       className={`text-xs ${getPriorityColor(notification.priority)}`}
                     >
-                      {notification.priority === 'high' ? 'عاجل' : 
-                       notification.priority === 'medium' ? 'متوسط' : 'عادي'}
+                      {getPriorityLabel(notification.priority)}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mb-1">
@@ -113,7 +90,7 @@ const ImportantNotifications = () => {
                   variant="ghost"
                   size="sm"
                   className="h-6 w-6 p-0 hover:bg-muted"
-                  onClick={() => dismissNotification(notification.id)}
+                  onClick={() => handleDismiss(notification)}
                 >
                   <X className="w-3 h-3" />
                 </Button>
@@ -122,7 +99,7 @@ const ImportantNotifications = () => {
           ))
         )}
         
-        {notifications.length > 0 && (
+        {importantNotifications.length > 0 && (
           <Button 
             variant="outline" 
             size="sm" 

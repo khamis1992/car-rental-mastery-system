@@ -5,21 +5,17 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { useNotifications } from '@/contexts/NotificationContext';
-import { useContractMonitoring } from '@/hooks/useContractMonitoring';
+import { useUnifiedNotifications } from '@/hooks/useUnifiedNotifications';
 import { cn } from '@/lib/utils';
 
 export const NotificationCenter = () => {
   const [open, setOpen] = useState(false);
   const { 
-    notifications, 
-    unreadCount, 
-    markAsRead, 
-    markAllAsRead, 
-    deleteNotification 
-  } = useNotifications();
-  
-  const { alerts, urgentCount, highCount } = useContractMonitoring();
+    notifications,
+    handleDismiss,
+    handleMarkAsRead,
+    stats
+  } = useUnifiedNotifications();
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -43,20 +39,18 @@ export const NotificationCenter = () => {
     return timeString;
   };
 
-  const totalNotifications = notifications.length;
-  const totalAlerts = urgentCount + highCount;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
-          {(unreadCount > 0 || totalAlerts > 0) && (
+          {stats.criticalCount > 0 && (
             <Badge 
               variant="destructive" 
               className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
             >
-              {unreadCount + totalAlerts}
+              {stats.criticalCount}
             </Badge>
           )}
         </Button>
@@ -70,11 +64,13 @@ export const NotificationCenter = () => {
               الإشعارات
             </div>
             <div className="flex items-center gap-2">
-              {unreadCount > 0 && (
+              {stats.unread > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={markAllAsRead}
+                  onClick={() => {
+                    notifications.filter(n => !n.read).forEach(n => handleMarkAsRead(n));
+                  }}
                   className="text-xs"
                 >
                   <Check className="w-4 h-4 mr-1" />
@@ -90,23 +86,23 @@ export const NotificationCenter = () => {
 
         <div className="mt-6">
           {/* إحصائيات سريعة */}
-          {totalAlerts > 0 && (
+          {stats.criticalCount > 0 && (
             <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 mb-4">
               <div className="flex items-center gap-2 text-destructive">
                 <Bell className="w-4 h-4" />
                 <span className="font-medium text-sm">تنبيهات مهمة</span>
               </div>
               <p className="text-xs text-destructive/80 mt-1">
-                {urgentCount > 0 && `${urgentCount} عاجل`}
-                {urgentCount > 0 && highCount > 0 && ' • '}
-                {highCount > 0 && `${highCount} مرتفع`}
+                {stats.urgent > 0 && `${stats.urgent} عاجل`}
+                {stats.urgent > 0 && stats.high > 0 && ' • '}
+                {stats.high > 0 && `${stats.high} مرتفع`}
               </p>
             </div>
           )}
 
           <ScrollArea className="h-[calc(100vh-200px)]">
             <div className="space-y-1">
-              {totalNotifications === 0 ? (
+              {notifications.length === 0 ? (
                 <div className="text-center py-8">
                   <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="font-medium mb-2">لا توجد إشعارات</h3>
@@ -122,7 +118,7 @@ export const NotificationCenter = () => {
                       "p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer",
                       !notification.read && "bg-primary/5 border-primary/20"
                     )}
-                    onClick={() => markAsRead(notification.id)}
+                    onClick={() => handleMarkAsRead(notification)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3 flex-1">
@@ -167,7 +163,7 @@ export const NotificationCenter = () => {
                                 size="sm"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  deleteNotification(notification.id);
+                                  handleDismiss(notification);
                                 }}
                                 className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
                               >

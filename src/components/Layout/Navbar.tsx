@@ -14,12 +14,10 @@ import { Calendar, User, Search, LogOut, Settings, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { NotificationCenter } from "@/components/Navbar/NotificationCenter";
-import { useContractMonitoring } from '@/hooks/useContractMonitoring';
 
 const Navbar = () => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
-  const { urgentCount, highCount } = useContractMonitoring();
 
   const handleSignOut = async () => {
     await signOut();
@@ -82,24 +80,8 @@ const Navbar = () => {
 
         {/* منطقة المستخدم والإشعارات */}
         <div className="flex items-center gap-4">
-          {/* مركز الإشعارات */}
+          {/* مركز الإشعارات الموحد */}
           <NotificationCenter />
-
-          {/* إشعارات سريعة */}
-          {(urgentCount > 0 || highCount > 0) && (
-            <div className="hidden lg:flex gap-2">
-              {urgentCount > 0 && (
-                <Badge variant="destructive">
-                  {urgentCount} عاجل
-                </Badge>
-              )}
-              {highCount > 0 && (
-                <Badge className="bg-orange-500 text-white">
-                  {highCount} مرتفع
-                </Badge>
-              )}
-            </div>
-          )}
 
           {/* قائمة المستخدم */}
           <DropdownMenu>
