@@ -14,6 +14,7 @@ import { Calendar, User, Search, LogOut, Settings, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { NotificationCenter } from "@/components/Navbar/NotificationCenter";
+import DailyTasksButton from "@/components/Navbar/DailyTasksButton";
 
 const Navbar = () => {
   const { user, profile, signOut } = useAuth();
@@ -80,6 +81,9 @@ const Navbar = () => {
 
         {/* منطقة المستخدم والإشعارات */}
         <div className="flex items-center gap-4">
+          {/* أيقونة مهام اليوم */}
+          <DailyTasksButton />
+          
           {/* مركز الإشعارات الموحد */}
           <NotificationCenter />
 

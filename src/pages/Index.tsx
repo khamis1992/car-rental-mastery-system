@@ -2,9 +2,6 @@ import StatsCard from "@/components/Dashboard/StatsCard";
 import QuickActions from "@/components/Dashboard/QuickActions";
 import RecentContracts from "@/components/Dashboard/RecentContracts";
 import FleetOverview from "@/components/Dashboard/FleetOverview";
-
-import ImportantNotifications from '@/components/Dashboard/ImportantNotifications';
-import DailyTasksChecklist from '@/components/Dashboard/DailyTasksChecklist';
 import { 
   User, 
   Calendar, 
@@ -70,10 +67,8 @@ const Index = () => {
           />
         </div>
 
-        {/* قسم التنبيهات والمهام */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8 animate-fade-in">
-          <ImportantNotifications />
-          <DailyTasksChecklist />
+        {/* قسم الإجراءات السريعة */}
+        <div className="grid grid-cols-1 gap-6 mb-8 animate-fade-in">
           <QuickActions />
         </div>
 
