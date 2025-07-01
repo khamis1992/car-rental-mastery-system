@@ -9,6 +9,269 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      contract_extensions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          contract_id: string
+          created_at: string
+          created_by: string | null
+          daily_rate: number
+          extension_amount: number
+          extension_days: number
+          id: string
+          new_end_date: string
+          original_end_date: string
+          reason: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          contract_id: string
+          created_at?: string
+          created_by?: string | null
+          daily_rate: number
+          extension_amount: number
+          extension_days: number
+          id?: string
+          new_end_date: string
+          original_end_date: string
+          reason?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          contract_id?: string
+          created_at?: string
+          created_by?: string | null
+          daily_rate?: number
+          extension_amount?: number
+          extension_days?: number
+          id?: string
+          new_end_date?: string
+          original_end_date?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_extensions_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contract_incidents: {
+        Row: {
+          contract_id: string
+          cost: number | null
+          created_at: string
+          created_by: string | null
+          customer_liable: boolean | null
+          description: string
+          id: string
+          incident_date: string
+          incident_type: string
+          insurance_claim_number: string | null
+          insurance_covered: boolean | null
+          location: string | null
+          photos: string[] | null
+          police_report_number: string | null
+          resolution_notes: string | null
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          contract_id: string
+          cost?: number | null
+          created_at?: string
+          created_by?: string | null
+          customer_liable?: boolean | null
+          description: string
+          id?: string
+          incident_date: string
+          incident_type: string
+          insurance_claim_number?: string | null
+          insurance_covered?: boolean | null
+          location?: string | null
+          photos?: string[] | null
+          police_report_number?: string | null
+          resolution_notes?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          contract_id?: string
+          cost?: number | null
+          created_at?: string
+          created_by?: string | null
+          customer_liable?: boolean | null
+          description?: string
+          id?: string
+          incident_date?: string
+          incident_type?: string
+          insurance_claim_number?: string | null
+          insurance_covered?: boolean | null
+          location?: string | null
+          photos?: string[] | null
+          police_report_number?: string | null
+          resolution_notes?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_incidents_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contracts: {
+        Row: {
+          actual_end_date: string | null
+          actual_start_date: string | null
+          company_signature: string | null
+          company_signed_at: string | null
+          contract_number: string
+          contract_type: Database["public"]["Enums"]["contract_type"]
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          customer_signature: string | null
+          customer_signed_at: string | null
+          daily_rate: number
+          discount_amount: number | null
+          end_date: string
+          final_amount: number
+          fuel_level_pickup: string | null
+          fuel_level_return: string | null
+          id: string
+          insurance_amount: number | null
+          notes: string | null
+          pickup_location: string | null
+          pickup_mileage: number | null
+          quotation_id: string | null
+          rental_days: number
+          return_location: string | null
+          return_mileage: number | null
+          sales_person_id: string | null
+          security_deposit: number | null
+          special_conditions: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["contract_status"]
+          tax_amount: number | null
+          terms_and_conditions: string | null
+          total_amount: number
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          actual_end_date?: string | null
+          actual_start_date?: string | null
+          company_signature?: string | null
+          company_signed_at?: string | null
+          contract_number: string
+          contract_type: Database["public"]["Enums"]["contract_type"]
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          customer_signature?: string | null
+          customer_signed_at?: string | null
+          daily_rate: number
+          discount_amount?: number | null
+          end_date: string
+          final_amount: number
+          fuel_level_pickup?: string | null
+          fuel_level_return?: string | null
+          id?: string
+          insurance_amount?: number | null
+          notes?: string | null
+          pickup_location?: string | null
+          pickup_mileage?: number | null
+          quotation_id?: string | null
+          rental_days: number
+          return_location?: string | null
+          return_mileage?: number | null
+          sales_person_id?: string | null
+          security_deposit?: number | null
+          special_conditions?: string | null
+          start_date: string
+          status?: Database["public"]["Enums"]["contract_status"]
+          tax_amount?: number | null
+          terms_and_conditions?: string | null
+          total_amount: number
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          actual_end_date?: string | null
+          actual_start_date?: string | null
+          company_signature?: string | null
+          company_signed_at?: string | null
+          contract_number?: string
+          contract_type?: Database["public"]["Enums"]["contract_type"]
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          customer_signature?: string | null
+          customer_signed_at?: string | null
+          daily_rate?: number
+          discount_amount?: number | null
+          end_date?: string
+          final_amount?: number
+          fuel_level_pickup?: string | null
+          fuel_level_return?: string | null
+          id?: string
+          insurance_amount?: number | null
+          notes?: string | null
+          pickup_location?: string | null
+          pickup_mileage?: number | null
+          quotation_id?: string | null
+          rental_days?: number
+          return_location?: string | null
+          return_mileage?: number | null
+          sales_person_id?: string | null
+          security_deposit?: number | null
+          special_conditions?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["contract_status"]
+          tax_amount?: number | null
+          terms_and_conditions?: string | null
+          total_amount?: number
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_evaluations: {
         Row: {
           comments: string | null
@@ -205,6 +468,90 @@ export type Database = {
         }
         Relationships: []
       }
+      quotations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          daily_rate: number
+          discount_amount: number | null
+          end_date: string
+          final_amount: number
+          id: string
+          quotation_number: string
+          rental_days: number
+          sales_person_id: string | null
+          special_conditions: string | null
+          start_date: string
+          status: string | null
+          tax_amount: number | null
+          terms_and_conditions: string | null
+          total_amount: number
+          updated_at: string
+          valid_until: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          daily_rate: number
+          discount_amount?: number | null
+          end_date: string
+          final_amount: number
+          id?: string
+          quotation_number: string
+          rental_days: number
+          sales_person_id?: string | null
+          special_conditions?: string | null
+          start_date: string
+          status?: string | null
+          tax_amount?: number | null
+          terms_and_conditions?: string | null
+          total_amount: number
+          updated_at?: string
+          valid_until?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          daily_rate?: number
+          discount_amount?: number | null
+          end_date?: string
+          final_amount?: number
+          id?: string
+          quotation_number?: string
+          rental_days?: number
+          sales_person_id?: string | null
+          special_conditions?: string | null
+          start_date?: string
+          status?: string | null
+          tax_amount?: number | null
+          terms_and_conditions?: string | null
+          total_amount?: number
+          updated_at?: string
+          valid_until?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotations_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           granted_at: string
@@ -386,7 +733,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_contract_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_customer_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_quotation_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
@@ -407,6 +762,13 @@ export type Database = {
       }
     }
     Enums: {
+      contract_status:
+        | "draft"
+        | "pending"
+        | "active"
+        | "completed"
+        | "cancelled"
+      contract_type: "daily" | "weekly" | "monthly" | "custom"
       customer_status: "active" | "inactive" | "blocked"
       customer_type: "individual" | "company"
       user_role:
@@ -539,6 +901,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      contract_status: ["draft", "pending", "active", "completed", "cancelled"],
+      contract_type: ["daily", "weekly", "monthly", "custom"],
       customer_status: ["active", "inactive", "blocked"],
       customer_type: ["individual", "company"],
       user_role: [

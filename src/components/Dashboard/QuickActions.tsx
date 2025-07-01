@@ -12,7 +12,7 @@ const QuickActions = () => {
       description: "إنشاء عقد تأجير جديد",
       icon: <Plus className="w-5 h-5" />,
       className: "btn-royal",
-      onClick: () => console.log('عقد جديد')
+      onClick: () => navigate('/contracts')
     },
     {
       title: "إدارة العملاء",
