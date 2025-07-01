@@ -1,62 +1,7 @@
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { ContractPDFData } from '@/types/contract';
 
-export interface ContractPDFData {
-  contract_number: string;
-  customers: {
-    name: string;
-    phone: string;
-    email?: string;
-    address?: string;
-    national_id?: string;
-  };
-  vehicles: {
-    make: string;
-    model: string;
-    year: number;
-    license_plate: string;
-    vehicle_number: string;
-    color: string;
-  };
-  start_date: string;
-  end_date: string;
-  rental_days: number;
-  daily_rate: number;
-  total_amount: number;
-  discount_amount?: number;
-  tax_amount?: number;
-  insurance_amount?: number;
-  security_deposit?: number;
-  final_amount: number;
-  pickup_location?: string;
-  return_location?: string;
-  special_conditions?: string;
-  terms_and_conditions?: string;
-  customer_signature?: string;
-  company_signature?: string;
-  customer_signed_at?: string;
-  company_signed_at?: string;
-  pickup_photos?: string[];
-  return_photos?: string[];
-  pickup_condition_notes?: string;
-  return_condition_notes?: string;
-  created_at: string;
-}
-
-export const generateContractPDF = async (contract: ContractPDFData): Promise<Blob> => {
-  // إنشاء عنصر HTML مؤقت للعقد
-  const tempDiv = document.createElement('div');
-  tempDiv.style.position = 'absolute';
-  tempDiv.style.left = '-9999px';
-  tempDiv.style.top = '-9999px';
-  tempDiv.style.width = '210mm'; // A4 width
-  tempDiv.style.background = 'white';
-  tempDiv.style.fontFamily = 'Cairo, sans-serif';
-  tempDiv.style.direction = 'rtl';
-  tempDiv.style.padding = '20mm';
-
-  // محتوى العقد
-  tempDiv.innerHTML = `
+export const generateContractHTML = (contract: ContractPDFData): string => {
+  return `
     <div style="max-width: 170mm; margin: 0 auto; background: white; color: black;">
       <!-- Header -->
       <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #1e40af; padding-bottom: 20px;">
@@ -234,62 +179,4 @@ export const generateContractPDF = async (contract: ContractPDFData): Promise<Bl
       </div>
     </div>
   `;
-
-  document.body.appendChild(tempDiv);
-
-  try {
-    // تحويل HTML إلى Canvas
-    const canvas = await html2canvas(tempDiv, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      width: 794, // A4 width in pixels at 96 DPI
-      height: 1123, // A4 height in pixels at 96 DPI
-    });
-
-    // إنشاء PDF
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
-
-    const imgData = canvas.toDataURL('image/png');
-    
-    // إضافة الصورة إلى PDF
-    pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
-
-    // إنشاء Blob
-    const pdfBlob = pdf.output('blob');
-    
-    return pdfBlob;
-  } finally {
-    // إزالة العنصر المؤقت
-    document.body.removeChild(tempDiv);
-  }
-};
-
-export const downloadContractPDF = async (contract: ContractPDFData, filename?: string) => {
-  try {
-    const pdfBlob = await generateContractPDF(contract);
-    
-    // إنشاء رابط تحميل
-    const url = URL.createObjectURL(pdfBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename || `contract_${contract.contract_number}.pdf`;
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    // تنظيف الرابط
-    URL.revokeObjectURL(url);
-    
-    return true;
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    throw new Error('فشل في إنشاء ملف PDF');
-  }
 };

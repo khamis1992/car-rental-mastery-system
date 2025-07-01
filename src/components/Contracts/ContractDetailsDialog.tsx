@@ -27,7 +27,7 @@ import { ContractDeliveryForm } from './ContractDeliveryForm';
 import { ContractReturnForm } from './ContractReturnForm';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { downloadContractPDF } from '@/lib/contractPDF';
+import { downloadContractPDF } from '@/lib/contract/contractPDFService';
 
 interface ContractDetailsDialogProps {
   contractId: string | null;
