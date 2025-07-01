@@ -1,5 +1,6 @@
 import React from 'react';
 import { TrendingUp, DollarSign, FileText, Calendar, CreditCard, Receipt } from 'lucide-react';
+import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -132,11 +133,30 @@ const Accounting = () => {
       </div>
 
       <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="transactions">المعاملات المالية</TabsTrigger>
-          <TabsTrigger value="reports">التقارير الشهرية</TabsTrigger>
+          <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
+          <TabsTrigger value="journal">القيود المحاسبية</TabsTrigger>
+          <TabsTrigger value="reports">التقارير المالية</TabsTrigger>
+          <TabsTrigger value="settings">الإعدادات</TabsTrigger>
           <TabsTrigger value="analytics">التحليلات</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="accounts" className="space-y-4">
+          <ChartOfAccountsTab />
+        </TabsContent>
+
+        <TabsContent value="journal" className="space-y-4">
+          <div className="text-center py-8 text-muted-foreground">
+            القيود المحاسبية - قريباً
+          </div>
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-4">
+          <div className="text-center py-8 text-muted-foreground">
+            إعدادات النظام المحاسبي - قريباً
+          </div>
+        </TabsContent>
 
         <TabsContent value="transactions" className="space-y-4">
           <Card className="card-elegant">

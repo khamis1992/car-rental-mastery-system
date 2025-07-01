@@ -160,6 +160,110 @@ export type Database = {
           },
         ]
       }
+      branches: {
+        Row: {
+          address: string | null
+          branch_code: string
+          branch_name: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          manager_name: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          branch_code: string
+          branch_name: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          manager_name?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          branch_code?: string
+          branch_name?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          manager_name?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      chart_of_accounts: {
+        Row: {
+          account_category: string
+          account_code: string
+          account_name: string
+          account_name_en: string | null
+          account_type: string
+          allow_posting: boolean | null
+          created_at: string
+          created_by: string | null
+          current_balance: number | null
+          id: string
+          is_active: boolean | null
+          level: number
+          notes: string | null
+          opening_balance: number | null
+          parent_account_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_category: string
+          account_code: string
+          account_name: string
+          account_name_en?: string | null
+          account_type: string
+          allow_posting?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          current_balance?: number | null
+          id?: string
+          is_active?: boolean | null
+          level?: number
+          notes?: string | null
+          opening_balance?: number | null
+          parent_account_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_category?: string
+          account_code?: string
+          account_name?: string
+          account_name_en?: string | null
+          account_type?: string
+          allow_posting?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          current_balance?: number | null
+          id?: string
+          is_active?: boolean | null
+          level?: number
+          notes?: string | null
+          opening_balance?: number | null
+          parent_account_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_parent_account_id_fkey"
+            columns: ["parent_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_extensions: {
         Row: {
           approved_at: string | null
@@ -435,6 +539,50 @@ export type Database = {
           },
         ]
       }
+      cost_centers: {
+        Row: {
+          cost_center_code: string
+          cost_center_name: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          cost_center_code: string
+          cost_center_name: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cost_center_code?: string
+          cost_center_name?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_centers_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_evaluations: {
         Row: {
           comments: string | null
@@ -688,6 +836,42 @@ export type Database = {
           },
         ]
       }
+      financial_periods: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_date: string
+          fiscal_year: number
+          id: string
+          is_closed: boolean | null
+          period_name: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_date: string
+          fiscal_year: number
+          id?: string
+          is_closed?: boolean | null
+          period_name: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string
+          fiscal_year?: number
+          id?: string
+          is_closed?: boolean | null
+          period_name?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       invoice_items: {
         Row: {
           created_at: string
@@ -830,6 +1014,145 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entries: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          entry_date: string
+          entry_number: string
+          financial_period_id: string | null
+          id: string
+          posted_at: string | null
+          posted_by: string | null
+          reference_id: string | null
+          reference_type: string | null
+          reversal_reason: string | null
+          reversed_at: string | null
+          reversed_by: string | null
+          status: string
+          total_credit: number
+          total_debit: number
+          updated_at: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          entry_date: string
+          entry_number: string
+          financial_period_id?: string | null
+          id?: string
+          posted_at?: string | null
+          posted_by?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          reversal_reason?: string | null
+          reversed_at?: string | null
+          reversed_by?: string | null
+          status?: string
+          total_credit?: number
+          total_debit?: number
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          entry_date?: string
+          entry_number?: string
+          financial_period_id?: string | null
+          id?: string
+          posted_at?: string | null
+          posted_by?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          reversal_reason?: string | null
+          reversed_at?: string | null
+          reversed_by?: string | null
+          status?: string
+          total_credit?: number
+          total_debit?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entries_financial_period_id_fkey"
+            columns: ["financial_period_id"]
+            isOneToOne: false
+            referencedRelation: "financial_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entry_lines: {
+        Row: {
+          account_id: string
+          cost_center_id: string | null
+          created_at: string
+          credit_amount: number | null
+          debit_amount: number | null
+          description: string | null
+          id: string
+          journal_entry_id: string
+          line_number: number
+        }
+        Insert: {
+          account_id: string
+          cost_center_id?: string | null
+          created_at?: string
+          credit_amount?: number | null
+          debit_amount?: number | null
+          description?: string | null
+          id?: string
+          journal_entry_id: string
+          line_number: number
+        }
+        Update: {
+          account_id?: string
+          cost_center_id?: string | null
+          created_at?: string
+          credit_amount?: number | null
+          debit_amount?: number | null
+          description?: string | null
+          id?: string
+          journal_entry_id?: string
+          line_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entry_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_lines_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_lines_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
             referencedColumns: ["id"]
           },
         ]
@@ -1750,7 +2073,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_branch_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_contract_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_cost_center_code: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
@@ -1763,6 +2094,10 @@ export type Database = {
         Returns: string
       }
       generate_invoice_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_journal_entry_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
