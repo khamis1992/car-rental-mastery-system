@@ -225,4 +225,19 @@
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
+  
+  /* Print styles */
+  @media print {
+    .print:block {
+      display: block !important;
+    }
+    
+    .no-print {
+      display: none !important;
+    }
+    
+    .signature-canvas {
+      border: 1px solid #000 !important;
+    }
+  }
 }

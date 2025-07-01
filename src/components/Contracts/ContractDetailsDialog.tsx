@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,11 +13,16 @@ import {
   MapPin, 
   FileCheck,
   Download,
-  Printer
+  Printer,
+  Signature
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { contractService } from '@/services/contractService';
+import { ContractPrintTemplate } from './ContractPrintTemplate';
+import { ElectronicSignature } from './ElectronicSignature';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ContractDetailsDialogProps {
   contractId: string | null;
@@ -32,6 +37,11 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
 }) => {
   const [contract, setContract] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [showPrintTemplate, setShowPrintTemplate] = useState(false);
+  const [showCustomerSignature, setShowCustomerSignature] = useState(false);
+  const [showCompanySignature, setShowCompanySignature] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (contractId && open) {
@@ -50,6 +60,56 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
       console.error('Error loading contract:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePrint = () => {
+    setShowPrintTemplate(true);
+    setTimeout(() => {
+      window.print();
+    }, 500);
+  };
+
+  const handleDownloadPDF = () => {
+    toast({
+      title: "قريباً",
+      description: "ميزة تحميل PDF ستكون متاحة قريباً",
+    });
+  };
+
+  const handleSignatureSaved = async (signature: string, type: 'customer' | 'company') => {
+    try {
+      const updateData = type === 'customer' 
+        ? { 
+            customer_signature: signature,
+            customer_signed_at: new Date().toISOString()
+          }
+        : { 
+            company_signature: signature,
+            company_signed_at: new Date().toISOString()
+          };
+
+      const { error } = await supabase
+        .from('contracts')
+        .update(updateData)
+        .eq('id', contractId);
+
+      if (error) throw error;
+
+      // إعادة تحميل العقد لعرض التوقيع المحدث
+      loadContract();
+      
+      toast({
+        title: "تم بنجاح",
+        description: `تم حفظ ${type === 'customer' ? 'توقيع العميل' : 'توقيع الشركة'} بنجاح`,
+      });
+    } catch (error) {
+      console.error('Error saving signature:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء حفظ التوقيع",
+        variant: "destructive",
+      });
     }
   };
 
@@ -95,11 +155,11 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
             </DialogTitle>
             <div className="flex items-center gap-2">
               {getStatusBadge(contract.status)}
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handlePrint}>
                 <Printer className="w-4 h-4 mr-2" />
                 طباعة
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
                 <Download className="w-4 h-4 mr-2" />
                 تحميل PDF
               </Button>
@@ -329,6 +389,87 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
             </Card>
           )}
 
+          {/* Electronic Signatures */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Signature className="w-4 h-4" />
+                التوقيعات الإلكترونية
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Customer Signature */}
+                <div className="space-y-3">
+                  <h4 className="font-medium">توقيع العميل</h4>
+                  {contract.customer_signature ? (
+                    <div className="space-y-2">
+                      <div className="border border-border rounded-lg p-4 bg-muted/20">
+                        <img 
+                          src={contract.customer_signature} 
+                          alt="توقيع العميل" 
+                          className="max-h-20 mx-auto"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground text-center">
+                        تم التوقيع في: {contract.customer_signed_at ? format(new Date(contract.customer_signed_at), 'PPp', { locale: ar }) : 'غير محدد'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+                        <p className="text-muted-foreground">لم يتم التوقيع بعد</p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => setShowCustomerSignature(true)}
+                      >
+                        <Signature className="w-4 h-4 mr-2" />
+                        إضافة توقيع العميل
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Company Signature */}
+                <div className="space-y-3">
+                  <h4 className="font-medium">توقيع الشركة</h4>
+                  {contract.company_signature ? (
+                    <div className="space-y-2">
+                      <div className="border border-border rounded-lg p-4 bg-muted/20">
+                        <img 
+                          src={contract.company_signature} 
+                          alt="توقيع الشركة" 
+                          className="max-h-20 mx-auto"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground text-center">
+                        تم التوقيع في: {contract.company_signed_at ? format(new Date(contract.company_signed_at), 'PPp', { locale: ar }) : 'غير محدد'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+                        <p className="text-muted-foreground">لم يتم التوقيع بعد</p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => setShowCompanySignature(true)}
+                      >
+                        <Signature className="w-4 h-4 mr-2" />
+                        إضافة توقيع الشركة
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Quotation Reference */}
           {contract.quotations && (
             <Card>
@@ -341,6 +482,32 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
             </Card>
           )}
         </div>
+
+        {/* Print Template */}
+        {showPrintTemplate && (
+          <div className="hidden print:block">
+            <ContractPrintTemplate contract={contract} />
+          </div>
+        )}
+
+        {/* Electronic Signature Dialogs */}
+        <ElectronicSignature
+          open={showCustomerSignature}
+          onOpenChange={setShowCustomerSignature}
+          title="توقيع العميل"
+          contractId={contract.contract_number}
+          signatureType="customer"
+          onSignatureSaved={(signature) => handleSignatureSaved(signature, 'customer')}
+        />
+
+        <ElectronicSignature
+          open={showCompanySignature}
+          onOpenChange={setShowCompanySignature}
+          title="توقيع الشركة"
+          contractId={contract.contract_number}
+          signatureType="company"
+          onSignatureSaved={(signature) => handleSignatureSaved(signature, 'company')}
+        />
       </DialogContent>
     </Dialog>
   );
