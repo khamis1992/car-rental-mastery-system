@@ -160,6 +160,128 @@ export type Database = {
           },
         ]
       }
+      bank_accounts: {
+        Row: {
+          account_id: string | null
+          account_name: string
+          account_number: string
+          account_type: string
+          bank_name: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          current_balance: number | null
+          id: string
+          is_active: boolean | null
+          opening_balance: number | null
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          account_name: string
+          account_number: string
+          account_type?: string
+          bank_name: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          current_balance?: number | null
+          id?: string
+          is_active?: boolean | null
+          opening_balance?: number | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          account_name?: string
+          account_number?: string
+          account_type?: string
+          bank_name?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          current_balance?: number | null
+          id?: string
+          is_active?: boolean | null
+          opening_balance?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_transactions: {
+        Row: {
+          balance_after: number | null
+          bank_account_id: string
+          created_at: string
+          created_by: string | null
+          credit_amount: number | null
+          debit_amount: number | null
+          description: string
+          id: string
+          journal_entry_id: string | null
+          reference_number: string | null
+          status: string
+          transaction_date: string
+          transaction_type: string
+          updated_at: string
+        }
+        Insert: {
+          balance_after?: number | null
+          bank_account_id: string
+          created_at?: string
+          created_by?: string | null
+          credit_amount?: number | null
+          debit_amount?: number | null
+          description: string
+          id?: string
+          journal_entry_id?: string | null
+          reference_number?: string | null
+          status?: string
+          transaction_date: string
+          transaction_type: string
+          updated_at?: string
+        }
+        Update: {
+          balance_after?: number | null
+          bank_account_id?: string
+          created_at?: string
+          created_by?: string | null
+          credit_amount?: number | null
+          debit_amount?: number | null
+          description?: string
+          id?: string
+          journal_entry_id?: string | null
+          reference_number?: string | null
+          status?: string
+          transaction_date?: string
+          transaction_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_transactions_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       branches: {
         Row: {
           address: string | null
