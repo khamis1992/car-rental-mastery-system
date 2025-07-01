@@ -271,6 +271,7 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
             </TableBody>
           </Table>
         </div>
+      </CardContent>
       </Card>
 
       {/* معاينة العرض */}

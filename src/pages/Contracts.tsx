@@ -263,10 +263,13 @@ const Contracts = () => {
 
           <QuotationsList
             quotations={quotations}
+            customers={customers}
+            vehicles={vehicles}
             onView={(id) => console.log('View quotation:', id)}
             onEdit={(id) => console.log('Edit quotation:', id)}
             onDelete={(id) => console.log('Delete quotation:', id)}
             onConvertToContract={handleConvertToContract}
+            onGetQuotationDetails={quotationService.getQuotationById}
           />
         </TabsContent>
       </Tabs>
