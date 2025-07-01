@@ -192,7 +192,7 @@ const OfficeLocationForm: React.FC<OfficeLocationFormProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 pr-4">
+        <div className="flex-1 overflow-y-auto px-1 max-h-[calc(90vh-120px)]">
           <form onSubmit={handleSubmit} className="space-y-4">
           {/* اسم الموقع */}
           <div className="space-y-2">
@@ -331,7 +331,7 @@ const OfficeLocationForm: React.FC<OfficeLocationFormProps> = ({
             </Button>
           </div>
           </form>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
