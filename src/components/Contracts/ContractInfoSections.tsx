@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import { User, Car, Calendar, DollarSign, MapPin, FileCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { VehicleConditionComparison } from './VehicleConditionComparison';
 
 interface ContractInfoSectionsProps {
   contract: any;
@@ -199,6 +200,33 @@ export const ContractInfoSections: React.FC<ContractInfoSectionsProps> = ({ cont
             )}
           </CardContent>
         </Card>
+      )}
+
+      {/* Vehicle Condition Comparison */}
+      {(contract.pickup_photos || contract.return_photos) && (
+        <VehicleConditionComparison
+          contractId={contract.id}
+          vehicleInfo={{
+            make: contract.vehicles?.make || '',
+            model: contract.vehicles?.model || '',
+            license_plate: contract.vehicles?.license_plate || '',
+            year: contract.vehicles?.year || 0
+          }}
+          pickupData={{
+            photos: contract.pickup_photos || [],
+            notes: contract.pickup_condition_notes || '',
+            mileage: contract.pickup_mileage,
+            fuel_level: contract.fuel_level_pickup,
+            date: contract.actual_start_date
+          }}
+          returnData={{
+            photos: contract.return_photos || [],
+            notes: contract.return_condition_notes || '',
+            mileage: contract.return_mileage,
+            fuel_level: contract.fuel_level_return,
+            date: contract.actual_end_date
+          }}
+        />
       )}
 
       {/* Additional Information */}

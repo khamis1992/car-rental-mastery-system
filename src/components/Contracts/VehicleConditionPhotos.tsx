@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Camera, X, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { photoService } from '@/services/photoService';
 
 interface VehicleConditionPhotosProps {
   contractId: string;
@@ -41,23 +42,18 @@ export const VehicleConditionPhotos: React.FC<VehicleConditionPhotosProps> = ({
 
     try {
       for (const file of files) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${contractId}_${type}_${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `${contractId}/${type}/${fileName}`;
+        const result = await photoService.uploadVehiclePhoto(file, {
+          contractId,
+          type,
+          category: 'general',
+          timestamp: new Date().toISOString()
+        });
 
-        const { error: uploadError } = await supabase.storage
-          .from('vehicle-conditions')
-          .upload(filePath, file);
-
-        if (uploadError) {
-          throw uploadError;
+        if (result.error) {
+          throw new Error(result.error);
         }
 
-        const { data } = supabase.storage
-          .from('vehicle-conditions')
-          .getPublicUrl(filePath);
-
-        uploadedPhotos.push(data.publicUrl);
+        uploadedPhotos.push(result.url);
       }
 
       const newPhotos = [...photos, ...uploadedPhotos];
@@ -72,7 +68,7 @@ export const VehicleConditionPhotos: React.FC<VehicleConditionPhotosProps> = ({
       console.error('Error uploading photos:', error);
       toast({
         title: "خطأ",
-        description: "فشل في رفع الصور",
+        description: error instanceof Error ? error.message : "فشل في رفع الصور",
         variant: "destructive",
       });
     } finally {
@@ -85,13 +81,10 @@ export const VehicleConditionPhotos: React.FC<VehicleConditionPhotosProps> = ({
 
   const removePhoto = async (photoUrl: string, index: number) => {
     try {
-      // Extract file path from URL for deletion
-      const urlParts = photoUrl.split('/vehicle-conditions/');
-      if (urlParts.length > 1) {
-        const filePath = urlParts[1];
-        await supabase.storage
-          .from('vehicle-conditions')
-          .remove([filePath]);
+      const success = await photoService.deleteVehiclePhoto(photoUrl);
+      
+      if (!success) {
+        throw new Error('فشل في حذف الصورة من التخزين');
       }
 
       const newPhotos = photos.filter((_, i) => i !== index);
@@ -106,7 +99,7 @@ export const VehicleConditionPhotos: React.FC<VehicleConditionPhotosProps> = ({
       console.error('Error deleting photo:', error);
       toast({
         title: "خطأ",
-        description: "فشل في حذف الصورة",
+        description: error instanceof Error ? error.message : "فشل في حذف الصورة",
         variant: "destructive",
       });
     }
