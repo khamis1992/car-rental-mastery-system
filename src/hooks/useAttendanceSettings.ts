@@ -34,7 +34,13 @@ export const useAttendanceSettings = () => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setOfficeLocations(data || []);
+      
+      if (!data || data.length === 0) {
+        console.warn('لا توجد مواقع مكاتب نشطة');
+        setError('لا توجد مواقع مكاتب نشطة. تواصل مع الإدارة لإضافة مواقع.');
+      } else {
+        setOfficeLocations(data);
+      }
     } catch (err) {
       console.error('خطأ في جلب مواقع المكاتب:', err);
       setError('فشل في جلب مواقع المكاتب');
@@ -47,14 +53,35 @@ export const useAttendanceSettings = () => {
         .from('attendance_settings')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+        .limit(1);
 
       if (error) throw error;
-      setAttendanceSettings(data);
+      
+      // إذا لم توجد إعدادات، استخدم القيم الافتراضية
+      if (!data || data.length === 0) {
+        console.warn('لا توجد إعدادات حضور، سيتم استخدام القيم الافتراضية');
+        setAttendanceSettings({
+          id: 'default',
+          allow_manual_override: true,
+          require_location: true,
+          max_distance_meters: 100,
+          grace_period_minutes: 15
+        });
+      } else {
+        setAttendanceSettings(data[0]);
+      }
     } catch (err) {
       console.error('خطأ في جلب إعدادات الحضور:', err);
       setError('فشل في جلب إعدادات الحضور');
+      
+      // استخدام القيم الافتراضية في حالة الخطأ
+      setAttendanceSettings({
+        id: 'default',
+        allow_manual_override: true,
+        require_location: true,
+        max_distance_meters: 100,
+        grace_period_minutes: 15
+      });
     }
   };
 

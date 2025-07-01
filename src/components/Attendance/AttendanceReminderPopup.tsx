@@ -36,6 +36,7 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
     officeLocations, 
     attendanceSettings, 
     loading: settingsLoading, 
+    error,
     isInOfficeRange: checkInOfficeRange 
   } = useAttendanceSettings();
 
@@ -61,6 +62,14 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
         }
       } catch (error) {
         console.error('خطأ في التحقق من بيانات الموظف:', error);
+        
+        // رسالة توضيحية للمستخدم
+        toast({
+          title: "تنبيه",
+          description: "لم يتم العثور على بيانات الموظف في النظام. سيتم استخدام النظام المؤقت.",
+          variant: "default"
+        });
+        
         // استخدام localStorage كبديل
         const today = new Date().toDateString();
         const lastCheckIn = localStorage.getItem('lastCheckInDate');
@@ -138,10 +147,31 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
   };
 
   const handleCheckIn = async () => {
-    if (!location || !employeeId) {
+    // التحقق من الموقع أولاً
+    if (!location) {
       toast({
-        title: "خطأ",
-        description: "لا يمكن تحديد موقعك أو بيانات الموظف",
+        title: "خطأ في الموقع",
+        description: "لا يمكن تحديد موقعك الحالي. تأكد من تفعيل GPS والسماح بالوصول للموقع.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // التحقق من بيانات الموظف
+    if (!employeeId) {
+      toast({
+        title: "خطأ في بيانات الموظف",
+        description: "لا يمكن العثور على بيانات الموظف. تواصل مع الإدارة.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // التحقق من إعدادات الحضور
+    if (!attendanceSettings) {
+      toast({
+        title: "خطأ في الإعدادات",
+        description: "لا يمكن تحميل إعدادات الحضور. تواصل مع الإدارة.",
         variant: "destructive"
       });
       return;
@@ -258,8 +288,8 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
   if (settingsLoading) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-md">
-          <div className="flex items-center justify-center p-6">
+        <DialogContent className="sm:max-w-md" aria-describedby="loading-description">
+          <div id="loading-description" className="flex items-center justify-center p-6">
             <div className="text-center">
               <Clock className="w-8 h-8 mx-auto mb-2 animate-spin" />
               <p>جاري تحميل الإعدادات...</p>
@@ -272,7 +302,7 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-describedby="attendance-reminder-description">
         <DialogHeader>
           <DialogTitle className="text-center flex items-center gap-2 justify-center">
             <Clock className="w-5 h-5" />
@@ -280,7 +310,7 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
+        <div id="attendance-reminder-description" className="space-y-6">
           {/* الوقت والتاريخ */}
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">
@@ -391,6 +421,14 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
             </div>
           )}
 
+          {/* رسائل الأخطاء والمساعدة */}
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
           {/* معلومات إضافية */}
           {!hasCheckedIn && !showManualOverride && attendanceSettings && (
             <div className="text-xs text-muted-foreground space-y-1">
@@ -403,6 +441,17 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
               {attendanceSettings.grace_period_minutes > 0 && (
                 <p>• فترة سماح: {attendanceSettings.grace_period_minutes} دقيقة</p>
               )}
+            </div>
+          )}
+
+          {/* معلومات تشخيصية (للمطورين فقط) */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="text-xs text-muted-foreground p-2 bg-muted rounded border">
+              <p>معلومات تشخيصية:</p>
+              <p>• الموقع: {location ? '✓ متاح' : '✗ غير متاح'}</p>
+              <p>• معرف الموظف: {employeeId ? '✓ متاح' : '✗ غير متاح'}</p>
+              <p>• إعدادات الحضور: {attendanceSettings ? '✓ متاحة' : '✗ غير متاحة'}</p>
+              <p>• مواقع المكاتب: {officeLocations.length} موقع</p>
             </div>
           )}
         </div>
