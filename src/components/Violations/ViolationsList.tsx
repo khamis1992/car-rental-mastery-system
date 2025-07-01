@@ -89,8 +89,8 @@ export const ViolationsList: React.FC<ViolationsListProps> = ({
       violation.vehicles?.license_plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
       violation.location?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === '' || violation.status === statusFilter;
-    const matchesLiability = liabilityFilter === '' || violation.liability_determination === liabilityFilter;
+    const matchesStatus = statusFilter === '' || statusFilter === 'all' || violation.status === statusFilter;
+    const matchesLiability = liabilityFilter === '' || liabilityFilter === 'all' || violation.liability_determination === liabilityFilter;
 
     return matchesSearch && matchesStatus && matchesLiability;
   });
@@ -123,7 +123,7 @@ export const ViolationsList: React.FC<ViolationsListProps> = ({
               <SelectValue placeholder="الحالة" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">جميع الحالات</SelectItem>
+              <SelectItem value="all">جميع الحالات</SelectItem>
               <SelectItem value="pending">معلقة</SelectItem>
               <SelectItem value="notified">تم الإشعار</SelectItem>
               <SelectItem value="paid">مدفوعة</SelectItem>
@@ -137,7 +137,7 @@ export const ViolationsList: React.FC<ViolationsListProps> = ({
               <SelectValue placeholder="المسؤولية" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">جميع المسؤوليات</SelectItem>
+              <SelectItem value="all">جميع المسؤوليات</SelectItem>
               <SelectItem value="pending">معلقة</SelectItem>
               <SelectItem value="customer">العميل</SelectItem>
               <SelectItem value="company">الشركة</SelectItem>

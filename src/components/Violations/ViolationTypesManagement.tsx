@@ -153,7 +153,7 @@ export const ViolationTypesManagement: React.FC<ViolationTypesManagementProps> =
       type.violation_name_ar.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (type.violation_name_en && type.violation_name_en.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesCategory = categoryFilter === '' || type.category === categoryFilter;
+    const matchesCategory = categoryFilter === '' || categoryFilter === 'all' || type.category === categoryFilter;
 
     return matchesSearch && matchesCategory;
   });
@@ -189,7 +189,7 @@ export const ViolationTypesManagement: React.FC<ViolationTypesManagementProps> =
                 <SelectValue placeholder="الفئة" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">جميع الفئات</SelectItem>
+                <SelectItem value="all">جميع الفئات</SelectItem>
                 <SelectItem value="speed">السرعة</SelectItem>
                 <SelectItem value="parking">الوقوف</SelectItem>
                 <SelectItem value="traffic_light">الإشارات</SelectItem>
