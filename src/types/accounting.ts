@@ -129,3 +129,61 @@ export interface BalanceSheet {
     total_equity: number;
   };
 }
+
+export interface FixedAsset {
+  id: string;
+  asset_code: string;
+  asset_name: string;
+  asset_category: string;
+  description?: string;
+  purchase_date: string;
+  purchase_cost: number;
+  useful_life_years: number;
+  residual_value: number;
+  depreciation_method: 'straight_line' | 'declining_balance';
+  accumulated_depreciation: number;
+  book_value: number;
+  location?: string;
+  supplier_name?: string;
+  invoice_number?: string;
+  serial_number?: string;
+  warranty_expiry?: string;
+  status: 'active' | 'disposed' | 'under_maintenance';
+  disposal_date?: string;
+  disposal_amount?: number;
+  disposal_reason?: string;
+  account_id?: string;
+  accumulated_depreciation_account_id?: string;
+  depreciation_expense_account_id?: string;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
+export interface AssetDepreciation {
+  id: string;
+  asset_id: string;
+  depreciation_date: string;
+  depreciation_amount: number;
+  accumulated_depreciation: number;
+  book_value: number;
+  method_used: string;
+  period_months: number;
+  journal_entry_id?: string;
+  notes?: string;
+  created_at: string;
+  created_by?: string;
+  asset?: FixedAsset;
+}
+
+export interface AssetCategory {
+  id: string;
+  category_name: string;
+  default_useful_life: number;
+  default_depreciation_method: string;
+  default_residual_rate: number;
+  description?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}

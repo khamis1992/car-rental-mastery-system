@@ -85,6 +85,102 @@ export type Database = {
           },
         ]
       }
+      asset_categories: {
+        Row: {
+          category_name: string
+          created_at: string
+          default_depreciation_method: string
+          default_residual_rate: number | null
+          default_useful_life: number
+          description: string | null
+          id: string
+          is_active: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          category_name: string
+          created_at?: string
+          default_depreciation_method?: string
+          default_residual_rate?: number | null
+          default_useful_life: number
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          category_name?: string
+          created_at?: string
+          default_depreciation_method?: string
+          default_residual_rate?: number | null
+          default_useful_life?: number
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      asset_depreciation: {
+        Row: {
+          accumulated_depreciation: number
+          asset_id: string
+          book_value: number
+          created_at: string
+          created_by: string | null
+          depreciation_amount: number
+          depreciation_date: string
+          id: string
+          journal_entry_id: string | null
+          method_used: string
+          notes: string | null
+          period_months: number
+        }
+        Insert: {
+          accumulated_depreciation: number
+          asset_id: string
+          book_value: number
+          created_at?: string
+          created_by?: string | null
+          depreciation_amount: number
+          depreciation_date: string
+          id?: string
+          journal_entry_id?: string | null
+          method_used: string
+          notes?: string | null
+          period_months?: number
+        }
+        Update: {
+          accumulated_depreciation?: number
+          asset_id?: string
+          book_value?: number
+          created_at?: string
+          created_by?: string | null
+          depreciation_amount?: number
+          depreciation_date?: string
+          id?: string
+          journal_entry_id?: string | null
+          method_used?: string
+          notes?: string | null
+          period_months?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_depreciation_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_depreciation_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance: {
         Row: {
           approved_at: string | null
@@ -993,6 +1089,118 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      fixed_assets: {
+        Row: {
+          account_id: string | null
+          accumulated_depreciation: number | null
+          accumulated_depreciation_account_id: string | null
+          asset_category: string
+          asset_code: string
+          asset_name: string
+          book_value: number
+          created_at: string
+          created_by: string | null
+          depreciation_expense_account_id: string | null
+          depreciation_method: string
+          description: string | null
+          disposal_amount: number | null
+          disposal_date: string | null
+          disposal_reason: string | null
+          id: string
+          invoice_number: string | null
+          location: string | null
+          purchase_cost: number
+          purchase_date: string
+          residual_value: number | null
+          serial_number: string | null
+          status: string
+          supplier_name: string | null
+          updated_at: string
+          useful_life_years: number
+          warranty_expiry: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          accumulated_depreciation?: number | null
+          accumulated_depreciation_account_id?: string | null
+          asset_category: string
+          asset_code: string
+          asset_name: string
+          book_value: number
+          created_at?: string
+          created_by?: string | null
+          depreciation_expense_account_id?: string | null
+          depreciation_method?: string
+          description?: string | null
+          disposal_amount?: number | null
+          disposal_date?: string | null
+          disposal_reason?: string | null
+          id?: string
+          invoice_number?: string | null
+          location?: string | null
+          purchase_cost: number
+          purchase_date: string
+          residual_value?: number | null
+          serial_number?: string | null
+          status?: string
+          supplier_name?: string | null
+          updated_at?: string
+          useful_life_years: number
+          warranty_expiry?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          accumulated_depreciation?: number | null
+          accumulated_depreciation_account_id?: string | null
+          asset_category?: string
+          asset_code?: string
+          asset_name?: string
+          book_value?: number
+          created_at?: string
+          created_by?: string | null
+          depreciation_expense_account_id?: string | null
+          depreciation_method?: string
+          description?: string | null
+          disposal_amount?: number | null
+          disposal_date?: string | null
+          disposal_reason?: string | null
+          id?: string
+          invoice_number?: string | null
+          location?: string | null
+          purchase_cost?: number
+          purchase_date?: string
+          residual_value?: number | null
+          serial_number?: string | null
+          status?: string
+          supplier_name?: string | null
+          updated_at?: string
+          useful_life_years?: number
+          warranty_expiry?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fixed_assets_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixed_assets_accumulated_depreciation_account_id_fkey"
+            columns: ["accumulated_depreciation_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixed_assets_depreciation_expense_account_id_fkey"
+            columns: ["depreciation_expense_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invoice_items: {
         Row: {
@@ -2195,6 +2403,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_book_value: {
+        Args: { asset_cost: number; accumulated_depreciation: number }
+        Returns: number
+      }
+      calculate_monthly_depreciation: {
+        Args: {
+          asset_cost: number
+          residual_value: number
+          useful_life_years: number
+          method?: string
+        }
+        Returns: number
+      }
+      create_depreciation_entries: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      generate_asset_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_branch_code: {
         Args: Record<PropertyKey, never>
         Returns: string
