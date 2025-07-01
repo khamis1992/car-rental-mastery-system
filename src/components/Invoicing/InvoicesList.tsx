@@ -16,6 +16,7 @@ interface InvoicesListProps {
   onSend: (id: string) => void;
   onDownload: (id: string) => void;
   onStatusChange: (id: string, status: string) => void;
+  onAddPayment?: (invoice: any) => void;
 }
 
 export const InvoicesList: React.FC<InvoicesListProps> = ({

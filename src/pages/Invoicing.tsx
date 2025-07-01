@@ -1,25 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, FileText } from 'lucide-react';
+import { Plus, FileText, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { InvoiceForm } from '@/components/Invoicing/InvoiceForm';
 import { InvoicesList } from '@/components/Invoicing/InvoicesList';
+import { PaymentForm } from '@/components/Invoicing/PaymentForm';
+import { PaymentsList } from '@/components/Invoicing/PaymentsList';
 import { useToast } from '@/hooks/use-toast';
 import { invoiceService } from '@/services/invoiceService';
+import { paymentService } from '@/services/paymentService';
+import { downloadInvoicePDF } from '@/lib/invoice/invoicePDFService';
 import { contractService } from '@/services/contractService';
 import { useContractsData } from '@/hooks/useContractsData';
-import { InvoiceWithDetails } from '@/types/invoice';
+import { InvoiceWithDetails, Payment } from '@/types/invoice';
 
 const Invoicing = () => {
   const [invoiceFormOpen, setInvoiceFormOpen] = useState(false);
+  const [paymentFormOpen, setPaymentFormOpen] = useState(false);
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState<any>(null);
   const [invoices, setInvoices] = useState<InvoiceWithDetails[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [invoiceStats, setInvoiceStats] = useState({
     total: 0,
     paid: 0,
     overdue: 0,
     totalRevenue: 0,
     outstandingRevenue: 0,
+  });
+  const [paymentStats, setPaymentStats] = useState({
+    totalCount: 0,
+    totalAmount: 0,
+    monthlyAmount: 0,
   });
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -61,10 +74,36 @@ const Invoicing = () => {
     }
   };
 
+  const loadPayments = async () => {
+    try {
+      const data = await paymentService.getRecentPayments(50);
+      setPayments(data as Payment[]);
+    } catch (error: any) {
+      toast({
+        title: 'خطأ في تحميل المدفوعات',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const loadPaymentStats = async () => {
+    try {
+      const stats = await paymentService.getPaymentStats();
+      setPaymentStats(stats);
+    } catch (error: any) {
+      toast({
+        title: 'خطأ في تحميل إحصائيات المدفوعات',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
   const loadData = async () => {
     setLoading(true);
     try {
-      await Promise.all([loadInvoices(), loadStats()]);
+      await Promise.all([loadInvoices(), loadStats(), loadPayments(), loadPaymentStats()]);
     } finally {
       setLoading(false);
     }
@@ -105,9 +144,39 @@ const Invoicing = () => {
     }
   };
 
-  const handleDownloadInvoice = (id: string) => {
-    // TODO: Implement PDF generation and download
-    console.log('Download invoice:', id);
+  const handleDownloadInvoice = async (id: string) => {
+    try {
+      const invoice = await invoiceService.getInvoiceById(id);
+      if (!invoice) return;
+
+      toast({
+        title: "جاري إنشاء PDF...",
+        description: "يرجى الانتظار أثناء إنشاء ملف PDF",
+      });
+
+      await downloadInvoicePDF(
+        invoice,
+        `invoice_${invoice.invoice_number}.pdf`,
+        { includeTerms: true, includeNotes: true },
+        (step, progress) => {
+          toast({
+            title: "جاري المعالجة",
+            description: `${step} - ${progress}%`,
+          });
+        }
+      );
+      
+      toast({
+        title: "تم بنجاح",
+        description: "تم تحميل ملف PDF بنجاح",
+      });
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message || "حدث خطأ أثناء تحميل الفاتورة",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleStatusChange = async (id: string, status: string) => {
@@ -122,6 +191,38 @@ const Invoicing = () => {
       toast({
         title: 'خطأ',
         description: error.message || 'حدث خطأ أثناء تحديث الفاتورة',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleAddPayment = (invoice: any) => {
+    setSelectedInvoiceForPayment(invoice);
+    setPaymentFormOpen(true);
+  };
+
+  const handleViewPayment = (id: string) => {
+    // TODO: Implement payment details dialog
+    console.log('View payment:', id);
+  };
+
+  const handlePrintReceipt = (id: string) => {
+    // TODO: Implement receipt printing
+    console.log('Print receipt:', id);
+  };
+
+  const handlePaymentStatusChange = async (id: string, status: string) => {
+    try {
+      await paymentService.updatePaymentStatus(id, status as any);
+      toast({
+        title: 'تم بنجاح',
+        description: 'تم تحديث حالة الدفعة بنجاح',
+      });
+      loadData();
+    } catch (error: any) {
+      toast({
+        title: 'خطأ',
+        description: error.message || 'حدث خطأ أثناء تحديث الدفعة',
         variant: 'destructive',
       });
     }
@@ -151,7 +252,7 @@ const Invoicing = () => {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">إجمالي الفواتير</CardTitle>
@@ -184,11 +285,24 @@ const Invoicing = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
+            <CardTitle className="text-sm font-medium">إجمالي المدفوعات</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl font-bold text-green-600">{paymentStats.totalCount}</div>
+            <p className="text-xs text-muted-foreground">{formatCurrency(paymentStats.totalAmount)}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">إيرادات الشهر</CardTitle>
             <span className="text-xs text-muted-foreground">د.ك</span>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold">{formatCurrency(invoiceStats.totalRevenue)}</div>
+            <div className="text-xl font-bold text-blue-600">
+              {formatCurrency(paymentStats.monthlyAmount)}
+            </div>
           </CardContent>
         </Card>
 
@@ -205,15 +319,34 @@ const Invoicing = () => {
         </Card>
       </div>
 
-      {/* Invoices List */}
-      <InvoicesList
-        invoices={invoices}
-        onView={handleViewInvoice}
-        onEdit={handleEditInvoice}
-        onSend={handleSendInvoice}
-        onDownload={handleDownloadInvoice}
-        onStatusChange={handleStatusChange}
-      />
+      {/* Main Content */}
+      <Tabs defaultValue="invoices" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="invoices">الفواتير</TabsTrigger>
+          <TabsTrigger value="payments">المدفوعات</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="invoices">
+          <InvoicesList
+            invoices={invoices}
+            onView={handleViewInvoice}
+            onEdit={handleEditInvoice}
+            onSend={handleSendInvoice}
+            onDownload={handleDownloadInvoice}
+            onStatusChange={handleStatusChange}
+            onAddPayment={handleAddPayment}
+          />
+        </TabsContent>
+
+        <TabsContent value="payments">
+          <PaymentsList
+            payments={payments}
+            onView={handleViewPayment}
+            onPrintReceipt={handlePrintReceipt}
+            onStatusChange={handlePaymentStatusChange}
+          />
+        </TabsContent>
+      </Tabs>
 
       {/* Invoice Form */}
       <InvoiceForm
@@ -223,6 +356,13 @@ const Invoicing = () => {
         contracts={contracts}
         customers={customers}
         preselectedContractId={new URLSearchParams(window.location.search).get('contract') || undefined}
+      />
+      {/* Payment Form */}
+      <PaymentForm
+        open={paymentFormOpen}
+        onOpenChange={setPaymentFormOpen}
+        onSuccess={handleFormSuccess}
+        invoice={selectedInvoiceForPayment}
       />
     </div>
   );
