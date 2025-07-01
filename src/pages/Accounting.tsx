@@ -3,7 +3,6 @@ import { TrendingUp, DollarSign, FileText, Calendar, CreditCard, Receipt } from 
 import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
 import { JournalEntriesTab } from '@/components/Accounting/JournalEntriesTab';
 import { FinancialReportsTab } from '@/components/Accounting/FinancialReportsTab';
-import { IntegratedDashboard } from '@/components/Dashboard/IntegratedDashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -135,9 +134,8 @@ const Accounting = () => {
         ))}
       </div>
 
-      <Tabs defaultValue="dashboard" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="dashboard">لوحة التحكم الذكية</TabsTrigger>
+      <Tabs defaultValue="transactions" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="transactions">المعاملات المالية</TabsTrigger>
           <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
           <TabsTrigger value="journal">القيود المحاسبية</TabsTrigger>
@@ -145,10 +143,6 @@ const Accounting = () => {
           <TabsTrigger value="settings">الإعدادات</TabsTrigger>
           <TabsTrigger value="analytics">التحليلات</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="dashboard" className="space-y-4">
-          <IntegratedDashboard />
-        </TabsContent>
 
         <TabsContent value="accounts" className="space-y-4">
           <ChartOfAccountsTab />
