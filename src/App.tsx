@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { Layout } from "@/components/Layout/Layout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Customers from "./pages/Customers";
@@ -33,52 +34,72 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/" element={
               <ProtectedRoute>
-                <Index />
+                <Layout>
+                  <Index />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/customers" element={
               <ProtectedRoute>
-                <Customers />
+                <Layout>
+                  <Customers />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/fleet" element={
               <ProtectedRoute>
-                <Fleet />
+                <Layout>
+                  <Fleet />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/contracts" element={
               <ProtectedRoute>
-                <Contracts />
+                <Layout>
+                  <Contracts />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/accounting" element={
               <ProtectedRoute>
-                <Accounting />
+                <Layout>
+                  <Accounting />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/settings" element={
               <ProtectedRoute>
-                <Settings />
+                <Layout>
+                  <Settings />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/notifications" element={
               <ProtectedRoute>
-                <Notifications />
+                <Layout>
+                  <Notifications />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/analytics" element={
               <ProtectedRoute>
-                <Analytics />
+                <Layout>
+                  <Analytics />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/communications" element={
               <ProtectedRoute>
-                <Communications />
+                <Layout>
+                  <Communications />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/maintenance" element={
               <ProtectedRoute>
-                <Maintenance />
+                <Layout>
+                  <Maintenance />
+                </Layout>
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

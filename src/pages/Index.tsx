@@ -1,4 +1,3 @@
-import Navbar from "@/components/Layout/Navbar";
 import StatsCard from "@/components/Dashboard/StatsCard";
 import QuickActions from "@/components/Dashboard/QuickActions";
 import RecentContracts from "@/components/Dashboard/RecentContracts";
@@ -13,10 +12,7 @@ import {
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gradient-soft">
-      <Navbar />
-      
-      <main className="container mx-auto px-6 py-8">
+    <div className="container mx-auto px-6 py-8">
         {/* شاشة الترحيب */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-foreground mb-2">
@@ -73,7 +69,6 @@ const Index = () => {
             <SystemStatus />
           </div>
         </div>
-      </main>
     </div>
   );
 };
