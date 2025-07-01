@@ -3,6 +3,7 @@ import StatsCard from "@/components/Dashboard/StatsCard";
 import QuickActions from "@/components/Dashboard/QuickActions";
 import RecentContracts from "@/components/Dashboard/RecentContracts";
 import FleetOverview from "@/components/Dashboard/FleetOverview";
+import SystemStatus from "@/components/Dashboard/SystemStatus";
 import { 
   User, 
   Calendar, 
@@ -69,6 +70,7 @@ const Index = () => {
           <div className="space-y-6">
             <QuickActions />
             <FleetOverview />
+            <SystemStatus />
           </div>
         </div>
       </main>

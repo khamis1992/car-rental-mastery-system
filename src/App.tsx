@@ -11,6 +11,7 @@ import Customers from "./pages/Customers";
 import Fleet from "./pages/Fleet";
 import Contracts from "./pages/Contracts";
 import Accounting from "./pages/Accounting";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,11 @@ const App = () => (
             <Route path="/accounting" element={
               <ProtectedRoute>
                 <Accounting />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

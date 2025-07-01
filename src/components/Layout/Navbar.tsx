@@ -185,7 +185,10 @@ const Navbar = () => {
               
               <DropdownMenuSeparator />
               
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem 
+                className="cursor-pointer"
+                onClick={() => navigate('/settings')}
+              >
                 <Settings className="w-4 h-4 ml-2" />
                 الإعدادات
               </DropdownMenuItem>
