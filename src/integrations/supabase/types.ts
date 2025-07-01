@@ -1240,6 +1240,48 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_tasks: {
+        Row: {
+          assigned_to_all: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string
+          due_time: string | null
+          id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to_all?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string
+          due_time?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to_all?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string
+          due_time?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       employees: {
         Row: {
           address: string | null
@@ -2380,6 +2422,54 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_assignments: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          employee_id: string
+          id: string
+          notes: string | null
+          status: string
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          status?: string
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_assignments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "daily_tasks"
             referencedColumns: ["id"]
           },
         ]
