@@ -36,6 +36,10 @@ export interface ContractPDFData {
   company_signature?: string;
   customer_signed_at?: string;
   company_signed_at?: string;
+  pickup_photos?: string[];
+  return_photos?: string[];
+  pickup_condition_notes?: string;
+  return_condition_notes?: string;
   created_at: string;
 }
 

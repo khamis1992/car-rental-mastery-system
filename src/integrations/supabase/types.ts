@@ -155,12 +155,16 @@ export type Database = {
           id: string
           insurance_amount: number | null
           notes: string | null
+          pickup_condition_notes: string | null
           pickup_location: string | null
           pickup_mileage: number | null
+          pickup_photos: string[] | null
           quotation_id: string | null
           rental_days: number
+          return_condition_notes: string | null
           return_location: string | null
           return_mileage: number | null
+          return_photos: string[] | null
           sales_person_id: string | null
           security_deposit: number | null
           special_conditions: string | null
@@ -193,12 +197,16 @@ export type Database = {
           id?: string
           insurance_amount?: number | null
           notes?: string | null
+          pickup_condition_notes?: string | null
           pickup_location?: string | null
           pickup_mileage?: number | null
+          pickup_photos?: string[] | null
           quotation_id?: string | null
           rental_days: number
+          return_condition_notes?: string | null
           return_location?: string | null
           return_mileage?: number | null
+          return_photos?: string[] | null
           sales_person_id?: string | null
           security_deposit?: number | null
           special_conditions?: string | null
@@ -231,12 +239,16 @@ export type Database = {
           id?: string
           insurance_amount?: number | null
           notes?: string | null
+          pickup_condition_notes?: string | null
           pickup_location?: string | null
           pickup_mileage?: number | null
+          pickup_photos?: string[] | null
           quotation_id?: string | null
           rental_days?: number
+          return_condition_notes?: string | null
           return_location?: string | null
           return_mileage?: number | null
+          return_photos?: string[] | null
           sales_person_id?: string | null
           security_deposit?: number | null
           special_conditions?: string | null

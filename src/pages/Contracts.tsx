@@ -5,11 +5,14 @@ import { ContractForm } from '@/components/Contracts/ContractForm';
 import { ContractsList } from '@/components/Contracts/ContractsList';
 import { ContractMonitoring } from '@/components/Contracts/ContractMonitoring';
 import { ContractStats } from '@/components/Contracts/ContractStats';
+import { ContractDetailsDialog } from '@/components/Contracts/ContractDetailsDialog';
 import { useContractsData } from '@/hooks/useContractsData';
 
 const Contracts = () => {
   const [contractFormOpen, setContractFormOpen] = useState(false);
   const [selectedQuotationForContract, setSelectedQuotationForContract] = useState<string>('');
+  const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
+  const [contractDetailsOpen, setContractDetailsOpen] = useState(false);
   
   const {
     quotations,
@@ -67,7 +70,10 @@ const Contracts = () => {
       {/* قائمة العقود */}
       <ContractsList
         contracts={contracts}
-        onView={(id) => console.log('View contract:', id)}
+        onView={(id) => {
+          setSelectedContractId(id);
+          setContractDetailsOpen(true);
+        }}
         onEdit={(id) => console.log('Edit contract:', id)}
         onActivate={(id) => console.log('Activate contract:', id)}
         onComplete={(id) => console.log('Complete contract:', id)}
@@ -87,6 +93,13 @@ const Contracts = () => {
         quotations={quotations.filter(q => ['draft', 'sent', 'accepted'].includes(q.status))}
         selectedQuotation={selectedQuotationForContract}
         onSuccess={handleFormSuccess}
+      />
+
+      {/* تفاصيل العقد */}
+      <ContractDetailsDialog
+        contractId={selectedContractId}
+        open={contractDetailsOpen}
+        onOpenChange={setContractDetailsOpen}
       />
     </div>
   );

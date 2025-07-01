@@ -14,13 +14,17 @@ import {
   FileCheck,
   Download,
   Printer,
-  Signature
+  Signature,
+  Truck,
+  CheckCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { contractService } from '@/services/contractService';
 import { ContractPrintTemplate } from './ContractPrintTemplate';
 import { ElectronicSignature } from './ElectronicSignature';
+import { ContractDeliveryForm } from './ContractDeliveryForm';
+import { ContractReturnForm } from './ContractReturnForm';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { downloadContractPDF } from '@/lib/contractPDF';
@@ -41,6 +45,8 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
   const [showPrintTemplate, setShowPrintTemplate] = useState(false);
   const [showCustomerSignature, setShowCustomerSignature] = useState(false);
   const [showCompanySignature, setShowCompanySignature] = useState(false);
+  const [showDeliveryForm, setShowDeliveryForm] = useState(false);
+  const [showReturnForm, setShowReturnForm] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -173,6 +179,22 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
             </DialogTitle>
             <div className="flex items-center gap-2">
               {getStatusBadge(contract.status)}
+              
+              {/* Contract Actions */}
+              {contract.status === 'pending' && (
+                <Button variant="default" size="sm" onClick={() => setShowDeliveryForm(true)}>
+                  <Truck className="w-4 h-4 mr-2" />
+                  تسليم المركبة
+                </Button>
+              )}
+              
+              {contract.status === 'active' && (
+                <Button variant="default" size="sm" onClick={() => setShowReturnForm(true)}>
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  استلام المركبة
+                </Button>
+              )}
+              
               <Button variant="outline" size="sm" onClick={handlePrint}>
                 <Printer className="w-4 h-4 mr-2" />
                 طباعة
@@ -525,6 +547,21 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           contractId={contract.contract_number}
           signatureType="company"
           onSignatureSaved={(signature) => handleSignatureSaved(signature, 'company')}
+        />
+
+        {/* Delivery and Return Forms */}
+        <ContractDeliveryForm
+          contract={contract}
+          open={showDeliveryForm}
+          onOpenChange={setShowDeliveryForm}
+          onSuccess={loadContract}
+        />
+
+        <ContractReturnForm
+          contract={contract}
+          open={showReturnForm}
+          onOpenChange={setShowReturnForm}
+          onSuccess={loadContract}
         />
       </DialogContent>
     </Dialog>
