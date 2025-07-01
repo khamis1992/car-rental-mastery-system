@@ -1,17 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FileText, Eye, Edit, Trash2, Calendar } from 'lucide-react';
+import { FileText, Eye, Edit, Trash2, Calendar, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { QuotationFiltersComponent, QuotationFilters } from './QuotationFilters';
+import { QuotationPreview } from './QuotationPreview';
 
 interface Quotation {
   id: string;
   quotation_number: string;
   customer_name: string;
+  customer_id: string;
   vehicle_info: string;
+  vehicle_id: string;
   start_date: string;
   end_date: string;
   rental_days: number;
@@ -23,20 +27,89 @@ interface Quotation {
 
 interface QuotationsListProps {
   quotations: Quotation[];
+  customers: Array<{ id: string; name: string }>;
+  vehicles: Array<{ id: string; make: string; model: string }>;
   onView?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onConvertToContract?: (id: string) => void;
+  onGetQuotationDetails?: (id: string) => Promise<any>;
 }
 
 export const QuotationsList: React.FC<QuotationsListProps> = ({
   quotations,
+  customers,
+  vehicles,
   onView,
   onEdit,
   onDelete,
   onConvertToContract,
+  onGetQuotationDetails,
 }) => {
   const [selectedQuotations, setSelectedQuotations] = useState<string[]>([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [selectedQuotation, setSelectedQuotation] = useState<any>(null);
+  
+  const [filters, setFilters] = useState<QuotationFilters>({
+    search: '',
+    status: '',
+    dateFrom: undefined,
+    dateTo: undefined,
+    customer: '',
+    vehicle: '',
+  });
+
+  // فلترة البيانات
+  const filteredQuotations = useMemo(() => {
+    return quotations.filter((quotation) => {
+      // فلترة البحث النصي
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase();
+        const searchableText = `${quotation.quotation_number} ${quotation.customer_name} ${quotation.vehicle_info}`.toLowerCase();
+        if (!searchableText.includes(searchTerm)) {
+          return false;
+        }
+      }
+
+      // فلترة الحالة
+      if (filters.status && quotation.status !== filters.status) {
+        return false;
+      }
+
+      // فلترة العميل
+      if (filters.customer && quotation.customer_id !== filters.customer) {
+        return false;
+      }
+
+      // فلترة المركبة
+      if (filters.vehicle && quotation.vehicle_id !== filters.vehicle) {
+        return false;
+      }
+
+      // فلترة التاريخ
+      const quotationDate = new Date(quotation.created_at);
+      if (filters.dateFrom && quotationDate < filters.dateFrom) {
+        return false;
+      }
+      if (filters.dateTo && quotationDate > filters.dateTo) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [quotations, filters]);
+
+  const handlePreview = async (id: string) => {
+    try {
+      if (onGetQuotationDetails) {
+        const details = await onGetQuotationDetails(id);
+        setSelectedQuotation(details);
+        setPreviewOpen(true);
+      }
+    } catch (error) {
+      console.error('Error fetching quotation details:', error);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
@@ -71,11 +144,20 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
   }
 
   return (
-    <Card>
+    <div className="space-y-4">
+      {/* مكون الفلترة */}
+      <QuotationFiltersComponent
+        filters={filters}
+        onFiltersChange={setFilters}
+        customers={customers}
+        vehicles={vehicles}
+      />
+
+      <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="w-5 h-5" />
-          عروض الأسعار ({quotations.length})
+          عروض الأسعار ({filteredQuotations.length} من {quotations.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -94,7 +176,7 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {quotations.map((quotation) => {
+              {filteredQuotations.map((quotation) => {
                 const expired = isExpired(quotation.valid_until);
                 return (
                   <TableRow key={quotation.id} className={expired ? 'opacity-75' : ''}>
@@ -132,14 +214,23 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onView?.(quotation.id)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handlePreview(quotation.id)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handlePreview(quotation.id)}
+                        title="طباعة"
+                      >
+                        <Printer className="w-4 h-4" />
+                      </Button>
                         
                         {quotation.status === 'draft' && (
                           <Button
@@ -180,7 +271,14 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
             </TableBody>
           </Table>
         </div>
-      </CardContent>
-    </Card>
+      </Card>
+
+      {/* معاينة العرض */}
+      <QuotationPreview
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        quotation={selectedQuotation}
+      />
+    </div>
   );
 };
