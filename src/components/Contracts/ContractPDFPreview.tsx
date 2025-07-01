@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
 import { 
   FileText, 
   Download, 
@@ -14,7 +15,8 @@ import {
   Settings, 
   Image as ImageIcon,
   Zap,
-  Camera
+  Camera,
+  Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { downloadContractPDF } from '@/lib/contract/contractPDFService';
@@ -38,6 +40,8 @@ export const ContractPDFPreview: React.FC<ContractPDFPreviewProps> = ({
     maxPhotosPerSection: 6
   });
   const [isGenerating, setIsGenerating] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressStep, setProgressStep] = useState('');
   const { toast } = useToast();
 
   const updateOption = <K extends keyof PDFOptions>(key: K, value: PDFOptions[K]) => {
@@ -48,6 +52,9 @@ export const ContractPDFPreview: React.FC<ContractPDFPreviewProps> = ({
     if (!contract) return;
 
     setIsGenerating(true);
+    setProgress(0);
+    setProgressStep('بدء المعالجة...');
+    
     try {
       toast({
         title: "جاري إنشاء PDF...",
@@ -57,7 +64,11 @@ export const ContractPDFPreview: React.FC<ContractPDFPreviewProps> = ({
       await downloadContractPDF(
         contract, 
         `contract_${contract.contract_number}_detailed.pdf`,
-        pdfOptions
+        pdfOptions,
+        (step: string, progress: number) => {
+          setProgressStep(step);
+          setProgress(progress);
+        }
       );
       
       toast({
@@ -74,6 +85,8 @@ export const ContractPDFPreview: React.FC<ContractPDFPreviewProps> = ({
       });
     } finally {
       setIsGenerating(false);
+      setProgress(0);
+      setProgressStep('');
     }
   };
 
@@ -294,6 +307,24 @@ export const ContractPDFPreview: React.FC<ContractPDFPreviewProps> = ({
             </CardContent>
           </Card>
 
+          {/* شريط التقدم */}
+          {isGenerating && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-sm font-medium">جاري المعالجة...</span>
+                  </div>
+                  <Progress value={progress} className="w-full" />
+                  <p className="text-xs text-muted-foreground text-center">
+                    {progressStep}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* أزرار الإجراءات */}
           <div className="flex justify-end gap-2 pt-4 border-t">
             <Button
@@ -310,7 +341,7 @@ export const ContractPDFPreview: React.FC<ContractPDFPreviewProps> = ({
             >
               {isGenerating ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   جاري الإنشاء...
                 </>
               ) : (

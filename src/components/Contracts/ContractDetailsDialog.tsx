@@ -78,7 +78,17 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           description: "يرجى الانتظار أثناء إنشاء ملف PDF",
         });
 
-        await downloadContractPDF(contract, `contract_${contract.contract_number}.pdf`);
+        await downloadContractPDF(
+          contract, 
+          `contract_${contract.contract_number}.pdf`,
+          {},
+          (step, progress) => {
+            toast({
+              title: "جاري المعالجة",
+              description: `${step} - ${progress}%`,
+            });
+          }
+        );
         
         toast({
           title: "تم بنجاح",
