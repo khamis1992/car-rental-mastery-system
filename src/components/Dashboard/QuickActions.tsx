@@ -20,13 +20,13 @@ const QuickActions = () => {
       title: "حجز سريع",
       description: "حجز سيارة بسرعة",
       icon: <Calendar className="w-5 h-5" />,
-      className: "btn-success"
+      className: "btn-primary"
     },
     {
       title: "تقرير يومي",
       description: "إنشاء تقرير اليوم",
       icon: <FileText className="w-5 h-5" />,
-      className: "btn-warning"
+      className: "btn-accent"
     }
   ];
 
