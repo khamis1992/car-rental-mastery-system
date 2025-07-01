@@ -85,6 +85,110 @@ export type Database = {
           },
         ]
       }
+      ai_classifications: {
+        Row: {
+          ai_reasoning: string | null
+          approved_at: string | null
+          approved_by: string | null
+          confidence_score: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_approved: boolean | null
+          model_version: string | null
+          suggested_account_id: string | null
+          suggested_category: string
+          transaction_id: string
+          transaction_type: string
+        }
+        Insert: {
+          ai_reasoning?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_approved?: boolean | null
+          model_version?: string | null
+          suggested_account_id?: string | null
+          suggested_category: string
+          transaction_id: string
+          transaction_type: string
+        }
+        Update: {
+          ai_reasoning?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_approved?: boolean | null
+          model_version?: string | null
+          suggested_account_id?: string | null
+          suggested_category?: string
+          transaction_id?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_classifications_suggested_account_id_fkey"
+            columns: ["suggested_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_insights: {
+        Row: {
+          affected_accounts: string[] | null
+          created_at: string
+          created_by: string | null
+          dismissed_at: string | null
+          dismissed_by: string | null
+          id: string
+          insight_data: Json | null
+          insight_description: string
+          insight_title: string
+          insight_type: string
+          is_dismissed: boolean | null
+          priority_level: string | null
+          recommended_actions: string[] | null
+        }
+        Insert: {
+          affected_accounts?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          id?: string
+          insight_data?: Json | null
+          insight_description: string
+          insight_title: string
+          insight_type: string
+          is_dismissed?: boolean | null
+          priority_level?: string | null
+          recommended_actions?: string[] | null
+        }
+        Update: {
+          affected_accounts?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          id?: string
+          insight_data?: Json | null
+          insight_description?: string
+          insight_title?: string
+          insight_type?: string
+          is_dismissed?: boolean | null
+          priority_level?: string | null
+          recommended_actions?: string[] | null
+        }
+        Relationships: []
+      }
       asset_categories: {
         Row: {
           category_name: string
@@ -1177,6 +1281,54 @@ export type Database = {
           },
         ]
       }
+      financial_forecasts: {
+        Row: {
+          accuracy_score: number | null
+          confidence_interval_high: number | null
+          confidence_interval_low: number | null
+          created_at: string
+          created_by: string | null
+          current_value: number | null
+          forecast_period: string
+          forecast_type: string
+          id: string
+          input_features: Json | null
+          model_used: string | null
+          period_type: string
+          predicted_value: number
+        }
+        Insert: {
+          accuracy_score?: number | null
+          confidence_interval_high?: number | null
+          confidence_interval_low?: number | null
+          created_at?: string
+          created_by?: string | null
+          current_value?: number | null
+          forecast_period: string
+          forecast_type: string
+          id?: string
+          input_features?: Json | null
+          model_used?: string | null
+          period_type: string
+          predicted_value: number
+        }
+        Update: {
+          accuracy_score?: number | null
+          confidence_interval_high?: number | null
+          confidence_interval_low?: number | null
+          created_at?: string
+          created_by?: string | null
+          current_value?: number | null
+          forecast_period?: string
+          forecast_type?: string
+          id?: string
+          input_features?: Json | null
+          model_used?: string | null
+          period_type?: string
+          predicted_value?: number
+        }
+        Relationships: []
+      }
       financial_kpis: {
         Row: {
           calculation_method: string | null
@@ -1766,6 +1918,48 @@ export type Database = {
           },
         ]
       }
+      ml_models: {
+        Row: {
+          accuracy_score: number | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          last_trained_at: string | null
+          model_name: string
+          model_parameters: Json | null
+          model_type: string
+          model_version: string
+          training_data_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          accuracy_score?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_trained_at?: string | null
+          model_name: string
+          model_parameters?: Json | null
+          model_type: string
+          model_version: string
+          training_data_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          accuracy_score?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_trained_at?: string | null
+          model_name?: string
+          model_parameters?: Json | null
+          model_type?: string
+          model_version?: string
+          training_data_count?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -2239,6 +2433,47 @@ export type Database = {
           },
         ]
       }
+      training_data: {
+        Row: {
+          actual_output: Json | null
+          created_at: string
+          expected_output: Json
+          id: string
+          input_features: Json
+          is_validated: boolean | null
+          model_id: string
+          validation_score: number | null
+        }
+        Insert: {
+          actual_output?: Json | null
+          created_at?: string
+          expected_output: Json
+          id?: string
+          input_features: Json
+          is_validated?: boolean | null
+          model_id: string
+          validation_score?: number | null
+        }
+        Update: {
+          actual_output?: Json | null
+          created_at?: string
+          expected_output?: Json
+          id?: string
+          input_features?: Json
+          is_validated?: boolean | null
+          model_id?: string
+          validation_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_data_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "ml_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           granted_at: string
@@ -2631,6 +2866,14 @@ export type Database = {
         Args: { for_date?: string }
         Returns: number
       }
+      calculate_forecast_accuracy: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          forecast_type: string
+          avg_accuracy: number
+          forecast_count: number
+        }[]
+      }
       calculate_monthly_depreciation: {
         Args: {
           asset_cost: number
@@ -2647,6 +2890,10 @@ export type Database = {
       create_depreciation_entries: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      extract_transaction_features: {
+        Args: { description: string; amount: number; transaction_date?: string }
+        Returns: Json
       }
       generate_asset_code: {
         Args: Record<PropertyKey, never>
