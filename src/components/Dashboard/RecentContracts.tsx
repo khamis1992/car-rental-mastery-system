@@ -12,7 +12,7 @@ const RecentContracts = () => {
       startDate: "2024-01-01",
       endDate: "2024-01-07",
       status: "نشط",
-      amount: "1,200 ريال"
+      amount: "12 د.ك"
     },
     {
       id: "C002", 
@@ -21,7 +21,7 @@ const RecentContracts = () => {
       startDate: "2024-01-02",
       endDate: "2024-01-05",
       status: "منتهي",
-      amount: "800 ريال"
+      amount: "8 د.ك"
     },
     {
       id: "C003",
@@ -30,7 +30,7 @@ const RecentContracts = () => {
       startDate: "2024-01-03",
       endDate: "2024-01-10",
       status: "نشط",
-      amount: "1,500 ريال"
+      amount: "15 د.ك"
     }
   ];
 

@@ -44,7 +44,7 @@ const Index = () => {
           />
           <StatsCard
             title="الإيرادات اليوم"
-            value="12,500 ريال"
+            value="125 د.ك"
             subtitle="من 22 عقد"
             icon={<Plus className="w-5 h-5" />}
             trend={{ value: "+8% عن أمس", type: "up" }}
