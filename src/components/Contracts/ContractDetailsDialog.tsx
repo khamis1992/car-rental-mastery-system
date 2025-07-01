@@ -23,6 +23,7 @@ import { ContractPrintTemplate } from './ContractPrintTemplate';
 import { ElectronicSignature } from './ElectronicSignature';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { downloadContractPDF } from '@/lib/contractPDF';
 
 interface ContractDetailsDialogProps {
   contractId: string | null;
@@ -70,11 +71,28 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
     }, 500);
   };
 
-  const handleDownloadPDF = () => {
-    toast({
-      title: "قريباً",
-      description: "ميزة تحميل PDF ستكون متاحة قريباً",
-    });
+  const handleDownloadPDF = async () => {
+    if (!contract) return;
+    
+    try {
+      toast({
+        title: "جاري إنشاء PDF...",
+        description: "يرجى الانتظار أثناء إنشاء ملف PDF",
+      });
+
+      await downloadContractPDF(contract, `contract_${contract.contract_number}.pdf`);
+      
+      toast({
+        title: "تم بنجاح",
+        description: "تم تحميل ملف PDF بنجاح",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل في إنشاء ملف PDF",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSignatureSaved = async (signature: string, type: 'customer' | 'company') => {
