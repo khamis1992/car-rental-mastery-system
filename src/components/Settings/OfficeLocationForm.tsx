@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { MapPin, Loader2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { officeLocationService, CreateOfficeLocationData, UpdateOfficeLocationData, OfficeLocation } from '@/services/officeLocationService';
@@ -183,7 +184,7 @@ const OfficeLocationForm: React.FC<OfficeLocationFormProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="w-5 h-5" />
@@ -191,7 +192,8 @@ const OfficeLocationForm: React.FC<OfficeLocationFormProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <ScrollArea className="flex-1 pr-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
           {/* اسم الموقع */}
           <div className="space-y-2">
             <Label htmlFor="name">اسم الموقع *</Label>
@@ -328,7 +330,8 @@ const OfficeLocationForm: React.FC<OfficeLocationFormProps> = ({
               إلغاء
             </Button>
           </div>
-        </form>
+          </form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
