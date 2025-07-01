@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ContractForm } from '@/components/Contracts/ContractForm';
 import { ContractsList } from '@/components/Contracts/ContractsList';
+import { ContractMonitoring } from '@/components/Contracts/ContractMonitoring';
 import { contractService } from '@/services/contractService';
 import { quotationService } from '@/services/quotationService';
 
@@ -106,6 +107,11 @@ const Contracts = () => {
     loadData();
   };
 
+  const handleAlertClick = (alert: any) => {
+    // Handle alert click - could navigate to specific contract or show details
+    console.log('Alert clicked:', alert);
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -178,7 +184,10 @@ const Contracts = () => {
         </Card>
       </div>
 
-      {/* التبويبات - العقود فقط */}
+      {/* لوحة مراقبة العقود */}
+      <ContractMonitoring onAlertClick={handleAlertClick} />
+
+      {/* قائمة العقود */}
       <ContractsList
         contracts={contracts}
         onView={(id) => console.log('View contract:', id)}

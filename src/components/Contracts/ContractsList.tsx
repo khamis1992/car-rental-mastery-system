@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { FileText, Eye, Edit, Calendar, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { ContractActions } from './ContractActions';
+import { ContractDetailsDialog } from './ContractDetailsDialog';
 
 interface Contract {
   id: string;
@@ -38,6 +40,8 @@ export const ContractsList: React.FC<ContractsListProps> = ({
   onActivate,
   onComplete,
 }) => {
+  const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const getStatusBadge = (status: string) => {
     const statusMap = {
       draft: { label: 'مسودة', variant: 'secondary' as const },
@@ -140,42 +144,24 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => onView?.(contract.id)}
+                        onClick={() => {
+                          setSelectedContractId(contract.id);
+                          setDetailsDialogOpen(true);
+                        }}
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
                       
-                      {(contract.status === 'draft' || contract.status === 'pending') && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEdit?.(contract.id)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      )}
-
-                      {contract.status === 'pending' && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onActivate?.(contract.id)}
-                          className="text-primary"
-                        >
-                          تفعيل
-                        </Button>
-                      )}
-
-                      {contract.status === 'active' && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onComplete?.(contract.id)}
-                          className="text-green-600"
-                        >
-                          إنهاء
-                        </Button>
-                      )}
+                      <ContractActions
+                        contract={{
+                          id: contract.id,
+                          status: contract.status,
+                          contract_number: contract.contract_number,
+                          customer_name: contract.customer_name,
+                          vehicle_info: contract.vehicle_info,
+                        }}
+                        onUpdate={() => window.location.reload()}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -184,6 +170,12 @@ export const ContractsList: React.FC<ContractsListProps> = ({
           </Table>
         </div>
       </CardContent>
+
+      <ContractDetailsDialog
+        contractId={selectedContractId}
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+      />
     </Card>
   );
 };
