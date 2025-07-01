@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, FileText, User, Calendar, Users, Calculator, BarChart3, MessageSquare } from "lucide-react";
+import { Plus, FileText, User, Calendar, Users, Calculator, BarChart3, MessageSquare, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const QuickActions = () => {
@@ -29,10 +29,17 @@ const QuickActions = () => {
       onClick: () => navigate('/fleet')
     },
     {
+      title: "الحضور والانصراف",
+      description: "إدارة حضور الموظفين",
+      icon: <Clock className="w-5 h-5" />,
+      className: "btn-orange",
+      onClick: () => navigate('/attendance')
+    },
+    {
       title: "التحليلات",
       description: "تقارير مفصلة",
       icon: <BarChart3 className="w-5 h-5" />,
-      className: "btn-orange",
+      className: "btn-purple",
       onClick: () => navigate('/analytics')
     }
   ];
@@ -45,7 +52,7 @@ const QuickActions = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           {actions.map((action, index) => (
             <Button
               key={index}

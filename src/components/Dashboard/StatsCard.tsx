@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ReactNode } from "react";
 
 interface StatsCardProps {
@@ -11,10 +12,12 @@ interface StatsCardProps {
     value: string;
     type: 'up' | 'down' | 'neutral';
   };
+  actionText?: string;
+  onActionClick?: () => void;
   className?: string;
 }
 
-const StatsCard = ({ title, value, subtitle, icon, trend, className = "" }: StatsCardProps) => {
+const StatsCard = ({ title, value, subtitle, icon, trend, className = "", actionText, onActionClick }: StatsCardProps) => {
   const getTrendColor = (type: string) => {
     switch (type) {
       case 'up': return 'bg-success text-success-foreground';
@@ -42,14 +45,26 @@ const StatsCard = ({ title, value, subtitle, icon, trend, className = "" }: Stat
             {subtitle}
           </p>
         )}
-        {trend && (
-          <Badge 
-            variant="secondary" 
-            className={`text-xs ${getTrendColor(trend.type)}`}
-          >
-            {trend.value}
-          </Badge>
-        )}
+        <div className="flex items-center justify-between">
+          {trend && (
+            <Badge 
+              variant="secondary" 
+              className={`text-xs ${getTrendColor(trend.type)}`}
+            >
+              {trend.value}
+            </Badge>
+          )}
+          {actionText && onActionClick && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs hover-scale"
+              onClick={onActionClick}
+            >
+              {actionText}
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
