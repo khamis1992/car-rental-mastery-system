@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, Search, LogOut, Settings, Shield, Bell, Users, Car, FileText } from "lucide-react";
+import { Calendar, User, Search, LogOut, Settings, Shield, Bell, Users, Car, FileText, Calculator } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -116,6 +116,16 @@ const Navbar = () => {
               >
                 <FileText className="w-4 h-4" />
                 <span className="hidden md:inline">العقود</span>
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/accounting')}
+                className="flex items-center gap-2"
+              >
+                <Calculator className="w-4 h-4" />
+                <span className="hidden md:inline">المحاسبة</span>
               </Button>
             </div>
           </div>

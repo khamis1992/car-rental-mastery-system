@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Customers from "./pages/Customers";
 import Fleet from "./pages/Fleet";
 import Contracts from "./pages/Contracts";
+import Accounting from "./pages/Accounting";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,11 @@ const App = () => (
             <Route path="/contracts" element={
               <ProtectedRoute>
                 <Contracts />
+              </ProtectedRoute>
+            } />
+            <Route path="/accounting" element={
+              <ProtectedRoute>
+                <Accounting />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
