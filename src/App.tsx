@@ -13,6 +13,7 @@ import Customers from "./pages/Customers";
 import Fleet from "./pages/Fleet";
 import Quotations from "./pages/Quotations";
 import Contracts from "./pages/Contracts";
+import Invoicing from "./pages/Invoicing";
 import Accounting from "./pages/Accounting";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
@@ -65,6 +66,13 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <Contracts />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/invoicing" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Invoicing />
                 </Layout>
               </ProtectedRoute>
             } />

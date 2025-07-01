@@ -9,6 +9,82 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      additional_charges: {
+        Row: {
+          amount: number
+          charge_date: string
+          charge_type: string
+          contract_id: string
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          description: string
+          documents: string[] | null
+          id: string
+          invoice_id: string | null
+          notes: string | null
+          photos: string[] | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          charge_date?: string
+          charge_type: string
+          contract_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          description: string
+          documents?: string[] | null
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          photos?: string[] | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          charge_date?: string
+          charge_type?: string
+          contract_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          description?: string
+          documents?: string[] | null
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          photos?: string[] | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "additional_charges_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "additional_charges_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "additional_charges_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_extensions: {
         Row: {
           approved_at: string | null
@@ -444,6 +520,234 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_items: {
+        Row: {
+          created_at: string
+          daily_rate: number | null
+          description: string
+          end_date: string | null
+          id: string
+          invoice_id: string
+          item_type: string
+          quantity: number
+          start_date: string | null
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          daily_rate?: number | null
+          description: string
+          end_date?: string | null
+          id?: string
+          invoice_id: string
+          item_type?: string
+          quantity?: number
+          start_date?: string | null
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          daily_rate?: number | null
+          description?: string
+          end_date?: string | null
+          id?: string
+          invoice_id?: string
+          item_type?: string
+          quantity?: number
+          start_date?: string | null
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          contract_id: string
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          discount_amount: number
+          due_date: string
+          id: string
+          invoice_date: string
+          invoice_number: string
+          invoice_type: string
+          issue_date: string
+          notes: string | null
+          outstanding_amount: number
+          paid_amount: number
+          paid_at: string | null
+          payment_method: string | null
+          payment_terms: string | null
+          sent_at: string | null
+          status: string
+          subtotal: number
+          tax_amount: number
+          terms_and_conditions: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          discount_amount?: number
+          due_date: string
+          id?: string
+          invoice_date?: string
+          invoice_number: string
+          invoice_type?: string
+          issue_date?: string
+          notes?: string | null
+          outstanding_amount?: number
+          paid_amount?: number
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_terms?: string | null
+          sent_at?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          terms_and_conditions?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          discount_amount?: number
+          due_date?: string
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          invoice_type?: string
+          issue_date?: string
+          notes?: string | null
+          outstanding_amount?: number
+          paid_amount?: number
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_terms?: string | null
+          sent_at?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          terms_and_conditions?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          bank_name: string | null
+          check_number: string | null
+          contract_id: string
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          id: string
+          invoice_id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string
+          payment_number: string
+          receipt_url: string | null
+          status: string
+          transaction_reference: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          bank_name?: string | null
+          check_number?: string | null
+          contract_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          id?: string
+          invoice_id: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          payment_number: string
+          receipt_url?: string | null
+          status?: string
+          transaction_reference?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_name?: string | null
+          check_number?: string | null
+          contract_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          id?: string
+          invoice_id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          payment_number?: string
+          receipt_url?: string | null
+          status?: string
+          transaction_reference?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           branch_id: string | null
@@ -750,6 +1054,14 @@ export type Database = {
         Returns: string
       }
       generate_customer_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_invoice_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_payment_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
