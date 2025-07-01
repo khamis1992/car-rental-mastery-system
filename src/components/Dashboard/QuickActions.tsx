@@ -8,11 +8,11 @@ const QuickActions = () => {
   
   const actions = [
     {
-      title: "عقد جديد",
-      description: "إنشاء عقد تأجير جديد",
+      title: "عرض سعر جديد",
+      description: "إنشاء عرض سعر جديد",
       icon: <Plus className="w-5 h-5" />,
       className: "btn-royal",
-      onClick: () => navigate('/contracts')
+      onClick: () => navigate('/quotations')
     },
     {
       title: "إدارة العملاء",
