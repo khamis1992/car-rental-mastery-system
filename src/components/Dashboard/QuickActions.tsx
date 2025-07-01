@@ -34,13 +34,6 @@ const QuickActions = () => {
       icon: <Clock className="w-5 h-5" />,
       className: "btn-orange",
       onClick: () => navigate('/attendance')
-    },
-    {
-      title: "التحليلات",
-      description: "تقارير مفصلة",
-      icon: <BarChart3 className="w-5 h-5" />,
-      className: "btn-purple",
-      onClick: () => navigate('/analytics')
     }
   ];
 

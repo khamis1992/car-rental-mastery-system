@@ -2,7 +2,6 @@ import StatsCard from "@/components/Dashboard/StatsCard";
 import QuickActions from "@/components/Dashboard/QuickActions";
 import RecentContracts from "@/components/Dashboard/RecentContracts";
 import FleetOverview from "@/components/Dashboard/FleetOverview";
-import { AlertsOverview } from '@/components/Dashboard/AlertsOverview';
 
 import ImportantNotifications from '@/components/Dashboard/ImportantNotifications';
 import DailyTasksChecklist from '@/components/Dashboard/DailyTasksChecklist';
@@ -87,7 +86,6 @@ const Index = () => {
 
           {/* العمود الأيمن */}
           <div className="space-y-6">
-            <AlertsOverview onAlertClick={(alert) => console.log('Alert clicked:', alert)} />
             <FleetOverview />
           </div>
         </div>
