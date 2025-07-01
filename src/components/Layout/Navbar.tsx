@@ -11,10 +11,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Calendar, User, Search, LogOut, Settings, Shield, Bell, Users, Car, FileText, Calculator } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const { user, profile, signOut } = useAuth();
+  const { unreadCount } = useNotifications();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -134,11 +136,18 @@ const Navbar = () => {
         {/* منطقة المستخدم والإشعارات */}
         <div className="flex items-center gap-4">
           {/* زر الإشعارات */}
-          <Button variant="ghost" size="icon" className="relative">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="relative"
+            onClick={() => navigate('/notifications')}
+          >
             <Bell className="w-5 h-5" />
-            <Badge className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
-              3
-            </Badge>
+            {unreadCount > 0 && (
+              <Badge className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                {unreadCount}
+              </Badge>
+            )}
           </Button>
 
           {/* إشعارات سريعة */}
