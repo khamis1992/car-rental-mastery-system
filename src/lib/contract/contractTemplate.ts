@@ -1,6 +1,19 @@
 import { ContractPDFData } from '@/types/contract';
 
-export const generateContractHTML = (contract: ContractPDFData): string => {
+export interface PDFOptions {
+  includePhotos?: boolean;
+  includeComparison?: boolean;
+  photoQuality?: 'low' | 'medium' | 'high';
+  maxPhotosPerSection?: number;
+}
+
+export const generateContractHTML = (contract: ContractPDFData, options: PDFOptions = {}): string => {
+  const {
+    includePhotos = false,
+    includeComparison = false,
+    photoQuality = 'medium',
+    maxPhotosPerSection = 6
+  } = options;
   return `
     <div style="max-width: 170mm; margin: 0 auto; background: white; color: black;">
       <!-- Header -->
@@ -135,6 +148,9 @@ export const generateContractHTML = (contract: ContractPDFData): string => {
         </div>
       </div>
 
+      <!-- Vehicle Condition Section -->
+      ${includePhotos || includeComparison ? generateVehicleConditionSection(contract, options) : ''}
+
       <!-- Signatures -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px;">
         <div style="text-align: center;">
@@ -177,6 +193,103 @@ export const generateContractHTML = (contract: ContractPDFData): string => {
         <p>هذا العقد محرر من نسختين، يحتفظ كل طرف بنسخة أصلية</p>
         <p style="margin-top: 8px;">تم إنشاء هذا العقد إلكترونياً في ${new Date().toLocaleDateString('ar-SA')}</p>
       </div>
+    </div>
+  `;
+};
+
+/**
+ * إنشاء قسم حالة المركبة مع الصور والمقارنة
+ */
+const generateVehicleConditionSection = (contract: ContractPDFData, options: PDFOptions): string => {
+  const { includeComparison, maxPhotosPerSection = 6, photoQuality = 'medium' } = options;
+  
+  const pickupPhotos = contract.pickup_photos?.slice(0, maxPhotosPerSection) || [];
+  const returnPhotos = contract.return_photos?.slice(0, maxPhotosPerSection) || [];
+  
+  if (pickupPhotos.length === 0 && returnPhotos.length === 0) {
+    return '';
+  }
+
+  // تحديد حجم الصور حسب الجودة
+  const getImageStyle = () => {
+    const sizes = {
+      low: 'width: 60px; height: 45px;',
+      medium: 'width: 80px; height: 60px;',
+      high: 'width: 100px; height: 75px;'
+    };
+    return sizes[photoQuality];
+  };
+
+  const imageStyle = getImageStyle();
+
+  return `
+    <!-- Vehicle Condition Section -->
+    <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin-bottom: 25px; page-break-inside: avoid;">
+      <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 15px; color: #1e40af;">حالة المركبة</h3>
+      
+      ${includeComparison && pickupPhotos.length > 0 && returnPhotos.length > 0 ? `
+      <!-- Comparison View -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <!-- Pickup Condition -->
+        <div>
+          <h4 style="font-weight: 600; font-size: 14px; margin-bottom: 10px; color: #059669;">حالة التسليم</h4>
+          ${contract.pickup_condition_notes ? `
+          <p style="font-size: 12px; color: #666; margin-bottom: 10px; background: #f0f9ff; padding: 8px; border-radius: 4px;">
+            <strong>الملاحظات:</strong> ${contract.pickup_condition_notes}
+          </p>` : ''}
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;">
+            ${pickupPhotos.map(photo => `
+              <img src="${photo}" style="${imageStyle} object-fit: cover; border-radius: 4px; border: 1px solid #e5e7eb;" alt="حالة التسليم" />
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Return Condition -->
+        <div>
+          <h4 style="font-weight: 600; font-size: 14px; margin-bottom: 10px; color: #dc2626;">حالة الإرجاع</h4>
+          ${contract.return_condition_notes ? `
+          <p style="font-size: 12px; color: #666; margin-bottom: 10px; background: #fef2f2; padding: 8px; border-radius: 4px;">
+            <strong>الملاحظات:</strong> ${contract.return_condition_notes}
+          </p>` : ''}
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;">
+            ${returnPhotos.map(photo => `
+              <img src="${photo}" style="${imageStyle} object-fit: cover; border-radius: 4px; border: 1px solid #e5e7eb;" alt="حالة الإرجاع" />
+            `).join('')}
+          </div>
+        </div>
+      </div>
+      ` : `
+      <!-- Single Section View -->
+      ${pickupPhotos.length > 0 ? `
+      <div style="margin-bottom: 20px;">
+        <h4 style="font-weight: 600; font-size: 14px; margin-bottom: 10px; color: #059669;">حالة التسليم</h4>
+        ${contract.pickup_condition_notes ? `
+        <p style="font-size: 12px; color: #666; margin-bottom: 10px; background: #f0f9ff; padding: 8px; border-radius: 4px;">
+          <strong>الملاحظات:</strong> ${contract.pickup_condition_notes}
+        </p>` : ''}
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
+          ${pickupPhotos.map(photo => `
+            <img src="${photo}" style="${imageStyle} object-fit: cover; border-radius: 4px; border: 1px solid #e5e7eb;" alt="حالة التسليم" />
+          `).join('')}
+        </div>
+      </div>
+      ` : ''}
+      
+      ${returnPhotos.length > 0 ? `
+      <div>
+        <h4 style="font-weight: 600; font-size: 14px; margin-bottom: 10px; color: #dc2626;">حالة الإرجاع</h4>
+        ${contract.return_condition_notes ? `
+        <p style="font-size: 12px; color: #666; margin-bottom: 10px; background: #fef2f2; padding: 8px; border-radius: 4px;">
+          <strong>الملاحظات:</strong> ${contract.return_condition_notes}
+        </p>` : ''}
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
+          ${returnPhotos.map(photo => `
+            <img src="${photo}" style="${imageStyle} object-fit: cover; border-radius: 4px; border: 1px solid #e5e7eb;" alt="حالة الإرجاع" />
+          `).join('')}
+        </div>
+      </div>
+      ` : ''}
+      `}
     </div>
   `;
 };

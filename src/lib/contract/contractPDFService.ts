@@ -1,9 +1,12 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { ContractPDFData } from '@/types/contract';
-import { generateContractHTML } from './contractTemplate';
+import { generateContractHTML, PDFOptions } from './contractTemplate';
 
-export const generateContractPDF = async (contract: ContractPDFData): Promise<Blob> => {
+export const generateContractPDF = async (
+  contract: ContractPDFData, 
+  options: PDFOptions = {}
+): Promise<Blob> => {
   // إنشاء عنصر HTML مؤقت للعقد
   const tempDiv = document.createElement('div');
   tempDiv.style.position = 'absolute';
@@ -16,7 +19,7 @@ export const generateContractPDF = async (contract: ContractPDFData): Promise<Bl
   tempDiv.style.padding = '20mm';
 
   // محتوى العقد
-  tempDiv.innerHTML = generateContractHTML(contract);
+  tempDiv.innerHTML = generateContractHTML(contract, options);
 
   document.body.appendChild(tempDiv);
 
@@ -53,9 +56,13 @@ export const generateContractPDF = async (contract: ContractPDFData): Promise<Bl
   }
 };
 
-export const downloadContractPDF = async (contract: ContractPDFData, filename?: string) => {
+export const downloadContractPDF = async (
+  contract: ContractPDFData, 
+  filename?: string,
+  options: PDFOptions = {}
+) => {
   try {
-    const pdfBlob = await generateContractPDF(contract);
+    const pdfBlob = await generateContractPDF(contract, options);
     
     // إنشاء رابط تحميل
     const url = URL.createObjectURL(pdfBlob);

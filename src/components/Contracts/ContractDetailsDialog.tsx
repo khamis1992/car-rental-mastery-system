@@ -8,6 +8,7 @@ import { ContractReturnForm } from './ContractReturnForm';
 import { ContractHeader } from './ContractHeader';
 import { ContractInfoSections } from './ContractInfoSections';
 import { ContractSignatureSection } from './ContractSignatureSection';
+import { ContractPDFPreview } from './ContractPDFPreview';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { downloadContractPDF } from '@/lib/contract/contractPDFService';
@@ -30,6 +31,7 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
   const [showCompanySignature, setShowCompanySignature] = useState(false);
   const [showDeliveryForm, setShowDeliveryForm] = useState(false);
   const [showReturnForm, setShowReturnForm] = useState(false);
+  const [showPDFPreview, setShowPDFPreview] = useState(false);
   const { toast } = useToast();
 
   React.useEffect(() => {
@@ -62,24 +64,33 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
   const handleDownloadPDF = async () => {
     if (!contract) return;
     
-    try {
-      toast({
-        title: "جاري إنشاء PDF...",
-        description: "يرجى الانتظار أثناء إنشاء ملف PDF",
-      });
+    // إذا كان هناك صور، اعرض معاينة التخصيص
+    const hasPhotos = (contract.pickup_photos && contract.pickup_photos.length > 0) || 
+                     (contract.return_photos && contract.return_photos.length > 0);
+    
+    if (hasPhotos) {
+      setShowPDFPreview(true);
+    } else {
+      // تحميل PDF بسيط بدون صور
+      try {
+        toast({
+          title: "جاري إنشاء PDF...",
+          description: "يرجى الانتظار أثناء إنشاء ملف PDF",
+        });
 
-      await downloadContractPDF(contract, `contract_${contract.contract_number}.pdf`);
-      
-      toast({
-        title: "تم بنجاح",
-        description: "تم تحميل ملف PDF بنجاح",
-      });
-    } catch (error) {
-      toast({
-        title: "خطأ",
-        description: "فشل في إنشاء ملف PDF",
-        variant: "destructive",
-      });
+        await downloadContractPDF(contract, `contract_${contract.contract_number}.pdf`);
+        
+        toast({
+          title: "تم بنجاح",
+          description: "تم تحميل ملف PDF بنجاح",
+        });
+      } catch (error) {
+        toast({
+          title: "خطأ",
+          description: "فشل في إنشاء ملف PDF",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -194,6 +205,13 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           open={showReturnForm}
           onOpenChange={setShowReturnForm}
           onSuccess={loadContract}
+        />
+
+        {/* PDF Preview */}
+        <ContractPDFPreview
+          contract={contract}
+          open={showPDFPreview}
+          onOpenChange={setShowPDFPreview}
         />
       </DialogContent>
     </Dialog>
