@@ -123,7 +123,7 @@ export const contractService = {
     return data;
   },
 
-  async updateContractStatus(id: string, status: string) {
+  async updateContractStatus(id: string, status: 'draft' | 'pending' | 'active' | 'completed' | 'cancelled') {
     const { data, error } = await supabase
       .from('contracts')
       .update({ status, updated_at: new Date().toISOString() })

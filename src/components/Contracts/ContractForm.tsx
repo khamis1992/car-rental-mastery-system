@@ -140,7 +140,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
         special_conditions: data.special_conditions,
         terms_and_conditions: data.terms_and_conditions,
         notes: data.notes,
-        status: 'draft',
+        status: 'draft' as const,
       };
 
       const { error } = await supabase
