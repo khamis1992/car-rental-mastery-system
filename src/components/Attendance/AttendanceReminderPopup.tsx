@@ -2,20 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Clock, MapPin, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Clock, MapPin, CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAttendanceSettings } from '@/hooks/useAttendanceSettings';
+import { attendanceService } from '@/services/attendanceService';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 interface AttendanceReminderPopupProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-// إحداثيات المكتب (يجب تحديثها بالإحداثيات الفعلية)
-const OFFICE_LOCATION = {
-  latitude: 29.3375,  // إحداثيات الكويت تقريبية
-  longitude: 47.9744,
-  radius: 100 // نصف قطر بالأمتار
-};
 
 const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({ 
   isOpen, 
@@ -25,21 +25,54 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
   const [locationError, setLocationError] = useState<string>('');
   const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
+  const [showManualOverride, setShowManualOverride] = useState(false);
+  const [overrideReason, setOverrideReason] = useState('');
+  const [distance, setDistance] = useState<number | null>(null);
+  const [employeeId, setEmployeeId] = useState<string | null>(null);
+  
   const { toast } = useToast();
+  const { profile } = useAuth();
+  const { 
+    officeLocations, 
+    attendanceSettings, 
+    loading: settingsLoading, 
+    isInOfficeRange: checkInOfficeRange 
+  } = useAttendanceSettings();
 
   // التحقق من تسجيل الحضور اليوم
   useEffect(() => {
-    const checkTodayAttendance = () => {
-      const today = new Date().toDateString();
-      const lastCheckIn = localStorage.getItem('lastCheckInDate');
-      setHasCheckedIn(lastCheckIn === today);
+    const checkTodayAttendance = async () => {
+      if (!profile?.user_id) return;
+
+      // البحث عن معرف الموظف
+      try {
+        const { data: employee } = await supabase
+          .from('employees')
+          .select('id')
+          .eq('user_id', profile.user_id)
+          .single();
+
+        if (employee) {
+          setEmployeeId(employee.id);
+          
+          // التحقق من الحضور اليوم
+          const { data: attendance } = await attendanceService.checkTodayAttendance(employee.id);
+          setHasCheckedIn(!!attendance);
+        }
+      } catch (error) {
+        console.error('خطأ في التحقق من بيانات الموظف:', error);
+        // استخدام localStorage كبديل
+        const today = new Date().toDateString();
+        const lastCheckIn = localStorage.getItem('lastCheckInDate');
+        setHasCheckedIn(lastCheckIn === today);
+      }
     };
 
     if (isOpen) {
       checkTodayAttendance();
       getCurrentLocation();
     }
-  }, [isOpen]);
+  }, [isOpen, profile]);
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -49,74 +82,74 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setLocation({
+        const userLocation = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
-        });
+        };
+        setLocation(userLocation);
         setLocationError('');
+
+        // حساب المسافة من المكتب
+        if (userLocation) {
+          const result = checkInOfficeRange(userLocation.lat, userLocation.lng);
+          setDistance(result.distance);
+        }
       },
       (error) => {
         let errorMessage = 'خطأ في الحصول على الموقع';
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = 'تم رفض إذن الوصول للموقع';
+            errorMessage = 'تم رفض إذن الوصول للموقع. يرجى السماح بالوصول للموقع وإعادة المحاولة.';
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage = 'معلومات الموقع غير متاحة';
+            errorMessage = 'معلومات الموقع غير متاحة. تأكد من تشغيل GPS.';
             break;
           case error.TIMEOUT:
-            errorMessage = 'انتهت مهلة الحصول على الموقع';
+            errorMessage = 'انتهت مهلة الحصول على الموقع. يرجى إعادة المحاولة.';
             break;
         }
         setLocationError(errorMessage);
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000
+        timeout: 15000,
+        maximumAge: 300000 // 5 دقائق
       }
     );
   };
 
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 6371e3; // نصف قطر الأرض بالأمتار
-    const φ1 = lat1 * Math.PI/180;
-    const φ2 = lat2 * Math.PI/180;
-    const Δφ = (lat2-lat1) * Math.PI/180;
-    const Δλ = (lon2-lon1) * Math.PI/180;
+  const getLocationStatus = () => {
+    if (!location) return { isValid: false, message: 'جاري تحديد موقعك...' };
+    if (!attendanceSettings?.require_location) return { isValid: true, message: 'الموقع غير مطلوب' };
 
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-    return R * c; // المسافة بالأمتار
-  };
-
-  const isInOfficeRange = () => {
-    if (!location) return false;
+    const result = checkInOfficeRange(location.lat, location.lng);
     
-    const distance = calculateDistance(
-      location.lat,
-      location.lng,
-      OFFICE_LOCATION.latitude,
-      OFFICE_LOCATION.longitude
-    );
-    
-    return distance <= OFFICE_LOCATION.radius;
+    if (result.isValid) {
+      return { 
+        isValid: true, 
+        message: `أنت داخل نطاق ${result.office?.name || 'المكتب'} - المسافة: ${Math.round(result.distance)}م` 
+      };
+    } else {
+      return { 
+        isValid: false, 
+        message: `أنت خارج نطاق المكتب - المسافة: ${Math.round(result.distance)}م (المسموح: ${result.office?.radius || 100}م)` 
+      };
+    }
   };
 
   const handleCheckIn = async () => {
-    if (!location) {
+    if (!location || !employeeId) {
       toast({
         title: "خطأ",
-        description: "لا يمكن تحديد موقعك الحالي",
+        description: "لا يمكن تحديد موقعك أو بيانات الموظف",
         variant: "destructive"
       });
       return;
     }
 
-    if (!isInOfficeRange()) {
+    const locationStatus = getLocationStatus();
+    
+    if (!locationStatus.isValid && !attendanceSettings?.allow_manual_override) {
       toast({
         title: "خطأ",
         description: "يجب أن تكون في المكتب لتسجيل الحضور",
@@ -125,30 +158,63 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
       return;
     }
 
+    // إذا كان خارج النطاق ومسموح بالاستثناء
+    if (!locationStatus.isValid && attendanceSettings?.allow_manual_override) {
+      setShowManualOverride(true);
+      return;
+    }
+
+    await performCheckIn();
+  };
+
+  const performCheckIn = async (isManualOverride = false) => {
+    if (!location || !employeeId) return;
+
     setIsCheckingIn(true);
     
     try {
-      // محاكاة API call لتسجيل الحضور
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // حفظ تاريخ تسجيل الحضور
-      const today = new Date().toDateString();
-      localStorage.setItem('lastCheckInDate', today);
-      localStorage.setItem('checkInTime', new Date().toISOString());
-      
-      setHasCheckedIn(true);
-      
-      toast({
-        title: "تم تسجيل الحضور بنجاح",
-        description: `الوقت: ${new Date().toLocaleTimeString('ar-KW')}`,
-      });
-      
-      // إغلاق النافذة المنبثقة بعد 2 ثانية
-      setTimeout(() => {
-        onClose();
-      }, 2000);
-      
+      const result = checkInOfficeRange(location.lat, location.lng);
+      const checkInData = {
+        employee_id: employeeId,
+        date: new Date().toISOString().split('T')[0],
+        check_in_time: new Date().toISOString(),
+        location_latitude: location.lat,
+        location_longitude: location.lng,
+        distance_from_office: result.distance,
+        office_location_id: result.office?.id,
+        manual_override: isManualOverride,
+        override_reason: isManualOverride ? overrideReason : undefined,
+        notes: isManualOverride ? `استثناء يدوي: ${overrideReason}` : undefined
+      };
+
+      const response = isManualOverride 
+        ? await attendanceService.requestManualOverride(checkInData)
+        : await attendanceService.checkIn(checkInData);
+
+      if (response.success) {
+        // حفظ في localStorage أيضاً
+        const today = new Date().toDateString();
+        localStorage.setItem('lastCheckInDate', today);
+        localStorage.setItem('checkInTime', new Date().toISOString());
+        
+        setHasCheckedIn(true);
+        
+        toast({
+          title: isManualOverride ? "تم إرسال طلب الاستثناء" : "تم تسجيل الحضور بنجاح",
+          description: isManualOverride 
+            ? "سيتم مراجعة طلبك من قبل المدير"
+            : `الوقت: ${new Date().toLocaleTimeString('ar-KW')}`,
+        });
+        
+        // إغلاق النافذة المنبثقة بعد 2 ثانية
+        setTimeout(() => {
+          onClose();
+        }, 2000);
+      } else {
+        throw response.error;
+      }
     } catch (error) {
+      console.error('خطأ في تسجيل الحضور:', error);
       toast({
         title: "خطأ",
         description: "فشل في تسجيل الحضور، حاول مرة أخرى",
@@ -156,7 +222,22 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
       });
     } finally {
       setIsCheckingIn(false);
+      setShowManualOverride(false);
+      setOverrideReason('');
     }
+  };
+
+  const handleManualOverride = async () => {
+    if (!overrideReason.trim()) {
+      toast({
+        title: "خطأ",
+        description: "يرجى كتابة سبب الاستثناء",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    await performCheckIn(true);
   };
 
   const currentTime = new Date().toLocaleTimeString('ar-KW', {
@@ -171,6 +252,23 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
     month: 'long',
     day: 'numeric'
   });
+
+  const locationStatus = getLocationStatus();
+
+  if (settingsLoading) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md">
+          <div className="flex items-center justify-center p-6">
+            <div className="text-center">
+              <Clock className="w-8 h-8 mx-auto mb-2 animate-spin" />
+              <p>جاري تحميل الإعدادات...</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -219,49 +317,92 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
             
             {locationError ? (
               <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{locationError}</AlertDescription>
               </Alert>
-            ) : location ? (
-              <Alert variant={isInOfficeRange() ? "default" : "destructive"}>
+            ) : (
+              <Alert variant={locationStatus.isValid ? "default" : "destructive"}>
                 <AlertDescription>
-                  {isInOfficeRange() 
-                    ? "أنت داخل نطاق المكتب" 
-                    : "أنت خارج نطاق المكتب"
-                  }
+                  {locationStatus.message}
                 </AlertDescription>
               </Alert>
-            ) : (
-              <Alert>
-                <AlertDescription>جاري تحديد موقعك...</AlertDescription>
-              </Alert>
             )}
           </div>
+
+          {/* نموذج الاستثناء اليدوي */}
+          {showManualOverride && (
+            <div className="space-y-4 p-4 border rounded-lg bg-muted">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-orange-500" />
+                <Label className="font-semibold">طلب استثناء يدوي</Label>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="override-reason">سبب الاستثناء</Label>
+                <Textarea
+                  id="override-reason"
+                  placeholder="مثال: حالة طوارئ، مشكلة في المواصلات، إلخ..."
+                  value={overrideReason}
+                  onChange={(e) => setOverrideReason(e.target.value)}
+                  className="min-h-[80px]"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleManualOverride}
+                  disabled={isCheckingIn || !overrideReason.trim()}
+                  className="flex-1"
+                >
+                  إرسال طلب الاستثناء
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowManualOverride(false)}
+                  disabled={isCheckingIn}
+                >
+                  إلغاء
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* أزرار الإجراء */}
-          <div className="flex gap-2">
-            {!hasCheckedIn && (
-              <Button
-                onClick={handleCheckIn}
-                disabled={isCheckingIn || !location || !isInOfficeRange()}
-                className="flex-1"
+          {!showManualOverride && (
+            <div className="flex gap-2">
+              {!hasCheckedIn && (
+                <Button
+                  onClick={handleCheckIn}
+                  disabled={isCheckingIn || !location || (!locationStatus.isValid && !attendanceSettings?.allow_manual_override)}
+                  className="flex-1"
+                >
+                  <Clock className="w-4 h-4 ml-2" />
+                  {isCheckingIn ? "جاري التسجيل..." : "تسجيل الحضور"}
+                </Button>
+              )}
+              
+              <Button 
+                variant="outline" 
+                onClick={onClose}
+                className={hasCheckedIn ? "flex-1" : ""}
               >
-                <Clock className="w-4 h-4 ml-2" />
-                {isCheckingIn ? "جاري التسجيل..." : "تسجيل الحضور"}
+                {hasCheckedIn ? "إغلاق" : "تذكيري لاحقاً"}
               </Button>
-            )}
-            
-            <Button 
-              variant="outline" 
-              onClick={onClose}
-              className={hasCheckedIn ? "flex-1" : ""}
-            >
-              {hasCheckedIn ? "إغلاق" : "تذكيري لاحقاً"}
-            </Button>
-          </div>
+            </div>
+          )}
 
-          {!hasCheckedIn && (
-            <div className="text-xs text-muted-foreground text-center">
-              يجب أن تكون في المكتب لتسجيل الحضور
+          {/* معلومات إضافية */}
+          {!hasCheckedIn && !showManualOverride && attendanceSettings && (
+            <div className="text-xs text-muted-foreground space-y-1">
+              {attendanceSettings.require_location && (
+                <p>• يجب أن تكون في نطاق {attendanceSettings.max_distance_meters}م من المكتب</p>
+              )}
+              {attendanceSettings.allow_manual_override && (
+                <p>• يمكن طلب استثناء يدوي في حالات الطوارئ</p>
+              )}
+              {attendanceSettings.grace_period_minutes > 0 && (
+                <p>• فترة سماح: {attendanceSettings.grace_period_minutes} دقيقة</p>
+              )}
             </div>
           )}
         </div>

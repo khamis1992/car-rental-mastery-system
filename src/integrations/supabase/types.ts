@@ -295,11 +295,15 @@ export type Database = {
           check_out_time: string | null
           created_at: string
           date: string
+          distance_from_office: number | null
           employee_id: string
           id: string
           location_latitude: number | null
           location_longitude: number | null
+          manual_override: boolean | null
           notes: string | null
+          office_location_id: string | null
+          override_reason: string | null
           overtime_hours: number | null
           status: string
           total_hours: number | null
@@ -314,11 +318,15 @@ export type Database = {
           check_out_time?: string | null
           created_at?: string
           date: string
+          distance_from_office?: number | null
           employee_id: string
           id?: string
           location_latitude?: number | null
           location_longitude?: number | null
+          manual_override?: boolean | null
           notes?: string | null
+          office_location_id?: string | null
+          override_reason?: string | null
           overtime_hours?: number | null
           status?: string
           total_hours?: number | null
@@ -333,11 +341,15 @@ export type Database = {
           check_out_time?: string | null
           created_at?: string
           date?: string
+          distance_from_office?: number | null
           employee_id?: string
           id?: string
           location_latitude?: number | null
           location_longitude?: number | null
+          manual_override?: boolean | null
           notes?: string | null
+          office_location_id?: string | null
+          override_reason?: string | null
           overtime_hours?: number | null
           status?: string
           total_hours?: number | null
@@ -358,7 +370,47 @@ export type Database = {
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "attendance_office_location_id_fkey"
+            columns: ["office_location_id"]
+            isOneToOne: false
+            referencedRelation: "office_locations"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      attendance_settings: {
+        Row: {
+          allow_manual_override: boolean
+          created_at: string
+          created_by: string | null
+          grace_period_minutes: number
+          id: string
+          max_distance_meters: number
+          require_location: boolean
+          updated_at: string
+        }
+        Insert: {
+          allow_manual_override?: boolean
+          created_at?: string
+          created_by?: string | null
+          grace_period_minutes?: number
+          id?: string
+          max_distance_meters?: number
+          require_location?: boolean
+          updated_at?: string
+        }
+        Update: {
+          allow_manual_override?: boolean
+          created_at?: string
+          created_by?: string | null
+          grace_period_minutes?: number
+          id?: string
+          max_distance_meters?: number
+          require_location?: boolean
+          updated_at?: string
+        }
+        Relationships: []
       }
       bank_accounts: {
         Row: {
@@ -1956,6 +2008,45 @@ export type Database = {
           model_type?: string
           model_version?: string
           training_data_count?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      office_locations: {
+        Row: {
+          address: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          latitude: number
+          longitude: number
+          name: string
+          radius: number
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          latitude: number
+          longitude: number
+          name: string
+          radius?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          latitude?: number
+          longitude?: number
+          name?: string
+          radius?: number
           updated_at?: string
         }
         Relationships: []
