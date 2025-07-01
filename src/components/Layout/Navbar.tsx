@@ -11,11 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, User, Search } from "lucide-react";
 
 const Navbar = () => {
-  const currentDate = new Date().toLocaleDateString('ar-SA', {
+  const currentDate = new Date().toLocaleDateString('ar-EG', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
+    calendar: 'gregory'
   });
 
   return (
