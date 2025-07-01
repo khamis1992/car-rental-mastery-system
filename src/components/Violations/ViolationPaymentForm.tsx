@@ -149,12 +149,12 @@ export const ViolationPaymentForm: React.FC<ViolationPaymentFormProps> = ({
 
             <div>
               <Label htmlFor="payment_method">طريقة الدفع *</Label>
-              <Select value={formData.payment_method} onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cash">نقداً</SelectItem>
+            <Select value={formData.payment_method} onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value as 'cash' | 'card' | 'bank_transfer' | 'check' }))}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cash">نقداً</SelectItem>
                   <SelectItem value="card">بطاقة ائتمان</SelectItem>
                   <SelectItem value="bank_transfer">حوالة بنكية</SelectItem>
                   <SelectItem value="check">شيك</SelectItem>

@@ -314,12 +314,12 @@ export const ViolationTypesManagement: React.FC<ViolationTypesManagementProps> =
 
               <div>
                 <Label htmlFor="category">الفئة *</Label>
-                <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="speed">السرعة</SelectItem>
+              <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value as 'speed' | 'parking' | 'traffic_light' | 'general' }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="speed">السرعة</SelectItem>
                     <SelectItem value="parking">الوقوف</SelectItem>
                     <SelectItem value="traffic_light">الإشارات</SelectItem>
                     <SelectItem value="general">عامة</SelectItem>
@@ -329,12 +329,12 @@ export const ViolationTypesManagement: React.FC<ViolationTypesManagementProps> =
 
               <div>
                 <Label htmlFor="severity_level">درجة الخطورة *</Label>
-                <Select value={formData.severity_level} onValueChange={(value) => setFormData(prev => ({ ...prev, severity_level: value }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="minor">بسيطة</SelectItem>
+              <Select value={formData.severity_level} onValueChange={(value) => setFormData(prev => ({ ...prev, severity_level: value as 'minor' | 'moderate' | 'major' | 'severe' }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="minor">بسيطة</SelectItem>
                     <SelectItem value="moderate">متوسطة</SelectItem>
                     <SelectItem value="major">كبيرة</SelectItem>
                     <SelectItem value="severe">خطيرة</SelectItem>

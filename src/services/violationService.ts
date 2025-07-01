@@ -19,7 +19,14 @@ export const violationService = {
     const { data, error } = await supabase
       .from('violation_types')
       .insert([{
-        ...violationType,
+        violation_code: violationType.violation_code!,
+        violation_name_ar: violationType.violation_name_ar!,
+        violation_name_en: violationType.violation_name_en,
+        description: violationType.description,
+        base_fine_amount: violationType.base_fine_amount!,
+        points: violationType.points || 0,
+        category: violationType.category!,
+        severity_level: violationType.severity_level!,
         created_by: (await supabase.auth.getUser()).data.user?.id
       }])
       .select()
@@ -97,15 +104,29 @@ export const violationService = {
     const { data, error } = await supabase
       .from('traffic_violations')
       .insert([{
-        ...violation,
         violation_number: violationNumber,
+        violation_type_id: violation.violation_type_id!,
+        violation_date: violation.violation_date!,
+        violation_time: violation.violation_time,
+        location: violation.location,
+        description: violation.description,
+        vehicle_id: violation.vehicle_id!,
+        contract_id: violation.contract_id,
+        customer_id: violation.customer_id!,
+        official_violation_number: violation.official_violation_number,
+        issuing_authority: violation.issuing_authority,
+        officer_name: violation.officer_name,
+        fine_amount: violation.fine_amount!,
+        processing_fee: violation.processing_fee || 0,
+        total_amount: violation.total_amount!,
+        notes: violation.notes,
         created_by: (await supabase.auth.getUser()).data.user?.id
       }])
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return data as TrafficViolation;
   },
 
   async updateViolation(id: string, updates: Partial<TrafficViolation>): Promise<TrafficViolation> {
@@ -117,7 +138,7 @@ export const violationService = {
       .single();
 
     if (error) throw error;
-    return data;
+    return data as TrafficViolation;
   },
 
   async determineViolationLiability(
@@ -140,7 +161,7 @@ export const violationService = {
       .single();
 
     if (error) throw error;
-    return data;
+    return data as TrafficViolation;
   },
 
   // خدمات دفعات المخالفات
@@ -152,7 +173,7 @@ export const violationService = {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []) as ViolationPayment[];
   },
 
   async createViolationPayment(payment: Partial<ViolationPayment>): Promise<ViolationPayment> {
@@ -161,15 +182,22 @@ export const violationService = {
     const { data, error } = await supabase
       .from('violation_payments')
       .insert([{
-        ...payment,
         payment_number: paymentNumber,
+        violation_id: payment.violation_id!,
+        amount: payment.amount!,
+        payment_date: payment.payment_date!,
+        payment_method: payment.payment_method!,
+        transaction_reference: payment.transaction_reference,
+        bank_name: payment.bank_name,
+        check_number: payment.check_number,
+        notes: payment.notes,
         created_by: (await supabase.auth.getUser()).data.user?.id
       }])
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return data as ViolationPayment;
   },
 
   // إحصائيات المخالفات
@@ -242,7 +270,7 @@ export const violationService = {
     const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []) as ViolationWithDetails[];
   },
 
   // تحديث حالة الإشعار
@@ -258,6 +286,6 @@ export const violationService = {
       .single();
 
     if (error) throw error;
-    return data;
+    return data as TrafficViolation;
   }
 };

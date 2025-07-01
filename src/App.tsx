@@ -20,6 +20,7 @@ import Notifications from "./pages/Notifications";
 import Analytics from "./pages/Analytics";
 import Communications from "./pages/Communications";
 import Maintenance from "./pages/Maintenance";
+import TrafficViolations from "./pages/TrafficViolations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -115,6 +116,13 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <Maintenance />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/violations" element={
+              <ProtectedRoute>
+                <Layout>
+                  <TrafficViolations />
                 </Layout>
               </ProtectedRoute>
             } />

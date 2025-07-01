@@ -6,7 +6,8 @@ import {
   FileText, 
   Calculator, 
   BarChart3, 
-  Wrench, 
+  Wrench,
+  AlertTriangle,
   MessageCircle,
   Bell,
   Settings
@@ -67,6 +68,11 @@ const mainItems = [
     title: "الصيانة", 
     url: "/maintenance", 
     icon: Wrench 
+  },
+  { 
+    title: "المخالفات المرورية", 
+    url: "/violations", 
+    icon: AlertTriangle 
   },
 ];
 
