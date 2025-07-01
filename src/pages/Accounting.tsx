@@ -1,6 +1,8 @@
 import React from 'react';
 import { TrendingUp, DollarSign, FileText, Calendar, CreditCard, Receipt } from 'lucide-react';
 import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
+import { JournalEntriesTab } from '@/components/Accounting/JournalEntriesTab';
+import { FinancialReportsTab } from '@/components/Accounting/FinancialReportsTab';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -147,9 +149,7 @@ const Accounting = () => {
         </TabsContent>
 
         <TabsContent value="journal" className="space-y-4">
-          <div className="text-center py-8 text-muted-foreground">
-            القيود المحاسبية - قريباً
-          </div>
+          <JournalEntriesTab />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
@@ -194,35 +194,7 @@ const Accounting = () => {
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-4">
-          <Card className="card-elegant">
-            <CardHeader>
-              <CardTitle>التقارير الشهرية</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {monthlyReports.map((report, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h3 className="font-medium">{report.month}</h3>
-                      <p className="text-sm text-muted-foreground">{report.contracts} عقد مكتمل</p>
-                    </div>
-                    <div className="text-right space-y-1">
-                      <p className="text-green-600 font-medium">
-                        إيرادات: {report.revenue.toLocaleString()} ر.س
-                      </p>
-                      <p className="text-red-600 text-sm">
-                        مصروفات: {report.expenses.toLocaleString()} ر.س
-                      </p>
-                      <p className="font-bold">
-                        صافي: {(report.revenue - report.expenses).toLocaleString()} ر.س
-                      </p>
-                    </div>
-                    <Badge variant="default">{report.status}</Badge>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <FinancialReportsTab />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
