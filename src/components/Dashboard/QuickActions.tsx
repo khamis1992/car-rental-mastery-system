@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, FileText, User, Calendar, Users, Calculator } from "lucide-react";
+import { Plus, FileText, User, Calendar, Users, Calculator, BarChart3, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const QuickActions = () => {
@@ -26,14 +26,14 @@ const QuickActions = () => {
       description: "حجز سيارة بسرعة",
       icon: <Calendar className="w-5 h-5" />,
       className: "btn-purple",
-      onClick: () => console.log('حجز سريع')
+      onClick: () => navigate('/fleet')
     },
     {
-      title: "المحاسبة",
-      description: "التقارير المالية",
-      icon: <Calculator className="w-5 h-5" />,
+      title: "التحليلات",
+      description: "تقارير مفصلة",
+      icon: <BarChart3 className="w-5 h-5" />,
       className: "btn-orange",
-      onClick: () => navigate('/accounting')
+      onClick: () => navigate('/analytics')
     }
   ];
 
