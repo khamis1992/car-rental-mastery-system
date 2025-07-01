@@ -67,22 +67,15 @@ const Index = () => {
           />
         </div>
 
-        {/* قسم الإجراءات السريعة */}
-        <div className="grid grid-cols-1 gap-6 mb-8 animate-fade-in">
+        {/* قسم الإجراءات السريعة ونظرة عامة على الأسطول */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 animate-fade-in">
           <QuickActions />
+          <FleetOverview />
         </div>
 
         {/* المحتوى الرئيسي */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
-          {/* العمود الأيسر - العقود الحديثة */}
-          <div className="lg:col-span-2 space-y-6">
-            <RecentContracts />
-          </div>
-
-          {/* العمود الأيمن */}
-          <div className="space-y-6">
-            <FleetOverview />
-          </div>
+        <div className="grid grid-cols-1 gap-6 animate-fade-in">
+          <RecentContracts />
         </div>
     </div>
   );
