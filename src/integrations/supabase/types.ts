@@ -417,6 +417,129 @@ export type Database = {
         }
         Relationships: []
       }
+      budget_items: {
+        Row: {
+          account_id: string
+          actual_amount: number | null
+          budget_id: string
+          budgeted_amount: number
+          created_at: string
+          id: string
+          item_type: string
+          notes: string | null
+          q1_amount: number | null
+          q2_amount: number | null
+          q3_amount: number | null
+          q4_amount: number | null
+          updated_at: string
+          variance_amount: number | null
+          variance_percentage: number | null
+        }
+        Insert: {
+          account_id: string
+          actual_amount?: number | null
+          budget_id: string
+          budgeted_amount: number
+          created_at?: string
+          id?: string
+          item_type: string
+          notes?: string | null
+          q1_amount?: number | null
+          q2_amount?: number | null
+          q3_amount?: number | null
+          q4_amount?: number | null
+          updated_at?: string
+          variance_amount?: number | null
+          variance_percentage?: number | null
+        }
+        Update: {
+          account_id?: string
+          actual_amount?: number | null
+          budget_id?: string
+          budgeted_amount?: number
+          created_at?: string
+          id?: string
+          item_type?: string
+          notes?: string | null
+          q1_amount?: number | null
+          q2_amount?: number | null
+          q3_amount?: number | null
+          q4_amount?: number | null
+          updated_at?: string
+          variance_amount?: number | null
+          variance_percentage?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_items_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budgets: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          budget_name: string
+          budget_period: string
+          budget_year: number
+          created_at: string
+          created_by: string | null
+          end_date: string
+          id: string
+          notes: string | null
+          start_date: string
+          status: string
+          total_expense_budget: number | null
+          total_revenue_budget: number | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          budget_name: string
+          budget_period?: string
+          budget_year: number
+          created_at?: string
+          created_by?: string | null
+          end_date: string
+          id?: string
+          notes?: string | null
+          start_date: string
+          status?: string
+          total_expense_budget?: number | null
+          total_revenue_budget?: number | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          budget_name?: string
+          budget_period?: string
+          budget_year?: number
+          created_at?: string
+          created_by?: string | null
+          end_date?: string
+          id?: string
+          notes?: string | null
+          start_date?: string
+          status?: string
+          total_expense_budget?: number | null
+          total_revenue_budget?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chart_of_accounts: {
         Row: {
           account_category: string
@@ -1053,6 +1176,99 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      financial_kpis: {
+        Row: {
+          calculation_method: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          kpi_category: string
+          kpi_name: string
+          kpi_target: number | null
+          kpi_unit: string | null
+          kpi_value: number
+          notes: string | null
+          period_date: string
+        }
+        Insert: {
+          calculation_method?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kpi_category: string
+          kpi_name: string
+          kpi_target?: number | null
+          kpi_unit?: string | null
+          kpi_value: number
+          notes?: string | null
+          period_date: string
+        }
+        Update: {
+          calculation_method?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kpi_category?: string
+          kpi_name?: string
+          kpi_target?: number | null
+          kpi_unit?: string | null
+          kpi_value?: number
+          notes?: string | null
+          period_date?: string
+        }
+        Relationships: []
+      }
+      financial_performance: {
+        Row: {
+          calculated_at: string
+          created_by: string | null
+          expense_ratio: number | null
+          gross_profit: number | null
+          id: string
+          net_profit: number | null
+          period_month: number | null
+          period_quarter: number | null
+          period_type: string
+          period_year: number
+          profit_margin: number | null
+          revenue_growth: number | null
+          total_expenses: number | null
+          total_revenue: number | null
+        }
+        Insert: {
+          calculated_at?: string
+          created_by?: string | null
+          expense_ratio?: number | null
+          gross_profit?: number | null
+          id?: string
+          net_profit?: number | null
+          period_month?: number | null
+          period_quarter?: number | null
+          period_type: string
+          period_year: number
+          profit_margin?: number | null
+          revenue_growth?: number | null
+          total_expenses?: number | null
+          total_revenue?: number | null
+        }
+        Update: {
+          calculated_at?: string
+          created_by?: string | null
+          expense_ratio?: number | null
+          gross_profit?: number | null
+          id?: string
+          net_profit?: number | null
+          period_month?: number | null
+          period_quarter?: number | null
+          period_type?: string
+          period_year?: number
+          profit_margin?: number | null
+          revenue_growth?: number | null
+          total_expenses?: number | null
+          total_revenue?: number | null
+        }
+        Relationships: []
       }
       financial_periods: {
         Row: {
@@ -2407,6 +2623,14 @@ export type Database = {
         Args: { asset_cost: number; accumulated_depreciation: number }
         Returns: number
       }
+      calculate_budget_variance: {
+        Args: { budget_id: string }
+        Returns: undefined
+      }
+      calculate_financial_kpis: {
+        Args: { for_date?: string }
+        Returns: number
+      }
       calculate_monthly_depreciation: {
         Args: {
           asset_cost: number
@@ -2415,6 +2639,10 @@ export type Database = {
           method?: string
         }
         Returns: number
+      }
+      calculate_monthly_performance: {
+        Args: { target_year: number; target_month: number }
+        Returns: string
       }
       create_depreciation_entries: {
         Args: Record<PropertyKey, never>
