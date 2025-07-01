@@ -1,0 +1,24 @@
+import { z } from 'zod';
+
+export const vehicleSchema = z.object({
+  make: z.string().min(2, 'يجب إدخال الصانع'),
+  model: z.string().min(2, 'يجب إدخال الموديل'),
+  year: z.number().min(1900).max(new Date().getFullYear() + 1),
+  color: z.string().min(2, 'يجب إدخال اللون'),
+  vehicle_type: z.enum(['sedan', 'suv', 'hatchback', 'coupe', 'pickup', 'van', 'luxury']),
+  license_plate: z.string().min(3, 'يجب إدخال رقم اللوحة'),
+  daily_rate: z.number().min(1, 'يجب إدخال السعر اليومي'),
+  weekly_rate: z.number().optional(),
+  monthly_rate: z.number().optional(),
+  engine_size: z.string().optional(),
+  fuel_type: z.string().default('بنزين'),
+  transmission: z.string().default('أوتوماتيك'),
+  mileage: z.number().default(0),
+  insurance_company: z.string().optional(),
+  insurance_policy_number: z.string().optional(),
+  insurance_expiry: z.string().optional(),
+  registration_expiry: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+export type VehicleFormData = z.infer<typeof vehicleSchema>;
