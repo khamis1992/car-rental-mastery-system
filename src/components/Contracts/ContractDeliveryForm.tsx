@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { VehicleConditionPhotos } from './VehicleConditionPhotos';
+import { VehicleConditionDiagramSection } from './VehicleDiagram/VehicleConditionDiagramSection';
+import type { DamageArea } from './VehicleDiagram/VehicleDiagramInteractive';
 import { MapPin, Gauge, Fuel, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,7 +32,8 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
     pickup_mileage: '',
     fuel_level_pickup: 'Full',
     pickup_photos: [] as string[],
-    pickup_condition_notes: ''
+    pickup_condition_notes: '',
+    pickup_damages: [] as DamageArea[]
   });
   const { toast } = useToast();
 
@@ -164,13 +166,15 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
             </CardContent>
           </Card>
 
-          {/* Vehicle Condition Photos */}
-          <VehicleConditionPhotos
+          {/* Vehicle Condition with Interactive Diagram */}
+          <VehicleConditionDiagramSection
             contractId={contract.id}
             vehicleInfo={`${contract.vehicles?.make} ${contract.vehicles?.model} - ${contract.vehicles?.license_plate}`}
             type="pickup"
-            existingPhotos={deliveryData.pickup_photos}
-            existingNotes={deliveryData.pickup_condition_notes}
+            damages={deliveryData.pickup_damages}
+            onDamagesChange={(damages) => updateDeliveryData('pickup_damages', damages)}
+            photos={deliveryData.pickup_photos}
+            notes={deliveryData.pickup_condition_notes}
             onPhotosChange={(photos) => updateDeliveryData('pickup_photos', photos)}
             onNotesChange={(notes) => updateDeliveryData('pickup_condition_notes', notes)}
           />

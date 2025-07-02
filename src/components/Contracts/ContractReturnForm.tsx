@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { VehicleConditionPhotos } from './VehicleConditionPhotos';
+import { VehicleConditionDiagramSection } from './VehicleDiagram/VehicleConditionDiagramSection';
+import type { DamageArea } from './VehicleDiagram/VehicleDiagramInteractive';
 import { MapPin, Gauge, Clock, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,7 +31,8 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
     return_mileage: '',
     fuel_level_return: 'Full',
     return_photos: [] as string[],
-    return_condition_notes: ''
+    return_condition_notes: '',
+    return_damages: [] as DamageArea[]
   });
   const { toast } = useToast();
 
@@ -190,13 +192,15 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
             </CardContent>
           </Card>
 
-          {/* Vehicle Condition Photos */}
-          <VehicleConditionPhotos
+          {/* Vehicle Condition with Interactive Diagram */}
+          <VehicleConditionDiagramSection
             contractId={contract.id}
             vehicleInfo={`${contract.vehicles?.make} ${contract.vehicles?.model} - ${contract.vehicles?.license_plate}`}
             type="return"
-            existingPhotos={returnData.return_photos}
-            existingNotes={returnData.return_condition_notes}
+            damages={returnData.return_damages}
+            onDamagesChange={(damages) => updateReturnData('return_damages', damages)}
+            photos={returnData.return_photos}
+            notes={returnData.return_condition_notes}
             onPhotosChange={(photos) => updateReturnData('return_photos', photos)}
             onNotesChange={(notes) => updateReturnData('return_condition_notes', notes)}
           />
