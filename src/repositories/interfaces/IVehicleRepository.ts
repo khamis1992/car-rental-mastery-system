@@ -10,9 +10,14 @@ export interface Vehicle {
   vehicle_type: string;
   license_plate: string;
   vin_number?: string;
+  body_type?: string;
   daily_rate: number;
   weekly_rate?: number;
   monthly_rate?: number;
+  min_daily_rate?: number;
+  max_daily_rate?: number;
+  mileage_limit?: number;
+  excess_mileage_cost?: number;
   engine_size?: string;
   fuel_type: string;
   transmission: string;
@@ -31,6 +36,7 @@ export interface Vehicle {
   useful_life_years?: number;
   residual_value?: number;
   depreciation_method?: 'straight_line' | 'declining_balance';
+  previous_accumulated_depreciation?: number;
   asset_id?: string;
   // Other fields
   registration_expiry?: string;

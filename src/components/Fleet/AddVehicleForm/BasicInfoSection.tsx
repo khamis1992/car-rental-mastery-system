@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Car, Calendar, FileText, Gauge, Settings } from 'lucide-react';
+import { Car, Calendar, FileText, Gauge, Settings, Wrench } from 'lucide-react';
 import { type VehicleFormData } from './types';
 
 interface BasicInfoSectionProps {
@@ -134,6 +134,27 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({ control }) =
               </FormItem>
             )}
           />
+
+          <FormField
+            control={control}
+            name="vin_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium text-foreground">رقم الهيكل (VIN)</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Wrench className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="WVWZZZ1JZ3W386752" 
+                      className="h-12 pr-10 bg-background/60 border-border/60"
+                      {...field} 
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         {/* العمود الأيمن */}
@@ -212,6 +233,27 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({ control }) =
                     <Settings className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input 
                       placeholder="أوتوماتيك" 
+                      className="h-12 pr-10 bg-background/60 border-border/60"
+                      {...field} 
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="body_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium text-foreground">نوع الهيكل</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Car className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="مثال: 4 أبواب، 2 أبواب، هاتشباك" 
                       className="h-12 pr-10 bg-background/60 border-border/60"
                       {...field} 
                     />
