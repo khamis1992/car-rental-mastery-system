@@ -38,7 +38,7 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
         customers!inner(name, phone),
         vehicles!inner(make, model, vehicle_number)
       `)
-      .order('contracts.created_at', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
 
@@ -235,7 +235,7 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
         customers(name),
         vehicles(make, model, vehicle_number)
       `)
-      .order('contracts.created_at', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(limit);
 
     if (error) throw error;

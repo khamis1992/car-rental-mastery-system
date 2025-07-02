@@ -173,7 +173,21 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   const onSubmit = async (data: ContractFormData) => {
     setIsLoading(true);
     try {
+      console.log('Starting contract creation with data:', data);
+      
+      // Validate dates
+      if (data.start_date >= data.end_date) {
+        throw new Error('تاريخ النهاية يجب أن يكون بعد تاريخ البداية');
+      }
+
+      // Validate vehicle availability
+      if (!selectedVehicle || selectedVehicle.status !== 'available') {
+        throw new Error('المركبة المختارة غير متاحة');
+      }
+
+      console.log('Generating contract number...');
       const contractNumber = await generateContractNumber();
+      console.log('Generated contract number:', contractNumber);
       
       const contractData = {
         contract_number: contractNumber,
@@ -199,20 +213,34 @@ export const ContractForm: React.FC<ContractFormProps> = ({
         terms_and_conditions: data.terms_and_conditions,
         notes: data.notes,
         status: 'draft' as const,
+        created_by: null, // Will be set by database trigger
       };
 
-      const { error } = await supabase
+      console.log('Inserting contract data:', contractData);
+      const { error, data: insertedData } = await supabase
         .from('contracts')
-        .insert(contractData);
+        .insert(contractData)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error(`خطأ في قاعدة البيانات: ${error.message}`);
+      }
+
+      console.log('Contract created successfully:', insertedData);
 
       // Update quotation status if one was selected
       if (data.quotation_id) {
-        await supabase
+        console.log('Updating quotation status...');
+        const { error: quotationError } = await supabase
           .from('quotations')
           .update({ status: 'converted' })
           .eq('id', data.quotation_id);
+        
+        if (quotationError) {
+          console.error('Error updating quotation:', quotationError);
+          // Don't throw here as contract is already created
+        }
       }
 
       toast({
@@ -224,9 +252,10 @@ export const ContractForm: React.FC<ContractFormProps> = ({
       onOpenChange(false);
       onSuccess?.();
     } catch (error: any) {
+      console.error('Contract creation error:', error);
       toast({
         title: 'خطأ في إنشاء العقد',
-        description: error.message,
+        description: error.message || 'حدث خطأ غير متوقع',
         variant: 'destructive',
       });
     } finally {
