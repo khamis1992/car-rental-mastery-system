@@ -10,7 +10,31 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
     const { data, error } = await supabase
       .from('contracts')
       .select(`
-        *,
+        id,
+        contract_number,
+        customer_id,
+        vehicle_id,
+        quotation_id,
+        start_date,
+        end_date,
+        actual_start_date,
+        actual_end_date,
+        rental_days,
+        contract_type,
+        daily_rate,
+        total_amount,
+        discount_amount,
+        tax_amount,
+        security_deposit,
+        insurance_amount,
+        final_amount,
+        status,
+        pickup_location,
+        return_location,
+        special_conditions,
+        terms_and_conditions,
+        notes,
+        created_at,
         customers!inner(name, phone),
         vehicles!inner(make, model, vehicle_number)
       `)
@@ -164,7 +188,11 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
     const { data, error } = await supabase
       .from('contracts')
       .select(`
-        *,
+        id,
+        contract_number,
+        final_amount,
+        status,
+        created_at,
         customers(name),
         vehicles(make, model, vehicle_number)
       `)
