@@ -338,11 +338,21 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {customer.address && <p>{customer.address}</p>}
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      {customer.city && <span>{customer.city}</span>}
-                      {customer.city && customer.country && <span>-</span>}
-                      {customer.country && <span>{customer.country}</span>}
+                    {customer.address && (
+                      <div className="flex items-center gap-2 flex-row-reverse">
+                        <label className="text-sm font-medium text-muted-foreground">العنوان</label>
+                        <span className="text-muted-foreground">:</span>
+                        <p>{customer.address}</p>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 flex-row-reverse">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        {customer.country && <span>{customer.country}</span>}
+                        {customer.city && customer.country && <span>-</span>}
+                        {customer.city && <span>{customer.city}</span>}
+                      </div>
+                      <span className="text-muted-foreground">:</span>
+                      <label className="text-sm font-medium text-muted-foreground">المدينة والدولة</label>
                     </div>
                   </div>
                 </CardContent>
