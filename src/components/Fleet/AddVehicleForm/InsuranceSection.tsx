@@ -8,7 +8,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Shield, Calendar, FileText, Settings } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Shield, Calendar, FileText, Settings, Building, User } from 'lucide-react';
 import { type VehicleFormData } from './types';
 
 interface InsuranceSectionProps {
@@ -20,10 +27,60 @@ export const InsuranceSection: React.FC<InsuranceSectionProps> = ({ control }) =
     <div className="bg-muted/30 rounded-xl p-6 border border-border/50">
       <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
         <Shield className="w-5 h-5 text-primary" />
-        التأمين والترخيص
+        التأمين والملكية
       </h3>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
+          <FormField
+            control={control}
+            name="insurance_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium text-foreground">نوع التأمين</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || "comprehensive"}>
+                  <FormControl>
+                    <SelectTrigger className="h-12 bg-background/60 border-border/60 text-right">
+                      <div className="flex items-center gap-2">
+                        <Shield className="w-4 h-4 text-muted-foreground" />
+                        <SelectValue placeholder="اختر نوع التأمين" />
+                      </div>
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="comprehensive">تأمين شامل</SelectItem>
+                    <SelectItem value="third_party">تأمين طرف ثالث</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="owner_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium text-foreground">نوع الملكية</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || "company"}>
+                  <FormControl>
+                    <SelectTrigger className="h-12 bg-background/60 border-border/60 text-right">
+                      <div className="flex items-center gap-2">
+                        <Building className="w-4 h-4 text-muted-foreground" />
+                        <SelectValue placeholder="اختر نوع الملكية" />
+                      </div>
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="company">ملك الشركة</SelectItem>
+                    <SelectItem value="customer">ملك العميل</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={control}
             name="insurance_company"
@@ -35,27 +92,6 @@ export const InsuranceSection: React.FC<InsuranceSectionProps> = ({ control }) =
                     <Shield className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input 
                       placeholder="مثال: التعاونية للتأمين" 
-                      className="h-12 pr-10 bg-background/60 border-border/60"
-                      {...field} 
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={control}
-            name="insurance_policy_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium text-foreground">رقم وثيقة التأمين</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <FileText className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="رقم الوثيقة" 
                       className="h-12 pr-10 bg-background/60 border-border/60"
                       {...field} 
                     />
@@ -86,6 +122,27 @@ export const InsuranceSection: React.FC<InsuranceSectionProps> = ({ control }) =
         </div>
 
         <div className="space-y-6">
+          <FormField
+            control={control}
+            name="insurance_policy_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium text-foreground">رقم وثيقة التأمين</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <FileText className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="رقم الوثيقة" 
+                      className="h-12 pr-10 bg-background/60 border-border/60"
+                      {...field} 
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={control}
             name="insurance_expiry"

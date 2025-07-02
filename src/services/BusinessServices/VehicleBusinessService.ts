@@ -41,6 +41,39 @@ export class VehicleBusinessService {
       
       const result = await this.vehicleRepository.create(vehicleData);
       console.log('VehicleBusinessService: تم إنشاء المركبة بنجاح:', result);
+      
+      // إذا كانت المركبة ملك الشركة وتحتوي على بيانات الأصل، قم بإنشاء أصل ثابت
+      if (vehicleData.owner_type === 'company' && vehicleData.purchase_date && vehicleData.purchase_cost) {
+        try {
+          console.log('VehicleBusinessService: إنشاء أصل ثابت للمركبة');
+          const { data: assetFunction, error: functionError } = await (this.vehicleRepository as any).supabase
+            .rpc('create_vehicle_asset', {
+              vehicle_id: result.id,
+              vehicle_data: JSON.stringify({
+                make: vehicleData.make,
+                model: vehicleData.model,
+                license_plate: vehicleData.license_plate,
+                vehicle_number: vehicleData.vehicle_number,
+                purchase_date: vehicleData.purchase_date,
+                purchase_cost: vehicleData.purchase_cost,
+                useful_life_years: vehicleData.useful_life_years || 5,
+                residual_value: vehicleData.residual_value || 0,
+                depreciation_method: vehicleData.depreciation_method || 'straight_line'
+              })
+            });
+          
+          if (functionError) {
+            console.error('VehicleBusinessService: خطأ في إنشاء الأصل الثابت:', functionError);
+            // لا نرمي خطأ هنا لأن المركبة تم إنشاؤها بنجاح
+          } else {
+            console.log('VehicleBusinessService: تم إنشاء الأصل الثابت بنجاح:', assetFunction);
+          }
+        } catch (assetError) {
+          console.error('VehicleBusinessService: خطأ في إنشاء الأصل الثابت:', assetError);
+          // لا نرمي خطأ هنا لأن المركبة تم إنشاؤها بنجاح
+        }
+      }
+      
       return result;
     } catch (error) {
       console.error('VehicleBusinessService: خطأ في إنشاء المركبة:', error);

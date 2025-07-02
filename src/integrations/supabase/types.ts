@@ -2758,16 +2758,20 @@ export type Database = {
       }
       vehicles: {
         Row: {
+          asset_id: string | null
           color: string
           created_at: string
           created_by: string | null
           daily_rate: number
+          depreciation_method: string | null
+          depreciation_rate: number | null
           engine_size: string | null
           fuel_type: string | null
           id: string
           insurance_company: string | null
           insurance_expiry: string | null
           insurance_policy_number: string | null
+          insurance_type: string | null
           last_maintenance_date: string | null
           license_plate: string
           make: string
@@ -2776,10 +2780,15 @@ export type Database = {
           monthly_rate: number | null
           next_maintenance_due: string | null
           notes: string | null
+          owner_type: string | null
+          purchase_cost: number | null
+          purchase_date: string | null
           registration_expiry: string | null
+          residual_value: number | null
           status: Database["public"]["Enums"]["vehicle_status"]
           transmission: string | null
           updated_at: string
+          useful_life_years: number | null
           vehicle_number: string
           vehicle_type: Database["public"]["Enums"]["vehicle_type"]
           vin_number: string | null
@@ -2787,16 +2796,20 @@ export type Database = {
           year: number
         }
         Insert: {
+          asset_id?: string | null
           color: string
           created_at?: string
           created_by?: string | null
           daily_rate: number
+          depreciation_method?: string | null
+          depreciation_rate?: number | null
           engine_size?: string | null
           fuel_type?: string | null
           id?: string
           insurance_company?: string | null
           insurance_expiry?: string | null
           insurance_policy_number?: string | null
+          insurance_type?: string | null
           last_maintenance_date?: string | null
           license_plate: string
           make: string
@@ -2805,10 +2818,15 @@ export type Database = {
           monthly_rate?: number | null
           next_maintenance_due?: string | null
           notes?: string | null
+          owner_type?: string | null
+          purchase_cost?: number | null
+          purchase_date?: string | null
           registration_expiry?: string | null
+          residual_value?: number | null
           status?: Database["public"]["Enums"]["vehicle_status"]
           transmission?: string | null
           updated_at?: string
+          useful_life_years?: number | null
           vehicle_number: string
           vehicle_type: Database["public"]["Enums"]["vehicle_type"]
           vin_number?: string | null
@@ -2816,16 +2834,20 @@ export type Database = {
           year: number
         }
         Update: {
+          asset_id?: string | null
           color?: string
           created_at?: string
           created_by?: string | null
           daily_rate?: number
+          depreciation_method?: string | null
+          depreciation_rate?: number | null
           engine_size?: string | null
           fuel_type?: string | null
           id?: string
           insurance_company?: string | null
           insurance_expiry?: string | null
           insurance_policy_number?: string | null
+          insurance_type?: string | null
           last_maintenance_date?: string | null
           license_plate?: string
           make?: string
@@ -2834,17 +2856,30 @@ export type Database = {
           monthly_rate?: number | null
           next_maintenance_due?: string | null
           notes?: string | null
+          owner_type?: string | null
+          purchase_cost?: number | null
+          purchase_date?: string | null
           registration_expiry?: string | null
+          residual_value?: number | null
           status?: Database["public"]["Enums"]["vehicle_status"]
           transmission?: string | null
           updated_at?: string
+          useful_life_years?: number | null
           vehicle_number?: string
           vehicle_type?: Database["public"]["Enums"]["vehicle_type"]
           vin_number?: string | null
           weekly_rate?: number | null
           year?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       violation_history: {
         Row: {
@@ -3086,6 +3121,10 @@ export type Database = {
       create_depreciation_entries: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      create_vehicle_asset: {
+        Args: { vehicle_id: string; vehicle_data: Json }
+        Returns: string
       }
       extract_transaction_features: {
         Args: { description: string; amount: number; transaction_date?: string }

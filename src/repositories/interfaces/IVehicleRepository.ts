@@ -18,9 +18,21 @@ export interface Vehicle {
   transmission: string;
   mileage: number;
   status: 'available' | 'rented' | 'maintenance' | 'out_of_service';
+  // Insurance fields
+  insurance_type?: 'comprehensive' | 'third_party';
   insurance_company?: string;
   insurance_policy_number?: string;
   insurance_expiry?: string;
+  // Owner and asset fields
+  owner_type?: 'customer' | 'company';
+  purchase_date?: string;
+  purchase_cost?: number;
+  depreciation_rate?: number;
+  useful_life_years?: number;
+  residual_value?: number;
+  depreciation_method?: 'straight_line' | 'declining_balance';
+  asset_id?: string;
+  // Other fields
   registration_expiry?: string;
   last_maintenance_date?: string;
   next_maintenance_due?: string;

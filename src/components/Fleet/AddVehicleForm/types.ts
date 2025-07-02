@@ -14,9 +14,21 @@ export const vehicleSchema = z.object({
   fuel_type: z.string().default('بنزين'),
   transmission: z.string().default('أوتوماتيك'),
   mileage: z.number().default(0),
+  // Insurance fields
+  insurance_type: z.enum(['comprehensive', 'third_party']).default('comprehensive'),
   insurance_company: z.string().optional(),
   insurance_policy_number: z.string().optional(),
   insurance_expiry: z.string().optional(),
+  // Owner type
+  owner_type: z.enum(['customer', 'company']).default('company'),
+  // Asset depreciation fields (conditional on owner_type being 'company')
+  purchase_date: z.string().optional(),
+  purchase_cost: z.number().optional(),
+  depreciation_rate: z.number().optional(),
+  useful_life_years: z.number().optional(),
+  residual_value: z.number().optional(),
+  depreciation_method: z.enum(['straight_line', 'declining_balance']).default('straight_line'),
+  // Other fields
   registration_expiry: z.string().optional(),
   notes: z.string().optional(),
 });

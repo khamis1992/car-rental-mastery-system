@@ -14,6 +14,7 @@ import { Car } from 'lucide-react';
 import { BasicInfoSection } from './AddVehicleForm/BasicInfoSection';
 import { PricingSection } from './AddVehicleForm/PricingSection';
 import { InsuranceSection } from './AddVehicleForm/InsuranceSection';
+import { AssetDepreciationSection } from './AddVehicleForm/AssetDepreciationSection';
 import { NotesSection } from './AddVehicleForm/NotesSection';
 import { FormActions } from './AddVehicleForm/FormActions';
 import { vehicleSchema, type VehicleFormData } from './AddVehicleForm/types';
@@ -40,6 +41,10 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
       fuel_type: 'بنزين',
       transmission: 'أوتوماتيك',
       mileage: 0,
+      insurance_type: 'comprehensive',
+      owner_type: 'company',
+      depreciation_method: 'straight_line',
+      residual_value: 0,
     },
   });
 
@@ -67,9 +72,20 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         fuel_type: data.fuel_type || 'بنزين',
         transmission: data.transmission || 'أوتوماتيك',
         mileage: data.mileage || 0,
+        // Insurance fields
+        insurance_type: data.insurance_type || 'comprehensive',
         insurance_company: data.insurance_company || undefined,
         insurance_policy_number: data.insurance_policy_number || undefined,
         insurance_expiry: data.insurance_expiry || undefined,
+        // Owner type and asset fields
+        owner_type: data.owner_type || 'company',
+        purchase_date: data.purchase_date || undefined,
+        purchase_cost: data.purchase_cost || undefined,
+        depreciation_rate: data.depreciation_rate || undefined,
+        useful_life_years: data.useful_life_years || undefined,
+        residual_value: data.residual_value || undefined,
+        depreciation_method: data.depreciation_method || 'straight_line',
+        // Other fields
         registration_expiry: data.registration_expiry || undefined,
         notes: data.notes || undefined,
         status: 'available' as const,
@@ -107,6 +123,10 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
       fuel_type: 'بنزين',
       transmission: 'أوتوماتيك',
       mileage: 0,
+      insurance_type: 'comprehensive',
+      owner_type: 'company',
+      depreciation_method: 'straight_line',
+      residual_value: 0,
     });
   };
 
@@ -128,6 +148,7 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             <BasicInfoSection control={form.control} />
             <PricingSection control={form.control} />
             <InsuranceSection control={form.control} />
+            <AssetDepreciationSection control={form.control} />
             <NotesSection control={form.control} />
             <FormActions 
               onReset={resetForm}
