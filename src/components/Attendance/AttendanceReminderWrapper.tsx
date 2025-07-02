@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import AttendanceReminderPopup from './AttendanceReminderPopup';
 
 const AttendanceReminderWrapper = () => {
+  const location = useLocation();
   const { user, session } = useAuth();
   const { systemSettings } = useSettings();
   const [showAttendanceReminder, setShowAttendanceReminder] = useState(false);
+
+  // إخفاء التذكير في الصفحات العامة
+  if (location.pathname.startsWith('/public-quotation')) {
+    return null;
+  }
 
   useEffect(() => {
     // التحقق من تفعيل نظام الحضور أولاً
