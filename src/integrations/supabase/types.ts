@@ -2759,6 +2759,7 @@ export type Database = {
       vehicles: {
         Row: {
           asset_id: string | null
+          body_type: string | null
           color: string
           created_at: string
           created_by: string | null
@@ -2766,6 +2767,7 @@ export type Database = {
           depreciation_method: string | null
           depreciation_rate: number | null
           engine_size: string | null
+          excess_mileage_cost: number | null
           fuel_type: string | null
           id: string
           insurance_company: string | null
@@ -2775,12 +2777,16 @@ export type Database = {
           last_maintenance_date: string | null
           license_plate: string
           make: string
+          max_daily_rate: number | null
           mileage: number | null
+          mileage_limit: number | null
+          min_daily_rate: number | null
           model: string
           monthly_rate: number | null
           next_maintenance_due: string | null
           notes: string | null
           owner_type: string | null
+          previous_accumulated_depreciation: number | null
           purchase_cost: number | null
           purchase_date: string | null
           registration_expiry: string | null
@@ -2797,6 +2803,7 @@ export type Database = {
         }
         Insert: {
           asset_id?: string | null
+          body_type?: string | null
           color: string
           created_at?: string
           created_by?: string | null
@@ -2804,6 +2811,7 @@ export type Database = {
           depreciation_method?: string | null
           depreciation_rate?: number | null
           engine_size?: string | null
+          excess_mileage_cost?: number | null
           fuel_type?: string | null
           id?: string
           insurance_company?: string | null
@@ -2813,12 +2821,16 @@ export type Database = {
           last_maintenance_date?: string | null
           license_plate: string
           make: string
+          max_daily_rate?: number | null
           mileage?: number | null
+          mileage_limit?: number | null
+          min_daily_rate?: number | null
           model: string
           monthly_rate?: number | null
           next_maintenance_due?: string | null
           notes?: string | null
           owner_type?: string | null
+          previous_accumulated_depreciation?: number | null
           purchase_cost?: number | null
           purchase_date?: string | null
           registration_expiry?: string | null
@@ -2835,6 +2847,7 @@ export type Database = {
         }
         Update: {
           asset_id?: string | null
+          body_type?: string | null
           color?: string
           created_at?: string
           created_by?: string | null
@@ -2842,6 +2855,7 @@ export type Database = {
           depreciation_method?: string | null
           depreciation_rate?: number | null
           engine_size?: string | null
+          excess_mileage_cost?: number | null
           fuel_type?: string | null
           id?: string
           insurance_company?: string | null
@@ -2851,12 +2865,16 @@ export type Database = {
           last_maintenance_date?: string | null
           license_plate?: string
           make?: string
+          max_daily_rate?: number | null
           mileage?: number | null
+          mileage_limit?: number | null
+          min_daily_rate?: number | null
           model?: string
           monthly_rate?: number | null
           next_maintenance_due?: string | null
           notes?: string | null
           owner_type?: string | null
+          previous_accumulated_depreciation?: number | null
           purchase_cost?: number | null
           purchase_date?: string | null
           registration_expiry?: string | null
