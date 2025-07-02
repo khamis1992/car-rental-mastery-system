@@ -44,7 +44,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import AddCustomerForm from '@/components/Customers/AddCustomerForm';
+import CompactAddCustomerForm from '@/components/Customers/CompactAddCustomerForm';
 import CustomerDetailsDialog from '@/components/Customers/CustomerDetailsDialog';
 
 interface Customer {
@@ -210,7 +210,7 @@ const Customers = () => {
                   أدخل بيانات العميل الجديد
                 </DialogDescription>
               </DialogHeader>
-              <AddCustomerForm onCustomerAdded={handleCustomerAdded} />
+              <CompactAddCustomerForm onCustomerAdded={handleCustomerAdded} />
             </DialogContent>
           </Dialog>
         )}

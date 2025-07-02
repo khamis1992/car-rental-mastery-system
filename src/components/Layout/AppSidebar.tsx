@@ -121,12 +121,21 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const { profile } = useAuth();
-  const { systemSettings } = useSettings();
   const currentPath = location.pathname;
+  
+  // محاولة الحصول على الإعدادات مع قيمة افتراضية
+  let attendanceEnabled = true;
+  try {
+    const { systemSettings } = useSettings();
+    attendanceEnabled = systemSettings.attendanceEnabled;
+  } catch (error) {
+    // في حالة عدم توفر السياق، استخدم القيمة الافتراضية
+    console.warn('Settings context not available, using default values');
+  }
   
   // فلترة العناصر بناءً على الإعدادات
   const filteredMainItems = mainItems.filter(item => {
-    if (item.url === "/attendance" && !systemSettings.attendanceEnabled) {
+    if (item.url === "/attendance" && !attendanceEnabled) {
       return false;
     }
     return true;
