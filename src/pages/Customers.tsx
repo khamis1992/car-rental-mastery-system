@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -37,7 +37,8 @@ import {
   Building,
   User,
   Phone,
-  Mail
+  Mail,
+  Loader2
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -64,8 +65,11 @@ interface Customer {
 
 const Customers = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [allCustomers, setAllCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -75,27 +79,22 @@ const Customers = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
 
-  const fetchCustomers = async () => {
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const fetchAllCustomers = useCallback(async () => {
     try {
       setLoading(true);
-      let query = supabase
+      const { data, error } = await supabase
         .from('customers')
         .select('*')
         .order('created_at', { ascending: false });
-
-      if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter as 'active' | 'inactive' | 'blocked');
-      }
-
-      if (typeFilter !== 'all') {
-        query = query.eq('customer_type', typeFilter as 'individual' | 'company');
-      }
-
-      if (searchTerm) {
-        query = query.or(`name.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,customer_number.ilike.%${searchTerm}%`);
-      }
-
-      const { data, error } = await query;
 
       if (error) {
         console.error('خطأ في جلب العملاء:', error);
@@ -107,7 +106,7 @@ const Customers = () => {
         return;
       }
 
-      setCustomers(data || []);
+      setAllCustomers(data || []);
     } catch (error) {
       console.error('خطأ في جلب العملاء:', error);
       toast({
@@ -118,11 +117,53 @@ const Customers = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
+  // Improved search and filtering logic
+  const filteredCustomers = useMemo(() => {
+    let filtered = allCustomers;
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(customer => customer.status === statusFilter);
+    }
+
+    // Apply type filter
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter(customer => customer.customer_type === typeFilter);
+    }
+
+    // Apply search filter
+    if (debouncedSearchTerm) {
+      const searchLower = debouncedSearchTerm.toLowerCase().trim();
+      filtered = filtered.filter(customer => {
+        return (
+          customer.name?.toLowerCase().includes(searchLower) ||
+          customer.phone?.toLowerCase().includes(searchLower) ||
+          customer.email?.toLowerCase().includes(searchLower) ||
+          customer.customer_number?.toLowerCase().includes(searchLower) ||
+          customer.national_id?.toLowerCase().includes(searchLower)
+        );
+      });
+    }
+
+    return filtered;
+  }, [allCustomers, statusFilter, typeFilter, debouncedSearchTerm]);
+
+  // Update customers when filters change
   useEffect(() => {
-    fetchCustomers();
-  }, [searchTerm, statusFilter, typeFilter]);
+    if (debouncedSearchTerm !== searchTerm) {
+      setSearchLoading(true);
+    } else {
+      setSearchLoading(false);
+    }
+    setCustomers(filteredCustomers);
+  }, [filteredCustomers, debouncedSearchTerm, searchTerm]);
+
+  // Load all customers on mount
+  useEffect(() => {
+    fetchAllCustomers();
+  }, [fetchAllCustomers]);
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -156,7 +197,7 @@ const Customers = () => {
 
   const handleCustomerAdded = () => {
     setShowAddDialog(false);
-    fetchCustomers();
+    fetchAllCustomers();
     toast({
       title: "تم بنجاح",
       description: "تم إضافة العميل بنجاح",
@@ -262,7 +303,11 @@ const Customers = () => {
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              {searchLoading ? (
+                <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 animate-spin" />
+              ) : (
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              )}
               <Input
                 placeholder="البحث في العملاء..."
                 value={searchTerm}
