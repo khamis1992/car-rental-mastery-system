@@ -20,7 +20,6 @@ import {
   X,
   Car
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   convertCSVToVehicleData, 
@@ -28,6 +27,7 @@ import {
   type CSVImportResult 
 } from '@/lib/csvImport';
 import { type VehicleFormData } from '@/components/Fleet/AddVehicleForm/types';
+import { serviceContainer } from '@/services/Container/ServiceContainer';
 
 interface CSVImportDialogProps {
   open: boolean;
@@ -114,6 +114,7 @@ export const CSVImportDialog: React.FC<CSVImportDialogProps> = ({
     setImportProgress(0);
 
     try {
+      const vehicleService = serviceContainer.getVehicleBusinessService();
       const vehicles = csvData.data;
       const totalVehicles = vehicles.length;
       let successCount = 0;
@@ -123,40 +124,33 @@ export const CSVImportDialog: React.FC<CSVImportDialogProps> = ({
         const vehicle = vehicles[i];
         
         try {
-          // Generate vehicle number
-          const { data: vehicleNumber } = await supabase.rpc('generate_vehicle_number');
+          // Generate vehicle number and create vehicle using the business service
+          const vehicleNumber = await vehicleService.generateVehicleNumber();
           
-          // Insert vehicle
-          const { error } = await supabase
-            .from('vehicles')
-            .insert({
-              vehicle_number: vehicleNumber,
-              make: vehicle.make,
-              model: vehicle.model,
-              year: vehicle.year,
-              color: vehicle.color,
-              vehicle_type: vehicle.vehicle_type,
-              license_plate: vehicle.license_plate,
-              daily_rate: vehicle.daily_rate,
-              weekly_rate: vehicle.weekly_rate,
-              monthly_rate: vehicle.monthly_rate,
-              engine_size: vehicle.engine_size,
-              fuel_type: vehicle.fuel_type,
-              transmission: vehicle.transmission,
-              mileage: vehicle.mileage,
-              insurance_company: vehicle.insurance_company,
-              insurance_policy_number: vehicle.insurance_policy_number,
-              insurance_expiry: vehicle.insurance_expiry || null,
-              registration_expiry: vehicle.registration_expiry || null,
-              notes: vehicle.notes,
-            });
+          await vehicleService.createVehicle({
+            vehicle_number: vehicleNumber,
+            make: vehicle.make,
+            model: vehicle.model,
+            year: vehicle.year,
+            color: vehicle.color,
+            vehicle_type: vehicle.vehicle_type,
+            license_plate: vehicle.license_plate,
+            daily_rate: vehicle.daily_rate,
+            weekly_rate: vehicle.weekly_rate,
+            monthly_rate: vehicle.monthly_rate,
+            engine_size: vehicle.engine_size,
+            fuel_type: vehicle.fuel_type,
+            transmission: vehicle.transmission,
+            mileage: vehicle.mileage,
+            status: 'available',
+            insurance_company: vehicle.insurance_company,
+            insurance_policy_number: vehicle.insurance_policy_number,
+            insurance_expiry: vehicle.insurance_expiry || undefined,
+            registration_expiry: vehicle.registration_expiry || undefined,
+            notes: vehicle.notes,
+          });
 
-          if (error) {
-            console.error('Error inserting vehicle:', error);
-            errorCount++;
-          } else {
-            successCount++;
-          }
+          successCount++;
         } catch (error) {
           console.error('Error processing vehicle:', error);
           errorCount++;
