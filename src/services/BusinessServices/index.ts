@@ -9,3 +9,4 @@ export * from './ViolationBusinessService';
 export * from './ViolationTypeBusinessService';
 export * from './ViolationPaymentBusinessService';
 export * from './WorkLocationBusinessService';
+export * from './VehicleBusinessService';

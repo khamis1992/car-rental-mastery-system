@@ -4,9 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { VehicleCard } from '@/components/Fleet/VehicleCard';
-import { Tables } from '@/integrations/supabase/types';
-
-type Vehicle = Tables<'vehicles'>;
+import { Vehicle } from '@/repositories/interfaces/IVehicleRepository';
 
 interface VehicleListProps {
   vehicles: Vehicle[];

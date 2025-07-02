@@ -1,0 +1,58 @@
+import { BaseRepository } from '../base/BaseRepository';
+import { IVehicleRepository, Vehicle } from '../interfaces/IVehicleRepository';
+import { supabase } from '@/integrations/supabase/client';
+
+export class VehicleRepository extends BaseRepository<Vehicle> implements IVehicleRepository {
+  protected tableName = 'vehicles';
+
+  async getAvailableVehicles(): Promise<Vehicle[]> {
+    const { data, error } = await supabase
+      .from('vehicles')
+      .select('*')
+      .eq('status', 'available')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return (data || []) as Vehicle[];
+  }
+
+  async getByStatus(status: string): Promise<Vehicle[]> {
+    const { data, error } = await supabase
+      .from('vehicles')
+      .select('*')
+      .eq('status', status as any)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return (data || []) as Vehicle[];
+  }
+
+  async getByVehicleNumber(vehicleNumber: string): Promise<Vehicle | null> {
+    const { data, error } = await supabase
+      .from('vehicles')
+      .select('*')
+      .eq('vehicle_number', vehicleNumber)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data as Vehicle | null;
+  }
+
+  async getByLicensePlate(licensePlate: string): Promise<Vehicle | null> {
+    const { data, error } = await supabase
+      .from('vehicles')
+      .select('*')
+      .eq('license_plate', licensePlate)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data as Vehicle | null;
+  }
+
+  async generateVehicleNumber(): Promise<string> {
+    const { data, error } = await supabase.rpc('generate_vehicle_number');
+    
+    if (error) throw error;
+    return data as string;
+  }
+}

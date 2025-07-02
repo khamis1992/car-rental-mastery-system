@@ -1,7 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -17,6 +16,7 @@ import { InsuranceSection } from './AddVehicleForm/InsuranceSection';
 import { NotesSection } from './AddVehicleForm/NotesSection';
 import { FormActions } from './AddVehicleForm/FormActions';
 import { vehicleSchema, type VehicleFormData } from './AddVehicleForm/types';
+import { serviceContainer } from '@/services/Container/ServiceContainer';
 
 interface AddVehicleFormProps {
   open: boolean;
@@ -31,6 +31,7 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
   onSuccess,
 }) => {
   const { toast } = useToast();
+  const vehicleService = serviceContainer.getVehicleBusinessService();
   
   const form = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleSchema),
@@ -44,12 +45,9 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
   const onSubmit = async (data: VehicleFormData) => {
     try {
       // Generate vehicle number
-      const { data: vehicleNumber, error: numberError } = await supabase
-        .rpc('generate_vehicle_number');
+      const vehicleNumber = await vehicleService.generateVehicleNumber();
 
-      if (numberError) throw numberError;
-
-      // Insert vehicle
+      // Prepare vehicle data
       const vehicleData = {
         vehicle_number: vehicleNumber,
         make: data.make,
@@ -59,24 +57,21 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         vehicle_type: data.vehicle_type,
         license_plate: data.license_plate,
         daily_rate: data.daily_rate,
-        weekly_rate: data.weekly_rate || null,
-        monthly_rate: data.monthly_rate || null,
-        engine_size: data.engine_size || null,
+        weekly_rate: data.weekly_rate || undefined,
+        monthly_rate: data.monthly_rate || undefined,
+        engine_size: data.engine_size || undefined,
         fuel_type: data.fuel_type || 'بنزين',
         transmission: data.transmission || 'أوتوماتيك',
         mileage: data.mileage || 0,
-        insurance_company: data.insurance_company || null,
-        insurance_policy_number: data.insurance_policy_number || null,
-        insurance_expiry: data.insurance_expiry || null,
-        registration_expiry: data.registration_expiry || null,
-        notes: data.notes || null,
+        insurance_company: data.insurance_company || undefined,
+        insurance_policy_number: data.insurance_policy_number || undefined,
+        insurance_expiry: data.insurance_expiry || undefined,
+        registration_expiry: data.registration_expiry || undefined,
+        notes: data.notes || undefined,
+        status: 'available' as const,
       };
 
-      const { error } = await supabase
-        .from('vehicles')
-        .insert(vehicleData);
-
-      if (error) throw error;
+      await vehicleService.createVehicle(vehicleData);
 
       toast({
         title: 'تم إضافة المركبة',

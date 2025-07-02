@@ -11,6 +11,7 @@ export * from './interfaces/IViolationRepository';
 export * from './interfaces/IViolationTypeRepository';
 export * from './interfaces/IViolationPaymentRepository';
 export * from './interfaces/IWorkLocationRepository';
+export * from './interfaces/IVehicleRepository';
 
 // Base repository
 export * from './base/BaseRepository';
@@ -27,3 +28,4 @@ export * from './implementations/ViolationRepository';
 export * from './implementations/ViolationTypeRepository';
 export * from './implementations/ViolationPaymentRepository';
 export * from './implementations/WorkLocationRepository';
+export * from './implementations/VehicleRepository';

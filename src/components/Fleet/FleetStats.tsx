@@ -1,9 +1,7 @@
 import React from 'react';
 import { Car, Wrench, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tables } from '@/integrations/supabase/types';
-
-type Vehicle = Tables<'vehicles'>;
+import { Vehicle } from '@/repositories/interfaces/IVehicleRepository';
 
 interface FleetStatsProps {
   vehicles: Vehicle[];

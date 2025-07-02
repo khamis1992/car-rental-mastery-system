@@ -3,9 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Car, Calendar, Wrench, AlertTriangle, Edit, Eye } from 'lucide-react';
-import { Tables } from '@/integrations/supabase/types';
-
-type Vehicle = Tables<'vehicles'>;
+import { Vehicle } from '@/repositories/interfaces/IVehicleRepository';
 
 interface VehicleCardProps {
   vehicle: Vehicle;

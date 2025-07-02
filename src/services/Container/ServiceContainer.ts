@@ -10,6 +10,7 @@ import { ViolationRepository } from '@/repositories/implementations/ViolationRep
 import { ViolationTypeRepository } from '@/repositories/implementations/ViolationTypeRepository';
 import { ViolationPaymentRepository } from '@/repositories/implementations/ViolationPaymentRepository';
 import { WorkLocationRepository } from '@/repositories/implementations/WorkLocationRepository';
+import { VehicleRepository } from '@/repositories/implementations/VehicleRepository';
 
 // Business services
 import { ContractBusinessService } from '@/services/BusinessServices/ContractBusinessService';
@@ -23,6 +24,7 @@ import { ViolationBusinessService } from '@/services/BusinessServices/ViolationB
 import { ViolationTypeBusinessService } from '@/services/BusinessServices/ViolationTypeBusinessService';
 import { ViolationPaymentBusinessService } from '@/services/BusinessServices/ViolationPaymentBusinessService';
 import { WorkLocationBusinessService } from '@/services/BusinessServices/WorkLocationBusinessService';
+import { VehicleBusinessService } from '@/services/BusinessServices/VehicleBusinessService';
 
 // Repository interfaces
 import { IContractRepository } from '@/repositories/interfaces/IContractRepository';
@@ -36,6 +38,7 @@ import { IViolationRepository } from '@/repositories/interfaces/IViolationReposi
 import { IViolationTypeRepository } from '@/repositories/interfaces/IViolationTypeRepository';
 import { IViolationPaymentRepository } from '@/repositories/interfaces/IViolationPaymentRepository';
 import { IWorkLocationRepository } from '@/repositories/interfaces/IWorkLocationRepository';
+import { IVehicleRepository } from '@/repositories/interfaces/IVehicleRepository';
 
 export class ServiceContainer {
   private static instance: ServiceContainer;
@@ -52,6 +55,7 @@ export class ServiceContainer {
   private violationTypeRepository: IViolationTypeRepository;
   private violationPaymentRepository: IViolationPaymentRepository;
   private workLocationRepository: IWorkLocationRepository;
+  private vehicleRepository: IVehicleRepository;
   
   // Business service instances
   private contractBusinessService: ContractBusinessService;
@@ -65,6 +69,7 @@ export class ServiceContainer {
   private violationTypeBusinessService: ViolationTypeBusinessService;
   private violationPaymentBusinessService: ViolationPaymentBusinessService;
   private workLocationBusinessService: WorkLocationBusinessService;
+  private vehicleBusinessService: VehicleBusinessService;
 
   private constructor() {
     // Initialize repositories
@@ -79,6 +84,7 @@ export class ServiceContainer {
     this.violationTypeRepository = new ViolationTypeRepository();
     this.violationPaymentRepository = new ViolationPaymentRepository();
     this.workLocationRepository = new WorkLocationRepository();
+    this.vehicleRepository = new VehicleRepository();
     
     // Initialize business services with dependencies
     this.contractBusinessService = new ContractBusinessService(this.contractRepository);
@@ -92,6 +98,7 @@ export class ServiceContainer {
     this.violationTypeBusinessService = new ViolationTypeBusinessService(this.violationTypeRepository);
     this.violationPaymentBusinessService = new ViolationPaymentBusinessService(this.violationPaymentRepository);
     this.workLocationBusinessService = new WorkLocationBusinessService(this.workLocationRepository);
+    this.vehicleBusinessService = new VehicleBusinessService(this.vehicleRepository);
   }
 
   static getInstance(): ServiceContainer {
@@ -146,6 +153,10 @@ export class ServiceContainer {
     return this.workLocationRepository;
   }
 
+  getVehicleRepository(): IVehicleRepository {
+    return this.vehicleRepository;
+  }
+
   // Business service getters
   getContractBusinessService(): ContractBusinessService {
     return this.contractBusinessService;
@@ -189,6 +200,10 @@ export class ServiceContainer {
 
   getWorkLocationBusinessService(): WorkLocationBusinessService {
     return this.workLocationBusinessService;
+  }
+
+  getVehicleBusinessService(): VehicleBusinessService {
+    return this.vehicleBusinessService;
   }
 }
 
