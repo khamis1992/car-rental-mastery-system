@@ -94,6 +94,34 @@ export const quotationService = {
     if (error) throw error;
   },
 
+  async generatePublicLink(id: string, expiresInDays: number = 30) {
+    const { data, error } = await supabase
+      .rpc('generate_public_quotation_link', {
+        quotation_id: id,
+        expires_in_days: expiresInDays
+      });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async sendPublicQuotation(id: string, customerEmail: string) {
+    // This would integrate with an email service
+    // For now, we'll just update the status to 'sent'
+    const { data, error } = await supabase
+      .from('quotations')
+      .update({ 
+        status: 'sent',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
   async getActiveQuotations() {
     const { data, error } = await supabase
       .from('quotations')

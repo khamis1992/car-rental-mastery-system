@@ -28,6 +28,7 @@ import Attendance from "./pages/Attendance";
 import Leaves from "./pages/Leaves";
 import Payroll from "./pages/Payroll";
 import NotFound from "./pages/NotFound";
+import PublicQuotation from "./pages/PublicQuotation";
 import AttendanceReminderWrapper from "@/components/Attendance/AttendanceReminderWrapper";
 import { SearchDialog } from "@/components/Search/SearchDialog";
 
@@ -164,6 +165,8 @@ const App = () => (
                       </Layout>
                     </ProtectedRoute>
                   } />
+                  {/* Public routes */}
+                  <Route path="/public-quotation/:token" element={<PublicQuotation />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

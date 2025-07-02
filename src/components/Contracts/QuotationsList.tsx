@@ -3,11 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FileText, Eye, Edit, Trash2, Calendar, Printer } from 'lucide-react';
+import { FileText, Eye, Edit, Trash2, Calendar, Printer, Share2, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { QuotationFiltersComponent, QuotationFilters } from './QuotationFilters';
 import { QuotationPreview } from './QuotationPreview';
+import { quotationService } from '@/services/quotationService';
+import { useToast } from '@/hooks/use-toast';
 
 interface Quotation {
   id: string;
@@ -50,6 +52,7 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedQuotation, setSelectedQuotation] = useState<any>(null);
   const [loadingStates, setLoadingStates] = useState<{[key: string]: boolean}>({});
+  const { toast } = useToast();
   
   const [filters, setFilters] = useState<QuotationFilters>({
     search: '',
@@ -160,6 +163,55 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
       console.error('Error printing quotation:', error);
     } finally {
       setLoadingStates(prev => ({...prev, [`print_${id}`]: false}));
+    }
+  };
+
+  const handleGeneratePublicLink = async (id: string) => {
+    try {
+      setLoadingStates(prev => ({...prev, [`public_${id}`]: true}));
+      const token = await quotationService.generatePublicLink(id);
+      const publicUrl = `${window.location.origin}/public-quotation/${token}`;
+      
+      // نسخ الرابط للحافظة
+      await navigator.clipboard.writeText(publicUrl);
+      
+      toast({
+        title: 'تم إنشاء الرابط العام',
+        description: 'تم نسخ الرابط للحافظة. يمكنك إرساله للعميل الآن.',
+      });
+    } catch (error) {
+      console.error('Error generating public link:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ في إنشاء الرابط العام',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingStates(prev => ({...prev, [`public_${id}`]: false}));
+    }
+  };
+
+  const handleSendQuotation = async (id: string) => {
+    try {
+      setLoadingStates(prev => ({...prev, [`send_${id}`]: true}));
+      await quotationService.sendPublicQuotation(id, ''); // Email would be provided in real implementation
+      
+      toast({
+        title: 'تم إرسال العرض',
+        description: 'تم تحديث حالة العرض إلى "مرسل"',
+      });
+      
+      // Refresh the list
+      window.location.reload();
+    } catch (error) {
+      console.error('Error sending quotation:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ في إرسال العرض',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingStates(prev => ({...prev, [`send_${id}`]: false}));
     }
   };
 
@@ -294,6 +346,39 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
                           <Printer className="w-4 h-4" />
                         )}
                       </Button>
+
+                      {quotation.status === 'draft' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleGeneratePublicLink(quotation.id)}
+                          disabled={loadingStates[`public_${quotation.id}`]}
+                          title="إنشاء رابط عام"
+                        >
+                          {loadingStates[`public_${quotation.id}`] ? (
+                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Share2 className="w-4 h-4" />
+                          )}
+                        </Button>
+                      )}
+
+                      {quotation.status === 'draft' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSendQuotation(quotation.id)}
+                          disabled={loadingStates[`send_${quotation.id}`]}
+                          className="text-blue-600"
+                          title="إرسال العرض"
+                        >
+                          {loadingStates[`send_${quotation.id}`] ? (
+                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            'إرسال'
+                          )}
+                        </Button>
+                      )}
                         
                         {quotation.status === 'draft' && (
                           <Button

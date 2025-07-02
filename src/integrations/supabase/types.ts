@@ -2344,6 +2344,9 @@ export type Database = {
       }
       quotations: {
         Row: {
+          client_notes: string | null
+          client_response_at: string | null
+          client_viewed_at: string | null
           created_at: string
           created_by: string | null
           customer_id: string
@@ -2352,6 +2355,8 @@ export type Database = {
           end_date: string
           final_amount: number
           id: string
+          public_link_expires_at: string | null
+          public_token: string | null
           quotation_number: string
           rental_days: number
           sales_person_id: string | null
@@ -2366,6 +2371,9 @@ export type Database = {
           vehicle_id: string
         }
         Insert: {
+          client_notes?: string | null
+          client_response_at?: string | null
+          client_viewed_at?: string | null
           created_at?: string
           created_by?: string | null
           customer_id: string
@@ -2374,6 +2382,8 @@ export type Database = {
           end_date: string
           final_amount: number
           id?: string
+          public_link_expires_at?: string | null
+          public_token?: string | null
           quotation_number: string
           rental_days: number
           sales_person_id?: string | null
@@ -2388,6 +2398,9 @@ export type Database = {
           vehicle_id: string
         }
         Update: {
+          client_notes?: string | null
+          client_response_at?: string | null
+          client_viewed_at?: string | null
           created_at?: string
           created_by?: string | null
           customer_id?: string
@@ -2396,6 +2409,8 @@ export type Database = {
           end_date?: string
           final_amount?: number
           id?: string
+          public_link_expires_at?: string | null
+          public_token?: string | null
           quotation_number?: string
           rental_days?: number
           sales_person_id?: string | null
@@ -3110,6 +3125,10 @@ export type Database = {
       }
       generate_payment_number: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_public_quotation_link: {
+        Args: { quotation_id: string; expires_in_days?: number }
         Returns: string
       }
       generate_quotation_number: {
