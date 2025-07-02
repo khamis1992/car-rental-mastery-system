@@ -6,12 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Play, CheckCircle, XCircle, FileText } from 'lucide-react';
+import { CalendarIcon, Play, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { contractService } from '@/services/contractService';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ContractActionsProps {
   contract: {
@@ -27,6 +28,7 @@ interface ContractActionsProps {
 export const ContractActions: React.FC<ContractActionsProps> = ({ contract, onUpdate }) => {
   const [showActivateDialog, setShowActivateDialog] = useState(false);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -119,13 +121,37 @@ export const ContractActions: React.FC<ContractActionsProps> = ({ contract, onUp
     }
   };
 
+  const handleDelete = async () => {
+    setIsLoading(true);
+    try {
+      // حذف العقد من قاعدة البيانات
+      const { error } = await supabase
+        .from('contracts')
+        .delete()
+        .eq('id', contract.id);
+
+      if (error) throw error;
+      
+      toast({
+        title: 'تم حذف العقد بنجاح',
+        description: `العقد ${contract.contract_number} تم حذفه نهائياً`,
+      });
+
+      setShowDeleteDialog(false);
+      onUpdate();
+    } catch (error: any) {
+      toast({
+        title: 'خطأ في حذف العقد',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex items-center gap-1">
-      {/* View Contract */}
-      <Button variant="ghost" size="sm">
-        <FileText className="w-4 h-4" />
-      </Button>
-
       {/* Status-specific actions */}
       {contract.status === 'pending' && (
         <Button
@@ -159,6 +185,16 @@ export const ContractActions: React.FC<ContractActionsProps> = ({ contract, onUp
           <XCircle className="w-4 h-4" />
         </Button>
       )}
+
+      {/* Delete Contract */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setShowDeleteDialog(true)}
+        className="text-destructive hover:text-destructive"
+      >
+        <Trash2 className="w-4 h-4" />
+      </Button>
 
       {/* Activate Contract Dialog */}
       <Dialog open={showActivateDialog} onOpenChange={setShowActivateDialog}>
@@ -296,6 +332,52 @@ export const ContractActions: React.FC<ContractActionsProps> = ({ contract, onUp
               </Button>
               <Button onClick={handleComplete} disabled={isLoading}>
                 {isLoading ? 'جاري الإنهاء...' : 'إنهاء العقد'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Contract Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>حذف العقد</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="text-center">
+              <Trash2 className="w-16 h-16 text-destructive mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">هل أنت متأكد من حذف هذا العقد؟</h3>
+              <p className="text-sm text-muted-foreground mb-2">
+                العقد: <span className="font-medium">{contract.contract_number}</span>
+              </p>
+              <p className="text-sm text-muted-foreground mb-2">
+                العميل: <span className="font-medium">{contract.customer_name}</span>
+              </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                المركبة: <span className="font-medium">{contract.vehicle_info}</span>
+              </p>
+              <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3">
+                <p className="text-sm text-destructive font-medium">
+                  ⚠️ تحذير: هذا الإجراء لا يمكن التراجع عنه
+                </p>
+                <p className="text-xs text-destructive mt-1">
+                  سيتم حذف العقد وجميع البيانات المرتبطة به نهائياً
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+                إلغاء
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleDelete} 
+                disabled={isLoading}
+              >
+                {isLoading ? 'جاري الحذف...' : 'حذف العقد'}
               </Button>
             </div>
           </div>
