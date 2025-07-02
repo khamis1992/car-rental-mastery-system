@@ -12,7 +12,15 @@ export class VehicleBusinessService {
   }
 
   async createVehicle(vehicleData: Omit<Vehicle, 'id' | 'created_at' | 'updated_at'>): Promise<Vehicle> {
-    return this.vehicleRepository.create(vehicleData);
+    try {
+      console.log('VehicleBusinessService: بدء إنشاء المركبة:', vehicleData);
+      const result = await this.vehicleRepository.create(vehicleData);
+      console.log('VehicleBusinessService: تم إنشاء المركبة بنجاح:', result);
+      return result;
+    } catch (error) {
+      console.error('VehicleBusinessService: خطأ في إنشاء المركبة:', error);
+      throw error;
+    }
   }
 
   async updateVehicle(id: string, updates: Partial<Vehicle>): Promise<Vehicle> {
@@ -40,7 +48,15 @@ export class VehicleBusinessService {
   }
 
   async generateVehicleNumber(): Promise<string> {
-    return this.vehicleRepository.generateVehicleNumber();
+    try {
+      console.log('VehicleBusinessService: بدء توليد رقم المركبة');
+      const result = await this.vehicleRepository.generateVehicleNumber();
+      console.log('VehicleBusinessService: تم توليد رقم المركبة:', result);
+      return result;
+    } catch (error) {
+      console.error('VehicleBusinessService: خطأ في توليد رقم المركبة:', error);
+      throw error;
+    }
   }
 
   async updateVehicleStatus(id: string, status: 'available' | 'rented' | 'maintenance' | 'out_of_service'): Promise<Vehicle> {

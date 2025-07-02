@@ -26,14 +26,26 @@ export abstract class BaseRepository<T, K = string> implements IRepository<T, K>
   }
 
   async create(data: Omit<T, 'id' | 'created_at' | 'updated_at'>): Promise<T> {
-    const { data: result, error } = await supabase
-      .from(this.tableName as any)
-      .insert([data as any])
-      .select()
-      .single();
+    try {
+      console.log(`BaseRepository(${this.tableName}): بدء إنشاء سجل جديد:`, data);
+      
+      const { data: result, error } = await supabase
+        .from(this.tableName as any)
+        .insert([data as any])
+        .select()
+        .single();
 
-    if (error) throw error;
-    return result as T;
+      if (error) {
+        console.error(`BaseRepository(${this.tableName}): خطأ في إنشاء السجل:`, error);
+        throw error;
+      }
+      
+      console.log(`BaseRepository(${this.tableName}): تم إنشاء السجل بنجاح:`, result);
+      return result as T;
+    } catch (error) {
+      console.error(`BaseRepository(${this.tableName}): خطأ في دالة create:`, error);
+      throw error;
+    }
   }
 
   async update(id: K, data: Partial<T>): Promise<T> {

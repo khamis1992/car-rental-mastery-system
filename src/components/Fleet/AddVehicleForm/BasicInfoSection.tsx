@@ -48,7 +48,7 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({ control }) =
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-medium text-foreground">نوع المركبة</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
                   <FormControl>
                     <SelectTrigger className="h-12 bg-background/60 border-border/60 text-right">
                       <div className="flex items-center gap-2">

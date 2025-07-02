@@ -50,9 +50,20 @@ export class VehicleRepository extends BaseRepository<Vehicle> implements IVehic
   }
 
   async generateVehicleNumber(): Promise<string> {
-    const { data, error } = await supabase.rpc('generate_vehicle_number');
-    
-    if (error) throw error;
-    return data as string;
+    try {
+      console.log('VehicleRepository: استدعاء دالة توليد رقم المركبة');
+      const { data, error } = await supabase.rpc('generate_vehicle_number');
+      
+      if (error) {
+        console.error('VehicleRepository: خطأ في استدعاء دالة توليد رقم المركبة:', error);
+        throw error;
+      }
+      
+      console.log('VehicleRepository: تم الحصول على رقم المركبة:', data);
+      return data as string;
+    } catch (error) {
+      console.error('VehicleRepository: خطأ في توليد رقم المركبة:', error);
+      throw error;
+    }
   }
 }
