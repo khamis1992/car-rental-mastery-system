@@ -957,12 +957,14 @@ export type Database = {
           notes: string | null
           payment_registered_at: string | null
           pickup_condition_notes: string | null
+          pickup_damages: Json | null
           pickup_location: string | null
           pickup_mileage: number | null
           pickup_photos: string[] | null
           quotation_id: string | null
           rental_days: number
           return_condition_notes: string | null
+          return_damages: Json | null
           return_location: string | null
           return_mileage: number | null
           return_photos: string[] | null
@@ -1001,12 +1003,14 @@ export type Database = {
           notes?: string | null
           payment_registered_at?: string | null
           pickup_condition_notes?: string | null
+          pickup_damages?: Json | null
           pickup_location?: string | null
           pickup_mileage?: number | null
           pickup_photos?: string[] | null
           quotation_id?: string | null
           rental_days: number
           return_condition_notes?: string | null
+          return_damages?: Json | null
           return_location?: string | null
           return_mileage?: number | null
           return_photos?: string[] | null
@@ -1045,12 +1049,14 @@ export type Database = {
           notes?: string | null
           payment_registered_at?: string | null
           pickup_condition_notes?: string | null
+          pickup_damages?: Json | null
           pickup_location?: string | null
           pickup_mileage?: number | null
           pickup_photos?: string[] | null
           quotation_id?: string | null
           rental_days?: number
           return_condition_notes?: string | null
+          return_damages?: Json | null
           return_location?: string | null
           return_mileage?: number | null
           return_photos?: string[] | null
