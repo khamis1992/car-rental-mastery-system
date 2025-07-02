@@ -136,13 +136,13 @@ const Accounting = () => {
       </div>
 
       <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6 dir-rtl">
-          <TabsTrigger value="transactions">المعاملات المالية</TabsTrigger>
-          <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
-          <TabsTrigger value="journal">القيود المحاسبية</TabsTrigger>
-          <TabsTrigger value="reports">التقارير المالية</TabsTrigger>
-          <TabsTrigger value="settings">الإعدادات</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="analytics">التحليلات</TabsTrigger>
+          <TabsTrigger value="settings">الإعدادات</TabsTrigger>
+          <TabsTrigger value="reports">التقارير المالية</TabsTrigger>
+          <TabsTrigger value="journal">القيود المحاسبية</TabsTrigger>
+          <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
+          <TabsTrigger value="transactions">المعاملات المالية</TabsTrigger>
         </TabsList>
 
         <TabsContent value="accounts" className="space-y-4">
