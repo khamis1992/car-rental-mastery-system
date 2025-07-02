@@ -11,19 +11,29 @@ import { useToast } from '@/hooks/use-toast';
 interface QuotationData {
   id: string;
   quotation_number: string;
-  customer: {
+  customers?: {
     name: string;
     phone: string;
     email?: string;
     address?: string;
   };
-  vehicle: {
+  vehicles?: {
     make: string;
     model: string;
     year: number;
     license_plate: string;
     vehicle_number: string;
   };
+  // البيانات قد تأتي مفلطحة أيضاً
+  customer_name?: string;
+  customer_phone?: string;
+  customer_email?: string;
+  customer_address?: string;
+  make?: string;
+  model?: string;
+  year?: number;
+  license_plate?: string;
+  vehicle_number?: string;
   start_date: string;
   end_date: string;
   rental_days: number;
@@ -54,7 +64,63 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
   if (!quotation) return null;
 
   const handlePrint = () => {
-    window.print();
+    const printContent = document.getElementById('quotation-preview');
+    if (printContent) {
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>عرض سعر ${quotation.quotation_number}</title>
+              <style>
+                body { font-family: Arial, sans-serif; direction: rtl; margin: 20px; }
+                .bg-primary { background-color: #0ea5e9 !important; color: white !important; }
+                .text-primary { color: #0ea5e9 !important; }
+                .border-b { border-bottom: 1px solid #e5e7eb; }
+                .mb-4 { margin-bottom: 1rem; }
+                .mb-6 { margin-bottom: 1.5rem; }
+                .p-4 { padding: 1rem; }
+                .rounded-lg { border-radius: 0.5rem; }
+                .text-center { text-align: center; }
+                .text-right { text-align: right; }
+                .text-left { text-align: left; }
+                .grid { display: grid; }
+                .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+                .gap-4 { gap: 1rem; }
+                .font-bold { font-weight: bold; }
+                .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+                .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+                .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+                .text-xs { font-size: 0.75rem; line-height: 1rem; }
+                .border { border: 1px solid #e5e7eb; }
+                .bg-muted { background-color: #f9fafb; }
+                .space-y-3 > * + * { margin-top: 0.75rem; }
+                .border-t { border-top: 1px solid #e5e7eb; }
+                .pt-6 { padding-top: 1.5rem; }
+                .mt-6 { margin-top: 1.5rem; }
+                .flex { display: flex; }
+                .justify-between { justify-content: space-between; }
+                .text-green-600 { color: #059669; }
+                .opacity-90 { opacity: 0.9; }
+                @media print {
+                  body { margin: 0; }
+                  .bg-primary { background-color: #0ea5e9 !important; -webkit-print-color-adjust: exact; }
+                }
+              </style>
+            </head>
+            <body>
+              ${printContent.innerHTML}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      }
+    }
   };
 
   const handleDownloadPDF = () => {
@@ -69,7 +135,7 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
     if (navigator.share) {
       navigator.share({
         title: `عرض سعر ${quotation.quotation_number}`,
-        text: `عرض سعر لتأجير ${quotation.vehicle.make} ${quotation.vehicle.model}`,
+        text: `عرض سعر لتأجير ${quotation.make || quotation.vehicles?.make || ''} ${quotation.model || quotation.vehicles?.model || ''}`,
         url: window.location.href,
       });
     } else {
@@ -131,15 +197,15 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
               <h3 className="font-bold text-lg mb-3 text-primary">معلومات العميل</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p><strong>الاسم:</strong> {quotation.customer.name}</p>
-                  <p><strong>الهاتف:</strong> {quotation.customer.phone}</p>
+                  <p><strong>الاسم:</strong> {quotation.customer_name || quotation.customers?.name || 'غير محدد'}</p>
+                  <p><strong>الهاتف:</strong> {quotation.customer_phone || quotation.customers?.phone || 'غير محدد'}</p>
                 </div>
                 <div>
-                  {quotation.customer.email && (
-                    <p><strong>البريد الإلكتروني:</strong> {quotation.customer.email}</p>
+                  {(quotation.customer_email || quotation.customers?.email) && (
+                    <p><strong>البريد الإلكتروني:</strong> {quotation.customer_email || quotation.customers?.email}</p>
                   )}
-                  {quotation.customer.address && (
-                    <p><strong>العنوان:</strong> {quotation.customer.address}</p>
+                  {(quotation.customer_address || quotation.customers?.address) && (
+                    <p><strong>العنوان:</strong> {quotation.customer_address || quotation.customers?.address}</p>
                   )}
                 </div>
               </div>
@@ -152,12 +218,12 @@ export const QuotationPreview: React.FC<QuotationPreviewProps> = ({
               <h3 className="font-bold text-lg mb-3 text-primary">معلومات المركبة</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p><strong>الماركة والموديل:</strong> {quotation.vehicle.make} {quotation.vehicle.model}</p>
-                  <p><strong>سنة الصنع:</strong> {quotation.vehicle.year}</p>
+                  <p><strong>الماركة والموديل:</strong> {quotation.make || quotation.vehicles?.make || 'غير محدد'} {quotation.model || quotation.vehicles?.model || ''}</p>
+                  <p><strong>سنة الصنع:</strong> {quotation.year || quotation.vehicles?.year || 'غير محدد'}</p>
                 </div>
                 <div>
-                  <p><strong>رقم اللوحة:</strong> {quotation.vehicle.license_plate}</p>
-                  <p><strong>رقم المركبة:</strong> {quotation.vehicle.vehicle_number}</p>
+                  <p><strong>رقم اللوحة:</strong> {quotation.license_plate || quotation.vehicles?.license_plate || 'غير محدد'}</p>
+                  <p><strong>رقم المركبة:</strong> {quotation.vehicle_number || quotation.vehicles?.vehicle_number || 'غير محدد'}</p>
                 </div>
               </div>
             </CardContent>

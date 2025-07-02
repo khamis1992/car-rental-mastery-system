@@ -148,6 +148,21 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
     }
   };
 
+  const handlePrint = async (id: string) => {
+    try {
+      setLoadingStates(prev => ({...prev, [`print_${id}`]: true}));
+      if (onGetQuotationDetails) {
+        const details = await onGetQuotationDetails(id);
+        setSelectedQuotation(details);
+        setPreviewOpen(true);
+      }
+    } catch (error) {
+      console.error('Error printing quotation:', error);
+    } finally {
+      setLoadingStates(prev => ({...prev, [`print_${id}`]: false}));
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusMap = {
       draft: { label: 'مسودة', variant: 'secondary' as const },
@@ -269,11 +284,15 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handlePreview(quotation.id)}
-                        disabled={loadingStates[`preview_${quotation.id}`]}
+                        onClick={() => handlePrint(quotation.id)}
+                        disabled={loadingStates[`print_${quotation.id}`]}
                         title="طباعة"
                       >
-                        <Printer className="w-4 h-4" />
+                        {loadingStates[`print_${quotation.id}`] ? (
+                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Printer className="w-4 h-4" />
+                        )}
                       </Button>
                         
                         {quotation.status === 'draft' && (
