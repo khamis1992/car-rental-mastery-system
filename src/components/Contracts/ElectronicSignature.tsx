@@ -69,108 +69,98 @@ export const ElectronicSignature: React.FC<ElectronicSignatureProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Pen className="w-5 h-5" />
+          <DialogTitle className="flex items-center gap-2 text-base">
+            <Pen className="w-4 h-4" />
             {title}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* معلومات العقد */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">معلومات العقد</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">رقم العقد:</span>
-                  <span className="font-medium mr-2">{contractId}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">نوع التوقيع:</span>
-                  <span className="font-medium mr-2">
-                    {signatureType === 'customer' ? 'توقيع العميل' : 'توقيع الشركة'}
-                  </span>
-                </div>
+        <div className="space-y-4">
+          {/* معلومات مختصرة */}
+          <div className="bg-muted/30 rounded-lg p-3">
+            <div className="text-sm space-y-1">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">رقم العقد:</span>
+                <span className="font-medium">{contractId}</span>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* منطقة التوقيع */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm flex items-center justify-between">
-                <span>منطقة التوقيع</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={clearSignature}
-                  className="text-xs"
-                >
-                  <RotateCcw className="w-3 h-3 mr-1" />
-                  مسح
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="border-2 border-dashed border-border rounded-lg p-4 bg-muted/20">
-                <SignatureCanvas
-                  ref={signatureRef}
-                  canvasProps={{
-                    width: 500,
-                    height: 200,
-                    className: 'signature-canvas w-full h-full bg-white rounded',
-                    style: {
-                      border: '1px solid hsl(var(--border))',
-                    }
-                  }}
-                  backgroundColor="white"
-                  penColor="black"
-                  minWidth={1}
-                  maxWidth={3}
-                  onBegin={handleBeginStroke}
-                  onEnd={handleEndStroke}
-                />
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">نوع التوقيع:</span>
+                <span className="font-medium">
+                  {signatureType === 'customer' ? 'توقيع العميل' : 'توقيع الشركة'}
+                </span>
               </div>
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                استخدم الماوس أو اللمس للتوقيع في المنطقة أعلاه
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* معلومات قانونية */}
-          <Card className="border-warning/50 bg-warning/5">
-            <CardContent className="pt-6">
-              <div className="space-y-3 text-sm">
-                <h4 className="font-medium text-warning">إقرار وموافقة</h4>
-                <div className="space-y-2 text-muted-foreground">
-                  <p>• بالتوقيع أدناه، أؤكد أنني قرأت وفهمت جميع بنود وشروط هذا العقد</p>
-                  <p>• أوافق على جميع الشروط والأحكام المذكورة في العقد</p>
-                  <p>• أتعهد بالالتزام بجميع البنود المتفق عليها</p>
-                  <p>• هذا التوقيع الإلكتروني له نفس القوة القانونية للتوقيع اليدوي</p>
-                </div>
+          {/* منطقة التوقيع المحسنة */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium">منطقة التوقيع</h4>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearSignature}
+                className="h-7 px-2 text-xs"
+              >
+                <RotateCcw className="w-3 h-3 mr-1" />
+                مسح
+              </Button>
+            </div>
+            
+            <div className="border-2 border-dashed border-border rounded-lg p-2 bg-background">
+              <SignatureCanvas
+                ref={signatureRef}
+                canvasProps={{
+                  width: 400,
+                  height: 150,
+                  className: 'signature-canvas w-full h-full bg-white rounded',
+                  style: {
+                    border: '1px solid hsl(var(--border))',
+                  }
+                }}
+                backgroundColor="white"
+                penColor="black"
+                minWidth={1}
+                maxWidth={2.5}
+                onBegin={handleBeginStroke}
+                onEnd={handleEndStroke}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground text-center">
+              استخدم الماوس أو اللمس للتوقيع
+            </p>
+          </div>
+
+          {/* إقرار مختصر */}
+          <div className="bg-warning/10 border border-warning/30 rounded-lg p-3">
+            <div className="space-y-2 text-xs">
+              <h4 className="font-medium text-warning text-sm">إقرار وموافقة</h4>
+              <div className="text-muted-foreground space-y-1">
+                <p>• أؤكد قراءتي وفهمي لجميع بنود العقد</p>
+                <p>• أوافق على الشروط والأحكام المذكورة</p>
+                <p>• التوقيع الإلكتروني له نفس القوة القانونية</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* أزرار الإجراءات */}
-          <div className="flex justify-end gap-3">
+          {/* أزرار مدمجة */}
+          <div className="flex gap-2 pt-2">
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
+              className="flex-1"
             >
               <X className="w-4 h-4 mr-2" />
               إلغاء
             </Button>
             <Button
               onClick={saveSignature}
-              className="btn-primary"
+              className="flex-1"
             >
               <Save className="w-4 h-4 mr-2" />
-              حفظ التوقيع
+              حفظ
             </Button>
           </div>
         </div>
