@@ -208,17 +208,17 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
                   <div className="space-y-4">
                     {history.map((item) => (
                       <div key={item.id} className="flex items-start gap-3 p-3 border border-border rounded-lg">
-                        <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
                         <div className="flex-1">
-                          <p className="font-medium">{item.description}</p>
+                          <p className="font-medium text-right">{item.description}</p>
                           {item.notes && (
-                            <p className="text-sm text-muted-foreground mt-1">{item.notes}</p>
+                            <p className="text-sm text-muted-foreground mt-1 text-right">{item.notes}</p>
                           )}
-                          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                            <Calendar className="w-3 h-3" />
+                          <div className="rtl-flex mt-2 text-xs text-muted-foreground">
                             <span>{formatDate(item.created_at)}</span>
+                            <Calendar className="w-3 h-3" />
                           </div>
                         </div>
+                        <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
                       </div>
                     ))}
                   </div>
