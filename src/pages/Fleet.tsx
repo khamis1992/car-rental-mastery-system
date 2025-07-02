@@ -6,6 +6,8 @@ import { AddVehicleForm } from '@/components/Fleet/AddVehicleForm';
 import { CSVImportDialog } from '@/components/Fleet/CSVImportDialog';
 import { FleetStats } from '@/components/Fleet/FleetStats';
 import { VehicleList } from '@/components/Fleet/VehicleList';
+import { VehicleDetailsDialog } from '@/components/Fleet/VehicleDetailsDialog';
+import { EditVehicleForm } from '@/components/Fleet/EditVehicleForm';
 import { serviceContainer } from '@/services/Container/ServiceContainer';
 import { Vehicle } from '@/repositories/interfaces/IVehicleRepository';
 
@@ -15,6 +17,9 @@ const Fleet = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [showCSVImport, setShowCSVImport] = useState(false);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const { toast } = useToast();
   const vehicleService = serviceContainer.getVehicleBusinessService();
 
@@ -38,19 +43,13 @@ const Fleet = () => {
   }, []);
 
   const handleEdit = (vehicle: Vehicle) => {
-    // TODO: Implement edit functionality
-    toast({
-      title: 'قريباً',
-      description: 'سيتم إضافة خاصية التعديل قريباً',
-    });
+    setSelectedVehicle(vehicle);
+    setShowEditDialog(true);
   };
 
   const handleView = (vehicle: Vehicle) => {
-    // TODO: Implement view functionality  
-    toast({
-      title: 'قريباً',
-      description: 'سيتم إضافة خاصية العرض التفصيلي قريباً',
-    });
+    setSelectedVehicle(vehicle);
+    setShowDetailsDialog(true);
   };
 
   return (
@@ -101,6 +100,19 @@ const Fleet = () => {
       <CSVImportDialog
         open={showCSVImport}
         onOpenChange={setShowCSVImport}
+        onSuccess={fetchVehicles}
+      />
+
+      <VehicleDetailsDialog
+        vehicle={selectedVehicle}
+        open={showDetailsDialog}
+        onOpenChange={setShowDetailsDialog}
+      />
+
+      <EditVehicleForm
+        vehicle={selectedVehicle}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
         onSuccess={fetchVehicles}
       />
     </div>
