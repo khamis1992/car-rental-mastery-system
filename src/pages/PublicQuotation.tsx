@@ -4,7 +4,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, XCircle, Eye, FileText, Calendar, DollarSign } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { 
+  CheckCircle, 
+  XCircle, 
+  User, 
+  Car, 
+  Calendar, 
+  DollarSign, 
+  FileText, 
+  Clock,
+  Printer,
+  Share2,
+  AlertTriangle,
+  Eye
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
@@ -145,6 +159,37 @@ const PublicQuotation = () => {
     }
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `عرض سعر ${quotation?.quotation_number}`,
+          text: 'عرض سعر تأجير مركبة',
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast({
+          title: 'تم النسخ',
+          description: 'تم نسخ رابط العرض إلى الحافظة',
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat('ar-KW', {
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3,
+    }).format(num);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -178,31 +223,65 @@ const PublicQuotation = () => {
   const hasResponded = quotation.client_response_at;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-primary text-primary-foreground py-8">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20" dir="rtl">
+      {/* Header محسن */}
+      <div className="bg-gradient-primary text-primary-foreground py-12 shadow-elegant">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <h1 className="text-3xl font-bold mb-2">عرض سعر تأجير مركبة</h1>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <FileText className="w-8 h-8" />
+              <h1 className="text-4xl font-bold">عرض سعر تأجير مركبة</h1>
+            </div>
             <p className="text-xl opacity-90">رقم العرض: {quotation.quotation_number}</p>
+            <p className="text-sm opacity-75 mt-2">
+              عرض سعر تم إنشاؤه بتاريخ {format(new Date(quotation.created_at), 'dd/MM/yyyy', { locale: ar })}
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Status Alert */}
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* أزرار الطباعة والمشاركة */}
+        <div className="flex justify-center gap-4 mb-6 print:hidden">
+          <Button
+            onClick={handlePrint}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Printer className="w-4 h-4" />
+            طباعة العرض
+          </Button>
+          <Button
+            onClick={handleShare}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Share2 className="w-4 h-4" />
+            مشاركة العرض
+          </Button>
+        </div>
+
+        {/* Status Alert محسن */}
         {hasResponded && (
-          <Card className={`mb-6 ${quotation.status === 'accepted' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
+          <Card className={`mb-6 shadow-lg ${
+            quotation.status === 'accepted' 
+              ? 'border-green-200 bg-green-50/80' 
+              : 'border-red-200 bg-red-50/80'
+          }`}>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
                 {quotation.status === 'accepted' ? (
-                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <div className="flex items-center justify-center w-12 h-12 bg-green-600 rounded-full">
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  </div>
                 ) : (
-                  <XCircle className="w-6 h-6 text-red-600" />
+                  <div className="flex items-center justify-center w-12 h-12 bg-red-600 rounded-full">
+                    <XCircle className="w-6 h-6 text-white" />
+                  </div>
                 )}
                 <div>
-                  <p className="font-semibold">
-                    {quotation.status === 'accepted' ? 'تم قبول العرض' : 'تم رفض العرض'}
+                  <p className="text-lg font-bold text-green-700">
+                    {quotation.status === 'accepted' ? '✅ تم قبول العرض' : '❌ تم رفض العرض'}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     في {format(new Date(quotation.client_response_at!), 'dd/MM/yyyy HH:mm', { locale: ar })}
@@ -213,149 +292,235 @@ const PublicQuotation = () => {
           </Card>
         )}
 
-        {/* Expiry Warning */}
+        {/* تنبيه انتهاء الصلاحية محسن */}
         {isExpired && (
-          <Card className="mb-6 border-yellow-200 bg-yellow-50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <Calendar className="w-6 h-6 text-yellow-600" />
-                <p className="text-yellow-800">
-                  انتهت صلاحية هذا العرض في {format(new Date(quotation.valid_until), 'dd/MM/yyyy', { locale: ar })}
-                </p>
+          <Card className="mb-6 border-yellow-300 bg-yellow-50/80 shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center w-12 h-12 bg-yellow-600 rounded-full">
+                  <Clock className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-yellow-800">⏰ انتهت صلاحية العرض</p>
+                  <p className="text-sm text-yellow-700">
+                    انتهت الصلاحية في {format(new Date(quotation.valid_until), 'dd/MM/yyyy', { locale: ar })}
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* معلومات العميل */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>معلومات العميل</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p><strong>الاسم:</strong> {quotation.customers?.name || 'غير محدد'}</p>
-                <p><strong>الهاتف:</strong> {quotation.customers?.phone || 'غير محدد'}</p>
-              </div>
-              <div>
+        {/* Grid لعمودين في الشاشات الواسعة */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* العمود الأول */}
+          <div className="space-y-6">
+            {/* معلومات العميل محسنة */}
+            <Card className="card-elegant hover-scale">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-lg font-bold">
+                  <div className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-full">
+                    <User className="w-5 h-5 text-primary" />
+                  </div>
+                  معلومات العميل
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 border-b border-muted">
+                  <p className="text-sm text-muted-foreground">الاسم</p>
+                  <p className="font-semibold">{quotation.customers?.name || 'غير محدد'}</p>
+                </div>
+                <div className="p-4 border-b border-muted">
+                  <p className="text-sm text-muted-foreground">الهاتف</p>
+                  <p className="font-semibold">{quotation.customers?.phone || 'غير محدد'}</p>
+                </div>
                 {quotation.customers?.email && (
-                  <p><strong>البريد الإلكتروني:</strong> {quotation.customers.email}</p>
+                  <div className="p-4 border-b border-muted">
+                    <p className="text-sm text-muted-foreground">البريد الإلكتروني</p>
+                    <p className="font-semibold">{quotation.customers.email}</p>
+                  </div>
                 )}
                 {quotation.customers?.address && (
-                  <p><strong>العنوان:</strong> {quotation.customers.address}</p>
+                  <div className="p-4">
+                    <p className="text-sm text-muted-foreground">العنوان</p>
+                    <p className="font-semibold">{quotation.customers.address}</p>
+                  </div>
                 )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        {/* معلومات المركبة */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>معلومات المركبة</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p><strong>الماركة والموديل:</strong> {quotation.vehicles?.make || 'غير محدد'} {quotation.vehicles?.model || ''}</p>
-                <p><strong>سنة الصنع:</strong> {quotation.vehicles?.year || 'غير محدد'}</p>
-              </div>
-              <div>
-                <p><strong>رقم اللوحة:</strong> {quotation.vehicles?.license_plate || 'غير محدد'}</p>
-                <p><strong>رقم المركبة:</strong> {quotation.vehicles?.vehicle_number || 'غير محدد'}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* تفاصيل الإيجار */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>تفاصيل الإيجار</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p><strong>تاريخ البداية:</strong> {format(new Date(quotation.start_date), 'dd/MM/yyyy', { locale: ar })}</p>
-                <p><strong>تاريخ النهاية:</strong> {format(new Date(quotation.end_date), 'dd/MM/yyyy', { locale: ar })}</p>
-              </div>
-              <div>
-                <p><strong>عدد الأيام:</strong> {quotation.rental_days} أيام</p>
-                <p><strong>السعر اليومي:</strong> {quotation.daily_rate.toFixed(3)} د.ك</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* التكلفة التفصيلية */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>التكلفة التفصيلية</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span>المجموع الفرعي ({quotation.rental_days} أيام × {quotation.daily_rate.toFixed(3)} د.ك)</span>
-                <span>{quotation.total_amount.toFixed(3)} د.ك</span>
-              </div>
-              
-              {quotation.discount_amount > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span>الخصم</span>
-                  <span>- {quotation.discount_amount.toFixed(3)} د.ك</span>
+            {/* معلومات المركبة محسنة */}
+            <Card className="card-elegant hover-scale">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-lg font-bold">
+                  <div className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-full">
+                    <Car className="w-5 h-5 text-primary" />
+                  </div>
+                  معلومات المركبة
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 border-b border-muted">
+                  <p className="text-sm text-muted-foreground">الماركة والموديل</p>
+                  <p className="font-semibold">
+                    {quotation.vehicles?.make || 'غير محدد'} {quotation.vehicles?.model || ''}
+                  </p>
                 </div>
-              )}
-              
-              {quotation.tax_amount > 0 && (
-                <div className="flex justify-between">
-                  <span>الضريبة</span>
-                  <span>+ {quotation.tax_amount.toFixed(3)} د.ك</span>
+                <div className="p-4 border-b border-muted">
+                  <p className="text-sm text-muted-foreground">سنة الصنع</p>
+                  <p className="font-semibold">{quotation.vehicles?.year || 'غير محدد'}</p>
                 </div>
-              )}
-              
-              <Separator />
-              
-              <div className="flex justify-between text-lg font-bold text-primary">
-                <span>المجموع الإجمالي</span>
-                <span>{quotation.final_amount.toFixed(3)} د.ك</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                <div className="p-4 border-b border-muted">
+                  <p className="text-sm text-muted-foreground">رقم اللوحة</p>
+                  <p className="font-semibold">{quotation.vehicles?.license_plate || 'غير محدد'}</p>
+                </div>
+                <div className="p-4">
+                  <p className="text-sm text-muted-foreground">رقم المركبة</p>
+                  <p className="font-semibold">{quotation.vehicles?.vehicle_number || 'غير محدد'}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* الشروط والأحكام */}
+          {/* العمود الثاني */}
+          <div className="space-y-6">
+            {/* تفاصيل الإيجار محسنة */}
+            <Card className="card-elegant hover-scale">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-lg font-bold">
+                  <div className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-full">
+                    <Calendar className="w-5 h-5 text-primary" />
+                  </div>
+                  تفاصيل الإيجار
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 border-b border-muted">
+                  <p className="text-sm text-muted-foreground">تاريخ البداية</p>
+                  <p className="font-semibold">
+                    {format(new Date(quotation.start_date), 'dd/MM/yyyy', { locale: ar })}
+                  </p>
+                </div>
+                <div className="p-4 border-b border-muted">
+                  <p className="text-sm text-muted-foreground">تاريخ النهاية</p>
+                  <p className="font-semibold">
+                    {format(new Date(quotation.end_date), 'dd/MM/yyyy', { locale: ar })}
+                  </p>
+                </div>
+                <div className="p-4 border-b border-muted">
+                  <p className="text-sm text-muted-foreground">عدد الأيام</p>
+                  <p className="font-semibold">{quotation.rental_days} أيام</p>
+                </div>
+                <div className="p-4">
+                  <p className="text-sm text-muted-foreground">السعر اليومي</p>
+                  <p className="font-semibold text-primary text-right">
+                    {formatNumber(quotation.daily_rate)} د.ك
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* التكلفة التفصيلية محسنة */}
+            <Card className="card-elegant hover-scale">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-lg font-bold">
+                  <div className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-full">
+                    <DollarSign className="w-5 h-5 text-primary" />
+                  </div>
+                  التكلفة التفصيلية
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center p-4 border-b border-muted">
+                  <span className="text-sm">
+                    المجموع الفرعي ({quotation.rental_days} أيام × {formatNumber(quotation.daily_rate)} د.ك)
+                  </span>
+                  <span className="font-semibold text-right">{formatNumber(quotation.total_amount)} د.ك</span>
+                </div>
+                
+                {quotation.discount_amount > 0 && (
+                  <div className="flex justify-between items-center p-4 border-b border-muted text-green-600">
+                    <span className="text-sm">الخصم</span>
+                    <span className="font-semibold text-right">- {formatNumber(quotation.discount_amount)} د.ك</span>
+                  </div>
+                )}
+                
+                {quotation.tax_amount > 0 && (
+                  <div className="flex justify-between items-center p-4 border-b border-muted">
+                    <span className="text-sm">الضريبة</span>
+                    <span className="font-semibold text-right">+ {formatNumber(quotation.tax_amount)} د.ك</span>
+                  </div>
+                )}
+                
+                <div className="bg-primary/5 rounded-lg p-6 border border-primary/20">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-bold">المجموع الإجمالي</span>
+                    <span className="text-2xl font-bold text-primary text-right">
+                      {formatNumber(quotation.final_amount)} د.ك
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* الشروط والأحكام محسنة */}
         {(quotation.special_conditions || quotation.terms_and_conditions) && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>الشروط والأحكام</CardTitle>
+          <Card className="mt-6 card-elegant hover-scale">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-lg font-bold">
+                <div className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-full">
+                  <FileText className="w-5 h-5 text-primary" />
+                </div>
+                الشروط والأحكام
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-6">
               {quotation.special_conditions && (
-                <div className="mb-4">
-                  <h4 className="font-medium mb-2">شروط خاصة:</h4>
-                  <p className="text-sm bg-muted p-3 rounded">{quotation.special_conditions}</p>
+                <div className="p-6 bg-muted/50 rounded-lg border border-muted">
+                  <h4 className="font-bold mb-3 text-primary">شروط خاصة:</h4>
+                  <p className="text-sm leading-relaxed">{quotation.special_conditions}</p>
                 </div>
               )}
               
               {quotation.terms_and_conditions && (
-                <div>
-                  <h4 className="font-medium mb-2">الشروط والأحكام العامة:</h4>
-                  <p className="text-sm bg-muted p-3 rounded">{quotation.terms_and_conditions}</p>
+                <div className="p-6 bg-muted/50 rounded-lg border border-muted">
+                  <h4 className="font-bold mb-3 text-primary">الشروط والأحكام العامة:</h4>
+                  <p className="text-sm leading-relaxed">{quotation.terms_and_conditions}</p>
                 </div>
               )}
             </CardContent>
           </Card>
         )}
 
-        {/* أزرار الاستجابة */}
+        {/* ملاحظة مهمة */}
+        <Card className="mt-6 border-amber-200 bg-amber-50/80">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex items-center justify-center w-12 h-12 bg-amber-500 rounded-full flex-shrink-0">
+                <AlertTriangle className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-amber-800 mb-2">ملاحظة مهمة</h3>
+                <p className="text-sm text-amber-700 leading-relaxed">
+                  العميل مسؤول عن إعادة المركبة بنفس حالة التسليم. أي أضرار أو تغييرات ستكون على عاتق العميل.
+                  يجب الالتزام بجميع قوانين المرور والسلامة أثناء فترة الإيجار.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* أزرار الاستجابة محسنة */}
         {canRespond && !hasResponded && (
-          <Card>
-            <CardHeader>
-              <CardTitle>استجابة العميل</CardTitle>
+          <Card className="mt-6 card-elegant">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-bold text-center">استجابة العميل</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     ملاحظات (اختيارية)
@@ -364,7 +529,8 @@ const PublicQuotation = () => {
                     value={clientNotes}
                     onChange={(e) => setClientNotes(e.target.value)}
                     placeholder="أضف أي ملاحظات أو استفسارات هنا..."
-                    rows={3}
+                    rows={4}
+                    className="text-right"
                   />
                 </div>
                 
@@ -372,9 +538,10 @@ const PublicQuotation = () => {
                   <Button
                     onClick={() => handleResponse('accept', clientNotes)}
                     disabled={responding}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-600 hover:bg-green-700 px-8 py-3 text-lg"
+                    size="lg"
                   >
-                    <CheckCircle className="w-4 h-4 mr-2" />
+                    <CheckCircle className="w-5 h-5 ml-2" />
                     قبول العرض
                   </Button>
                   
@@ -382,8 +549,10 @@ const PublicQuotation = () => {
                     onClick={() => handleResponse('reject', clientNotes)}
                     disabled={responding}
                     variant="destructive"
+                    className="px-8 py-3 text-lg"
+                    size="lg"
                   >
-                    <XCircle className="w-4 h-4 mr-2" />
+                    <XCircle className="w-5 h-5 ml-2" />
                     رفض العرض
                   </Button>
                 </div>
@@ -392,11 +561,18 @@ const PublicQuotation = () => {
           </Card>
         )}
 
-        {/* معلومات إضافية */}
-        <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>صالح حتى: {format(new Date(quotation.valid_until), 'dd/MM/yyyy', { locale: ar })}</p>
+        {/* معلومات صلاحية العرض */}
+        <div className="mt-8 text-center">
+          <Badge variant={isExpired ? "destructive" : "secondary"} className="text-lg px-6 py-2">
+            <Clock className="w-4 h-4 ml-2" />
+            {isExpired ? "انتهت الصلاحية" : "صالح حتى"}: {format(new Date(quotation.valid_until), 'dd/MM/yyyy', { locale: ar })}
+          </Badge>
+          
           {quotation.client_viewed_at && (
-            <p>تم عرضه في: {format(new Date(quotation.client_viewed_at), 'dd/MM/yyyy HH:mm', { locale: ar })}</p>
+            <p className="text-sm text-muted-foreground mt-4 flex items-center justify-center gap-2">
+              <Eye className="w-4 h-4" />
+              تم عرضه في: {format(new Date(quotation.client_viewed_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+            </p>
           )}
         </div>
       </div>
