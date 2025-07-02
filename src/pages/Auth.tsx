@@ -63,7 +63,7 @@ const Auth = () => {
       <Card className="w-full max-w-md card-elegant">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-primary">
-            نظام تأجير السيارات
+            البشائر الخليجية
           </CardTitle>
           <CardDescription>
             تسجيل الدخول إلى حسابك
