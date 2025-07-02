@@ -52,11 +52,11 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
   
   const [filters, setFilters] = useState<QuotationFilters>({
     search: '',
-    status: '',
+    status: 'all',
     dateFrom: undefined,
     dateTo: undefined,
-    customer: '',
-    vehicle: '',
+    customer: 'all',
+    vehicle: 'all',
   });
 
   // فلترة البيانات
@@ -72,17 +72,17 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
       }
 
       // فلترة الحالة
-      if (filters.status && quotation.status !== filters.status) {
+      if (filters.status && filters.status !== 'all' && quotation.status !== filters.status) {
         return false;
       }
 
       // فلترة العميل
-      if (filters.customer && quotation.customer_id !== filters.customer) {
+      if (filters.customer && filters.customer !== 'all' && quotation.customer_id !== filters.customer) {
         return false;
       }
 
       // فلترة المركبة
-      if (filters.vehicle && quotation.vehicle_id !== filters.vehicle) {
+      if (filters.vehicle && filters.vehicle !== 'all' && quotation.vehicle_id !== filters.vehicle) {
         return false;
       }
 

@@ -45,9 +45,9 @@ export const ContractsList: React.FC<ContractsListProps> = ({
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [filters, setFilters] = useState<ContractFilters>({
     search: '',
-    status: '',
-    contractType: '',
-    dateRange: '',
+    status: 'all',
+    contractType: 'all',
+    dateRange: 'all',
   });
 
   const filteredContracts = useMemo(() => {
@@ -63,13 +63,13 @@ export const ContractsList: React.FC<ContractsListProps> = ({
       }
 
       // فلتر الحالة
-      if (filters.status && contract.status !== filters.status) return false;
+      if (filters.status && filters.status !== 'all' && contract.status !== filters.status) return false;
 
       // فلتر نوع العقد
-      if (filters.contractType && contract.contract_type !== filters.contractType) return false;
+      if (filters.contractType && filters.contractType !== 'all' && contract.contract_type !== filters.contractType) return false;
 
       // فلتر الفترة الزمنية
-      if (filters.dateRange) {
+      if (filters.dateRange && filters.dateRange !== 'all') {
         const contractDate = new Date(contract.created_at);
         switch (filters.dateRange) {
           case 'today':
@@ -136,7 +136,7 @@ export const ContractsList: React.FC<ContractsListProps> = ({
       <ContractFiltersComponent
         filters={filters}
         onFiltersChange={setFilters}
-        onClearFilters={() => setFilters({ search: '', status: '', contractType: '', dateRange: '' })}
+        onClearFilters={() => setFilters({ search: '', status: 'all', contractType: 'all', dateRange: 'all' })}
       />
       
       <Card>

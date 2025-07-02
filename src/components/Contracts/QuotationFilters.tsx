@@ -38,16 +38,16 @@ export const QuotationFiltersComponent: React.FC<QuotationFiltersProps> = ({
   const clearFilters = () => {
     onFiltersChange({
       search: '',
-      status: '',
+      status: 'all',
       dateFrom: undefined,
       dateTo: undefined,
-      customer: '',
-      vehicle: '',
+      customer: 'all',
+      vehicle: 'all',
     });
   };
 
-  const hasActiveFilters = filters.search || filters.status || filters.dateFrom || 
-    filters.dateTo || filters.customer || filters.vehicle;
+  const hasActiveFilters = filters.search || (filters.status && filters.status !== 'all') || filters.dateFrom || 
+    filters.dateTo || (filters.customer && filters.customer !== 'all') || (filters.vehicle && filters.vehicle !== 'all');
 
   return (
     <div className="bg-card border rounded-lg p-4 space-y-4">
@@ -92,7 +92,7 @@ export const QuotationFiltersComponent: React.FC<QuotationFiltersProps> = ({
               <SelectValue placeholder="جميع الحالات" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">جميع الحالات</SelectItem>
+              <SelectItem value="all">جميع الحالات</SelectItem>
               <SelectItem value="draft">مسودة</SelectItem>
               <SelectItem value="sent">مرسل</SelectItem>
               <SelectItem value="accepted">مقبول</SelectItem>
@@ -111,7 +111,7 @@ export const QuotationFiltersComponent: React.FC<QuotationFiltersProps> = ({
               <SelectValue placeholder="جميع العملاء" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">جميع العملاء</SelectItem>
+              <SelectItem value="all">جميع العملاء</SelectItem>
               {customers.map((customer) => (
                 <SelectItem key={customer.id} value={customer.id}>
                   {customer.name}
@@ -129,7 +129,7 @@ export const QuotationFiltersComponent: React.FC<QuotationFiltersProps> = ({
               <SelectValue placeholder="جميع المركبات" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">جميع المركبات</SelectItem>
+              <SelectItem value="all">جميع المركبات</SelectItem>
               {vehicles.map((vehicle) => (
                 <SelectItem key={vehicle.id} value={vehicle.id}>
                   {vehicle.make} {vehicle.model}

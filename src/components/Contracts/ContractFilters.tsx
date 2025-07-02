@@ -27,7 +27,7 @@ export const ContractFiltersComponent: React.FC<ContractFiltersProps> = ({
     onFiltersChange({ ...filters, [key]: value });
   };
 
-  const hasActiveFilters = Object.values(filters).some(value => value !== '');
+  const hasActiveFilters = Object.values(filters).some(value => value !== '' && value !== 'all');
 
   return (
     <Card>
@@ -53,7 +53,7 @@ export const ContractFiltersComponent: React.FC<ContractFiltersProps> = ({
                 <SelectValue placeholder="جميع الحالات" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">جميع الحالات</SelectItem>
+                <SelectItem value="all">جميع الحالات</SelectItem>
                 <SelectItem value="draft">مسودة</SelectItem>
                 <SelectItem value="pending">في الانتظار</SelectItem>
                 <SelectItem value="active">نشط</SelectItem>
@@ -70,7 +70,7 @@ export const ContractFiltersComponent: React.FC<ContractFiltersProps> = ({
                 <SelectValue placeholder="جميع الأنواع" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">جميع الأنواع</SelectItem>
+                <SelectItem value="all">جميع الأنواع</SelectItem>
                 <SelectItem value="daily">يومي</SelectItem>
                 <SelectItem value="weekly">أسبوعي</SelectItem>
                 <SelectItem value="monthly">شهري</SelectItem>
@@ -86,7 +86,7 @@ export const ContractFiltersComponent: React.FC<ContractFiltersProps> = ({
                 <SelectValue placeholder="جميع الفترات" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">جميع الفترات</SelectItem>
+                <SelectItem value="all">جميع الفترات</SelectItem>
                 <SelectItem value="today">اليوم</SelectItem>
                 <SelectItem value="week">هذا الأسبوع</SelectItem>
                 <SelectItem value="month">هذا الشهر</SelectItem>
