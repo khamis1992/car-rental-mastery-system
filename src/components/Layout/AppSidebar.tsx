@@ -28,6 +28,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSettings } from "@/contexts/SettingsContext";
 import { Badge } from "@/components/ui/badge";
 
 const mainItems = [
@@ -120,7 +121,16 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const { profile } = useAuth();
+  const { systemSettings } = useSettings();
   const currentPath = location.pathname;
+  
+  // فلترة العناصر بناءً على الإعدادات
+  const filteredMainItems = mainItems.filter(item => {
+    if (item.url === "/attendance" && !systemSettings.attendanceEnabled) {
+      return false;
+    }
+    return true;
+  });
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -182,7 +192,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>القوائم الرئيسية</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainItems.map((item) => (
+              {filteredMainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink 

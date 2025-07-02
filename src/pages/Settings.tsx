@@ -10,10 +10,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import OfficeLocationManager from '@/components/Settings/OfficeLocationManager';
 
 const Settings = () => {
   const { profile } = useAuth();
+  const { systemSettings: globalSystemSettings, updateSystemSettings } = useSettings();
   const [companySettings, setCompanySettings] = useState({
     name: 'شركة النجوم لتأجير السيارات',
     email: 'info@najoomrentals.com',
@@ -30,7 +32,8 @@ const Settings = () => {
     language: 'ar',
     emailNotifications: true,
     smsNotifications: false,
-    maintenanceMode: false
+    maintenanceMode: false,
+    attendanceEnabled: true
   });
 
   const users = [
@@ -396,6 +399,17 @@ const Settings = () => {
                     <p className="text-sm text-muted-foreground">تنبيه قبل انتهاء تأمين المركبات</p>
                   </div>
                   <Switch defaultChecked />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>تفعيل نظام الحضور والغياب</Label>
+                    <p className="text-sm text-muted-foreground">إظهار أو إخفاء تبويبة الحضور والغياب من القائمة الرئيسية</p>
+                  </div>
+                  <Switch 
+                    checked={globalSystemSettings.attendanceEnabled}
+                    onCheckedChange={(checked) => updateSystemSettings('attendanceEnabled', checked)}
+                  />
                 </div>
               </div>
             </CardContent>
