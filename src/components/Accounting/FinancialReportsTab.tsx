@@ -132,9 +132,9 @@ export const FinancialReportsTab = () => {
       {/* التقارير */}
       <Tabs defaultValue="trial-balance" className="space-y-4">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="trial-balance">ميزان المراجعة</TabsTrigger>
-          <TabsTrigger value="income-statement">قائمة الدخل</TabsTrigger>
           <TabsTrigger value="balance-sheet">الميزانية العمومية</TabsTrigger>
+          <TabsTrigger value="income-statement">قائمة الدخل</TabsTrigger>
+          <TabsTrigger value="trial-balance">ميزان المراجعة</TabsTrigger>
         </TabsList>
 
         {/* ميزان المراجعة */}

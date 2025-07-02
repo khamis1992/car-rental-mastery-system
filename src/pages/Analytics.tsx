@@ -150,11 +150,11 @@ const Analytics = () => {
 
       <Tabs defaultValue="revenue" className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="revenue">الإيرادات</TabsTrigger>
-          <TabsTrigger value="fleet">الأسطول</TabsTrigger>
-          <TabsTrigger value="customers">العملاء</TabsTrigger>
-          <TabsTrigger value="performance">الأداء</TabsTrigger>
           <TabsTrigger value="trends">الاتجاهات</TabsTrigger>
+          <TabsTrigger value="performance">الأداء</TabsTrigger>
+          <TabsTrigger value="customers">العملاء</TabsTrigger>
+          <TabsTrigger value="fleet">الأسطول</TabsTrigger>
+          <TabsTrigger value="revenue">الإيرادات</TabsTrigger>
         </TabsList>
 
         <TabsContent value="revenue" className="space-y-4">

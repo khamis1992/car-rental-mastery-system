@@ -155,11 +155,11 @@ const Settings = () => {
 
       <Tabs defaultValue={activeTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="company">بيانات الشركة</TabsTrigger>
-          <TabsTrigger value="system">إعدادات النظام</TabsTrigger>
-          <TabsTrigger value="users">إدارة المستخدمين</TabsTrigger>
-          <TabsTrigger value="locations">مواقع المكاتب</TabsTrigger>
           <TabsTrigger value="notifications">الإشعارات</TabsTrigger>
+          <TabsTrigger value="locations">مواقع المكاتب</TabsTrigger>
+          <TabsTrigger value="users">إدارة المستخدمين</TabsTrigger>
+          <TabsTrigger value="system">إعدادات النظام</TabsTrigger>
+          <TabsTrigger value="company">بيانات الشركة</TabsTrigger>
         </TabsList>
 
         <TabsContent value="company" className="space-y-4">

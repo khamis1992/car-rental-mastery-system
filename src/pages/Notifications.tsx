@@ -166,12 +166,12 @@ const Notifications = () => {
 
       <Tabs defaultValue="all" className="space-y-4">
         <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="all">الكل ({notifications.length})</TabsTrigger>
-          <TabsTrigger value="contracts">العقود</TabsTrigger>
-          <TabsTrigger value="maintenance">الصيانة</TabsTrigger>
-          <TabsTrigger value="payments">المدفوعات</TabsTrigger>
-          <TabsTrigger value="insurance">التأمين</TabsTrigger>
           <TabsTrigger value="settings">الإعدادات</TabsTrigger>
+          <TabsTrigger value="insurance">التأمين</TabsTrigger>
+          <TabsTrigger value="payments">المدفوعات</TabsTrigger>
+          <TabsTrigger value="maintenance">الصيانة</TabsTrigger>
+          <TabsTrigger value="contracts">العقود</TabsTrigger>
+          <TabsTrigger value="all">الكل ({notifications.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">

@@ -190,10 +190,10 @@ const Communications = () => {
 
       <Tabs defaultValue="email" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="email">البريد الإلكتروني</TabsTrigger>
-          <TabsTrigger value="sms">الرسائل النصية</TabsTrigger>
-          <TabsTrigger value="automation">الأتمتة</TabsTrigger>
           <TabsTrigger value="history">السجل</TabsTrigger>
+          <TabsTrigger value="automation">الأتمتة</TabsTrigger>
+          <TabsTrigger value="sms">الرسائل النصية</TabsTrigger>
+          <TabsTrigger value="email">البريد الإلكتروني</TabsTrigger>
         </TabsList>
 
         <TabsContent value="email" className="space-y-4">
