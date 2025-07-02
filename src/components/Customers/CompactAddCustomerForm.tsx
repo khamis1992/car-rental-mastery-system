@@ -96,18 +96,49 @@ const CompactAddCustomerForm: React.FC<CompactAddCustomerFormProps> = ({ onCusto
     setLoading(true);
     
     try {
-      // توليد رقم العميل
-      const { data: customerNumber, error: numberError } = await supabase
+      let customerNumber: string;
+
+      // محاولة توليد رقم العميل باستخدام الدالة
+      const { data: generatedNumber, error: numberError } = await supabase
         .rpc('generate_customer_number');
 
-      if (numberError) {
-        console.error('خطأ في توليد رقم العميل:', numberError);
-        toast({
-          title: "خطأ",
-          description: "فشل في توليد رقم العميل",
-          variant: "destructive",
-        });
-        return;
+      if (numberError || !generatedNumber) {
+        console.warn('فشل في توليد رقم العميل باستخدام الدالة، جاري المحاولة بطريقة بديلة:', numberError);
+        
+        // الطريقة البديلة: توليد رقم العميل يدوياً
+        try {
+          // الحصول على آخر رقم عميل من قاعدة البيانات
+          const { data: lastCustomer, error: fetchError } = await supabase
+            .from('customers')
+            .select('customer_number')
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+          if (fetchError) {
+            console.error('خطأ في جلب آخر رقم عميل:', fetchError);
+            // استخدام رقم افتراضي مع timestamp
+            const timestamp = Date.now().toString().slice(-6);
+            customerNumber = `CUS${timestamp}`;
+          } else {
+            let nextNumber = 1;
+            if (lastCustomer && lastCustomer.length > 0) {
+              const lastNumber = lastCustomer[0].customer_number;
+              // استخراج الرقم من رقم العميل (مثل CUS000001 -> 1)
+              const match = lastNumber.match(/CUS(\d+)/);
+              if (match) {
+                nextNumber = parseInt(match[1]) + 1;
+              }
+            }
+            customerNumber = `CUS${nextNumber.toString().padStart(6, '0')}`;
+          }
+        } catch (fallbackError) {
+          console.error('فشل في الطريقة البديلة أيضاً:', fallbackError);
+          // آخر محاولة: استخدام timestamp
+          const timestamp = Date.now().toString().slice(-6);
+          customerNumber = `CUS${timestamp}`;
+        }
+      } else {
+        customerNumber = generatedNumber;
       }
 
       // إضافة العميل
