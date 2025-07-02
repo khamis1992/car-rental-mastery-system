@@ -91,6 +91,9 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
     // Use callback to create temporary damage instead of immediately adding to damages
     if (onDamageCreate) {
       onDamageCreate(newDamage);
+    } else {
+      // Fallback behavior if no callback provided
+      setSelectedDamage(newDamage);
     }
     setIsAddingDamage(false); // Auto-disable adding mode
   }, [readonly, isAddingDamage, damages, toast]);
