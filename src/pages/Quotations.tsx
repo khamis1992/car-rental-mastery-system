@@ -3,13 +3,17 @@ import { FileText, Plus, DollarSign, TrendingUp, Clock, Users } from 'lucide-rea
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { QuotationForm } from '@/components/Contracts/QuotationForm';
 import { QuotationsList } from '@/components/Contracts/QuotationsList';
+import { QuotationEditDialog } from '@/components/Contracts/QuotationEditDialog';
 import { quotationService } from '@/services/quotationService';
 
 const Quotations = () => {
   const [quotationFormOpen, setQuotationFormOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedQuotationId, setSelectedQuotationId] = useState<string>('');
   const [quotations, setQuotations] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
@@ -23,6 +27,7 @@ const Quotations = () => {
   });
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadData();
@@ -100,6 +105,44 @@ const Quotations = () => {
 
   const handleFormSuccess = () => {
     loadData();
+  };
+
+  const handleView = (id: string) => {
+    console.log('View quotation:', id);
+    // يمكن إضافة معاينة أو فتح صفحة تفاصيل
+  };
+
+  const handleEdit = (id: string) => {
+    console.log('Edit quotation:', id);
+    setSelectedQuotationId(id);
+    setEditDialogOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    console.log('Delete quotation:', id);
+    try {
+      const confirmed = window.confirm('هل أنت متأكد من حذف عرض السعر؟');
+      if (!confirmed) return;
+
+      await quotationService.deleteQuotation(id);
+      toast({
+        title: 'تم حذف العرض',
+        description: 'تم حذف عرض السعر بنجاح',
+      });
+      loadData();
+    } catch (error: any) {
+      toast({
+        title: 'خطأ في الحذف',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleConvertToContract = (id: string) => {
+    console.log('Convert to contract:', id);
+    // استخدام React Router بدلاً من window.location.href
+    navigate(`/contracts?quotation=${id}`);
   };
 
   if (loading) {
@@ -214,28 +257,10 @@ const Quotations = () => {
         quotations={quotations}
         customers={customers}
         vehicles={vehicles}
-        onView={(id) => console.log('View quotation:', id)}
-        onEdit={(id) => console.log('Edit quotation:', id)}
-        onDelete={async (id) => {
-          try {
-            await quotationService.deleteQuotation(id);
-            toast({
-              title: 'تم حذف العرض',
-              description: 'تم حذف عرض السعر بنجاح',
-            });
-            loadData();
-          } catch (error: any) {
-            toast({
-              title: 'خطأ في الحذف',
-              description: error.message,
-              variant: 'destructive',
-            });
-          }
-        }}
-        onConvertToContract={(id) => {
-          // التوجه لصفحة العقود مع العرض المحدد
-          window.location.href = `/contracts?quotation=${id}`;
-        }}
+        onView={handleView}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onConvertToContract={handleConvertToContract}
         onGetQuotationDetails={quotationService.getQuotationById}
       />
 
@@ -245,6 +270,14 @@ const Quotations = () => {
         onOpenChange={setQuotationFormOpen}
         customers={customers}
         vehicles={vehicles}
+        onSuccess={handleFormSuccess}
+      />
+
+      {/* نموذج تعديل عرض السعر */}
+      <QuotationEditDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        quotationId={selectedQuotationId}
         onSuccess={handleFormSuccess}
       />
     </div>

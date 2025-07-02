@@ -49,6 +49,7 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
   const [selectedQuotations, setSelectedQuotations] = useState<string[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedQuotation, setSelectedQuotation] = useState<any>(null);
+  const [loadingStates, setLoadingStates] = useState<{[key: string]: boolean}>({});
   
   const [filters, setFilters] = useState<QuotationFilters>({
     search: '',
@@ -101,6 +102,7 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
 
   const handlePreview = async (id: string) => {
     try {
+      setLoadingStates(prev => ({...prev, [`preview_${id}`]: true}));
       if (onGetQuotationDetails) {
         const details = await onGetQuotationDetails(id);
         setSelectedQuotation(details);
@@ -108,6 +110,41 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
       }
     } catch (error) {
       console.error('Error fetching quotation details:', error);
+    } finally {
+      setLoadingStates(prev => ({...prev, [`preview_${id}`]: false}));
+    }
+  };
+
+  const handleEdit = async (id: string) => {
+    try {
+      setLoadingStates(prev => ({...prev, [`edit_${id}`]: true}));
+      await onEdit?.(id);
+    } catch (error) {
+      console.error('Error editing quotation:', error);
+    } finally {
+      setLoadingStates(prev => ({...prev, [`edit_${id}`]: false}));
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      setLoadingStates(prev => ({...prev, [`delete_${id}`]: true}));
+      await onDelete?.(id);
+    } catch (error) {
+      console.error('Error deleting quotation:', error);
+    } finally {
+      setLoadingStates(prev => ({...prev, [`delete_${id}`]: false}));
+    }
+  };
+
+  const handleConvert = async (id: string) => {
+    try {
+      setLoadingStates(prev => ({...prev, [`convert_${id}`]: true}));
+      await onConvertToContract?.(id);
+    } catch (error) {
+      console.error('Error converting quotation:', error);
+    } finally {
+      setLoadingStates(prev => ({...prev, [`convert_${id}`]: false}));
     }
   };
 
@@ -219,14 +256,21 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => handlePreview(quotation.id)}
+                        disabled={loadingStates[`preview_${quotation.id}`]}
+                        title="معاينة"
                       >
-                        <Eye className="w-4 h-4" />
+                        {loadingStates[`preview_${quotation.id}`] ? (
+                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
                       </Button>
 
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handlePreview(quotation.id)}
+                        disabled={loadingStates[`preview_${quotation.id}`]}
                         title="طباعة"
                       >
                         <Printer className="w-4 h-4" />
@@ -236,9 +280,15 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => onEdit?.(quotation.id)}
+                            onClick={() => handleEdit(quotation.id)}
+                            disabled={loadingStates[`edit_${quotation.id}`]}
+                            title="تعديل"
                           >
-                            <Edit className="w-4 h-4" />
+                            {loadingStates[`edit_${quotation.id}`] ? (
+                              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Edit className="w-4 h-4" />
+                            )}
                           </Button>
                         )}
 
@@ -246,10 +296,16 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => onConvertToContract?.(quotation.id)}
+                            onClick={() => handleConvert(quotation.id)}
+                            disabled={loadingStates[`convert_${quotation.id}`]}
                             className="text-primary"
+                            title="تحويل لعقد"
                           >
-                            تحويل لعقد
+                            {loadingStates[`convert_${quotation.id}`] ? (
+                              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              'تحويل لعقد'
+                            )}
                           </Button>
                         )}
 
@@ -257,10 +313,16 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => onDelete?.(quotation.id)}
+                            onClick={() => handleDelete(quotation.id)}
+                            disabled={loadingStates[`delete_${quotation.id}`]}
                             className="text-destructive"
+                            title="حذف"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            {loadingStates[`delete_${quotation.id}`] ? (
+                              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
                           </Button>
                         )}
                       </div>
