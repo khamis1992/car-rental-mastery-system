@@ -396,7 +396,7 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
                           </Button>
                         )}
 
-                        {(quotation.status === 'accepted' || quotation.status === 'sent') && !expired && (
+                        {quotation.status === 'accepted' && !expired && (
                           <Button
                             variant="ghost"
                             size="sm"
