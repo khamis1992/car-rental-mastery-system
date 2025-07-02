@@ -2,24 +2,18 @@ import StatsCard from "@/components/Dashboard/StatsCard";
 import QuickActions from "@/components/Dashboard/QuickActions";
 import RecentContracts from "@/components/Dashboard/RecentContracts";
 import FleetOverview from "@/components/Dashboard/FleetOverview";
-import AddEmployeeForm from "@/components/Employees/AddEmployeeForm";
 import { 
   User, 
   Calendar, 
   FileText,
   Plus,
   TrendingUp,
-  DollarSign,
-  UserPlus
+  DollarSign
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Index = () => {
   const navigate = useNavigate();
-  const [showAddEmployee, setShowAddEmployee] = useState(false);
 
   return (
     <div className="container mx-auto px-6 py-8">
@@ -31,20 +25,6 @@ const Index = () => {
           <p className="text-muted-foreground">
             نظرة شاملة على أعمالك وإدارة متكاملة لجميع عمليات التأجير
           </p>
-        </div>
-
-        {/* تنبيه لإضافة الموظف */}
-        <div className="mb-6">
-          <Alert>
-            <UserPlus className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <span>لتتمكن من تسجيل الحضور، يجب أولاً إضافة بياناتك كموظف في النظام</span>
-              <Button onClick={() => setShowAddEmployee(true)} size="sm">
-                <UserPlus className="w-4 h-4 ml-2" />
-                إضافة بيانات الموظف
-              </Button>
-            </AlertDescription>
-          </Alert>
         </div>
 
         {/* بطاقات الإحصائيات */}
@@ -97,16 +77,6 @@ const Index = () => {
         <div className="grid grid-cols-1 gap-6 animate-fade-in">
           <RecentContracts />
         </div>
-
-        {/* نموذج إضافة موظف */}
-        <AddEmployeeForm 
-          isOpen={showAddEmployee}
-          onClose={() => setShowAddEmployee(false)}
-          onEmployeeAdded={() => {
-            setShowAddEmployee(false);
-            window.location.reload(); // إعادة تحميل الصفحة لإخفاء التنبيه
-          }}
-        />
     </div>
   );
 };
