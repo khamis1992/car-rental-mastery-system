@@ -62,6 +62,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   onSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingQuotation, setIsLoadingQuotation] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<ContractFormData>({
@@ -106,55 +107,61 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   // Auto-populate form when quotation is selected
   React.useEffect(() => {
     const loadQuotationData = async () => {
-      if (selectedQuotation) {
+      if (selectedQuotation && onGetQuotationDetails) {
+        console.log('Loading quotation data for:', selectedQuotation);
+        setIsLoadingQuotation(true);
+        
         try {
-          // Get full quotation details
-          if (onGetQuotationDetails) {
-            const quotationDetails = await onGetQuotationDetails(selectedQuotation);
-            
-            // Auto-populate all form fields from quotation
-            form.setValue('customer_id', quotationDetails.customer_id);
-            form.setValue('vehicle_id', quotationDetails.vehicle_id);
-            form.setValue('quotation_id', quotationDetails.id);
-            form.setValue('start_date', new Date(quotationDetails.start_date));
-            form.setValue('end_date', new Date(quotationDetails.end_date));
-            form.setValue('daily_rate', quotationDetails.daily_rate);
-            form.setValue('discount_amount', quotationDetails.discount_amount || 0);
-            form.setValue('tax_amount', quotationDetails.tax_amount || 0);
-            
-            // Determine contract type based on rental days
-            const startDate = new Date(quotationDetails.start_date);
-            const endDate = new Date(quotationDetails.end_date);
-            const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-            
-            let contractType: 'daily' | 'weekly' | 'monthly' | 'custom' = 'daily';
-            if (days >= 30) {
-              contractType = 'monthly';
-            } else if (days >= 7) {
-              contractType = 'weekly';
-            } else if (days === 1) {
-              contractType = 'daily';
-            } else {
-              contractType = 'custom';
-            }
-            
-            form.setValue('contract_type', contractType);
-            
-            if (quotationDetails.special_conditions) {
-              form.setValue('special_conditions', quotationDetails.special_conditions);
-            }
-            if (quotationDetails.terms_and_conditions) {
-              form.setValue('terms_and_conditions', quotationDetails.terms_and_conditions);
-            }
+          const quotationDetails = await onGetQuotationDetails(selectedQuotation);
+          console.log('Quotation details loaded:', quotationDetails);
+          
+          // Determine contract type based on rental days
+          const startDate = new Date(quotationDetails.start_date);
+          const endDate = new Date(quotationDetails.end_date);
+          const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+          
+          let contractType: 'daily' | 'weekly' | 'monthly' | 'custom' = 'daily';
+          if (days >= 30) {
+            contractType = 'monthly';
+          } else if (days >= 7) {
+            contractType = 'weekly';
+          } else if (days === 1) {
+            contractType = 'daily';
+          } else {
+            contractType = 'custom';
           }
+          
+          // Use form.reset() to populate all fields at once and trigger re-renders
+          const formData: Partial<ContractFormData> = {
+            customer_id: quotationDetails.customer_id,
+            vehicle_id: quotationDetails.vehicle_id,
+            quotation_id: quotationDetails.id,
+            start_date: new Date(quotationDetails.start_date),
+            end_date: new Date(quotationDetails.end_date),
+            daily_rate: quotationDetails.daily_rate,
+            discount_amount: quotationDetails.discount_amount || 0,
+            tax_amount: quotationDetails.tax_amount || 0,
+            security_deposit: 0,
+            insurance_amount: 0,
+            contract_type: contractType,
+            special_conditions: quotationDetails.special_conditions || '',
+            terms_and_conditions: quotationDetails.terms_and_conditions || '',
+            notes: ''
+          };
+          
+          console.log('Setting form data:', formData);
+          form.reset(formData);
+          
         } catch (error) {
           console.error('Error loading quotation details:', error);
+        } finally {
+          setIsLoadingQuotation(false);
         }
       }
     };
 
     loadQuotationData();
-  }, [selectedQuotation, form, onGetQuotationDetails]);
+  }, [selectedQuotation, onGetQuotationDetails, form]);
 
   // Update daily rate when vehicle changes
   React.useEffect(() => {
@@ -253,7 +260,11 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>عرض السعر (اختياري)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select 
+                          key={`quotation-${field.value || 'empty'}`}
+                          onValueChange={field.onChange} 
+                          value={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="اختر عرض سعر" />
@@ -279,7 +290,11 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>العميل</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select 
+                        key={`customer-${field.value || 'empty'}`}
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="اختر العميل" />
@@ -304,7 +319,11 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>المركبة</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select 
+                        key={`vehicle-${field.value || 'empty'}`}
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="اختر المركبة" />
@@ -329,7 +348,11 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>نوع العقد</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select 
+                        key={`contract-type-${field.value || 'empty'}`}
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="اختر نوع العقد" />
@@ -588,30 +611,34 @@ export const ContractForm: React.FC<ContractFormProps> = ({
              <div className="space-y-4">
                <h3 className="text-lg font-medium">تفاصيل المركبة</h3>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <FormField
-                   control={form.control}
-                   name="fuel_level_pickup"
-                   render={({ field }) => (
-                     <FormItem>
-                       <FormLabel>مستوى الوقود عند الاستلام</FormLabel>
-                       <Select onValueChange={field.onChange} defaultValue={field.value}>
-                         <FormControl>
-                           <SelectTrigger>
-                             <SelectValue placeholder="اختر مستوى الوقود" />
-                           </SelectTrigger>
-                         </FormControl>
-                         <SelectContent>
-                           <SelectItem value="full">ممتلئ</SelectItem>
-                           <SelectItem value="3/4">3/4</SelectItem>
-                           <SelectItem value="1/2">1/2</SelectItem>
-                           <SelectItem value="1/4">1/4</SelectItem>
-                           <SelectItem value="empty">فارغ</SelectItem>
-                         </SelectContent>
-                       </Select>
-                       <FormMessage />
-                     </FormItem>
-                   )}
-                 />
+                  <FormField
+                    control={form.control}
+                    name="fuel_level_pickup"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>مستوى الوقود عند الاستلام</FormLabel>
+                        <Select 
+                          key={`fuel-level-${field.value || 'empty'}`}
+                          onValueChange={field.onChange} 
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="اختر مستوى الوقود" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="full">ممتلئ</SelectItem>
+                            <SelectItem value="3/4">3/4</SelectItem>
+                            <SelectItem value="1/2">1/2</SelectItem>
+                            <SelectItem value="1/4">1/4</SelectItem>
+                            <SelectItem value="empty">فارغ</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                  <FormField
                    control={form.control}
