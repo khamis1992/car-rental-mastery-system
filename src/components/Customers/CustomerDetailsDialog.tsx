@@ -234,11 +234,11 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  <span>المعلومات الأساسية</span>
                   <div className="flex items-center gap-2">
                     {getTypeBadge(customer.customer_type)}
                     {getStatusBadge(customer.status)}
                   </div>
+                  <span>المعلومات الأساسية</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
