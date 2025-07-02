@@ -124,7 +124,7 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
           >
             {/* Vehicle Diagram Image */}
             <image
-              href="/lovable-uploads/ab29ad47-ee4e-4e76-aac1-0652adafa064.png"
+              href="/lovable-uploads/cf0ef0ce-1c56-4da0-b065-8c130f4f182f.png"
               x="0"
               y="0"
               width="400"
