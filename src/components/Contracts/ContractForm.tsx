@@ -242,32 +242,33 @@ export const ContractForm: React.FC<ContractFormProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>إنشاء عقد جديد</DialogTitle>
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="text-right">
+          <DialogTitle className="text-2xl font-bold text-primary">إنشاء عقد جديد</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Basic Information */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">المعلومات الأساسية</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            
+            {/* المعلومات الأساسية */}
+            <div className="bg-card border rounded-lg p-6 space-y-4">
+              <h3 className="text-lg font-bold text-slate-700 border-b pb-2">المعلومات الأساسية</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {quotations.length > 0 && (
                   <FormField
                     control={form.control}
                     name="quotation_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>عرض السعر (اختياري)</FormLabel>
+                        <FormLabel className="text-sm font-medium">عرض السعر (اختياري)</FormLabel>
                         <Select 
                           key={`quotation-${field.value || 'empty'}`}
                           onValueChange={field.onChange} 
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="اختر عرض سعر" />
+                            <SelectTrigger className="h-11">
+                              <SelectValue placeholder="اختر عرض سعر موجود" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -289,14 +290,14 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   name="customer_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>العميل</FormLabel>
+                      <FormLabel className="text-sm font-medium">العميل *</FormLabel>
                       <Select 
                         key={`customer-${field.value || 'empty'}`}
                         onValueChange={field.onChange} 
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-11">
                             <SelectValue placeholder="اختر العميل" />
                           </SelectTrigger>
                         </FormControl>
@@ -318,15 +319,15 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   name="vehicle_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>المركبة</FormLabel>
+                      <FormLabel className="text-sm font-medium">المركبة *</FormLabel>
                       <Select 
                         key={`vehicle-${field.value || 'empty'}`}
                         onValueChange={field.onChange} 
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="اختر المركبة" />
+                          <SelectTrigger className="h-11">
+                            <SelectValue placeholder="اختر المركبة المتاحة" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -347,14 +348,14 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   name="contract_type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>نوع العقد</FormLabel>
+                      <FormLabel className="text-sm font-medium">نوع العقد *</FormLabel>
                       <Select 
                         key={`contract-type-${field.value || 'empty'}`}
                         onValueChange={field.onChange} 
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-11">
                             <SelectValue placeholder="اختر نوع العقد" />
                           </SelectTrigger>
                         </FormControl>
@@ -372,32 +373,32 @@ export const ContractForm: React.FC<ContractFormProps> = ({
               </div>
             </div>
 
-            {/* Dates */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">التواريخ</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* التواريخ */}
+            <div className="bg-card border rounded-lg p-6 space-y-4">
+              <h3 className="text-lg font-bold text-slate-700 border-b pb-2">التواريخ</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="start_date"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>تاريخ البداية</FormLabel>
+                      <FormLabel className="text-sm font-medium">تاريخ البداية *</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
                               variant="outline"
                               className={cn(
-                                "w-full pl-3 text-left font-normal",
+                                "w-full h-11 justify-start text-right font-normal",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
+                              <CalendarIcon className="ml-2 h-4 w-4" />
                               {field.value ? (
                                 format(field.value, "PPP", { locale: ar })
                               ) : (
-                                <span>اختر التاريخ</span>
+                                <span>اختر تاريخ البداية</span>
                               )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
@@ -408,6 +409,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                             onSelect={field.onChange}
                             disabled={(date) => date < new Date()}
                             initialFocus
+                            className="pointer-events-auto"
                           />
                         </PopoverContent>
                       </Popover>
@@ -421,23 +423,23 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   name="end_date"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>تاريخ النهاية</FormLabel>
+                      <FormLabel className="text-sm font-medium">تاريخ النهاية *</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
                               variant="outline"
                               className={cn(
-                                "w-full pl-3 text-left font-normal",
+                                "w-full h-11 justify-start text-right font-normal",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
+                              <CalendarIcon className="ml-2 h-4 w-4" />
                               {field.value ? (
                                 format(field.value, "PPP", { locale: ar })
                               ) : (
-                                <span>اختر التاريخ</span>
+                                <span>اختر تاريخ النهاية</span>
                               )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
@@ -448,6 +450,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                             onSelect={field.onChange}
                             disabled={(date) => date < (form.getValues('start_date') || new Date())}
                             initialFocus
+                            className="pointer-events-auto"
                           />
                         </PopoverContent>
                       </Popover>
@@ -456,22 +459,34 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   )}
                 />
               </div>
+              
+              {/* عرض تحذير للتواريخ المتعارضة */}
+              {rentalDays > 0 && watchedValues.contract_type === 'daily' && rentalDays > 1 && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <p className="text-sm text-amber-800">
+                    تنبيه: تم اختيار عقد يومي لكن المدة {rentalDays} أيام. يمكن تغيير نوع العقد إلى "مخصص" أو تعديل التواريخ.
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Pricing */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">التسعير</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* التسعير */}
+            <div className="bg-card border rounded-lg p-6 space-y-4">
+              <h3 className="text-lg font-bold text-slate-700 border-b pb-2">التسعير</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField
                   control={form.control}
                   name="daily_rate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>السعر اليومي (د.ك)</FormLabel>
+                      <FormLabel className="text-sm font-medium">السعر اليومي *</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          step="0.01"
+                          step="0.001"
+                          min="0"
+                          placeholder="مثال: 25.000 د.ك"
+                          className="h-11 text-right"
                           {...field}
                           onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                         />
@@ -486,11 +501,14 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   name="discount_amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>قيمة الخصم (د.ك)</FormLabel>
+                      <FormLabel className="text-sm font-medium">قيمة الخصم</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          step="0.01"
+                          step="0.001"
+                          min="0"
+                          placeholder="مثال: 5.000 د.ك"
+                          className="h-11 text-right"
                           {...field}
                           onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                         />
@@ -505,11 +523,14 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   name="tax_amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>قيمة الضريبة (د.ك)</FormLabel>
+                      <FormLabel className="text-sm font-medium">قيمة الضريبة</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          step="0.01"
+                          step="0.001"
+                          min="0"
+                          placeholder="مثال: 2.500 د.ك"
+                          className="h-11 text-right"
                           {...field}
                           onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                         />
@@ -524,11 +545,14 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   name="security_deposit"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>التأمين (د.ك)</FormLabel>
+                      <FormLabel className="text-sm font-medium">مبلغ التأمين</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          step="0.01"
+                          step="0.001"
+                          min="0"
+                          placeholder="مثال: 100.000 د.ك"
+                          className="h-11 text-right"
                           {...field}
                           onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                         />
@@ -543,11 +567,14 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   name="insurance_amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>قيمة التأمين الشامل (د.ك)</FormLabel>
+                      <FormLabel className="text-sm font-medium">التأمين الشامل</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          step="0.01"
+                          step="0.001"
+                          min="0"
+                          placeholder="مثال: 10.000 د.ك"
+                          className="h-11 text-right"
                           {...field}
                           onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                         />
@@ -558,120 +585,140 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                 />
               </div>
 
-              {/* Calculation Summary */}
+              {/* ملخص الحساب */}
               {rentalDays > 0 && (
-                <div className="bg-muted p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">ملخص الحساب</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                    <div>عدد الأيام: {rentalDays}</div>
-                    <div>المجموع الفرعي: {totalAmount.toFixed(3)} د.ك</div>
-                    <div>الخصم: {(watchedValues.discount_amount || 0).toFixed(3)} د.ك</div>
-                    <div>الضريبة: {(watchedValues.tax_amount || 0).toFixed(3)} د.ك</div>
-                    <div className="font-bold col-span-2">المجموع الإجمالي: {finalAmount.toFixed(3)} د.ك</div>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+                  <h4 className="font-bold text-blue-900 mb-3">ملخص الحساب</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="text-blue-800">
+                      <span className="font-medium">عدد الأيام:</span>
+                      <span className="block text-lg font-bold">{rentalDays}</span>
+                    </div>
+                    <div className="text-blue-800">
+                      <span className="font-medium">المجموع الفرعي:</span>
+                      <span className="block text-lg font-bold">{totalAmount.toFixed(3)} د.ك</span>
+                    </div>
+                    <div className="text-blue-800">
+                      <span className="font-medium">بعد الخصم والضريبة:</span>
+                      <span className="block text-lg font-bold">{(totalAmount - (watchedValues.discount_amount || 0) + (watchedValues.tax_amount || 0)).toFixed(3)} د.ك</span>
+                    </div>
+                    <div className="text-blue-900 bg-blue-100 p-2 rounded">
+                      <span className="font-medium">المجموع الإجمالي:</span>
+                      <span className="block text-xl font-bold text-blue-600">{finalAmount.toFixed(3)} د.ك</span>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Locations */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">المواقع</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* المواقع وتفاصيل المركبة */}
+            <div className="bg-card border rounded-lg p-6 space-y-4">
+              <h3 className="text-lg font-bold text-slate-700 border-b pb-2">المواقع وتفاصيل المركبة</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="pickup_location"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>موقع الاستلام</FormLabel>
+                      <FormLabel className="text-sm font-medium">موقع الاستلام</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input 
+                          placeholder="مثال: المكتب الرئيسي - الكويت"
+                          className="h-11 text-right"
+                          {...field} 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                 <FormField
-                   control={form.control}
-                   name="return_location"
-                   render={({ field }) => (
-                     <FormItem>
-                       <FormLabel>موقع الإرجاع</FormLabel>
-                       <FormControl>
-                         <Input {...field} />
-                       </FormControl>
-                       <FormMessage />
-                     </FormItem>
-                   )}
-                 />
-               </div>
-             </div>
+                <FormField
+                  control={form.control}
+                  name="return_location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">موقع الإرجاع</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="مثال: المكتب الرئيسي - الكويت"
+                          className="h-11 text-right"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-             {/* Vehicle Details */}
-             <div className="space-y-4">
-               <h3 className="text-lg font-medium">تفاصيل المركبة</h3>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="fuel_level_pickup"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>مستوى الوقود عند الاستلام</FormLabel>
-                        <Select 
-                          key={`fuel-level-${field.value || 'empty'}`}
-                          onValueChange={field.onChange} 
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="اختر مستوى الوقود" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="full">ممتلئ</SelectItem>
-                            <SelectItem value="3/4">3/4</SelectItem>
-                            <SelectItem value="1/2">1/2</SelectItem>
-                            <SelectItem value="1/4">1/4</SelectItem>
-                            <SelectItem value="empty">فارغ</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="fuel_level_pickup"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">مستوى الوقود عند الاستلام</FormLabel>
+                      <Select 
+                        key={`fuel-level-${field.value || 'empty'}`}
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-11">
+                            <SelectValue placeholder="اختر مستوى الوقود" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="full">ممتلئ (100%)</SelectItem>
+                          <SelectItem value="3/4">ثلاثة أرباع (75%)</SelectItem>
+                          <SelectItem value="1/2">النصف (50%)</SelectItem>
+                          <SelectItem value="1/4">ربع (25%)</SelectItem>
+                          <SelectItem value="empty">فارغ</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                 <FormField
-                   control={form.control}
-                   name="pickup_mileage"
-                   render={({ field }) => (
-                     <FormItem>
-                       <FormLabel>قراءة العداد عند الاستلام (كم)</FormLabel>
-                       <FormControl>
-                         <Input
-                           type="number"
-                           {...field}
-                           onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                         />
-                       </FormControl>
-                       <FormMessage />
-                     </FormItem>
-                   )}
-                 />
-               </div>
-             </div>
+                <FormField
+                  control={form.control}
+                  name="pickup_mileage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">قراءة العداد عند الاستلام</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="مثال: 45000 كم"
+                          className="h-11 text-right"
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
-            {/* Additional Information */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">معلومات إضافية</h3>
-              <div className="space-y-4">
+            {/* شروط العقد والملاحظات */}
+            <div className="bg-card border rounded-lg p-6 space-y-4">
+              <h3 className="text-lg font-bold text-slate-700 border-b pb-2">شروط العقد والملاحظات</h3>
+              <div className="space-y-6">
                 <FormField
                   control={form.control}
                   name="special_conditions"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>شروط خاصة</FormLabel>
+                      <FormLabel className="text-sm font-medium">شروط خاصة</FormLabel>
                       <FormControl>
-                        <Textarea {...field} />
+                        <Textarea 
+                          placeholder="أدخل أي شروط خاصة للعقد..."
+                          className="min-h-[80px] text-right"
+                          {...field} 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -683,9 +730,13 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   name="terms_and_conditions"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الشروط والأحكام</FormLabel>
+                      <FormLabel className="text-sm font-medium">الشروط والأحكام</FormLabel>
                       <FormControl>
-                        <Textarea {...field} />
+                        <Textarea 
+                          placeholder="أدخل الشروط والأحكام العامة للعقد..."
+                          className="min-h-[100px] text-right"
+                          {...field} 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -697,9 +748,13 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>ملاحظات</FormLabel>
+                      <FormLabel className="text-sm font-medium">ملاحظات إضافية</FormLabel>
                       <FormControl>
-                        <Textarea {...field} />
+                        <Textarea 
+                          placeholder="أدخل أي ملاحظات أو تفاصيل إضافية..."
+                          className="min-h-[80px] text-right"
+                          {...field} 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -708,13 +763,39 @@ export const ContractForm: React.FC<ContractFormProps> = ({
               </div>
             </div>
 
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                إلغاء
+            {/* أزرار التحكم */}
+            <div className="flex justify-between items-center pt-6 border-t">
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="lg"
+                onClick={() => {
+                  form.reset();
+                }}
+                className="px-8"
+              >
+                تفريغ النموذج
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? 'جاري الإنشاء...' : 'إنشاء العقد'}
-              </Button>
+              
+              <div className="flex gap-4">
+                <Button 
+                  type="button" 
+                  variant="secondary" 
+                  size="lg"
+                  onClick={() => onOpenChange(false)}
+                  className="px-8"
+                >
+                  إلغاء
+                </Button>
+                <Button 
+                  type="submit" 
+                  size="lg"
+                  disabled={isLoading}
+                  className="px-8 bg-primary hover:bg-primary/90"
+                >
+                  {isLoading ? 'جاري الإنشاء...' : 'إنشاء العقد'}
+                </Button>
+              </div>
             </div>
           </form>
         </Form>
