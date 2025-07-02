@@ -116,7 +116,7 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
       <CardContent>
         <div className="relative">
           <svg
-            viewBox="-30 -10 460 220"
+            viewBox="0 0 400 200"
             className={`w-full h-80 border rounded-lg bg-muted/20 ${
               isAddingDamage && !readonly ? 'cursor-crosshair' : ''
             }`}
@@ -133,17 +133,17 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
               opacity="0.9"
             />
             
-            {/* Labels - positioned outside the diagram */}
-            <text x="420" y="105" textAnchor="start" className="text-sm fill-gray-700 font-medium">
+            {/* Labels */}
+            <text x="375" y="105" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
               المؤخرة
             </text>
-            <text x="200" y="15" textAnchor="middle" className="text-sm fill-gray-700 font-medium">
+            <text x="200" y="25" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
               يمين
             </text>
-            <text x="200" y="195" textAnchor="middle" className="text-sm fill-gray-700 font-medium">
+            <text x="200" y="185" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
               يسار
             </text>
-            <text x="-20" y="105" textAnchor="end" className="text-sm fill-gray-700 font-medium">
+            <text x="25" y="105" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
               المقدمة
             </text>
 
