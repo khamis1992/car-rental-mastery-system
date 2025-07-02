@@ -97,7 +97,19 @@ const Contracts = () => {
           const { data, error } = await supabase
             .from('quotations')
             .select(`
-              *,
+              id,
+              quotation_number,
+              customer_id,
+              vehicle_id,
+              start_date,
+              end_date,
+              daily_rate,
+              total_amount,
+              discount_amount,
+              tax_amount,
+              final_amount,
+              special_conditions,
+              terms_and_conditions,
               customers(name, phone, email, address),
               vehicles(make, model, year, license_plate, vehicle_number)
             `)

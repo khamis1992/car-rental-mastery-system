@@ -38,7 +38,13 @@ export const ContractHistory: React.FC<ContractHistoryProps> = ({ contractId }) 
       const { data: contract, error } = await supabase
         .from('contracts')
         .select(`
-          *,
+          id,
+          contract_number,
+          status,
+          actual_start_date,
+          actual_end_date,
+          created_at,
+          created_by,
           customers(name),
           vehicles(make, model, vehicle_number)
         `)
