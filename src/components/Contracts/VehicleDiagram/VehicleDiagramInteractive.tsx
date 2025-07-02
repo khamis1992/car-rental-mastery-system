@@ -137,10 +137,10 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
             <text x="375" y="105" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
               المؤخرة
             </text>
-            <text x="200" y="25" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
+            <text x="200" y="15" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
               يمين
             </text>
-            <text x="200" y="185" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
+            <text x="200" y="175" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
               يسار
             </text>
             <text x="25" y="105" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
