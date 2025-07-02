@@ -1,15 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { contractService } from '@/services/contractService';
-import { quotationService } from '@/services/quotationService';
+import { serviceContainer } from '@/services/Container/ServiceContainer';
+import { ContractWithDetails } from '@/services/contractService';
 
-// NOTE: This hook is deprecated in favor of useContractsDataRefactored
-// which implements the Repository Pattern. Use the new hook for new components.
-
-export const useContractsData = () => {
+export const useContractsDataRefactored = () => {
   const [quotations, setQuotations] = useState<any[]>([]);
-  const [contracts, setContracts] = useState<any[]>([]);
+  const [contracts, setContracts] = useState<ContractWithDetails[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [contractStats, setContractStats] = useState({
@@ -21,13 +18,16 @@ export const useContractsData = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  const contractService = serviceContainer.getContractBusinessService();
+  const quotationService = serviceContainer.getQuotationBusinessService();
+
   const loadQuotations = async () => {
     const activeQuotations = await quotationService.getActiveQuotations();
     setQuotations(activeQuotations);
   };
 
   const loadContracts = async () => {
-    const data = await contractService.getContractsWithDetails();
+    const data = await contractService.getAllContracts();
     setContracts(data);
   };
 
