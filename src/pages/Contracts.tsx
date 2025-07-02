@@ -7,6 +7,7 @@ import { ContractMonitoring } from '@/components/Contracts/ContractMonitoring';
 import { ContractStats } from '@/components/Contracts/ContractStats';
 import { ContractDetailsDialog } from '@/components/Contracts/ContractDetailsDialog';
 import { useContractsDataRefactored } from '@/hooks/useContractsDataRefactored';
+import { supabase } from '@/integrations/supabase/client';
 
 const Contracts = () => {
   const [contractFormOpen, setContractFormOpen] = useState(false);
@@ -92,6 +93,19 @@ const Contracts = () => {
         vehicles={vehicles}
         quotations={quotations.filter(q => ['draft', 'sent', 'accepted'].includes(q.status))}
         selectedQuotation={selectedQuotationForContract}
+        onGetQuotationDetails={async (id: string) => {
+          const { data, error } = await supabase
+            .from('quotations')
+            .select(`
+              *,
+              customers(name, phone, email, address),
+              vehicles(make, model, year, license_plate, vehicle_number)
+            `)
+            .eq('id', id)
+            .single();
+          if (error) throw error;
+          return data;
+        }}
         onSuccess={handleFormSuccess}
       />
 

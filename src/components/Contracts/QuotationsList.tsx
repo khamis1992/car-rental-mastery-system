@@ -3,11 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FileText, Eye, Edit, Trash2, Calendar, Printer, Share2, Copy } from 'lucide-react';
+import { FileText, Eye, Edit, Trash2, Calendar, Share2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { QuotationFiltersComponent, QuotationFilters } from './QuotationFilters';
 import { QuotationPreview } from './QuotationPreview';
+import { ShareLinkDialog } from './ShareLinkDialog';
 import { quotationService } from '@/services/quotationService';
 import { useToast } from '@/hooks/use-toast';
 
@@ -51,6 +52,9 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
   const [selectedQuotations, setSelectedQuotations] = useState<string[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedQuotation, setSelectedQuotation] = useState<any>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareQuotation, setShareQuotation] = useState<any>(null);
+  const [publicUrl, setPublicUrl] = useState('');
   const [loadingStates, setLoadingStates] = useState<{[key: string]: boolean}>({});
   const { toast } = useToast();
   
@@ -151,24 +155,9 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
     }
   };
 
-  const handlePrint = async (id: string) => {
+  const handleShareLink = async (id: string) => {
     try {
-      setLoadingStates(prev => ({...prev, [`print_${id}`]: true}));
-      if (onGetQuotationDetails) {
-        const details = await onGetQuotationDetails(id);
-        setSelectedQuotation(details);
-        setPreviewOpen(true);
-      }
-    } catch (error) {
-      console.error('Error printing quotation:', error);
-    } finally {
-      setLoadingStates(prev => ({...prev, [`print_${id}`]: false}));
-    }
-  };
-
-  const handleGeneratePublicLink = async (id: string) => {
-    try {
-      setLoadingStates(prev => ({...prev, [`public_${id}`]: true}));
+      setLoadingStates(prev => ({...prev, [`share_${id}`]: true}));
       
       // التحقق من حالة العرض قبل إنشاء الرابط
       const quotation = quotations.find(q => q.id === id);
@@ -181,25 +170,17 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
       }
 
       const token = await quotationService.generatePublicLink(id);
-      const publicUrl = `${window.location.origin}/public-quotation/${token}`;
+      const generatedUrl = `${window.location.origin}/public-quotation/${token}`;
       
-      // نسخ الرابط للحافظة
-      try {
-        await navigator.clipboard.writeText(publicUrl);
-        toast({
-          title: 'تم إنشاء وإرسال العرض',
-          description: 'تم نسخ الرابط للحافظة وتحديث حالة العرض إلى "مرسل".',
-        });
-      } catch (clipboardError) {
-        // في حالة فشل النسخ للحافظة، عرض الرابط للمستخدم
-        toast({
-          title: 'تم إنشاء وإرسال العرض',
-          description: `الرابط: ${publicUrl}`,
-        });
-      }
+      // تعيين بيانات المشاركة وفتح الحوار
+      setPublicUrl(generatedUrl);
+      setShareQuotation(quotation);
+      setShareDialogOpen(true);
       
-      // إعادة تحميل البيانات لإظهار الحالة المحدثة
-      window.location.reload();
+      toast({
+        title: 'تم إنشاء الرابط بنجاح',
+        description: 'يمكنك الآن مشاركة عرض السعر',
+      });
     } catch (error: any) {
       console.error('Error generating public link:', error);
       toast({
@@ -208,7 +189,7 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
         variant: 'destructive',
       });
     } finally {
-      setLoadingStates(prev => ({...prev, [`public_${id}`]: false}));
+      setLoadingStates(prev => ({...prev, [`share_${id}`]: false}));
     }
   };
 
@@ -315,7 +296,7 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
                         {format(new Date(quotation.valid_until), 'dd/MM/yyyy', { locale: ar })}
                       </div>
                     </TableCell>
-                    <TableCell>
+                     <TableCell>
                     <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
@@ -331,29 +312,15 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
                         )}
                       </Button>
 
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handlePrint(quotation.id)}
-                        disabled={loadingStates[`print_${quotation.id}`]}
-                        title="طباعة"
-                      >
-                        {loadingStates[`print_${quotation.id}`] ? (
-                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Printer className="w-4 h-4" />
-                        )}
-                      </Button>
-
                       {['draft', 'sent'].includes(quotation.status) && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleGeneratePublicLink(quotation.id)}
-                          disabled={loadingStates[`public_${quotation.id}`]}
-                          title={quotation.status === 'draft' ? "إنشاء وإرسال العرض" : "إنشاء رابط عام"}
+                          onClick={() => handleShareLink(quotation.id)}
+                          disabled={loadingStates[`share_${quotation.id}`]}
+                          title="مشاركة عرض السعر"
                         >
-                          {loadingStates[`public_${quotation.id}`] ? (
+                          {loadingStates[`share_${quotation.id}`] ? (
                             <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                           ) : (
                             <Share2 className="w-4 h-4" />
@@ -383,7 +350,7 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
                             size="sm"
                             onClick={() => handleConvert(quotation.id)}
                             disabled={loadingStates[`convert_${quotation.id}`]}
-                            className="text-primary"
+                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
                             title="تحويل لعقد"
                           >
                             {loadingStates[`convert_${quotation.id}`] ? (
@@ -394,22 +361,20 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
                           </Button>
                         )}
 
-                        {quotation.status === 'draft' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(quotation.id)}
-                            disabled={loadingStates[`delete_${quotation.id}`]}
-                            className="text-destructive"
-                            title="حذف"
-                          >
-                            {loadingStates[`delete_${quotation.id}`] ? (
-                              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
-                            )}
-                          </Button>
-                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(quotation.id)}
+                          disabled={loadingStates[`delete_${quotation.id}`]}
+                          className="text-destructive"
+                          title="حذف"
+                        >
+                          {loadingStates[`delete_${quotation.id}`] ? (
+                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -427,6 +392,17 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
         onOpenChange={setPreviewOpen}
         quotation={selectedQuotation}
       />
+
+      {/* حوار مشاركة الرابط */}
+      {shareQuotation && (
+        <ShareLinkDialog
+          open={shareDialogOpen}
+          onOpenChange={setShareDialogOpen}
+          publicUrl={publicUrl}
+          quotationNumber={shareQuotation.quotation_number}
+          customerName={shareQuotation.customer_name}
+        />
+      )}
     </div>
   );
 };

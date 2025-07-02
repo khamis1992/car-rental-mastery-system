@@ -47,6 +47,7 @@ interface ContractFormProps {
   vehicles: Array<{ id: string; make: string; model: string; vehicle_number: string; daily_rate: number; status: string }>;
   quotations?: Array<{ id: string; quotation_number: string; customer_id: string; vehicle_id: string; final_amount: number }>;
   selectedQuotation?: string;
+  onGetQuotationDetails?: (id: string) => Promise<any>;
   onSuccess?: () => void;
 }
 
@@ -57,6 +58,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   vehicles,
   quotations = [],
   selectedQuotation,
+  onGetQuotationDetails,
   onSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -101,13 +103,46 @@ export const ContractForm: React.FC<ContractFormProps> = ({
 
   const { rentalDays, totalAmount, finalAmount } = calculateAmounts();
 
-  // Update form when quotation is selected
+  // Auto-populate form when quotation is selected
   React.useEffect(() => {
-    if (selectedQuote) {
-      form.setValue('customer_id', selectedQuote.customer_id);
-      form.setValue('vehicle_id', selectedQuote.vehicle_id);
-    }
-  }, [selectedQuote, form]);
+    const loadQuotationData = async () => {
+      if (selectedQuotation || selectedQuote) {
+        try {
+          // Get full quotation details
+          const quotationId = selectedQuotation || selectedQuote?.id;
+          if (quotationId && onGetQuotationDetails) {
+            const quotationDetails = await onGetQuotationDetails(quotationId);
+            
+            // Auto-populate form fields
+            form.setValue('customer_id', quotationDetails.customer_id);
+            form.setValue('vehicle_id', quotationDetails.vehicle_id);
+            form.setValue('quotation_id', quotationDetails.id);
+            form.setValue('start_date', new Date(quotationDetails.start_date));
+            form.setValue('end_date', new Date(quotationDetails.end_date));
+            form.setValue('daily_rate', quotationDetails.daily_rate);
+            form.setValue('discount_amount', quotationDetails.discount_amount || 0);
+            form.setValue('tax_amount', quotationDetails.tax_amount || 0);
+            
+            if (quotationDetails.special_conditions) {
+              form.setValue('special_conditions', quotationDetails.special_conditions);
+            }
+            if (quotationDetails.terms_and_conditions) {
+              form.setValue('terms_and_conditions', quotationDetails.terms_and_conditions);
+            }
+          } else if (selectedQuote) {
+            // Fallback for basic quotation data
+            form.setValue('customer_id', selectedQuote.customer_id);
+            form.setValue('vehicle_id', selectedQuote.vehicle_id);
+            form.setValue('quotation_id', selectedQuote.id);
+          }
+        } catch (error) {
+          console.error('Error loading quotation details:', error);
+        }
+      }
+    };
+
+    loadQuotationData();
+  }, [selectedQuotation, selectedQuote, form, onGetQuotationDetails]);
 
   // Update daily rate when vehicle changes
   React.useEffect(() => {
