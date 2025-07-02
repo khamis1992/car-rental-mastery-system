@@ -7,8 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { paymentService } from '@/services/paymentService';
+import { serviceContainer } from '@/services/Container/ServiceContainer';
 import { PaymentFormData } from '@/types/invoice';
+
+// NOTE: This component now uses the Repository Pattern via serviceContainer
 
 interface PaymentFormProps {
   open: boolean;
@@ -25,6 +27,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const paymentService = serviceContainer.getPaymentBusinessService();
   const [formData, setFormData] = useState<PaymentFormData>({
     invoice_id: invoice?.id || '',
     amount: invoice?.outstanding_amount || 0,

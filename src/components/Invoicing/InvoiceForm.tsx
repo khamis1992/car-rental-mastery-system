@@ -8,8 +8,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { invoiceService } from '@/services/invoiceService';
+import { serviceContainer } from '@/services/Container/ServiceContainer';
 import { InvoiceFormData } from '@/types/invoice';
+
+// NOTE: This component now uses the Repository Pattern via serviceContainer
 
 interface InvoiceFormProps {
   open: boolean;
@@ -30,6 +32,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
 }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const invoiceService = serviceContainer.getInvoiceBusinessService();
   const [formData, setFormData] = useState<InvoiceFormData>({
     contract_id: preselectedContractId || '',
     customer_id: '',

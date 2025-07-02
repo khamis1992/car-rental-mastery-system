@@ -10,14 +10,18 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
 interface PaymentsListProps {
-  payments: Payment[];
+  payments?: Payment[];
+  loading?: boolean;
+  onRefresh?: () => void;
   onView: (id: string) => void;
   onPrintReceipt: (id: string) => void;
   onStatusChange: (id: string, status: string) => void;
 }
 
 export const PaymentsList: React.FC<PaymentsListProps> = ({
-  payments,
+  payments = [],
+  loading = false,
+  onRefresh,
   onView,
   onPrintReceipt,
   onStatusChange,
@@ -71,7 +75,13 @@ export const PaymentsList: React.FC<PaymentsListProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {payments.length === 0 ? (
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                    جاري التحميل...
+                  </TableCell>
+                </TableRow>
+              ) : payments.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     لا توجد مدفوعات

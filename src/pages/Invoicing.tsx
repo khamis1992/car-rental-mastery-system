@@ -9,18 +9,17 @@ import { InvoicesList } from '@/components/Invoicing/InvoicesList';
 import { PaymentForm } from '@/components/Invoicing/PaymentForm';
 import { PaymentsList } from '@/components/Invoicing/PaymentsList';
 import { useToast } from '@/hooks/use-toast';
-import { invoiceService } from '@/services/invoiceService';
-import { paymentService } from '@/services/paymentService';
 import { downloadInvoicePDF } from '@/lib/invoice/invoicePDFService';
-import { contractService } from '@/services/contractService';
-import { useContractsData } from '@/hooks/useContractsData';
+import { useContractsDataRefactored } from '@/hooks/useContractsDataRefactored';
+import { useInvoicingDataRefactored } from '@/hooks/useInvoicingDataRefactored';
 import { InvoiceWithDetails, Payment } from '@/types/invoice';
+
+// NOTE: This page now uses the Repository Pattern via useInvoicingDataRefactored and useContractsDataRefactored
 
 const Invoicing = () => {
   const [invoiceFormOpen, setInvoiceFormOpen] = useState(false);
   const [paymentFormOpen, setPaymentFormOpen] = useState(false);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState<any>(null);
-  const [invoices, setInvoices] = useState<InvoiceWithDetails[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [invoiceStats, setInvoiceStats] = useState({
     total: 0,
@@ -34,10 +33,17 @@ const Invoicing = () => {
     totalAmount: 0,
     monthlyAmount: 0,
   });
-  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   
-  const { contracts, customers } = useContractsData();
+  // Use the new Repository Pattern hooks
+  const { contracts, customers } = useContractsDataRefactored();
+  const { 
+    invoices, 
+    loading, 
+    loadData: loadInvoiceData, 
+    invoiceService, 
+    paymentService 
+  } = useInvoicingDataRefactored();
 
   // Check for contract parameter in URL
   useEffect(() => {
@@ -49,16 +55,8 @@ const Invoicing = () => {
   }, []);
 
   const loadInvoices = async () => {
-    try {
-      const data = await invoiceService.getInvoicesWithDetails();
-      setInvoices(data);
-    } catch (error: any) {
-      toast({
-        title: 'خطأ في تحميل الفواتير',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
+    // Now handled by useInvoicingDataRefactored hook
+    return;
   };
 
   const loadStats = async () => {
@@ -101,11 +99,10 @@ const Invoicing = () => {
   };
 
   const loadData = async () => {
-    setLoading(true);
     try {
-      await Promise.all([loadInvoices(), loadStats(), loadPayments(), loadPaymentStats()]);
-    } finally {
-      setLoading(false);
+      await Promise.all([loadInvoiceData(), loadStats(), loadPayments(), loadPaymentStats()]);
+    } catch (error) {
+      // Error handling is done in individual functions
     }
   };
 
@@ -329,6 +326,8 @@ const Invoicing = () => {
         <TabsContent value="invoices">
           <InvoicesList
             invoices={invoices}
+            loading={loading}
+            onRefresh={loadData}
             onView={handleViewInvoice}
             onEdit={handleEditInvoice}
             onSend={handleSendInvoice}
@@ -341,6 +340,8 @@ const Invoicing = () => {
         <TabsContent value="payments">
           <PaymentsList
             payments={payments}
+            loading={loading}
+            onRefresh={loadData}
             onView={handleViewPayment}
             onPrintReceipt={handlePrintReceipt}
             onStatusChange={handlePaymentStatusChange}

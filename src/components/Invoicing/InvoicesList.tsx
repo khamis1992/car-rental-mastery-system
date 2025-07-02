@@ -11,6 +11,8 @@ import { ar } from 'date-fns/locale';
 
 interface InvoicesListProps {
   invoices: InvoiceWithDetails[];
+  loading?: boolean;
+  onRefresh?: () => void;
   onView: (id: string) => void;
   onEdit: (id: string) => void;
   onSend: (id: string) => void;
@@ -21,6 +23,8 @@ interface InvoicesListProps {
 
 export const InvoicesList: React.FC<InvoicesListProps> = ({
   invoices,
+  loading = false,
+  onRefresh,
   onView,
   onEdit,
   onSend,
@@ -80,7 +84,13 @@ export const InvoicesList: React.FC<InvoicesListProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invoices.length === 0 ? (
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                    جاري التحميل...
+                  </TableCell>
+                </TableRow>
+              ) : invoices.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                     لا توجد فواتير
