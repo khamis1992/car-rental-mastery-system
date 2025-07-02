@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, Users, Building, Shield, Bell, Database, Palette } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,11 +11,13 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useToast } from '@/hooks/use-toast';
 import OfficeLocationManager from '@/components/Settings/OfficeLocationManager';
 
 const Settings = () => {
   const { profile } = useAuth();
   const { systemSettings: globalSystemSettings, updateSystemSettings } = useSettings();
+  const { toast } = useToast();
   const [companySettings, setCompanySettings] = useState({
     name: 'شركة النجوم لتأجير السيارات',
     email: 'info@najoomrentals.com',
@@ -25,16 +27,12 @@ const Settings = () => {
     logo: ''
   });
 
-  const [systemSettings, setSystemSettings] = useState({
-    defaultCurrency: 'SAR',
-    timeZone: 'Asia/Riyadh',
-    dateFormat: 'DD/MM/YYYY',
-    language: 'ar',
-    emailNotifications: true,
-    smsNotifications: false,
-    maintenanceMode: false,
-    attendanceEnabled: true
-  });
+  const [systemSettings, setSystemSettings] = useState(globalSystemSettings);
+
+  // تحديث الحالة المحلية عند تغيير الإعدادات العامة
+  useEffect(() => {
+    setSystemSettings(globalSystemSettings);
+  }, [globalSystemSettings]);
 
   const users = [
     {
@@ -93,6 +91,26 @@ const Settings = () => {
     setSystemSettings(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleSaveSettings = () => {
+    try {
+      // حفظ إعدادات النظام في السياق العام
+      Object.keys(systemSettings).forEach(key => {
+        updateSystemSettings(key, systemSettings[key as keyof typeof systemSettings]);
+      });
+      
+      toast({
+        title: "تم حفظ الإعدادات",
+        description: "تم حفظ جميع الإعدادات بنجاح",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ في حفظ الإعدادات",
+        description: "حدث خطأ أثناء حفظ الإعدادات",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Only allow admin and manager to access settings
   if (!profile || (profile.role !== 'admin' && profile.role !== 'manager')) {
     return (
@@ -121,7 +139,10 @@ const Settings = () => {
             <Database className="w-4 h-4" />
             نسخ احتياطي
           </Button>
-          <Button className="btn-primary flex items-center gap-2">
+          <Button 
+            className="btn-primary flex items-center gap-2"
+            onClick={handleSaveSettings}
+          >
             <SettingsIcon className="w-4 h-4" />
             حفظ الإعدادات
           </Button>
@@ -406,10 +427,10 @@ const Settings = () => {
                     <Label>تفعيل نظام الحضور والغياب</Label>
                     <p className="text-sm text-muted-foreground">إظهار أو إخفاء تبويبة الحضور والغياب من القائمة الرئيسية</p>
                   </div>
-                  <Switch 
-                    checked={globalSystemSettings.attendanceEnabled}
-                    onCheckedChange={(checked) => updateSystemSettings('attendanceEnabled', checked)}
-                  />
+                   <Switch 
+                     checked={systemSettings.attendanceEnabled}
+                     onCheckedChange={(checked) => handleSystemSettingChange('attendanceEnabled', checked)}
+                   />
                 </div>
               </div>
             </CardContent>
