@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { Badge } from '@/components/ui/badge';
+import { formatCurrencyKWD } from '@/lib/currency';
 
 const Analytics = () => {
   const [dateRange, setDateRange] = useState('thisMonth');
@@ -27,7 +28,7 @@ const Analytics = () => {
   const kpiData = [
     {
       title: 'إجمالي الإيرادات',
-      value: '125,450 ر.س',
+      value: formatCurrencyKWD(125450),
       change: '+12.5%',
       trend: 'up',
       icon: <DollarSign className="w-6 h-6 text-green-500" />
@@ -175,8 +176,8 @@ const Analytics = () => {
                         <p className="text-sm text-muted-foreground">{data.contracts} عقد</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold">{data.revenue.toLocaleString()} ر.س</p>
-                        <p className="text-sm text-muted-foreground">متوسط: {data.avgDailyRate} ر.س/يوم</p>
+                        <p className="font-bold">{formatCurrencyKWD(data.revenue)}</p>
+                        <p className="text-sm text-muted-foreground">متوسط: {formatCurrencyKWD(data.avgDailyRate)}/يوم</p>
                       </div>
                     </div>
                   ))}
@@ -197,7 +198,7 @@ const Analytics = () => {
                     <div key={index} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="font-medium">{vehicle.vehicleType}</span>
-                        <span className="font-bold">{vehicle.revenue.toLocaleString()} ر.س</span>
+                        <span className="font-bold">{formatCurrencyKWD(vehicle.revenue)}</span>
                       </div>
                       <div className="w-full bg-muted rounded-full h-2">
                         <div 
@@ -244,11 +245,11 @@ const Analytics = () => {
                       </div>
                       <div>
                         <p className="text-muted-foreground">الإيرادات</p>
-                        <p className="font-bold">{vehicle.revenue.toLocaleString()} ر.س</p>
+                        <p className="font-bold">{formatCurrencyKWD(vehicle.revenue)}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">متوسط الإيراد/سيارة</p>
-                        <p className="font-bold">{Math.round(vehicle.revenue / vehicle.count).toLocaleString()} ر.س</p>
+                        <p className="font-bold">{formatCurrencyKWD(Math.round(vehicle.revenue / vehicle.count))}</p>
                       </div>
                     </div>
                   </div>
@@ -283,7 +284,7 @@ const Analytics = () => {
                       </div>
                       <div className="flex justify-between text-sm text-muted-foreground">
                         <span>{segment.count} عميل</span>
-                        <span>{segment.revenue.toLocaleString()} ر.س</span>
+                        <span>{formatCurrencyKWD(segment.revenue)}</span>
                       </div>
                     </div>
                   ))}
@@ -352,7 +353,7 @@ const Analytics = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-green-600">{vehicle.revenue.toLocaleString()} ر.س</p>
+                      <p className="font-bold text-green-600">{formatCurrencyKWD(vehicle.revenue)}</p>
                       <p className="text-sm text-muted-foreground">هذا الشهر</p>
                     </div>
                   </div>
@@ -408,7 +409,7 @@ const Analytics = () => {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span>الإيرادات المتوقعة:</span>
-                        <span className="font-bold">72,000 ر.س</span>
+                        <span className="font-bold">{formatCurrencyKWD(72000)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>العقود المتوقعة:</span>
