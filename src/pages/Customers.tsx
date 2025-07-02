@@ -363,75 +363,81 @@ const Customers = () => {
           <CardTitle>قائمة العملاء</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>رقم العميل</TableHead>
-                <TableHead>الاسم</TableHead>
-                <TableHead>النوع</TableHead>
-                <TableHead>الهاتف</TableHead>
-                <TableHead>البريد الإلكتروني</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead>العقود</TableHead>
-                <TableHead>الإجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {customers.map((customer) => (
-                <TableRow key={customer.id}>
-                  <TableCell className="font-mono">{customer.customer_number}</TableCell>
-                  <TableCell className="font-medium">{customer.name}</TableCell>
-                  <TableCell>{getTypeBadge(customer.customer_type)}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-muted-foreground" />
-                      {customer.phone}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {customer.email ? (
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-muted-foreground" />
-                        {customer.email}
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground">غير محدد</span>
-                    )}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(customer.status)}</TableCell>
-                  <TableCell>{customer.total_contracts}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedCustomer(customer);
-                            setShowDetailsDialog(true);
-                          }}
-                        >
-                          <Eye className="w-4 h-4 ml-2" />
-                          عرض التفاصيل
-                        </DropdownMenuItem>
-                        {canAddCustomers && (
-                          <DropdownMenuItem onClick={() => handleEditCustomer(customer)}>
-                            <Edit className="w-4 h-4 ml-2" />
-                            تعديل
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-32 text-right">رقم العميل</TableHead>
+                  <TableHead className="w-48 text-right">الاسم</TableHead>
+                  <TableHead className="w-24 text-right">النوع</TableHead>
+                  <TableHead className="w-40 text-right">الهاتف</TableHead>
+                  <TableHead className="w-52 text-right">البريد الإلكتروني</TableHead>
+                  <TableHead className="w-24 text-right">الحالة</TableHead>
+                  <TableHead className="w-20 text-right text-center">العقود</TableHead>
+                  <TableHead className="w-24 text-right text-center">الإجراءات</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {customers.map((customer) => (
+                  <TableRow key={customer.id}>
+                    <TableCell className="w-32 font-mono text-right">{customer.customer_number}</TableCell>
+                    <TableCell className="w-48 font-medium text-right">{customer.name}</TableCell>
+                    <TableCell className="w-24 text-right">{getTypeBadge(customer.customer_type)}</TableCell>
+                    <TableCell className="w-40 text-right">
+                      <div className="flex items-center justify-start gap-2">
+                        <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <span className="truncate">{customer.phone}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-52 text-right">
+                      {customer.email ? (
+                        <div className="flex items-center justify-start gap-2">
+                          <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <span className="truncate">{customer.email}</span>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">غير محدد</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="w-24 text-right">{getStatusBadge(customer.status)}</TableCell>
+                    <TableCell className="w-20 text-center">{customer.total_contracts}</TableCell>
+                    <TableCell className="w-24 text-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+                          <DropdownMenuLabel className="text-right">الإجراءات</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-right cursor-pointer"
+                            onClick={() => {
+                              setSelectedCustomer(customer);
+                              setShowDetailsDialog(true);
+                            }}
+                          >
+                            <Eye className="w-4 h-4 ml-2" />
+                            عرض التفاصيل
+                          </DropdownMenuItem>
+                          {canAddCustomers && (
+                            <DropdownMenuItem 
+                              className="text-right cursor-pointer"
+                              onClick={() => handleEditCustomer(customer)}
+                            >
+                              <Edit className="w-4 h-4 ml-2" />
+                              تعديل
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
           
           {customers.length === 0 && (
             <div className="text-center py-8">
