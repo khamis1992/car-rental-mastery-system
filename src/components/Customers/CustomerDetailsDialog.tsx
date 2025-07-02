@@ -196,9 +196,9 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
             {/* تاريخ العميل */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 flex-row-reverse">
+                  <span>تاريخ العميل</span>
                   <History className="w-5 h-5" />
-                  تاريخ العميل
                 </CardTitle>
               </CardHeader>
               <CardContent>
