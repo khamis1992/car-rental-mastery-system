@@ -130,9 +130,11 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ar-SA', {
+    return new Intl.NumberFormat('ar-KW', {
       style: 'currency',
-      currency: 'SAR'
+      currency: 'KWD',
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3
     }).format(amount);
   };
 
@@ -152,9 +154,80 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
 
         <Tabs defaultValue="details" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="details">البيانات الأساسية</TabsTrigger>
             <TabsTrigger value="history">التاريخ والإحصائيات</TabsTrigger>
+            <TabsTrigger value="details">البيانات الأساسية</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="history" className="space-y-4">
+            {/* الإحصائيات */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-primary">{customer.total_contracts}</p>
+                    <p className="text-sm text-muted-foreground">إجمالي العقود</p>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-600">
+                      {formatCurrency(customer.total_revenue)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">إجمالي الإيرادات</p>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-blue-600">
+                      {customer.last_contract_date ? formatDate(customer.last_contract_date) : 'لا توجد'}
+                    </p>
+                    <p className="text-sm text-muted-foreground">آخر عقد</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* تاريخ العميل */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <History className="w-5 h-5" />
+                  تاريخ العميل
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <p className="text-center py-4">جاري التحميل...</p>
+                ) : history.length > 0 ? (
+                  <div className="space-y-4">
+                    {history.map((item) => (
+                      <div key={item.id} className="flex items-start gap-3 p-3 border border-border rounded-lg">
+                        <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                        <div className="flex-1">
+                          <p className="font-medium">{item.description}</p>
+                          {item.notes && (
+                            <p className="text-sm text-muted-foreground mt-1">{item.notes}</p>
+                          )}
+                          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                            <Calendar className="w-3 h-3" />
+                            <span>{formatDate(item.created_at)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center py-4 text-muted-foreground">لا يوجد تاريخ للعميل</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="details" className="space-y-4">
             {/* المعلومات الأساسية */}
@@ -284,76 +357,6 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
             )}
           </TabsContent>
 
-          <TabsContent value="history" className="space-y-4">
-            {/* الإحصائيات */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-primary">{customer.total_contracts}</p>
-                    <p className="text-sm text-muted-foreground">إجمالي العقود</p>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">
-                      {formatCurrency(customer.total_revenue)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">إجمالي الإيرادات</p>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-600">
-                      {customer.last_contract_date ? formatDate(customer.last_contract_date) : 'لا توجد'}
-                    </p>
-                    <p className="text-sm text-muted-foreground">آخر عقد</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* تاريخ العميل */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <History className="w-5 h-5" />
-                  تاريخ العميل
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <p className="text-center py-4">جاري التحميل...</p>
-                ) : history.length > 0 ? (
-                  <div className="space-y-4">
-                    {history.map((item) => (
-                      <div key={item.id} className="flex items-start gap-3 p-3 border border-border rounded-lg">
-                        <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                        <div className="flex-1">
-                          <p className="font-medium">{item.description}</p>
-                          {item.notes && (
-                            <p className="text-sm text-muted-foreground mt-1">{item.notes}</p>
-                          )}
-                          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                            <Calendar className="w-3 h-3" />
-                            <span>{formatDate(item.created_at)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center py-4 text-muted-foreground">لا يوجد تاريخ للعميل</p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>
