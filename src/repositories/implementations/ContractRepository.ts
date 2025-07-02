@@ -141,6 +141,74 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
     return data;
   }
 
+  async updateContractSignature(id: string, signatureType: 'customer' | 'company', signature: string) {
+    const updateData: any = {
+      updated_at: new Date().toISOString()
+    };
+
+    if (signatureType === 'customer') {
+      updateData.customer_signature = signature;
+      updateData.customer_signed_at = new Date().toISOString();
+    } else {
+      updateData.company_signature = signature;
+      updateData.company_signed_at = new Date().toISOString();
+    }
+
+    // Check if this completes the signing process
+    const contract = await this.getContractById(id);
+    const hasCustomerSignature = signatureType === 'customer' || contract.customer_signature;
+    const hasCompanySignature = signatureType === 'company' || contract.company_signature;
+
+    // If both signatures are now present and status is draft, move to pending
+    if (hasCustomerSignature && hasCompanySignature && contract.status === 'draft') {
+      updateData.status = 'pending';
+    }
+
+    const { data, error } = await supabase
+      .from('contracts')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async markDeliveryCompleted(id: string, deliveryData: any) {
+    const updateData = {
+      ...deliveryData,
+      delivery_completed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data, error } = await supabase
+      .from('contracts')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async markPaymentRegistered(id: string) {
+    const { data, error } = await supabase
+      .from('contracts')
+      .update({
+        payment_registered_at: new Date().toISOString(),
+        status: 'active',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
   async activateContract(id: string, actualStartDate: string, pickupMileage?: number) {
     const { data, error } = await supabase
       .from('contracts')

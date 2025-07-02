@@ -79,4 +79,43 @@ export class ContractBusinessService {
     const totalAmount = dailyRate * rentalDays;
     return totalAmount - discountAmount + taxAmount;
   }
+
+  async updateSignature(id: string, signatureType: 'customer' | 'company', signature: string) {
+    const contract = await this.contractRepository.getContractById(id);
+    if (!contract) {
+      throw new Error('Contract not found');
+    }
+
+    return await this.contractRepository.updateContractSignature(id, signatureType, signature);
+  }
+
+  async markDeliveryCompleted(id: string, deliveryData: any) {
+    const contract = await this.contractRepository.getContractById(id);
+    if (!contract) {
+      throw new Error('Contract not found');
+    }
+
+    if (contract.status !== 'pending') {
+      throw new Error('Contract must be in pending status to mark delivery as completed');
+    }
+
+    return await this.contractRepository.markDeliveryCompleted(id, deliveryData);
+  }
+
+  async registerPayment(id: string) {
+    const contract = await this.contractRepository.getContractById(id);
+    if (!contract) {
+      throw new Error('Contract not found');
+    }
+
+    if (contract.status !== 'pending') {
+      throw new Error('Contract must be in pending status to register payment');
+    }
+
+    if (!contract.delivery_completed_at) {
+      throw new Error('Delivery must be completed before registering payment');
+    }
+
+    return await this.contractRepository.markPaymentRegistered(id);
+  }
 }

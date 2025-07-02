@@ -5,6 +5,7 @@ import { ContractPrintTemplate } from './ContractPrintTemplate';
 import { ElectronicSignature } from './ElectronicSignature';
 import { ContractDeliveryForm } from './ContractDeliveryForm';
 import { ContractReturnForm } from './ContractReturnForm';
+import { ContractPaymentForm } from './ContractPaymentForm';
 import { ContractHeader } from './ContractHeader';
 import { ContractInfoSections } from './ContractInfoSections';
 import { ContractSignatureSection } from './ContractSignatureSection';
@@ -31,6 +32,7 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
   const [showCompanySignature, setShowCompanySignature] = useState(false);
   const [showDeliveryForm, setShowDeliveryForm] = useState(false);
   const [showReturnForm, setShowReturnForm] = useState(false);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showPDFPreview, setShowPDFPreview] = useState(false);
   const { toast } = useToast();
 
@@ -106,7 +108,7 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
 
   const handleSignatureSaved = async (signature: string, type: 'customer' | 'company') => {
     try {
-      const updateData = type === 'customer' 
+      const updateData: any = type === 'customer' 
         ? { 
             customer_signature: signature,
             customer_signed_at: new Date().toISOString()
@@ -116,18 +118,34 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
             company_signed_at: new Date().toISOString()
           };
 
+      // Check if this completes the signing process
+      const hasCustomerSignature = type === 'customer' || contract.customer_signature;
+      const hasCompanySignature = type === 'company' || contract.company_signature;
+
+      // If both signatures are now present and status is draft, move to pending
+      if (hasCustomerSignature && hasCompanySignature && contract.status === 'draft') {
+        updateData.status = 'pending';
+      }
+
       const { error } = await supabase
         .from('contracts')
-        .update(updateData)
+        .update({
+          ...updateData,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', contractId);
 
       if (error) throw error;
 
       loadContract();
       
+      const statusMessage = updateData.status === 'pending' 
+        ? ' وتم تحديث حالة العقد إلى "في انتظار التسليم"'
+        : '';
+      
       toast({
         title: "تم بنجاح",
-        description: `تم حفظ ${type === 'customer' ? 'توقيع العميل' : 'توقيع الشركة'} بنجاح`,
+        description: `تم حفظ ${type === 'customer' ? 'توقيع العميل' : 'توقيع الشركة'} بنجاح${statusMessage}`,
       });
     } catch (error) {
       console.error('Error saving signature:', error);
@@ -166,6 +184,7 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           onDownloadPDF={handleDownloadPDF}
           onShowDelivery={() => setShowDeliveryForm(true)}
           onShowReturn={() => setShowReturnForm(true)}
+          onShowPayment={() => setShowPaymentForm(true)}
         />
 
         <ContractInfoSections contract={contract} />
@@ -214,6 +233,14 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           contract={contract}
           open={showReturnForm}
           onOpenChange={setShowReturnForm}
+          onSuccess={loadContract}
+        />
+
+        {/* Payment Form */}
+        <ContractPaymentForm
+          contract={contract}
+          open={showPaymentForm}
+          onOpenChange={setShowPaymentForm}
           onSuccess={loadContract}
         />
 

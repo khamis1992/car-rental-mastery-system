@@ -946,6 +946,7 @@ export type Database = {
           customer_signature: string | null
           customer_signed_at: string | null
           daily_rate: number
+          delivery_completed_at: string | null
           discount_amount: number | null
           end_date: string
           final_amount: number
@@ -954,6 +955,7 @@ export type Database = {
           id: string
           insurance_amount: number | null
           notes: string | null
+          payment_registered_at: string | null
           pickup_condition_notes: string | null
           pickup_location: string | null
           pickup_mileage: number | null
@@ -988,6 +990,7 @@ export type Database = {
           customer_signature?: string | null
           customer_signed_at?: string | null
           daily_rate: number
+          delivery_completed_at?: string | null
           discount_amount?: number | null
           end_date: string
           final_amount: number
@@ -996,6 +999,7 @@ export type Database = {
           id?: string
           insurance_amount?: number | null
           notes?: string | null
+          payment_registered_at?: string | null
           pickup_condition_notes?: string | null
           pickup_location?: string | null
           pickup_mileage?: number | null
@@ -1030,6 +1034,7 @@ export type Database = {
           customer_signature?: string | null
           customer_signed_at?: string | null
           daily_rate?: number
+          delivery_completed_at?: string | null
           discount_amount?: number | null
           end_date?: string
           final_amount?: number
@@ -1038,6 +1043,7 @@ export type Database = {
           id?: string
           insurance_amount?: number | null
           notes?: string | null
+          payment_registered_at?: string | null
           pickup_condition_notes?: string | null
           pickup_location?: string | null
           pickup_mileage?: number | null

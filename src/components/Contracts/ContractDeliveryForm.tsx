@@ -45,7 +45,7 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
         .update({
           ...deliveryData,
           pickup_mileage: deliveryData.pickup_mileage ? parseInt(deliveryData.pickup_mileage) : null,
-          status: 'active'
+          delivery_completed_at: new Date().toISOString()
         })
         .eq('id', contract.id);
 
@@ -59,7 +59,7 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
 
       toast({
         title: "تم بنجاح",
-        description: "تم تسليم المركبة وتفعيل العقد بنجاح",
+        description: "تم تسليم المركبة بنجاح. يجب تسجيل الدفع لتفعيل العقد.",
       });
 
       onSuccess();
@@ -186,7 +186,7 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
               إلغاء
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'جاري التسليم...' : 'تأكيد التسليم وتفعيل العقد'}
+              {loading ? 'جاري التسليم...' : 'تأكيد التسليم'}
             </Button>
           </div>
         </form>

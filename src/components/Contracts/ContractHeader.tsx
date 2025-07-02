@@ -2,7 +2,7 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { FileText, Printer, Download, Truck, CheckCircle } from 'lucide-react';
+import { FileText, Printer, Download, Truck, CheckCircle, CreditCard } from 'lucide-react';
 
 interface ContractHeaderProps {
   contract: any;
@@ -10,6 +10,7 @@ interface ContractHeaderProps {
   onDownloadPDF: () => void;
   onShowDelivery: () => void;
   onShowReturn: () => void;
+  onShowPayment?: () => void;
 }
 
 export const ContractHeader: React.FC<ContractHeaderProps> = ({
@@ -17,7 +18,8 @@ export const ContractHeader: React.FC<ContractHeaderProps> = ({
   onPrint,
   onDownloadPDF,
   onShowDelivery,
-  onShowReturn
+  onShowReturn,
+  onShowPayment
 }) => {
   const getStatusBadge = (status: string) => {
     const statusMap = {
@@ -43,10 +45,17 @@ export const ContractHeader: React.FC<ContractHeaderProps> = ({
           {getStatusBadge(contract.status)}
           
           {/* Contract Actions */}
-          {contract.status === 'pending' && (
+          {contract.status === 'pending' && !contract.delivery_completed_at && (
             <Button variant="default" size="sm" onClick={onShowDelivery}>
               <Truck className="w-4 h-4 mr-2" />
               تسليم المركبة
+            </Button>
+          )}
+
+          {contract.status === 'pending' && contract.delivery_completed_at && !contract.payment_registered_at && onShowPayment && (
+            <Button variant="default" size="sm" onClick={onShowPayment}>
+              <CreditCard className="w-4 h-4 mr-2" />
+              تسجيل الدفع
             </Button>
           )}
           
