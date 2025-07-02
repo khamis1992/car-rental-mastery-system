@@ -12,7 +12,12 @@ import {
   Bell,
   Settings,
   Clock,
-  Calendar
+  Calendar,
+  Building2,
+  DollarSign,
+  UserCheck,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -30,8 +35,10 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-const mainItems = [
+// الأعمال الأساسية
+const coreBusinessItems = [
   { 
     title: "الرئيسية", 
     url: "/", 
@@ -57,6 +64,10 @@ const mainItems = [
     url: "/contracts", 
     icon: FileText 
   },
+];
+
+// المالية
+const financialItems = [
   { 
     title: "المحاسبة", 
     url: "/accounting", 
@@ -67,6 +78,10 @@ const mainItems = [
     url: "/analytics", 
     icon: BarChart3 
   },
+];
+
+// إدارة الأسطول
+const fleetManagementItems = [
   { 
     title: "الصيانة", 
     url: "/maintenance", 
@@ -77,6 +92,10 @@ const mainItems = [
     url: "/violations", 
     icon: AlertTriangle 
   },
+];
+
+// الموارد البشرية
+const hrItems = [
   { 
     title: "الموظفين", 
     url: "/employees", 
@@ -95,11 +114,12 @@ const mainItems = [
   { 
     title: "الرواتب", 
     url: "/payroll", 
-    icon: Calculator 
+    icon: DollarSign 
   },
 ];
 
-const otherItems = [
+// النظام
+const systemItems = [
   { 
     title: "التواصل", 
     url: "/communications", 
@@ -122,6 +142,13 @@ export function AppSidebar() {
   const location = useLocation();
   const { profile } = useAuth();
   const currentPath = location.pathname;
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({
+    core: false,
+    financial: true,
+    fleet: true,
+    hr: true,
+    system: true,
+  });
   
   // محاولة الحصول على الإعدادات مع قيمة افتراضية
   let attendanceEnabled = true;
@@ -134,7 +161,7 @@ export function AppSidebar() {
   }
   
   // فلترة العناصر بناءً على الإعدادات
-  const filteredMainItems = mainItems.filter(item => {
+  const filteredHrItems = hrItems.filter(item => {
     if (item.url === "/attendance" && !attendanceEnabled) {
       return false;
     }
@@ -152,6 +179,17 @@ export function AppSidebar() {
     return isActive(path) 
       ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
       : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground";
+  };
+
+  const toggleGroup = (groupKey: string) => {
+    setCollapsedGroups(prev => ({
+      ...prev,
+      [groupKey]: !prev[groupKey]
+    }));
+  };
+
+  const hasActiveRoute = (items: typeof coreBusinessItems) => {
+    return items.some(item => isActive(item.url));
   };
 
   const getRoleLabel = (role: string) => {
@@ -176,6 +214,68 @@ export function AppSidebar() {
     return roleColors[role] || 'bg-gray-500';
   };
 
+  const renderMenuGroup = (
+    items: typeof coreBusinessItems,
+    groupKey: string,
+    title: string,
+    icon: React.ComponentType<any>
+  ) => {
+    const IconComponent = icon;
+    const isGroupActive = hasActiveRoute(items);
+    const isCollapsed = collapsedGroups[groupKey];
+
+    return (
+      <Collapsible 
+        open={!isCollapsed || isGroupActive} 
+        onOpenChange={() => toggleGroup(groupKey)}
+      >
+        <SidebarGroup>
+          <CollapsibleTrigger asChild>
+            <SidebarGroupLabel 
+              className={`cursor-pointer flex items-center justify-between hover:bg-sidebar-accent/50 rounded-md transition-colors ${
+                isGroupActive ? 'text-sidebar-accent-foreground bg-sidebar-accent/20' : ''
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <IconComponent className="w-4 h-4" />
+                {state === "expanded" && <span>{title}</span>}
+              </div>
+              {state === "expanded" && (
+                <div className="transition-transform duration-200">
+                  {isCollapsed && !isGroupActive ? (
+                    <ChevronRight className="w-3 h-3" />
+                  ) : (
+                    <ChevronDown className="w-3 h-3" />
+                  )}
+                </div>
+              )}
+            </SidebarGroupLabel>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink 
+                        to={item.url} 
+                        end={item.url === "/"}
+                        className={getNavClassName(item.url)}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        {state === "expanded" && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </CollapsibleContent>
+        </SidebarGroup>
+      </Collapsible>
+    );
+  };
+
   return (
     <Sidebar className="border-l" side="right">
       <SidebarHeader className="p-4">
@@ -197,48 +297,11 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>القوائم الرئيسية</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {filteredMainItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url} 
-                      end={item.url === "/"}
-                      className={getNavClassName(item.url)}
-                    >
-                      <item.icon className="w-4 h-4" />
-                      {state === "expanded" && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>أخرى</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {otherItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url}
-                      className={getNavClassName(item.url)}
-                    >
-                      <item.icon className="w-4 h-4" />
-                      {state === "expanded" && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {renderMenuGroup(coreBusinessItems, "core", "الأعمال الأساسية", Building2)}
+        {renderMenuGroup(financialItems, "financial", "المالية", Calculator)}
+        {renderMenuGroup(fleetManagementItems, "fleet", "إدارة الأسطول", Car)}
+        {renderMenuGroup(filteredHrItems, "hr", "الموارد البشرية", UserCheck)}
+        {renderMenuGroup(systemItems, "system", "النظام", Settings)}
       </SidebarContent>
     </Sidebar>
   );
