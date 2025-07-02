@@ -285,7 +285,7 @@ export function AppSidebar() {
           </div>
           {state === "expanded" && (
             <div className="flex-1">
-              <h2 className="text-lg font-bold text-foreground">نظام إدارة تأجير السيارات</h2>
+              <h2 className="text-lg font-bold text-foreground">بشائر لتأجير السيارات</h2>
               {profile && (
                 <Badge className={`text-white text-xs ${getRoleColor(profile.role)}`}>
                   {getRoleLabel(profile.role)}
