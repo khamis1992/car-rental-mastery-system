@@ -25,6 +25,7 @@ interface VehicleDiagramInteractiveProps {
   damages: DamageArea[];
   onDamagesChange: (damages: DamageArea[]) => void;
   onDamageCreate?: (damage: DamageArea) => void;
+  onDamageSelect?: (damage: DamageArea) => void;
   readonly?: boolean;
 }
 
@@ -34,9 +35,9 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
   damages = [],
   onDamagesChange,
   onDamageCreate,
+  onDamageSelect,
   readonly = false
 }) => {
-  const [selectedDamage, setSelectedDamage] = useState<DamageArea | null>(null);
   const [isAddingDamage, setIsAddingDamage] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -74,7 +75,6 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
         description: "يوجد ضرر قريب من هذا الموقع. يرجى اختيار موقع آخر أو تعديل الضرر الموجود.",
         variant: "destructive",
       });
-      setSelectedDamage(nearbyDamage);
       return;
     }
 
@@ -88,12 +88,9 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
       timestamp: new Date().toISOString()
     };
 
-    // Use callback to create temporary damage instead of immediately adding to damages
+    // Create temporary damage and notify parent
     if (onDamageCreate) {
       onDamageCreate(newDamage);
-    } else {
-      // Fallback behavior if no callback provided
-      setSelectedDamage(newDamage);
     }
     setIsAddingDamage(false); // Auto-disable adding mode
   }, [readonly, isAddingDamage, damages, toast]);
@@ -135,7 +132,6 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
       }
 
       onDamagesChange(updatedDamages);
-      setSelectedDamage(null);
       setValidationErrors([]);
       
       toast({
@@ -158,7 +154,6 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
     try {
       const updatedDamages = damages.filter(d => d.id !== damageId);
       onDamagesChange(updatedDamages);
-      setSelectedDamage(null);
       
       toast({
         title: "تم بنجاح",
@@ -305,7 +300,7 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
               المقدمة
             </text>
 
-            {/* Damage Markers */}
+            {/* Damage Markers - only render saved damages */}
             {damages.map((damage) => (
               <g key={damage.id}>
                 <circle
@@ -318,7 +313,9 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
                   className="cursor-pointer hover:scale-110 transition-transform"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelectedDamage(damage);
+                    if (onDamageSelect && !readonly) {
+                      onDamageSelect(damage);
+                    }
                   }}
                 />
                 <foreignObject
@@ -360,7 +357,11 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
                   <div
                     key={damage.id}
                     className="flex items-center justify-between p-2 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => setSelectedDamage(damage)}
+                    onClick={() => {
+                      if (onDamageSelect && !readonly) {
+                        onDamageSelect(damage);
+                      }
+                    }}
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <div

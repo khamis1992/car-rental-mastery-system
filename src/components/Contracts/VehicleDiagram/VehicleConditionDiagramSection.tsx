@@ -34,43 +34,52 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
 }) => {
   const [selectedDamage, setSelectedDamage] = useState<DamageArea | null>(null);
   const [tempDamage, setTempDamage] = useState<DamageArea | null>(null);
+  const [isNewDamage, setIsNewDamage] = useState(false);
   const [activeTab, setActiveTab] = useState('diagram');
 
   const typeLabel = type === 'pickup' ? 'التسليم' : 'الاستلام';
 
   const handleDamageSelect = (damage: DamageArea) => {
     setSelectedDamage(damage);
+    setIsNewDamage(false);
+    setTempDamage(null);
   };
 
   const handleDamageSave = (damage: DamageArea) => {
-    const updatedDamages = [...damages.filter(d => d.id !== damage.id), damage];
-    onDamagesChange(updatedDamages);
+    if (isNewDamage) {
+      // Add new damage to the list
+      const updatedDamages = [...damages, damage];
+      onDamagesChange(updatedDamages);
+    } else {
+      // Update existing damage
+      const updatedDamages = [...damages.filter(d => d.id !== damage.id), damage];
+      onDamagesChange(updatedDamages);
+    }
+    
+    // Reset state
     setSelectedDamage(null);
+    setTempDamage(null);
+    setIsNewDamage(false);
   };
 
   const handleDamageDelete = (damageId: string) => {
     const updatedDamages = damages.filter(d => d.id !== damageId);
     onDamagesChange(updatedDamages);
     setSelectedDamage(null);
+    setTempDamage(null);
+    setIsNewDamage(false);
   };
 
   const handleDamageCreate = (damage: DamageArea) => {
     setTempDamage(damage);
     setSelectedDamage(damage);
+    setIsNewDamage(true);
   };
 
-  const handleTempDamageSave = (damage: DamageArea) => {
-    // Save the temporary damage to the actual damages list
-    const updatedDamages = [...damages, damage];
-    onDamagesChange(updatedDamages);
-    setTempDamage(null);
+  const handleDialogClose = () => {
     setSelectedDamage(null);
-  };
-
-  const handleTempDamageCancel = () => {
-    // Clear temporary damage without saving
     setTempDamage(null);
-    setSelectedDamage(null);
+    setIsNewDamage(false);
   };
 
   return (
@@ -105,8 +114,24 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
               damages={damages}
               onDamagesChange={onDamagesChange}
               onDamageCreate={handleDamageCreate}
+              onDamageSelect={handleDamageSelect}
               readonly={readonly}
             />
+            
+            {/* Show temporary damage marker if exists */}
+            {tempDamage && isNewDamage && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <span className="text-sm font-medium">ضرر جديد في الانتظار</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    انقر "حفظ" في النافذة لإضافة الضرر
+                  </div>
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="photos" className="mt-6">
@@ -221,15 +246,11 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
             open={!!selectedDamage}
             onOpenChange={(open) => {
               if (!open) {
-                if (tempDamage && tempDamage.id === selectedDamage.id) {
-                  handleTempDamageCancel();
-                } else {
-                  setSelectedDamage(null);
-                }
+                handleDialogClose();
               }
             }}
-            onSave={tempDamage && tempDamage.id === selectedDamage.id ? handleTempDamageSave : handleDamageSave}
-            onDelete={tempDamage && tempDamage.id === selectedDamage.id ? undefined : handleDamageDelete}
+            onSave={handleDamageSave}
+            onDelete={isNewDamage ? undefined : handleDamageDelete}
             readonly={readonly}
           />
         )}
