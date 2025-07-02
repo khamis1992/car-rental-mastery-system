@@ -15,10 +15,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { NotificationCenter } from "@/components/Navbar/NotificationCenter";
 import DailyTasksButton from "@/components/Navbar/DailyTasksButton";
+import { useSearch } from "@/contexts/SearchContext";
 
 const Navbar = () => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const { setIsOpen } = useSearch();
 
   const handleSignOut = async () => {
     await signOut();
@@ -69,14 +71,17 @@ const Navbar = () => {
 
         {/* شريط البحث */}
         <div className="flex-1 max-w-md mx-8">
-          <div className="relative">
-            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <input 
-              type="text"
-              placeholder="البحث في النظام..."
-              className="w-full pr-10 pl-4 py-2 bg-muted border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-            />
-          </div>
+          <Button
+            variant="outline"
+            className="w-full justify-start text-muted-foreground h-10 px-3"
+            onClick={() => setIsOpen(true)}
+          >
+            <Search className="w-4 h-4 ml-2" />
+            البحث في النظام...
+            <div className="ml-auto text-xs text-muted-foreground">
+              Ctrl+K
+            </div>
+          </Button>
         </div>
 
         {/* منطقة المستخدم والإشعارات */}

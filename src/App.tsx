@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
+import { SearchProvider } from "@/contexts/SearchContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Layout } from "@/components/Layout/Layout";
 import Index from "./pages/Index";
@@ -28,6 +29,7 @@ import Leaves from "./pages/Leaves";
 import Payroll from "./pages/Payroll";
 import NotFound from "./pages/NotFound";
 import AttendanceReminderWrapper from "@/components/Attendance/AttendanceReminderWrapper";
+import { SearchDialog } from "@/components/Search/SearchDialog";
 
 const queryClient = new QueryClient();
 
@@ -36,137 +38,140 @@ const App = () => (
     <AuthProvider>
       <NotificationProvider>
         <SettingsProvider>
-          <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Index />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/customers" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Customers />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/fleet" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Fleet />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/quotations" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Quotations />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/contracts" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Contracts />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/invoicing" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Invoicing />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/accounting" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Accounting />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/settings" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Settings />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/notifications" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Notifications />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/analytics" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Analytics />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/communications" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Communications />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/maintenance" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Maintenance />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/violations" element={
-              <ProtectedRoute>
-                <Layout>
-                  <TrafficViolations />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/employees" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Employees />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/attendance" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Attendance />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/leaves" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Leaves />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/payroll" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Payroll />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <AttendanceReminderWrapper />
-        </BrowserRouter>
-          </TooltipProvider>
+          <SearchProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Index />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/customers" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Customers />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/fleet" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Fleet />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/quotations" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Quotations />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/contracts" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Contracts />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/invoicing" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Invoicing />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/accounting" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Accounting />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/settings" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Settings />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/notifications" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Notifications />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/analytics" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Analytics />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/communications" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Communications />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/maintenance" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Maintenance />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/violations" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <TrafficViolations />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/employees" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Employees />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/attendance" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Attendance />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/leaves" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Leaves />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/payroll" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Payroll />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <AttendanceReminderWrapper />
+                <SearchDialog />
+              </BrowserRouter>
+            </TooltipProvider>
+          </SearchProvider>
         </SettingsProvider>
       </NotificationProvider>
     </AuthProvider>
