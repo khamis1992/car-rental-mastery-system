@@ -9,7 +9,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DollarSign, Calculator, FileText, Download, Eye, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { formatCurrencyKWD } from '@/lib/currency';
 
 const Payroll = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -84,7 +83,9 @@ const Payroll = () => {
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
-  const formatCurrency = formatCurrencyKWD;
+  const formatCurrency = (amount: number) => {
+    return `${amount.toFixed(3)} د.ك`;
+  };
 
   const filteredPayroll = mockPayrollData.filter(payroll => {
     const matchesSearch = searchTerm === '' || 
@@ -178,10 +179,10 @@ const Payroll = () => {
       {/* التبويبات */}
       <Tabs defaultValue="current" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="current">الشهر الحالي</TabsTrigger>
-          <TabsTrigger value="history">سجل الرواتب</TabsTrigger>
-          <TabsTrigger value="reports">التقارير</TabsTrigger>
           <TabsTrigger value="settings">الإعدادات</TabsTrigger>
+          <TabsTrigger value="reports">التقارير</TabsTrigger>
+          <TabsTrigger value="history">سجل الرواتب</TabsTrigger>
+          <TabsTrigger value="current">الشهر الحالي</TabsTrigger>
         </TabsList>
 
         <TabsContent value="current">

@@ -236,9 +236,9 @@ const Attendance = () => {
       {/* التبويبات */}
       <Tabs defaultValue="today" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="today">اليوم</TabsTrigger>
-          <TabsTrigger value="history">السجل</TabsTrigger>
           <TabsTrigger value="reports">التقارير</TabsTrigger>
+          <TabsTrigger value="history">السجل</TabsTrigger>
+          <TabsTrigger value="today">اليوم</TabsTrigger>
         </TabsList>
 
         <TabsContent value="today">
