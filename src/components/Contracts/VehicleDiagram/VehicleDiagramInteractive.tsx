@@ -24,6 +24,7 @@ interface VehicleDiagramInteractiveProps {
   contractId: string;
   damages: DamageArea[];
   onDamagesChange: (damages: DamageArea[]) => void;
+  onDamageCreate?: (damage: DamageArea) => void;
   readonly?: boolean;
 }
 
@@ -32,6 +33,7 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
   contractId,
   damages = [],
   onDamagesChange,
+  onDamageCreate,
   readonly = false
 }) => {
   const [selectedDamage, setSelectedDamage] = useState<DamageArea | null>(null);
@@ -86,7 +88,10 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
       timestamp: new Date().toISOString()
     };
 
-    setSelectedDamage(newDamage);
+    // Use callback to create temporary damage instead of immediately adding to damages
+    if (onDamageCreate) {
+      onDamageCreate(newDamage);
+    }
     setIsAddingDamage(false); // Auto-disable adding mode
   }, [readonly, isAddingDamage, damages, toast]);
 

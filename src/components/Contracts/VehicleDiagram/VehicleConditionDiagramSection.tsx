@@ -33,6 +33,7 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
   readonly = false
 }) => {
   const [selectedDamage, setSelectedDamage] = useState<DamageArea | null>(null);
+  const [tempDamage, setTempDamage] = useState<DamageArea | null>(null);
   const [activeTab, setActiveTab] = useState('diagram');
 
   const typeLabel = type === 'pickup' ? 'التسليم' : 'الاستلام';
@@ -50,6 +51,25 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
   const handleDamageDelete = (damageId: string) => {
     const updatedDamages = damages.filter(d => d.id !== damageId);
     onDamagesChange(updatedDamages);
+    setSelectedDamage(null);
+  };
+
+  const handleDamageCreate = (damage: DamageArea) => {
+    setTempDamage(damage);
+    setSelectedDamage(damage);
+  };
+
+  const handleTempDamageSave = (damage: DamageArea) => {
+    // Save the temporary damage to the actual damages list
+    const updatedDamages = [...damages, damage];
+    onDamagesChange(updatedDamages);
+    setTempDamage(null);
+    setSelectedDamage(null);
+  };
+
+  const handleTempDamageCancel = () => {
+    // Clear temporary damage without saving
+    setTempDamage(null);
     setSelectedDamage(null);
   };
 
@@ -84,6 +104,7 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
               contractId={contractId}
               damages={damages}
               onDamagesChange={onDamagesChange}
+              onDamageCreate={handleDamageCreate}
               readonly={readonly}
             />
           </TabsContent>
@@ -198,9 +219,17 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
             contractId={contractId}
             type={type}
             open={!!selectedDamage}
-            onOpenChange={(open) => !open && setSelectedDamage(null)}
-            onSave={handleDamageSave}
-            onDelete={handleDamageDelete}
+            onOpenChange={(open) => {
+              if (!open) {
+                if (tempDamage && tempDamage.id === selectedDamage.id) {
+                  handleTempDamageCancel();
+                } else {
+                  setSelectedDamage(null);
+                }
+              }
+            }}
+            onSave={tempDamage && tempDamage.id === selectedDamage.id ? handleTempDamageSave : handleDamageSave}
+            onDelete={tempDamage && tempDamage.id === selectedDamage.id ? undefined : handleDamageDelete}
             readonly={readonly}
           />
         )}
