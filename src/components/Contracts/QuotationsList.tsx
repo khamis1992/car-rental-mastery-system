@@ -176,8 +176,8 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
         throw new Error('عرض السعر غير موجود');
       }
       
-      if (quotation.status !== 'draft') {
-        throw new Error('يمكن إنشاء روابط عامة فقط لعروض الأسعار في حالة مسودة');
+      if (!['draft', 'sent'].includes(quotation.status)) {
+        throw new Error('يمكن إنشاء روابط عامة فقط لعروض الأسعار في حالة مسودة أو مرسلة');
       }
 
       const token = await quotationService.generatePublicLink(id);
@@ -187,16 +187,19 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
       try {
         await navigator.clipboard.writeText(publicUrl);
         toast({
-          title: 'تم إنشاء الرابط العام',
-          description: 'تم نسخ الرابط للحافظة. يمكنك إرساله للعميل الآن.',
+          title: 'تم إنشاء وإرسال العرض',
+          description: 'تم نسخ الرابط للحافظة وتحديث حالة العرض إلى "مرسل".',
         });
       } catch (clipboardError) {
         // في حالة فشل النسخ للحافظة، عرض الرابط للمستخدم
         toast({
-          title: 'تم إنشاء الرابط العام',
+          title: 'تم إنشاء وإرسال العرض',
           description: `الرابط: ${publicUrl}`,
         });
       }
+      
+      // إعادة تحميل البيانات لإظهار الحالة المحدثة
+      window.location.reload();
     } catch (error: any) {
       console.error('Error generating public link:', error);
       toast({
@@ -209,29 +212,6 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
     }
   };
 
-  const handleSendQuotation = async (id: string) => {
-    try {
-      setLoadingStates(prev => ({...prev, [`send_${id}`]: true}));
-      await quotationService.sendPublicQuotation(id, ''); // Email would be provided in real implementation
-      
-      toast({
-        title: 'تم إرسال العرض',
-        description: 'تم تحديث حالة العرض إلى "مرسل"',
-      });
-      
-      // Refresh the list
-      window.location.reload();
-    } catch (error) {
-      console.error('Error sending quotation:', error);
-      toast({
-        title: 'خطأ',
-        description: 'حدث خطأ في إرسال العرض',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoadingStates(prev => ({...prev, [`send_${id}`]: false}));
-    }
-  };
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
@@ -365,35 +345,18 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
                         )}
                       </Button>
 
-                      {quotation.status === 'draft' && (
+                      {['draft', 'sent'].includes(quotation.status) && (
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleGeneratePublicLink(quotation.id)}
                           disabled={loadingStates[`public_${quotation.id}`]}
-                          title="إنشاء رابط عام"
+                          title={quotation.status === 'draft' ? "إنشاء وإرسال العرض" : "إنشاء رابط عام"}
                         >
                           {loadingStates[`public_${quotation.id}`] ? (
                             <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                           ) : (
                             <Share2 className="w-4 h-4" />
-                          )}
-                        </Button>
-                      )}
-
-                      {quotation.status === 'draft' && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleSendQuotation(quotation.id)}
-                          disabled={loadingStates[`send_${quotation.id}`]}
-                          className="text-blue-600"
-                          title="إرسال العرض"
-                        >
-                          {loadingStates[`send_${quotation.id}`] ? (
-                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            'إرسال'
                           )}
                         </Button>
                       )}
