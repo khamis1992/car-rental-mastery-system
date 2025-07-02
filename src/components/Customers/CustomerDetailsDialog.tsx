@@ -243,39 +243,44 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
                     <p className="font-mono text-lg">{customer.customer_number}</p>
+                    <span className="text-muted-foreground">:</span>
                     <label className="text-sm font-medium text-muted-foreground">رقم العميل</label>
                   </div>
                   
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
                     <p className="text-lg font-medium">{customer.name}</p>
+                    <span className="text-muted-foreground">:</span>
                     <label className="text-sm font-medium text-muted-foreground">
                       {customer.customer_type === 'company' ? 'اسم الشركة' : 'الاسم الكامل'}
                     </label>
                   </div>
 
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1">
                       <p>{customer.phone}</p>
                       <Phone className="w-4 h-4 text-muted-foreground" />
                     </div>
+                    <span className="text-muted-foreground">:</span>
                     <label className="text-sm font-medium text-muted-foreground">رقم الهاتف</label>
                   </div>
 
                   {customer.email && (
-                    <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1">
                         <p>{customer.email}</p>
                         <Mail className="w-4 h-4 text-muted-foreground" />
                       </div>
+                      <span className="text-muted-foreground">:</span>
                       <label className="text-sm font-medium text-muted-foreground">البريد الإلكتروني</label>
                     </div>
                   )}
 
                   {customer.national_id && (
-                    <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
                       <p className="font-mono">{customer.national_id}</p>
+                      <span className="text-muted-foreground">:</span>
                       <label className="text-sm font-medium text-muted-foreground">
                         {customer.customer_type === 'company' ? 'رقم السجل التجاري' : 'رقم الهوية'}
                       </label>
@@ -295,22 +300,25 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
                  <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {customer.company_contact_person && (
-                      <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
                         <p>{customer.company_contact_person}</p>
+                        <span className="text-muted-foreground">:</span>
                         <label className="text-sm font-medium text-muted-foreground">الشخص المسؤول</label>
                       </div>
                     )}
 
                     {customer.company_registration_number && (
-                      <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
                         <p className="font-mono">{customer.company_registration_number}</p>
+                        <span className="text-muted-foreground">:</span>
                         <label className="text-sm font-medium text-muted-foreground">رقم السجل التجاري</label>
                       </div>
                     )}
 
                     {customer.tax_number && (
-                      <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
                         <p className="font-mono">{customer.tax_number}</p>
+                        <span className="text-muted-foreground">:</span>
                         <label className="text-sm font-medium text-muted-foreground">الرقم الضريبي</label>
                       </div>
                     )}
