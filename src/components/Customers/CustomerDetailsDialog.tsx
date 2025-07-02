@@ -244,41 +244,51 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">رقم العميل</label>
-                    <p className="font-mono text-lg">{customer.customer_number}</p>
+                    <div className="flex justify-between items-center">
+                      <p className="font-mono text-lg">{customer.customer_number}</p>
+                      <label className="text-sm font-medium text-muted-foreground">رقم العميل</label>
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">
-                      {customer.customer_type === 'company' ? 'اسم الشركة' : 'الاسم الكامل'}
-                    </label>
-                    <p className="text-lg font-medium">{customer.name}</p>
+                    <div className="flex justify-between items-center">
+                      <p className="text-lg font-medium">{customer.name}</p>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        {customer.customer_type === 'company' ? 'اسم الشركة' : 'الاسم الكامل'}
+                      </label>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">رقم الهاتف</label>
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-muted-foreground" />
-                      <p>{customer.phone}</p>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <p>{customer.phone}</p>
+                        <Phone className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                      <label className="text-sm font-medium text-muted-foreground">رقم الهاتف</label>
                     </div>
                   </div>
 
                   {customer.email && (
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">البريد الإلكتروني</label>
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-muted-foreground" />
-                        <p>{customer.email}</p>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <p>{customer.email}</p>
+                          <Mail className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <label className="text-sm font-medium text-muted-foreground">البريد الإلكتروني</label>
                       </div>
                     </div>
                   )}
 
                   {customer.national_id && (
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">
-                        {customer.customer_type === 'company' ? 'رقم السجل التجاري' : 'رقم الهوية'}
-                      </label>
-                      <p className="font-mono">{customer.national_id}</p>
+                      <div className="flex justify-between items-center">
+                        <p className="font-mono">{customer.national_id}</p>
+                        <label className="text-sm font-medium text-muted-foreground">
+                          {customer.customer_type === 'company' ? 'رقم السجل التجاري' : 'رقم الهوية'}
+                        </label>
+                      </div>
                     </div>
                   )}
 
@@ -296,22 +306,28 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {customer.company_contact_person && (
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground">الشخص المسؤول</label>
-                        <p>{customer.company_contact_person}</p>
+                        <div className="flex justify-between items-center">
+                          <p>{customer.company_contact_person}</p>
+                          <label className="text-sm font-medium text-muted-foreground">الشخص المسؤول</label>
+                        </div>
                       </div>
                     )}
 
                     {customer.company_registration_number && (
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground">رقم السجل التجاري</label>
-                        <p className="font-mono">{customer.company_registration_number}</p>
+                        <div className="flex justify-between items-center">
+                          <p className="font-mono">{customer.company_registration_number}</p>
+                          <label className="text-sm font-medium text-muted-foreground">رقم السجل التجاري</label>
+                        </div>
                       </div>
                     )}
 
                     {customer.tax_number && (
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground">الرقم الضريبي</label>
-                        <p className="font-mono">{customer.tax_number}</p>
+                        <div className="flex justify-between items-center">
+                          <p className="font-mono">{customer.tax_number}</p>
+                          <label className="text-sm font-medium text-muted-foreground">الرقم الضريبي</label>
+                        </div>
                       </div>
                     )}
                   </div>
