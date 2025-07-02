@@ -178,7 +178,9 @@ export class VehicleBusinessService {
   private validateVehicleUpdateData(updates: Partial<Vehicle>): void {
     const errors: string[] = [];
 
-    // التحقق من الحقول المحدثة فقط
+    console.log('VehicleBusinessService: بيانات التحديث المستلمة:', updates);
+
+    // التحقق من الحقول المحدثة فقط - ولكن بطريقة أكثر مرونة
     if (updates.make !== undefined && (!updates.make || updates.make.trim() === '')) {
       errors.push('الماركة لا يمكن أن تكون فارغة');
     }
@@ -195,8 +197,12 @@ export class VehicleBusinessService {
       errors.push('اللون لا يمكن أن يكون فارغاً');
     }
 
-    if (updates.vehicle_type !== undefined && (!updates.vehicle_type || updates.vehicle_type.trim() === '')) {
-      errors.push('نوع المركبة لا يمكن أن يكون فارغاً');
+    // تعديل التحقق من نوع المركبة ليكون أكثر مرونة
+    if (updates.vehicle_type !== undefined) {
+      if (!updates.vehicle_type || updates.vehicle_type.trim() === '') {
+        console.log('VehicleBusinessService: نوع المركبة فارغ:', updates.vehicle_type);
+        errors.push('نوع المركبة لا يمكن أن يكون فارغاً');
+      }
     }
 
     if (updates.license_plate !== undefined && (!updates.license_plate || updates.license_plate.trim() === '')) {
@@ -226,6 +232,8 @@ export class VehicleBusinessService {
         errors.push('حالة المركبة غير صحيحة');
       }
     }
+
+    console.log('VehicleBusinessService: أخطاء التحقق:', errors);
 
     if (errors.length > 0) {
       throw new Error(`أخطاء في تحديث بيانات المركبة: ${errors.join(', ')}`);

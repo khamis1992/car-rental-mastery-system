@@ -182,19 +182,22 @@ export const EditVehicleForm: React.FC<EditVehicleFormProps> = ({
                 <Label htmlFor="vehicle_type">نوع المركبة *</Label>
                 <Select
                   value={formData.vehicle_type}
-                  onValueChange={(value) => handleInputChange('vehicle_type', value)}
+                  onValueChange={(value) => {
+                    console.log('EditVehicleForm: تغيير نوع المركبة:', value);
+                    handleInputChange('vehicle_type', value);
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="اختر نوع المركبة" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="سيدان">سيدان</SelectItem>
-                    <SelectItem value="هاتشباك">هاتشباك</SelectItem>
-                    <SelectItem value="SUV">SUV</SelectItem>
-                    <SelectItem value="كوبيه">كوبيه</SelectItem>
-                    <SelectItem value="شاحنة صغيرة">شاحنة صغيرة</SelectItem>
-                    <SelectItem value="فان">فان</SelectItem>
-                    <SelectItem value="كشف">كشف</SelectItem>
+                    <SelectItem value="sedan">سيدان</SelectItem>
+                    <SelectItem value="hatchback">هاتشباك</SelectItem>
+                    <SelectItem value="suv">SUV</SelectItem>
+                    <SelectItem value="coupe">كوبيه</SelectItem>
+                    <SelectItem value="pickup">شاحنة صغيرة</SelectItem>
+                    <SelectItem value="van">فان</SelectItem>
+                    <SelectItem value="luxury">فاخرة</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
