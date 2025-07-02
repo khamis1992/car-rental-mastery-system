@@ -7,33 +7,34 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { formatCurrencyKWD } from '@/lib/currency';
 
 const Accounting = () => {
   const financialStats = [
     {
       title: "الإيرادات الشهرية",
-      value: "45,000 ر.س",
+      value: formatCurrencyKWD(45000),
       change: "+12%",
       icon: <TrendingUp className="w-6 h-6 text-green-500" />,
       trend: "up"
     },
     {
       title: "المدفوعات المعلقة",
-      value: "8,500 ر.س",
+      value: formatCurrencyKWD(8500),
       change: "-5%",
       icon: <CreditCard className="w-6 h-6 text-orange-500" />,
       trend: "down"
     },
     {
       title: "إجمالي المصروفات",
-      value: "12,300 ر.س",
+      value: formatCurrencyKWD(12300),
       change: "+3%",
       icon: <Receipt className="w-6 h-6 text-red-500" />,
       trend: "up"
     },
     {
       title: "صافي الربح",
-      value: "32,700 ر.س",
+      value: formatCurrencyKWD(32700),
       change: "+18%",
       icon: <DollarSign className="w-6 h-6 text-green-600" />,
       trend: "up"
@@ -177,11 +178,11 @@ const Accounting = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className={`font-bold ${
-                        transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()} ر.س
-                      </p>
+                       <p className={`font-bold ${
+                         transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                       }`}>
+                         {transaction.amount > 0 ? '+' : ''}{formatCurrencyKWD(Math.abs(transaction.amount))}
+                       </p>
                       <Badge variant={transaction.status === 'مكتمل' ? 'default' : 'secondary'}>
                         {transaction.status}
                       </Badge>
