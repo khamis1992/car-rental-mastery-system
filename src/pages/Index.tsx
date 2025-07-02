@@ -20,7 +20,7 @@ const Index = () => {
         {/* شاشة الترحيب */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-foreground mb-2">
-            مرحباً بك في بشائر لتأجير السيارات
+            مرحباً بك في البشائر الخليجية لتأجير السيارات
           </h2>
           <p className="text-muted-foreground">
             نظرة شاملة على أعمالك وإدارة متكاملة لجميع عمليات التأجير
