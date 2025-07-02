@@ -138,10 +138,10 @@ const Employees = () => {
       {/* التبويبات */}
       <Tabs defaultValue="list" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="locations">مواقع العمل</TabsTrigger>
-          <TabsTrigger value="positions">المناصب</TabsTrigger>
-          <TabsTrigger value="departments">الأقسام</TabsTrigger>
           <TabsTrigger value="list">قائمة الموظفين</TabsTrigger>
+          <TabsTrigger value="departments">الأقسام</TabsTrigger>
+          <TabsTrigger value="positions">المناصب</TabsTrigger>
+          <TabsTrigger value="locations">مواقع العمل</TabsTrigger>
         </TabsList>
 
         <TabsContent value="list">

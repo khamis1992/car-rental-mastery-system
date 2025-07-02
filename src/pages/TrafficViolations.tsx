@@ -104,7 +104,7 @@ const TrafficViolations = () => {
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between">
         <div className="text-right">
           <h1 className="text-3xl font-bold text-foreground">إدارة المخالفات المرورية</h1>
@@ -145,9 +145,9 @@ const TrafficViolations = () => {
       {/* علامات التبويب */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="reports" className="text-right">التقارير</TabsTrigger>
-          <TabsTrigger value="violation-types" className="text-right">أنواع المخالفات</TabsTrigger>
           <TabsTrigger value="violations" className="text-right">المخالفات</TabsTrigger>
+          <TabsTrigger value="violation-types" className="text-right">أنواع المخالفات</TabsTrigger>
+          <TabsTrigger value="reports" className="text-right">التقارير</TabsTrigger>
         </TabsList>
         
         <TabsContent value="violations" className="space-y-6">

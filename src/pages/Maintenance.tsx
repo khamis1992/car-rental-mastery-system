@@ -20,11 +20,11 @@ const Maintenance = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="costs">التكاليف</TabsTrigger>
-          <TabsTrigger value="alerts">التنبيهات</TabsTrigger>
-          <TabsTrigger value="history">تاريخ الصيانة</TabsTrigger>
-          <TabsTrigger value="scheduler">جدولة الصيانة</TabsTrigger>
           <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
+          <TabsTrigger value="scheduler">جدولة الصيانة</TabsTrigger>
+          <TabsTrigger value="history">تاريخ الصيانة</TabsTrigger>
+          <TabsTrigger value="alerts">التنبيهات</TabsTrigger>
+          <TabsTrigger value="costs">التكاليف</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
