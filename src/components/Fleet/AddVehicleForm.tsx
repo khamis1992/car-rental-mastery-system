@@ -45,6 +45,7 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
       owner_type: 'company',
       depreciation_method: 'straight_line',
       residual_value: 0,
+      has_insurance_policy: true,
     },
   });
 
@@ -127,6 +128,7 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
       owner_type: 'company',
       depreciation_method: 'straight_line',
       residual_value: 0,
+      has_insurance_policy: true,
     });
   };
 

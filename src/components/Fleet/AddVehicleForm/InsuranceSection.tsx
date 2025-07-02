@@ -1,5 +1,5 @@
 import React from 'react';
-import { Control } from 'react-hook-form';
+import { Control, useWatch } from 'react-hook-form';
 import {
   FormControl,
   FormField,
@@ -8,6 +8,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -23,6 +24,13 @@ interface InsuranceSectionProps {
 }
 
 export const InsuranceSection: React.FC<InsuranceSectionProps> = ({ control }) => {
+  // Watch the has_insurance_policy field to conditionally show insurance policy fields
+  const hasInsurancePolicy = useWatch({
+    control,
+    name: 'has_insurance_policy',
+    defaultValue: true
+  });
+
   return (
     <div className="bg-muted/30 rounded-xl p-6 border border-border/50">
       <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -124,45 +132,69 @@ export const InsuranceSection: React.FC<InsuranceSectionProps> = ({ control }) =
         <div className="space-y-6">
           <FormField
             control={control}
-            name="insurance_policy_number"
+            name="has_insurance_policy"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium text-foreground">رقم وثيقة التأمين</FormLabel>
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                 <FormControl>
-                  <div className="relative">
-                    <FileText className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="رقم الوثيقة" 
-                      className="h-12 pr-10 bg-background/60 border-border/60"
-                      {...field} 
-                    />
-                  </div>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </FormControl>
-                <FormMessage />
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="text-sm font-medium text-foreground">
+                    يوجد بوليصة تأمين
+                  </FormLabel>
+                </div>
               </FormItem>
             )}
           />
 
-          <FormField
-            control={control}
-            name="insurance_expiry"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium text-foreground">تاريخ انتهاء التأمين</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      type="date" 
-                      className="h-12 pr-10 bg-background/60 border-border/60"
-                      {...field} 
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {hasInsurancePolicy && (
+            <>
+              <FormField
+                control={control}
+                name="insurance_policy_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-foreground">رقم وثيقة التأمين</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <FileText className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          placeholder="رقم الوثيقة" 
+                          className="h-12 pr-10 bg-background/60 border-border/60"
+                          {...field} 
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="insurance_expiry"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-foreground">تاريخ انتهاء التأمين</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          type="date" 
+                          className="h-12 pr-10 bg-background/60 border-border/60"
+                          {...field} 
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
 
           <FormField
             control={control}

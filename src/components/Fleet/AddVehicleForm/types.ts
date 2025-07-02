@@ -19,6 +19,7 @@ export const vehicleSchema = z.object({
   insurance_company: z.string().optional(),
   insurance_policy_number: z.string().optional(),
   insurance_expiry: z.string().optional(),
+  has_insurance_policy: z.boolean().default(true),
   // Owner type
   owner_type: z.enum(['customer', 'company']).default('company'),
   // Asset depreciation fields (conditional on owner_type being 'company')
