@@ -35,8 +35,8 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
         contracts.terms_and_conditions,
         contracts.notes,
         contracts.created_at,
-        customers!inner(name, phone),
-        vehicles!inner(make, model, vehicle_number)
+        customers(name, phone),
+        vehicles(make, model, vehicle_number)
       `)
       .order('created_at', { ascending: false });
 
