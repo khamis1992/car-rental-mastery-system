@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
 import { Car } from 'lucide-react';
@@ -44,8 +45,11 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
 
   const onSubmit = async (data: VehicleFormData) => {
     try {
+      console.log('بدء إنشاء مركبة جديدة:', data);
+      
       // Generate vehicle number
       const vehicleNumber = await vehicleService.generateVehicleNumber();
+      console.log('تم توليد رقم المركبة:', vehicleNumber);
 
       // Prepare vehicle data
       const vehicleData = {
@@ -71,20 +75,28 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         status: 'available' as const,
       };
 
+      console.log('بيانات المركبة المعدة للإرسال:', vehicleData);
+      
       await vehicleService.createVehicle(vehicleData);
+      console.log('تم إنشاء المركبة بنجاح');
 
       toast({
         title: 'تم إضافة المركبة',
-        description: 'تم إضافة المركبة بنجاح إلى الأسطول',
+        description: `تم إضافة المركبة ${data.make} ${data.model} بنجاح إلى الأسطول`,
       });
 
       form.reset();
       onOpenChange(false);
       onSuccess();
     } catch (error) {
+      console.error('خطأ في إنشاء المركبة:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
+      console.error('تفاصيل الخطأ:', errorMessage);
+      
       toast({
-        title: 'خطأ',
-        description: 'حدث خطأ أثناء إضافة المركبة',
+        title: 'خطأ في إضافة المركبة',
+        description: `فشل في إضافة المركبة: ${errorMessage}`,
         variant: 'destructive',
       });
     }
@@ -106,6 +118,9 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             <Car className="w-6 h-6" />
             إضافة مركبة جديدة
           </DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            قم بملء النموذج أدناه لإضافة مركبة جديدة إلى الأسطول
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
