@@ -43,7 +43,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import CompactAddCustomerForm from '@/components/Customers/CompactAddCustomerForm';
+import CustomerForm from '@/components/Customers/CustomerForm';
 import CustomerDetailsDialog from '@/components/Customers/CustomerDetailsDialog';
 
 interface Customer {
@@ -74,7 +74,9 @@ const Customers = () => {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
 
   const { profile } = useAuth();
   const { toast } = useToast();
@@ -204,6 +206,21 @@ const Customers = () => {
     });
   };
 
+  const handleCustomerUpdated = () => {
+    setShowEditDialog(false);
+    setCustomerToEdit(null);
+    fetchAllCustomers();
+    toast({
+      title: "تم بنجاح",
+      description: "تم تحديث العميل بنجاح",
+    });
+  };
+
+  const handleEditCustomer = (customer: Customer) => {
+    setCustomerToEdit(customer);
+    setShowEditDialog(true);
+  };
+
   const canAddCustomers = profile?.role === 'admin' || profile?.role === 'manager' || profile?.role === 'receptionist';
 
   if (loading) {
@@ -234,7 +251,7 @@ const Customers = () => {
                 </DialogDescription>
               </DialogHeader>
               <div className="flex-1 overflow-y-auto px-1">
-                <CompactAddCustomerForm onCustomerAdded={handleCustomerAdded} />
+                <CustomerForm onSuccess={handleCustomerAdded} mode="add" />
               </div>
             </DialogContent>
           </Dialog>
@@ -403,7 +420,7 @@ const Customers = () => {
                           عرض التفاصيل
                         </DropdownMenuItem>
                         {canAddCustomers && (
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditCustomer(customer)}>
                             <Edit className="w-4 h-4 ml-2" />
                             تعديل
                           </DropdownMenuItem>
@@ -429,6 +446,27 @@ const Customers = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* حوار تعديل العميل */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle>تعديل العميل</DialogTitle>
+            <DialogDescription>
+              تحديث بيانات العميل
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto px-1">
+            {customerToEdit && (
+              <CustomerForm 
+                customer={customerToEdit} 
+                onSuccess={handleCustomerUpdated} 
+                mode="edit" 
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* حوار تفاصيل العميل */}
       {selectedCustomer && (
