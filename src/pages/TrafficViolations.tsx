@@ -145,9 +145,9 @@ const TrafficViolations = () => {
       {/* علامات التبويب */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="violations" className="text-right">المخالفات</TabsTrigger>
-          <TabsTrigger value="violation-types" className="text-right">أنواع المخالفات</TabsTrigger>
           <TabsTrigger value="reports" className="text-right">التقارير</TabsTrigger>
+          <TabsTrigger value="violation-types" className="text-right">أنواع المخالفات</TabsTrigger>
+          <TabsTrigger value="violations" className="text-right">المخالفات</TabsTrigger>
         </TabsList>
         
         <TabsContent value="violations" className="space-y-6">

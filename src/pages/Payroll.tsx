@@ -179,10 +179,10 @@ const Payroll = () => {
       {/* التبويبات */}
       <Tabs defaultValue="current" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="current">الشهر الحالي</TabsTrigger>
-          <TabsTrigger value="history">سجل الرواتب</TabsTrigger>
-          <TabsTrigger value="reports">التقارير</TabsTrigger>
           <TabsTrigger value="settings">الإعدادات</TabsTrigger>
+          <TabsTrigger value="reports">التقارير</TabsTrigger>
+          <TabsTrigger value="history">سجل الرواتب</TabsTrigger>
+          <TabsTrigger value="current">الشهر الحالي</TabsTrigger>
         </TabsList>
 
         <TabsContent value="current">
