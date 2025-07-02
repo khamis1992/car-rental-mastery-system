@@ -116,7 +116,7 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
       <CardContent>
         <div className="relative">
           <svg
-            viewBox="0 0 400 200"
+            viewBox="0 0 400 220"
             className={`w-full h-80 border rounded-lg bg-muted/20 ${
               isAddingDamage && !readonly ? 'cursor-crosshair' : ''
             }`}
