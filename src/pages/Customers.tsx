@@ -203,14 +203,16 @@ const Customers = () => {
                 إضافة عميل جديد
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl">
-              <DialogHeader>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+              <DialogHeader className="flex-shrink-0">
                 <DialogTitle>إضافة عميل جديد</DialogTitle>
                 <DialogDescription>
                   أدخل بيانات العميل الجديد
                 </DialogDescription>
               </DialogHeader>
-              <CompactAddCustomerForm onCustomerAdded={handleCustomerAdded} />
+              <div className="flex-1 overflow-y-auto px-1">
+                <CompactAddCustomerForm onCustomerAdded={handleCustomerAdded} />
+              </div>
             </DialogContent>
           </Dialog>
         )}

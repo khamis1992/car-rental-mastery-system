@@ -186,14 +186,14 @@ const CompactAddCustomerForm: React.FC<CompactAddCustomerFormProps> = ({ onCusto
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="w-full">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {/* البيانات الأساسية */}
         <Card>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg">بيانات العميل الأساسية</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">بيانات العميل الأساسية</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             {/* نوع العميل */}
             <div className="space-y-2">
               <Label>نوع العميل</Label>
@@ -280,9 +280,9 @@ const CompactAddCustomerForm: React.FC<CompactAddCustomerFormProps> = ({ onCusto
               {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </Button>
           </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-4 mt-4">
+          <CollapsibleContent className="space-y-3 mt-3">
             <Card>
-              <CardContent className="pt-4 space-y-4">
+              <CardContent className="pt-3 space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="national_id">
@@ -346,7 +346,7 @@ const CompactAddCustomerForm: React.FC<CompactAddCustomerFormProps> = ({ onCusto
         </Collapsible>
 
         {/* أزرار الإجراء */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
+        <div className="flex justify-end gap-3 pt-3 border-t border-border/50">
           <Button
             type="submit"
             disabled={loading}
