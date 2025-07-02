@@ -169,21 +169,39 @@ export const QuotationsList: React.FC<QuotationsListProps> = ({
   const handleGeneratePublicLink = async (id: string) => {
     try {
       setLoadingStates(prev => ({...prev, [`public_${id}`]: true}));
+      
+      // التحقق من حالة العرض قبل إنشاء الرابط
+      const quotation = quotations.find(q => q.id === id);
+      if (!quotation) {
+        throw new Error('عرض السعر غير موجود');
+      }
+      
+      if (quotation.status !== 'draft') {
+        throw new Error('يمكن إنشاء روابط عامة فقط لعروض الأسعار في حالة مسودة');
+      }
+
       const token = await quotationService.generatePublicLink(id);
       const publicUrl = `${window.location.origin}/public-quotation/${token}`;
       
       // نسخ الرابط للحافظة
-      await navigator.clipboard.writeText(publicUrl);
-      
-      toast({
-        title: 'تم إنشاء الرابط العام',
-        description: 'تم نسخ الرابط للحافظة. يمكنك إرساله للعميل الآن.',
-      });
-    } catch (error) {
+      try {
+        await navigator.clipboard.writeText(publicUrl);
+        toast({
+          title: 'تم إنشاء الرابط العام',
+          description: 'تم نسخ الرابط للحافظة. يمكنك إرساله للعميل الآن.',
+        });
+      } catch (clipboardError) {
+        // في حالة فشل النسخ للحافظة، عرض الرابط للمستخدم
+        toast({
+          title: 'تم إنشاء الرابط العام',
+          description: `الرابط: ${publicUrl}`,
+        });
+      }
+    } catch (error: any) {
       console.error('Error generating public link:', error);
       toast({
-        title: 'خطأ',
-        description: 'حدث خطأ في إنشاء الرابط العام',
+        title: 'خطأ في إنشاء الرابط العام',
+        description: error.message || 'حدث خطأ غير متوقع',
         variant: 'destructive',
       });
     } finally {

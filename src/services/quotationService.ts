@@ -101,7 +101,15 @@ export const quotationService = {
         expires_in_days: expiresInDays
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Database error generating public link:', error);
+      throw new Error(error.message || 'فشل في إنشاء الرابط العام');
+    }
+    
+    if (!data) {
+      throw new Error('لم يتم إرجاع رمز صالح من قاعدة البيانات');
+    }
+    
     return data;
   },
 
