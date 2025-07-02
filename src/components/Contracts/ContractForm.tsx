@@ -106,14 +106,13 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   // Auto-populate form when quotation is selected
   React.useEffect(() => {
     const loadQuotationData = async () => {
-      if (selectedQuotation || selectedQuote) {
+      if (selectedQuotation) {
         try {
           // Get full quotation details
-          const quotationId = selectedQuotation || selectedQuote?.id;
-          if (quotationId && onGetQuotationDetails) {
-            const quotationDetails = await onGetQuotationDetails(quotationId);
+          if (onGetQuotationDetails) {
+            const quotationDetails = await onGetQuotationDetails(selectedQuotation);
             
-            // Auto-populate form fields
+            // Auto-populate all form fields from quotation
             form.setValue('customer_id', quotationDetails.customer_id);
             form.setValue('vehicle_id', quotationDetails.vehicle_id);
             form.setValue('quotation_id', quotationDetails.id);
@@ -123,17 +122,30 @@ export const ContractForm: React.FC<ContractFormProps> = ({
             form.setValue('discount_amount', quotationDetails.discount_amount || 0);
             form.setValue('tax_amount', quotationDetails.tax_amount || 0);
             
+            // Determine contract type based on rental days
+            const startDate = new Date(quotationDetails.start_date);
+            const endDate = new Date(quotationDetails.end_date);
+            const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+            
+            let contractType: 'daily' | 'weekly' | 'monthly' | 'custom' = 'daily';
+            if (days >= 30) {
+              contractType = 'monthly';
+            } else if (days >= 7) {
+              contractType = 'weekly';
+            } else if (days === 1) {
+              contractType = 'daily';
+            } else {
+              contractType = 'custom';
+            }
+            
+            form.setValue('contract_type', contractType);
+            
             if (quotationDetails.special_conditions) {
               form.setValue('special_conditions', quotationDetails.special_conditions);
             }
             if (quotationDetails.terms_and_conditions) {
               form.setValue('terms_and_conditions', quotationDetails.terms_and_conditions);
             }
-          } else if (selectedQuote) {
-            // Fallback for basic quotation data
-            form.setValue('customer_id', selectedQuote.customer_id);
-            form.setValue('vehicle_id', selectedQuote.vehicle_id);
-            form.setValue('quotation_id', selectedQuote.id);
           }
         } catch (error) {
           console.error('Error loading quotation details:', error);
@@ -142,7 +154,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
     };
 
     loadQuotationData();
-  }, [selectedQuotation, selectedQuote, form, onGetQuotationDetails]);
+  }, [selectedQuotation, form, onGetQuotationDetails]);
 
   // Update daily rate when vehicle changes
   React.useEffect(() => {
