@@ -153,14 +153,12 @@ export const VehicleConditionComparison: React.FC<VehicleConditionComparisonProp
             type="pickup"
             contractId={contractId}
             damages={pickupDamages}
-            onDamagesChange={() => {}}
             readonly={true}
           />
           <VehicleDiagramInteractive
             type="return"
             contractId={contractId}
             damages={returnDamages}
-            onDamagesChange={() => {}}
             readonly={true}
           />
         </div>

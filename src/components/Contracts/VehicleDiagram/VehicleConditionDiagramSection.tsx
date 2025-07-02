@@ -112,7 +112,6 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
               type={type}
               contractId={contractId}
               damages={damages}
-              onDamagesChange={onDamagesChange}
               onDamageCreate={handleDamageCreate}
               onDamageSelect={handleDamageSelect}
               readonly={readonly}

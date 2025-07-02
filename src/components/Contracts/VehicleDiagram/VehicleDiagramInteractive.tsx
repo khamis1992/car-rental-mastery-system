@@ -23,7 +23,6 @@ interface VehicleDiagramInteractiveProps {
   type: 'pickup' | 'return';
   contractId: string;
   damages: DamageArea[];
-  onDamagesChange: (damages: DamageArea[]) => void;
   onDamageCreate?: (damage: DamageArea) => void;
   onDamageSelect?: (damage: DamageArea) => void;
   readonly?: boolean;
@@ -33,7 +32,6 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
   type,
   contractId,
   damages = [],
-  onDamagesChange,
   onDamageCreate,
   onDamageSelect,
   readonly = false
@@ -95,79 +93,8 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
     setIsAddingDamage(false); // Auto-disable adding mode
   }, [readonly, isAddingDamage, damages, toast]);
 
-  const saveDamage = useCallback(async (damage: DamageArea) => {
-    setIsSaving(true);
-    
-    // Validate damage before saving
-    const validation = validateDamage(damage);
-    if (!validation.isValid) {
-      setValidationErrors(validation.errors);
-      toast({
-        title: "خطأ في التحقق",
-        description: validation.errors.join(', '),
-        variant: "destructive",
-      });
-      setIsSaving(false);
-      return;
-    }
-
-    // Show warnings if any
-    if (validation.warnings.length > 0) {
-      toast({
-        title: "تنبيه",
-        description: validation.warnings.join(', '),
-      });
-    }
-
-    try {
-      const updatedDamages = [...damages.filter(d => d.id !== damage.id), damage];
-      
-      // Validate the entire damage list
-      const listValidation = validateDamageList(updatedDamages);
-      if (listValidation.warnings.length > 0) {
-        toast({
-          title: "تنبيهات التحقق",
-          description: listValidation.warnings.join(', '),
-        });
-      }
-
-      onDamagesChange(updatedDamages);
-      setValidationErrors([]);
-      
-      toast({
-        title: "تم بنجاح",
-        description: "تم حفظ بيانات الضرر بنجاح",
-      });
-    } catch (error) {
-      console.error('Error saving damage:', error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ أثناء حفظ بيانات الضرر",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  }, [damages, onDamagesChange, toast]);
-
-  const removeDamage = useCallback((damageId: string) => {
-    try {
-      const updatedDamages = damages.filter(d => d.id !== damageId);
-      onDamagesChange(updatedDamages);
-      
-      toast({
-        title: "تم بنجاح",
-        description: "تم حذف الضرر بنجاح",
-      });
-    } catch (error) {
-      console.error('Error removing damage:', error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ أثناء حذف الضرر",
-        variant: "destructive",
-      });
-    }
-  }, [damages, onDamagesChange, toast]);
+  // Remove the saveDamage and removeDamage functions since they're not needed
+  // Damages are now only saved through the parent component via dialog
 
   const getSeverityColor = (severity: DamageArea['severity']) => {
     switch (severity) {
