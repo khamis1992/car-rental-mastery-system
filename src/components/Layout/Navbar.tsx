@@ -135,7 +135,10 @@ const Navbar = () => {
               </DropdownMenuItem>
               
               {(profile?.role === 'admin' || profile?.role === 'manager') && (
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => navigate('/settings?tab=users')}
+                >
                   <Shield className="w-4 h-4 ml-2" />
                   إدارة المستخدمين
                 </DropdownMenuItem>

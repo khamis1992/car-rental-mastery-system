@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Settings as SettingsIcon, Users, Building, Shield, Bell, Database, Palette } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,9 @@ const Settings = () => {
   const { profile } = useAuth();
   const { systemSettings: globalSystemSettings, updateSystemSettings } = useSettings();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'company';
+  
   const [companySettings, setCompanySettings] = useState({
     name: 'شركة النجوم لتأجير السيارات',
     email: 'info@najoomrentals.com',
@@ -149,7 +153,7 @@ const Settings = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="company" className="space-y-4">
+      <Tabs defaultValue={activeTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="company">بيانات الشركة</TabsTrigger>
           <TabsTrigger value="system">إعدادات النظام</TabsTrigger>
