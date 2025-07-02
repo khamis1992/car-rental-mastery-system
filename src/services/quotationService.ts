@@ -120,17 +120,17 @@ export const quotationService = {
   },
 
   async getQuotationStats() {
-    const { data: totalCount, error: totalError } = await supabase
+    const { count: totalCount, error: totalError } = await supabase
       .from('quotations')
       .select('*', { count: 'exact', head: true });
 
-    const { data: activeCount, error: activeError } = await supabase
+    const { count: activeCount, error: activeError } = await supabase
       .from('quotations')
       .select('*', { count: 'exact', head: true })
       .in('status', ['sent', 'accepted'])
       .gte('valid_until', new Date().toISOString().split('T')[0]);
 
-    const { data: expiredCount, error: expiredError } = await supabase
+    const { count: expiredCount, error: expiredError } = await supabase
       .from('quotations')
       .select('*', { count: 'exact', head: true })
       .lt('valid_until', new Date().toISOString().split('T')[0])
@@ -148,9 +148,9 @@ export const quotationService = {
     const totalRevenue = totalValue?.reduce((sum, q) => sum + (q.final_amount || 0), 0) || 0;
 
     return {
-      total: totalCount?.length || 0,
-      active: activeCount?.length || 0,
-      expired: expiredCount?.length || 0,
+      total: totalCount || 0,
+      active: activeCount || 0,
+      expired: expiredCount || 0,
       totalValue: totalRevenue,
     };
   },

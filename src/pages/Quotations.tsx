@@ -83,13 +83,13 @@ const Quotations = () => {
     const quotationStatsData = await quotationService.getQuotationStats();
     
     // حساب معدل التحويل
-    const { data: convertedCount } = await supabase
+    const { count: convertedCount } = await supabase
       .from('quotations')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'converted');
 
     const conversionRate = quotationStatsData.total > 0 
-      ? ((convertedCount?.length || 0) / quotationStatsData.total) * 100 
+      ? ((convertedCount || 0) / quotationStatsData.total) * 100 
       : 0;
 
     const avgValue = quotationStatsData.total > 0 
