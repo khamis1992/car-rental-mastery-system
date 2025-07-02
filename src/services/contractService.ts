@@ -36,35 +36,35 @@ export const contractService = {
     const { data, error } = await supabase
       .from('contracts')
       .select(`
-        id,
-        contract_number,
-        customer_id,
-        vehicle_id,
-        quotation_id,
-        start_date,
-        end_date,
-        actual_start_date,
-        actual_end_date,
-        rental_days,
-        contract_type,
-        daily_rate,
-        total_amount,
-        discount_amount,
-        tax_amount,
-        security_deposit,
-        insurance_amount,
-        final_amount,
-        status,
-        pickup_location,
-        return_location,
-        special_conditions,
-        terms_and_conditions,
-        notes,
-        created_at,
+        contracts.id,
+        contracts.contract_number,
+        contracts.customer_id,
+        contracts.vehicle_id,
+        contracts.quotation_id,
+        contracts.start_date,
+        contracts.end_date,
+        contracts.actual_start_date,
+        contracts.actual_end_date,
+        contracts.rental_days,
+        contracts.contract_type,
+        contracts.daily_rate,
+        contracts.total_amount,
+        contracts.discount_amount,
+        contracts.tax_amount,
+        contracts.security_deposit,
+        contracts.insurance_amount,
+        contracts.final_amount,
+        contracts.status,
+        contracts.pickup_location,
+        contracts.return_location,
+        contracts.special_conditions,
+        contracts.terms_and_conditions,
+        contracts.notes,
+        contracts.created_at,
         customers!inner(name, phone),
         vehicles!inner(make, model, vehicle_number)
       `)
-      .order('created_at', { ascending: false });
+      .order('contracts.created_at', { ascending: false });
 
     if (error) throw error;
 
@@ -241,15 +241,15 @@ export const contractService = {
     const { data, error } = await supabase
       .from('contracts')
       .select(`
-        id,
-        contract_number,
-        final_amount,
-        status,
-        created_at,
+        contracts.id,
+        contracts.contract_number,
+        contracts.final_amount,
+        contracts.status,
+        contracts.created_at,
         customers(name),
         vehicles(make, model, vehicle_number)
       `)
-      .order('created_at', { ascending: false })
+      .order('contracts.created_at', { ascending: false })
       .limit(limit);
 
     if (error) throw error;
