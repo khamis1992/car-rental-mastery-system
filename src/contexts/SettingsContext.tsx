@@ -19,7 +19,7 @@ interface SettingsContextType {
 const defaultSettings: SystemSettings = {
   defaultCurrency: 'KWD',
   timeZone: 'Asia/Kuwait',
-  dateFormat: 'DD/MM/YYYY',
+  dateFormat: 'gregorian', // تم تغيير النظام إلى التاريخ الميلادي كافتراضي
   language: 'ar',
   emailNotifications: true,
   smsNotifications: false,

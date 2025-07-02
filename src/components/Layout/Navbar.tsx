@@ -49,7 +49,7 @@ const Navbar = () => {
     return roleColors[role] || 'bg-gray-500';
   };
 
-  const currentDate = new Date().toLocaleDateString('ar-EG', {
+  const currentDate = new Date().toLocaleDateString('ar-KW', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',

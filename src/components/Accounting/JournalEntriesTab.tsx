@@ -464,7 +464,7 @@ export const JournalEntriesTab = () => {
             {filteredEntries.map((entry) => (
               <TableRow key={entry.id}>
                 <TableCell className="font-medium">{entry.entry_number}</TableCell>
-                <TableCell>{new Date(entry.entry_date).toLocaleDateString('ar-KW')}</TableCell>
+                <TableCell>{new Date(entry.entry_date).toLocaleDateString('ar-KW', { calendar: 'gregory' })}</TableCell>
                 <TableCell className="max-w-xs truncate">{entry.description}</TableCell>
                 <TableCell className="font-medium text-green-600">
                   {formatAmount(entry.total_debit)}

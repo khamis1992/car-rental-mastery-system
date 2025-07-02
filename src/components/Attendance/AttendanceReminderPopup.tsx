@@ -280,7 +280,8 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
     weekday: 'long',
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
+    calendar: 'gregory'
   });
 
   const locationStatus = getLocationStatus();

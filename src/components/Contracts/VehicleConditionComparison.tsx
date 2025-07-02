@@ -257,7 +257,7 @@ export const VehicleConditionComparison: React.FC<VehicleConditionComparisonProp
                   {pickupData.date && (
                     <div className="flex justify-between">
                       <span>تاريخ التسليم:</span>
-                      <span>{new Date(pickupData.date).toLocaleDateString('ar-SA')}</span>
+                      <span>{new Date(pickupData.date).toLocaleDateString('ar-KW', { calendar: 'gregory' })}</span>
                     </div>
                   )}
                   {pickupData.notes && (
@@ -295,7 +295,7 @@ export const VehicleConditionComparison: React.FC<VehicleConditionComparisonProp
                   {returnData.date && (
                     <div className="flex justify-between">
                       <span>تاريخ الإرجاع:</span>
-                      <span>{new Date(returnData.date).toLocaleDateString('ar-SA')}</span>
+                      <span>{new Date(returnData.date).toLocaleDateString('ar-KW', { calendar: 'gregory' })}</span>
                     </div>
                   )}
                   {returnData.notes && (

@@ -120,12 +120,13 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
 
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-SA', {
+    return new Date(dateString).toLocaleDateString('ar-KW', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      calendar: 'gregory'
     });
   };
 
