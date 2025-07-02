@@ -161,7 +161,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
     };
 
     loadQuotationData();
-  }, [selectedQuotation, onGetQuotationDetails, form]);
+  }, [selectedQuotation, onGetQuotationDetails]); // Removed 'form' from dependencies
 
   // Update daily rate when vehicle changes
   React.useEffect(() => {
