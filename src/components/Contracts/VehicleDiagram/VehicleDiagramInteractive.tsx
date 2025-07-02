@@ -115,7 +115,6 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
       </CardHeader>
       <CardContent>
         <div className="relative">
-          {/* Vehicle SVG Diagram */}
           <svg
             viewBox="0 0 400 200"
             className={`w-full h-64 border rounded-lg bg-muted/20 ${
@@ -123,65 +122,16 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
             }`}
             onClick={handleDiagramClick}
           >
-            {/* Car Body */}
-            <rect
-              x="50"
-              y="60"
-              width="300"
-              height="80"
-              rx="15"
-              fill="#e5e7eb"
-              stroke="#6b7280"
-              strokeWidth="2"
+            {/* Vehicle Diagram Image */}
+            <image
+              href="/lovable-uploads/ab29ad47-ee4e-4e76-aac1-0652adafa064.png"
+              x="0"
+              y="0"
+              width="400"
+              height="200"
+              preserveAspectRatio="xMidYMid meet"
+              opacity="0.9"
             />
-            
-            {/* Front Bumper */}
-            <rect
-              x="40"
-              y="75"
-              width="20"
-              height="50"
-              rx="10"
-              fill="#d1d5db"
-              stroke="#6b7280"
-              strokeWidth="2"
-            />
-            
-            {/* Rear Bumper */}
-            <rect
-              x="340"
-              y="75"
-              width="20"
-              height="50"
-              rx="10"
-              fill="#d1d5db"
-              stroke="#6b7280"
-              strokeWidth="2"
-            />
-            
-            {/* Windshield */}
-            <rect
-              x="80"
-              y="65"
-              width="240"
-              height="70"
-              rx="8"
-              fill="#bfdbfe"
-              stroke="#3b82f6"
-              strokeWidth="1"
-              opacity="0.7"
-            />
-            
-            {/* Wheels */}
-            <circle cx="100" cy="160" r="15" fill="#374151" stroke="#1f2937" strokeWidth="2" />
-            <circle cx="300" cy="160" r="15" fill="#374151" stroke="#1f2937" strokeWidth="2" />
-            <circle cx="100" cy="40" r="15" fill="#374151" stroke="#1f2937" strokeWidth="2" />
-            <circle cx="300" cy="40" r="15" fill="#374151" stroke="#1f2937" strokeWidth="2" />
-            
-            {/* Doors */}
-            <line x1="120" y1="60" x2="120" y2="140" stroke="#6b7280" strokeWidth="1" />
-            <line x1="200" y1="60" x2="200" y2="140" stroke="#6b7280" strokeWidth="1" />
-            <line x1="280" y1="60" x2="280" y2="140" stroke="#6b7280" strokeWidth="1" />
             
             {/* Labels */}
             <text x="200" y="25" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
