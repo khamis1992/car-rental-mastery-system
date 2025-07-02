@@ -64,7 +64,7 @@ export const contractService = {
         customers(name, phone),
         vehicles(make, model, vehicle_number)
       `)
-      .order('contracts.created_at', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
 
@@ -249,7 +249,7 @@ export const contractService = {
         customers(name),
         vehicles(make, model, vehicle_number)
       `)
-      .order('contracts.created_at', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(limit);
 
     if (error) throw error;
