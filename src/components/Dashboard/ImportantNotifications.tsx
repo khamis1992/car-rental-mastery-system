@@ -42,14 +42,14 @@ const ImportantNotifications = () => {
 
   return (
     <Card className="card-elegant">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-        <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Bell className="w-5 h-5" />
-          التنبيهات المهمة
-        </CardTitle>
+      <CardHeader className="rtl-header space-y-0 pb-3">
         <Badge variant="secondary" className="text-xs">
           {importantNotifications.length}
         </Badge>
+        <CardTitle className="text-lg font-semibold text-foreground rtl-title">
+          <span>التنبيهات المهمة</span>
+          <Bell className="w-5 h-5" />
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {importantNotifications.length === 0 ? (
@@ -68,16 +68,16 @@ const ImportantNotifications = () => {
                   {getIcon(notification.type)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="text-sm font-medium text-foreground truncate">
-                      {notification.title}
-                    </h4>
+                  <div className="rtl-flex mb-1">
                     <Badge 
                       variant="secondary" 
                       className={`text-xs ${getPriorityColor(notification.priority)}`}
                     >
                       {getPriorityLabel(notification.priority)}
                     </Badge>
+                    <h4 className="text-sm font-medium text-foreground truncate">
+                      {notification.title}
+                    </h4>
                   </div>
                   <p className="text-xs text-muted-foreground mb-1">
                     {notification.message}

@@ -59,31 +59,7 @@ const Navbar = () => {
 
   return (
     <header className="bg-card border-b border-border shadow-elegant px-6 py-3">
-      <div className="flex items-center justify-between">
-        {/* زر الشريط الجانبي والتاريخ */}
-        <div className="flex items-center gap-4">
-          <SidebarTrigger />
-          <p className="text-muted-foreground text-sm flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            {currentDate}
-          </p>
-        </div>
-
-        {/* شريط البحث */}
-        <div className="flex-1 max-w-md mx-8">
-          <Button
-            variant="outline"
-            className="w-full justify-start text-muted-foreground h-10 px-3"
-            onClick={() => setIsOpen(true)}
-          >
-            <Search className="w-4 h-4 ml-2" />
-            البحث في النظام...
-            <div className="ml-auto text-xs text-muted-foreground">
-              Ctrl+K
-            </div>
-          </Button>
-        </div>
-
+      <div className="rtl-header">
         {/* منطقة المستخدم والإشعارات */}
         <div className="flex items-center gap-4">
           {/* أيقونة مهام اليوم */}
@@ -156,6 +132,31 @@ const Navbar = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        {/* شريط البحث */}
+        <div className="flex-1 max-w-md mx-8">
+          <Button
+            variant="outline"
+            className="w-full justify-start text-muted-foreground h-10 px-3"
+            onClick={() => setIsOpen(true)}
+          >
+            <Search className="w-4 h-4 ml-2" />
+            البحث في النظام...
+            <div className="ml-auto text-xs text-muted-foreground">
+              Ctrl+K
+            </div>
+          </Button>
+        </div>
+
+        {/* زر الشريط الجانبي والتاريخ */}
+        <div className="rtl-flex gap-4">
+          <p className="text-muted-foreground text-sm rtl-flex">
+            <span>{currentDate}</span>
+            <Calendar className="w-4 h-4" />
+          </p>
+          <SidebarTrigger />
+        </div>
+
       </div>
     </header>
   );

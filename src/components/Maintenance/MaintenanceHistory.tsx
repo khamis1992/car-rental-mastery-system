@@ -214,52 +214,52 @@ export const MaintenanceHistory = () => {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <FileText className="h-4 w-4 text-blue-600" />
+            <div className="rtl-stats">
               <div>
                 <div className="text-2xl font-bold">{filteredRecords.length}</div>
                 <p className="text-xs text-muted-foreground">إجمالي السجلات</p>
               </div>
+              <FileText className="h-4 w-4 text-blue-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <Calendar className="h-4 w-4 text-green-600" />
+            <div className="rtl-stats">
               <div>
                 <div className="text-2xl font-bold">
                   {filteredRecords.filter(r => r.status === 'completed').length}
                 </div>
                 <p className="text-xs text-muted-foreground">صيانة مكتملة</p>
               </div>
+              <Calendar className="h-4 w-4 text-green-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <DollarSign className="h-4 w-4 text-yellow-600" />
+            <div className="rtl-stats">
               <div>
                 <div className="text-2xl font-bold">{calculateTotalCost().toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground">إجمالي التكلفة (د.ك)</p>
               </div>
+              <DollarSign className="h-4 w-4 text-yellow-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <Filter className="h-4 w-4 text-purple-600" />
+            <div className="rtl-stats">
               <div>
                 <div className="text-2xl font-bold">
                   {new Set(filteredRecords.map(r => r.vehicle_id)).size}
                 </div>
                 <p className="text-xs text-muted-foreground">مركبات مختلفة</p>
               </div>
+              <Filter className="h-4 w-4 text-purple-600" />
             </div>
           </CardContent>
         </Card>
@@ -268,7 +268,7 @@ export const MaintenanceHistory = () => {
       {/* أدوات البحث والتصفية */}
       <Card>
         <CardHeader>
-          <CardTitle>تاريخ الصيانة</CardTitle>
+          <CardTitle className="text-right">تاريخ الصيانة</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4 mb-6">

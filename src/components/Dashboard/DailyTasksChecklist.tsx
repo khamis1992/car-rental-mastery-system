@@ -83,23 +83,23 @@ const DailyTasksChecklist = () => {
   return (
     <Card className="card-elegant">
       <CardHeader className="space-y-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <Target className="w-5 h-5" />
-            مهام اليوم
-          </CardTitle>
+        <div className="rtl-header">
           <div className="text-right">
             <div className="text-2xl font-bold text-foreground">
               {completedTasks}/{tasks.length}
             </div>
             <div className="text-xs text-muted-foreground">مكتملة</div>
           </div>
+          <CardTitle className="text-lg font-semibold text-foreground rtl-title">
+            <span>مهام اليوم</span>
+            <Target className="w-5 h-5" />
+          </CardTitle>
         </div>
         
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">التقدم اليومي</span>
+          <div className="rtl-header text-sm">
             <span className="font-medium text-foreground">{completionPercentage}%</span>
+            <span className="text-muted-foreground">التقدم اليومي</span>
           </div>
           <Progress value={completionPercentage} className="h-2" />
         </div>
@@ -138,11 +138,7 @@ const DailyTasksChecklist = () => {
           ))}
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Clock className="w-3 h-3" />
-            آخر تحديث: الآن
-          </div>
+        <div className="rtl-header pt-2 border-t">
           <Button 
             variant="outline" 
             size="sm" 
@@ -150,6 +146,10 @@ const DailyTasksChecklist = () => {
           >
             إضافة مهمة
           </Button>
+          <div className="rtl-flex text-xs text-muted-foreground">
+            <span>آخر تحديث: الآن</span>
+            <Clock className="w-3 h-3" />
+          </div>
         </div>
       </CardContent>
     </Card>

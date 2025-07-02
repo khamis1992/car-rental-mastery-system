@@ -28,13 +28,13 @@ const StatsCard = ({ title, value, subtitle, icon, trend, className = "", action
 
   return (
     <Card className={`card-elegant hover:card-highlight transition-all duration-300 ${className}`}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {title}
-        </CardTitle>
+      <CardHeader className="rtl-header space-y-0 pb-2">
         <div className="text-primary">
           {icon}
         </div>
+        <CardTitle className="text-sm font-medium text-muted-foreground text-right">
+          {title}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold text-foreground mb-1">
@@ -45,15 +45,7 @@ const StatsCard = ({ title, value, subtitle, icon, trend, className = "", action
             {subtitle}
           </p>
         )}
-        <div className="flex items-center justify-between">
-          {trend && (
-            <Badge 
-              variant="secondary" 
-              className={`text-xs ${getTrendColor(trend.type)}`}
-            >
-              {trend.value}
-            </Badge>
-          )}
+        <div className="rtl-header">
           {actionText && onActionClick && (
             <Button
               variant="ghost"
@@ -63,6 +55,14 @@ const StatsCard = ({ title, value, subtitle, icon, trend, className = "", action
             >
               {actionText}
             </Button>
+          )}
+          {trend && (
+            <Badge 
+              variant="secondary" 
+              className={`text-xs ${getTrendColor(trend.type)}`}
+            >
+              {trend.value}
+            </Badge>
           )}
         </div>
       </CardContent>

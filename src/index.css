@@ -226,6 +226,53 @@
     box-shadow: var(--shadow-glow);
   }
   
+  /* RTL Layout Classes */
+  .rtl-flex {
+    @apply flex items-center gap-2 flex-row-reverse;
+  }
+  
+  .rtl-title {
+    @apply flex items-center gap-2 flex-row-reverse font-semibold;
+  }
+  
+  .rtl-label {
+    @apply flex items-center gap-2 flex-row-reverse text-sm font-medium text-muted-foreground;
+  }
+  
+  .rtl-header {
+    @apply flex items-center justify-between flex-row-reverse;
+  }
+  
+  .rtl-button {
+    @apply flex items-center gap-2 flex-row-reverse;
+  }
+  
+  .rtl-card-header {
+    @apply flex items-center justify-between;
+  }
+  
+  .rtl-info-item {
+    @apply flex items-center gap-2 flex-row-reverse;
+  }
+  
+  .rtl-stats {
+    @apply flex items-center space-x-2 space-x-reverse;
+  }
+  
+  /* Arabic text optimization */
+  .arabic-text {
+    @apply text-right;
+    font-feature-settings: "liga" off;
+    text-align: right;
+    direction: rtl;
+  }
+  
+  .mixed-content {
+    @apply text-right;
+    direction: rtl;
+    unicode-bidi: plaintext;
+  }
+  
   /* Print styles */
   @media print {
     .print:block {
