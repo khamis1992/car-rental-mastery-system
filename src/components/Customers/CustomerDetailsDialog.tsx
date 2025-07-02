@@ -331,9 +331,9 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
             {(customer.address || customer.city || customer.country) && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 flex-row-reverse">
+                    <span>العنوان</span>
                     <MapPin className="w-5 h-5" />
-                    العنوان
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
