@@ -52,10 +52,19 @@ export class VehicleBusinessService {
       console.log('VehicleBusinessService: بدء توليد رقم المركبة');
       const result = await this.vehicleRepository.generateVehicleNumber();
       console.log('VehicleBusinessService: تم توليد رقم المركبة:', result);
+      
+      // التحقق مرة أخيرة من صحة الرقم المولد
+      if (!result || typeof result !== 'string') {
+        throw new Error('رقم المركبة المولد غير صالح');
+      }
+      
       return result;
     } catch (error) {
       console.error('VehicleBusinessService: خطأ في توليد رقم المركبة:', error);
-      throw error;
+      if (error instanceof Error) {
+        throw new Error(`فشل في خدمة توليد رقم المركبة: ${error.message}`);
+      }
+      throw new Error('خطأ غير متوقع في خدمة توليد رقم المركبة');
     }
   }
 

@@ -56,14 +56,30 @@ export class VehicleRepository extends BaseRepository<Vehicle> implements IVehic
       
       if (error) {
         console.error('VehicleRepository: خطأ في استدعاء دالة توليد رقم المركبة:', error);
-        throw error;
+        throw new Error(`فشل في توليد رقم المركبة: ${error.message}`);
       }
       
-      console.log('VehicleRepository: تم الحصول على رقم المركبة:', data);
-      return data as string;
+      if (!data) {
+        console.error('VehicleRepository: لم يتم إرجاع رقم مركبة من الدالة');
+        throw new Error('فشل في توليد رقم المركبة: لم يتم إرجاع قيمة');
+      }
+      
+      const vehicleNumber = data as string;
+      console.log('VehicleRepository: تم الحصول على رقم المركبة:', vehicleNumber);
+      
+      // التحقق من صحة تنسيق رقم المركبة
+      if (!vehicleNumber.match(/^VEH\d{4}$/)) {
+        console.error('VehicleRepository: تنسيق رقم المركبة غير صحيح:', vehicleNumber);
+        throw new Error('فشل في توليد رقم المركبة: التنسيق غير صحيح');
+      }
+      
+      return vehicleNumber;
     } catch (error) {
       console.error('VehicleRepository: خطأ في توليد رقم المركبة:', error);
-      throw error;
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('خطأ غير متوقع في توليد رقم المركبة');
     }
   }
 }
