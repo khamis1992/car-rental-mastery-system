@@ -9,6 +9,10 @@ export const vehicleSchema = z.object({
   license_plate: z.string().min(3, 'يجب إدخال رقم اللوحة'),
   vin_number: z.string().optional(),
   body_type: z.string().optional(),
+  // Asset information
+  asset_code: z.string().optional(),
+  asset_code_hierarchy: z.string().optional(),
+  asset_sequence_number: z.number().optional(),
   daily_rate: z.number().min(1, 'يجب إدخال السعر اليومي'),
   weekly_rate: z.number().optional(),
   monthly_rate: z.number().optional(),

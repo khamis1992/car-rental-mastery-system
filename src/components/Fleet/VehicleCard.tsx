@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Car, Calendar, Wrench, AlertTriangle, Edit, Eye } from 'lucide-react';
+import { Car, Calendar, Wrench, AlertTriangle, Edit, Eye, Package } from 'lucide-react';
 import { Vehicle } from '@/repositories/interfaces/IVehicleRepository';
 
 interface VehicleCardProps {
@@ -110,6 +110,17 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onEdit, onVie
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">عداد المسافة:</span>
               <span className="font-medium">{vehicle.mileage.toLocaleString()} كم</span>
+            </div>
+          )}
+          {vehicle.asset_code_hierarchy && vehicle.asset_sequence_number && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground flex items-center gap-1">
+                <Package className="w-3 h-3" />
+                رمز الأصل:
+              </span>
+              <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                {vehicle.asset_code_hierarchy}-{String(vehicle.asset_sequence_number).padStart(4, '0')}
+              </span>
             </div>
           )}
         </div>

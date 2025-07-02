@@ -12,6 +12,7 @@ import {
 import { Form } from '@/components/ui/form';
 import { Car } from 'lucide-react';
 import { BasicInfoSection } from './AddVehicleForm/BasicInfoSection';
+import { AssetInfoSection } from './AddVehicleForm/AssetInfoSection';
 import { PricingSection } from './AddVehicleForm/PricingSection';
 import { AdvancedPricingSection } from './AddVehicleForm/AdvancedPricingSection';
 import { InsuranceSection } from './AddVehicleForm/InsuranceSection';
@@ -156,6 +157,7 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <BasicInfoSection control={form.control} />
+            <AssetInfoSection control={form.control} />
             <PricingSection control={form.control} />
             <AdvancedPricingSection control={form.control} />
             <InsuranceSection control={form.control} />

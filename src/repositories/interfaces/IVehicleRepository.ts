@@ -38,6 +38,9 @@ export interface Vehicle {
   depreciation_method?: 'straight_line' | 'declining_balance';
   previous_accumulated_depreciation?: number;
   asset_id?: string;
+  // Asset hierarchy fields
+  asset_code_hierarchy?: string;
+  asset_sequence_number?: number;
   // Other fields
   registration_expiry?: string;
   last_maintenance_date?: string;

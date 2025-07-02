@@ -225,6 +225,53 @@ export type Database = {
         }
         Relationships: []
       }
+      asset_code_hierarchy: {
+        Row: {
+          code: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          level: number
+          name_ar: string
+          name_en: string | null
+          parent_code: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          level?: number
+          name_ar: string
+          name_en?: string | null
+          parent_code?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          level?: number
+          name_ar?: string
+          name_en?: string | null
+          parent_code?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_code_hierarchy_parent_code_fkey"
+            columns: ["parent_code"]
+            isOneToOne: false
+            referencedRelation: "asset_code_hierarchy"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       asset_depreciation: {
         Row: {
           accumulated_depreciation: number
@@ -2758,7 +2805,9 @@ export type Database = {
       }
       vehicles: {
         Row: {
+          asset_code_hierarchy: string | null
           asset_id: string | null
+          asset_sequence_number: number | null
           body_type: string | null
           color: string
           created_at: string
@@ -2802,7 +2851,9 @@ export type Database = {
           year: number
         }
         Insert: {
+          asset_code_hierarchy?: string | null
           asset_id?: string | null
+          asset_sequence_number?: number | null
           body_type?: string | null
           color: string
           created_at?: string
@@ -2846,7 +2897,9 @@ export type Database = {
           year: number
         }
         Update: {
+          asset_code_hierarchy?: string | null
           asset_id?: string | null
+          asset_sequence_number?: number | null
           body_type?: string | null
           color?: string
           created_at?: string
@@ -2890,6 +2943,13 @@ export type Database = {
           year?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "vehicles_asset_code_hierarchy_fkey"
+            columns: ["asset_code_hierarchy"]
+            isOneToOne: false
+            referencedRelation: "asset_code_hierarchy"
+            referencedColumns: ["code"]
+          },
           {
             foreignKeyName: "vehicles_asset_id_fkey"
             columns: ["asset_id"]
@@ -3144,6 +3204,10 @@ export type Database = {
         Args: { vehicle_id: string; vehicle_data: Json }
         Returns: string
       }
+      create_vehicle_asset_with_hierarchy: {
+        Args: { vehicle_id: string; vehicle_data: Json }
+        Returns: string
+      }
       extract_transaction_features: {
         Args: { description: string; amount: number; transaction_date?: string }
         Returns: Json
@@ -3170,6 +3234,10 @@ export type Database = {
       }
       generate_employee_number: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_hierarchical_asset_code: {
+        Args: { vehicle_type: string; make: string; model: string }
         Returns: string
       }
       generate_invoice_number: {

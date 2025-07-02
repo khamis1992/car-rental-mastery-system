@@ -45,11 +45,12 @@ export class VehicleBusinessService {
       // إذا كانت المركبة ملك الشركة وتحتوي على بيانات الأصل، قم بإنشاء أصل ثابت
       if (vehicleData.owner_type === 'company' && vehicleData.purchase_date && vehicleData.purchase_cost) {
         try {
-          console.log('VehicleBusinessService: إنشاء أصل ثابت للمركبة');
+          console.log('VehicleBusinessService: إنشاء أصل ثابت للمركبة مع الرمز الهرمي');
           const { data: assetFunction, error: functionError } = await (this.vehicleRepository as any).supabase
-            .rpc('create_vehicle_asset', {
+            .rpc('create_vehicle_asset_with_hierarchy', {
               vehicle_id: result.id,
               vehicle_data: JSON.stringify({
+                vehicle_type: vehicleData.vehicle_type,
                 make: vehicleData.make,
                 model: vehicleData.model,
                 license_plate: vehicleData.license_plate,
