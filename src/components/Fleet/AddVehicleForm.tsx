@@ -13,6 +13,7 @@ import { Form } from '@/components/ui/form';
 import { Car } from 'lucide-react';
 import { BasicInfoSection } from './AddVehicleForm/BasicInfoSection';
 import { PricingSection } from './AddVehicleForm/PricingSection';
+import { AdvancedPricingSection } from './AddVehicleForm/AdvancedPricingSection';
 import { InsuranceSection } from './AddVehicleForm/InsuranceSection';
 import { AssetDepreciationSection } from './AddVehicleForm/AssetDepreciationSection';
 import { NotesSection } from './AddVehicleForm/NotesSection';
@@ -66,9 +67,15 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         color: data.color,
         vehicle_type: data.vehicle_type,
         license_plate: data.license_plate,
+        vin_number: data.vin_number || undefined,
+        body_type: data.body_type || undefined,
         daily_rate: data.daily_rate,
         weekly_rate: data.weekly_rate || undefined,
         monthly_rate: data.monthly_rate || undefined,
+        min_daily_rate: data.min_daily_rate || undefined,
+        max_daily_rate: data.max_daily_rate || undefined,
+        mileage_limit: data.mileage_limit || undefined,
+        excess_mileage_cost: data.excess_mileage_cost || undefined,
         engine_size: data.engine_size || undefined,
         fuel_type: data.fuel_type || 'بنزين',
         transmission: data.transmission || 'أوتوماتيك',
@@ -86,6 +93,7 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         useful_life_years: data.useful_life_years || undefined,
         residual_value: data.residual_value || undefined,
         depreciation_method: data.depreciation_method || 'straight_line',
+        previous_accumulated_depreciation: data.previous_accumulated_depreciation || undefined,
         // Other fields
         registration_expiry: data.registration_expiry || undefined,
         notes: data.notes || undefined,
@@ -149,6 +157,7 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <BasicInfoSection control={form.control} />
             <PricingSection control={form.control} />
+            <AdvancedPricingSection control={form.control} />
             <InsuranceSection control={form.control} />
             <AssetDepreciationSection control={form.control} />
             <NotesSection control={form.control} />

@@ -186,6 +186,30 @@ export const AssetDepreciationSection: React.FC<AssetDepreciationSectionProps> =
               </FormItem>
             )}
           />
+
+          <FormField
+            control={control}
+            name="previous_accumulated_depreciation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium text-foreground">الاستهلاك المتراكم السابق</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <DollarSign className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      type="number" 
+                      placeholder="0.000" 
+                      className="h-12 pr-10 pl-12 bg-background/60 border-border/60"
+                      {...field}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                    />
+                    <span className="absolute left-3 top-3 text-sm text-muted-foreground">د.ك</span>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
       </div>
     </div>
