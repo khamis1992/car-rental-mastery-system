@@ -3,18 +3,21 @@ import { ContractRepository } from '@/repositories/implementations/ContractRepos
 import { InvoiceRepository } from '@/repositories/implementations/InvoiceRepository';
 import { PaymentRepository } from '@/repositories/implementations/PaymentRepository';
 import { QuotationRepository } from '@/repositories/implementations/QuotationRepository';
+import { AdditionalChargeRepository } from '@/repositories/implementations/AdditionalChargeRepository';
 
 // Business services
 import { ContractBusinessService } from '@/services/BusinessServices/ContractBusinessService';
 import { InvoiceBusinessService } from '@/services/BusinessServices/InvoiceBusinessService';
 import { PaymentBusinessService } from '@/services/BusinessServices/PaymentBusinessService';
 import { QuotationBusinessService } from '@/services/BusinessServices/QuotationBusinessService';
+import { AdditionalChargeBusinessService } from '@/services/BusinessServices/AdditionalChargeBusinessService';
 
 // Repository interfaces
 import { IContractRepository } from '@/repositories/interfaces/IContractRepository';
 import { IInvoiceRepository } from '@/repositories/interfaces/IInvoiceRepository';
 import { IPaymentRepository } from '@/repositories/interfaces/IPaymentRepository';
 import { IQuotationRepository } from '@/repositories/interfaces/IQuotationRepository';
+import { IAdditionalChargeRepository } from '@/repositories/interfaces/IAdditionalChargeRepository';
 
 export class ServiceContainer {
   private static instance: ServiceContainer;
@@ -24,12 +27,14 @@ export class ServiceContainer {
   private invoiceRepository: IInvoiceRepository;
   private paymentRepository: IPaymentRepository;
   private quotationRepository: IQuotationRepository;
+  private additionalChargeRepository: IAdditionalChargeRepository;
   
   // Business service instances
   private contractBusinessService: ContractBusinessService;
   private invoiceBusinessService: InvoiceBusinessService;
   private paymentBusinessService: PaymentBusinessService;
   private quotationBusinessService: QuotationBusinessService;
+  private additionalChargeBusinessService: AdditionalChargeBusinessService;
 
   private constructor() {
     // Initialize repositories
@@ -37,12 +42,14 @@ export class ServiceContainer {
     this.invoiceRepository = new InvoiceRepository();
     this.paymentRepository = new PaymentRepository();
     this.quotationRepository = new QuotationRepository();
+    this.additionalChargeRepository = new AdditionalChargeRepository();
     
     // Initialize business services with dependencies
     this.contractBusinessService = new ContractBusinessService(this.contractRepository);
     this.invoiceBusinessService = new InvoiceBusinessService(this.invoiceRepository);
     this.paymentBusinessService = new PaymentBusinessService(this.paymentRepository, this.invoiceRepository);
     this.quotationBusinessService = new QuotationBusinessService(this.quotationRepository);
+    this.additionalChargeBusinessService = new AdditionalChargeBusinessService(this.additionalChargeRepository);
   }
 
   static getInstance(): ServiceContainer {
@@ -69,6 +76,10 @@ export class ServiceContainer {
     return this.quotationRepository;
   }
 
+  getAdditionalChargeRepository(): IAdditionalChargeRepository {
+    return this.additionalChargeRepository;
+  }
+
   // Business service getters
   getContractBusinessService(): ContractBusinessService {
     return this.contractBusinessService;
@@ -84,6 +95,10 @@ export class ServiceContainer {
 
   getQuotationBusinessService(): QuotationBusinessService {
     return this.quotationBusinessService;
+  }
+
+  getAdditionalChargeBusinessService(): AdditionalChargeBusinessService {
+    return this.additionalChargeBusinessService;
   }
 }
 

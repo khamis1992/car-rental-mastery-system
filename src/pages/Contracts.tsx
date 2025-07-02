@@ -6,7 +6,7 @@ import { ContractsList } from '@/components/Contracts/ContractsList';
 import { ContractMonitoring } from '@/components/Contracts/ContractMonitoring';
 import { ContractStats } from '@/components/Contracts/ContractStats';
 import { ContractDetailsDialog } from '@/components/Contracts/ContractDetailsDialog';
-import { useContractsData } from '@/hooks/useContractsData';
+import { useContractsDataRefactored } from '@/hooks/useContractsDataRefactored';
 
 const Contracts = () => {
   const [contractFormOpen, setContractFormOpen] = useState(false);
@@ -22,7 +22,7 @@ const Contracts = () => {
     contractStats,
     loading,
     loadData,
-  } = useContractsData();
+  } = useContractsDataRefactored();
 
   // التحقق من وجود quotation parameter في URL
   useEffect(() => {
