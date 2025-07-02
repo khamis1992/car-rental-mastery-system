@@ -46,6 +46,7 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
         .update({
           ...returnData,
           return_mileage: returnData.return_mileage ? parseInt(returnData.return_mileage) : null,
+          return_damages: JSON.parse(JSON.stringify(returnData.return_damages)), // Convert to Json
           status: 'completed'
         })
         .eq('id', contract.id);

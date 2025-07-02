@@ -107,6 +107,8 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
         return_photos,
         pickup_condition_notes,
         return_condition_notes,
+        pickup_damages,
+        return_damages,
         special_conditions,
         terms_and_conditions,
         notes,

@@ -47,6 +47,7 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
         .update({
           ...deliveryData,
           pickup_mileage: deliveryData.pickup_mileage ? parseInt(deliveryData.pickup_mileage) : null,
+          pickup_damages: JSON.parse(JSON.stringify(deliveryData.pickup_damages)), // Convert to Json
           delivery_completed_at: new Date().toISOString()
         })
         .eq('id', contract.id);

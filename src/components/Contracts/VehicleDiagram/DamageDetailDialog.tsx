@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Camera, X, Eye, AlertTriangle, Save, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { photoService } from '@/services/photoService';
+import { validateDamage } from './DamageValidation';
 import type { DamageArea } from './VehicleDiagramInteractive';
 
 interface DamageDetailDialogProps {
@@ -44,13 +45,24 @@ export const DamageDetailDialog: React.FC<DamageDetailDialogProps> = ({
   if (!damage || !editedDamage) return null;
 
   const handleSave = () => {
-    if (!editedDamage.description.trim()) {
+    // Enhanced validation using the validation utility
+    const validation = validateDamage(editedDamage);
+    
+    if (!validation.isValid) {
       toast({
-        title: "خطأ",
-        description: "يرجى إدخال وصف للضرر",
+        title: "خطأ في البيانات",
+        description: validation.errors.join(', '),
         variant: "destructive",
       });
       return;
+    }
+
+    // Show warnings if any
+    if (validation.warnings.length > 0) {
+      toast({
+        title: "تنبيهات",
+        description: validation.warnings.join(', '),
+      });
     }
 
     onSave(editedDamage);

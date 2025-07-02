@@ -37,5 +37,7 @@ export interface ContractPDFData {
   return_photos?: string[];
   pickup_condition_notes?: string;
   return_condition_notes?: string;
+  pickup_damages?: any[];
+  return_damages?: any[];
   created_at: string;
 }

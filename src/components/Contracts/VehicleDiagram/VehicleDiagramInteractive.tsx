@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Car, AlertTriangle, CheckCircle, Camera, X } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Car, AlertTriangle, CheckCircle, Camera, X, Save, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { validateDamage, validateDamageList } from './DamageValidation';
+import { DamageGuidanceHelper } from './DamageGuidanceHelper';
 
 export interface DamageArea {
+  [key: string]: any; // Index signature for Json compatibility
   id: string;
   x: number;
   y: number;
@@ -31,16 +36,45 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
 }) => {
   const [selectedDamage, setSelectedDamage] = useState<DamageArea | null>(null);
   const [isAddingDamage, setIsAddingDamage] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const { toast } = useToast();
 
   const typeLabel = type === 'pickup' ? 'التسليم' : 'الاستلام';
 
-  const handleDiagramClick = (event: React.MouseEvent<SVGElement>) => {
+  const handleDiagramClick = useCallback((event: React.MouseEvent<SVGElement>) => {
     if (readonly || !isAddingDamage) return;
 
     const svg = event.currentTarget;
     const rect = svg.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+    // Validate click position
+    if (x < 0 || x > 100 || y < 0 || y > 100) {
+      toast({
+        title: "خطأ",
+        description: "يرجى النقر داخل حدود مخطط المركبة",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check for nearby damages to avoid duplicates
+    const nearbyDamage = damages.find(damage => {
+      const distance = Math.sqrt(Math.pow(damage.x - x, 2) + Math.pow(damage.y - y, 2));
+      return distance < 5; // Less than 5% distance
+    });
+
+    if (nearbyDamage) {
+      toast({
+        title: "تنبيه",
+        description: "يوجد ضرر قريب من هذا الموقع. يرجى اختيار موقع آخر أو تعديل الضرر الموجود.",
+        variant: "destructive",
+      });
+      setSelectedDamage(nearbyDamage);
+      return;
+    }
 
     const newDamage: DamageArea = {
       id: `damage-${Date.now()}`,
@@ -53,20 +87,84 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
     };
 
     setSelectedDamage(newDamage);
-  };
+    setIsAddingDamage(false); // Auto-disable adding mode
+  }, [readonly, isAddingDamage, damages, toast]);
 
-  const saveDamage = (damage: DamageArea) => {
-    const updatedDamages = [...damages.filter(d => d.id !== damage.id), damage];
-    onDamagesChange(updatedDamages);
-    setSelectedDamage(null);
-    setIsAddingDamage(false);
-  };
+  const saveDamage = useCallback(async (damage: DamageArea) => {
+    setIsSaving(true);
+    
+    // Validate damage before saving
+    const validation = validateDamage(damage);
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
+      toast({
+        title: "خطأ في التحقق",
+        description: validation.errors.join(', '),
+        variant: "destructive",
+      });
+      setIsSaving(false);
+      return;
+    }
 
-  const removeDamage = (damageId: string) => {
-    const updatedDamages = damages.filter(d => d.id !== damageId);
-    onDamagesChange(updatedDamages);
-    setSelectedDamage(null);
-  };
+    // Show warnings if any
+    if (validation.warnings.length > 0) {
+      toast({
+        title: "تنبيه",
+        description: validation.warnings.join(', '),
+      });
+    }
+
+    try {
+      const updatedDamages = [...damages.filter(d => d.id !== damage.id), damage];
+      
+      // Validate the entire damage list
+      const listValidation = validateDamageList(updatedDamages);
+      if (listValidation.warnings.length > 0) {
+        toast({
+          title: "تنبيهات التحقق",
+          description: listValidation.warnings.join(', '),
+        });
+      }
+
+      onDamagesChange(updatedDamages);
+      setSelectedDamage(null);
+      setValidationErrors([]);
+      
+      toast({
+        title: "تم بنجاح",
+        description: "تم حفظ بيانات الضرر بنجاح",
+      });
+    } catch (error) {
+      console.error('Error saving damage:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء حفظ بيانات الضرر",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [damages, onDamagesChange, toast]);
+
+  const removeDamage = useCallback((damageId: string) => {
+    try {
+      const updatedDamages = damages.filter(d => d.id !== damageId);
+      onDamagesChange(updatedDamages);
+      setSelectedDamage(null);
+      
+      toast({
+        title: "تم بنجاح",
+        description: "تم حذف الضرر بنجاح",
+      });
+    } catch (error) {
+      console.error('Error removing damage:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء حذف الضرر",
+        variant: "destructive",
+      });
+    }
+  }, [damages, onDamagesChange, toast]);
 
   const getSeverityColor = (severity: DamageArea['severity']) => {
     switch (severity) {
@@ -91,37 +189,89 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
           <div className="flex items-center gap-2">
             <Car className="w-5 h-5" />
             مخطط المركبة التفاعلي - {typeLabel}
+            {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
           </div>
           {!readonly && (
-            <Button
-              variant={isAddingDamage ? "destructive" : "outline"}
-              size="sm"
-              onClick={() => setIsAddingDamage(!isAddingDamage)}
-            >
-              {isAddingDamage ? (
-                <>
-                  <X className="w-4 h-4 mr-2" />
-                  إلغاء
-                </>
-              ) : (
-                <>
-                  <AlertTriangle className="w-4 h-4 mr-2" />
-                  إضافة ضرر
-                </>
+            <div className="flex gap-2">
+              <Button
+                variant={isAddingDamage ? "destructive" : "outline"}
+                size="sm"
+                onClick={() => setIsAddingDamage(!isAddingDamage)}
+                disabled={isSaving}
+              >
+                {isAddingDamage ? (
+                  <>
+                    <X className="w-4 h-4 mr-2" />
+                    إلغاء
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle className="w-4 h-4 mr-2" />
+                    إضافة ضرر
+                  </>
+                )}
+              </Button>
+              {damages.length > 0 && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    const validation = validateDamageList(damages);
+                    if (validation.errors.length > 0) {
+                      toast({
+                        title: "أخطاء في التحقق",
+                        description: validation.errors.join(', '),
+                        variant: "destructive",
+                      });
+                    } else {
+                      toast({
+                        title: "التحقق مكتمل",
+                        description: `تم التحقق من ${damages.length} ضرر بنجاح`,
+                      });
+                    }
+                  }}
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  التحقق من البيانات
+                </Button>
               )}
-            </Button>
+            </div>
           )}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="relative">
-          <svg
-            viewBox="0 0 400 220"
-            className={`w-full h-80 border rounded-lg bg-muted/20 ${
-              isAddingDamage && !readonly ? 'cursor-crosshair' : ''
-            }`}
-            onClick={handleDiagramClick}
-          >
+        <div className="space-y-4">
+          {/* Validation Errors */}
+          {validationErrors.length > 0 && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>أخطاء في البيانات:</strong>
+                <ul className="list-disc list-inside mt-1">
+                  {validationErrors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Guidance Helper */}
+          <DamageGuidanceHelper 
+            isAddingDamage={isAddingDamage}
+            totalDamages={damages.length}
+            hasPhotos={damages.some(d => d.photos && d.photos.length > 0)}
+            readonly={readonly}
+          />
+
+          <div className="relative">
+            <svg
+              viewBox="0 0 400 220"
+              className={`w-full h-80 border rounded-lg bg-muted/20 transition-all duration-200 ${
+                isAddingDamage && !readonly ? 'cursor-crosshair ring-2 ring-blue-500 ring-opacity-50' : ''
+              } ${isSaving ? 'opacity-50 pointer-events-none' : ''}`}
+              onClick={handleDiagramClick}
+            >
             {/* Vehicle Diagram Image */}
             <image
               href="/lovable-uploads/cf0ef0ce-1c56-4da0-b065-8c130f4f182f.png"
@@ -176,65 +326,81 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
                 </foreignObject>
               </g>
             ))}
-          </svg>
+            </svg>
+          </div>
 
-          {/* Instructions */}
-          {isAddingDamage && !readonly && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-700">
-                انقر على أي مكان في المخطط لإضافة ضرر أو عيب في المركبة
-              </p>
-            </div>
-          )}
-
-          {/* Damage Summary */}
+          {/* Enhanced Damage Summary */}
           {damages.length > 0 && (
-            <div className="mt-4 space-y-2">
-              <h4 className="font-medium text-sm">الأضرار المسجلة ({damages.length}):</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="mt-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium text-sm">الأضرار المسجلة ({damages.length})</h4>
+                <div className="flex gap-1">
+                  <Badge variant="secondary" className="text-xs">
+                    {damages.filter(d => d.severity === 'minor').length} بسيط
+                  </Badge>
+                  <Badge variant="default" className="text-xs">
+                    {damages.filter(d => d.severity === 'major').length} متوسط
+                  </Badge>
+                  <Badge variant="destructive" className="text-xs">
+                    {damages.filter(d => d.severity === 'critical').length} شديد
+                  </Badge>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto">
                 {damages.map((damage) => (
                   <div
                     key={damage.id}
-                    className="flex items-center justify-between p-2 border rounded-lg cursor-pointer hover:bg-muted/50"
+                    className="flex items-center justify-between p-2 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
                     onClick={() => setSelectedDamage(damage)}
                   >
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant={damage.severity === 'critical' ? 'destructive' : 'secondary'}
-                        className="text-xs"
-                      >
-                        {damage.severity === 'minor' && 'بسيط'}
-                        {damage.severity === 'major' && 'متوسط'}
-                        {damage.severity === 'critical' && 'شديد'}
-                      </Badge>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div
+                        className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                          damage.severity === 'minor' ? 'bg-yellow-400' :
+                          damage.severity === 'major' ? 'bg-orange-500' :
+                          'bg-red-500'
+                        }`}
+                      />
                       <span className="text-sm truncate">
                         {damage.description || 'ضرر غير محدد'}
                       </span>
                     </div>
-                    {damage.photos && damage.photos.length > 0 && (
-                      <Camera className="w-4 h-4 text-muted-foreground" />
-                    )}
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {damage.photos && damage.photos.length > 0 && (
+                        <Badge variant="outline" className="text-xs px-1">
+                          {damage.photos.length} <Camera className="w-3 h-3 ml-1" />
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Legend */}
+          {/* Enhanced Legend */}
           <div className="mt-4 p-3 border rounded-lg bg-muted/20">
-            <h4 className="font-medium text-sm mb-2">مفتاح الألوان:</h4>
-            <div className="flex items-center gap-4 text-xs">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                <span>ضرر بسيط</span>
+            <h4 className="font-medium text-sm mb-2">دليل الاستخدام:</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                  <span>ضرر بسيط (خدوش سطحية)</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                  <span>ضرر متوسط (تلف في الطلاء)</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <span>ضرر شديد (تلف هيكلي)</span>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                <span>ضرر متوسط</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <span>ضرر شديد</span>
+              <div className="space-y-1 text-muted-foreground">
+                <p>• انقر على أي ضرر لعرض التفاصيل</p>
+                <p>• استخدم زر "إضافة ضرر" لتسجيل ضرر جديد</p>
+                <p>• يُنصح بإضافة صور للأضرار الشديدة</p>
               </div>
             </div>
           </div>
