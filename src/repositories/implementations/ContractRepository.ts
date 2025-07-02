@@ -66,6 +66,18 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
     return data;
   }
 
+  async updateContract(id: string, updates: any) {
+    const { data, error } = await supabase
+      .from('contracts')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
   async activateContract(id: string, actualStartDate: string, pickupMileage?: number) {
     const { data, error } = await supabase
       .from('contracts')

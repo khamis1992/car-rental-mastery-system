@@ -40,6 +40,16 @@ export class ContractBusinessService {
     return await this.contractRepository.completeContract(id, actualEndDate, returnMileage, fuelLevelReturn);
   }
 
+  async updateContract(id: string, updates: any) {
+    // Business logic for contract updates
+    const contract = await this.contractRepository.getContractById(id);
+    if (!contract) {
+      throw new Error('Contract not found');
+    }
+
+    return await this.contractRepository.updateContract(id, updates);
+  }
+
   async updateContractStatus(id: string, status: 'draft' | 'pending' | 'active' | 'completed' | 'cancelled') {
     // Business logic for status updates
     const contract = await this.contractRepository.getContractById(id);

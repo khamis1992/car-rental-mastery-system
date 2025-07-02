@@ -4,6 +4,7 @@ import { ContractWithDetails } from '@/services/contractService';
 export interface IContractRepository extends IRepositoryWithQuery<ContractWithDetails> {
   getContractsWithDetails(): Promise<ContractWithDetails[]>;
   getContractById(id: string): Promise<any>;
+  updateContract(id: string, updates: any): Promise<any>;
   activateContract(id: string, actualStartDate: string, pickupMileage?: number): Promise<any>;
   completeContract(id: string, actualEndDate: string, returnMileage?: number, fuelLevelReturn?: string): Promise<any>;
   updateContractStatus(id: string, status: 'draft' | 'pending' | 'active' | 'completed' | 'cancelled'): Promise<any>;
