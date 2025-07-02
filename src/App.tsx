@@ -27,6 +27,7 @@ import Attendance from "./pages/Attendance";
 import Leaves from "./pages/Leaves";
 import Payroll from "./pages/Payroll";
 import NotFound from "./pages/NotFound";
+import AttendanceReminderWrapper from "@/components/Attendance/AttendanceReminderWrapper";
 
 const queryClient = new QueryClient();
 
@@ -163,6 +164,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <AttendanceReminderWrapper />
         </BrowserRouter>
           </TooltipProvider>
         </SettingsProvider>

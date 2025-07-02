@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import AttendanceReminderPopup from '@/components/Attendance/AttendanceReminderPopup';
 
 interface Profile {
   id: string;
@@ -41,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showAttendanceReminder, setShowAttendanceReminder] = useState(false);
+  
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -75,13 +74,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setTimeout(async () => {
             const userProfile = await fetchProfile(session.user.id);
             setProfile(userProfile);
-            
-            // إظهار تذكير الحضور بعد تسجيل الدخول
-            const today = new Date().toDateString();
-            const lastCheckIn = localStorage.getItem('lastCheckInDate');
-            if (lastCheckIn !== today) {
-              setShowAttendanceReminder(true);
-            }
           }, 1000); // تأخير قصير للسماح للواجهة بالتحميل
         } else {
           setProfile(null);
@@ -156,10 +148,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider value={value}>
       {children}
-      <AttendanceReminderPopup 
-        isOpen={showAttendanceReminder}
-        onClose={() => setShowAttendanceReminder(false)}
-      />
     </AuthContext.Provider>
   );
 };
