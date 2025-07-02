@@ -447,11 +447,6 @@ const AttendanceReminderPopup: React.FC<AttendanceReminderPopupProps> = ({
           {/* معلومات تشخيصية (للمطورين فقط) */}
           {process.env.NODE_ENV === 'development' && (
             <div className="text-xs text-muted-foreground p-2 bg-muted rounded border">
-              <p>معلومات تشخيصية:</p>
-              <p>• الموقع: {location ? '✓ متاح' : '✗ غير متاح'}</p>
-              <p>• معرف الموظف: {employeeId ? '✓ متاح' : '✗ غير متاح'}</p>
-              <p>• إعدادات الحضور: {attendanceSettings ? '✓ متاحة' : '✗ غير متاحة'}</p>
-              <p>• مواقع المكاتب: {officeLocations.length} موقع</p>
             </div>
           )}
         </div>
