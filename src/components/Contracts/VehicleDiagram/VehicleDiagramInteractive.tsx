@@ -117,7 +117,7 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
         <div className="relative">
           <svg
             viewBox="0 0 400 200"
-            className={`w-full h-64 border rounded-lg bg-muted/20 ${
+            className={`w-full h-80 border rounded-lg bg-muted/20 ${
               isAddingDamage && !readonly ? 'cursor-crosshair' : ''
             }`}
             onClick={handleDiagramClick}
@@ -134,17 +134,17 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
             />
             
             {/* Labels */}
-            <text x="200" y="25" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
-              المقدمة
-            </text>
-            <text x="200" y="185" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
+            <text x="375" y="105" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
               المؤخرة
             </text>
-            <text x="25" y="105" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
+            <text x="200" y="25" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
+              يمين
+            </text>
+            <text x="200" y="185" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
               يسار
             </text>
-            <text x="375" y="105" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
-              يمين
+            <text x="25" y="105" textAnchor="middle" className="text-xs fill-gray-600 font-medium">
+              المقدمة
             </text>
 
             {/* Damage Markers */}
