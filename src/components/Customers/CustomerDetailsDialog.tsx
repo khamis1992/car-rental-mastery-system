@@ -152,7 +152,7 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="details" className="w-full">
+        <Tabs defaultValue="history" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="history">التاريخ والإحصائيات</TabsTrigger>
             <TabsTrigger value="details">البيانات الأساسية</TabsTrigger>
