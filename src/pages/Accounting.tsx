@@ -136,7 +136,7 @@ const Accounting = () => {
       </div>
 
       <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-6 dir-rtl">
           <TabsTrigger value="transactions">المعاملات المالية</TabsTrigger>
           <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
           <TabsTrigger value="journal">القيود المحاسبية</TabsTrigger>
