@@ -31,11 +31,9 @@ import {
   Users, 
   UserPlus, 
   Search, 
-  Filter, 
   MoreHorizontal, 
   Edit, 
-  Eye, 
-  Star,
+  Eye,
   Building,
   User,
   Phone,
@@ -57,7 +55,6 @@ interface Customer {
   national_id?: string;
   address?: string;
   city?: string;
-  rating: number;
   status: 'active' | 'inactive' | 'blocked';
   total_contracts: number;
   total_revenue: number;
@@ -156,21 +153,6 @@ const Customers = () => {
     );
   };
 
-  const getRatingStars = (rating: number) => {
-    return (
-      <div className="flex items-center gap-1">
-        {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            className={`w-4 h-4 ${
-              i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-            }`}
-          />
-        ))}
-        <span className="text-sm text-muted-foreground mr-1">({rating})</span>
-      </div>
-    );
-  };
 
   const handleCustomerAdded = () => {
     setShowAddDialog(false);
@@ -263,7 +245,7 @@ const Customers = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Star className="w-8 h-8 text-yellow-500" />
+              <Users className="w-8 h-8 text-yellow-500" />
               <div>
                 <p className="text-2xl font-bold">
                   {customers.filter(c => c.status === 'active').length}
@@ -327,7 +309,6 @@ const Customers = () => {
                 <TableHead>النوع</TableHead>
                 <TableHead>الهاتف</TableHead>
                 <TableHead>البريد الإلكتروني</TableHead>
-                <TableHead>التقييم</TableHead>
                 <TableHead>الحالة</TableHead>
                 <TableHead>العقود</TableHead>
                 <TableHead>الإجراءات</TableHead>
@@ -355,7 +336,6 @@ const Customers = () => {
                       <span className="text-muted-foreground">غير محدد</span>
                     )}
                   </TableCell>
-                  <TableCell>{getRatingStars(customer.rating)}</TableCell>
                   <TableCell>{getStatusBadge(customer.status)}</TableCell>
                   <TableCell>{customer.total_contracts}</TableCell>
                   <TableCell>

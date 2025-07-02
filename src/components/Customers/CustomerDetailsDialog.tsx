@@ -10,7 +10,6 @@ import {
   Mail, 
   MapPin, 
   Calendar, 
-  Star,
   FileText,
   History
 } from 'lucide-react';
@@ -30,7 +29,7 @@ interface Customer {
   company_contact_person?: string;
   company_registration_number?: string;
   tax_number?: string;
-  rating: number;
+  
   notes?: string;
   status: 'active' | 'inactive' | 'blocked';
   total_contracts: number;
@@ -119,21 +118,6 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
     );
   };
 
-  const getRatingStars = (rating: number) => {
-    return (
-      <div className="flex items-center gap-1">
-        {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            className={`w-4 h-4 ${
-              i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-            }`}
-          />
-        ))}
-        <span className="text-sm text-muted-foreground mr-1">({rating})</span>
-      </div>
-    );
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ar-SA', {
@@ -225,10 +209,6 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
                     </div>
                   )}
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">التقييم</label>
-                    {getRatingStars(customer.rating)}
-                  </div>
                 </div>
               </CardContent>
             </Card>
