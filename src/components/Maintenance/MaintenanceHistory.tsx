@@ -328,7 +328,15 @@ export const MaintenanceHistory = () => {
                   className="p-4 border rounded-lg space-y-3 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-start justify-between">
-                    <div className="space-y-1">
+                    <div className="flex flex-col items-start space-y-2">
+                      {getStatusBadge(record.status)}
+                      {record.cost > 0 && (
+                        <Badge variant="outline" className="text-green-600">
+                          {record.cost.toFixed(2)} د.ك
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="space-y-1 text-right flex-1 mr-4">
                       <div className="font-medium">
                         {record.vehicle_number} - {record.vehicle_make} {record.vehicle_model}
                       </div>
@@ -347,14 +355,6 @@ export const MaintenanceHistory = () => {
                         <div className="text-sm text-muted-foreground">
                           رقم الفاتورة: {record.invoice_number}
                         </div>
-                      )}
-                    </div>
-                    <div className="flex flex-col items-end space-y-2">
-                      {getStatusBadge(record.status)}
-                      {record.cost > 0 && (
-                        <Badge variant="outline" className="text-green-600">
-                          {record.cost.toFixed(2)} د.ك
-                        </Badge>
                       )}
                     </div>
                   </div>
