@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CheckCircle, Circle, Clock, FileText, PenTool, Truck, DollarSign, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { contractService } from '@/services/contractService';
 
 interface ProgressStep {
   id: string;
@@ -10,19 +15,35 @@ interface ProgressStep {
   status: 'completed' | 'current' | 'pending';
 }
 
+interface ContractData {
+  id: string;
+  status: string;
+  contract_number: string;
+  customer_name: string;
+  vehicle_info: string;
+}
+
 interface ContractProgressIndicatorProps {
   currentStatus: string;
   className?: string;
   showLabels?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  interactive?: boolean;
+  contractData?: ContractData;
+  onStatusUpdate?: () => void;
 }
 
 export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps> = ({
   currentStatus,
   className,
   showLabels = true,
-  size = 'md'
+  size = 'md',
+  interactive = false,
+  contractData,
+  onStatusUpdate
 }) => {
+  const [confirmAction, setConfirmAction] = useState<{ stepId: string; title: string; description: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const getSteps = (status: string): ProgressStep[] => {
     const baseSteps = [
       {
@@ -83,35 +104,115 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
     lg: 'w-5 h-5'
   };
 
+  const getNextAllowedStep = (currentStep: string): string | null => {
+    const statusOrder = ['draft', 'pending', 'active', 'payment', 'completed'];
+    const currentIndex = statusOrder.indexOf(currentStep);
+    
+    if (currentIndex >= 0 && currentIndex < statusOrder.length - 1) {
+      return statusOrder[currentIndex + 1];
+    }
+    return null;
+  };
+
+  const canAdvanceToStep = (stepId: string): boolean => {
+    if (!interactive || !contractData) return false;
+    
+    const nextStep = getNextAllowedStep(currentStatus);
+    return stepId === nextStep;
+  };
+
+  const getStepActionText = (stepId: string): { title: string; description: string } => {
+    const actions = {
+      pending: {
+        title: 'تأكيد التوقيع',
+        description: 'هل تريد تحويل العقد إلى حالة "في انتظار التوقيع"؟'
+      },
+      active: {
+        title: 'تفعيل العقد',
+        description: 'هل تريد تفعيل العقد وتسليم المركبة للعميل؟'
+      },
+      payment: {
+        title: 'تسجيل الدفع',
+        description: 'هل تريد الانتقال إلى مرحلة تسجيل المدفوعات؟'
+      },
+      completed: {
+        title: 'إكمال العقد',
+        description: 'هل تريد إكمال العقد واستلام المركبة؟'
+      }
+    };
+    
+    return actions[stepId as keyof typeof actions] || { title: '', description: '' };
+  };
+
+  const handleStepClick = (stepId: string) => {
+    if (!canAdvanceToStep(stepId)) return;
+    
+    const action = getStepActionText(stepId);
+    setConfirmAction({ stepId, ...action });
+  };
+
+  const executeAction = async () => {
+    if (!confirmAction || !contractData) return;
+    
+    setIsLoading(true);
+    try {
+      await contractService.updateContractStatus(contractData.id, confirmAction.stepId as any);
+      onStatusUpdate?.();
+      setConfirmAction(null);
+    } catch (error) {
+      console.error('Error updating contract status:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className={cn("w-full", className)}>
       <div className="flex items-center justify-between">
         {steps.map((step, index) => {
           const Icon = step.icon;
           const isLast = index === steps.length - 1;
+          const isClickable = canAdvanceToStep(step.id);
           
           return (
             <div key={step.id} className="flex flex-col items-center flex-1">
               {/* خط الاتصال */}
               <div className="flex items-center w-full">
                 {/* دائرة الخطوة */}
-                <div
-                  className={cn(
-                    "rounded-full flex items-center justify-center border-2 transition-all duration-300",
-                    sizeClasses[size],
-                    step.status === 'completed' && "bg-green-500 border-green-500 text-white",
-                    step.status === 'current' && "bg-primary border-primary text-white animate-pulse",
-                    step.status === 'pending' && "bg-muted border-muted-foreground/30 text-muted-foreground"
-                  )}
-                >
-                  {step.status === 'completed' ? (
-                    <CheckCircle className={iconSizeClasses[size]} />
-                  ) : step.status === 'current' ? (
-                    <Clock className={iconSizeClasses[size]} />
-                  ) : (
-                    <Icon className={iconSizeClasses[size]} />
-                  )}
-                </div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        className={cn(
+                          "rounded-full flex items-center justify-center border-2 transition-all duration-300",
+                          sizeClasses[size],
+                          step.status === 'completed' && "bg-green-500 border-green-500 text-white",
+                          step.status === 'current' && "bg-primary border-primary text-white animate-pulse",
+                          step.status === 'pending' && "bg-muted border-muted-foreground/30 text-muted-foreground",
+                          isClickable && "cursor-pointer hover:scale-110 hover:shadow-lg",
+                          !isClickable && interactive && "opacity-50"
+                        )}
+                        onClick={() => isClickable && handleStepClick(step.id)}
+                      >
+                        {step.status === 'completed' ? (
+                          <CheckCircle className={iconSizeClasses[size]} />
+                        ) : step.status === 'current' ? (
+                          <Clock className={iconSizeClasses[size]} />
+                        ) : (
+                          <Icon className={iconSizeClasses[size]} />
+                        )}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {isClickable ? 
+                          `انقر للانتقال إلى: ${step.title}` : 
+                          step.description
+                        }
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
 
                 {/* خط الاتصال إلى الخطوة التالية */}
                 {!isLast && (
@@ -150,6 +251,24 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
           );
         })}
       </div>
+
+      {/* حوار التأكيد */}
+      <AlertDialog open={!!confirmAction} onOpenChange={() => setConfirmAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmAction?.title}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmAction?.description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction onClick={executeAction} disabled={isLoading}>
+              {isLoading ? 'جاري التحديث...' : 'تأكيد'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -9,7 +9,7 @@ import { ar } from 'date-fns/locale';
 import { ContractActions } from './ContractActions';
 import { ContractDetailsDialog } from './ContractDetailsDialog';
 import { ContractFiltersComponent, ContractFilters } from './ContractFilters';
-import { CompactProgressIndicator } from './ContractProgressIndicator';
+import { CompactProgressIndicator, ContractProgressIndicator } from './ContractProgressIndicator';
 import { ContractHelp } from './ContractHelp';
 
 interface Contract {
@@ -206,9 +206,22 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                   <TableCell>
                     <div className="font-medium">{contract.final_amount.toFixed(3)} د.ك</div>
                   </TableCell>
-                  <TableCell>
-                    <CompactProgressIndicator status={contract.status} />
-                  </TableCell>
+                   <TableCell>
+                     <ContractProgressIndicator
+                       currentStatus={contract.status}
+                       showLabels={false}
+                       size="sm"
+                       interactive={true}
+                       contractData={{
+                         id: contract.id,
+                         status: contract.status,
+                         contract_number: contract.contract_number,
+                         customer_name: contract.customer_name,
+                         vehicle_info: contract.vehicle_info
+                       }}
+                       onStatusUpdate={() => window.location.reload()}
+                     />
+                   </TableCell>
                   <TableCell>
                     {getStatusBadge(contract.status)}
                   </TableCell>
