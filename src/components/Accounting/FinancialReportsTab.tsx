@@ -56,7 +56,7 @@ export const FinancialReportsTab = () => {
   };
 
   const formatAmount = (amount: number) => {
-    return `${amount.toLocaleString('ar-KW', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} د.ك`;
+    return `${amount.toFixed(3)} د.ك`;
   };
 
   const exportReport = (reportType: string) => {

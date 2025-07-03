@@ -5,12 +5,7 @@ export const useCurrencyFormatter = () => {
   const { systemSettings } = useSettings();
   
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ar-KW', {
-      style: 'currency',
-      currency: systemSettings.defaultCurrency || 'KWD',
-      minimumFractionDigits: 3,
-      maximumFractionDigits: 3
-    }).format(amount);
+    return `${amount.toFixed(3)} د.ك`;
   };
 
   return { formatCurrency };
@@ -18,10 +13,5 @@ export const useCurrencyFormatter = () => {
 
 // Direct utility function for use outside of React components
 export const formatCurrencyKWD = (amount: number) => {
-  return new Intl.NumberFormat('ar-KW', {
-    style: 'currency',
-    currency: 'KWD',
-    minimumFractionDigits: 3,
-    maximumFractionDigits: 3
-  }).format(amount);
+  return `${amount.toFixed(3)} د.ك`;
 };
