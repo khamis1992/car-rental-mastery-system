@@ -182,7 +182,7 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto bg-slate-50/50" dir="rtl">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto bg-background" dir="rtl">
         <DialogHeader className="border-b border-border pb-4">
           <DialogTitle className="text-2xl font-bold text-right flex items-center gap-2">
             <User className="w-6 h-6 text-primary" />
