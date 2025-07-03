@@ -51,6 +51,10 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
   const handleDiagramClick = useCallback((event: React.MouseEvent<SVGElement>) => {
     console.log('🖱️ Diagram clicked. readonly:', readonly, 'isAddingDamage:', isAddingDamage);
     
+    // Prevent default behavior and stop propagation to avoid navigation
+    event.preventDefault();
+    event.stopPropagation();
+    
     if (readonly || !isAddingDamage) {
       console.log('⏹️ Click ignored - readonly or not in adding mode');
       return;
@@ -102,11 +106,24 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
 
     console.log('🎯 Creating temporary damage (NOT adding to list yet):', newDamage);
 
-    // Create temporary damage and notify parent
-    if (onDamageCreate) {
-      onDamageCreate(newDamage);
+    try {
+      // Create temporary damage and notify parent
+      if (onDamageCreate) {
+        console.log('📞 Calling onDamageCreate with damage:', newDamage);
+        onDamageCreate(newDamage);
+        console.log('✅ onDamageCreate completed successfully');
+      } else {
+        console.warn('⚠️ onDamageCreate callback not provided');
+      }
+      setIsAddingDamage(false); // Auto-disable adding mode
+    } catch (error) {
+      console.error('❌ Error in handleDiagramClick:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء إضافة الضرر",
+        variant: "destructive",
+      });
     }
-    setIsAddingDamage(false); // Auto-disable adding mode
   }, [readonly, isAddingDamage, damages, toast, onDamageCreate]);
 
   // Remove the saveDamage and removeDamage functions since they're not needed
@@ -142,7 +159,9 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
               <Button
                 variant={isAddingDamage ? "destructive" : "outline"}
                 size="sm"
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
                   console.log('🔄 Toggling add damage mode. Current:', isAddingDamage);
                   setIsAddingDamage(!isAddingDamage);
                 }}

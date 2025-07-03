@@ -77,13 +77,19 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
   };
 
   const handleDamageCreate = (damage: DamageArea) => {
-    console.log('🆕 Creating new damage (temporary):', damage);
+    console.log('🆕 VehicleConditionDiagramSection: handleDamageCreate called with:', damage);
     console.log('📊 Current damages before creation:', damages.length);
+    console.log('📊 Current state - selectedDamage:', selectedDamage?.id, 'tempDamage:', tempDamage?.id, 'isNewDamage:', isNewDamage);
     
-    // Only set temporary state - don't add to damages list yet
-    setTempDamage(damage);
-    setSelectedDamage(damage);
-    setIsNewDamage(true);
+    try {
+      // Only set temporary state - don't add to damages list yet
+      setTempDamage(damage);
+      setSelectedDamage(damage);
+      setIsNewDamage(true);
+      console.log('✅ State updated successfully - dialog should open now');
+    } catch (error) {
+      console.error('❌ Error in handleDamageCreate:', error);
+    }
   };
 
   const handleDialogClose = () => {
@@ -255,7 +261,9 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
             type={type}
             open={!!selectedDamage}
             onOpenChange={(open) => {
+              console.log('🚪 Dialog onOpenChange called with:', open);
               if (!open) {
+                console.log('🚪 Dialog closing - calling handleDialogClose');
                 handleDialogClose();
               }
             }}
