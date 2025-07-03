@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -229,6 +229,9 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             <User className="w-6 h-6 text-primary" />
             إضافة موظف جديد
           </DialogTitle>
+          <DialogDescription className="text-right text-muted-foreground">
+            قم بتعبئة النموذج أدناه لإضافة موظف جديد إلى النظام
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 p-1">

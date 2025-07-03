@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -124,6 +124,9 @@ export const EmployeeDetailsDialog: React.FC<EmployeeDetailsDialogProps> = ({
               <User className="w-6 h-6 text-primary" />
               تفاصيل الموظف
             </DialogTitle>
+            <DialogDescription className="text-right text-muted-foreground">
+              عرض شامل لجميع المعلومات الشخصية والوظيفية للموظف
+            </DialogDescription>
             <div className="flex gap-2">
               {onEditClick && (
                 <Button
