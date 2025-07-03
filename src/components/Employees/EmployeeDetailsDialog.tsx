@@ -187,7 +187,7 @@ export const EmployeeDetailsDialog: React.FC<EmployeeDetailsDialogProps> = ({
                   <div className="flex items-center gap-2">
                     <Phone className="w-4 h-4 text-muted-foreground" />
                     <span className="font-medium">الهاتف:</span>
-                    <span>{employee.phone}</span>
+                    <span dir="ltr" className="text-left">{employee.phone}</span>
                   </div>
                 )}
 
@@ -325,11 +325,11 @@ export const EmployeeDetailsDialog: React.FC<EmployeeDetailsDialogProps> = ({
                       <span className="font-medium">الاسم:</span> {employee.emergency_contact_name}
                     </div>
                   )}
-                  {employee.emergency_contact_phone && (
-                    <div>
-                      <span className="font-medium">رقم الهاتف:</span> {employee.emergency_contact_phone}
-                    </div>
-                  )}
+                   {employee.emergency_contact_phone && (
+                     <div>
+                       <span className="font-medium">رقم الهاتف:</span> <span dir="ltr" className="text-left">{employee.emergency_contact_phone}</span>
+                     </div>
+                   )}
                 </div>
               </CardContent>
             </Card>
