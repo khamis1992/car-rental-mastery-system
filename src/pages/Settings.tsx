@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useToast } from '@/hooks/use-toast';
 import OfficeLocationManager from '@/components/Settings/OfficeLocationManager';
+import AddUserDialog from '@/components/Settings/AddUserDialog';
 
 const Settings = () => {
   const { profile } = useAuth();
@@ -32,6 +33,7 @@ const Settings = () => {
   });
 
   const [systemSettings, setSystemSettings] = useState(globalSystemSettings);
+  const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
 
   // تحديث الحالة المحلية عند تغيير الإعدادات العامة
   useEffect(() => {
@@ -113,6 +115,14 @@ const Settings = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleUserAdded = () => {
+    // Refresh users list or show success message
+    toast({
+      title: "تم إضافة المستخدم",
+      description: "تم إضافة المستخدم الجديد بنجاح",
+    });
   };
 
   // Only allow admin and manager to access settings
@@ -319,7 +329,10 @@ const Settings = () => {
                   <Users className="w-5 h-5" />
                   إدارة المستخدمين
                 </CardTitle>
-                <Button className="btn-primary">
+                <Button 
+                  className="btn-primary"
+                  onClick={() => setIsAddUserDialogOpen(true)}
+                >
                   <Users className="w-4 h-4 mr-2" />
                   إضافة مستخدم
                 </Button>
@@ -439,6 +452,12 @@ const Settings = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <AddUserDialog
+        open={isAddUserDialogOpen}
+        onOpenChange={setIsAddUserDialogOpen}
+        onUserAdded={handleUserAdded}
+      />
     </div>
   );
 };
