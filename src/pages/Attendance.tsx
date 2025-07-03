@@ -4,15 +4,24 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, MapPin, Calendar, CheckCircle, XCircle, AlertCircle, FileText } from 'lucide-react';
+import { Clock, MapPin, Calendar, CheckCircle, XCircle, AlertCircle, FileText, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useAuth } from '@/contexts/AuthContext';
+import { AttendanceManagement } from '@/components/Attendance/AttendanceManagement';
+import { attendanceService } from '@/services/attendanceService';
 
 const Attendance = () => {
+  const { profile } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [checkInTime, setCheckInTime] = useState<Date | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  
+  // تحديد مستوى الصلاحية
+  const isAdmin = profile?.role === 'admin';
+  const isHR = profile?.role === 'manager';
+  const hasManagementAccess = isAdmin || isHR;
 
   // تحديث الوقت كل ثانية
   useEffect(() => {
@@ -259,6 +268,15 @@ const Attendance = () => {
         <Tabs defaultValue="today" className="space-y-6">
           <div className="flex justify-end">
             <TabsList className="bg-gray-100 p-1 rounded-full">
+              {hasManagementAccess && (
+                <TabsTrigger 
+                  value="management" 
+                  className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                >
+                  <Users className="w-4 h-4 ml-2" />
+                  إدارة الحضور
+                </TabsTrigger>
+              )}
               <TabsTrigger 
                 value="reports" 
                 className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
@@ -277,8 +295,15 @@ const Attendance = () => {
               >
                 اليوم
               </TabsTrigger>
-            </TabsList>
+          </TabsList>
           </div>
+
+          {/* تبويب إدارة الحضور - للمديرين والموارد البشرية فقط */}
+          {hasManagementAccess && (
+            <TabsContent value="management">
+              <AttendanceManagement />
+            </TabsContent>
+          )}
 
           <TabsContent value="today">
             <Card className="shadow-lg rounded-lg">
