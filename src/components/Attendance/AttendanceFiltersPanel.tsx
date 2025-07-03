@@ -25,7 +25,7 @@ export const AttendanceFiltersPanel: React.FC<AttendanceFiltersPanelProps> = ({
   const handleFilterChange = (key: keyof AttendanceFilters, value: string) => {
     setFilters(prev => ({
       ...prev,
-      [key]: value || undefined
+      [key]: value === 'all' ? undefined : value
     }));
   };
 
@@ -75,14 +75,14 @@ export const AttendanceFiltersPanel: React.FC<AttendanceFiltersPanelProps> = ({
           <div className="space-y-2">
             <Label>الموظف</Label>
             <Select
-              value={filters.employeeId || ''}
+              value={filters.employeeId || 'all'}
               onValueChange={(value) => handleFilterChange('employeeId', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="اختر موظف" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">جميع الموظفين</SelectItem>
+                <SelectItem value="all">جميع الموظفين</SelectItem>
                 {employees.map((employee) => (
                   <SelectItem key={employee.id} value={employee.id}>
                     {employee.first_name} {employee.last_name} ({employee.employee_number})
@@ -96,14 +96,14 @@ export const AttendanceFiltersPanel: React.FC<AttendanceFiltersPanelProps> = ({
           <div className="space-y-2">
             <Label>القسم</Label>
             <Select
-              value={filters.department || ''}
+              value={filters.department || 'all'}
               onValueChange={(value) => handleFilterChange('department', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="اختر قسم" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">جميع الأقسام</SelectItem>
+                <SelectItem value="all">جميع الأقسام</SelectItem>
                 {departments.map((department) => (
                   <SelectItem key={department} value={department}>
                     {department}
@@ -117,14 +117,14 @@ export const AttendanceFiltersPanel: React.FC<AttendanceFiltersPanelProps> = ({
           <div className="space-y-2">
             <Label>حالة الحضور</Label>
             <Select
-              value={filters.status || ''}
+              value={filters.status || 'all'}
               onValueChange={(value) => handleFilterChange('status', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="اختر حالة" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">جميع الحالات</SelectItem>
+                <SelectItem value="all">جميع الحالات</SelectItem>
                 <SelectItem value="present">حاضر</SelectItem>
                 <SelectItem value="absent">غائب</SelectItem>
                 <SelectItem value="late">متأخر</SelectItem>
