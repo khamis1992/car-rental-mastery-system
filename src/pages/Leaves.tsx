@@ -56,22 +56,35 @@ const Leaves = () => {
     try {
       // جلب بيانات الموظف الحالي
       const employee = await leavesService.getCurrentUserEmployee();
+      
+      if (!employee) {
+        toast({
+          title: "تحذير",
+          description: "لم يتم العثور على بيانات الموظف. يرجى التواصل مع الإدارة.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       setCurrentEmployee(employee);
       
-      if (employee) {
-        // جلب طلبات الإجازات
-        await loadLeaveRequests();
-        
-        // جلب الإحصائيات
-        const stats = await leavesService.getLeaveStats(employee.id);
-        setLeaveStats(stats);
-        
-        // جلب رصيد الإجازات
-        const balance = await leavesService.getLeaveBalance(employee.id);
-        setLeaveBalance(balance);
-      }
+      // جلب طلبات الإجازات
+      await loadLeaveRequests();
+      
+      // جلب الإحصائيات
+      const stats = await leavesService.getLeaveStats(employee.id);
+      setLeaveStats(stats);
+      
+      // جلب رصيد الإجازات
+      const balance = await leavesService.getLeaveBalance(employee.id);
+      setLeaveBalance(balance);
     } catch (error) {
       console.error('خطأ في تحميل البيانات:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في تحميل بيانات الإجازات",
+        variant: "destructive",
+      });
     }
   };
 
@@ -259,6 +272,18 @@ const Leaves = () => {
 
   // التحقق من إذا كان المستخدم مديراً أو مدير موارد بشرية
   const canManageLeaves = profile?.role === 'admin' || profile?.role === 'manager';
+
+  // عرض رسالة إذا لم يتم العثور على بيانات الموظف
+  if (user && !currentEmployee) {
+    return (
+      <div className="container mx-auto p-6 text-center" dir="rtl">
+        <Card className="p-8">
+          <h2 className="text-2xl font-bold mb-4">بيانات الموظف غير موجودة</h2>
+          <p className="text-muted-foreground">لم يتم العثور على بيانات الموظف. يرجى التواصل مع الإدارة لإضافة بياناتك إلى النظام.</p>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6" dir="rtl">

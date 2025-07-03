@@ -6,6 +6,13 @@ export const leavesService = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('المستخدم غير مسجل الدخول');
 
+    // التحقق من الصلاحيات
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+
     let query = supabase
       .from('leave_requests')
       .select(`
@@ -20,9 +27,14 @@ export const leavesService = {
       .order('created_at', { ascending: false });
 
     // للموظفين العاديين، عرض طلباتهم فقط
-    const currentEmployee = await this.getCurrentUserEmployee();
-    if (currentEmployee) {
-      query = query.eq('employee_id', currentEmployee.id);
+    // للمديرين والمدراء، عرض جميع الطلبات
+    const canViewAll = profile?.role === 'admin' || profile?.role === 'manager';
+    
+    if (!canViewAll) {
+      const currentEmployee = await this.getCurrentUserEmployee();
+      if (currentEmployee) {
+        query = query.eq('employee_id', currentEmployee.id);
+      }
     }
 
     const { data, error } = await query;
