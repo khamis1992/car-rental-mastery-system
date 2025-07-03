@@ -355,8 +355,8 @@ const Leaves = () => {
             <CardHeader>
               
               {/* فلاتر البحث */}
-              <div className="flex flex-wrap gap-4 mt-4">
-                <div className="flex-1 min-w-[200px]">
+              <div className="flex flex-wrap gap-4 items-center justify-between">
+                <div className="flex-1 min-w-[200px] max-w-md">
                   <Input
                     placeholder="البحث في السبب..."
                     value={searchTerm}
@@ -364,32 +364,34 @@ const Leaves = () => {
                   />
                 </div>
                 
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="نوع الإجازة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">جميع الأنواع</SelectItem>
-                    <SelectItem value="annual">إجازة سنوية</SelectItem>
-                    <SelectItem value="sick">إجازة مرضية</SelectItem>
-                    <SelectItem value="maternity">إجازة أمومة</SelectItem>
-                    <SelectItem value="emergency">ظروف طارئة</SelectItem>
-                    <SelectItem value="unpaid">بدون راتب</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-4">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-[150px]">
+                      <SelectValue placeholder="الحالة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الحالات</SelectItem>
+                      <SelectItem value="pending">في الانتظار</SelectItem>
+                      <SelectItem value="approved">مُوافق عليها</SelectItem>
+                      <SelectItem value="rejected">مرفوضة</SelectItem>
+                      <SelectItem value="cancelled">ملغية</SelectItem>
+                    </SelectContent>
+                  </Select>
 
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="الحالة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">جميع الحالات</SelectItem>
-                    <SelectItem value="pending">في الانتظار</SelectItem>
-                    <SelectItem value="approved">مُوافق عليها</SelectItem>
-                    <SelectItem value="rejected">مرفوضة</SelectItem>
-                    <SelectItem value="cancelled">ملغية</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="w-[150px]">
+                      <SelectValue placeholder="نوع الإجازة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الأنواع</SelectItem>
+                      <SelectItem value="annual">إجازة سنوية</SelectItem>
+                      <SelectItem value="sick">إجازة مرضية</SelectItem>
+                      <SelectItem value="maternity">إجازة أمومة</SelectItem>
+                      <SelectItem value="emergency">ظروف طارئة</SelectItem>
+                      <SelectItem value="unpaid">بدون راتب</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardHeader>
             
