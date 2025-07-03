@@ -2,8 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const RecentContracts = () => {
+  const navigate = useNavigate();
+  
   const contracts = [
     {
       id: "C001",
@@ -49,7 +52,12 @@ const RecentContracts = () => {
         <CardTitle className="text-lg font-semibold text-foreground">
           العقود الحديثة
         </CardTitle>
-        <Button variant="outline" size="sm">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => navigate('/contracts')}
+          className="hover:scale-105 transition-transform"
+        >
           عرض الكل
         </Button>
       </CardHeader>
