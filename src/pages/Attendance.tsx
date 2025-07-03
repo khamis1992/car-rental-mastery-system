@@ -206,63 +206,65 @@ const Attendance = () => {
         </div>
 
         {/* قسم المقاييس - 4 كروت متساوية العرض */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="shadow-md rounded-lg border border-gray-200">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                <div className="flex-shrink-0">
-                  <span className="text-3xl">⚠️</span>
+        {!isAdmin && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="shadow-md rounded-lg border border-gray-200">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                  <div className="flex-shrink-0">
+                    <span className="text-3xl">⚠️</span>
+                  </div>
+                  <div className="text-right flex-1">
+                    <p className="text-sm text-muted-foreground">ساعات إضافية</p>
+                    <p className="text-3xl font-bold text-orange-600">12</p>
+                  </div>
                 </div>
-                <div className="text-right flex-1">
-                  <p className="text-sm text-muted-foreground">ساعات إضافية</p>
-                  <p className="text-3xl font-bold text-orange-600">12</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="shadow-md rounded-lg border border-gray-200">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                <div className="flex-shrink-0">
-                  <Clock className="w-8 h-8 text-blue-500" />
+            <Card className="shadow-md rounded-lg border border-gray-200">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                  <div className="flex-shrink-0">
+                    <Clock className="w-8 h-8 text-blue-500" />
+                  </div>
+                  <div className="text-right flex-1">
+                    <p className="text-sm text-muted-foreground">ساعات العمل</p>
+                    <p className="text-3xl font-bold text-blue-600">176</p>
+                  </div>
                 </div>
-                <div className="text-right flex-1">
-                  <p className="text-sm text-muted-foreground">ساعات العمل</p>
-                  <p className="text-3xl font-bold text-blue-600">176</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="shadow-md rounded-lg border border-gray-200">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                <div className="flex-shrink-0">
-                  <XCircle className="w-8 h-8 text-red-500" />
+            <Card className="shadow-md rounded-lg border border-gray-200">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                  <div className="flex-shrink-0">
+                    <XCircle className="w-8 h-8 text-red-500" />
+                  </div>
+                  <div className="text-right flex-1">
+                    <p className="text-sm text-muted-foreground">أيام الغياب</p>
+                    <p className="text-3xl font-bold text-red-600">1</p>
+                  </div>
                 </div>
-                <div className="text-right flex-1">
-                  <p className="text-sm text-muted-foreground">أيام الغياب</p>
-                  <p className="text-3xl font-bold text-red-600">1</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="shadow-md rounded-lg border border-gray-200">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                <div className="flex-shrink-0">
-                  <CheckCircle className="w-8 h-8 text-green-500" />
+            <Card className="shadow-md rounded-lg border border-gray-200">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                  <div className="flex-shrink-0">
+                    <CheckCircle className="w-8 h-8 text-green-500" />
+                  </div>
+                  <div className="text-right flex-1">
+                    <p className="text-sm text-muted-foreground">أيام الحضور</p>
+                    <p className="text-3xl font-bold text-green-600">22</p>
+                  </div>
                 </div>
-                <div className="text-right flex-1">
-                  <p className="text-sm text-muted-foreground">أيام الحضور</p>
-                  <p className="text-3xl font-bold text-green-600">22</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* عرض إدارة الحضور مباشرة للمدير */}
         {isAdmin ? (
