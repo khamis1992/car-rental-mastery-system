@@ -318,14 +318,9 @@ const Employees = () => {
                       {/* تفاصيل الموظف */}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div className="bg-card/50 rounded-lg p-4 border border-muted">
-                          <div className="text-sm text-muted-foreground mb-1">المنصب:</div>
-                          <div className="font-semibold text-foreground">{employee.position}</div>
-                        </div>
-                        
-                        <div className="bg-card/50 rounded-lg p-4 border border-muted">
-                          <div className="text-sm text-muted-foreground mb-1">القسم:</div>
-                          <div className="font-semibold text-foreground">
-                            {(employee as any).department?.department_name || employee.department || 'تقنية المعلومات'}
+                          <div className="text-sm text-muted-foreground mb-1">الراتب:</div>
+                          <div className="font-bold text-primary text-lg">
+                            {formatCurrency(employee.salary)}
                           </div>
                         </div>
                         
@@ -337,10 +332,15 @@ const Employees = () => {
                         </div>
                         
                         <div className="bg-card/50 rounded-lg p-4 border border-muted">
-                          <div className="text-sm text-muted-foreground mb-1">الراتب:</div>
-                          <div className="font-bold text-primary text-lg">
-                            {formatCurrency(employee.salary)}
+                          <div className="text-sm text-muted-foreground mb-1">القسم:</div>
+                          <div className="font-semibold text-foreground">
+                            {(employee as any).department?.department_name || employee.department || 'تقنية المعلومات'}
                           </div>
+                        </div>
+                        
+                        <div className="bg-card/50 rounded-lg p-4 border border-muted">
+                          <div className="text-sm text-muted-foreground mb-1">المنصب:</div>
+                          <div className="font-semibold text-foreground">{employee.position}</div>
                         </div>
                       </div>
                     </div>
