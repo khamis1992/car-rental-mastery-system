@@ -330,7 +330,10 @@ const Settings = () => {
                 {users.map((user) => (
                   <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg flex-row-reverse">
                     <div className="flex items-center gap-3 flex-row-reverse">
-                      <div className="space-y-1">
+                      <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-medium">
+                        {user.name.charAt(0)}
+                      </div>
+                      <div className="flex flex-col gap-1 text-right">
                         <div className="flex items-center gap-2 justify-end">
                           <Badge className={`text-white ${getRoleColor(user.role)}`}>
                             {getRoleLabel(user.role)}
@@ -338,15 +341,10 @@ const Settings = () => {
                           <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
                             {user.status === 'active' ? 'نشط' : 'غير نشط'}
                           </Badge>
-                          <h3 className="font-medium text-right">{user.name}</h3>
-                          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-medium">
-                            {user.name.charAt(0)}
-                          </div>
+                          <h3 className="font-medium">{user.name}</h3>
                         </div>
-                        <div className="text-right space-y-1">
-                          <p className="text-sm text-muted-foreground">{user.email}</p>
-                          <p className="text-xs text-muted-foreground">آخر دخول: {user.lastLogin}</p>
-                        </div>
+                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                        <p className="text-xs text-muted-foreground">آخر دخول: {user.lastLogin}</p>
                       </div>
                     </div>
                     
