@@ -34,6 +34,42 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
     return_condition_notes: '',
     return_damages: [] as DamageArea[]
   });
+
+  // Load existing data from contract when form opens
+  React.useEffect(() => {
+    if (contract) {
+      console.log('📋 ContractReturnForm: Loading existing contract data:', {
+        return_damages: contract.return_damages,
+        return_photos: contract.return_photos,
+        return_condition_notes: contract.return_condition_notes,
+        return_mileage: contract.return_mileage,
+        fuel_level_return: contract.fuel_level_return
+      });
+
+      setReturnData(prev => ({
+        ...prev,
+        actual_end_date: contract.actual_end_date 
+          ? new Date(contract.actual_end_date).toISOString().split('T')[0]
+          : prev.actual_end_date,
+        return_location: contract.return_location || contract.pickup_location || prev.return_location,
+        return_mileage: contract.return_mileage ? contract.return_mileage.toString() : '',
+        fuel_level_return: contract.fuel_level_return || 'Full',
+        return_photos: Array.isArray(contract.return_photos) ? contract.return_photos : [],
+        return_condition_notes: contract.return_condition_notes || '',
+        return_damages: Array.isArray(contract.return_damages) 
+          ? contract.return_damages.map((damage: any) => ({
+              id: damage.id,
+              x: Number(damage.x) || 0,
+              y: Number(damage.y) || 0,
+              severity: damage.severity || 'minor',
+              description: damage.description || '',
+              photos: Array.isArray(damage.photos) ? damage.photos : [],
+              timestamp: damage.timestamp || new Date().toISOString()
+            }))
+          : []
+      }));
+    }
+  }, [contract]);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {

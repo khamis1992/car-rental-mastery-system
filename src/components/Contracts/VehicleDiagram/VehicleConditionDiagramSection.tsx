@@ -37,6 +37,17 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
   const [isNewDamage, setIsNewDamage] = useState(false);
   const [activeTab, setActiveTab] = useState('diagram');
 
+  // Log data changes for debugging
+  React.useEffect(() => {
+    console.log('🔄 VehicleConditionDiagramSection: Data updated:', {
+      type,
+      damagesCount: damages?.length || 0,
+      photosCount: photos?.length || 0,
+      notesLength: notes?.length || 0,
+      damages: damages?.map(d => ({ id: d.id, description: d.description })) || []
+    });
+  }, [damages, photos, notes, type]);
+
   const typeLabel = type === 'pickup' ? 'التسليم' : 'الاستلام';
 
   const handleDamageSelect = (damage: DamageArea) => {
@@ -109,7 +120,7 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="summary" className="flex items-center gap-2 flex-row-reverse">
               <List className="w-4 h-4" />
               ملخص الحالة
@@ -117,6 +128,10 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
             <TabsTrigger value="diagram" className="flex items-center gap-2 flex-row-reverse">
               <Map className="w-4 h-4" />
               المخطط التفاعلي
+            </TabsTrigger>
+            <TabsTrigger value="photos" className="flex items-center gap-2 flex-row-reverse">
+              <Camera className="w-4 h-4" />
+              الصور والملاحظات
             </TabsTrigger>
           </TabsList>
 
@@ -235,6 +250,18 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="photos" className="mt-6">
+            <VehicleConditionPhotos
+              contractId={contractId}
+              vehicleInfo={vehicleInfo}
+              type={type}
+              existingPhotos={photos}
+              existingNotes={notes}
+              onPhotosChange={onPhotosChange}
+              onNotesChange={onNotesChange}
+            />
           </TabsContent>
         </Tabs>
 

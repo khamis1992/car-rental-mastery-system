@@ -29,6 +29,18 @@ export const VehicleConditionPhotos: React.FC<VehicleConditionPhotosProps> = ({
 }) => {
   const [photos, setPhotos] = useState<string[]>(existingPhotos);
   const [notes, setNotes] = useState(existingNotes);
+
+  // Update state when props change
+  React.useEffect(() => {
+    console.log('📸 VehicleConditionPhotos: Updating photos from props:', {
+      type,
+      existingPhotos: existingPhotos?.length || 0,
+      existingNotes: existingNotes?.length || 0
+    });
+    
+    setPhotos(Array.isArray(existingPhotos) ? existingPhotos : []);
+    setNotes(existingNotes || '');
+  }, [existingPhotos, existingNotes, type]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();

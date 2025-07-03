@@ -35,6 +35,42 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
     pickup_condition_notes: '',
     pickup_damages: [] as DamageArea[]
   });
+
+  // Load existing data from contract when form opens
+  React.useEffect(() => {
+    if (contract) {
+      console.log('📋 ContractDeliveryForm: Loading existing contract data:', {
+        pickup_damages: contract.pickup_damages,
+        pickup_photos: contract.pickup_photos,
+        pickup_condition_notes: contract.pickup_condition_notes,
+        pickup_mileage: contract.pickup_mileage,
+        fuel_level_pickup: contract.fuel_level_pickup
+      });
+
+      setDeliveryData(prev => ({
+        ...prev,
+        actual_start_date: contract.actual_start_date 
+          ? new Date(contract.actual_start_date).toISOString().split('T')[0]
+          : prev.actual_start_date,
+        pickup_location: contract.pickup_location || prev.pickup_location,
+        pickup_mileage: contract.pickup_mileage ? contract.pickup_mileage.toString() : '',
+        fuel_level_pickup: contract.fuel_level_pickup || 'Full',
+        pickup_photos: Array.isArray(contract.pickup_photos) ? contract.pickup_photos : [],
+        pickup_condition_notes: contract.pickup_condition_notes || '',
+        pickup_damages: Array.isArray(contract.pickup_damages) 
+          ? contract.pickup_damages.map((damage: any) => ({
+              id: damage.id,
+              x: Number(damage.x) || 0,
+              y: Number(damage.y) || 0,
+              severity: damage.severity || 'minor',
+              description: damage.description || '',
+              photos: Array.isArray(damage.photos) ? damage.photos : [],
+              timestamp: damage.timestamp || new Date().toISOString()
+            }))
+          : []
+      }));
+    }
+  }, [contract]);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
