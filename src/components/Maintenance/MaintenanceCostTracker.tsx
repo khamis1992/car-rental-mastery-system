@@ -391,9 +391,9 @@ export const MaintenanceCostTracker = () => {
         {/* اتجاه التكاليف */}
         <Card>
           <CardHeader>
-            <CardTitle>اتجاه التكاليف الشهرية</CardTitle>
+            <CardTitle className="text-right">اتجاه التكاليف الشهرية</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="text-right">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={costTrends}>
@@ -429,9 +429,9 @@ export const MaintenanceCostTracker = () => {
         {/* التكاليف حسب النوع */}
         <Card>
           <CardHeader>
-            <CardTitle>التكاليف حسب نوع الصيانة</CardTitle>
+            <CardTitle className="text-right">التكاليف حسب نوع الصيانة</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="text-right">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsPieChart>
