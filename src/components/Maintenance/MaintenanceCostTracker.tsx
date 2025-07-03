@@ -288,7 +288,7 @@ export const MaintenanceCostTracker = () => {
           <CardTitle className="text-right">تتبع تكاليف الصيانة</CardTitle>
         </CardHeader>
         <CardContent className="text-right">
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="flex flex-col md:flex-row-reverse gap-4 mb-6">
             <Select value={periodFilter} onValueChange={setPeriodFilter}>
               <SelectTrigger className="w-full md:w-48">
                 <SelectValue placeholder="الفترة الزمنية" />
