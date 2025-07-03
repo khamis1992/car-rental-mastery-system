@@ -375,9 +375,9 @@ export const MaintenanceAlerts = () => {
       {/* قائمة التنبيهات */}
       <Card>
         <CardHeader>
-          <CardTitle>تنبيهات الصيانة</CardTitle>
+          <CardTitle className="text-right">تنبيهات الصيانة</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="text-right">
           {alerts.length === 0 ? (
             <Alert>
               <CheckCircle className="h-4 w-4" />
