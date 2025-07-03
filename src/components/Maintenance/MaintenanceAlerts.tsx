@@ -393,23 +393,23 @@ export const MaintenanceAlerts = () => {
                   className="p-4 border rounded-lg space-y-3"
                 >
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-2 space-x-reverse">
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
                       {getPriorityBadge(alert.priority)}
                     </div>
-                    <div className="flex items-start space-x-3 space-x-reverse text-right flex-1 mr-4">
-                      {getAlertIcon(alert.alert_type)}
+                    <div className="flex items-start space-x-3 rtl:space-x-reverse text-right flex-1 ml-4">
                       <div className="space-y-1">
-                        <div className="font-medium">{alert.title}</div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="font-medium text-right">{alert.title}</div>
+                        <div className="text-sm text-muted-foreground text-right">
                           {alert.vehicle_number} - {alert.vehicle_make} {alert.vehicle_model}
                         </div>
-                        <div className="text-sm">{alert.description}</div>
+                        <div className="text-sm text-right">{alert.description}</div>
                         {alert.scheduled_date && (
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-sm text-muted-foreground text-right">
                             التاريخ: {format(new Date(alert.scheduled_date), 'dd/MM/yyyy', { locale: ar })}
                           </div>
                         )}
                       </div>
+                      {getAlertIcon(alert.alert_type)}
                     </div>
                   </div>
 
