@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, MapPin, Calendar, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Clock, MapPin, Calendar, CheckCircle, XCircle, AlertCircle, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
@@ -110,232 +110,277 @@ const Attendance = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6" dir="rtl">
-      {/* العنوان */}
-      <div>
-        <h1 className="text-3xl font-bold">نظام الحضور والانصراف</h1>
-        <p className="text-muted-foreground">تسجيل الحضور ومتابعة ساعات العمل</p>
+    <div className="min-h-screen bg-background font-['Tajawal']" dir="rtl">
+      {/* العنوان مع خلفية زرقاء داكنة */}
+      <div className="bg-[#1E3A8A] text-white p-6 shadow-lg">
+        <div className="container mx-auto flex items-center justify-between">
+          <Calendar className="w-8 h-8 text-white" />
+          <div className="text-right">
+            <h1 className="text-3xl font-bold">نظام الحضور والانصراف</h1>
+            <p className="text-blue-100 mt-1">تسجيل الحضور ومتابعة ساعات العمل</p>
+          </div>
+        </div>
       </div>
 
-      {/* بطاقة تسجيل الحضور */}
-      <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
-        <CardContent className="p-6">
-          <div className="text-center space-y-4">
-            <div>
-              <div className="text-4xl font-bold text-primary">
-                {format(currentTime, 'HH:mm:ss', { locale: ar })}
+      <div className="container mx-auto p-6 space-y-8">
+        {/* قسم الساعة الرئيسي */}
+        <div className="flex justify-center">
+          <Card className="w-full max-w-md shadow-lg rounded-lg">
+            <CardContent className="p-8 text-center space-y-6">
+              {/* الساعة الرقمية */}
+              <div>
+                <div className="text-5xl font-bold text-primary mb-2">
+                  {format(currentTime, 'HH:mm:ss', { locale: ar })}
+                </div>
+                <div className="text-xl text-muted-foreground">
+                  {format(currentTime, 'dd MMMM yyyy', { locale: ar })}
+                </div>
               </div>
-              <div className="text-lg text-muted-foreground">
-                {format(currentTime, 'dd MMMM yyyy', { locale: ar })}
-              </div>
-            </div>
 
-            {location && (
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="w-4 h-4" />
-                <span>الموقع متاح</span>
+              {/* حالة الموقع */}
+              <div className="flex items-center justify-center gap-2">
+                {location ? (
+                  <div className="flex items-center gap-2 text-green-600">
+                    <span>✅</span>
+                    <span className="font-medium">الموقع متاح</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-red-600">
+                    <span>❌</span>
+                    <span className="font-medium">الموقع غير متاح</span>
+                  </div>
+                )}
               </div>
-            )}
 
-            <div className="space-y-4">
-              {isCheckedIn ? (
-                <div className="space-y-2">
-                  <div className="text-sm text-muted-foreground">
-                    وقت الحضور: {checkInTime && format(checkInTime, 'HH:mm', { locale: ar })}
+              {/* زر تسجيل الحضور */}
+              <div className="space-y-4">
+                {isCheckedIn ? (
+                  <div className="space-y-3">
+                    <div className="text-sm text-muted-foreground">
+                      وقت الحضور: {checkInTime && format(checkInTime, 'HH:mm', { locale: ar })}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      ساعات العمل: {calculateWorkingHours()} ساعة
+                    </div>
+                    <Button 
+                      onClick={handleCheckIn}
+                      variant="destructive"
+                      size="lg"
+                      className="w-full py-4 text-lg rounded-lg"
+                    >
+                      <Clock className="w-6 h-6 ml-2" />
+                      تسجيل الانصراف
+                    </Button>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    ساعات العمل: {calculateWorkingHours()} ساعة
-                  </div>
+                ) : (
                   <Button 
                     onClick={handleCheckIn}
-                    variant="destructive"
                     size="lg"
-                    className="w-full max-w-xs"
+                    className="w-full py-4 text-lg bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md"
+                    disabled={!location}
                   >
-                    <Clock className="w-5 h-5 ml-2" />
-                    تسجيل الانصراف
+                    <Clock className="w-6 h-6 ml-2" />
+                    تسجيل الحضور
                   </Button>
-                </div>
-              ) : (
-                <Button 
-                  onClick={handleCheckIn}
-                  size="lg"
-                  className="w-full max-w-xs"
-                  disabled={!location}
-                >
-                  <Clock className="w-5 h-5 ml-2" />
-                  تسجيل الحضور
-                </Button>
-              )}
-            </div>
-
-            {!location && (
-              <div className="text-sm text-destructive">
-                يجب السماح بالوصول للموقع لتسجيل الحضور
+                )}
               </div>
-            )}
+
+              {!location && (
+                <div className="text-sm text-destructive bg-red-50 p-3 rounded-lg">
+                  يجب السماح بالوصول للموقع لتسجيل الحضور
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* قسم المقاييس - 4 كروت متساوية العرض */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="shadow-md rounded-lg border border-gray-200">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                <div className="flex-shrink-0">
+                  <span className="text-3xl">⚠️</span>
+                </div>
+                <div className="text-right flex-1">
+                  <p className="text-sm text-muted-foreground">ساعات إضافية</p>
+                  <p className="text-3xl font-bold text-orange-600">12</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-md rounded-lg border border-gray-200">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                <div className="flex-shrink-0">
+                  <Clock className="w-8 h-8 text-blue-500" />
+                </div>
+                <div className="text-right flex-1">
+                  <p className="text-sm text-muted-foreground">ساعات العمل</p>
+                  <p className="text-3xl font-bold text-blue-600">176</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-md rounded-lg border border-gray-200">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                <div className="flex-shrink-0">
+                  <XCircle className="w-8 h-8 text-red-500" />
+                </div>
+                <div className="text-right flex-1">
+                  <p className="text-sm text-muted-foreground">أيام الغياب</p>
+                  <p className="text-3xl font-bold text-red-600">1</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-md rounded-lg border border-gray-200">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                <div className="flex-shrink-0">
+                  <CheckCircle className="w-8 h-8 text-green-500" />
+                </div>
+                <div className="text-right flex-1">
+                  <p className="text-sm text-muted-foreground">أيام الحضور</p>
+                  <p className="text-3xl font-bold text-green-600">22</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* قسم التبويبات مع محاذاة لليمين */}
+        <Tabs defaultValue="today" className="space-y-6">
+          <div className="flex justify-end">
+            <TabsList className="bg-gray-100 p-1 rounded-full">
+              <TabsTrigger 
+                value="reports" 
+                className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              >
+                التقارير
+              </TabsTrigger>
+              <TabsTrigger 
+                value="history" 
+                className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              >
+                السجل
+              </TabsTrigger>
+              <TabsTrigger 
+                value="today" 
+                className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              >
+                اليوم
+              </TabsTrigger>
+            </TabsList>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* إحصائيات الحضور */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <CheckCircle className="w-8 h-8 text-green-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">أيام الحضور</p>
-                <p className="text-2xl font-bold">22</p>
-                <p className="text-xs text-muted-foreground">هذا الشهر</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <TabsContent value="today">
+            <Card className="shadow-lg rounded-lg">
+              <CardHeader className="text-right">
+                <CardTitle className="text-xl">حضور اليوم</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isCheckedIn ? (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between p-6 border border-green-200 rounded-lg bg-green-50">
+                      <Badge variant="default" className="bg-green-600">حاضر</Badge>
+                      <div className="text-right">
+                        <h3 className="font-semibold text-green-800">تم تسجيل الحضور</h3>
+                        <p className="text-sm text-green-600">
+                          الوقت: {checkInTime && format(checkInTime, 'HH:mm', { locale: ar })}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="p-6 border rounded-lg">
+                      <h3 className="font-semibold mb-4 text-right">إحصائيات اليوم</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div className="text-right">
+                          <span className="text-muted-foreground">ساعات العمل:</span>
+                          <span className="mr-2 font-semibold">{calculateWorkingHours()} ساعة</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-muted-foreground">الحالة:</span>
+                          <span className="mr-2 text-green-600 font-semibold">حاضر</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="text-muted-foreground text-lg">
+                      لم يتم تسجيل الحضور بعد
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <XCircle className="w-8 h-8 text-red-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">أيام الغياب</p>
-                <p className="text-2xl font-bold">1</p>
-                <p className="text-xs text-muted-foreground">هذا الشهر</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <Clock className="w-8 h-8 text-blue-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">ساعات العمل</p>
-                <p className="text-2xl font-bold">176</p>
-                <p className="text-xs text-muted-foreground">هذا الشهر</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <AlertCircle className="w-8 h-8 text-orange-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">ساعات إضافية</p>
-                <p className="text-2xl font-bold">12</p>
-                <p className="text-xs text-muted-foreground">هذا الشهر</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* التبويبات */}
-      <Tabs defaultValue="today" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="reports">التقارير</TabsTrigger>
-          <TabsTrigger value="history">السجل</TabsTrigger>
-          <TabsTrigger value="today">اليوم</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="today">
-          <Card>
-            <CardHeader>
-              <CardTitle>حضور اليوم</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isCheckedIn ? (
+          <TabsContent value="history">
+            <Card className="shadow-lg rounded-lg">
+              <CardHeader>
+                <CardTitle className="text-right">سجل الحضور</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h3 className="font-medium">تم تسجيل الحضور</h3>
-                      <p className="text-sm text-muted-foreground">
-                        الوقت: {checkInTime && format(checkInTime, 'HH:mm', { locale: ar })}
-                      </p>
-                    </div>
-                    <Badge variant="default">حاضر</Badge>
-                  </div>
-                  
-                  <div className="p-4 border rounded-lg">
-                    <h3 className="font-medium mb-2">إحصائيات اليوم</h3>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">ساعات العمل:</span>
-                        <span className="mr-2 font-medium">{calculateWorkingHours()} ساعة</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">الحالة:</span>
-                        <span className="mr-2 text-green-600">حاضر</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  لم يتم تسجيل الحضور بعد
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="history">
-          <Card>
-            <CardHeader>
-              <CardTitle>سجل الحضور</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockAttendanceData.map((record) => (
-                  <div key={record.id} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1 text-right">
-                        <div className="flex items-center gap-4 mb-2 justify-end">
-                          {getStatusBadge(record.status)}
-                          <h3 className="font-medium">
-                            {format(new Date(record.date), 'dd MMMM yyyy', { locale: ar })}
-                          </h3>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm text-muted-foreground text-right">
-                          <div>
-                            <span className="font-medium">الحضور:</span> {record.check_in_time || 'لم يسجل'}
+                  {mockAttendanceData.map((record) => (
+                    <div key={record.id} className="border rounded-lg p-6 hover:bg-gray-50 transition-colors">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1 text-right">
+                          <div className="flex items-center gap-4 mb-4 justify-end">
+                            {getStatusBadge(record.status)}
+                            <h3 className="font-semibold text-lg">
+                              {format(new Date(record.date), 'dd MMMM yyyy', { locale: ar })}
+                            </h3>
                           </div>
-                          <div>
-                            <span className="font-medium">الانصراف:</span> {record.check_out_time || 'لم يسجل'}
-                          </div>
-                          <div>
-                            <span className="font-medium">ساعات العمل:</span> {record.total_hours} ساعة
-                          </div>
-                          <div>
-                            <span className="font-medium">ساعات إضافية:</span> {record.overtime_hours} ساعة
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-right">
+                            <div>
+                              <span className="font-medium text-muted-foreground">الحضور:</span>
+                              <div className="font-semibold">{record.check_in_time || 'لم يسجل'}</div>
+                            </div>
+                            <div>
+                              <span className="font-medium text-muted-foreground">الانصراف:</span>
+                              <div className="font-semibold">{record.check_out_time || 'لم يسجل'}</div>
+                            </div>
+                            <div>
+                              <span className="font-medium text-muted-foreground">ساعات العمل:</span>
+                              <div className="font-semibold">{record.total_hours} ساعة</div>
+                            </div>
+                            <div>
+                              <span className="font-medium text-muted-foreground">ساعات إضافية:</span>
+                              <div className="font-semibold">{record.overtime_hours} ساعة</div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="reports">
-          <Card>
-            <CardHeader>
-              <CardTitle>تقارير الحضور</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                تقارير الحضور التفصيلية - قريباً
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="reports">
+            <Card className="shadow-lg rounded-lg">
+              <CardHeader>
+                <CardTitle className="text-right">تقارير الحضور</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12 text-muted-foreground">
+                  <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                  <div className="text-lg">تقارير الحضور التفصيلية - قريباً</div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };
