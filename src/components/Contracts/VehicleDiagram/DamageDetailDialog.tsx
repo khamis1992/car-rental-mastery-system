@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -205,6 +205,12 @@ export const DamageDetailDialog: React.FC<DamageDetailDialogProps> = ({
               {getSeverityLabel(editedDamage.severity)}
             </Badge>
           </DialogTitle>
+          <DialogDescription>
+            {isNewDamage 
+              ? "إضافة ضرر جديد للمركبة. يرجى ملء جميع التفاصيل المطلوبة قبل الحفظ."
+              : "عرض وتعديل تفاصيل الضرر المسجل على المركبة."
+            }
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
