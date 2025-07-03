@@ -392,10 +392,11 @@ export const MaintenanceAlerts = () => {
                   key={alert.id}
                   className="p-4 border rounded-lg"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-3 rtl:space-x-reverse text-right flex-1">
+                  <div className="flex items-center justify-between gap-4">
+                    {/* الأيقونة والمحتوى على اليمين */}
+                    <div className="flex items-start gap-3 flex-1">
                       {getAlertIcon(alert.alert_type)}
-                      <div className="space-y-1">
+                      <div className="space-y-1 text-right">
                         <div className="font-medium text-right">{alert.title}</div>
                         <div className="text-sm text-muted-foreground text-right">
                           {alert.vehicle_number} - {alert.vehicle_make} {alert.vehicle_model}
@@ -409,22 +410,13 @@ export const MaintenanceAlerts = () => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center mx-4">
+                    {/* شارة الأولوية في المنتصف */}
+                    <div className="flex items-center">
                       {getPriorityBadge(alert.priority)}
                     </div>
                     
-                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                      {alert.maintenance_id && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleMarkAsResolved(alert)}
-                          className="text-green-600 hover:text-green-700"
-                        >
-                          <CheckCircle className="h-4 w-4 ml-1" />
-                          تم الحل
-                        </Button>
-                      )}
+                    {/* زر الإخفاء على اليسار */}
+                    <div className="flex items-center">
                       <Button
                         size="sm"
                         variant="outline"
