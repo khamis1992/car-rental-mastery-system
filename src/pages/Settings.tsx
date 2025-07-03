@@ -139,10 +139,6 @@ const Settings = () => {
         </div>
         
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="flex items-center gap-2">
-            <Database className="w-4 h-4" />
-            نسخ احتياطي
-          </Button>
           <Button 
             className="btn-primary flex items-center gap-2"
             onClick={handleSaveSettings}
