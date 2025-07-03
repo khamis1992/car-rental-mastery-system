@@ -152,16 +152,16 @@ export const ViolationsList: React.FC<ViolationsListProps> = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>رقم المخالفة</TableHead>
-                <TableHead>نوع المخالفة</TableHead>
-                <TableHead>العميل</TableHead>
-                <TableHead>المركبة</TableHead>
-                <TableHead>تاريخ المخالفة</TableHead>
-                <TableHead>المبلغ</TableHead>
-                <TableHead>المسؤولية</TableHead>
-                <TableHead>حالة الدفع</TableHead>
-                <TableHead>الحالة</TableHead>
                 <TableHead>الإجراءات</TableHead>
+                <TableHead>الحالة</TableHead>
+                <TableHead>حالة الدفع</TableHead>
+                <TableHead>المسؤولية</TableHead>
+                <TableHead>المبلغ</TableHead>
+                <TableHead>تاريخ المخالفة</TableHead>
+                <TableHead>المركبة</TableHead>
+                <TableHead>العميل</TableHead>
+                <TableHead>نوع المخالفة</TableHead>
+                <TableHead>رقم المخالفة</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -180,52 +180,6 @@ export const ViolationsList: React.FC<ViolationsListProps> = ({
               ) : (
                 filteredViolations.map((violation) => (
                   <TableRow key={violation.id}>
-                    <TableCell className="font-medium">
-                      {violation.violation_number}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{violation.violation_types?.violation_name_ar}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {getSeverityBadge(violation.violation_types?.severity_level || 'minor')}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{violation.customers?.name}</div>
-                        <div className="text-sm text-muted-foreground">{violation.customers?.phone}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{violation.vehicles?.license_plate}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {violation.vehicles?.make} {violation.vehicles?.model}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(violation.violation_date), 'dd/MM/yyyy', { locale: ar })}
-                      {violation.violation_time && (
-                        <div className="text-sm text-muted-foreground">
-                          {violation.violation_time}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{formatCurrency(violation.total_amount)}</div>
-                        {violation.paid_amount > 0 && (
-                          <div className="text-sm text-success">
-                            مدفوع: {formatCurrency(violation.paid_amount)}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>{getLiabilityBadge(violation.liability_determination)}</TableCell>
-                    <TableCell>{getPaymentStatusBadge(violation.payment_status)}</TableCell>
-                    <TableCell>{getStatusBadge(violation.status)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Button
@@ -270,6 +224,52 @@ export const ViolationsList: React.FC<ViolationsListProps> = ({
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
+                    </TableCell>
+                    <TableCell>{getStatusBadge(violation.status)}</TableCell>
+                    <TableCell>{getPaymentStatusBadge(violation.payment_status)}</TableCell>
+                    <TableCell>{getLiabilityBadge(violation.liability_determination)}</TableCell>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{formatCurrency(violation.total_amount)}</div>
+                        {violation.paid_amount > 0 && (
+                          <div className="text-sm text-success">
+                            مدفوع: {formatCurrency(violation.paid_amount)}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(violation.violation_date), 'dd/MM/yyyy', { locale: ar })}
+                      {violation.violation_time && (
+                        <div className="text-sm text-muted-foreground">
+                          {violation.violation_time}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{violation.vehicles?.license_plate}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {violation.vehicles?.make} {violation.vehicles?.model}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{violation.customers?.name}</div>
+                        <div className="text-sm text-muted-foreground">{violation.customers?.phone}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{violation.violation_types?.violation_name_ar}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {getSeverityBadge(violation.violation_types?.severity_level || 'minor')}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {violation.violation_number}
                     </TableCell>
                   </TableRow>
                 ))

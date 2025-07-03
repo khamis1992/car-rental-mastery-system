@@ -204,14 +204,14 @@ export const ViolationTypesManagement: React.FC<ViolationTypesManagementProps> =
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>الكود</TableHead>
-                  <TableHead>اسم المخالفة</TableHead>
-                  <TableHead>الفئة</TableHead>
-                  <TableHead>درجة الخطورة</TableHead>
-                  <TableHead>الغرامة الأساسية</TableHead>
-                  <TableHead>النقاط</TableHead>
-                  <TableHead>الحالة</TableHead>
                   <TableHead>الإجراءات</TableHead>
+                  <TableHead>الحالة</TableHead>
+                  <TableHead>النقاط</TableHead>
+                  <TableHead>الغرامة الأساسية</TableHead>
+                  <TableHead>درجة الخطورة</TableHead>
+                  <TableHead>الفئة</TableHead>
+                  <TableHead>اسم المخالفة</TableHead>
+                  <TableHead>الكود</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -230,24 +230,6 @@ export const ViolationTypesManagement: React.FC<ViolationTypesManagementProps> =
                 ) : (
                   filteredTypes.map((type) => (
                     <TableRow key={type.id}>
-                      <TableCell className="font-medium">{type.violation_code}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{type.violation_name_ar}</div>
-                          {type.violation_name_en && (
-                            <div className="text-sm text-muted-foreground">{type.violation_name_en}</div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>{getCategoryBadge(type.category)}</TableCell>
-                      <TableCell>{getSeverityBadge(type.severity_level)}</TableCell>
-                      <TableCell className="font-medium">{formatCurrency(type.base_fine_amount)}</TableCell>
-                      <TableCell>{type.points}</TableCell>
-                      <TableCell>
-                        <Badge variant={type.is_active ? 'default' : 'secondary'}>
-                          {type.is_active ? 'نشط' : 'غير نشط'}
-                        </Badge>
-                      </TableCell>
                       <TableCell>
                         <Button
                           variant="ghost"
@@ -257,6 +239,24 @@ export const ViolationTypesManagement: React.FC<ViolationTypesManagementProps> =
                           <Edit className="w-4 h-4" />
                         </Button>
                       </TableCell>
+                      <TableCell>
+                        <Badge variant={type.is_active ? 'default' : 'secondary'}>
+                          {type.is_active ? 'نشط' : 'غير نشط'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{type.points}</TableCell>
+                      <TableCell className="font-medium">{formatCurrency(type.base_fine_amount)}</TableCell>
+                      <TableCell>{getSeverityBadge(type.severity_level)}</TableCell>
+                      <TableCell>{getCategoryBadge(type.category)}</TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{type.violation_name_ar}</div>
+                          {type.violation_name_en && (
+                            <div className="text-sm text-muted-foreground">{type.violation_name_en}</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">{type.violation_code}</TableCell>
                     </TableRow>
                   ))
                 )}
