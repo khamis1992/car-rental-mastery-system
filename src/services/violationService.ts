@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { TrafficViolation, ViolationType, ViolationPayment, ViolationWithDetails, ViolationStats } from '@/types/violation';
+import { TrafficViolation, ViolationType, ViolationPayment, ViolationWithDetails, ViolationStats, ViolationReportData } from '@/types/violation';
 
 export const violationService = {
   // خدمات أنواع المخالفات
@@ -287,5 +287,133 @@ export const violationService = {
 
     if (error) throw error;
     return data as TrafficViolation;
+  },
+
+  // خدمات التقارير
+  async generateViolationReport(filters: {
+    date_from?: string;
+    date_to?: string;
+    status?: string;
+    liability_determination?: string;
+    customer_id?: string;
+    vehicle_id?: string;
+    violation_type_id?: string;
+  }): Promise<ViolationReportData> {
+    // استعلام أساسي للمخالفات
+    let query = supabase
+      .from('traffic_violations')
+      .select(`
+        *,
+        violation_types (
+          violation_name_ar,
+          category,
+          severity_level
+        ),
+        customers (
+          name
+        )
+      `);
+
+    // تطبيق الفلاتر
+    if (filters.date_from) query = query.gte('violation_date', filters.date_from);
+    if (filters.date_to) query = query.lte('violation_date', filters.date_to);
+    if (filters.status) query = query.eq('status', filters.status);
+    if (filters.liability_determination) query = query.eq('liability_determination', filters.liability_determination);
+    if (filters.customer_id) query = query.eq('customer_id', filters.customer_id);
+    if (filters.vehicle_id) query = query.eq('vehicle_id', filters.vehicle_id);
+    if (filters.violation_type_id) query = query.eq('violation_type_id', filters.violation_type_id);
+
+    const { data: violations, error } = await query;
+
+    if (error) throw error;
+
+    const violationsData = violations || [];
+
+    // حساب الإحصائيات
+    const totalViolations = violationsData.length;
+    const totalAmount = violationsData.reduce((sum, v) => sum + (v.total_amount || 0), 0);
+    const paidAmount = violationsData.reduce((sum, v) => sum + (v.paid_amount || 0), 0);
+    const outstandingAmount = totalAmount - paidAmount;
+
+    // تجميع حسب الحالة
+    const statusAgg = violationsData.reduce((acc: any, v) => {
+      const status = v.status || 'غير محدد';
+      if (!acc[status]) {
+        acc[status] = { status, count: 0, amount: 0 };
+      }
+      acc[status].count++;
+      acc[status].amount += v.total_amount || 0;
+      return acc;
+    }, {});
+    const violationsByStatus = Object.values(statusAgg) as Array<{
+      status: string;
+      count: number;
+      amount: number;
+    }>;
+
+    // تجميع حسب نوع المخالفة
+    const typeAgg = violationsData.reduce((acc: any, v) => {
+      const typeName = v.violation_types?.violation_name_ar || 'غير محدد';
+      if (!acc[typeName]) {
+        acc[typeName] = { type_name: typeName, count: 0, amount: 0 };
+      }
+      acc[typeName].count++;
+      acc[typeName].amount += v.total_amount || 0;
+      return acc;
+    }, {});
+    const violationsByType = Object.values(typeAgg) as Array<{
+      type_name: string;
+      count: number;
+      amount: number;
+    }>;
+
+    // تجميع حسب المسؤولية
+    const liabilityAgg = violationsData.reduce((acc: any, v) => {
+      const liability = v.liability_determination || 'معلقة';
+      const liabilityLabel = liability === 'customer' ? 'العميل' : 
+                            liability === 'company' ? 'الشركة' : 
+                            liability === 'shared' ? 'مشتركة' : 'معلقة';
+      if (!acc[liability]) {
+        acc[liability] = { liability: liabilityLabel, count: 0, amount: 0 };
+      }
+      acc[liability].count++;
+      acc[liability].amount += v.total_amount || 0;
+      return acc;
+    }, {});
+    const violationsByLiability = Object.values(liabilityAgg) as Array<{
+      liability: string;
+      count: number;
+      amount: number;
+    }>;
+
+    // الاتجاه الشهري (آخر 6 أشهر)
+    const monthlyTrend = [];
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const monthKey = date.toISOString().substring(0, 7); // YYYY-MM
+      const monthName = date.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' });
+      
+      const monthData = violationsData.filter(v => 
+        v.violation_date && v.violation_date.startsWith(monthKey)
+      );
+      
+      monthlyTrend.push({
+        month: monthName,
+        count: monthData.length,
+        amount: monthData.reduce((sum, v) => sum + (v.total_amount || 0), 0)
+      });
+    }
+
+    return {
+      total_violations: totalViolations,
+      total_amount: totalAmount,
+      paid_amount: paidAmount,
+      outstanding_amount: outstandingAmount,
+      violations_by_status: violationsByStatus,
+      violations_by_type: violationsByType,
+      violations_by_liability: violationsByLiability,
+      monthly_trend: monthlyTrend
+    };
   }
 };

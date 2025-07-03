@@ -110,3 +110,49 @@ export interface ViolationStats {
   customer_liability_violations: number;
   company_liability_violations: number;
 }
+
+export interface ViolationReport {
+  id: string;
+  report_name: string;
+  report_type: 'summary' | 'detailed' | 'analysis' | 'comparison';
+  description: string;
+  filters: {
+    date_from?: string;
+    date_to?: string;
+    status?: string;
+    liability_determination?: string;
+    customer_id?: string;
+    vehicle_id?: string;
+    violation_type_id?: string;
+  };
+  data: any;
+  generated_at: string;
+  generated_by: string;
+}
+
+export interface ViolationReportData {
+  total_violations: number;
+  total_amount: number;
+  paid_amount: number;
+  outstanding_amount: number;
+  violations_by_status: Array<{
+    status: string;
+    count: number;
+    amount: number;
+  }>;
+  violations_by_type: Array<{
+    type_name: string;
+    count: number;
+    amount: number;
+  }>;
+  violations_by_liability: Array<{
+    liability: string;
+    count: number;
+    amount: number;
+  }>;
+  monthly_trend: Array<{
+    month: string;
+    count: number;
+    amount: number;
+  }>;
+}

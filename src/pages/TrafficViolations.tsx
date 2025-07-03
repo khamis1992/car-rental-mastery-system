@@ -8,6 +8,7 @@ import { ViolationForm } from '@/components/Violations/ViolationForm';
 import { ViolationStats } from '@/components/Violations/ViolationStats';
 import { ViolationTypesManagement } from '@/components/Violations/ViolationTypesManagement';
 import { ViolationDetailsDialog } from '@/components/Violations/ViolationDetailsDialog';
+import { ViolationReports } from '@/components/Violations/ViolationReports';
 import { violationService } from '@/services/violationService';
 import { ViolationWithDetails, ViolationStats as ViolationStatsType } from '@/types/violation';
 import { useToast } from '@/hooks/use-toast';
@@ -168,14 +169,7 @@ const TrafficViolations = () => {
         </TabsContent>
         
         <TabsContent value="reports" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-right">تقارير المخالفات</CardTitle>
-            </CardHeader>
-            <CardContent className="text-right">
-              <p className="text-muted-foreground">قريباً... سيتم إضافة التقارير التفصيلية</p>
-            </CardContent>
-          </Card>
+          <ViolationReports />
         </TabsContent>
       </Tabs>
 
