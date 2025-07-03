@@ -328,28 +328,28 @@ const Settings = () => {
             <CardContent>
               <div className="space-y-4">
                 {users.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-3">
+                  <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg flex-row-reverse">
+                    <div className="flex items-center gap-3 flex-row-reverse">
+                      <div>
+                        <h3 className="font-medium text-right">{user.name}</h3>
+                        <p className="text-sm text-muted-foreground text-right">{user.email}</p>
+                        <p className="text-xs text-muted-foreground text-right">آخر دخول: {user.lastLogin}</p>
+                      </div>
                       <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-medium">
                         {user.name.charAt(0)}
-                      </div>
-                      <div>
-                        <h3 className="font-medium">{user.name}</h3>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
-                        <p className="text-xs text-muted-foreground">آخر دخول: {user.lastLogin}</p>
                       </div>
                     </div>
                     
                     <div className="flex items-center gap-2">
-                      <Badge className={`text-white ${getRoleColor(user.role)}`}>
-                        {getRoleLabel(user.role)}
-                      </Badge>
-                      <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
-                        {user.status === 'active' ? 'نشط' : 'غير نشط'}
-                      </Badge>
                       <Button variant="outline" size="sm">
                         تعديل
                       </Button>
+                      <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
+                        {user.status === 'active' ? 'نشط' : 'غير نشط'}
+                      </Badge>
+                      <Badge className={`text-white ${getRoleColor(user.role)}`}>
+                        {getRoleLabel(user.role)}
+                      </Badge>
                     </div>
                   </div>
                 ))}
