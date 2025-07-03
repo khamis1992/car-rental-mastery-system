@@ -113,13 +113,15 @@ const Attendance = () => {
     <div className="min-h-screen bg-background font-['Tajawal']" dir="rtl">
       {/* العنوان مع خلفية زرقاء داكنة */}
       <div className="bg-[#1E3A8A] text-white p-6 shadow-lg">
-        <div className="container mx-auto flex items-center justify-between">
-          <Calendar className="w-8 h-8 text-white" />
-          <div className="text-right">
+      <div className="container mx-auto flex items-center justify-end">
+        <div className="text-right flex items-center gap-4">
+          <div>
             <h1 className="text-3xl font-bold">نظام الحضور والانصراف</h1>
             <p className="text-blue-100 mt-1">تسجيل الحضور ومتابعة ساعات العمل</p>
           </div>
+          <Calendar className="w-8 h-8 text-white" />
         </div>
+      </div>
       </div>
 
       <div className="container mx-auto p-6 space-y-8">
