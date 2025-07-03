@@ -110,13 +110,13 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="diagram" className="flex items-center gap-2 flex-row-reverse">
-              <Map className="w-4 h-4" />
-              المخطط التفاعلي
-            </TabsTrigger>
             <TabsTrigger value="summary" className="flex items-center gap-2 flex-row-reverse">
               <List className="w-4 h-4" />
               ملخص الحالة
+            </TabsTrigger>
+            <TabsTrigger value="diagram" className="flex items-center gap-2 flex-row-reverse">
+              <Map className="w-4 h-4" />
+              المخطط التفاعلي
             </TabsTrigger>
           </TabsList>
 
