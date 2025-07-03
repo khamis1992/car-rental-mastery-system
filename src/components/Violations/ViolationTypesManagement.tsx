@@ -174,12 +174,12 @@ export const ViolationTypesManagement: React.FC<ViolationTypesManagementProps> =
           <div className="flex gap-4 mt-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
                   placeholder="البحث بالكود أو الاسم..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pr-10"
+                  className="pl-10"
                 />
               </div>
             </div>

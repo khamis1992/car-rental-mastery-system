@@ -74,12 +74,12 @@ export const QuotationFiltersComponent: React.FC<QuotationFiltersProps> = ({
         <div className="space-y-2">
           <label className="text-sm font-medium">البحث</label>
           <div className="relative">
-            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               placeholder="رقم العرض، العميل، المركبة..."
               value={filters.search}
               onChange={(e) => updateFilter('search', e.target.value)}
-              className="pr-10"
+              className="pl-10"
             />
           </div>
         </div>

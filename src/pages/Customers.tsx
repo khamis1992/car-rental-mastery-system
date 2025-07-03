@@ -335,15 +335,15 @@ const Customers = () => {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               {searchLoading ? (
-                <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 animate-spin" />
+                <Loader2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 animate-spin" />
               ) : (
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               )}
               <Input
                 placeholder="البحث في العملاء..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pr-10"
+                className="pl-10"
               />
             </div>
             
