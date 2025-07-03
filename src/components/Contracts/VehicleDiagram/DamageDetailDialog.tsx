@@ -35,12 +35,20 @@ export const DamageDetailDialog: React.FC<DamageDetailDialogProps> = ({
 }) => {
   const [editedDamage, setEditedDamage] = useState<DamageArea | null>(damage);
   const [uploading, setUploading] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Determine if this is a new damage
+  const isNewDamage = !onDelete;
 
   React.useEffect(() => {
     console.log('🔄 DamageDetailDialog: damage prop changed:', damage);
     setEditedDamage(damage);
+    // Reset interaction tracking when damage changes
+    setHasInteracted(false);
+    setIsInitialLoad(true);
   }, [damage]);
 
   if (!damage || !editedDamage) return null;
@@ -86,6 +94,13 @@ export const DamageDetailDialog: React.FC<DamageDetailDialogProps> = ({
 
   const updateDamage = (field: keyof DamageArea, value: any) => {
     setEditedDamage(prev => prev ? { ...prev, [field]: value } : null);
+    // Mark as interacted when user changes any field
+    if (!hasInteracted) {
+      setHasInteracted(true);
+    }
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+    }
   };
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -232,10 +247,19 @@ export const DamageDetailDialog: React.FC<DamageDetailDialogProps> = ({
               onChange={(e) => updateDamage('description', e.target.value)}
               rows={3}
               disabled={readonly}
-              className={!editedDamage.description?.trim() ? 'border-destructive' : ''}
+              className={
+                (hasInteracted || !isInitialLoad) && !editedDamage.description?.trim() 
+                  ? 'border-destructive' 
+                  : ''
+              }
             />
-            {!editedDamage.description?.trim() && (
+            {(hasInteracted || !isInitialLoad) && !editedDamage.description?.trim() && (
               <p className="text-xs text-destructive mt-1">هذا الحقل مطلوب</p>
+            )}
+            {isNewDamage && isInitialLoad && !hasInteracted && (
+              <p className="text-xs text-muted-foreground mt-1">
+                يرجى إضافة وصف مفصل للضرر قبل الحفظ
+              </p>
             )}
           </div>
 
