@@ -265,32 +265,6 @@ const Employees = () => {
                   {filteredEmployees.map((employee) => (
                   <div key={employee.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
                      <div className="flex justify-between items-start">
-                       <div className="flex-1 text-right ml-4">
-                         <div className="flex items-center gap-4 mb-2 justify-end">
-                           <h3 className="font-medium text-lg">
-                             {employee.first_name} {employee.last_name}
-                           </h3>
-                           <Badge variant="outline">{employee.employee_number}</Badge>
-                           {getStatusBadge(employee.status)}
-                           {getUserLinkingBadge(employee)}
-                         </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-sm text-muted-foreground text-right">
-                          <div>
-                            <span className="font-medium">المنصب:</span> {employee.position}
-                          </div>
-                           <div>
-                             <span className="font-medium">القسم:</span> {(employee as any).department?.department_name || employee.department || 'غير محدد'}
-                           </div>
-                          <div>
-                            <span className="font-medium">البريد:</span> {employee.email}
-                          </div>
-                          <div>
-                            <span className="font-medium">الراتب:</span> {formatCurrency(employee.salary)}
-                          </div>
-                        </div>
-                      </div>
-                       
                        <div className="flex gap-2">
                          <Button 
                            variant="outline" 
@@ -313,6 +287,32 @@ const Employees = () => {
                            {employee.user_id ? 'إدارة الحساب' : 'ربط حساب'}
                          </Button>
                        </div>
+                       
+                       <div className="flex-1 text-right mr-4">
+                         <div className="flex items-center gap-4 mb-2 justify-end">
+                           {getUserLinkingBadge(employee)}
+                           {getStatusBadge(employee.status)}
+                           <Badge variant="outline">{employee.employee_number}</Badge>
+                           <h3 className="font-medium text-lg">
+                             {employee.first_name} {employee.last_name}
+                           </h3>
+                         </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-sm text-muted-foreground text-right">
+                          <div>
+                            <span className="font-medium">المنصب:</span> {employee.position}
+                          </div>
+                           <div>
+                             <span className="font-medium">القسم:</span> {(employee as any).department?.department_name || employee.department || 'غير محدد'}
+                           </div>
+                          <div>
+                            <span className="font-medium">البريد:</span> {employee.email}
+                          </div>
+                          <div>
+                            <span className="font-medium">الراتب:</span> {formatCurrency(employee.salary)}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
