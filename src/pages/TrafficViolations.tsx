@@ -170,9 +170,9 @@ const TrafficViolations = () => {
         <TabsContent value="reports" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>تقارير المخالفات</CardTitle>
+              <CardTitle className="text-right">تقارير المخالفات</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="text-right">
               <p className="text-muted-foreground">قريباً... سيتم إضافة التقارير التفصيلية</p>
             </CardContent>
           </Card>
