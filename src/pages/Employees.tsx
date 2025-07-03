@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { AddEmployeeForm } from '@/components/Employees/AddEmployeeForm';
 import { LinkUserDialog } from '@/components/Employees/LinkUserDialog';
 import { EmployeeDetailsDialog } from '@/components/Employees/EmployeeDetailsDialog';
+import { EditEmployeeForm } from '@/components/Employees/EditEmployeeForm';
 import { DepartmentsList } from '@/components/Departments/DepartmentsList';
 import { Employee } from '@/types/hr';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +23,7 @@ const Employees = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
@@ -86,6 +88,11 @@ const Employees = () => {
   const handleLinkUser = (employee: Employee) => {
     setSelectedEmployee(employee);
     setShowLinkDialog(true);
+  };
+
+  const handleEditEmployee = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setShowEditForm(true);
   };
 
   const getUserLinkingBadge = (employee: Employee) => {
@@ -279,6 +286,7 @@ const Employees = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
+                            onClick={() => handleEditEmployee(employee)}
                             className="bg-warning text-warning-foreground border-warning"
                           >
                             تعديل
@@ -408,6 +416,13 @@ const Employees = () => {
         onOpenChange={setShowDetailsDialog}
         employee={selectedEmployee}
         onLinkUserClick={handleLinkUser}
+      />
+
+      <EditEmployeeForm
+        open={showEditForm}
+        onOpenChange={setShowEditForm}
+        employee={selectedEmployee}
+        onEmployeeUpdated={handleEmployeeUpdated}
       />
     </div>
   );
