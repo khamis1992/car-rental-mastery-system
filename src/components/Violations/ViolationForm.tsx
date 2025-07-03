@@ -60,11 +60,6 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
     violation_time: '',
     location: '',
     description: '',
-    official_violation_number: '',
-    issuing_authority: '',
-    officer_name: '',
-    fine_amount: 0,
-    processing_fee: 0,
     notes: ''
   });
 
@@ -125,14 +120,10 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
   };
 
   const handleViolationTypeChange = (violationTypeId: string) => {
-    const violationType = violationTypes.find(vt => vt.id === violationTypeId);
-    if (violationType) {
-      setFormData(prev => ({
-        ...prev,
-        violation_type_id: violationTypeId,
-        fine_amount: violationType.base_fine_amount
-      }));
-    }
+    setFormData(prev => ({
+      ...prev,
+      violation_type_id: violationTypeId
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,6 +138,16 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
       return;
     }
 
+    const selectedViolationType = violationTypes.find(vt => vt.id === formData.violation_type_id);
+    if (!selectedViolationType) {
+      toast({
+        title: 'خطأ في البيانات',
+        description: 'نوع المخالفة المحدد غير صحيح',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setLoading(true);
     
     try {
@@ -155,7 +156,9 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
         customer_id: selectedCustomerId,
         vehicle_id: selectedVehicleId,
         contract_id: selectedContractId || undefined,
-        total_amount: formData.fine_amount + formData.processing_fee
+        fine_amount: selectedViolationType.base_fine_amount,
+        processing_fee: 0,
+        total_amount: selectedViolationType.base_fine_amount
       });
 
       onSuccess();
@@ -179,11 +182,6 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
       violation_time: '',
       location: '',
       description: '',
-      official_violation_number: '',
-      issuing_authority: '',
-      officer_name: '',
-      fine_amount: 0,
-      processing_fee: 0,
       notes: ''
     });
     setSelectedCustomerId('');
@@ -320,87 +318,6 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
             </CardContent>
           </Card>
 
-          {/* معلومات الجهة المصدرة */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">معلومات الجهة المصدرة</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="official_violation_number">رقم المخالفة الرسمي</Label>
-                  <Input
-                    id="official_violation_number"
-                    value={formData.official_violation_number}
-                    onChange={(e) => setFormData(prev => ({ ...prev, official_violation_number: e.target.value }))}
-                    placeholder="رقم المخالفة من الجهة المصدرة"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="issuing_authority">الجهة المصدرة</Label>
-                  <Input
-                    id="issuing_authority"
-                    value={formData.issuing_authority}
-                    onChange={(e) => setFormData(prev => ({ ...prev, issuing_authority: e.target.value }))}
-                    placeholder="اسم الجهة المصدرة"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="officer_name">اسم الضابط</Label>
-                  <Input
-                    id="officer_name"
-                    value={formData.officer_name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, officer_name: e.target.value }))}
-                    placeholder="اسم الضابط المصدر للمخالفة"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* المعلومات المالية */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">المعلومات المالية</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="fine_amount">مبلغ الغرامة (د.ك) *</Label>
-                  <Input
-                    id="fine_amount"
-                    type="number"
-                    step="0.001"
-                    value={formData.fine_amount}
-                    onChange={(e) => setFormData(prev => ({ ...prev, fine_amount: parseFloat(e.target.value) || 0 }))}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="processing_fee">رسوم المعالجة (د.ك)</Label>
-                  <Input
-                    id="processing_fee"
-                    type="number"
-                    step="0.001"
-                    value={formData.processing_fee}
-                    onChange={(e) => setFormData(prev => ({ ...prev, processing_fee: parseFloat(e.target.value) || 0 }))}
-                  />
-                </div>
-
-                <div>
-                  <Label>المبلغ الإجمالي (د.ك)</Label>
-                  <Input
-                    value={(formData.fine_amount + formData.processing_fee).toFixed(3)}
-                    disabled
-                    className="bg-muted"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* ملاحظات */}
           <Card>
