@@ -134,19 +134,6 @@ const Attendance = () => {
       </div>
 
       <div className="container mx-auto p-6 space-y-8">
-        {/* رسالة توضيحية */}
-        <div className="text-center">
-          <Card className="w-full max-w-md mx-auto shadow-lg rounded-lg">
-            <CardContent className="p-8 text-center space-y-4">
-              <div className="text-lg text-muted-foreground">
-                تم نقل ساعة الحضور إلى الشريط العلوي
-              </div>
-              <div className="text-sm text-muted-foreground">
-                يمكنك الآن تسجيل الحضور والانصراف من أي صفحة في النظام عبر الضغط على الساعة في الشريط العلوي
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* قسم المقاييس - 4 كروت متساوية العرض */}
         {!isAdmin && (
