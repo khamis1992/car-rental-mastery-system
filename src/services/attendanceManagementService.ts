@@ -15,7 +15,7 @@ export interface AttendanceRecord {
   notes: string | null;
   created_at: string;
   updated_at: string;
-  employee?: {
+  employees?: {
     id: string;
     employee_number: string;
     first_name: string;
@@ -54,7 +54,7 @@ export const attendanceManagementService = {
       .from('attendance')
       .select(`
         *,
-        employee:employees(
+        employees!employee_id(
           id,
           employee_number,
           first_name,
@@ -95,16 +95,16 @@ export const attendanceManagementService = {
     // تطبيق فلتر القسم والبحث النصي
     if (filters?.department && records) {
       records = records.filter(record => 
-        record.employee?.department === filters.department
+        record.employees?.department === filters.department
       );
     }
     
     if (filters?.searchTerm && records) {
       const searchLower = filters.searchTerm.toLowerCase();
       records = records.filter(record => 
-        record.employee?.first_name?.toLowerCase().includes(searchLower) ||
-        record.employee?.last_name?.toLowerCase().includes(searchLower) ||
-        record.employee?.employee_number?.toLowerCase().includes(searchLower)
+        record.employees?.first_name?.toLowerCase().includes(searchLower) ||
+        record.employees?.last_name?.toLowerCase().includes(searchLower) ||
+        record.employees?.employee_number?.toLowerCase().includes(searchLower)
       );
     }
     
@@ -226,9 +226,9 @@ export const attendanceManagementService = {
     ];
     
     const csvRows = records.map(record => [
-      record.employee?.employee_number || '',
-      `${record.employee?.first_name || ''} ${record.employee?.last_name || ''}`.trim(),
-      record.employee?.department || '',
+      record.employees?.employee_number || '',
+      `${record.employees?.first_name || ''} ${record.employees?.last_name || ''}`.trim(),
+      record.employees?.department || '',
       record.date,
       record.check_in_time || '',
       record.check_out_time || '',

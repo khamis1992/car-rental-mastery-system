@@ -191,16 +191,16 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 border-2 border-primary/20">
                       <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                        {record.employee?.first_name?.charAt(0)}
-                        {record.employee?.last_name?.charAt(0)}
+                        {record.employees?.first_name?.charAt(0)}
+                        {record.employees?.last_name?.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <div className="font-semibold text-foreground">
-                        {record.employee?.first_name} {record.employee?.last_name}
+                        {record.employees?.first_name} {record.employees?.last_name}
                       </div>
                       <div className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full inline-block">
-                        {record.employee?.employee_number}
+                        {record.employees?.employee_number}
                       </div>
                     </div>
                   </div>
@@ -209,7 +209,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                 {/* القسم */}
                 <TableCell className="text-right">
                   <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                    {record.employee?.department}
+                    {record.employees?.department}
                   </Badge>
                 </TableCell>
 
