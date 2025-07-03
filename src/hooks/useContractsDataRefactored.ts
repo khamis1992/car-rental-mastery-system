@@ -16,63 +16,118 @@ export const useContractsDataRefactored = () => {
     monthlyRevenue: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   const contractService = serviceContainer.getContractBusinessService();
   const quotationService = serviceContainer.getQuotationBusinessService();
 
   const loadQuotations = async () => {
-    const activeQuotations = await quotationService.getActiveQuotations();
-    setQuotations(activeQuotations);
+    try {
+      const activeQuotations = await quotationService.getActiveQuotations();
+      setQuotations(activeQuotations);
+      setErrors(prev => ({ ...prev, quotations: '' }));
+    } catch (error: any) {
+      console.error('Error loading quotations:', error);
+      setErrors(prev => ({ ...prev, quotations: error.message || 'فشل في تحميل عروض الأسعار' }));
+      // Keep existing data if available
+    }
   };
 
   const loadContracts = async () => {
-    const data = await contractService.getAllContracts();
-    setContracts(data);
+    try {
+      const data = await contractService.getAllContracts();
+      setContracts(data);
+      setErrors(prev => ({ ...prev, contracts: '' }));
+    } catch (error: any) {
+      console.error('Error loading contracts:', error);
+      setErrors(prev => ({ ...prev, contracts: error.message || 'فشل في تحميل العقود' }));
+      // Keep existing data if available
+    }
   };
 
   const loadCustomers = async () => {
-    const { data, error } = await supabase
-      .from('customers')
-      .select('id, name, customer_number')
-      .eq('status', 'active')
-      .order('name');
-    
-    if (error) throw error;
-    setCustomers(data || []);
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .select('id, name, customer_number')
+        .eq('status', 'active')
+        .order('name');
+      
+      if (error) throw error;
+      setCustomers(data || []);
+      setErrors(prev => ({ ...prev, customers: '' }));
+    } catch (error: any) {
+      console.error('Error loading customers:', error);
+      setErrors(prev => ({ ...prev, customers: error.message || 'فشل في تحميل العملاء' }));
+      // Keep existing data if available
+    }
   };
 
   const loadVehicles = async () => {
-    const { data, error } = await supabase
-      .from('vehicles')
-      .select('id, make, model, vehicle_number, daily_rate, status')
-      .order('vehicle_number');
-    
-    if (error) throw error;
-    setVehicles(data || []);
+    try {
+      const { data, error } = await supabase
+        .from('vehicles')
+        .select('id, make, model, vehicle_number, daily_rate, status')
+        .order('vehicle_number');
+      
+      if (error) throw error;
+      setVehicles(data || []);
+      setErrors(prev => ({ ...prev, vehicles: '' }));
+    } catch (error: any) {
+      console.error('Error loading vehicles:', error);
+      setErrors(prev => ({ ...prev, vehicles: error.message || 'فشل في تحميل المركبات' }));
+      // Keep existing data if available
+    }
   };
 
   const loadStats = async () => {
-    const contractStatsData = await contractService.getContractStats();
-    setContractStats(contractStatsData);
+    try {
+      const contractStatsData = await contractService.getContractStats();
+      setContractStats(contractStatsData);
+      setErrors(prev => ({ ...prev, stats: '' }));
+    } catch (error: any) {
+      console.error('Error loading stats:', error);
+      setErrors(prev => ({ ...prev, stats: error.message || 'فشل في تحميل الإحصائيات' }));
+      // Keep existing stats if available
+    }
   };
 
-  const loadData = async () => {
+  const loadData = async (retryCount = 0) => {
     try {
       setLoading(true);
-      await Promise.all([
-        loadContracts(),
-        loadCustomers(),
-        loadVehicles(),
-        loadQuotations(),
-        loadStats(),
-      ]);
+      setErrors({});
+      
+      // Load data separately instead of Promise.all to prevent single failure from affecting everything
+      await loadContracts();
+      await loadCustomers();
+      await loadVehicles();
+      await loadQuotations();
+      await loadStats();
+      
+      // Check if we have any critical errors and show toast only for complete failures
+      const hasErrors = Object.values(errors).some(error => error !== '');
+      if (hasErrors && retryCount === 0) {
+        const errorCount = Object.values(errors).filter(error => error !== '').length;
+        toast({
+          title: 'تحذير',
+          description: `فشل في تحميل ${errorCount} من أقسام البيانات. يمكنك المحاولة مرة أخرى.`,
+          variant: 'destructive',
+        });
+      }
     } catch (error: any) {
-      toast({
-        title: 'خطأ في تحميل البيانات',
-        description: error.message,
-        variant: 'destructive',
-      });
+      console.error('Critical error in loadData:', error);
+      // Only show this for completely unexpected errors
+      if (retryCount < 2) {
+        // Retry once more
+        setTimeout(() => loadData(retryCount + 1), 1000);
+      } else {
+        toast({
+          title: 'خطأ في تحميل البيانات',
+          description: 'حدث خطأ غير متوقع. يرجى إعادة تحميل الصفحة.',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -89,6 +144,7 @@ export const useContractsDataRefactored = () => {
     vehicles,
     contractStats,
     loading,
+    errors,
     loadData,
   };
 };

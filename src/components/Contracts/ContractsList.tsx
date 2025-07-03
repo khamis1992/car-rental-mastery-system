@@ -223,17 +223,15 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                          customer_name: contract.customer_name,
                          vehicle_info: contract.vehicle_info
                        }}
-                        onStatusUpdate={() => {
-                          if (onStatusUpdate) {
-                            onStatusUpdate();
-                          } else {
-                            window.location.reload();
-                          }
-                          toast({
-                            title: "تم التحديث",
-                            description: "تم تحديث حالة العقد بنجاح",
-                          });
-                        }}
+                         onStatusUpdate={() => {
+                           toast({
+                             title: "تم التحديث",
+                             description: "تم تحديث حالة العقد بنجاح",
+                           });
+                           if (onStatusUpdate) {
+                             onStatusUpdate();
+                           }
+                         }}
                      />
                    </TableCell>
                   <TableCell>
@@ -259,8 +257,12 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                           contract_number: contract.contract_number,
                           customer_name: contract.customer_name,
                           vehicle_info: contract.vehicle_info,
-                        }}
-                        onUpdate={() => window.location.reload()}
+                         }}
+                         onUpdate={() => {
+                           if (onStatusUpdate) {
+                             onStatusUpdate();
+                           }
+                         }}
                       />
                     </div>
                   </TableCell>

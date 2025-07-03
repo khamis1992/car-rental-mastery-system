@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ContractForm } from '@/components/Contracts/ContractForm';
 import { ContractsList } from '@/components/Contracts/ContractsList';
 import { ContractMonitoring } from '@/components/Contracts/ContractMonitoring';
@@ -22,6 +23,7 @@ const Contracts = () => {
     vehicles,
     contractStats,
     loading,
+    errors,
     loadData,
   } = useContractsDataRefactored();
 
@@ -53,6 +55,16 @@ const Contracts = () => {
         
         <div className="flex items-center gap-2">
           <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => loadData()}
+            disabled={loading}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            تحديث
+          </Button>
+          <Button 
             className="btn-primary flex items-center gap-2"
             onClick={() => setContractFormOpen(true)}
           >
@@ -61,6 +73,17 @@ const Contracts = () => {
           </Button>
         </div>
       </div>
+
+      {/* Error alerts */}
+      {Object.entries(errors).map(([key, error]) => 
+        error && (
+          <Alert key={key} variant="destructive">
+            <AlertDescription>
+              {error}
+            </AlertDescription>
+          </Alert>
+        )
+      )}
 
       {/* إحصائيات سريعة */}
       <ContractStats stats={contractStats} />
