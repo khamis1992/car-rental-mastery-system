@@ -235,24 +235,6 @@ export const MaintenanceOverview = () => {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>تقدم الصيانة</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>الصيانة المكتملة والجارية</span>
-                <span>{Math.round(getMaintenanceProgress())}%</span>
-              </div>
-              <Progress value={getMaintenanceProgress()} className="h-2" />
-            </div>
-            <div className="text-sm text-muted-foreground">
-              {stats.scheduledMaintenance + stats.inProgressMaintenance} من أصل {stats.scheduledMaintenance + stats.inProgressMaintenance + stats.overdueMaintenance} عملية صيانة
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
             <CardTitle>إحصائيات التكاليف</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -272,6 +254,24 @@ export const MaintenanceOverview = () => {
             </div>
             <div className="text-sm text-muted-foreground">
               {stats.completedThisMonth} عملية صيانة مكتملة هذا الشهر
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>تقدم الصيانة</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>الصيانة المكتملة والجارية</span>
+                <span>{Math.round(getMaintenanceProgress())}%</span>
+              </div>
+              <Progress value={getMaintenanceProgress()} className="h-2" />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {stats.scheduledMaintenance + stats.inProgressMaintenance} من أصل {stats.scheduledMaintenance + stats.inProgressMaintenance + stats.overdueMaintenance} عملية صيانة
             </div>
           </CardContent>
         </Card>
