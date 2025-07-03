@@ -195,16 +195,21 @@ const Employees = () => {
                 {filteredEmployees.map((employee) => (
                   <div key={employee.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
                     <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-4 mb-2">
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">عرض</Button>
+                        <Button variant="outline" size="sm">تعديل</Button>
+                      </div>
+                      
+                      <div className="flex-1 text-right mr-4">
+                        <div className="flex items-center gap-4 mb-2 justify-end">
+                          {getStatusBadge(employee.status)}
+                          <Badge variant="outline">{employee.employee_number}</Badge>
                           <h3 className="font-medium text-lg">
                             {employee.first_name} {employee.last_name}
                           </h3>
-                          <Badge variant="outline">{employee.employee_number}</Badge>
-                          {getStatusBadge(employee.status)}
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-sm text-muted-foreground">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-sm text-muted-foreground text-right">
                           <div>
                             <span className="font-medium">المنصب:</span> {employee.position}
                           </div>
@@ -218,11 +223,6 @@ const Employees = () => {
                             <span className="font-medium">الراتب:</span> {formatCurrency(employee.salary)}
                           </div>
                         </div>
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">عرض</Button>
-                        <Button variant="outline" size="sm">تعديل</Button>
                       </div>
                     </div>
                   </div>

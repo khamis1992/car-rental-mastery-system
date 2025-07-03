@@ -292,15 +292,15 @@ const Attendance = () => {
                 {mockAttendanceData.map((record) => (
                   <div key={record.id} className="border rounded-lg p-4">
                     <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-4 mb-2">
+                      <div className="flex-1 text-right">
+                        <div className="flex items-center gap-4 mb-2 justify-end">
+                          {getStatusBadge(record.status)}
                           <h3 className="font-medium">
                             {format(new Date(record.date), 'dd MMMM yyyy', { locale: ar })}
                           </h3>
-                          {getStatusBadge(record.status)}
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm text-muted-foreground">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm text-muted-foreground text-right">
                           <div>
                             <span className="font-medium">الحضور:</span> {record.check_in_time || 'لم يسجل'}
                           </div>

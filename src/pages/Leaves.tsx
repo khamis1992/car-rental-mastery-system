@@ -399,13 +399,20 @@ const Leaves = () => {
                 {filteredRequests.map((request) => (
                   <div key={request.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
                     <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-4 mb-2">
-                          {getLeaveTypeBadge(request.leave_type)}
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">عرض</Button>
+                        {request.status === 'pending' && (
+                          <Button variant="outline" size="sm">إلغاء</Button>
+                        )}
+                      </div>
+                      
+                      <div className="flex-1 text-right mr-4">
+                        <div className="flex items-center gap-4 mb-2 justify-end">
                           {getStatusBadge(request.status)}
+                          {getLeaveTypeBadge(request.leave_type)}
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm mb-2">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm mb-2 text-right">
                           <div>
                             <span className="font-medium text-muted-foreground">من:</span>
                             <span className="mr-2">{format(new Date(request.start_date), 'dd/MM/yyyy', { locale: ar })}</span>
@@ -420,30 +427,23 @@ const Leaves = () => {
                           </div>
                         </div>
                         
-                        <div className="text-sm">
+                        <div className="text-sm text-right">
                           <span className="font-medium text-muted-foreground">السبب:</span>
                           <span className="mr-2">{request.reason}</span>
                         </div>
 
                         {request.status === 'approved' && request.approved_by && (
-                          <div className="text-sm text-green-600 mt-1">
+                          <div className="text-sm text-green-600 mt-1 text-right">
                             <span className="font-medium">مُوافق من:</span>
                             <span className="mr-2">{request.approved_by}</span>
                           </div>
                         )}
 
                         {request.status === 'rejected' && request.rejection_reason && (
-                          <div className="text-sm text-red-600 mt-1">
+                          <div className="text-sm text-red-600 mt-1 text-right">
                             <span className="font-medium">سبب الرفض:</span>
                             <span className="mr-2">{request.rejection_reason}</span>
                           </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">عرض</Button>
-                        {request.status === 'pending' && (
-                          <Button variant="outline" size="sm">إلغاء</Button>
                         )}
                       </div>
                     </div>
