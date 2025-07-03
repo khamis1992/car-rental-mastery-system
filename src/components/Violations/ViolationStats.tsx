@@ -71,15 +71,15 @@ export const ViolationStats: React.FC<ViolationStatsProps> = ({ stats }) => {
           return (
             <Card key={index}>
               <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col items-center text-center space-y-3">
+                  <div className={`p-3 rounded-full ${stat.bgColor}`}>
+                    <Icon className={`w-6 h-6 ${stat.color}`} />
+                  </div>
                   <div>
+                    <p className="text-2xl font-bold">{stat.value}</p>
                     <p className="text-sm font-medium text-muted-foreground">
                       {stat.title}
                     </p>
-                    <p className="text-2xl font-bold">{stat.value}</p>
-                  </div>
-                  <div className={`p-2 rounded-full ${stat.bgColor}`}>
-                    <Icon className={`w-4 h-4 ${stat.color}`} />
                   </div>
                 </div>
               </CardContent>
@@ -93,15 +93,15 @@ export const ViolationStats: React.FC<ViolationStatsProps> = ({ stats }) => {
         {financialCards.map((stat, index) => (
           <Card key={index}>
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col items-center text-center space-y-3">
+                <div className="p-3 rounded-full bg-primary/10">
+                  <DollarSign className="w-6 h-6 text-primary" />
+                </div>
                 <div>
+                  <p className="text-xl font-bold text-foreground">{stat.value}</p>
                   <p className="text-sm font-medium text-muted-foreground">
                     {stat.title}
                   </p>
-                  <p className="text-xl font-bold text-foreground">{stat.value}</p>
-                </div>
-                <div className="p-2 rounded-full bg-primary/10">
-                  <DollarSign className="w-4 h-4 text-primary" />
                 </div>
               </div>
             </CardContent>
