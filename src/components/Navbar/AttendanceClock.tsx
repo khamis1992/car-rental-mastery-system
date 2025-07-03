@@ -7,6 +7,7 @@ import { ar } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
 import { attendanceService } from '@/services/attendanceService';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export const AttendanceClock: React.FC = () => {
   const { profile } = useAuth();
@@ -44,7 +45,7 @@ export const AttendanceClock: React.FC = () => {
   }, []);
 
   const handleCheckIn = async () => {
-    if (!profile?.id) {
+    if (!profile?.user_id) {
       toast({
         title: 'خطأ',
         description: 'لم يتم العثور على بيانات المستخدم',
@@ -62,41 +63,66 @@ export const AttendanceClock: React.FC = () => {
       return;
     }
 
-    if (!isCheckedIn) {
-      // تسجيل الحضور
-      const now = new Date();
-      const checkInData = {
-        employee_id: profile.id,
-        date: now.toISOString().split('T')[0],
-        check_in_time: now.toISOString(),
-        location_latitude: location.lat,
-        location_longitude: location.lng,
-        status: 'present'
-      };
+    try {
+      // العثور على الموظف المرتبط بالمستخدم الحالي
+      const { data: employee, error: employeeError } = await supabase
+        .from('employees')
+        .select('id')
+        .eq('user_id', profile.user_id)
+        .single();
 
-      const result = await attendanceService.checkIn(checkInData);
-      
-      if (result.success) {
-        setIsCheckedIn(true);
-        setCheckInTime(new Date());
-        toast({
-          title: 'تم التسجيل',
-          description: 'تم تسجيل الحضور بنجاح'
-        });
-      } else {
+      if (employeeError || !employee) {
         toast({
           title: 'خطأ',
-          description: 'حدث خطأ في تسجيل الحضور',
+          description: 'لم يتم العثور على بيانات الموظف. يرجى التواصل مع الإدارة.',
           variant: 'destructive'
         });
+        return;
       }
-    } else {
-      // تسجيل الانصراف
-      setIsCheckedIn(false);
-      setCheckInTime(null);
+
+      if (!isCheckedIn) {
+        // تسجيل الحضور
+        const now = new Date();
+        const checkInData = {
+          employee_id: employee.id,
+          date: now.toISOString().split('T')[0],
+          check_in_time: now.toISOString(),
+          location_latitude: location.lat,
+          location_longitude: location.lng,
+          status: 'present'
+        };
+
+        const result = await attendanceService.checkIn(checkInData);
+        
+        if (result.success) {
+          setIsCheckedIn(true);
+          setCheckInTime(new Date());
+          toast({
+            title: 'تم التسجيل',
+            description: 'تم تسجيل الحضور بنجاح'
+          });
+        } else {
+          toast({
+            title: 'خطأ',
+            description: 'حدث خطأ في تسجيل الحضور',
+            variant: 'destructive'
+          });
+        }
+      } else {
+        // تسجيل الانصراف
+        setIsCheckedIn(false);
+        setCheckInTime(null);
+        toast({
+          title: 'تم التسجيل',
+          description: 'تم تسجيل الانصراف بنجاح'
+        });
+      }
+    } catch (error) {
+      console.error('خطأ في تسجيل الحضور:', error);
       toast({
-        title: 'تم التسجيل',
-        description: 'تم تسجيل الانصراف بنجاح'
+        title: 'خطأ',
+        description: 'حدث خطأ غير متوقع',
+        variant: 'destructive'
       });
     }
     
