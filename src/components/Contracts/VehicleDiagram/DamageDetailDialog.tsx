@@ -56,31 +56,39 @@ export const DamageDetailDialog: React.FC<DamageDetailDialogProps> = ({
   const handleSave = () => {
     console.log('💾 DamageDetailDialog: Attempting to save damage:', editedDamage);
     
-    // Enhanced validation using the validation utility
-    // Check if this is a new damage (temporary) by checking if onDelete is undefined
-    const isNewDamage = !onDelete;
-    const validation = validateDamage(editedDamage, false); // Always validate as permanent when saving
-    
-    if (!validation.isValid) {
-      console.warn('❌ Validation failed:', validation.errors);
+    // Basic validation - ensure we have the minimum required data
+    if (!editedDamage.description?.trim()) {
+      console.warn('❌ Description is required');
       toast({
-        title: "خطأ في البيانات",
-        description: validation.errors.join(', '),
+        title: "حقل مطلوب",
+        description: "يرجى إضافة وصف للضرر قبل الحفظ",
         variant: "destructive",
       });
       return;
     }
 
-    // Show warnings if any
-    if (validation.warnings.length > 0) {
-      console.warn('⚠️ Validation warnings:', validation.warnings);
+    if (editedDamage.description.trim().length < 3) {
+      console.warn('❌ Description too short');
       toast({
-        title: "تنبيهات",
-        description: validation.warnings.join(', '),
+        title: "وصف قصير",
+        description: "يرجى إضافة وصف أكثر تفصيلاً للضرر (على الأقل 3 أحرف)",
+        variant: "destructive",
       });
+      return;
     }
 
-    console.log('✅ Damage validation passed, calling onSave');
+    // Validate position bounds
+    if (editedDamage.x < 0 || editedDamage.x > 100 || editedDamage.y < 0 || editedDamage.y > 100) {
+      console.warn('❌ Position out of bounds');
+      toast({
+        title: "موقع غير صحيح",
+        description: "موقع الضرر خارج حدود المخطط",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log('✅ Basic validation passed, calling onSave');
     onSave(editedDamage);
     onOpenChange(false);
   };
