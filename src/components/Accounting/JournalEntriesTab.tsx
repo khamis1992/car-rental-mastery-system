@@ -247,7 +247,7 @@ export const JournalEntriesTab = () => {
   };
 
   const formatAmount = (amount: number) => {
-    return `${amount.toFixed(3)} د.ك`;
+    return `د.ك ${amount.toFixed(3)}`;
   };
 
   if (loading) {

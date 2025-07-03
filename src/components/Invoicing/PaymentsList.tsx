@@ -50,7 +50,7 @@ export const PaymentsList: React.FC<PaymentsListProps> = ({
   };
 
   const formatCurrency = (amount: number) => {
-    return `${amount.toFixed(3)} د.ك`;
+    return `د.ك ${amount.toFixed(3)}`;
   };
 
   return (

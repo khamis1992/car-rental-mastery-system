@@ -86,7 +86,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
     }
   };
 
-  const formatCurrency = (amount: number) => `${amount.toFixed(3)} د.ك`;
+  const formatCurrency = (amount: number) => `د.ك ${amount.toFixed(3)}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

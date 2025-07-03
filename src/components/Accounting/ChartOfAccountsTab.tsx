@@ -148,7 +148,7 @@ export const ChartOfAccountsTab = () => {
   };
 
   const formatBalance = (amount: number) => {
-    return `${amount.toFixed(3)} د.ك`;
+    return `د.ك ${amount.toFixed(3)}`;
   };
 
   if (loading) {

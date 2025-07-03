@@ -53,7 +53,7 @@ const Employees = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return `${amount.toFixed(3)} د.ك`;
+    return `د.ك ${amount.toFixed(3)}`;
   };
 
   const filteredEmployees = mockEmployees.filter(employee => {

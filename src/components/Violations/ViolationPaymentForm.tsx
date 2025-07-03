@@ -56,7 +56,7 @@ export const ViolationPaymentForm: React.FC<ViolationPaymentFormProps> = ({
     if (formData.amount <= 0 || formData.amount > outstandingAmount) {
       toast({
         title: 'مبلغ غير صحيح',
-        description: `يجب أن يكون المبلغ بين 0 و ${outstandingAmount.toFixed(3)} د.ك`,
+        description: `يجب أن يكون المبلغ بين 0 و د.ك ${outstandingAmount.toFixed(3)}`,
         variant: 'destructive'
       });
       return;

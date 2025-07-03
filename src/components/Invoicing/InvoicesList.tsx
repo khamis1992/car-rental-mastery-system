@@ -58,7 +58,7 @@ export const InvoicesList: React.FC<InvoicesListProps> = ({
   };
 
   const formatCurrency = (amount: number) => {
-    return `${amount.toFixed(3)} د.ك`;
+    return `د.ك ${amount.toFixed(3)}`;
   };
 
   return (
