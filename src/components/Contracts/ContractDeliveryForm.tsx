@@ -80,6 +80,10 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
   };
 
   const updateDeliveryData = (field: string, value: any) => {
+    console.log('🔄 ContractDeliveryForm: Updating', field, 'with value:', value);
+    if (field === 'pickup_damages') {
+      console.log('⚠️ pickup_damages being updated with:', value?.length, 'damages');
+    }
     setDeliveryData(prev => ({ ...prev, [field]: value }));
   };
 

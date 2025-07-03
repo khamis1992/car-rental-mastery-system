@@ -79,6 +79,10 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
   };
 
   const updateReturnData = (field: string, value: any) => {
+    console.log('🔄 ContractReturnForm: Updating', field, 'with value:', value);
+    if (field === 'return_damages') {
+      console.log('⚠️ return_damages being updated with:', value?.length, 'damages');
+    }
     setReturnData(prev => ({ ...prev, [field]: value }));
   };
 

@@ -39,6 +39,7 @@ export const DamageDetailDialog: React.FC<DamageDetailDialogProps> = ({
   const { toast } = useToast();
 
   React.useEffect(() => {
+    console.log('🔄 DamageDetailDialog: damage prop changed:', damage);
     setEditedDamage(damage);
   }, [damage]);
 

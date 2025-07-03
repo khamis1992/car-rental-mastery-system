@@ -127,7 +127,7 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
             <VehicleDiagramInteractive
               type={type}
               contractId={contractId}
-              damages={damages}
+              damages={damages} // Only show saved damages, not temporary ones
               onDamageCreate={handleDamageCreate}
               onDamageSelect={handleDamageSelect}
               readonly={readonly}

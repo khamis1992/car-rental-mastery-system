@@ -40,6 +40,11 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
   const [isSaving, setIsSaving] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const { toast } = useToast();
+  
+  // Debug effect to track isAddingDamage changes
+  React.useEffect(() => {
+    console.log('🎯 isAddingDamage state changed to:', isAddingDamage);
+  }, [isAddingDamage]);
 
   const typeLabel = type === 'pickup' ? 'التسليم' : 'الاستلام';
 
