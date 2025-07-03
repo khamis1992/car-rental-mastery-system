@@ -272,8 +272,8 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="text-right">
-          <DialogTitle className="text-2xl font-bold text-primary">إنشاء عقد جديد</DialogTitle>
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold text-primary text-right">إنشاء عقد جديد</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>

@@ -276,7 +276,7 @@ export const ContractWizard: React.FC<ContractWizardProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-right flex items-center justify-between">
+          <DialogTitle className="flex items-center justify-between text-right">
             <span>إنشاء عقد جديد - {currentStepData.title}</span>
             <Button
               variant="ghost"
