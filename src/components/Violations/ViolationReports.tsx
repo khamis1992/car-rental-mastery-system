@@ -226,9 +226,9 @@ export const ViolationReports: React.FC = () => {
                   <TableBody>
                     {reportData.violations_by_status.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{formatCurrency(item.amount)}</TableCell>
-                        <TableCell>{item.count}</TableCell>
-                        <TableCell>
+                        <TableCell className="font-medium text-right">{formatCurrency(item.amount)}</TableCell>
+                        <TableCell className="text-right">{item.count}</TableCell>
+                        <TableCell className="text-right">
                           <Badge variant={getSeverityColor(item.status)}>
                             {item.status === 'pending' ? 'معلقة' :
                              item.status === 'notified' ? 'تم الإشعار' :
@@ -265,9 +265,9 @@ export const ViolationReports: React.FC = () => {
                   <TableBody>
                     {reportData.violations_by_type.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{formatCurrency(item.amount)}</TableCell>
-                        <TableCell>{item.count}</TableCell>
-                        <TableCell>{item.type_name}</TableCell>
+                        <TableCell className="font-medium text-right">{formatCurrency(item.amount)}</TableCell>
+                        <TableCell className="text-right">{item.count}</TableCell>
+                        <TableCell className="text-right">{item.type_name}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -296,9 +296,9 @@ export const ViolationReports: React.FC = () => {
                   <TableBody>
                     {reportData.violations_by_liability.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{formatCurrency(item.amount)}</TableCell>
-                        <TableCell>{item.count}</TableCell>
-                        <TableCell>
+                        <TableCell className="font-medium text-right">{formatCurrency(item.amount)}</TableCell>
+                        <TableCell className="text-right">{item.count}</TableCell>
+                        <TableCell className="text-right">
                           <Badge variant={
                             item.liability === 'العميل' ? 'destructive' :
                             item.liability === 'الشركة' ? 'default' :
@@ -335,9 +335,9 @@ export const ViolationReports: React.FC = () => {
                   <TableBody>
                     {reportData.monthly_trend.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{formatCurrency(item.amount)}</TableCell>
-                        <TableCell>{item.count}</TableCell>
-                        <TableCell>{item.month}</TableCell>
+                        <TableCell className="font-medium text-right">{formatCurrency(item.amount)}</TableCell>
+                        <TableCell className="text-right">{item.count}</TableCell>
+                        <TableCell className="text-right">{item.month}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

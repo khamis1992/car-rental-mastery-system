@@ -392,7 +392,7 @@ export const violationService = {
       const date = new Date();
       date.setMonth(date.getMonth() - i);
       const monthKey = date.toISOString().substring(0, 7); // YYYY-MM
-      const monthName = date.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' });
+      const monthName = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
       
       const monthData = violationsData.filter(v => 
         v.violation_date && v.violation_date.startsWith(monthKey)
