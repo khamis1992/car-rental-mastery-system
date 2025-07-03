@@ -390,10 +390,10 @@ export const MaintenanceAlerts = () => {
               {alerts.map((alert) => (
                 <div
                   key={alert.id}
-                  className="p-4 border rounded-lg space-y-3"
+                  className="p-4 border rounded-lg"
                 >
                   <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-3 rtl:space-x-reverse text-right flex-1 mr-4">
+                    <div className="flex items-start space-x-3 rtl:space-x-reverse text-right flex-1">
                       {getAlertIcon(alert.alert_type)}
                       <div className="space-y-1">
                         <div className="font-medium text-right">{alert.title}</div>
@@ -408,32 +408,33 @@ export const MaintenanceAlerts = () => {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                    
+                    <div className="flex items-center mx-4">
                       {getPriorityBadge(alert.priority)}
                     </div>
-                  </div>
-
-                  <div className="flex items-center justify-end space-x-2 space-x-reverse pt-2 border-t">
-                    {alert.maintenance_id && (
+                    
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                      {alert.maintenance_id && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleMarkAsResolved(alert)}
+                          className="text-green-600 hover:text-green-700"
+                        >
+                          <CheckCircle className="h-4 w-4 ml-1" />
+                          تم الحل
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleMarkAsResolved(alert)}
-                        className="text-green-600 hover:text-green-700"
+                        onClick={() => handleDismissAlert(alert.id)}
+                        className="text-gray-600 hover:text-gray-700"
                       >
-                        <CheckCircle className="h-4 w-4 ml-1" />
-                        تم الحل
+                        <X className="h-4 w-4 ml-1" />
+                        إخفاء
                       </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDismissAlert(alert.id)}
-                      className="text-gray-600 hover:text-gray-700"
-                    >
-                      <X className="h-4 w-4 ml-1" />
-                      إخفاء
-                    </Button>
+                    </div>
                   </div>
                 </div>
               ))}
