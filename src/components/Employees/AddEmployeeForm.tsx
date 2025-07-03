@@ -52,6 +52,7 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     national_id: '',
     position: '',
     department: '',
+    department_id: '',
     salary: '',
     emergency_contact_name: '',
     emergency_contact_phone: '',
@@ -93,7 +94,7 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
 
   const validateForm = () => {
     const errors: Record<string, boolean> = {};
-    const requiredFields = ['first_name', 'last_name', 'position', 'department', 'salary'];
+    const requiredFields = ['first_name', 'last_name', 'position', 'department_id', 'salary'];
     
     requiredFields.forEach(field => {
       if (!formData[field as keyof typeof formData]) {
@@ -131,6 +132,9 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       // Generate employee number
       const { data: employeeNumberData } = await supabase.rpc('generate_employee_number');
       
+      // Get department name from selected department ID
+      const selectedDepartment = departments.find(dept => dept.id === formData.department_id);
+      
       const employeeData = {
         employee_number: employeeNumberData,
         first_name: formData.first_name,
@@ -139,8 +143,8 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         phone: formData.phone || null,
         national_id: formData.national_id || null,
         position: formData.position,
-        department: formData.department,
-        department_id: formData.department || null,
+        department: selectedDepartment?.department_name || null,
+        department_id: formData.department_id || null,
         salary: parseFloat(formData.salary),
         hire_date: hireDate!.toISOString().split('T')[0],
         status: 'active' as const,
@@ -176,6 +180,7 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         national_id: '',
         position: '',
         department: '',
+        department_id: '',
         salary: '',
         emergency_contact_name: '',
         emergency_contact_phone: '',
@@ -188,9 +193,22 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       setShowBankDetails(false);
     } catch (error) {
       console.error('Error adding employee:', error);
+      let errorMessage = 'حدث خطأ أثناء إضافة الموظف، يرجى المحاولة مرة أخرى';
+      
+      // More specific error handling
+      if (error instanceof Error) {
+        if (error.message.includes('employee_number')) {
+          errorMessage = 'خطأ في توليد رقم الموظف';
+        } else if (error.message.includes('department')) {
+          errorMessage = 'خطأ في بيانات القسم المحدد';
+        } else if (error.message.includes('duplicate key')) {
+          errorMessage = 'هذا الموظف موجود مسبقاً في النظام';
+        }
+      }
+      
       toast({
         title: 'خطأ في إضافة الموظف',
-        description: 'حدث خطأ أثناء إضافة الموظف، يرجى المحاولة مرة أخرى',
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
@@ -399,8 +417,8 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                     القسم
                     <span className="text-destructive">*</span>
                   </Label>
-                  <Select value={formData.department} onValueChange={(value) => handleInputChange('department', value)}>
-                    <SelectTrigger className={inputClassName('department')}>
+                  <Select value={formData.department_id} onValueChange={(value) => handleInputChange('department_id', value)}>
+                    <SelectTrigger className={inputClassName('department_id')}>
                       <SelectValue placeholder="اختر القسم" />
                     </SelectTrigger>
                     <SelectContent>
@@ -411,7 +429,7 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                       ))}
                     </SelectContent>
                   </Select>
-                  {fieldErrors.department && (
+                  {fieldErrors.department_id && (
                     <p className="text-sm text-destructive flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" />
                       هذا الحقل مطلوب
