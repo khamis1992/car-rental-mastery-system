@@ -325,8 +325,8 @@ export const MaintenanceAlerts = () => {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <Bell className="h-4 w-4 text-blue-600" />
+            <div className="flex flex-col items-center text-center space-y-2">
+              <Bell className="h-6 w-6 text-blue-600" />
               <div>
                 <div className="text-2xl font-bold">{alerts.length}</div>
                 <p className="text-xs text-muted-foreground">إجمالي التنبيهات</p>
@@ -337,8 +337,8 @@ export const MaintenanceAlerts = () => {
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <AlertTriangle className="h-4 w-4 text-red-600" />
+            <div className="flex flex-col items-center text-center space-y-2">
+              <AlertTriangle className="h-6 w-6 text-red-600" />
               <div>
                 <div className="text-2xl font-bold text-red-600">{stats.high}</div>
                 <p className="text-xs text-muted-foreground">أولوية عالية</p>
@@ -349,8 +349,8 @@ export const MaintenanceAlerts = () => {
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <Clock className="h-4 w-4 text-yellow-600" />
+            <div className="flex flex-col items-center text-center space-y-2">
+              <Clock className="h-6 w-6 text-yellow-600" />
               <div>
                 <div className="text-2xl font-bold text-yellow-600">{stats.medium}</div>
                 <p className="text-xs text-muted-foreground">أولوية متوسطة</p>
@@ -361,8 +361,8 @@ export const MaintenanceAlerts = () => {
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <Calendar className="h-4 w-4 text-blue-600" />
+            <div className="flex flex-col items-center text-center space-y-2">
+              <Calendar className="h-6 w-6 text-blue-600" />
               <div>
                 <div className="text-2xl font-bold text-blue-600">{stats.low}</div>
                 <p className="text-xs text-muted-foreground">أولوية منخفضة</p>

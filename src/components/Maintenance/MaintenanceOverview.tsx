@@ -192,8 +192,10 @@ export const MaintenanceOverview = () => {
             <Clock className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.inProgressMaintenance}</div>
-            <p className="text-xs text-muted-foreground">في المركز</p>
+            <div className="flex flex-col items-center text-center space-y-2">
+              <div className="text-2xl font-bold text-yellow-600">{stats.inProgressMaintenance}</div>
+              <p className="text-xs text-muted-foreground">في المركز</p>
+            </div>
           </CardContent>
         </Card>
 
@@ -203,8 +205,10 @@ export const MaintenanceOverview = () => {
             <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.overdueMaintenance}</div>
-            <p className="text-xs text-muted-foreground">تحتاج انتباه</p>
+            <div className="flex flex-col items-center text-center space-y-2">
+              <div className="text-2xl font-bold text-red-600">{stats.overdueMaintenance}</div>
+              <p className="text-xs text-muted-foreground">تحتاج انتباه</p>
+            </div>
           </CardContent>
         </Card>
 
@@ -214,8 +218,10 @@ export const MaintenanceOverview = () => {
             <Calendar className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.scheduledMaintenance}</div>
-            <p className="text-xs text-muted-foreground">عملية صيانة</p>
+            <div className="flex flex-col items-center text-center space-y-2">
+              <div className="text-2xl font-bold text-blue-600">{stats.scheduledMaintenance}</div>
+              <p className="text-xs text-muted-foreground">عملية صيانة</p>
+            </div>
           </CardContent>
         </Card>
 
@@ -225,8 +231,10 @@ export const MaintenanceOverview = () => {
             <Wrench className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalVehicles}</div>
-            <p className="text-xs text-muted-foreground">في الأسطول</p>
+            <div className="flex flex-col items-center text-center space-y-2">
+              <div className="text-2xl font-bold">{stats.totalVehicles}</div>
+              <p className="text-xs text-muted-foreground">في الأسطول</p>
+            </div>
           </CardContent>
         </Card>
       </div>

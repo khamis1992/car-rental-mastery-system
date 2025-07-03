@@ -214,52 +214,52 @@ export const MaintenanceHistory = () => {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
-            <div className="rtl-stats">
+            <div className="flex flex-col items-center text-center space-y-2">
+              <FileText className="h-6 w-6 text-blue-600" />
               <div>
                 <div className="text-2xl font-bold">{filteredRecords.length}</div>
                 <p className="text-xs text-muted-foreground">إجمالي السجلات</p>
               </div>
-              <FileText className="h-4 w-4 text-blue-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="rtl-stats">
+            <div className="flex flex-col items-center text-center space-y-2">
+              <Calendar className="h-6 w-6 text-green-600" />
               <div>
                 <div className="text-2xl font-bold">
                   {filteredRecords.filter(r => r.status === 'completed').length}
                 </div>
                 <p className="text-xs text-muted-foreground">صيانة مكتملة</p>
               </div>
-              <Calendar className="h-4 w-4 text-green-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="rtl-stats">
+            <div className="flex flex-col items-center text-center space-y-2">
+              <DollarSign className="h-6 w-6 text-yellow-600" />
               <div>
                 <div className="text-2xl font-bold">{calculateTotalCost().toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground">إجمالي التكلفة (د.ك)</p>
               </div>
-              <DollarSign className="h-4 w-4 text-yellow-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="rtl-stats">
+            <div className="flex flex-col items-center text-center space-y-2">
+              <Filter className="h-6 w-6 text-purple-600" />
               <div>
                 <div className="text-2xl font-bold">
                   {new Set(filteredRecords.map(r => r.vehicle_id)).size}
                 </div>
                 <p className="text-xs text-muted-foreground">مركبات مختلفة</p>
               </div>
-              <Filter className="h-4 w-4 text-purple-600" />
             </div>
           </CardContent>
         </Card>
