@@ -38,13 +38,15 @@ import {
   User,
   Phone,
   Mail,
-  Loader2
+  Loader2,
+  Upload
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import CustomerForm from '@/components/Customers/CustomerForm';
 import CustomerDetailsDialog from '@/components/Customers/CustomerDetailsDialog';
+import CustomerCSVImportDialog from '@/components/Customers/CustomerCSVImportDialog';
 
 interface Customer {
   id: string;
@@ -76,6 +78,7 @@ const Customers = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showCSVImportDialog, setShowCSVImportDialog] = useState(false);
   const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
 
   const { profile } = useAuth();
@@ -236,25 +239,36 @@ const Customers = () => {
         </div>
         
         {canAddCustomers && (
-          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-            <DialogTrigger asChild>
-              <Button className="btn-primary flex items-center gap-2">
-                <UserPlus className="w-4 h-4" />
-                إضافة عميل جديد
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
-              <DialogHeader className="flex-shrink-0">
-                <DialogTitle>إضافة عميل جديد</DialogTitle>
-                <DialogDescription>
-                  أدخل بيانات العميل الجديد
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex-1 overflow-y-auto px-1">
-                <CustomerForm onSuccess={handleCustomerAdded} mode="add" />
-              </div>
-            </DialogContent>
-          </Dialog>
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="outline"
+              onClick={() => setShowCSVImportDialog(true)}
+              className="flex items-center gap-2"
+            >
+              <Upload className="w-4 h-4" />
+              استيراد من CSV
+            </Button>
+            
+            <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+              <DialogTrigger asChild>
+                <Button className="btn-primary flex items-center gap-2">
+                  <UserPlus className="w-4 h-4" />
+                  إضافة عميل جديد
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                <DialogHeader className="flex-shrink-0">
+                  <DialogTitle>إضافة عميل جديد</DialogTitle>
+                  <DialogDescription>
+                    أدخل بيانات العميل الجديد
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex-1 overflow-y-auto px-1">
+                  <CustomerForm onSuccess={handleCustomerAdded} mode="add" />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         )}
       </div>
 
@@ -482,6 +496,13 @@ const Customers = () => {
           onOpenChange={setShowDetailsDialog}
         />
       )}
+
+      {/* حوار استيراد CSV */}
+      <CustomerCSVImportDialog
+        open={showCSVImportDialog}
+        onOpenChange={setShowCSVImportDialog}
+        onSuccess={fetchAllCustomers}
+      />
     </div>
   );
 };
