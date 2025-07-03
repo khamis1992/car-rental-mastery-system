@@ -109,14 +109,10 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="diagram" className="flex items-center gap-2">
               <Map className="w-4 h-4" />
               المخطط التفاعلي
-            </TabsTrigger>
-            <TabsTrigger value="photos" className="flex items-center gap-2">
-              <Camera className="w-4 h-4" />
-              الصور والملاحظات
             </TabsTrigger>
             <TabsTrigger value="summary" className="flex items-center gap-2">
               <List className="w-4 h-4" />
@@ -150,17 +146,6 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
             )}
           </TabsContent>
 
-          <TabsContent value="photos" className="mt-6">
-            <VehicleConditionPhotos
-              contractId={contractId}
-              vehicleInfo={vehicleInfo}
-              type={type}
-              existingPhotos={photos}
-              existingNotes={notes}
-              onPhotosChange={onPhotosChange}
-              onNotesChange={onNotesChange}
-            />
-          </TabsContent>
 
           <TabsContent value="summary" className="mt-6">
             <div className="space-y-4">
