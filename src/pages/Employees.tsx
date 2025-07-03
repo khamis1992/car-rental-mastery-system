@@ -302,14 +302,14 @@ const Employees = () => {
                               {employee.first_name} {employee.last_name}
                             </h2>
                             <div className="flex items-center gap-3 justify-end">
+                              {getStatusBadge(employee.status)}
+                              {getUserLinkingBadge(employee)}
                               <Badge 
                                 variant="outline" 
                                 className="bg-primary/10 text-primary border-primary/20 font-medium"
                               >
                                 {employee.employee_number}
                               </Badge>
-                              {getStatusBadge(employee.status)}
-                              {getUserLinkingBadge(employee)}
                             </div>
                           </div>
                         </div>
