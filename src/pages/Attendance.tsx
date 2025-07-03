@@ -264,137 +264,118 @@ const Attendance = () => {
           </Card>
         </div>
 
-        {/* قسم التبويبات مع محاذاة لليمين */}
-        <Tabs defaultValue={isAdmin ? "management" : "today"} className="space-y-6">
-          <div className="flex justify-end">
-            <TabsList className="bg-gray-100 p-1 rounded-full">
-              {isAdmin && (
+        {/* عرض إدارة الحضور مباشرة للمدير */}
+        {isAdmin ? (
+          <AttendanceManagement />
+        ) : (
+          /* قسم التبويبات للموظفين العاديين */
+          <Tabs defaultValue="today" className="space-y-6">
+            <div className="flex justify-end">
+              <TabsList className="bg-gray-100 p-1 rounded-full">
                 <TabsTrigger 
-                  value="management" 
+                  value="history" 
                   className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
                 >
-                  <Users className="w-4 h-4 ml-2" />
-                  إدارة الحضور
+                  السجل
                 </TabsTrigger>
-              )}
-              {!isAdmin && (
-                <>
-                  <TabsTrigger 
-                    value="history" 
-                    className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-                  >
-                    السجل
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="today" 
-                    className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-                  >
-                    اليوم
-                  </TabsTrigger>
-                </>
-              )}
-          </TabsList>
-          </div>
+                <TabsTrigger 
+                  value="today" 
+                  className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                >
+                  اليوم
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-          {/* تبويب إدارة الحضور - للمديرين فقط */}
-          {isAdmin && (
-            <TabsContent value="management">
-              <AttendanceManagement />
-            </TabsContent>
-          )}
-
-          {!isAdmin && (
             <TabsContent value="today">
-            <Card className="shadow-lg rounded-lg">
-              <CardHeader className="text-right">
-                <CardTitle className="text-xl">حضور اليوم</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isCheckedIn ? (
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between p-6 border border-green-200 rounded-lg bg-green-50">
-                      <Badge variant="default" className="bg-green-600">حاضر</Badge>
-                      <div className="text-right">
-                        <h3 className="font-semibold text-green-800">تم تسجيل الحضور</h3>
-                        <p className="text-sm text-green-600">
-                          الوقت: {checkInTime && format(checkInTime, 'HH:mm', { locale: ar })}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="p-6 border rounded-lg">
-                      <h3 className="font-semibold mb-4 text-right">إحصائيات اليوم</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <Card className="shadow-lg rounded-lg">
+                <CardHeader className="text-right">
+                  <CardTitle className="text-xl">حضور اليوم</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isCheckedIn ? (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between p-6 border border-green-200 rounded-lg bg-green-50">
+                        <Badge variant="default" className="bg-green-600">حاضر</Badge>
                         <div className="text-right">
-                          <span className="text-muted-foreground">ساعات العمل:</span>
-                          <span className="mr-2 font-semibold">{calculateWorkingHours()} ساعة</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-muted-foreground">الحالة:</span>
-                          <span className="mr-2 text-green-600 font-semibold">حاضر</span>
+                          <h3 className="font-semibold text-green-800">تم تسجيل الحضور</h3>
+                          <p className="text-sm text-green-600">
+                            الوقت: {checkInTime && format(checkInTime, 'HH:mm', { locale: ar })}
+                          </p>
                         </div>
                       </div>
+                      
+                      <div className="p-6 border rounded-lg">
+                        <h3 className="font-semibold mb-4 text-right">إحصائيات اليوم</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div className="text-right">
+                            <span className="text-muted-foreground">ساعات العمل:</span>
+                            <span className="mr-2 font-semibold">{calculateWorkingHours()} ساعة</span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-muted-foreground">الحالة:</span>
+                            <span className="mr-2 text-green-600 font-semibold">حاضر</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="text-muted-foreground text-lg">
-                      لم يتم تسجيل الحضور بعد
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="text-muted-foreground text-lg">
+                        لم يتم تسجيل الحضور بعد
+                      </div>
                     </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          )}
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-          {!isAdmin && (
             <TabsContent value="history">
-            <Card className="shadow-lg rounded-lg">
-              <CardHeader>
-                <CardTitle className="text-right">سجل الحضور</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {mockAttendanceData.map((record) => (
-                    <div key={record.id} className="border rounded-lg p-6 hover:bg-gray-50 transition-colors">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1 text-right">
-                          <div className="flex items-center gap-4 mb-4 justify-end">
-                            {getStatusBadge(record.status)}
-                            <h3 className="font-semibold text-lg">
-                              {format(new Date(record.date), 'dd MMMM yyyy', { locale: ar })}
-                            </h3>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-right">
-                            <div>
-                              <span className="font-medium text-muted-foreground">الحضور:</span>
-                              <div className="font-semibold">{record.check_in_time || 'لم يسجل'}</div>
+              <Card className="shadow-lg rounded-lg">
+                <CardHeader>
+                  <CardTitle className="text-right">سجل الحضور</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockAttendanceData.map((record) => (
+                      <div key={record.id} className="border rounded-lg p-6 hover:bg-gray-50 transition-colors">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1 text-right">
+                            <div className="flex items-center gap-4 mb-4 justify-end">
+                              {getStatusBadge(record.status)}
+                              <h3 className="font-semibold text-lg">
+                                {format(new Date(record.date), 'dd MMMM yyyy', { locale: ar })}
+                              </h3>
                             </div>
-                            <div>
-                              <span className="font-medium text-muted-foreground">الانصراف:</span>
-                              <div className="font-semibold">{record.check_out_time || 'لم يسجل'}</div>
-                            </div>
-                            <div>
-                              <span className="font-medium text-muted-foreground">ساعات العمل:</span>
-                              <div className="font-semibold">{record.total_hours} ساعة</div>
-                            </div>
-                            <div>
-                              <span className="font-medium text-muted-foreground">ساعات إضافية:</span>
-                              <div className="font-semibold">{record.overtime_hours} ساعة</div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-right">
+                              <div>
+                                <span className="font-medium text-muted-foreground">الحضور:</span>
+                                <div className="font-semibold">{record.check_in_time || 'لم يسجل'}</div>
+                              </div>
+                              <div>
+                                <span className="font-medium text-muted-foreground">الانصراف:</span>
+                                <div className="font-semibold">{record.check_out_time || 'لم يسجل'}</div>
+                              </div>
+                              <div>
+                                <span className="font-medium text-muted-foreground">ساعات العمل:</span>
+                                <div className="font-semibold">{record.total_hours} ساعة</div>
+                              </div>
+                              <div>
+                                <span className="font-medium text-muted-foreground">ساعات إضافية:</span>
+                                <div className="font-semibold">{record.overtime_hours} ساعة</div>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          )}
-        </Tabs>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
     </div>
   );
