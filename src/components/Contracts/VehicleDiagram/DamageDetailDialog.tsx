@@ -49,7 +49,9 @@ export const DamageDetailDialog: React.FC<DamageDetailDialogProps> = ({
     console.log('💾 DamageDetailDialog: Attempting to save damage:', editedDamage);
     
     // Enhanced validation using the validation utility
-    const validation = validateDamage(editedDamage);
+    // Check if this is a new damage (temporary) by checking if onDelete is undefined
+    const isNewDamage = !onDelete;
+    const validation = validateDamage(editedDamage, false); // Always validate as permanent when saving
     
     if (!validation.isValid) {
       console.warn('❌ Validation failed:', validation.errors);
@@ -220,7 +222,9 @@ export const DamageDetailDialog: React.FC<DamageDetailDialogProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="description">وصف الضرر</Label>
+            <Label htmlFor="description">
+              وصف الضرر <span className="text-destructive">*</span>
+            </Label>
             <Textarea
               id="description"
               placeholder="اكتب وصفاً مفصلاً للضرر أو العيب..."
@@ -228,7 +232,11 @@ export const DamageDetailDialog: React.FC<DamageDetailDialogProps> = ({
               onChange={(e) => updateDamage('description', e.target.value)}
               rows={3}
               disabled={readonly}
+              className={!editedDamage.description?.trim() ? 'border-destructive' : ''}
             />
+            {!editedDamage.description?.trim() && (
+              <p className="text-xs text-destructive mt-1">هذا الحقل مطلوب</p>
+            )}
           </div>
 
           {/* Photo Section */}

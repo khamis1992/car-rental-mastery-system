@@ -6,17 +6,24 @@ export interface ValidationResult {
   warnings: string[];
 }
 
-export const validateDamage = (damage: DamageArea): ValidationResult => {
+export const validateDamage = (damage: DamageArea, isTemporary: boolean = false): ValidationResult => {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // Required field validation
-  if (!damage.description || damage.description.trim().length === 0) {
-    errors.push('وصف الضرر مطلوب');
-  }
+  // Required field validation - only for permanent damages
+  if (!isTemporary) {
+    if (!damage.description || damage.description.trim().length === 0) {
+      errors.push('وصف الضرر مطلوب');
+    }
 
-  if (damage.description && damage.description.trim().length < 5) {
-    warnings.push('وصف الضرر قصير جداً، يفضل إضافة تفاصيل أكثر');
+    if (damage.description && damage.description.trim().length < 5) {
+      warnings.push('وصف الضرر قصير جداً، يفضل إضافة تفاصيل أكثر');
+    }
+  } else {
+    // For temporary damages, only show warnings
+    if (!damage.description || damage.description.trim().length === 0) {
+      warnings.push('يرجى إضافة وصف للضرر');
+    }
   }
 
   // Position validation

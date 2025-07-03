@@ -49,12 +49,7 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
   const handleDamageSave = (damage: DamageArea) => {
     console.log('💾 Saving damage:', damage, 'isNewDamage:', isNewDamage);
     
-    // Validate damage before saving
-    if (!damage.description?.trim()) {
-      console.warn('⚠️ Attempting to save damage without description');
-      return;
-    }
-    
+    // No need to validate here as validation is done in DamageDetailDialog
     if (isNewDamage) {
       // Add new damage to the list
       console.log('➕ Adding new damage to list. Current damages:', damages.length);
