@@ -40,18 +40,29 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
   const typeLabel = type === 'pickup' ? 'التسليم' : 'الاستلام';
 
   const handleDamageSelect = (damage: DamageArea) => {
+    console.log('📝 Selecting damage for editing:', damage);
     setSelectedDamage(damage);
     setIsNewDamage(false);
     setTempDamage(null);
   };
 
   const handleDamageSave = (damage: DamageArea) => {
+    console.log('💾 Saving damage:', damage, 'isNewDamage:', isNewDamage);
+    
+    // Validate damage before saving
+    if (!damage.description?.trim()) {
+      console.warn('⚠️ Attempting to save damage without description');
+      return;
+    }
+    
     if (isNewDamage) {
       // Add new damage to the list
+      console.log('➕ Adding new damage to list. Current damages:', damages.length);
       const updatedDamages = [...damages, damage];
       onDamagesChange(updatedDamages);
     } else {
       // Update existing damage
+      console.log('✏️ Updating existing damage. Current damages:', damages.length);
       const updatedDamages = [...damages.filter(d => d.id !== damage.id), damage];
       onDamagesChange(updatedDamages);
     }
@@ -71,12 +82,17 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
   };
 
   const handleDamageCreate = (damage: DamageArea) => {
+    console.log('🆕 Creating new damage (temporary):', damage);
+    console.log('📊 Current damages before creation:', damages.length);
+    
+    // Only set temporary state - don't add to damages list yet
     setTempDamage(damage);
     setSelectedDamage(damage);
     setIsNewDamage(true);
   };
 
   const handleDialogClose = () => {
+    console.log('❌ Dialog closed - resetting temporary states');
     setSelectedDamage(null);
     setTempDamage(null);
     setIsNewDamage(false);

@@ -45,10 +45,13 @@ export const DamageDetailDialog: React.FC<DamageDetailDialogProps> = ({
   if (!damage || !editedDamage) return null;
 
   const handleSave = () => {
+    console.log('💾 DamageDetailDialog: Attempting to save damage:', editedDamage);
+    
     // Enhanced validation using the validation utility
     const validation = validateDamage(editedDamage);
     
     if (!validation.isValid) {
+      console.warn('❌ Validation failed:', validation.errors);
       toast({
         title: "خطأ في البيانات",
         description: validation.errors.join(', '),
@@ -59,12 +62,14 @@ export const DamageDetailDialog: React.FC<DamageDetailDialogProps> = ({
 
     // Show warnings if any
     if (validation.warnings.length > 0) {
+      console.warn('⚠️ Validation warnings:', validation.warnings);
       toast({
         title: "تنبيهات",
         description: validation.warnings.join(', '),
       });
     }
 
+    console.log('✅ Damage validation passed, calling onSave');
     onSave(editedDamage);
     onOpenChange(false);
   };

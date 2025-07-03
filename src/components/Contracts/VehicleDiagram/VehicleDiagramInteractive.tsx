@@ -44,15 +44,23 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
   const typeLabel = type === 'pickup' ? 'التسليم' : 'الاستلام';
 
   const handleDiagramClick = useCallback((event: React.MouseEvent<SVGElement>) => {
-    if (readonly || !isAddingDamage) return;
+    console.log('🖱️ Diagram clicked. readonly:', readonly, 'isAddingDamage:', isAddingDamage);
+    
+    if (readonly || !isAddingDamage) {
+      console.log('⏹️ Click ignored - readonly or not in adding mode');
+      return;
+    }
 
     const svg = event.currentTarget;
     const rect = svg.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
 
+    console.log('📍 Click coordinates:', { x, y });
+
     // Validate click position
     if (x < 0 || x > 100 || y < 0 || y > 100) {
+      console.warn('❌ Click outside diagram bounds');
       toast({
         title: "خطأ",
         description: "يرجى النقر داخل حدود مخطط المركبة",
@@ -68,6 +76,7 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
     });
 
     if (nearbyDamage) {
+      console.warn('⚠️ Nearby damage found, preventing duplicate');
       toast({
         title: "تنبيه",
         description: "يوجد ضرر قريب من هذا الموقع. يرجى اختيار موقع آخر أو تعديل الضرر الموجود.",
@@ -86,12 +95,14 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
       timestamp: new Date().toISOString()
     };
 
+    console.log('🎯 Creating temporary damage (NOT adding to list yet):', newDamage);
+
     // Create temporary damage and notify parent
     if (onDamageCreate) {
       onDamageCreate(newDamage);
     }
     setIsAddingDamage(false); // Auto-disable adding mode
-  }, [readonly, isAddingDamage, damages, toast]);
+  }, [readonly, isAddingDamage, damages, toast, onDamageCreate]);
 
   // Remove the saveDamage and removeDamage functions since they're not needed
   // Damages are now only saved through the parent component via dialog
@@ -126,7 +137,10 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
               <Button
                 variant={isAddingDamage ? "destructive" : "outline"}
                 size="sm"
-                onClick={() => setIsAddingDamage(!isAddingDamage)}
+                onClick={() => {
+                  console.log('🔄 Toggling add damage mode. Current:', isAddingDamage);
+                  setIsAddingDamage(!isAddingDamage);
+                }}
                 disabled={isSaving}
               >
                 {isAddingDamage ? (
