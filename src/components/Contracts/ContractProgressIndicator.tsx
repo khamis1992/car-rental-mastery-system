@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useAuth } from '@/contexts/AuthContext';
 import { contractService } from '@/services/contractService';
 
 interface ProgressStep {
@@ -44,6 +45,7 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
   onStatusUpdate
 }) => {
   const navigate = useNavigate();
+  const { user, session } = useAuth();
   const [confirmAction, setConfirmAction] = useState<{ stepId: string; title: string; description: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const getSteps = (status: string): ProgressStep[] => {
@@ -147,14 +149,14 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
   };
 
   const handleStepClick = (stepId: string) => {
-    if (!interactive || !contractData) return;
+    if (!interactive || !contractData || !user || !session) return;
     
     // Navigate to the contract stage page
     navigate(`/contracts/stage/${stepId}/${contractData.id}`);
   };
 
   const executeAction = async () => {
-    if (!confirmAction || !contractData) return;
+    if (!confirmAction || !contractData || !user || !session) return;
     
     setIsLoading(true);
     try {

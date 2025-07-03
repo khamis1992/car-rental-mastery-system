@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { serviceContainer } from '@/services/Container/ServiceContainer';
 import { ContractWithDetails } from '@/services/contractService';
@@ -18,6 +19,7 @@ export const useContractsDataRefactored = () => {
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
+  const { user, session, loading: authLoading } = useAuth();
 
   const contractService = serviceContainer.getContractBusinessService();
   const quotationService = serviceContainer.getQuotationBusinessService();
@@ -94,6 +96,21 @@ export const useContractsDataRefactored = () => {
   };
 
   const loadData = async (retryCount = 0) => {
+    // Don't load data if authentication is still loading or user is not authenticated
+    if (authLoading) {
+      console.log('Authentication still loading, skipping data load');
+      return;
+    }
+
+    if (!user || !session) {
+      console.log('User not authenticated, skipping data load');
+      setLoading(false);
+      setErrors({
+        general: 'يجب تسجيل الدخول أولاً للوصول إلى البيانات'
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       setErrors({});
@@ -134,8 +151,11 @@ export const useContractsDataRefactored = () => {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    // Only load data when authentication is complete
+    if (!authLoading) {
+      loadData();
+    }
+  }, [authLoading, user, session]);
 
   return {
     quotations,

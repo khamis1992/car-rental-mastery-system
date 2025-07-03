@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -11,6 +12,7 @@ import { useContractsDataRefactored } from '@/hooks/useContractsDataRefactored';
 import { supabase } from '@/integrations/supabase/client';
 
 const Contracts = () => {
+  const navigate = useNavigate();
   const [contractFormOpen, setContractFormOpen] = useState(false);
   const [selectedQuotationForContract, setSelectedQuotationForContract] = useState<string>('');
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
@@ -80,6 +82,16 @@ const Contracts = () => {
           <Alert key={key} variant="destructive">
             <AlertDescription>
               {error}
+              {key === 'general' && (
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  onClick={() => navigate('/auth')}
+                  className="pr-2 h-auto p-0 text-destructive underline"
+                >
+                  تسجيل الدخول
+                </Button>
+              )}
             </AlertDescription>
           </Alert>
         )
