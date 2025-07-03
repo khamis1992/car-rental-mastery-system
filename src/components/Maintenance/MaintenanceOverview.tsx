@@ -235,22 +235,22 @@ export const MaintenanceOverview = () => {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>إحصائيات التكاليف</CardTitle>
+            <CardTitle className="text-right">إحصائيات التكاليف</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <DollarSign className="h-4 w-4 text-green-600" />
+          <CardContent className="space-y-4 text-right">
+            <div className="flex items-center space-x-2 rtl:space-x-reverse justify-end">
               <div>
                 <div className="text-2xl font-bold">{stats.totalCostThisMonth.toFixed(2)} د.ك</div>
                 <p className="text-xs text-muted-foreground">تكلفة هذا الشهر</p>
               </div>
+              <DollarSign className="h-4 w-4 text-green-600" />
             </div>
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <TrendingUp className="h-4 w-4 text-blue-600" />
+            <div className="flex items-center space-x-2 rtl:space-x-reverse justify-end">
               <div>
                 <div className="text-lg font-semibold">{stats.averageCostPerService.toFixed(2)} د.ك</div>
                 <p className="text-xs text-muted-foreground">متوسط التكلفة لكل خدمة</p>
               </div>
+              <TrendingUp className="h-4 w-4 text-blue-600" />
             </div>
             <div className="text-sm text-muted-foreground">
               {stats.completedThisMonth} عملية صيانة مكتملة هذا الشهر
@@ -260,13 +260,13 @@ export const MaintenanceOverview = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>تقدم الصيانة</CardTitle>
+            <CardTitle className="text-right">تقدم الصيانة</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 text-right">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>الصيانة المكتملة والجارية</span>
                 <span>{Math.round(getMaintenanceProgress())}%</span>
+                <span>الصيانة المكتملة والجارية</span>
               </div>
               <Progress value={getMaintenanceProgress()} className="h-2" />
             </div>
