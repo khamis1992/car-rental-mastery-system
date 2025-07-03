@@ -18,6 +18,8 @@ import { useForm } from 'react-hook-form';
 
 const Leaves = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -109,6 +111,11 @@ const Leaves = () => {
     console.log('طلب إجازة جديد:', data);
     setIsDialogOpen(false);
     form.reset();
+  };
+
+  const handleViewRequest = (request: any) => {
+    setSelectedRequest(request);
+    setViewDialogOpen(true);
   };
 
   const filteredRequests = mockLeaveRequests.filter(request => {
@@ -401,7 +408,13 @@ const Leaves = () => {
                   <div key={request.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
                     <div className="flex justify-between items-start">
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">عرض</Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewRequest(request)}
+                        >
+                          عرض
+                        </Button>
                         {request.status === 'pending' && (
                           <Button variant="outline" size="sm">إلغاء</Button>
                         )}
@@ -487,6 +500,113 @@ const Leaves = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* عرض تفاصيل الطلب */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-right">تفاصيل طلب الإجازة</DialogTitle>
+          </DialogHeader>
+          
+          {selectedRequest && (
+            <div className="space-y-6" dir="rtl">
+              {/* معلومات أساسية */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">نوع الإجازة</label>
+                    <div className="mt-1">
+                      {getLeaveTypeBadge(selectedRequest.leave_type)}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">حالة الطلب</label>
+                    <div className="mt-1">
+                      {getStatusBadge(selectedRequest.status)}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">تاريخ البداية</label>
+                    <p className="mt-1">{format(new Date(selectedRequest.start_date), 'dd/MM/yyyy', { locale: ar })}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">تاريخ النهاية</label>
+                    <p className="mt-1">{format(new Date(selectedRequest.end_date), 'dd/MM/yyyy', { locale: ar })}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* المدة */}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">مدة الإجازة</label>
+                <p className="mt-1 text-lg font-semibold">{selectedRequest.total_days} يوم</p>
+              </div>
+
+              {/* السبب */}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">سبب الإجازة</label>
+                <p className="mt-1 p-3 bg-muted rounded-lg">{selectedRequest.reason}</p>
+              </div>
+
+              {/* معلومات الموافقة أو الرفض */}
+              {selectedRequest.status === 'approved' && selectedRequest.approved_by && (
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <h4 className="font-medium text-green-800 mb-2">تفاصيل الموافقة</h4>
+                  <div className="space-y-1 text-sm">
+                    <p><span className="font-medium">مُوافق من:</span> {selectedRequest.approved_by}</p>
+                    <p><span className="font-medium">تاريخ الموافقة:</span> {format(new Date(selectedRequest.approved_at), 'dd/MM/yyyy', { locale: ar })}</p>
+                  </div>
+                </div>
+              )}
+
+              {selectedRequest.status === 'rejected' && selectedRequest.rejection_reason && (
+                <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                  <h4 className="font-medium text-red-800 mb-2">سبب الرفض</h4>
+                  <p className="text-sm text-red-700">{selectedRequest.rejection_reason}</p>
+                </div>
+              )}
+
+              {/* معلومات إضافية */}
+              <div className="pt-4 border-t">
+                <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                  <div>
+                    <span className="font-medium">تاريخ الإنشاء:</span>
+                    <span className="mr-2">{format(new Date(selectedRequest.created_at), 'dd/MM/yyyy', { locale: ar })}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium">رقم الطلب:</span>
+                    <span className="mr-2">#{selectedRequest.id}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* الإجراءات */}
+              <div className="flex gap-2 pt-4">
+                {selectedRequest.status === 'pending' && (
+                  <>
+                    <Button variant="outline" className="flex-1">
+                      تعديل الطلب
+                    </Button>
+                    <Button variant="destructive" className="flex-1">
+                      إلغاء الطلب
+                    </Button>
+                  </>
+                )}
+                <Button 
+                  variant="outline" 
+                  onClick={() => setViewDialogOpen(false)}
+                  className="flex-1"
+                >
+                  إغلاق
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
