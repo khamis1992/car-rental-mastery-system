@@ -1,16 +1,15 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DollarSign, ArrowRight } from 'lucide-react';
-import { ContractDetailsDialog } from '@/components/Contracts/ContractDetailsDialog';
+import { ContractStageWrapper } from '@/components/Contracts/ContractStageWrapper';
 
 const PaymentStage = () => {
-  const { contractId } = useParams();
   const navigate = useNavigate();
 
   return (
-    <div className="p-6 space-y-6">
+    <ContractStageWrapper stageName="مرحلة الدفع" stageDescription="تسجيل المدفوعات">
       <div className="flex items-center justify-between">
         <div className="text-right">
           <h1 className="text-3xl font-bold text-foreground">مرحلة الدفع</h1>
@@ -53,15 +52,7 @@ const PaymentStage = () => {
           </div>
         </CardContent>
       </Card>
-
-      {contractId && (
-        <ContractDetailsDialog
-          contractId={contractId}
-          open={true}
-          onOpenChange={(open) => !open && navigate('/contracts')}
-        />
-      )}
-    </div>
+    </ContractStageWrapper>
   );
 };
 

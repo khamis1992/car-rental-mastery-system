@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { DamageArea } from '@/components/Contracts/VehicleDiagram/VehicleDiagramInteractive';
@@ -29,10 +29,20 @@ export const useContractDamageAutoSave = ({
   });
   
   const { toast } = useToast();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Load existing damages from database
   const loadDamages = useCallback(async (): Promise<DamageArea[]> => {
-    if (!enabled) return [];
+    if (!enabled || !contractId) return [];
+    
+    // Cancel any existing request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Create new abort controller for this request
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
     
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
@@ -43,9 +53,18 @@ export const useContractDamageAutoSave = ({
         .from('contracts')
         .select(field)
         .eq('id', contractId)
+        .abortSignal(signal)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.name === 'AbortError') {
+          console.log('🔄 Request cancelled');
+          return [];
+        }
+        throw error;
+      }
+
+      if (signal.aborted) return [];
 
       const damages = data?.[field] as DamageArea[] || [];
       console.log(`📂 Loaded ${damages.length} existing ${type} damages from database`);
@@ -53,20 +72,29 @@ export const useContractDamageAutoSave = ({
       setState(prev => ({ ...prev, isLoading: false }));
       return damages;
       
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('🔄 Load request was cancelled');
+        return [];
+      }
+      
       console.error('❌ Error loading damages:', error);
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: 'فشل في تحميل الأضرار المحفوظة' 
-      }));
+      
+      // Only set error state if component is still mounted
+      if (!signal.aborted) {
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false, 
+          error: 'فشل في تحميل الأضرار المحفوظة' 
+        }));
+      }
       return [];
     }
   }, [contractId, type, enabled]);
 
   // Save damages to database
   const saveDamages = useCallback(async (damages: DamageArea[]): Promise<boolean> => {
-    if (!enabled) return true;
+    if (!enabled || !contractId) return true;
     
     setState(prev => ({ ...prev, isSaving: true, error: null }));
     
@@ -92,19 +120,23 @@ export const useContractDamageAutoSave = ({
       console.log(`✅ Auto-saved ${damages.length} ${type} damages successfully`);
       return true;
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error auto-saving damages:', error);
-      setState(prev => ({ 
-        ...prev, 
-        isSaving: false, 
-        error: 'فشل في حفظ الأضرار تلقائياً' 
-      }));
       
-      toast({
-        title: "خطأ في الحفظ التلقائي",
-        description: "فشل في حفظ الأضرار. سيتم المحاولة مرة أخرى عند إجراء التغيير التالي.",
-        variant: "destructive",
-      });
+      // Don't show toast for aborted requests
+      if (error.name !== 'AbortError') {
+        setState(prev => ({ 
+          ...prev, 
+          isSaving: false, 
+          error: 'فشل في حفظ الأضرار تلقائياً' 
+        }));
+        
+        toast({
+          title: "خطأ في الحفظ التلقائي",
+          description: "فشل في حفظ الأضرار. سيتم المحاولة مرة أخرى عند إجراء التغيير التالي.",
+          variant: "destructive",
+        });
+      }
       
       return false;
     }
@@ -121,6 +153,16 @@ export const useContractDamageAutoSave = ({
 
     return () => clearTimeout(timeoutId);
   }, [saveDamages, enabled]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        console.log('🧹 Cleanup: Aborted pending requests');
+      }
+    };
+  }, []);
 
   // Clear error after some time
   useEffect(() => {

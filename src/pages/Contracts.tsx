@@ -10,6 +10,7 @@ import { ContractStats } from '@/components/Contracts/ContractStats';
 import { ContractDetailsDialog } from '@/components/Contracts/ContractDetailsDialog';
 import { useContractsDataRefactored } from '@/hooks/useContractsDataRefactored';
 import { supabase } from '@/integrations/supabase/client';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const Contracts = () => {
   const navigate = useNavigate();
@@ -98,71 +99,81 @@ const Contracts = () => {
       )}
 
       {/* إحصائيات سريعة */}
-      <ContractStats stats={contractStats} />
+      <ErrorBoundary>
+        <ContractStats stats={contractStats} />
+      </ErrorBoundary>
 
       {/* لوحة مراقبة العقود */}
-      <ContractMonitoring onAlertClick={handleAlertClick} />
+      <ErrorBoundary>
+        <ContractMonitoring onAlertClick={handleAlertClick} />
+      </ErrorBoundary>
 
       {/* قائمة العقود */}
-      <ContractsList
-        contracts={contracts}
-        onView={(id) => {
-          setSelectedContractId(id);
-          setContractDetailsOpen(true);
-        }}
-        onEdit={(id) => console.log('Edit contract:', id)}
-        onActivate={(id) => console.log('Activate contract:', id)}
-        onComplete={(id) => console.log('Complete contract:', id)}
-        onStatusUpdate={loadData}
-      />
+      <ErrorBoundary>
+        <ContractsList
+          contracts={contracts}
+          onView={(id) => {
+            setSelectedContractId(id);
+            setContractDetailsOpen(true);
+          }}
+          onEdit={(id) => console.log('Edit contract:', id)}
+          onActivate={(id) => console.log('Activate contract:', id)}
+          onComplete={(id) => console.log('Complete contract:', id)}
+          onStatusUpdate={loadData}
+        />
+      </ErrorBoundary>
 
       {/* نموذج إنشاء عقد */}
-      <ContractForm
-        open={contractFormOpen}
-        onOpenChange={(open) => {
-          setContractFormOpen(open);
-          if (!open) {
-            setSelectedQuotationForContract('');
-          }
-        }}
-        customers={customers}
-        vehicles={vehicles}
-        quotations={quotations.filter(q => ['draft', 'sent', 'accepted'].includes(q.status))}
-        selectedQuotation={selectedQuotationForContract}
-        onGetQuotationDetails={async (id: string) => {
-          const { data, error } = await supabase
-            .from('quotations')
-            .select(`
-              id,
-              quotation_number,
-              customer_id,
-              vehicle_id,
-              start_date,
-              end_date,
-              daily_rate,
-              total_amount,
-              discount_amount,
-              tax_amount,
-              final_amount,
-              special_conditions,
-              terms_and_conditions,
-              customers(name, phone, email, address),
-              vehicles(make, model, year, license_plate, vehicle_number)
-            `)
-            .eq('id', id)
-            .single();
-          if (error) throw error;
-          return data;
-        }}
-        onSuccess={handleFormSuccess}
-      />
+      <ErrorBoundary>
+        <ContractForm
+          open={contractFormOpen}
+          onOpenChange={(open) => {
+            setContractFormOpen(open);
+            if (!open) {
+              setSelectedQuotationForContract('');
+            }
+          }}
+          customers={customers}
+          vehicles={vehicles}
+          quotations={quotations.filter(q => ['draft', 'sent', 'accepted'].includes(q.status))}
+          selectedQuotation={selectedQuotationForContract}
+          onGetQuotationDetails={async (id: string) => {
+            const { data, error } = await supabase
+              .from('quotations')
+              .select(`
+                id,
+                quotation_number,
+                customer_id,
+                vehicle_id,
+                start_date,
+                end_date,
+                daily_rate,
+                total_amount,
+                discount_amount,
+                tax_amount,
+                final_amount,
+                special_conditions,
+                terms_and_conditions,
+                customers(name, phone, email, address),
+                vehicles(make, model, year, license_plate, vehicle_number)
+              `)
+              .eq('id', id)
+              .single();
+            if (error) throw error;
+            return data;
+          }}
+          onSuccess={handleFormSuccess}
+        />
+      </ErrorBoundary>
 
       {/* تفاصيل العقد */}
-      <ContractDetailsDialog
-        contractId={selectedContractId}
-        open={contractDetailsOpen}
-        onOpenChange={setContractDetailsOpen}
-      />
+      <ErrorBoundary>
+        <ContractDetailsDialog
+          contractId={selectedContractId}
+          open={contractDetailsOpen}
+          onOpenChange={setContractDetailsOpen}
+        />
+      </ErrorBoundary>
     </div>
   );
 };
