@@ -280,9 +280,9 @@ export const MaintenanceOverview = () => {
       {/* الصيانة القادمة */}
       <Card>
         <CardHeader>
-          <CardTitle>الصيانة القادمة</CardTitle>
+          <CardTitle className="text-right">الصيانة القادمة</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="text-right">
           {upcomingMaintenance.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
