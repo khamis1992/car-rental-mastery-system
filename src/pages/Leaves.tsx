@@ -125,7 +125,7 @@ const Leaves = () => {
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
       {/* العنوان والإجراءات */}
       <div className="flex justify-between items-center">
-        <div>
+        <div className="text-right">
           <h1 className="text-3xl font-bold">إدارة الإجازات</h1>
           <p className="text-muted-foreground">طلب الإجازات ومتابعة الموافقات</p>
         </div>
