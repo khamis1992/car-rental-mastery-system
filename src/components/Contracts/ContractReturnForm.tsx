@@ -5,9 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { VehicleConditionDiagramSection } from './VehicleDiagram/VehicleConditionDiagramSection';
 import type { DamageArea } from './VehicleDiagram/VehicleDiagramInteractive';
-import { MapPin, Gauge, Clock, AlertTriangle } from 'lucide-react';
+import { useContractDamageAutoSave } from '@/hooks/useContractDamageAutoSave';
+import { MapPin, Gauge, Clock, AlertTriangle, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -35,17 +37,23 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
     return_damages: [] as DamageArea[]
   });
 
+  // Enhanced data loading with auto-save support
+  const autoSave = useContractDamageAutoSave({
+    contractId: contract?.id || '',
+    type: 'return',
+    enabled: !!contract && !loading
+  });
+
   // Load existing data from contract when form opens
   React.useEffect(() => {
-    if (contract) {
-      console.log('📋 ContractReturnForm: Loading existing contract data:', {
-        return_damages: contract.return_damages,
-        return_photos: contract.return_photos,
-        return_condition_notes: contract.return_condition_notes,
-        return_mileage: contract.return_mileage,
-        fuel_level_return: contract.fuel_level_return
-      });
-
+    const loadContractData = async () => {
+      if (!contract) return;
+      
+      console.log('📋 ContractReturnForm: Loading existing contract data');
+      
+      // Load damages from database using auto-save hook
+      const savedDamages = await autoSave.loadDamages();
+      
       setReturnData(prev => ({
         ...prev,
         actual_end_date: contract.actual_end_date 
@@ -56,20 +64,24 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
         fuel_level_return: contract.fuel_level_return || 'Full',
         return_photos: Array.isArray(contract.return_photos) ? contract.return_photos : [],
         return_condition_notes: contract.return_condition_notes || '',
-        return_damages: Array.isArray(contract.return_damages) 
-          ? contract.return_damages.map((damage: any) => ({
-              id: damage.id,
-              x: Number(damage.x) || 0,
-              y: Number(damage.y) || 0,
-              severity: damage.severity || 'minor',
-              description: damage.description || '',
-              photos: Array.isArray(damage.photos) ? damage.photos : [],
-              timestamp: damage.timestamp || new Date().toISOString()
-            }))
-          : []
+        return_damages: savedDamages.length > 0 ? savedDamages : (
+          Array.isArray(contract.return_damages) 
+            ? contract.return_damages.map((damage: any) => ({
+                id: damage.id,
+                x: Number(damage.x) || 0,
+                y: Number(damage.y) || 0,
+                severity: damage.severity || 'minor',
+                description: damage.description || '',
+                photos: Array.isArray(damage.photos) ? damage.photos : [],
+                timestamp: damage.timestamp || new Date().toISOString()
+              }))
+            : []
+        )
       }));
-    }
-  }, [contract]);
+    };
+
+    loadContractData();
+  }, [contract, autoSave]);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -116,9 +128,12 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
 
   const updateReturnData = (field: string, value: any) => {
     console.log('🔄 ContractReturnForm: Updating', field, 'with value:', value);
+    
     if (field === 'return_damages') {
       console.log('⚠️ return_damages being updated with:', value?.length, 'damages');
+      // Note: Auto-save is now handled within VehicleConditionDiagramSection
     }
+    
     setReturnData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -140,6 +155,16 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Auto-save status info */}
+          {autoSave.error && (
+            <Alert variant="destructive">
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                {autoSave.error} - ستتم محاولة الحفظ مرة أخرى عند إجراء تغييرات.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {/* Basic Return Info */}
           <Card>
             <CardHeader>

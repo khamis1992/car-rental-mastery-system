@@ -6,9 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { VehicleConditionDiagramSection } from './VehicleDiagram/VehicleConditionDiagramSection';
 import type { DamageArea } from './VehicleDiagram/VehicleDiagramInteractive';
-import { MapPin, Gauge, Fuel, Clock } from 'lucide-react';
+import { useContractDamageAutoSave } from '@/hooks/useContractDamageAutoSave';
+import { MapPin, Gauge, Fuel, Clock, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -36,17 +38,23 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
     pickup_damages: [] as DamageArea[]
   });
 
+  // Enhanced data loading with auto-save support
+  const autoSave = useContractDamageAutoSave({
+    contractId: contract?.id || '',
+    type: 'pickup',
+    enabled: !!contract && !loading
+  });
+
   // Load existing data from contract when form opens
   React.useEffect(() => {
-    if (contract) {
-      console.log('📋 ContractDeliveryForm: Loading existing contract data:', {
-        pickup_damages: contract.pickup_damages,
-        pickup_photos: contract.pickup_photos,
-        pickup_condition_notes: contract.pickup_condition_notes,
-        pickup_mileage: contract.pickup_mileage,
-        fuel_level_pickup: contract.fuel_level_pickup
-      });
-
+    const loadContractData = async () => {
+      if (!contract) return;
+      
+      console.log('📋 ContractDeliveryForm: Loading existing contract data');
+      
+      // Load damages from database using auto-save hook
+      const savedDamages = await autoSave.loadDamages();
+      
       setDeliveryData(prev => ({
         ...prev,
         actual_start_date: contract.actual_start_date 
@@ -57,20 +65,24 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
         fuel_level_pickup: contract.fuel_level_pickup || 'Full',
         pickup_photos: Array.isArray(contract.pickup_photos) ? contract.pickup_photos : [],
         pickup_condition_notes: contract.pickup_condition_notes || '',
-        pickup_damages: Array.isArray(contract.pickup_damages) 
-          ? contract.pickup_damages.map((damage: any) => ({
-              id: damage.id,
-              x: Number(damage.x) || 0,
-              y: Number(damage.y) || 0,
-              severity: damage.severity || 'minor',
-              description: damage.description || '',
-              photos: Array.isArray(damage.photos) ? damage.photos : [],
-              timestamp: damage.timestamp || new Date().toISOString()
-            }))
-          : []
+        pickup_damages: savedDamages.length > 0 ? savedDamages : (
+          Array.isArray(contract.pickup_damages) 
+            ? contract.pickup_damages.map((damage: any) => ({
+                id: damage.id,
+                x: Number(damage.x) || 0,
+                y: Number(damage.y) || 0,
+                severity: damage.severity || 'minor',
+                description: damage.description || '',
+                photos: Array.isArray(damage.photos) ? damage.photos : [],
+                timestamp: damage.timestamp || new Date().toISOString()
+              }))
+            : []
+        )
       }));
-    }
-  }, [contract]);
+    };
+
+    loadContractData();
+  }, [contract, autoSave]);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -117,9 +129,12 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
 
   const updateDeliveryData = (field: string, value: any) => {
     console.log('🔄 ContractDeliveryForm: Updating', field, 'with value:', value);
+    
     if (field === 'pickup_damages') {
       console.log('⚠️ pickup_damages being updated with:', value?.length, 'damages');
+      // Note: Auto-save is now handled within VehicleConditionDiagramSection
     }
+    
     setDeliveryData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -136,6 +151,16 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Auto-save status info */}
+          {autoSave.error && (
+            <Alert variant="destructive">
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                {autoSave.error} - ستتم محاولة الحفظ مرة أخرى عند إجراء تغييرات.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {/* Basic Delivery Info */}
           <Card>
             <CardHeader>

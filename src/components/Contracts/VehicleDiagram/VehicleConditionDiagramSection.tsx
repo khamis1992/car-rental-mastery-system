@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { VehicleDiagramInteractive, type DamageArea } from './VehicleDiagramInteractive';
 import { DamageDetailDialog } from './DamageDetailDialog';
 import { VehicleConditionPhotos } from '../VehicleConditionPhotos';
-import { Car, Camera, Map, List } from 'lucide-react';
+import { Car, Camera, Map, List, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface VehicleConditionDiagramSectionProps {
   contractId: string;
@@ -19,6 +22,8 @@ interface VehicleConditionDiagramSectionProps {
   onNotesChange: (notes: string) => void;
   readonly?: boolean;
 }
+
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSectionProps> = ({
   contractId,
@@ -36,6 +41,9 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
   const [tempDamage, setTempDamage] = useState<DamageArea | null>(null);
   const [isNewDamage, setIsNewDamage] = useState(false);
   const [activeTab, setActiveTab] = useState('diagram');
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const { toast } = useToast();
 
   // Log data changes for debugging
   React.useEffect(() => {
@@ -57,21 +65,72 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
     setTempDamage(null);
   };
 
-  const handleDamageSave = (damage: DamageArea) => {
+  // Auto-save damages to database
+  const saveDamagesToDatabase = useCallback(async (damagesToSave: DamageArea[]) => {
+    if (readonly) return;
+    
+    setSaveStatus('saving');
+    console.log('💾 Auto-saving damages to database:', damagesToSave.length, 'damages');
+    
+    try {
+      const field = type === 'pickup' ? 'pickup_damages' : 'return_damages';
+      
+      const { error } = await supabase
+        .from('contracts')
+        .update({
+          [field]: JSON.parse(JSON.stringify(damagesToSave)), // Convert to Json
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', contractId);
+
+      if (error) throw error;
+      
+      setSaveStatus('saved');
+      setLastSaved(new Date());
+      console.log('✅ Damages auto-saved successfully');
+      
+      // Reset status after 3 seconds
+      setTimeout(() => {
+        setSaveStatus('idle');
+      }, 3000);
+      
+    } catch (error) {
+      console.error('❌ Error auto-saving damages:', error);
+      setSaveStatus('error');
+      
+      toast({
+        title: "خطأ في الحفظ",
+        description: "فشل في حفظ الأضرار تلقائياً. يرجى المحاولة مرة أخرى.",
+        variant: "destructive",
+      });
+      
+      // Reset status after 5 seconds
+      setTimeout(() => {
+        setSaveStatus('idle');
+      }, 5000);
+    }
+  }, [contractId, type, readonly, toast]);
+
+  const handleDamageSave = async (damage: DamageArea) => {
     console.log('💾 Saving damage:', damage, 'isNewDamage:', isNewDamage);
     
-    // No need to validate here as validation is done in DamageDetailDialog
+    let updatedDamages: DamageArea[];
+    
     if (isNewDamage) {
       // Add new damage to the list
       console.log('➕ Adding new damage to list. Current damages:', damages.length);
-      const updatedDamages = [...damages, damage];
-      onDamagesChange(updatedDamages);
+      updatedDamages = [...damages, damage];
     } else {
       // Update existing damage
       console.log('✏️ Updating existing damage. Current damages:', damages.length);
-      const updatedDamages = [...damages.filter(d => d.id !== damage.id), damage];
-      onDamagesChange(updatedDamages);
+      updatedDamages = [...damages.filter(d => d.id !== damage.id), damage];
     }
+    
+    // Update local state
+    onDamagesChange(updatedDamages);
+    
+    // Auto-save to database
+    await saveDamagesToDatabase(updatedDamages);
     
     // Reset state
     setSelectedDamage(null);
@@ -79,9 +138,13 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
     setIsNewDamage(false);
   };
 
-  const handleDamageDelete = (damageId: string) => {
+  const handleDamageDelete = async (damageId: string) => {
     const updatedDamages = damages.filter(d => d.id !== damageId);
     onDamagesChange(updatedDamages);
+    
+    // Auto-save to database
+    await saveDamagesToDatabase(updatedDamages);
+    
     setSelectedDamage(null);
     setTempDamage(null);
     setIsNewDamage(false);
@@ -110,15 +173,64 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
     setIsNewDamage(false);
   };
 
+  // Save status indicator component
+  const SaveStatusIndicator = () => {
+    if (readonly) return null;
+    
+    switch (saveStatus) {
+      case 'saving':
+        return (
+          <div className="flex items-center gap-2 text-blue-600">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-sm">جاري الحفظ...</span>
+          </div>
+        );
+      case 'saved':
+        return (
+          <div className="flex items-center gap-2 text-green-600">
+            <CheckCircle className="w-4 h-4" />
+            <span className="text-sm">تم الحفظ</span>
+            {lastSaved && (
+              <span className="text-xs text-muted-foreground">
+                {lastSaved.toLocaleTimeString('ar-KW')}
+              </span>
+            )}
+          </div>
+        );
+      case 'error':
+        return (
+          <div className="flex items-center gap-2 text-red-600">
+            <AlertTriangle className="w-4 h-4" />
+            <span className="text-sm">خطأ في الحفظ</span>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Car className="w-5 h-5" />
-          حالة المركبة عند {typeLabel} - {vehicleInfo}
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Car className="w-5 h-5" />
+            حالة المركبة عند {typeLabel} - {vehicleInfo}
+          </div>
+          <SaveStatusIndicator />
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Auto-save status alert */}
+        {saveStatus === 'error' && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              فشل في حفظ الأضرار تلقائياً. سيتم المحاولة مرة أخرى عند إجراء التغيير التالي.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="summary" className="flex items-center gap-2 flex-row-reverse">
