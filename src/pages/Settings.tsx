@@ -330,8 +330,16 @@ const Settings = () => {
                 {users.map((user) => (
                   <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg flex-row-reverse">
                     <div className="flex items-center gap-3 flex-row-reverse">
-                      <div>
-                        <h3 className="font-medium text-right">{user.name}</h3>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 justify-end">
+                          <Badge className={`text-white ${getRoleColor(user.role)}`}>
+                            {getRoleLabel(user.role)}
+                          </Badge>
+                          <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
+                            {user.status === 'active' ? 'نشط' : 'غير نشط'}
+                          </Badge>
+                          <h3 className="font-medium text-right">{user.name}</h3>
+                        </div>
                         <p className="text-sm text-muted-foreground text-right">{user.email}</p>
                         <p className="text-xs text-muted-foreground text-right">آخر دخول: {user.lastLogin}</p>
                       </div>
@@ -344,12 +352,6 @@ const Settings = () => {
                       <Button variant="outline" size="sm">
                         تعديل
                       </Button>
-                      <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
-                        {user.status === 'active' ? 'نشط' : 'غير نشط'}
-                      </Badge>
-                      <Badge className={`text-white ${getRoleColor(user.role)}`}>
-                        {getRoleLabel(user.role)}
-                      </Badge>
                     </div>
                   </div>
                 ))}
