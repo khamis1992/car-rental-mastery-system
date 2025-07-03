@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,14 +15,21 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
+import { leavesService } from '@/services/leavesService';
+import { RejectLeaveDialog } from '@/components/Leaves/RejectLeaveDialog';
+import { useToast } from '@/hooks/use-toast';
 
 const Leaves = () => {
+  const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [leaveRequests, setLeaveRequests] = useState([]);
 
   const form = useForm({
     defaultValues: {
@@ -33,41 +40,71 @@ const Leaves = () => {
     }
   });
 
-  const mockLeaveRequests = [
-    {
-      id: '1',
-      leave_type: 'annual',
-      start_date: '2024-02-01',
-      end_date: '2024-02-05',
-      total_days: 5,
-      reason: 'إجازة سنوية',
-      status: 'approved',
-      approved_by: 'أحمد المدير',
-      approved_at: '2024-01-25',
-      created_at: '2024-01-20'
-    },
-    {
-      id: '2',
-      leave_type: 'sick',
-      start_date: '2024-01-15',
-      end_date: '2024-01-16',
-      total_days: 2,
-      reason: 'إجازة مرضية',
-      status: 'pending',
-      created_at: '2024-01-14'
-    },
-    {
-      id: '3',
-      leave_type: 'emergency',
-      start_date: '2024-01-10',
-      end_date: '2024-01-10',
-      total_days: 1,
-      reason: 'ظروف طارئة',
-      status: 'rejected',
-      rejection_reason: 'لا يمكن الموافقة في هذا التوقيت',
-      created_at: '2024-01-09'
+  // تحديث البيانات عند تحميل الصفحة
+  useEffect(() => {
+    loadLeaveRequests();
+  }, []);
+
+  const loadLeaveRequests = async () => {
+    try {
+      const requests = await leavesService.getLeaveRequests();
+      setLeaveRequests(requests || []);
+    } catch (error) {
+      console.error('خطأ في تحميل طلبات الإجازات:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في تحميل طلبات الإجازات",
+        variant: "destructive",
+      });
     }
-  ];
+  };
+
+  const handleApproveRequest = async (requestId: string) => {
+    setIsLoading(true);
+    try {
+      await leavesService.approveLeaveRequest(requestId, 'current-user-id'); // يجب الحصول على معرف المستخدم الحالي
+      await loadLeaveRequests();
+      setViewDialogOpen(false);
+      toast({
+        title: "تم بنجاح",
+        description: "تم اعتماد طلب الإجازة وإرسال إشعار للموظف",
+      });
+    } catch (error) {
+      console.error('خطأ في اعتماد الطلب:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في اعتماد طلب الإجازة",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRejectRequest = async (reason: string) => {
+    if (!selectedRequest) return;
+    
+    setIsLoading(true);
+    try {
+      await leavesService.rejectLeaveRequest(selectedRequest.id, reason, 'current-user-id'); // يجب الحصول على معرف المستخدم الحالي
+      await loadLeaveRequests();
+      setRejectDialogOpen(false);
+      setViewDialogOpen(false);
+      toast({
+        title: "تم بنجاح",
+        description: "تم رفض طلب الإجازة وإرسال إشعار للموظف",
+      });
+    } catch (error) {
+      console.error('خطأ في رفض الطلب:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في رفض طلب الإجازة",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getLeaveTypeBadge = (type: string) => {
     const typeConfig = {
@@ -118,9 +155,9 @@ const Leaves = () => {
     setViewDialogOpen(true);
   };
 
-  const filteredRequests = mockLeaveRequests.filter(request => {
+  const filteredRequests = leaveRequests.filter(request => {
     const matchesSearch = searchTerm === '' || 
-      request.reason.toLowerCase().includes(searchTerm.toLowerCase());
+      (request.reason && request.reason.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesStatus = statusFilter === '' || statusFilter === 'all' || request.status === statusFilter;
     const matchesType = typeFilter === '' || typeFilter === 'all' || request.leave_type === typeFilter;
@@ -587,11 +624,20 @@ const Leaves = () => {
               <div className="flex gap-2 pt-4">
                 {selectedRequest.status === 'pending' && (
                   <>
-                    <Button variant="outline" className="flex-1">
-                      تعديل الطلب
+                    <Button 
+                      onClick={() => handleApproveRequest(selectedRequest.id)}
+                      disabled={isLoading}
+                      className="flex-1"
+                    >
+                      {isLoading ? 'جاري الاعتماد...' : 'اعتماد'}
                     </Button>
-                    <Button variant="destructive" className="flex-1">
-                      إلغاء الطلب
+                    <Button 
+                      variant="destructive" 
+                      onClick={() => setRejectDialogOpen(true)}
+                      disabled={isLoading}
+                      className="flex-1"
+                    >
+                      رفض الطلب
                     </Button>
                   </>
                 )}
@@ -599,6 +645,7 @@ const Leaves = () => {
                   variant="outline" 
                   onClick={() => setViewDialogOpen(false)}
                   className="flex-1"
+                  disabled={isLoading}
                 >
                   إغلاق
                 </Button>
@@ -607,6 +654,14 @@ const Leaves = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* dialog رفض الطلب */}
+      <RejectLeaveDialog
+        open={rejectDialogOpen}
+        onOpenChange={setRejectDialogOpen}
+        onConfirm={handleRejectRequest}
+        isLoading={isLoading}
+      />
     </div>
   );
 };
