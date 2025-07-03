@@ -359,9 +359,9 @@ export const MaintenanceScheduler = () => {
       {/* أدوات التحكم */}
       <Card>
         <CardHeader>
-          <CardTitle>جدولة الصيانة</CardTitle>
+          <CardTitle className="text-right">جدولة الصيانة</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="text-right">
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-1">
               <div className="relative">
