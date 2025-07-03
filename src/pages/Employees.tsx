@@ -345,7 +345,9 @@ const Employees = () => {
                         <div className="bg-card/50 rounded-lg p-4 border border-muted">
                           <div className="text-sm text-muted-foreground mb-1">القسم:</div>
                           <div className="font-semibold text-foreground">
-                            {(employee as any).department?.department_name || employee.department || 'غير محدد'}
+                            {typeof (employee as any).department === 'object' && (employee as any).department?.department_name 
+                              ? (employee as any).department.department_name 
+                              : employee.department || 'غير محدد'}
                           </div>
                         </div>
                         
