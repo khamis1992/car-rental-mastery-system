@@ -70,7 +70,7 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
   };
 
   const formatCurrency = (amount: number) => {
-    return `${amount.toFixed(3)} د.ك`;
+    return `د.ك ${amount.toFixed(3)}`;
   };
 
   const getStatusBadge = (status: string) => {

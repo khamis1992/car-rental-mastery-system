@@ -90,7 +90,7 @@ export const ViolationPaymentForm: React.FC<ViolationPaymentFormProps> = ({
   };
 
   const formatCurrency = (amount: number) => {
-    return `${amount.toFixed(3)} د.ك`;
+    return `د.ك ${amount.toFixed(3)}`;
   };
 
   return (

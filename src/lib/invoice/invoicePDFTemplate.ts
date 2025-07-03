@@ -7,7 +7,7 @@ export interface InvoicePDFOptions {
 }
 
 export const generateInvoiceHTML = (invoice: any, options: InvoicePDFOptions = {}): string => {
-  const formatCurrency = (amount: number) => `${amount.toFixed(3)} د.ك`;
+  const formatCurrency = (amount: number) => `د.ك ${amount.toFixed(3)}`;
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ar-SA', {
       year: 'numeric',

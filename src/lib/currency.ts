@@ -5,7 +5,7 @@ export const useCurrencyFormatter = () => {
   const { systemSettings } = useSettings();
   
   const formatCurrency = (amount: number) => {
-    return `${amount.toFixed(3)} د.ك`;
+    return `د.ك ${amount.toFixed(3)}`;
   };
 
   return { formatCurrency };
@@ -13,5 +13,5 @@ export const useCurrencyFormatter = () => {
 
 // Direct utility function for use outside of React components
 export const formatCurrencyKWD = (amount: number) => {
-  return `${amount.toFixed(3)} د.ك`;
+  return `د.ك ${amount.toFixed(3)}`;
 };

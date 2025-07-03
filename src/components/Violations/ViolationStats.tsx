@@ -10,7 +10,7 @@ interface ViolationStatsProps {
 
 export const ViolationStats: React.FC<ViolationStatsProps> = ({ stats }) => {
   const formatCurrency = (amount: number) => {
-    return `${amount.toFixed(3)} د.ك`;
+    return `د.ك ${amount.toFixed(3)}`;
   };
 
   const statsCards = [

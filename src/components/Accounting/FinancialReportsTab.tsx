@@ -56,7 +56,7 @@ export const FinancialReportsTab = () => {
   };
 
   const formatAmount = (amount: number) => {
-    return `${amount.toFixed(3)} د.ك`;
+    return `د.ك ${amount.toFixed(3)}`;
   };
 
   const exportReport = (reportType: string) => {
