@@ -386,42 +386,63 @@ export const MaintenanceAlerts = () => {
               </AlertDescription>
             </Alert>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {alerts.map((alert) => (
                 <div
                   key={alert.id}
-                  className="p-4 border rounded-lg"
+                  className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm"
                 >
-                  <div className="flex items-center justify-between gap-4">
-                    {/* الأيقونة والمحتوى على اليمين */}
-                    <div className="flex items-start gap-3 flex-1">
-                      {getAlertIcon(alert.alert_type)}
-                      <div className="space-y-1 text-right">
-                        <div className="font-medium text-right">{alert.title}</div>
-                        <div className="text-sm text-muted-foreground text-right">
-                          {alert.vehicle_number} - {alert.vehicle_make} {alert.vehicle_model}
+                  <div className="flex items-center justify-between">
+                    {/* المحتوى الرئيسي على اليمين */}
+                    <div className="flex-1 text-right">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {/* زر الإخفاء */}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDismissAlert(alert.id)}
+                            className="h-8 px-3 text-gray-600 hover:text-gray-700 border-gray-300"
+                          >
+                            <X className="h-4 w-4 ml-1" />
+                            إخفاء
+                          </Button>
+                          
+                          {/* شارة الأولوية */}
+                          {alert.priority === 'high' && (
+                            <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                              عالية
+                            </span>
+                          )}
+                          {alert.priority === 'medium' && (
+                            <span className="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                              متوسطة
+                            </span>
+                          )}
+                          {alert.priority === 'low' && (
+                            <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                              منخفضة
+                            </span>
+                          )}
                         </div>
-                        <div className="text-sm text-right">{alert.description}</div>
-                        {alert.scheduled_date && (
-                          <div className="text-sm text-muted-foreground text-right">
-                            التاريخ: {format(new Date(alert.scheduled_date), 'dd/MM/yyyy', { locale: ar })}
-                          </div>
-                        )}
+                        
+                        <div className="text-right">
+                          <h3 className="font-semibold text-gray-900 text-lg mb-1">
+                            {alert.title}
+                          </h3>
+                          <p className="text-gray-600 text-sm mb-1">
+                            {alert.vehicle_number} - {alert.vehicle_make} {alert.vehicle_model}
+                          </p>
+                          <p className="text-gray-800 text-sm mb-1">
+                            {alert.description}
+                          </p>
+                          {alert.scheduled_date && (
+                            <p className="text-gray-500 text-xs">
+                              التاريخ: {format(new Date(alert.scheduled_date), 'dd/MM/yyyy', { locale: ar })}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    
-                    {/* شارة الأولوية والزر على اليسار */}
-                    <div className="flex items-center gap-3">
-                      {getPriorityBadge(alert.priority)}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDismissAlert(alert.id)}
-                        className="text-gray-600 hover:text-gray-700"
-                      >
-                        <X className="h-4 w-4 ml-1" />
-                        إخفاء
-                      </Button>
                     </div>
                   </div>
                 </div>
