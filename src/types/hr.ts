@@ -9,6 +9,7 @@ export interface Employee {
   national_id?: string;
   position: string;
   department: string;
+  department_id?: string;
   hire_date: string;
   salary: number;
   status: 'active' | 'inactive' | 'terminated';

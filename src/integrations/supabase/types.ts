@@ -1341,6 +1341,53 @@ export type Database = {
         }
         Relationships: []
       }
+      departments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          department_code: string
+          department_name: string
+          department_name_en: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          manager_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          department_code: string
+          department_name: string
+          department_name_en?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          manager_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          department_code?: string
+          department_name?: string
+          department_name_en?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          manager_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departments_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees: {
         Row: {
           address: string | null
@@ -1349,6 +1396,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           department: string
+          department_id: string | null
           email: string | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
@@ -1374,6 +1422,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           department: string
+          department_id?: string | null
           email?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
@@ -1399,6 +1448,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           department?: string
+          department_id?: string | null
           email?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
@@ -1418,6 +1468,13 @@ export type Database = {
           work_location_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "employees_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "employees_manager_id_fkey"
             columns: ["manager_id"]
@@ -3241,6 +3298,10 @@ export type Database = {
         Returns: string
       }
       generate_customer_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_department_code: {
         Args: Record<PropertyKey, never>
         Returns: string
       }

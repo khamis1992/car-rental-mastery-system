@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,6 +43,7 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   const [loading, setLoading] = useState(false);
   const [hireDate, setHireDate] = useState<Date>();
   const [showBankDetails, setShowBankDetails] = useState(false);
+  const [departments, setDepartments] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -60,6 +61,27 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   });
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (open) {
+      fetchDepartments();
+    }
+  }, [open]);
+
+  const fetchDepartments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('departments')
+        .select('id, department_name')
+        .eq('is_active', true)
+        .order('department_name');
+
+      if (error) throw error;
+      setDepartments(data || []);
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -118,6 +140,7 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         national_id: formData.national_id || null,
         position: formData.position,
         department: formData.department,
+        department_id: formData.department || null,
         salary: parseFloat(formData.salary),
         hire_date: hireDate!.toISOString().split('T')[0],
         status: 'active' as const,
@@ -381,12 +404,11 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                       <SelectValue placeholder="اختر القسم" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="تقنية المعلومات">تقنية المعلومات</SelectItem>
-                      <SelectItem value="المالية">المالية</SelectItem>
-                      <SelectItem value="الموارد البشرية">الموارد البشرية</SelectItem>
-                      <SelectItem value="التسويق">التسويق</SelectItem>
-                      <SelectItem value="العمليات">العمليات</SelectItem>
-                      <SelectItem value="خدمة العملاء">خدمة العملاء</SelectItem>
+                      {departments.map((dept) => (
+                        <SelectItem key={dept.id} value={dept.id}>
+                          {dept.department_name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   {fieldErrors.department && (

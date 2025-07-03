@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { AddEmployeeForm } from '@/components/Employees/AddEmployeeForm';
 import { LinkUserDialog } from '@/components/Employees/LinkUserDialog';
 import { EmployeeDetailsDialog } from '@/components/Employees/EmployeeDetailsDialog';
+import { DepartmentsList } from '@/components/Departments/DepartmentsList';
 import { Employee } from '@/types/hr';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -23,17 +24,24 @@ const Employees = () => {
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchEmployees();
+    fetchDepartments();
   }, []);
 
   const fetchEmployees = async () => {
     try {
       const { data, error } = await supabase
         .from('employees')
-        .select('*')
+        .select(`
+          *,
+          department:department_id (
+            department_name
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -47,6 +55,21 @@ const Employees = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDepartments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('departments')
+        .select('id, department_name')
+        .eq('is_active', true)
+        .order('department_name');
+
+      if (error) throw error;
+      setDepartments(data || []);
+    } catch (error) {
+      console.error('Error fetching departments:', error);
     }
   };
 
@@ -104,7 +127,7 @@ const Employees = () => {
       employee.employee_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (employee.email && employee.email.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesDepartment = departmentFilter === '' || departmentFilter === 'all' || employee.department === departmentFilter;
+    const matchesDepartment = departmentFilter === '' || departmentFilter === 'all' || employee.department_id === departmentFilter;
     const matchesStatus = statusFilter === '' || statusFilter === 'all' || employee.status === statusFilter;
 
     return matchesSearch && matchesDepartment && matchesStatus;
@@ -210,10 +233,11 @@ const Employees = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">جميع الأقسام</SelectItem>
-                    <SelectItem value="تقنية المعلومات">تقنية المعلومات</SelectItem>
-                    <SelectItem value="المالية">المالية</SelectItem>
-                    <SelectItem value="الموارد البشرية">الموارد البشرية</SelectItem>
-                    <SelectItem value="التسويق">التسويق</SelectItem>
+                    {departments.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.department_name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 
@@ -278,9 +302,9 @@ const Employees = () => {
                           <div>
                             <span className="font-medium">المنصب:</span> {employee.position}
                           </div>
-                          <div>
-                            <span className="font-medium">القسم:</span> {employee.department}
-                          </div>
+                           <div>
+                             <span className="font-medium">القسم:</span> {(employee as any).department?.department_name || employee.department || 'غير محدد'}
+                           </div>
                           <div>
                             <span className="font-medium">البريد:</span> {employee.email}
                           </div>
@@ -305,16 +329,7 @@ const Employees = () => {
         </TabsContent>
 
         <TabsContent value="departments">
-          <Card>
-            <CardHeader>
-              <CardTitle>الأقسام</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                إدارة أقسام الشركة - قريباً
-              </div>
-            </CardContent>
-          </Card>
+          <DepartmentsList />
         </TabsContent>
 
         <TabsContent value="positions">
