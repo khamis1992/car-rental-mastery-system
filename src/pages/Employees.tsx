@@ -144,14 +144,14 @@ const Employees = () => {
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
       {/* العنوان والإجراءات */}
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">إدارة الموظفين</h1>
-          <p className="text-muted-foreground">إدارة بيانات الموظفين والتعيينات</p>
-        </div>
         <Button onClick={() => setShowAddForm(true)}>
           <Plus className="w-4 h-4 ml-2" />
           إضافة موظف جديد
         </Button>
+        <div className="text-right">
+          <h1 className="text-3xl font-bold">إدارة الموظفين</h1>
+          <p className="text-muted-foreground">إدارة بيانات الموظفين والتعيينات</p>
+        </div>
       </div>
 
       {/* إحصائيات سريعة */}
