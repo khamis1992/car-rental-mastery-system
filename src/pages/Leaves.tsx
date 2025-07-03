@@ -353,7 +353,7 @@ const Leaves = () => {
         <TabsContent value="requests">
           <Card>
             <CardHeader>
-              <CardTitle>طلبات الإجازات</CardTitle>
+              <CardTitle className="text-right">طلبات الإجازات</CardTitle>
               
               {/* فلاتر البحث */}
               <div className="flex flex-wrap gap-4 mt-4">
