@@ -64,10 +64,11 @@ export const AttendanceClock: React.FC = () => {
 
     if (!isCheckedIn) {
       // تسجيل الحضور
+      const now = new Date();
       const checkInData = {
         employee_id: profile.id,
-        date: new Date().toISOString().split('T')[0],
-        check_in_time: format(new Date(), 'HH:mm:ss'),
+        date: now.toISOString().split('T')[0],
+        check_in_time: now.toISOString(),
         location_latitude: location.lat,
         location_longitude: location.lng,
         status: 'present'
