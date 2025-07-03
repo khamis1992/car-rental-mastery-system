@@ -163,11 +163,11 @@ export const ViolationTypesManagement: React.FC<ViolationTypesManagementProps> =
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>إدارة أنواع المخالفات</CardTitle>
             <Button onClick={() => setFormOpen(true)}>
               <Plus className="w-4 h-4 ml-2" />
               إضافة نوع مخالفة
             </Button>
+            <CardTitle className="text-right">إدارة أنواع المخالفات</CardTitle>
           </div>
           
           {/* فلاتر البحث */}
