@@ -221,7 +221,10 @@ const Employees = () => {
         <TabsContent value="list">
           <Card>
             <CardHeader>
-              <CardTitle>قائمة الموظفين</CardTitle>
+              <div className="flex justify-between items-center">
+                <div></div>
+                <CardTitle className="text-right">قائمة الموظفين</CardTitle>
+              </div>
               
               {/* فلاتر البحث */}
               <div className="flex flex-wrap gap-4 mt-4">
