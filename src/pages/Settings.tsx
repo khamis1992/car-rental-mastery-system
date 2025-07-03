@@ -343,8 +343,10 @@ const Settings = () => {
                             {user.name.charAt(0)}
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground text-right">{user.email}</p>
-                        <p className="text-xs text-muted-foreground text-right">آخر دخول: {user.lastLogin}</p>
+                        <div className="text-right space-y-1">
+                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                          <p className="text-xs text-muted-foreground">آخر دخول: {user.lastLogin}</p>
+                        </div>
                       </div>
                     </div>
                     
