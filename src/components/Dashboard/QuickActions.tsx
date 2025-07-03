@@ -22,13 +22,6 @@ const QuickActions = () => {
       onClick: () => navigate('/customers')
     },
     {
-      title: "حجز سريع",
-      description: "حجز سيارة بسرعة",
-      icon: <Calendar className="w-5 h-5" />,
-      className: "btn-purple",
-      onClick: () => navigate('/fleet')
-    },
-    {
       title: "الحضور والانصراف",
       description: "إدارة حضور الموظفين",
       icon: <Clock className="w-5 h-5" />,
