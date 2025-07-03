@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,40 +6,48 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Search, Users, UserCheck, UserX } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { AddEmployeeForm } from '@/components/Employees/AddEmployeeForm';
+import { Employee } from '@/types/hr';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const Employees = () => {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const mockEmployees = [
-    {
-      id: '1',
-      employee_number: 'EMP0001',
-      first_name: 'أحمد',
-      last_name: 'محمد',
-      email: 'ahmed@company.com',
-      phone: '12345678',
-      position: 'مطور',
-      department: 'تقنية المعلومات',
-      hire_date: '2024-01-15',
-      status: 'active',
-      salary: 1200.000
-    },
-    {
-      id: '2',
-      employee_number: 'EMP0002',
-      first_name: 'فاطمة',
-      last_name: 'أحمد',
-      email: 'fatima@company.com',
-      phone: '87654321',
-      position: 'محاسبة',
-      department: 'المالية',
-      hire_date: '2024-02-01',
-      status: 'active',
-      salary: 1000.000
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setEmployees((data || []) as Employee[]);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+      toast({
+        title: 'خطأ في تحميل البيانات',
+        description: 'حدث خطأ أثناء تحميل بيانات الموظفين',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const handleEmployeeAdded = (newEmployee: Employee) => {
+    setEmployees(prev => [newEmployee, ...prev]);
+  };
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -56,12 +64,12 @@ const Employees = () => {
     return `د.ك ${amount.toFixed(3)}`;
   };
 
-  const filteredEmployees = mockEmployees.filter(employee => {
+  const filteredEmployees = employees.filter(employee => {
     const matchesSearch = searchTerm === '' || 
       employee.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.employee_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.email.toLowerCase().includes(searchTerm.toLowerCase());
+      (employee.email && employee.email.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesDepartment = departmentFilter === '' || departmentFilter === 'all' || employee.department === departmentFilter;
     const matchesStatus = statusFilter === '' || statusFilter === 'all' || employee.status === statusFilter;
@@ -77,7 +85,7 @@ const Employees = () => {
           <h1 className="text-3xl font-bold">إدارة الموظفين</h1>
           <p className="text-muted-foreground">إدارة بيانات الموظفين والتعيينات</p>
         </div>
-        <Button>
+        <Button onClick={() => setShowAddForm(true)}>
           <Plus className="w-4 h-4 ml-2" />
           إضافة موظف جديد
         </Button>
@@ -191,8 +199,13 @@ const Employees = () => {
             </CardHeader>
             
             <CardContent>
-              <div className="space-y-4">
-                {filteredEmployees.map((employee) => (
+              {loading ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  جاري تحميل البيانات...
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredEmployees.map((employee) => (
                   <div key={employee.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
                     <div className="flex justify-between items-start">
                       <div className="flex gap-2">
@@ -228,12 +241,13 @@ const Employees = () => {
                   </div>
                 ))}
 
-                {filteredEmployees.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    لا توجد نتائج مطابقة لبحثك
-                  </div>
-                )}
-              </div>
+                  {filteredEmployees.length === 0 && !loading && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      لا توجد نتائج مطابقة لبحثك
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -277,6 +291,12 @@ const Employees = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <AddEmployeeForm
+        open={showAddForm}
+        onOpenChange={setShowAddForm}
+        onEmployeeAdded={handleEmployeeAdded}
+      />
     </div>
   );
 };
