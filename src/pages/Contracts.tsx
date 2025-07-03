@@ -78,6 +78,7 @@ const Contracts = () => {
         onEdit={(id) => console.log('Edit contract:', id)}
         onActivate={(id) => console.log('Activate contract:', id)}
         onComplete={(id) => console.log('Complete contract:', id)}
+        onStatusUpdate={loadData}
       />
 
       {/* نموذج إنشاء عقد */}

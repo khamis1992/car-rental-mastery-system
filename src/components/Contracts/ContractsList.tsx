@@ -11,6 +11,7 @@ import { ContractDetailsDialog } from './ContractDetailsDialog';
 import { ContractFiltersComponent, ContractFilters } from './ContractFilters';
 import { CompactProgressIndicator, ContractProgressIndicator } from './ContractProgressIndicator';
 import { ContractHelp } from './ContractHelp';
+import { useToast } from '@/hooks/use-toast';
 
 interface Contract {
   id: string;
@@ -34,6 +35,7 @@ interface ContractsListProps {
   onEdit?: (id: string) => void;
   onActivate?: (id: string) => void;
   onComplete?: (id: string) => void;
+  onStatusUpdate?: () => void;
 }
 
 export const ContractsList: React.FC<ContractsListProps> = ({
@@ -42,7 +44,9 @@ export const ContractsList: React.FC<ContractsListProps> = ({
   onEdit,
   onActivate,
   onComplete,
+  onStatusUpdate,
 }) => {
+  const { toast } = useToast();
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [filters, setFilters] = useState<ContractFilters>({
@@ -219,7 +223,17 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                          customer_name: contract.customer_name,
                          vehicle_info: contract.vehicle_info
                        }}
-                       onStatusUpdate={() => window.location.reload()}
+                        onStatusUpdate={() => {
+                          if (onStatusUpdate) {
+                            onStatusUpdate();
+                          } else {
+                            window.location.reload();
+                          }
+                          toast({
+                            title: "تم التحديث",
+                            description: "تم تحديث حالة العقد بنجاح",
+                          });
+                        }}
                      />
                    </TableCell>
                   <TableCell>

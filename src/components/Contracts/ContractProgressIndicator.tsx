@@ -147,10 +147,10 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
   };
 
   const handleStepClick = (stepId: string) => {
-    if (!interactive || !contractData) return;
+    if (!interactive || !contractData || !canAdvanceToStep(stepId)) return;
     
-    // Navigate to the contract stage page
-    navigate(`/contracts/stage/${stepId}/${contractData.id}`);
+    const action = getStepActionText(stepId);
+    setConfirmAction({ stepId, title: action.title, description: action.description });
   };
 
   const executeAction = async () => {
@@ -162,7 +162,9 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
       onStatusUpdate?.();
       setConfirmAction(null);
     } catch (error) {
-      console.error('Error updating contract status:', error);
+      console.error('خطأ في تحديث حالة العقد:', error);
+      // يمكن إضافة toast notification هنا لاحقاً
+      alert('حدث خطأ أثناء تحديث حالة العقد. يرجى المحاولة مرة أخرى.');
     } finally {
       setIsLoading(false);
     }
