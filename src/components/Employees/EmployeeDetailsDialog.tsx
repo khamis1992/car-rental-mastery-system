@@ -230,7 +230,12 @@ export const EmployeeDetailsDialog: React.FC<EmployeeDetailsDialogProps> = ({
                   <span className="font-medium">المنصب:</span> {employee.position}
                 </div>
                 <div>
-                  <span className="font-medium">القسم:</span> {employee.department}
+                  <span className="font-medium">القسم:</span> {(() => {
+                    if (employee.department_id && typeof (employee as any).department === 'object' && (employee as any).department?.department_name) {
+                      return (employee as any).department.department_name;
+                    }
+                    return employee.department || 'غير محدد';
+                  })()}
                 </div>
                 <div>
                   <span className="font-medium">الراتب:</span> {formatCurrency(employee.salary)}
