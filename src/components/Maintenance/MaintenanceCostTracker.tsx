@@ -479,14 +479,6 @@ export const MaintenanceCostTracker = () => {
                   className="p-4 border rounded-lg space-y-2"
                 >
                   <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium">
-                        {vehicle.vehicle_number} - {vehicle.vehicle_make} {vehicle.vehicle_model}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {vehicle.maintenanceCount} عملية صيانة
-                      </div>
-                    </div>
                     <div className="text-left">
                       <div className="text-lg font-bold">
                         {vehicle.totalCost.toFixed(2)} د.ك
@@ -494,6 +486,14 @@ export const MaintenanceCostTracker = () => {
                       <Badge variant="outline">
                         متوسط: {vehicle.averageCost.toFixed(2)} د.ك
                       </Badge>
+                    </div>
+                    <div className="text-right flex-1 mr-4">
+                      <div className="font-medium">
+                        {vehicle.vehicle_number} - {vehicle.vehicle_make} {vehicle.vehicle_model}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {vehicle.maintenanceCount} عملية صيانة
+                      </div>
                     </div>
                   </div>
                   <div className="text-sm text-muted-foreground">

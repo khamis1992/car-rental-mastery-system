@@ -393,7 +393,10 @@ export const MaintenanceAlerts = () => {
                   className="p-4 border rounded-lg space-y-3"
                 >
                   <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-3 space-x-reverse">
+                    <div className="flex items-center space-x-2 space-x-reverse">
+                      {getPriorityBadge(alert.priority)}
+                    </div>
+                    <div className="flex items-start space-x-3 space-x-reverse text-right flex-1 mr-4">
                       {getAlertIcon(alert.alert_type)}
                       <div className="space-y-1">
                         <div className="font-medium">{alert.title}</div>
@@ -407,9 +410,6 @@ export const MaintenanceAlerts = () => {
                           </div>
                         )}
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-2 space-x-reverse">
-                      {getPriorityBadge(alert.priority)}
                     </div>
                   </div>
 
