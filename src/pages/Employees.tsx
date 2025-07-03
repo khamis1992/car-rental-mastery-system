@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Search, Users, UserCheck, UserX } from 'lucide-react';
+import { Plus, Search, Users, UserCheck, UserX, Link, UserPlus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AddEmployeeForm } from '@/components/Employees/AddEmployeeForm';
+import { LinkUserDialog } from '@/components/Employees/LinkUserDialog';
+import { EmployeeDetailsDialog } from '@/components/Employees/EmployeeDetailsDialog';
 import { Employee } from '@/types/hr';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +19,9 @@ const Employees = () => {
   const [departmentFilter, setDepartmentFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showLinkDialog, setShowLinkDialog] = useState(false);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,6 +52,34 @@ const Employees = () => {
 
   const handleEmployeeAdded = (newEmployee: Employee) => {
     setEmployees(prev => [newEmployee, ...prev]);
+  };
+
+  const handleEmployeeUpdated = (updatedEmployee: Employee) => {
+    setEmployees(prev => prev.map(emp => 
+      emp.id === updatedEmployee.id ? updatedEmployee : emp
+    ));
+  };
+
+  const handleLinkUser = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setShowLinkDialog(true);
+  };
+
+  const getUserLinkingBadge = (employee: Employee) => {
+    if (employee.user_id) {
+      return (
+        <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+          <UserCheck className="w-3 h-3 mr-1" />
+          مرتبط بحساب
+        </Badge>
+      );
+    }
+    return (
+      <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
+        <UserX className="w-3 h-3 mr-1" />
+        غير مرتبط
+      </Badge>
+    );
   };
 
   const getStatusBadge = (status: string) => {
@@ -207,20 +240,39 @@ const Employees = () => {
                 <div className="space-y-4">
                   {filteredEmployees.map((employee) => (
                   <div key={employee.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
-                    <div className="flex justify-between items-start">
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">عرض</Button>
-                        <Button variant="outline" size="sm">تعديل</Button>
-                      </div>
-                      
-                      <div className="flex-1 text-right mr-4">
-                        <div className="flex items-center gap-4 mb-2 justify-end">
-                          {getStatusBadge(employee.status)}
-                          <Badge variant="outline">{employee.employee_number}</Badge>
-                          <h3 className="font-medium text-lg">
-                            {employee.first_name} {employee.last_name}
-                          </h3>
-                        </div>
+                     <div className="flex justify-between items-start">
+                       <div className="flex gap-2">
+                         <Button 
+                           variant="outline" 
+                           size="sm"
+                           onClick={() => {
+                             setSelectedEmployee(employee);
+                             setShowDetailsDialog(true);
+                           }}
+                         >
+                           عرض
+                         </Button>
+                         <Button variant="outline" size="sm">تعديل</Button>
+                         <Button 
+                           variant="outline" 
+                           size="sm"
+                           onClick={() => handleLinkUser(employee)}
+                           className="flex items-center gap-1"
+                         >
+                           <Link className="w-3 h-3" />
+                           {employee.user_id ? 'إدارة الحساب' : 'ربط حساب'}
+                         </Button>
+                       </div>
+                       
+                       <div className="flex-1 text-right mr-4">
+                         <div className="flex items-center gap-4 mb-2 justify-end">
+                           {getUserLinkingBadge(employee)}
+                           {getStatusBadge(employee.status)}
+                           <Badge variant="outline">{employee.employee_number}</Badge>
+                           <h3 className="font-medium text-lg">
+                             {employee.first_name} {employee.last_name}
+                           </h3>
+                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-sm text-muted-foreground text-right">
                           <div>
@@ -296,6 +348,20 @@ const Employees = () => {
         open={showAddForm}
         onOpenChange={setShowAddForm}
         onEmployeeAdded={handleEmployeeAdded}
+      />
+
+      <LinkUserDialog
+        open={showLinkDialog}
+        onOpenChange={setShowLinkDialog}
+        employee={selectedEmployee}
+        onEmployeeUpdated={handleEmployeeUpdated}
+      />
+
+      <EmployeeDetailsDialog
+        open={showDetailsDialog}
+        onOpenChange={setShowDetailsDialog}
+        employee={selectedEmployee}
+        onLinkUserClick={handleLinkUser}
       />
     </div>
   );
