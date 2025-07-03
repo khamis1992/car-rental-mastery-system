@@ -229,6 +229,123 @@ export const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
+              {/* 💼 بطاقة المعلومات الوظيفية */}
+              <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-lg">
+                <CardHeader className="bg-green-600 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-3 text-xl font-bold">
+                    <Briefcase className="w-6 h-6" />
+                    💼 المعلومات الوظيفية
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6 bg-white">
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="position"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-semibold text-gray-700">المنصب *</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              className="bg-white border-gray-300 focus:border-green-500 focus:ring-green-500"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="department_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-semibold text-gray-700">القسم</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="bg-white border-gray-300 focus:border-green-500">
+                                <SelectValue placeholder="اختر القسم" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-white border-gray-300 shadow-lg z-50">
+                              {departments.map((dept) => (
+                                <SelectItem key={dept.id} value={dept.id}>
+                                  {dept.department_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="salary"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-semibold text-gray-700">الراتب (د.ك) *</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              step="0.001"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              className="bg-white border-gray-300 focus:border-green-500 focus:ring-green-500"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* المعلومات البنكية */}
+                  <div className="border-t pt-4">
+                    <h4 className="font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                      المعلومات البنكية
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="bank_name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-semibold text-gray-700">اسم البنك</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                className="bg-white border-gray-300 focus:border-green-500 focus:ring-green-500"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="bank_account_number"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-semibold text-gray-700">رقم الحساب البنكي</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                className="bg-white border-gray-300 focus:border-green-500 focus:ring-green-500"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* 🧍‍♂️ بطاقة المعلومات الشخصية */}
               <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg">
                 <CardHeader className="bg-blue-600 text-white rounded-t-lg">
@@ -418,123 +535,6 @@ export const EditEmployeeForm: React.FC<EditEmployeeFormProps> = ({
                                   field.onChange(formatted);
                                 }}
                                 className="bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 💼 بطاقة المعلومات الوظيفية */}
-              <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-lg">
-                <CardHeader className="bg-green-600 text-white rounded-t-lg">
-                  <CardTitle className="flex items-center gap-3 text-xl font-bold">
-                    <Briefcase className="w-6 h-6" />
-                    💼 المعلومات الوظيفية
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6 bg-white">
-                  <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="position"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-semibold text-gray-700">المنصب *</FormLabel>
-                          <FormControl>
-                            <Input 
-                              {...field} 
-                              className="bg-white border-gray-300 focus:border-green-500 focus:ring-green-500"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="department_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-semibold text-gray-700">القسم</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="bg-white border-gray-300 focus:border-green-500">
-                                <SelectValue placeholder="اختر القسم" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="bg-white border-gray-300 shadow-lg z-50">
-                              {departments.map((dept) => (
-                                <SelectItem key={dept.id} value={dept.id}>
-                                  {dept.department_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="salary"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-semibold text-gray-700">الراتب (د.ك) *</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number" 
-                              step="0.001"
-                              {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                              className="bg-white border-gray-300 focus:border-green-500 focus:ring-green-500"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* المعلومات البنكية */}
-                  <div className="border-t pt-4">
-                    <h4 className="font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-                      المعلومات البنكية
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="bank_name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="font-semibold text-gray-700">اسم البنك</FormLabel>
-                            <FormControl>
-                              <Input 
-                                {...field} 
-                                className="bg-white border-gray-300 focus:border-green-500 focus:ring-green-500"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="bank_account_number"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="font-semibold text-gray-700">رقم الحساب البنكي</FormLabel>
-                            <FormControl>
-                              <Input 
-                                {...field} 
-                                className="bg-white border-gray-300 focus:border-green-500 focus:ring-green-500"
                               />
                             </FormControl>
                             <FormMessage />
