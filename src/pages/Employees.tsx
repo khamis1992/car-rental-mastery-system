@@ -270,6 +270,22 @@ const Employees = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
+                            onClick={() => handleLinkUser(employee)}
+                            className="flex items-center gap-2 hover:bg-success hover:text-success-foreground transition-colors"
+                          >
+                            <Link className="w-3 h-3" />
+                            ربط حساب
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="hover:bg-warning hover:text-warning-foreground transition-colors"
+                          >
+                            تعديل
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
                             onClick={() => {
                               setSelectedEmployee(employee);
                               setShowDetailsDialog(true);
@@ -277,22 +293,6 @@ const Employees = () => {
                             className="hover:bg-primary hover:text-primary-foreground transition-colors"
                           >
                             عرض
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="hover:bg-secondary hover:text-secondary-foreground transition-colors"
-                          >
-                            تعديل
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleLinkUser(employee)}
-                            className="flex items-center gap-2 hover:bg-accent hover:text-accent-foreground transition-colors"
-                          >
-                            <Link className="w-3 h-3" />
-                            ربط حساب
                           </Button>
                         </div>
                         
