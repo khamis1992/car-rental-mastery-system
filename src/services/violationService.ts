@@ -16,6 +16,8 @@ export const violationService = {
   },
 
   async createViolationType(violationType: Partial<ViolationType>): Promise<ViolationType> {
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const { data, error } = await supabase
       .from('violation_types')
       .insert([{
@@ -27,7 +29,7 @@ export const violationService = {
         points: violationType.points || 0,
         category: violationType.category!,
         severity_level: violationType.severity_level!,
-        created_by: (await supabase.auth.getUser()).data.user?.id
+        created_by: user?.id
       }])
       .select()
       .single();
@@ -101,6 +103,9 @@ export const violationService = {
   async createViolation(violation: Partial<TrafficViolation>): Promise<TrafficViolation> {
     const { data: violationNumber } = await supabase.rpc('generate_violation_number');
     
+    // الحصول على معلومات المستخدم بشكل آمن
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const { data, error } = await supabase
       .from('traffic_violations')
       .insert([{
@@ -120,7 +125,7 @@ export const violationService = {
         processing_fee: violation.processing_fee || 0,
         total_amount: violation.total_amount!,
         notes: violation.notes,
-        created_by: (await supabase.auth.getUser()).data.user?.id
+        created_by: user?.id
       }])
       .select()
       .single();
@@ -147,13 +152,15 @@ export const violationService = {
     percentage: number,
     reason?: string
   ): Promise<TrafficViolation> {
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const { data, error } = await supabase
       .from('traffic_violations')
       .update({
         liability_determination: liability,
         liability_percentage: percentage,
         liability_reason: reason,
-        liability_determined_by: (await supabase.auth.getUser()).data.user?.id,
+        liability_determined_by: user?.id,
         liability_determined_at: new Date().toISOString()
       })
       .eq('id', id)
@@ -178,6 +185,7 @@ export const violationService = {
 
   async createViolationPayment(payment: Partial<ViolationPayment>): Promise<ViolationPayment> {
     const { data: paymentNumber } = await supabase.rpc('generate_violation_payment_number');
+    const { data: { user } } = await supabase.auth.getUser();
     
     const { data, error } = await supabase
       .from('violation_payments')
@@ -191,7 +199,7 @@ export const violationService = {
         bank_name: payment.bank_name,
         check_number: payment.check_number,
         notes: payment.notes,
-        created_by: (await supabase.auth.getUser()).data.user?.id
+        created_by: user?.id
       }])
       .select()
       .single();
