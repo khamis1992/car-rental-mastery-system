@@ -155,66 +155,71 @@ const Employees = () => {
       </div>
 
       {/* إحصائيات سريعة */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <Users className="w-8 h-8 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">إجمالي الموظفين</p>
-                <p className="text-2xl font-bold">24</p>
+      <div className="relative">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <Users className="w-8 h-8 text-primary" />
+                <div>
+                  <p className="text-sm text-muted-foreground">إجمالي الموظفين</p>
+                  <p className="text-2xl font-bold">24</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <UserCheck className="w-8 h-8 text-green-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">الموظفون النشطون</p>
-                <p className="text-2xl font-bold">22</p>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <UserCheck className="w-8 h-8 text-green-500" />
+                <div>
+                  <p className="text-sm text-muted-foreground">الموظفون النشطون</p>
+                  <p className="text-2xl font-bold">22</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <UserX className="w-8 h-8 text-red-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">منتهي الخدمة</p>
-                <p className="text-2xl font-bold">2</p>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <UserX className="w-8 h-8 text-red-500" />
+                <div>
+                  <p className="text-sm text-muted-foreground">منتهي الخدمة</p>
+                  <p className="text-2xl font-bold">2</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <Users className="w-8 h-8 text-blue-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">التعيينات الجديدة</p>
-                <p className="text-2xl font-bold">3</p>
-                <p className="text-xs text-muted-foreground">هذا الشهر</p>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <Users className="w-8 h-8 text-blue-500" />
+                <div>
+                  <p className="text-sm text-muted-foreground">التعيينات الجديدة</p>
+                  <p className="text-2xl font-bold">3</p>
+                  <p className="text-xs text-muted-foreground">هذا الشهر</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* التبويبات موضعة تحت الكارت الأول */}
+        <div className="absolute top-full mt-4 right-0 md:right-0">
+          <TabsList>
+            <TabsTrigger value="locations">مواقع العمل</TabsTrigger>
+            <TabsTrigger value="positions">المناصب</TabsTrigger>
+            <TabsTrigger value="departments">الأقسام</TabsTrigger>
+            <TabsTrigger value="list">قائمة الموظفين</TabsTrigger>
+          </TabsList>
+        </div>
       </div>
 
       {/* التبويبات */}
       <Tabs defaultValue="list" className="space-y-4">
-        <TabsList className="justify-end">
-          <TabsTrigger value="locations">مواقع العمل</TabsTrigger>
-          <TabsTrigger value="positions">المناصب</TabsTrigger>
-          <TabsTrigger value="departments">الأقسام</TabsTrigger>
-          <TabsTrigger value="list">قائمة الموظفين</TabsTrigger>
-        </TabsList>
-
         <TabsContent value="list">
           <Card>
             <CardHeader>
