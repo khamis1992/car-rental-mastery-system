@@ -49,6 +49,12 @@ export const useContractDamageAutoSave = ({
     try {
       const field = type === 'pickup' ? 'pickup_damages' : 'return_damages';
       
+      // Check if signal was aborted before making request
+      if (signal.aborted) {
+        console.log('🔄 Request aborted before execution');
+        return [];
+      }
+      
       const { data, error } = await supabase
         .from('contracts')
         .select(field)
@@ -56,31 +62,38 @@ export const useContractDamageAutoSave = ({
         .abortSignal(signal)
         .single();
 
+      // Check again after the request
+      if (signal.aborted) {
+        console.log('🔄 Request was aborted during execution');
+        return [];
+      }
+
       if (error) {
-        if (error.name === 'AbortError') {
-          console.log('🔄 Request cancelled');
+        if (error.name === 'AbortError' || error.message?.includes('abort')) {
+          console.log('🔄 Request cancelled due to abort');
           return [];
         }
         throw error;
       }
 
-      if (signal.aborted) return [];
-
       const damages = data?.[field] as DamageArea[] || [];
       console.log(`📂 Loaded ${damages.length} existing ${type} damages from database`);
       
-      setState(prev => ({ ...prev, isLoading: false }));
+      // Only update state if not aborted
+      if (!signal.aborted) {
+        setState(prev => ({ ...prev, isLoading: false }));
+      }
       return damages;
       
     } catch (error: any) {
-      if (error.name === 'AbortError') {
-        console.log('🔄 Load request was cancelled');
+      if (error.name === 'AbortError' || error.message?.includes('abort')) {
+        console.log('🔄 Load request was cancelled:', error.message);
         return [];
       }
       
       console.error('❌ Error loading damages:', error);
       
-      // Only set error state if component is still mounted
+      // Only set error state if component is still mounted and not aborted
       if (!signal.aborted) {
         setState(prev => ({ 
           ...prev, 
@@ -109,7 +122,14 @@ export const useContractDamageAutoSave = ({
         })
         .eq('id', contractId);
 
-      if (error) throw error;
+      if (error) {
+        if (error.name === 'AbortError' || error.message?.includes('abort')) {
+          console.log('🔄 Save request was cancelled');
+          setState(prev => ({ ...prev, isSaving: false }));
+          return false;
+        }
+        throw error;
+      }
       
       setState(prev => ({ 
         ...prev, 
@@ -124,7 +144,7 @@ export const useContractDamageAutoSave = ({
       console.error('❌ Error auto-saving damages:', error);
       
       // Don't show toast for aborted requests
-      if (error.name !== 'AbortError') {
+      if (error.name !== 'AbortError' && !error.message?.includes('abort')) {
         setState(prev => ({ 
           ...prev, 
           isSaving: false, 
@@ -136,6 +156,8 @@ export const useContractDamageAutoSave = ({
           description: "فشل في حفظ الأضرار. سيتم المحاولة مرة أخرى عند إجراء التغيير التالي.",
           variant: "destructive",
         });
+      } else {
+        setState(prev => ({ ...prev, isSaving: false }));
       }
       
       return false;
@@ -144,15 +166,29 @@ export const useContractDamageAutoSave = ({
 
   // Auto-save with debouncing
   const autoSave = useCallback(async (damages: DamageArea[]) => {
-    if (!enabled) return;
+    if (!enabled || !contractId) return;
+    
+    // Cancel previous auto-save if still pending
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
     
     // Debounce auto-save by 1 second
-    const timeoutId = setTimeout(async () => {
-      await saveDamages(damages);
+    timeoutRef.current = setTimeout(async () => {
+      // Check if still enabled and mounted before saving
+      if (enabled && contractId) {
+        await saveDamages(damages);
+      }
     }, 1000);
 
-    return () => clearTimeout(timeoutId);
-  }, [saveDamages, enabled]);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [saveDamages, enabled, contractId]);
+  
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -161,8 +197,21 @@ export const useContractDamageAutoSave = ({
         abortControllerRef.current.abort();
         console.log('🧹 Cleanup: Aborted pending requests');
       }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        console.log('🧹 Cleanup: Cleared pending auto-save timeout');
+      }
     };
   }, []);
+  
+  // Cleanup when contractId or type changes
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [contractId, type]);
 
   // Clear error after some time
   useEffect(() => {

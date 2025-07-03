@@ -11,9 +11,11 @@ import { ContractDetailsDialog } from '@/components/Contracts/ContractDetailsDia
 import { useContractsDataRefactored } from '@/hooks/useContractsDataRefactored';
 import { supabase } from '@/integrations/supabase/client';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { AbortErrorBoundary, useAbortErrorHandler } from '@/components/ErrorBoundary/AbortErrorBoundary';
 
 const Contracts = () => {
   const navigate = useNavigate();
+  useAbortErrorHandler(); // Handle abort errors gracefully
   const [contractFormOpen, setContractFormOpen] = useState(false);
   const [selectedQuotationForContract, setSelectedQuotationForContract] = useState<string>('');
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
@@ -49,8 +51,9 @@ const Contracts = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <AbortErrorBoundary>
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
         <div className="text-right">
           <h1 className="text-3xl font-bold text-foreground">إدارة العقود</h1>
           <p className="text-muted-foreground">إدارة عقود الإيجار وعروض الأسعار</p>
@@ -175,6 +178,7 @@ const Contracts = () => {
         />
       </ErrorBoundary>
     </div>
+    </AbortErrorBoundary>
   );
 };
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,78 +20,174 @@ export const useContractsDataRefactored = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const { user, session, loading: authLoading } = useAuth();
+  
+  // Add ref for managing abort controllers
+  const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
+  const isMountedRef = useRef(true);
 
   const contractService = serviceContainer.getContractBusinessService();
   const quotationService = serviceContainer.getQuotationBusinessService();
 
   const loadQuotations = async () => {
+    const key = 'quotations';
+    const controller = new AbortController();
+    abortControllersRef.current.set(key, controller);
+    
     try {
       const activeQuotations = await quotationService.getActiveQuotations();
+      
+      if (!isMountedRef.current || controller.signal.aborted) {
+        console.log('🔄 Quotations load cancelled');
+        return;
+      }
+      
       setQuotations(activeQuotations);
       setErrors(prev => ({ ...prev, quotations: '' }));
     } catch (error: any) {
+      if (error.name === 'AbortError' || error.message?.includes('abort')) {
+        console.log('🔄 Quotations request was cancelled');
+        return;
+      }
+      
       console.error('Error loading quotations:', error);
-      setErrors(prev => ({ ...prev, quotations: error.message || 'فشل في تحميل عروض الأسعار' }));
-      // Keep existing data if available
+      if (isMountedRef.current) {
+        setErrors(prev => ({ ...prev, quotations: error.message || 'فشل في تحميل عروض الأسعار' }));
+      }
+    } finally {
+      abortControllersRef.current.delete(key);
     }
   };
 
   const loadContracts = async () => {
+    const key = 'contracts';
+    const controller = new AbortController();
+    abortControllersRef.current.set(key, controller);
+    
     try {
       const data = await contractService.getAllContracts();
+      
+      if (!isMountedRef.current || controller.signal.aborted) {
+        console.log('🔄 Contracts load cancelled');
+        return;
+      }
+      
       setContracts(data);
       setErrors(prev => ({ ...prev, contracts: '' }));
     } catch (error: any) {
+      if (error.name === 'AbortError' || error.message?.includes('abort')) {
+        console.log('🔄 Contracts request was cancelled');
+        return;
+      }
+      
       console.error('Error loading contracts:', error);
-      setErrors(prev => ({ ...prev, contracts: error.message || 'فشل في تحميل العقود' }));
-      // Keep existing data if available
+      if (isMountedRef.current) {
+        setErrors(prev => ({ ...prev, contracts: error.message || 'فشل في تحميل العقود' }));
+      }
+    } finally {
+      abortControllersRef.current.delete(key);
     }
   };
 
   const loadCustomers = async () => {
+    const key = 'customers';
+    const controller = new AbortController();
+    abortControllersRef.current.set(key, controller);
+    
     try {
       const { data, error } = await supabase
         .from('customers')
         .select('id, name, customer_number')
         .eq('status', 'active')
-        .order('name');
+        .order('name')
+        .abortSignal(controller.signal);
       
       if (error) throw error;
+      
+      if (!isMountedRef.current || controller.signal.aborted) {
+        console.log('🔄 Customers load cancelled');
+        return;
+      }
+      
       setCustomers(data || []);
       setErrors(prev => ({ ...prev, customers: '' }));
     } catch (error: any) {
+      if (error.name === 'AbortError' || error.message?.includes('abort')) {
+        console.log('🔄 Customers request was cancelled');
+        return;
+      }
+      
       console.error('Error loading customers:', error);
-      setErrors(prev => ({ ...prev, customers: error.message || 'فشل في تحميل العملاء' }));
-      // Keep existing data if available
+      if (isMountedRef.current) {
+        setErrors(prev => ({ ...prev, customers: error.message || 'فشل في تحميل العملاء' }));
+      }
+    } finally {
+      abortControllersRef.current.delete(key);
     }
   };
 
   const loadVehicles = async () => {
+    const key = 'vehicles';
+    const controller = new AbortController();
+    abortControllersRef.current.set(key, controller);
+    
     try {
       const { data, error } = await supabase
         .from('vehicles')
         .select('id, make, model, vehicle_number, daily_rate, status')
-        .order('vehicle_number');
+        .order('vehicle_number')
+        .abortSignal(controller.signal);
       
       if (error) throw error;
+      
+      if (!isMountedRef.current || controller.signal.aborted) {
+        console.log('🔄 Vehicles load cancelled');
+        return;
+      }
+      
       setVehicles(data || []);
       setErrors(prev => ({ ...prev, vehicles: '' }));
     } catch (error: any) {
+      if (error.name === 'AbortError' || error.message?.includes('abort')) {
+        console.log('🔄 Vehicles request was cancelled');
+        return;
+      }
+      
       console.error('Error loading vehicles:', error);
-      setErrors(prev => ({ ...prev, vehicles: error.message || 'فشل في تحميل المركبات' }));
-      // Keep existing data if available
+      if (isMountedRef.current) {
+        setErrors(prev => ({ ...prev, vehicles: error.message || 'فشل في تحميل المركبات' }));
+      }
+    } finally {
+      abortControllersRef.current.delete(key);
     }
   };
 
   const loadStats = async () => {
+    const key = 'stats';
+    const controller = new AbortController();
+    abortControllersRef.current.set(key, controller);
+    
     try {
       const contractStatsData = await contractService.getContractStats();
+      
+      if (!isMountedRef.current || controller.signal.aborted) {
+        console.log('🔄 Stats load cancelled');
+        return;
+      }
+      
       setContractStats(contractStatsData);
       setErrors(prev => ({ ...prev, stats: '' }));
     } catch (error: any) {
+      if (error.name === 'AbortError' || error.message?.includes('abort')) {
+        console.log('🔄 Stats request was cancelled');
+        return;
+      }
+      
       console.error('Error loading stats:', error);
-      setErrors(prev => ({ ...prev, stats: error.message || 'فشل في تحميل الإحصائيات' }));
-      // Keep existing stats if available
+      if (isMountedRef.current) {
+        setErrors(prev => ({ ...prev, stats: error.message || 'فشل في تحميل الإحصائيات' }));
+      }
+    } finally {
+      abortControllersRef.current.delete(key);
     }
   };
 
@@ -156,6 +252,21 @@ export const useContractsDataRefactored = () => {
       loadData();
     }
   }, [authLoading, user, session]);
+  
+  // Cleanup effect
+  useEffect(() => {
+    isMountedRef.current = true;
+    
+    return () => {
+      isMountedRef.current = false;
+      // Cancel all pending requests
+      abortControllersRef.current.forEach((controller, key) => {
+        controller.abort();
+        console.log(`🧹 Cleanup: Aborted ${key} request`);
+      });
+      abortControllersRef.current.clear();
+    };
+  }, []);
 
   return {
     quotations,

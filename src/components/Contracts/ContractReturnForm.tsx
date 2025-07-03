@@ -47,41 +47,49 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
   // Load existing data from contract when form opens
   React.useEffect(() => {
     const loadContractData = async () => {
-      if (!contract) return;
+      if (!contract?.id || loading) return;
       
       console.log('📋 ContractReturnForm: Loading existing contract data');
       
-      // Load damages from database using auto-save hook
-      const savedDamages = await autoSave.loadDamages();
-      
-      setReturnData(prev => ({
-        ...prev,
-        actual_end_date: contract.actual_end_date 
-          ? new Date(contract.actual_end_date).toISOString().split('T')[0]
-          : prev.actual_end_date,
-        return_location: contract.return_location || contract.pickup_location || prev.return_location,
-        return_mileage: contract.return_mileage ? contract.return_mileage.toString() : '',
-        fuel_level_return: contract.fuel_level_return || 'Full',
-        return_photos: Array.isArray(contract.return_photos) ? contract.return_photos : [],
-        return_condition_notes: contract.return_condition_notes || '',
-        return_damages: savedDamages.length > 0 ? savedDamages : (
-          Array.isArray(contract.return_damages) 
-            ? contract.return_damages.map((damage: any) => ({
-                id: damage.id,
-                x: Number(damage.x) || 0,
-                y: Number(damage.y) || 0,
-                severity: damage.severity || 'minor',
-                description: damage.description || '',
-                photos: Array.isArray(damage.photos) ? damage.photos : [],
-                timestamp: damage.timestamp || new Date().toISOString()
-              }))
-            : []
-        )
-      }));
+      try {
+        // Load damages from database using auto-save hook
+        const savedDamages = await autoSave.loadDamages();
+        
+        setReturnData(prev => ({
+          ...prev,
+          actual_end_date: contract.actual_end_date 
+            ? new Date(contract.actual_end_date).toISOString().split('T')[0]
+            : prev.actual_end_date,
+          return_location: contract.return_location || contract.pickup_location || prev.return_location,
+          return_mileage: contract.return_mileage ? contract.return_mileage.toString() : '',
+          fuel_level_return: contract.fuel_level_return || 'Full',
+          return_photos: Array.isArray(contract.return_photos) ? contract.return_photos : [],
+          return_condition_notes: contract.return_condition_notes || '',
+          return_damages: savedDamages.length > 0 ? savedDamages : (
+            Array.isArray(contract.return_damages) 
+              ? contract.return_damages.map((damage: any) => ({
+                  id: damage.id,
+                  x: Number(damage.x) || 0,
+                  y: Number(damage.y) || 0,
+                  severity: damage.severity || 'minor',
+                  description: damage.description || '',
+                  photos: Array.isArray(damage.photos) ? damage.photos : [],
+                  timestamp: damage.timestamp || new Date().toISOString()
+                }))
+              : []
+          )
+        }));
+      } catch (error) {
+        console.error('Error loading contract data:', error);
+        // Don't throw error, just log it and continue with existing data
+      }
     };
 
-    loadContractData();
-  }, [contract, autoSave]);
+    // Only load once when contract is available and form is open
+    if (open && contract?.id && !loading) {
+      loadContractData();
+    }
+  }, [contract?.id, open, loading]); // Removed autoSave from dependencies to prevent loops
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {

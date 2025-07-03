@@ -4,12 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, ArrowRight } from 'lucide-react';
 import { ContractStageWrapper } from '@/components/Contracts/ContractStageWrapper';
+import { AbortErrorBoundary, useAbortErrorHandler } from '@/components/ErrorBoundary/AbortErrorBoundary';
 
 const DraftStage = () => {
   const navigate = useNavigate();
+  useAbortErrorHandler(); // Handle abort errors gracefully
 
   return (
-    <ContractStageWrapper stageName="مرحلة إنشاء العقد" stageDescription="إعداد العقد والتفاصيل">
+    <AbortErrorBoundary>
+      <ContractStageWrapper stageName="مرحلة إنشاء العقد" stageDescription="إعداد العقد والتفاصيل">
       <div className="flex items-center justify-between">
         <div className="text-right">
           <h1 className="text-3xl font-bold text-foreground">مرحلة إنشاء العقد</h1>
@@ -53,6 +56,7 @@ const DraftStage = () => {
         </CardContent>
       </Card>
     </ContractStageWrapper>
+    </AbortErrorBoundary>
   );
 };
 

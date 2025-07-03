@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ContractDetailsDialog } from './ContractDetailsDialog';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -20,28 +20,42 @@ export const ContractStageWrapper: React.FC<ContractStageWrapperProps> = ({
   const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isValidContract, setIsValidContract] = useState<boolean | null>(null);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
+    isMountedRef.current = true;
+    
     if (contractId) {
       // Validate contract ID format (basic validation)
       const isValid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(contractId);
       setIsValidContract(isValid);
       
-      if (isValid) {
+      if (isValid && isMountedRef.current) {
         setDialogOpen(true);
-      } else {
+      } else if (!isValid) {
         console.error('❌ Invalid contract ID format:', contractId);
-        navigate('/contracts');
+        // Use setTimeout to avoid React navigation warnings
+        setTimeout(() => {
+          if (isMountedRef.current) {
+            navigate('/contracts');
+          }
+        }, 100);
       }
     }
+    
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [contractId, navigate]);
 
   const handleDialogClose = (open: boolean) => {
-    if (!open) {
+    if (!open && isMountedRef.current) {
       setDialogOpen(false);
-      // Use setTimeout to ensure smooth navigation
+      // Use setTimeout to ensure smooth navigation and avoid race conditions
       setTimeout(() => {
-        navigate('/contracts');
+        if (isMountedRef.current) {
+          navigate('/contracts');
+        }
       }, 100);
     }
   };
