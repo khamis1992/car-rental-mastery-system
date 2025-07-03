@@ -271,7 +271,7 @@ const Employees = () => {
                             variant="outline" 
                             size="sm"
                             onClick={() => handleLinkUser(employee)}
-                            className="flex items-center gap-2 hover:bg-success hover:text-success-foreground transition-colors"
+                            className="flex items-center gap-2 bg-success text-success-foreground border-success"
                           >
                             <Link className="w-3 h-3" />
                             ربط حساب
@@ -279,7 +279,7 @@ const Employees = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            className="hover:bg-warning hover:text-warning-foreground transition-colors"
+                            className="bg-warning text-warning-foreground border-warning"
                           >
                             تعديل
                           </Button>
@@ -290,7 +290,7 @@ const Employees = () => {
                               setSelectedEmployee(employee);
                               setShowDetailsDialog(true);
                             }}
-                            className="hover:bg-primary hover:text-primary-foreground transition-colors"
+                            className="bg-primary text-primary-foreground border-primary"
                           >
                             عرض
                           </Button>
