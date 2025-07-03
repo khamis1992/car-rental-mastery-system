@@ -209,9 +209,9 @@ export const ViolationReports: React.FC = () => {
           <TabsContent value="status" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-right flex items-center gap-2">
+                <CardTitle className="text-right flex items-center gap-2 justify-end">
+                  <span>توزيع المخالفات حسب الحالة</span>
                   <PieChart className="w-5 h-5" />
-                  توزيع المخالفات حسب الحالة
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -248,9 +248,9 @@ export const ViolationReports: React.FC = () => {
           <TabsContent value="types" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-right flex items-center gap-2">
+                <CardTitle className="text-right flex items-center gap-2 justify-end">
+                  <span>توزيع المخالفات حسب النوع</span>
                   <BarChart3 className="w-5 h-5" />
-                  توزيع المخالفات حسب النوع
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -279,9 +279,9 @@ export const ViolationReports: React.FC = () => {
           <TabsContent value="liability" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-right flex items-center gap-2">
+                <CardTitle className="text-right flex items-center gap-2 justify-end">
+                  <span>توزيع المخالفات حسب المسؤولية</span>
                   <PieChart className="w-5 h-5" />
-                  توزيع المخالفات حسب المسؤولية
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -318,9 +318,9 @@ export const ViolationReports: React.FC = () => {
           <TabsContent value="trend" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-right flex items-center gap-2">
+                <CardTitle className="text-right flex items-center gap-2 justify-end">
+                  <span>الاتجاه الشهري للمخالفات</span>
                   <TrendingUp className="w-5 h-5" />
-                  الاتجاه الشهري للمخالفات
                 </CardTitle>
               </CardHeader>
               <CardContent>
