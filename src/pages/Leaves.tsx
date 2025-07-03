@@ -344,10 +344,10 @@ const Leaves = () => {
 
       {/* التبويبات */}
       <Tabs defaultValue="requests" className="space-y-4">
-        <TabsList className="justify-end">
-          <TabsTrigger value="calendar">التقويم</TabsTrigger>
-          <TabsTrigger value="balance">رصيد الإجازات</TabsTrigger>
+        <TabsList className="flex justify-end w-full">
           <TabsTrigger value="requests">طلبات الإجازات</TabsTrigger>
+          <TabsTrigger value="balance">رصيد الإجازات</TabsTrigger>
+          <TabsTrigger value="calendar">التقويم</TabsTrigger>
         </TabsList>
 
         <TabsContent value="requests">
