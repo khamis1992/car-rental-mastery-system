@@ -29,6 +29,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { AttendanceTable } from './AttendanceTable';
 import { AttendanceFiltersPanel } from './AttendanceFiltersPanel';
+import { AttendanceReports } from './AttendanceReports';
 
 export const AttendanceManagement: React.FC = () => {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
@@ -245,6 +246,7 @@ export const AttendanceManagement: React.FC = () => {
           <TabsList>
             <TabsTrigger value="records">سجلات الحضور</TabsTrigger>
             <TabsTrigger value="filters">الفلاتر المتقدمة</TabsTrigger>
+            <TabsTrigger value="reports">التقارير</TabsTrigger>
           </TabsList>
           
           <div className="flex items-center gap-2">
@@ -303,6 +305,10 @@ export const AttendanceManagement: React.FC = () => {
             onApplyFilters={applyFilters}
             currentFilters={filters}
           />
+        </TabsContent>
+
+        <TabsContent value="reports">
+          <AttendanceReports />
         </TabsContent>
       </Tabs>
     </div>

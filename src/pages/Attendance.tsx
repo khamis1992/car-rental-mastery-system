@@ -265,10 +265,10 @@ const Attendance = () => {
         </div>
 
         {/* قسم التبويبات مع محاذاة لليمين */}
-        <Tabs defaultValue="today" className="space-y-6">
+        <Tabs defaultValue={isAdmin ? "management" : "today"} className="space-y-6">
           <div className="flex justify-end">
             <TabsList className="bg-gray-100 p-1 rounded-full">
-              {hasManagementAccess && (
+              {isAdmin && (
                 <TabsTrigger 
                   value="management" 
                   className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
@@ -277,35 +277,34 @@ const Attendance = () => {
                   إدارة الحضور
                 </TabsTrigger>
               )}
-              <TabsTrigger 
-                value="reports" 
-                className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-              >
-                التقارير
-              </TabsTrigger>
-              <TabsTrigger 
-                value="history" 
-                className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-              >
-                السجل
-              </TabsTrigger>
-              <TabsTrigger 
-                value="today" 
-                className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-              >
-                اليوم
-              </TabsTrigger>
+              {!isAdmin && (
+                <>
+                  <TabsTrigger 
+                    value="history" 
+                    className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                  >
+                    السجل
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="today" 
+                    className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                  >
+                    اليوم
+                  </TabsTrigger>
+                </>
+              )}
           </TabsList>
           </div>
 
-          {/* تبويب إدارة الحضور - للمديرين والموارد البشرية فقط */}
-          {hasManagementAccess && (
+          {/* تبويب إدارة الحضور - للمديرين فقط */}
+          {isAdmin && (
             <TabsContent value="management">
               <AttendanceManagement />
             </TabsContent>
           )}
 
-          <TabsContent value="today">
+          {!isAdmin && (
+            <TabsContent value="today">
             <Card className="shadow-lg rounded-lg">
               <CardHeader className="text-right">
                 <CardTitle className="text-xl">حضور اليوم</CardTitle>
@@ -347,8 +346,10 @@ const Attendance = () => {
               </CardContent>
             </Card>
           </TabsContent>
+          )}
 
-          <TabsContent value="history">
+          {!isAdmin && (
+            <TabsContent value="history">
             <Card className="shadow-lg rounded-lg">
               <CardHeader>
                 <CardTitle className="text-right">سجل الحضور</CardTitle>
@@ -392,20 +393,7 @@ const Attendance = () => {
               </CardContent>
             </Card>
           </TabsContent>
-
-          <TabsContent value="reports">
-            <Card className="shadow-lg rounded-lg">
-              <CardHeader>
-                <CardTitle className="text-right">تقارير الحضور</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-muted-foreground">
-                  <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                  <div className="text-lg">تقارير الحضور التفصيلية - قريباً</div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>
