@@ -147,10 +147,10 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
   };
 
   const handleStepClick = (stepId: string) => {
-    if (!interactive || !contractData || !canAdvanceToStep(stepId)) return;
+    if (!interactive || !contractData) return;
     
-    const action = getStepActionText(stepId);
-    setConfirmAction({ stepId, title: action.title, description: action.description });
+    // Navigate to the contract stage page
+    navigate(`/contracts/stage/${stepId}/${contractData.id}`);
   };
 
   const executeAction = async () => {
