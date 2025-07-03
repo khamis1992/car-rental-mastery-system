@@ -696,7 +696,13 @@ export const MaintenanceScheduler = () => {
                   )}
                 >
                   <div className="flex items-start justify-between">
-                    <div className="space-y-1">
+                    <div className="flex flex-col items-start space-y-2">
+                      {getStatusBadge(schedule.status)}
+                      {isOverdue(schedule.scheduled_date, schedule.status) && (
+                        <Badge variant="destructive" className="text-xs">متأخرة</Badge>
+                      )}
+                    </div>
+                    <div className="space-y-1 text-right flex-1 mr-4">
                       <div className="font-medium">
                         {schedule.vehicle_number} - {schedule.vehicle_make} {schedule.vehicle_model}
                       </div>
@@ -712,21 +718,9 @@ export const MaintenanceScheduler = () => {
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-col items-end space-y-2">
-                      {getStatusBadge(schedule.status)}
-                      {isOverdue(schedule.scheduled_date, schedule.status) && (
-                        <Badge variant="destructive" className="text-xs">متأخرة</Badge>
-                      )}
-                    </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-2 border-t">
-                    <div className="text-sm text-muted-foreground">
-                      <span>مجدولة: {format(new Date(schedule.scheduled_date), 'dd/MM/yyyy', { locale: ar })}</span>
-                      {schedule.cost > 0 && (
-                        <span className="mr-4">التكلفة: {schedule.cost.toFixed(2)} د.ك</span>
-                      )}
-                    </div>
                     <div className="flex items-center gap-2">
                       {schedule.status === 'scheduled' && (
                         <Button
@@ -753,6 +747,12 @@ export const MaintenanceScheduler = () => {
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
+                    </div>
+                    <div className="text-sm text-muted-foreground text-right">
+                      <span>مجدولة: {format(new Date(schedule.scheduled_date), 'dd/MM/yyyy', { locale: ar })}</span>
+                      {schedule.cost > 0 && (
+                        <span className="mr-4">التكلفة: {schedule.cost.toFixed(2)} د.ك</span>
+                      )}
                     </div>
                   </div>
                 </div>
