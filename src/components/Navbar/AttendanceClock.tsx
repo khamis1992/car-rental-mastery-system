@@ -17,6 +17,8 @@ export const AttendanceClock: React.FC = () => {
   const [checkInTime, setCheckInTime] = useState<Date | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [currentAttendanceId, setCurrentAttendanceId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // تحديث الوقت كل ثانية
   useEffect(() => {
@@ -44,6 +46,36 @@ export const AttendanceClock: React.FC = () => {
     }
   }, []);
 
+  // فحص حالة الحضور عند تحميل المكون
+  useEffect(() => {
+    const checkTodayAttendance = async () => {
+      if (!profile?.user_id) return;
+
+      try {
+        const { data: employee, error: employeeError } = await supabase
+          .from('employees')
+          .select('id')
+          .eq('user_id', profile.user_id)
+          .single();
+
+        if (employeeError || !employee) return;
+
+        const result = await attendanceService.checkTodayAttendance(employee.id);
+        if (result.data) {
+          setIsCheckedIn(true);
+          setCurrentAttendanceId(result.data.id);
+          if (result.data.check_in_time) {
+            setCheckInTime(new Date(result.data.check_in_time));
+          }
+        }
+      } catch (error) {
+        console.error('خطأ في فحص الحضور:', error);
+      }
+    };
+
+    checkTodayAttendance();
+  }, [profile?.user_id]);
+
   const handleCheckIn = async () => {
     if (!profile?.user_id) {
       toast({
@@ -63,6 +95,8 @@ export const AttendanceClock: React.FC = () => {
       return;
     }
 
+    setIsLoading(true);
+    
     try {
       // العثور على الموظف المرتبط بالمستخدم الحالي
       const { data: employee, error: employeeError } = await supabase
@@ -81,6 +115,23 @@ export const AttendanceClock: React.FC = () => {
       }
 
       if (!isCheckedIn) {
+        // التحقق من عدم وجود سجل حضور لليوم الحالي
+        const todayCheck = await attendanceService.checkTodayAttendance(employee.id);
+        if (todayCheck.data) {
+          toast({
+            title: 'تحذير',
+            description: 'تم تسجيل الحضور مسبقاً لهذا اليوم',
+            variant: 'destructive'
+          });
+          // تحديث الحالة المحلية لتتطابق مع قاعدة البيانات
+          setIsCheckedIn(true);
+          setCurrentAttendanceId(todayCheck.data.id);
+          if (todayCheck.data.check_in_time) {
+            setCheckInTime(new Date(todayCheck.data.check_in_time));
+          }
+          return;
+        }
+
         // تسجيل الحضور
         const now = new Date();
         const checkInData = {
@@ -96,7 +147,12 @@ export const AttendanceClock: React.FC = () => {
         
         if (result.success) {
           setIsCheckedIn(true);
-          setCheckInTime(new Date());
+          setCheckInTime(now);
+          // الحصول على معرف السجل الجديد لاستخدامه في الانصراف
+          const newRecord = await attendanceService.checkTodayAttendance(employee.id);
+          if (newRecord.data) {
+            setCurrentAttendanceId(newRecord.data.id);
+          }
           toast({
             title: 'تم التسجيل',
             description: 'تم تسجيل الحضور بنجاح'
@@ -110,12 +166,33 @@ export const AttendanceClock: React.FC = () => {
         }
       } else {
         // تسجيل الانصراف
-        setIsCheckedIn(false);
-        setCheckInTime(null);
-        toast({
-          title: 'تم التسجيل',
-          description: 'تم تسجيل الانصراف بنجاح'
-        });
+        if (!currentAttendanceId) {
+          toast({
+            title: 'خطأ',
+            description: 'لا يمكن العثور على سجل الحضور لتسجيل الانصراف',
+            variant: 'destructive'
+          });
+          return;
+        }
+
+        const now = new Date();
+        const checkOutResult = await attendanceService.checkOut(currentAttendanceId, now.toISOString());
+        
+        if (checkOutResult.success) {
+          setIsCheckedIn(false);
+          setCheckInTime(null);
+          setCurrentAttendanceId(null);
+          toast({
+            title: 'تم التسجيل',
+            description: 'تم تسجيل الانصراف بنجاح'
+          });
+        } else {
+          toast({
+            title: 'خطأ',
+            description: 'حدث خطأ في تسجيل الانصراف',
+            variant: 'destructive'
+          });
+        }
       }
     } catch (error) {
       console.error('خطأ في تسجيل الحضور:', error);
@@ -124,6 +201,8 @@ export const AttendanceClock: React.FC = () => {
         description: 'حدث خطأ غير متوقع',
         variant: 'destructive'
       });
+    } finally {
+      setIsLoading(false);
     }
     
     // إغلاق القائمة المنسدلة بعد التسجيل
@@ -200,17 +279,18 @@ export const AttendanceClock: React.FC = () => {
                   onClick={handleCheckIn}
                   variant="destructive"
                   className="w-full rtl-flex gap-2"
+                  disabled={isLoading}
                 >
-                  <span>تسجيل الانصراف</span>
+                  <span>{isLoading ? 'جاري التسجيل...' : 'تسجيل الانصراف'}</span>
                   <Clock className="w-4 h-4" />
                 </Button>
               ) : (
                 <Button 
                   onClick={handleCheckIn}
                   className="w-full bg-green-600 hover:bg-green-700 text-white rtl-flex gap-2"
-                  disabled={!location}
+                  disabled={!location || isLoading}
                 >
-                  <span>تسجيل الحضور</span>
+                  <span>{isLoading ? 'جاري التسجيل...' : 'تسجيل الحضور'}</span>
                   <Clock className="w-4 h-4" />
                 </Button>
               )}
