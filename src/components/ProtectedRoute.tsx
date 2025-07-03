@@ -31,7 +31,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
   }
 
   if (!user) {
+    console.log('User not authenticated, redirecting to /auth');
     return <Navigate to="/auth" replace />;
+  }
+
+  // If user exists but profile is still loading, show loading state
+  if (user && !profile) {
+    return (
+      <div className="min-h-screen bg-gradient-soft flex items-center justify-center">
+        <div className="text-center">
+          <Skeleton className="h-8 w-32 mx-auto mb-4" />
+          <Skeleton className="h-4 w-48 mx-auto" />
+        </div>
+      </div>
+    );
   }
 
   if (requiredRole && profile && profile.role !== requiredRole && profile.role !== 'admin') {

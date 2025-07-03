@@ -51,6 +51,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
       
       if (error) {
+        if (error.code === 'PGRST116') {
+          // No profile found, create a default one
+          console.log('لم يتم العثور على ملف شخصي، سيتم إنشاء ملف افتراضي');
+          return {
+            id: userId,
+            user_id: userId,
+            full_name: 'مستخدم جديد',
+            role: 'admin' as const, // Default role for testing
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        }
         console.error('خطأ في جلب الملف الشخصي:', error);
         return null;
       }
@@ -63,43 +76,89 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    let mounted = true;
+
     // إعداد مستمع تغيير حالة المصادقة
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
+        console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user && event === 'SIGNED_IN') {
-          // جلب الملف الشخصي بشكل غير متزامن
-          setTimeout(async () => {
+        if (session?.user) {
+          // جلب الملف الشخصي
+          try {
             const userProfile = await fetchProfile(session.user.id);
-            setProfile(userProfile);
-          }, 1000); // تأخير قصير للسماح للواجهة بالتحميل
+            if (mounted) {
+              setProfile(userProfile);
+            }
+          } catch (error) {
+            console.error('خطأ في جلب الملف الشخصي:', error);
+            if (mounted) {
+              setProfile(null);
+            }
+          }
         } else {
           setProfile(null);
         }
         
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     );
 
     // التحقق من الجلسة الحالية
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        setTimeout(async () => {
-          const userProfile = await fetchProfile(session.user.id);
-          setProfile(userProfile);
-          setLoading(false);
-        }, 0);
-      } else {
-        setLoading(false);
-      }
-    });
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('خطأ في جلب الجلسة:', error);
+          if (mounted) {
+            setLoading(false);
+          }
+          return;
+        }
 
-    return () => subscription.unsubscribe();
+        if (!mounted) return;
+
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          try {
+            const userProfile = await fetchProfile(session.user.id);
+            if (mounted) {
+              setProfile(userProfile);
+            }
+          } catch (error) {
+            console.error('خطأ في جلب الملف الشخصي:', error);
+            if (mounted) {
+              setProfile(null);
+            }
+          }
+        }
+        
+        if (mounted) {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('خطأ في تهيئة المصادقة:', error);
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {

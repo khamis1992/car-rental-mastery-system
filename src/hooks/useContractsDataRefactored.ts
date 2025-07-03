@@ -17,6 +17,7 @@ export const useContractsDataRefactored = () => {
   });
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const { toast } = useToast();
 
   const contractService = serviceContainer.getContractBusinessService();
@@ -93,10 +94,36 @@ export const useContractsDataRefactored = () => {
     }
   };
 
+  const checkAuthentication = async () => {
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('خطأ في التحقق من المصادقة:', error);
+        setIsAuthenticated(false);
+        return false;
+      }
+      const authenticated = !!session?.user;
+      setIsAuthenticated(authenticated);
+      return authenticated;
+    } catch (error) {
+      console.error('خطأ في التحقق من المصادقة:', error);
+      setIsAuthenticated(false);
+      return false;
+    }
+  };
+
   const loadData = async (retryCount = 0) => {
     try {
       setLoading(true);
       setErrors({});
+      
+      // Check authentication first
+      const authenticated = await checkAuthentication();
+      if (!authenticated) {
+        console.log('المستخدم غير مصرح له، لن يتم تحميل البيانات');
+        setLoading(false);
+        return;
+      }
       
       // Load data separately instead of Promise.all to prevent single failure from affecting everything
       await loadContracts();
@@ -146,5 +173,6 @@ export const useContractsDataRefactored = () => {
     loading,
     errors,
     loadData,
+    isAuthenticated,
   };
 };

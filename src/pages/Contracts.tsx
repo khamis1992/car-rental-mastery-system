@@ -25,6 +25,7 @@ const Contracts = () => {
     loading,
     errors,
     loadData,
+    isAuthenticated,
   } = useContractsDataRefactored();
 
   // التحقق من وجود quotation parameter في URL
@@ -44,6 +45,22 @@ const Contracts = () => {
   const handleAlertClick = (alert: any) => {
     console.log('Alert clicked:', alert);
   };
+
+  // Show authentication message if user is not authenticated
+  if (isAuthenticated === false) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-foreground mb-4">إدارة العقود</h1>
+          <Alert>
+            <AlertDescription>
+              يجب تسجيل الدخول أولاً للوصول إلى إدارة العقود.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
