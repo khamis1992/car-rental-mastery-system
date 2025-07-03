@@ -432,7 +432,7 @@ export const MaintenanceScheduler = () => {
                               <SelectValue placeholder="🚗 اختر المركبة" />
                             </SelectTrigger>
                             <SelectContent>
-                              {vehicles.map((vehicle) => (
+                              {vehicles.filter(vehicle => vehicle.id && vehicle.id.trim() !== '').map((vehicle) => (
                                 <SelectItem key={vehicle.id} value={vehicle.id}>
                                   {vehicle.vehicle_number} - {vehicle.make} {vehicle.model}
                                 </SelectItem>

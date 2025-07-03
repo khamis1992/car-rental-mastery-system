@@ -289,7 +289,7 @@ export const MaintenanceHistory = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">جميع المركبات</SelectItem>
-                {vehicles.map((vehicle) => (
+                {vehicles.filter(vehicle => vehicle.id && vehicle.id.trim() !== '').map((vehicle) => (
                   <SelectItem key={vehicle.id} value={vehicle.id}>
                     {vehicle.vehicle_number} - {vehicle.make}
                   </SelectItem>
