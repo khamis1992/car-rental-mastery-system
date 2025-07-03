@@ -187,9 +187,9 @@ export const MaintenanceOverview = () => {
       {/* إحصائيات سريعة */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-col items-center text-center space-y-2 pb-2">
+            <Clock className="h-6 w-6 text-yellow-600" />
             <CardTitle className="text-sm font-medium">جاري التنفيذ</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center text-center space-y-2">
@@ -200,9 +200,9 @@ export const MaintenanceOverview = () => {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-col items-center text-center space-y-2 pb-2">
+            <AlertTriangle className="h-6 w-6 text-red-600" />
             <CardTitle className="text-sm font-medium">صيانة متأخرة</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center text-center space-y-2">
@@ -213,9 +213,9 @@ export const MaintenanceOverview = () => {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-col items-center text-center space-y-2 pb-2">
+            <Calendar className="h-6 w-6 text-blue-600" />
             <CardTitle className="text-sm font-medium">صيانة مجدولة</CardTitle>
-            <Calendar className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center text-center space-y-2">
@@ -226,9 +226,9 @@ export const MaintenanceOverview = () => {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-col items-center text-center space-y-2 pb-2">
+            <Wrench className="h-6 w-6 text-muted-foreground" />
             <CardTitle className="text-sm font-medium">إجمالي المركبات</CardTitle>
-            <Wrench className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center text-center space-y-2">
