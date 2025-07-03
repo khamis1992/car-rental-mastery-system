@@ -463,9 +463,9 @@ export const MaintenanceCostTracker = () => {
       {/* التكاليف حسب المركبة */}
       <Card>
         <CardHeader>
-          <CardTitle>التكاليف حسب المركبة</CardTitle>
+          <CardTitle className="text-right">التكاليف حسب المركبة</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="text-right">
           {vehicleCosts.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-50" />
