@@ -286,29 +286,29 @@ const Employees = () => {
                            <Link className="w-3 h-3" />
                            {employee.user_id ? 'إدارة الحساب' : 'ربط حساب'}
                          </Button>
+                         {getUserLinkingBadge(employee)}
+                         {getStatusBadge(employee.status)}
+                         <Badge variant="outline">{employee.employee_number}</Badge>
                        </div>
                        
                        <div className="flex-1 text-right mr-4">
-                         <div className="flex items-center gap-4 mb-2 justify-end">
-                           {getUserLinkingBadge(employee)}
-                           {getStatusBadge(employee.status)}
-                           <Badge variant="outline">{employee.employee_number}</Badge>
-                           <h3 className="font-medium text-lg">
+                         <div className="mb-2">
+                           <h3 className="font-medium text-lg text-right">
                              {employee.first_name} {employee.last_name}
                            </h3>
                          </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-sm text-muted-foreground text-right">
-                          <div>
+                          <div className="text-right">
                             <span className="font-medium">المنصب:</span> {employee.position}
                           </div>
-                           <div>
+                           <div className="text-right">
                              <span className="font-medium">القسم:</span> {(employee as any).department?.department_name || employee.department || 'غير محدد'}
                            </div>
-                          <div>
+                          <div className="text-right">
                             <span className="font-medium">البريد:</span> {employee.email}
                           </div>
-                          <div>
+                          <div className="text-right">
                             <span className="font-medium">الراتب:</span> {formatCurrency(employee.salary)}
                           </div>
                         </div>
