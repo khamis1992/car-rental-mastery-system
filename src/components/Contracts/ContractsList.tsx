@@ -3,12 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FileText, Eye, Edit, Calendar, MapPin } from 'lucide-react';
+import { FileText, Eye, Edit, Calendar, MapPin, HelpCircle, TrendingUp } from 'lucide-react';
 import { format, isToday, isThisWeek, isThisMonth, isThisQuarter, isThisYear } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { ContractActions } from './ContractActions';
 import { ContractDetailsDialog } from './ContractDetailsDialog';
 import { ContractFiltersComponent, ContractFilters } from './ContractFilters';
+import { CompactProgressIndicator } from './ContractProgressIndicator';
+import { ContractHelp } from './ContractHelp';
 
 interface Contract {
   id: string;
@@ -141,9 +143,18 @@ export const ContractsList: React.FC<ContractsListProps> = ({
       
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            العقود ({filteredContracts.length} من {contracts.length})
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              العقود ({filteredContracts.length} من {contracts.length})
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm">
+                <TrendingUp className="w-4 h-4 mr-2" />
+                تقارير
+              </Button>
+              <ContractHelp />
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -157,6 +168,7 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                 <TableHead className="text-right">النوع</TableHead>
                 <TableHead className="text-right">فترة الإيجار</TableHead>
                 <TableHead className="text-right">المبلغ الإجمالي</TableHead>
+                <TableHead className="text-right">التقدم</TableHead>
                 <TableHead className="text-right">الحالة</TableHead>
                 <TableHead className="text-right">الإجراءات</TableHead>
               </TableRow>
@@ -193,6 +205,9 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                   </TableCell>
                   <TableCell>
                     <div className="font-medium">{contract.final_amount.toFixed(3)} د.ك</div>
+                  </TableCell>
+                  <TableCell>
+                    <CompactProgressIndicator status={contract.status} />
                   </TableCell>
                   <TableCell>
                     {getStatusBadge(contract.status)}
