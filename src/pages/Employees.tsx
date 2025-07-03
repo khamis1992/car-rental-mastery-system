@@ -265,7 +265,43 @@ const Employees = () => {
                   {filteredEmployees.map((employee) => (
                   <div key={employee.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
                      <div className="flex justify-between items-start">
+                       <div className="flex-1 text-left ml-4">
+                         <div className="mb-2">
+                           <h3 className="font-medium text-lg text-left">
+                             {employee.first_name} {employee.last_name}
+                           </h3>
+                         </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-sm text-muted-foreground text-left">
+                          <div className="text-left">
+                            <span className="font-medium">المنصب:</span> {employee.position}
+                          </div>
+                           <div className="text-left">
+                             <span className="font-medium">القسم:</span> {(employee as any).department?.department_name || employee.department || 'غير محدد'}
+                           </div>
+                          <div className="text-left">
+                            <span className="font-medium">البريد:</span> {employee.email}
+                          </div>
+                          <div className="text-left">
+                            <span className="font-medium">الراتب:</span> {formatCurrency(employee.salary)}
+                          </div>
+                        </div>
+                      </div>
+                       
                        <div className="flex gap-2">
+                         <Badge variant="outline">{employee.employee_number}</Badge>
+                         {getStatusBadge(employee.status)}
+                         {getUserLinkingBadge(employee)}
+                         <Button 
+                           variant="outline" 
+                           size="sm"
+                           onClick={() => handleLinkUser(employee)}
+                           className="flex items-center gap-1"
+                         >
+                           <Link className="w-3 h-3" />
+                           {employee.user_id ? 'إدارة الحساب' : 'ربط حساب'}
+                         </Button>
+                         <Button variant="outline" size="sm">تعديل</Button>
                          <Button 
                            variant="outline" 
                            size="sm"
@@ -276,43 +312,7 @@ const Employees = () => {
                          >
                            عرض
                          </Button>
-                         <Button variant="outline" size="sm">تعديل</Button>
-                         <Button 
-                           variant="outline" 
-                           size="sm"
-                           onClick={() => handleLinkUser(employee)}
-                           className="flex items-center gap-1"
-                         >
-                           <Link className="w-3 h-3" />
-                           {employee.user_id ? 'إدارة الحساب' : 'ربط حساب'}
-                         </Button>
-                         {getUserLinkingBadge(employee)}
-                         {getStatusBadge(employee.status)}
-                         <Badge variant="outline">{employee.employee_number}</Badge>
                        </div>
-                       
-                       <div className="flex-1 text-right mr-4">
-                         <div className="mb-2">
-                           <h3 className="font-medium text-lg text-right">
-                             {employee.first_name} {employee.last_name}
-                           </h3>
-                         </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-sm text-muted-foreground text-right">
-                          <div className="text-right">
-                            <span className="font-medium">المنصب:</span> {employee.position}
-                          </div>
-                           <div className="text-right">
-                             <span className="font-medium">القسم:</span> {(employee as any).department?.department_name || employee.department || 'غير محدد'}
-                           </div>
-                          <div className="text-right">
-                            <span className="font-medium">البريد:</span> {employee.email}
-                          </div>
-                          <div className="text-right">
-                            <span className="font-medium">الراتب:</span> {formatCurrency(employee.salary)}
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 ))}
