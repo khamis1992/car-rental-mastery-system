@@ -20,8 +20,8 @@ export const ViolationReports: React.FC = () => {
   const [filters, setFilters] = useState({
     date_from: '',
     date_to: '',
-    status: '',
-    liability_determination: ''
+    status: 'all',
+    liability_determination: 'all'
   });
   const { toast } = useToast();
 
@@ -121,12 +121,12 @@ export const ViolationReports: React.FC = () => {
             
             <div>
               <Label htmlFor="status">الحالة</Label>
-              <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
+              <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value === 'all' ? '' : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="جميع الحالات" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">جميع الحالات</SelectItem>
+                  <SelectItem value="all">جميع الحالات</SelectItem>
                   <SelectItem value="pending">معلقة</SelectItem>
                   <SelectItem value="notified">تم الإشعار</SelectItem>
                   <SelectItem value="paid">مدفوعة</SelectItem>
@@ -138,12 +138,12 @@ export const ViolationReports: React.FC = () => {
             
             <div>
               <Label htmlFor="liability">المسؤولية</Label>
-              <Select value={filters.liability_determination} onValueChange={(value) => handleFilterChange('liability_determination', value)}>
+              <Select value={filters.liability_determination} onValueChange={(value) => handleFilterChange('liability_determination', value === 'all' ? '' : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="جميع المسؤوليات" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">جميع المسؤوليات</SelectItem>
+                  <SelectItem value="all">جميع المسؤوليات</SelectItem>
                   <SelectItem value="customer">العميل</SelectItem>
                   <SelectItem value="company">الشركة</SelectItem>
                   <SelectItem value="shared">مشتركة</SelectItem>
