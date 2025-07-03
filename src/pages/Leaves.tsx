@@ -206,6 +206,15 @@ const Leaves = () => {
       return;
     }
 
+    if (!data.leave_type) {
+      toast({
+        title: "خطأ",
+        description: "يرجى اختيار نوع الإجازة",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const totalDays = calculateDays(data.start_date, data.end_date);
@@ -216,11 +225,21 @@ const Leaves = () => {
         start_date: format(data.start_date, 'yyyy-MM-dd'),
         end_date: format(data.end_date, 'yyyy-MM-dd'),
         total_days: totalDays,
-        reason: data.reason,
+        reason: data.reason || '',
         status: 'pending' as const
       };
 
-      await leavesService.createLeaveRequest(leaveRequest);
+      const newRequest = await leavesService.createLeaveRequest(leaveRequest);
+      
+      // إضافة الطلب الجديد فوراً للقائمة
+      setLeaveRequests(prev => [newRequest, ...prev]);
+      
+      // تحديث الإحصائيات
+      setLeaveStats(prev => ({
+        ...prev,
+        pending: prev.pending + 1,
+        total: prev.total + 1
+      }));
       
       toast({
         title: "تم بنجاح",
@@ -229,13 +248,11 @@ const Leaves = () => {
       
       setIsDialogOpen(false);
       form.reset();
-      await loadLeaveRequests();
-      await loadData(); // إعادة تحميل الإحصائيات
     } catch (error) {
       console.error('خطأ في إرسال طلب الإجازة:', error);
       toast({
         title: "خطأ",
-        description: "حدث خطأ في إرسال طلب الإجازة",
+        description: error instanceof Error ? error.message : "حدث خطأ في إرسال طلب الإجازة",
         variant: "destructive",
       });
     } finally {

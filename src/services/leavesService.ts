@@ -13,44 +13,81 @@ export const leavesService = {
       .eq('user_id', user.id)
       .single();
 
-    let query = supabase
-      .from('leave_requests')
-      .select(`
-        *,
-        employee:employees(
-          id,
-          first_name,
-          last_name,
-          employee_number
-        )
-      `)
-      .order('created_at', { ascending: false });
-
-    // للموظفين العاديين، عرض طلباتهم فقط
     // للمديرين والمدراء، عرض جميع الطلبات
     const canViewAll = profile?.role === 'admin' || profile?.role === 'manager';
     
-    if (!canViewAll) {
+    if (canViewAll) {
+      // عرض جميع الطلبات للمديرين
+      const { data, error } = await supabase
+        .from('leave_requests')
+        .select(`
+          *,
+          employee:employees!leave_requests_employee_id_fkey(
+            id,
+            first_name,
+            last_name,
+            employee_number
+          )
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    } else {
+      // للموظفين العاديين، عرض طلباتهم فقط
       const currentEmployee = await this.getCurrentUserEmployee();
-      if (currentEmployee) {
-        query = query.eq('employee_id', currentEmployee.id);
+      if (!currentEmployee) {
+        return [];
       }
+      
+      const { data, error } = await supabase
+        .from('leave_requests')
+        .select(`
+          *,
+          employee:employees!leave_requests_employee_id_fkey(
+            id,
+            first_name,
+            last_name,
+            employee_number
+          )
+        `)
+        .eq('employee_id', currentEmployee.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
     }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data;
   },
 
   async createLeaveRequest(request: Omit<LeaveRequest, 'id' | 'created_at' | 'updated_at'>) {
-    const { data, error } = await supabase
-      .from('leave_requests')
-      .insert(request)
-      .select()
-      .single();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('المستخدم غير مسجل الدخول');
 
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await supabase
+        .from('leave_requests')
+        .insert(request)
+        .select(`
+          *,
+          employee:employees!leave_requests_employee_id_fkey(
+            id,
+            first_name,
+            last_name,
+            employee_number
+          )
+        `)
+        .single();
+
+      if (error) {
+        console.error('خطأ في إنشاء طلب الإجازة:', error);
+        throw new Error('فشل في إنشاء طلب الإجازة. يرجى المحاولة مرة أخرى.');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('خطأ في createLeaveRequest:', error);
+      throw error;
+    }
   },
 
   async approveLeaveRequest(requestId: string) {
