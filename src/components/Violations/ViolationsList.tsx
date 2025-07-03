@@ -102,7 +102,7 @@ export const ViolationsList: React.FC<ViolationsListProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>قائمة المخالفات المرورية</CardTitle>
+        <CardTitle className="text-right">قائمة المخالفات المرورية</CardTitle>
         
         {/* فلاتر البحث */}
         <div className="flex flex-wrap gap-4 mt-4">
