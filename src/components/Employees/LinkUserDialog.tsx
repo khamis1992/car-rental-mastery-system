@@ -234,7 +234,12 @@ export const LinkUserDialog: React.FC<LinkUserDialogProps> = ({
                   <span className="font-medium">المنصب:</span> {employee.position}
                 </div>
                 <div>
-                  <span className="font-medium">القسم:</span> {employee.department}
+                  <span className="font-medium">القسم:</span> {(() => {
+                    if (employee.department_id && typeof (employee as any).department === 'object' && (employee as any).department?.department_name) {
+                      return (employee as any).department.department_name;
+                    }
+                    return employee.department || 'غير محدد';
+                  })()}
                 </div>
                 {employee.email && (
                   <div className="flex items-center gap-1">
