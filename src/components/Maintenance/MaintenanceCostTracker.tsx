@@ -327,8 +327,8 @@ export const MaintenanceCostTracker = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <DollarSign className="h-4 w-4 text-green-600" />
+            <div className="flex flex-col items-center text-center space-y-2">
+              <DollarSign className="h-6 w-6 text-green-600" />
               <div>
                 <div className="text-2xl font-bold">{totalStats.totalCost.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground">إجمالي التكلفة (د.ك)</p>
@@ -339,8 +339,8 @@ export const MaintenanceCostTracker = () => {
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <BarChart3 className="h-4 w-4 text-blue-600" />
+            <div className="flex flex-col items-center text-center space-y-2">
+              <BarChart3 className="h-6 w-6 text-blue-600" />
               <div>
                 <div className="text-2xl font-bold">{totalStats.totalMaintenance}</div>
                 <p className="text-xs text-muted-foreground">عدد الصيانات</p>
@@ -351,8 +351,8 @@ export const MaintenanceCostTracker = () => {
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <TrendingUp className="h-4 w-4 text-purple-600" />
+            <div className="flex flex-col items-center text-center space-y-2">
+              <TrendingUp className="h-6 w-6 text-purple-600" />
               <div>
                 <div className="text-2xl font-bold">{totalStats.averageCost.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground">متوسط التكلفة (د.ك)</p>
@@ -363,8 +363,8 @@ export const MaintenanceCostTracker = () => {
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <TrendingDown className="h-4 w-4 text-red-600" />
+            <div className="flex flex-col items-center text-center space-y-2">
+              <TrendingDown className="h-6 w-6 text-red-600" />
               <div>
                 <div className="text-2xl font-bold">{totalStats.highestCost.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground">أعلى تكلفة (د.ك)</p>
@@ -375,8 +375,8 @@ export const MaintenanceCostTracker = () => {
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <PieChart className="h-4 w-4 text-orange-600" />
+            <div className="flex flex-col items-center text-center space-y-2">
+              <PieChart className="h-6 w-6 text-orange-600" />
               <div>
                 <div className="text-lg font-bold truncate">{totalStats.mostExpensiveType}</div>
                 <p className="text-xs text-muted-foreground">أغلى نوع صيانة</p>
