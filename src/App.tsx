@@ -29,6 +29,11 @@ import Leaves from "./pages/Leaves";
 import Payroll from "./pages/Payroll";
 import NotFound from "./pages/NotFound";
 import PublicQuotation from "./pages/PublicQuotation";
+import DraftStage from "./pages/ContractStages/DraftStage";
+import PendingStage from "./pages/ContractStages/PendingStage";
+import ActiveStage from "./pages/ContractStages/ActiveStage";
+import PaymentStage from "./pages/ContractStages/PaymentStage";
+import CompletedStage from "./pages/ContractStages/CompletedStage";
 import AttendanceReminderWrapper from "@/components/Attendance/AttendanceReminderWrapper";
 import { SearchDialog } from "@/components/Search/SearchDialog";
 
@@ -162,6 +167,42 @@ const App = () => (
                     <ProtectedRoute>
                       <Layout>
                         <Payroll />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  {/* Contract stage routes */}
+                  <Route path="/contracts/stage/draft/:contractId" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <DraftStage />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/contracts/stage/pending/:contractId" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <PendingStage />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/contracts/stage/active/:contractId" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <ActiveStage />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/contracts/stage/payment/:contractId" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <PaymentStage />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/contracts/stage/completed/:contractId" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <CompletedStage />
                       </Layout>
                     </ProtectedRoute>
                   } />

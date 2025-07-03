@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Circle, Clock, FileText, PenTool, Truck, DollarSign, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
   contractData,
   onStatusUpdate
 }) => {
+  const navigate = useNavigate();
   const [confirmAction, setConfirmAction] = useState<{ stepId: string; title: string; description: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const getSteps = (status: string): ProgressStep[] => {
@@ -145,10 +147,10 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
   };
 
   const handleStepClick = (stepId: string) => {
-    if (!canAdvanceToStep(stepId)) return;
+    if (!interactive || !contractData) return;
     
-    const action = getStepActionText(stepId);
-    setConfirmAction({ stepId, ...action });
+    // Navigate to the contract stage page
+    navigate(`/contracts/stage/${stepId}/${contractData.id}`);
   };
 
   const executeAction = async () => {
@@ -189,10 +191,9 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
                           step.status === 'completed' && "bg-green-500 border-green-500 text-white",
                           step.status === 'current' && "bg-primary border-primary text-white animate-pulse",
                           step.status === 'pending' && "bg-muted border-muted-foreground/30 text-muted-foreground",
-                          isClickable && "cursor-pointer hover:scale-110 hover:shadow-lg",
-                          !isClickable && interactive && "opacity-50"
+                          interactive && contractData && "cursor-pointer hover:scale-110 hover:shadow-lg"
                         )}
-                        onClick={() => isClickable && handleStepClick(step.id)}
+                        onClick={() => interactive && contractData && handleStepClick(step.id)}
                       >
                         {step.status === 'completed' ? (
                           <CheckCircle className={iconSizeClasses[size]} />
@@ -205,7 +206,7 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>
-                        {isClickable ? 
+                        {interactive && contractData ? 
                           `انقر للانتقال إلى: ${step.title}` : 
                           step.description
                         }
