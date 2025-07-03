@@ -27,6 +27,8 @@ const csvVehicleSchema = z.object({
   color: z.string().min(1, 'اللون مطلوب'),
   vehicle_type: z.enum(['sedan', 'suv', 'hatchback', 'coupe', 'pickup', 'van', 'luxury']),
   license_plate: z.string().min(1, 'رقم اللوحة مطلوب'),
+  vin_number: z.string().optional(),
+  body_type: z.string().optional(),
   daily_rate: z.string().transform((val) => {
     const num = parseFloat(val);
     if (isNaN(num) || num <= 0) throw new Error('السعر اليومي يجب أن يكون رقماً موجباً');
@@ -44,6 +46,30 @@ const csvVehicleSchema = z.object({
     if (isNaN(num)) throw new Error('السعر الشهري يجب أن يكون رقماً');
     return num;
   }),
+  min_daily_rate: z.string().optional().transform((val) => {
+    if (!val || val.trim() === '') return undefined;
+    const num = parseFloat(val);
+    if (isNaN(num)) throw new Error('الحد الأدنى للسعر اليومي يجب أن يكون رقماً');
+    return num;
+  }),
+  max_daily_rate: z.string().optional().transform((val) => {
+    if (!val || val.trim() === '') return undefined;
+    const num = parseFloat(val);
+    if (isNaN(num)) throw new Error('الحد الأقصى للسعر اليومي يجب أن يكون رقماً');
+    return num;
+  }),
+  mileage_limit: z.string().optional().transform((val) => {
+    if (!val || val.trim() === '') return undefined;
+    const num = parseInt(val, 10);
+    if (isNaN(num)) throw new Error('حد المسافة يجب أن يكون رقماً');
+    return num;
+  }),
+  excess_mileage_cost: z.string().optional().transform((val) => {
+    if (!val || val.trim() === '') return undefined;
+    const num = parseFloat(val);
+    if (isNaN(num)) throw new Error('تكلفة المسافة الإضافية يجب أن تكون رقماً');
+    return num;
+  }),
   engine_size: z.string().optional(),
   fuel_type: z.string().default('بنزين'),
   transmission: z.string().default('أوتوماتيك'),
@@ -53,9 +79,37 @@ const csvVehicleSchema = z.object({
     if (isNaN(num)) throw new Error('المسافة المقطوعة يجب أن تكون رقماً');
     return num;
   }),
+  insurance_type: z.string().optional().default('comprehensive'),
   insurance_company: z.string().optional(),
   insurance_policy_number: z.string().optional(),
   insurance_expiry: z.string().optional(),
+  owner_type: z.string().optional().default('company'),
+  purchase_date: z.string().optional(),
+  purchase_cost: z.string().optional().transform((val) => {
+    if (!val || val.trim() === '') return undefined;
+    const num = parseFloat(val);
+    if (isNaN(num)) throw new Error('تكلفة الشراء يجب أن تكون رقماً');
+    return num;
+  }),
+  depreciation_rate: z.string().optional().transform((val) => {
+    if (!val || val.trim() === '') return undefined;
+    const num = parseFloat(val);
+    if (isNaN(num)) throw new Error('معدل الاستهلاك يجب أن يكون رقماً');
+    return num;
+  }),
+  useful_life_years: z.string().optional().transform((val) => {
+    if (!val || val.trim() === '') return undefined;
+    const num = parseInt(val, 10);
+    if (isNaN(num)) throw new Error('سنوات العمر الإنتاجي يجب أن تكون رقماً');
+    return num;
+  }),
+  residual_value: z.string().optional().transform((val) => {
+    if (!val || val.trim() === '') return undefined;
+    const num = parseFloat(val);
+    if (isNaN(num)) throw new Error('القيمة المتبقية يجب أن تكون رقماً');
+    return num;
+  }),
+  depreciation_method: z.string().optional().default('straight_line'),
   registration_expiry: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -151,16 +205,31 @@ export function convertCSVToVehicleData(csvContent: string): CSVImportResult {
         color: validatedData.color,
         vehicle_type: validatedData.vehicle_type,
         license_plate: validatedData.license_plate,
+        vin_number: validatedData.vin_number,
+        body_type: validatedData.body_type,
         daily_rate: validatedData.daily_rate,
         weekly_rate: validatedData.weekly_rate,
         monthly_rate: validatedData.monthly_rate,
+        min_daily_rate: validatedData.min_daily_rate,
+        max_daily_rate: validatedData.max_daily_rate,
+        mileage_limit: validatedData.mileage_limit,
+        excess_mileage_cost: validatedData.excess_mileage_cost,
         engine_size: validatedData.engine_size,
         fuel_type: validatedData.fuel_type,
         transmission: validatedData.transmission,
         mileage: validatedData.mileage,
+        insurance_type: validatedData.insurance_type as any,
         insurance_company: validatedData.insurance_company,
         insurance_policy_number: validatedData.insurance_policy_number,
         insurance_expiry: validatedData.insurance_expiry,
+        has_insurance_policy: true,
+        owner_type: validatedData.owner_type as any,
+        purchase_date: validatedData.purchase_date,
+        purchase_cost: validatedData.purchase_cost,
+        depreciation_rate: validatedData.depreciation_rate,
+        useful_life_years: validatedData.useful_life_years,
+        residual_value: validatedData.residual_value,
+        depreciation_method: validatedData.depreciation_method as any,
         registration_expiry: validatedData.registration_expiry,
         notes: validatedData.notes,
       };
@@ -197,16 +266,18 @@ export function convertCSVToVehicleData(csvContent: string): CSVImportResult {
 
 export function generateSampleCSV(): string {
   const headers = [
-    'make', 'model', 'year', 'color', 'vehicle_type', 'license_plate', 
-    'daily_rate', 'weekly_rate', 'monthly_rate', 'engine_size', 
-    'fuel_type', 'transmission', 'mileage', 'insurance_company', 
-    'insurance_policy_number', 'insurance_expiry', 'registration_expiry', 'notes'
+    'make', 'model', 'year', 'color', 'vehicle_type', 'license_plate', 'vin_number', 'body_type',
+    'daily_rate', 'weekly_rate', 'monthly_rate', 'min_daily_rate', 'max_daily_rate',
+    'mileage_limit', 'excess_mileage_cost', 'engine_size', 'fuel_type', 'transmission', 'mileage',
+    'insurance_type', 'insurance_company', 'insurance_policy_number', 'insurance_expiry',
+    'owner_type', 'purchase_date', 'purchase_cost', 'depreciation_rate', 'useful_life_years',
+    'residual_value', 'depreciation_method', 'registration_expiry', 'notes'
   ];
   
   const sampleData = [
-    ['تويوتا', 'كامري', '2023', 'أبيض', 'sedan', 'ك ص د 123', '25.000', '150.000', '500.000', '2.5L', 'بنزين', 'أوتوماتيك', '15000', 'شركة التأمين الكويتية', 'POL123456', '2025-12-31', '2025-06-30', 'مركبة جديدة بحالة ممتازة'],
-    ['نيسان', 'التيما', '2022', 'أسود', 'sedan', 'ك ص د 456', '22.000', '140.000', '450.000', '2.0L', 'بنزين', 'أوتوماتيك', '25000', 'شركة الخليج للتأمين', 'POL789123', '2025-08-15', '2025-04-20', ''],
-    ['فورد', 'إكسبلورر', '2023', 'أزرق', 'suv', 'ك ص د 789', '35.000', '220.000', '750.000', '3.5L', 'بنزين', 'أوتوماتيك', '8000', 'شركة الكويت للتأمين', 'POL456789', '2026-01-10', '2025-09-15', 'سيارة عائلية واسعة']
+    ['تويوتا', 'كامري', '2023', 'أبيض', 'sedan', 'ك ص د 123', 'JTDKB20U090123456', 'سيدان', '25.000', '150.000', '500.000', '20.000', '30.000', '200', '0.500', '2.5L', 'بنزين', 'أوتوماتيك', '15000', 'comprehensive', 'شركة التأمين الكويتية', 'POL123456', '2025-12-31', 'company', '2023-01-15', '12000.000', '20', '5', '2000.000', 'straight_line', '2025-06-30', 'مركبة جديدة بحالة ممتازة'],
+    ['نيسان', 'التيما', '2022', 'أسود', 'sedan', 'ك ص د 456', 'JN1AZ36D12M123456', 'سيدان', '22.000', '140.000', '450.000', '18.000', '28.000', '200', '0.500', '2.0L', 'بنزين', 'أوتوماتيك', '25000', 'comprehensive', 'شركة الخليج للتأمين', 'POL789123', '2025-08-15', 'company', '2022-03-10', '10000.000', '20', '5', '1500.000', 'straight_line', '2025-04-20', ''],
+    ['فورد', 'إكسبلورر', '2023', 'أزرق', 'suv', 'ك ص د 789', '1FMHK7F89NGA12345', 'SUV', '35.000', '220.000', '750.000', '30.000', '40.000', '200', '0.500', '3.5L', 'بنزين', 'أوتوماتيك', '8000', 'comprehensive', 'شركة الكويت للتأمين', 'POL456789', '2026-01-10', 'company', '2023-05-20', '18000.000', '20', '7', '3000.000', 'straight_line', '2025-09-15', 'سيارة عائلية واسعة']
   ];
   
   const csvContent = [headers.join(','), ...sampleData.map(row => row.join(','))].join('\n');
