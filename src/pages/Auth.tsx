@@ -32,24 +32,19 @@ const Auth = () => {
     setError('');
 
     try {
-      console.log('Attempting to sign in with:', email);
       const result = await signIn(email, password);
 
       if (result.error) {
-        console.error('Sign in error:', result.error);
         let errorMessage = 'حدث خطأ غير متوقع';
         
         if (result.error.message?.includes('Invalid login credentials')) {
           errorMessage = 'بيانات تسجيل الدخول غير صحيحة';
         } else if (result.error.message?.includes('Email not confirmed')) {
           errorMessage = 'يجب تأكيد البريد الإلكتروني أولاً';
-        } else if (result.error.message?.includes('Email not confirmed')) {
-          errorMessage = 'البريد الإلكتروني غير مؤكد';
         }
         
         setError(errorMessage);
       } else {
-        console.log('Sign in successful');
         toast({
           title: "تم تسجيل الدخول بنجاح",
           description: "مرحباً بك في نظام تأجير السيارات",
