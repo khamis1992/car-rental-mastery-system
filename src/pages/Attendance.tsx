@@ -134,73 +134,16 @@ const Attendance = () => {
       </div>
 
       <div className="container mx-auto p-6 space-y-8">
-        {/* قسم الساعة الرئيسي */}
-        <div className="flex justify-center">
-          <Card className="w-full max-w-md shadow-lg rounded-lg">
-            <CardContent className="p-8 text-center space-y-6">
-              {/* الساعة الرقمية */}
-              <div>
-                <div className="text-5xl font-bold text-primary mb-2">
-                  {format(currentTime, 'HH:mm:ss', { locale: ar })}
-                </div>
-                <div className="text-xl text-muted-foreground">
-                  {format(currentTime, 'dd MMMM yyyy', { locale: ar })}
-                </div>
+        {/* رسالة توضيحية */}
+        <div className="text-center">
+          <Card className="w-full max-w-md mx-auto shadow-lg rounded-lg">
+            <CardContent className="p-8 text-center space-y-4">
+              <div className="text-lg text-muted-foreground">
+                تم نقل ساعة الحضور إلى الشريط العلوي
               </div>
-
-              {/* حالة الموقع */}
-              <div className="flex items-center justify-center gap-2">
-                {location ? (
-                  <div className="flex items-center gap-2 text-green-600">
-                    <span>✅</span>
-                    <span className="font-medium">الموقع متاح</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 text-red-600">
-                    <span>❌</span>
-                    <span className="font-medium">الموقع غير متاح</span>
-                  </div>
-                )}
+              <div className="text-sm text-muted-foreground">
+                يمكنك الآن تسجيل الحضور والانصراف من أي صفحة في النظام عبر الضغط على الساعة في الشريط العلوي
               </div>
-
-              {/* زر تسجيل الحضور */}
-              <div className="space-y-4">
-                {isCheckedIn ? (
-                  <div className="space-y-3">
-                    <div className="text-sm text-muted-foreground">
-                      وقت الحضور: {checkInTime && format(checkInTime, 'HH:mm', { locale: ar })}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      ساعات العمل: {calculateWorkingHours()} ساعة
-                    </div>
-                    <Button 
-                      onClick={handleCheckIn}
-                      variant="destructive"
-                      size="lg"
-                      className="w-full py-4 text-lg rounded-lg"
-                    >
-                      <Clock className="w-6 h-6 ml-2" />
-                      تسجيل الانصراف
-                    </Button>
-                  </div>
-                ) : (
-                  <Button 
-                    onClick={handleCheckIn}
-                    size="lg"
-                    className="w-full py-4 text-lg bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md"
-                    disabled={!location}
-                  >
-                    <Clock className="w-6 h-6 ml-2" />
-                    تسجيل الحضور
-                  </Button>
-                )}
-              </div>
-
-              {!location && (
-                <div className="text-sm text-destructive bg-red-50 p-3 rounded-lg">
-                  يجب السماح بالوصول للموقع لتسجيل الحضور
-                </div>
-              )}
             </CardContent>
           </Card>
         </div>

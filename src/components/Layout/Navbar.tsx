@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { NotificationCenter } from "@/components/Navbar/NotificationCenter";
 import DailyTasksButton from "@/components/Navbar/DailyTasksButton";
+import { AttendanceClock } from "@/components/Navbar/AttendanceClock";
 import { useSearch } from "@/contexts/SearchContext";
 
 const Navbar = () => {
@@ -133,19 +134,24 @@ const Navbar = () => {
           </DropdownMenu>
         </div>
 
-        {/* شريط البحث */}
-        <div className="flex-1 max-w-md mx-8">
-          <Button
-            variant="outline"
-            className="w-full justify-start text-muted-foreground h-10 px-3"
-            onClick={() => setIsOpen(true)}
-          >
-            <Search className="w-4 h-4 ml-2" />
-            البحث في النظام...
-            <div className="ml-auto text-xs text-muted-foreground">
-              Ctrl+K
-            </div>
-          </Button>
+        {/* شريط البحث وساعة الحضور */}
+        <div className="flex items-center gap-4 flex-1 max-w-2xl mx-8">
+          <div className="flex-1 max-w-md">
+            <Button
+              variant="outline"
+              className="w-full justify-start text-muted-foreground h-10 px-3"
+              onClick={() => setIsOpen(true)}
+            >
+              <Search className="w-4 h-4 ml-2" />
+              البحث في النظام...
+              <div className="ml-auto text-xs text-muted-foreground">
+                Ctrl+K
+              </div>
+            </Button>
+          </div>
+          
+          {/* ساعة الحضور */}
+          <AttendanceClock />
         </div>
 
         {/* زر الشريط الجانبي والتاريخ */}
