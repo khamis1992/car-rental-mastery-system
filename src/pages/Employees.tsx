@@ -206,9 +206,11 @@ const Employees = () => {
             </CardContent>
           </Card>
         </div>
-        
-        {/* التبويبات موضعة تحت الكارت الأول */}
-        <div className="absolute top-full mt-4 right-0 md:right-0">
+      </div>
+
+      {/* التبويبات */}
+      <Tabs defaultValue="list" className="space-y-4">
+        <div className="flex justify-end">
           <TabsList>
             <TabsTrigger value="locations">مواقع العمل</TabsTrigger>
             <TabsTrigger value="positions">المناصب</TabsTrigger>
@@ -216,10 +218,6 @@ const Employees = () => {
             <TabsTrigger value="list">قائمة الموظفين</TabsTrigger>
           </TabsList>
         </div>
-      </div>
-
-      {/* التبويبات */}
-      <Tabs defaultValue="list" className="space-y-4">
         <TabsContent value="list">
           <Card>
             <CardHeader>
