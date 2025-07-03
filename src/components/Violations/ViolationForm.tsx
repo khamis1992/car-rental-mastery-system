@@ -85,7 +85,7 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
       const [violationTypesData, customersData, vehiclesData] = await Promise.all([
         violationService.getViolationTypes(),
         supabase.from('customers').select('id, name, customer_number, phone').eq('status', 'active'),
-        supabase.from('vehicles').select('id, license_plate, make, model, vehicle_number').eq('status', 'available')
+        supabase.from('vehicles').select('id, license_plate, make, model, vehicle_number')
       ]);
 
       setViolationTypes(violationTypesData);
