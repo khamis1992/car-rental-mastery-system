@@ -18,9 +18,11 @@ import { useForm } from 'react-hook-form';
 import { leavesService } from '@/services/leavesService';
 import { RejectLeaveDialog } from '@/components/Leaves/RejectLeaveDialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Leaves = () => {
   const { toast } = useToast();
+  const { user, profile } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -30,6 +32,9 @@ const Leaves = () => {
   const [typeFilter, setTypeFilter] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [leaveRequests, setLeaveRequests] = useState([]);
+  const [currentEmployee, setCurrentEmployee] = useState(null);
+  const [leaveStats, setLeaveStats] = useState({ approved: 0, pending: 0, total: 0 });
+  const [leaveBalance, setLeaveBalance] = useState({ annual: 21, sick: 14, emergency: 7 });
 
   const form = useForm({
     defaultValues: {
@@ -42,8 +47,33 @@ const Leaves = () => {
 
   // تحديث البيانات عند تحميل الصفحة
   useEffect(() => {
-    loadLeaveRequests();
-  }, []);
+    if (user) {
+      loadData();
+    }
+  }, [user]);
+
+  const loadData = async () => {
+    try {
+      // جلب بيانات الموظف الحالي
+      const employee = await leavesService.getCurrentUserEmployee();
+      setCurrentEmployee(employee);
+      
+      if (employee) {
+        // جلب طلبات الإجازات
+        await loadLeaveRequests();
+        
+        // جلب الإحصائيات
+        const stats = await leavesService.getLeaveStats(employee.id);
+        setLeaveStats(stats);
+        
+        // جلب رصيد الإجازات
+        const balance = await leavesService.getLeaveBalance(employee.id);
+        setLeaveBalance(balance);
+      }
+    } catch (error) {
+      console.error('خطأ في تحميل البيانات:', error);
+    }
+  };
 
   const loadLeaveRequests = async () => {
     try {
@@ -62,7 +92,7 @@ const Leaves = () => {
   const handleApproveRequest = async (requestId: string) => {
     setIsLoading(true);
     try {
-      await leavesService.approveLeaveRequest(requestId, 'current-user-id'); // يجب الحصول على معرف المستخدم الحالي
+      await leavesService.approveLeaveRequest(requestId);
       await loadLeaveRequests();
       setViewDialogOpen(false);
       toast({
@@ -86,7 +116,7 @@ const Leaves = () => {
     
     setIsLoading(true);
     try {
-      await leavesService.rejectLeaveRequest(selectedRequest.id, reason, 'current-user-id'); // يجب الحصول على معرف المستخدم الحالي
+      await leavesService.rejectLeaveRequest(selectedRequest.id, reason);
       await loadLeaveRequests();
       setRejectDialogOpen(false);
       setViewDialogOpen(false);
@@ -144,10 +174,60 @@ const Leaves = () => {
     return diffDays;
   };
 
-  const onSubmit = (data: any) => {
-    console.log('طلب إجازة جديد:', data);
-    setIsDialogOpen(false);
-    form.reset();
+  const onSubmit = async (data: any) => {
+    if (!currentEmployee) {
+      toast({
+        title: "خطأ",
+        description: "لم يتم العثور على بيانات الموظف",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!data.start_date || !data.end_date) {
+      toast({
+        title: "خطأ",
+        description: "يرجى اختيار تاريخ البداية والنهاية",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const totalDays = calculateDays(data.start_date, data.end_date);
+      
+      const leaveRequest = {
+        employee_id: currentEmployee.id,
+        leave_type: data.leave_type,
+        start_date: format(data.start_date, 'yyyy-MM-dd'),
+        end_date: format(data.end_date, 'yyyy-MM-dd'),
+        total_days: totalDays,
+        reason: data.reason,
+        status: 'pending' as const
+      };
+
+      await leavesService.createLeaveRequest(leaveRequest);
+      
+      toast({
+        title: "تم بنجاح",
+        description: "تم إرسال طلب الإجازة بنجاح",
+      });
+      
+      setIsDialogOpen(false);
+      form.reset();
+      await loadLeaveRequests();
+      await loadData(); // إعادة تحميل الإحصائيات
+    } catch (error) {
+      console.error('خطأ في إرسال طلب الإجازة:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في إرسال طلب الإجازة",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleViewRequest = (request: any) => {
@@ -164,6 +244,21 @@ const Leaves = () => {
 
     return matchesSearch && matchesStatus && matchesType;
   });
+
+  // التحقق من تسجيل الدخول
+  if (!user) {
+    return (
+      <div className="container mx-auto p-6 text-center" dir="rtl">
+        <Card className="p-8">
+          <h2 className="text-2xl font-bold mb-4">يجب تسجيل الدخول</h2>
+          <p className="text-muted-foreground">يرجى تسجيل الدخول للوصول إلى نظام الإجازات</p>
+        </Card>
+      </div>
+    );
+  }
+
+  // التحقق من إذا كان المستخدم مديراً أو مدير موارد بشرية
+  const canManageLeaves = profile?.role === 'admin' || profile?.role === 'manager';
 
   return (
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
@@ -313,8 +408,8 @@ const Leaves = () => {
                 />
 
                 <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1">
-                    إرسال الطلب
+                  <Button type="submit" className="flex-1" disabled={isLoading}>
+                    {isLoading ? 'جاري الإرسال...' : 'إرسال الطلب'}
                   </Button>
                   <Button 
                     type="button" 
@@ -339,7 +434,7 @@ const Leaves = () => {
               <CalendarIcon className="w-8 h-8 text-primary" />
               <div>
                 <p className="text-sm text-muted-foreground">الرصيد المتاح</p>
-                <p className="text-2xl font-bold">21</p>
+                <p className="text-2xl font-bold">{leaveBalance.annual}</p>
                 <p className="text-xs text-muted-foreground">يوم إجازة سنوية</p>
               </div>
             </div>
@@ -352,7 +447,7 @@ const Leaves = () => {
               <Check className="w-8 h-8 text-green-500" />
               <div>
                 <p className="text-sm text-muted-foreground">الإجازات المُوافقة</p>
-                <p className="text-2xl font-bold">8</p>
+                <p className="text-2xl font-bold">{leaveStats.approved}</p>
                 <p className="text-xs text-muted-foreground">هذا العام</p>
               </div>
             </div>
@@ -365,7 +460,7 @@ const Leaves = () => {
               <Clock className="w-8 h-8 text-orange-500" />
               <div>
                 <p className="text-sm text-muted-foreground">في الانتظار</p>
-                <p className="text-2xl font-bold">2</p>
+                <p className="text-2xl font-bold">{leaveStats.pending}</p>
                 <p className="text-xs text-muted-foreground">طلب معلق</p>
               </div>
             </div>
@@ -378,7 +473,7 @@ const Leaves = () => {
               <FileText className="w-8 h-8 text-blue-500" />
               <div>
                 <p className="text-sm text-muted-foreground">إجمالي الطلبات</p>
-                <p className="text-2xl font-bold">12</p>
+                <p className="text-2xl font-bold">{leaveStats.total}</p>
                 <p className="text-xs text-muted-foreground">هذا العام</p>
               </div>
             </div>
@@ -622,7 +717,7 @@ const Leaves = () => {
 
               {/* الإجراءات */}
               <div className="flex gap-2 pt-4">
-                {selectedRequest.status === 'pending' && (
+                {selectedRequest.status === 'pending' && canManageLeaves && (
                   <>
                     <Button 
                       onClick={() => handleApproveRequest(selectedRequest.id)}

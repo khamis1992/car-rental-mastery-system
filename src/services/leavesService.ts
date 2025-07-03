@@ -3,7 +3,10 @@ import { LeaveRequest } from "@/types/hr";
 
 export const leavesService = {
   async getLeaveRequests() {
-    const { data, error } = await supabase
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('المستخدم غير مسجل الدخول');
+
+    let query = supabase
       .from('leave_requests')
       .select(`
         *,
@@ -16,6 +19,13 @@ export const leavesService = {
       `)
       .order('created_at', { ascending: false });
 
+    // للموظفين العاديين، عرض طلباتهم فقط
+    const currentEmployee = await this.getCurrentUserEmployee();
+    if (currentEmployee) {
+      query = query.eq('employee_id', currentEmployee.id);
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
     return data;
   },
@@ -31,12 +41,14 @@ export const leavesService = {
     return data;
   },
 
-  async approveLeaveRequest(requestId: string, approverId: string) {
+  async approveLeaveRequest(requestId: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('المستخدم غير مسجل الدخول');
     const { data, error } = await supabase
       .from('leave_requests')
       .update({
         status: 'approved',
-        approved_by: approverId,
+        approved_by: user.id,
         approved_at: new Date().toISOString()
       })
       .eq('id', requestId)
@@ -59,7 +71,7 @@ export const leavesService = {
         message: `تم اعتماد طلب إجازتك من ${data.start_date} إلى ${data.end_date}`,
         notification_type: 'success',
         recipient_id: employee.user_id,
-        sender_id: approverId,
+        sender_id: user.id,
         entity_type: 'leave_request',
         entity_id: requestId
       });
@@ -68,13 +80,15 @@ export const leavesService = {
     return data;
   },
 
-  async rejectLeaveRequest(requestId: string, rejectionReason: string, rejectedBy: string) {
+  async rejectLeaveRequest(requestId: string, rejectionReason: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('المستخدم غير مسجل الدخول');
     const { data, error } = await supabase
       .from('leave_requests')
       .update({
         status: 'rejected',
         rejection_reason: rejectionReason,
-        approved_by: rejectedBy,
+        approved_by: user.id,
         approved_at: new Date().toISOString()
       })
       .eq('id', requestId)
@@ -97,7 +111,7 @@ export const leavesService = {
         message: `تم رفض طلب إجازتك من ${data.start_date} إلى ${data.end_date}. السبب: ${rejectionReason}`,
         notification_type: 'error',
         recipient_id: employee.user_id,
-        sender_id: rejectedBy,
+        sender_id: user.id,
         entity_type: 'leave_request',
         entity_id: requestId
       });
@@ -133,9 +147,43 @@ export const leavesService = {
       .from('employees')
       .select('*')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
-    if (error) return null;
+    if (error) {
+      console.error('خطأ في جلب بيانات الموظف:', error);
+      return null;
+    }
     return data;
+  },
+
+  async getLeaveBalance(employeeId: string) {
+    // هذه دالة لحساب رصيد الإجازات - يمكن تطويرها لاحقاً
+    return {
+      annual: 21,
+      sick: 14,
+      emergency: 7
+    };
+  },
+
+  async getLeaveStats(employeeId: string) {
+    const { data, error } = await supabase
+      .from('leave_requests')
+      .select('status, leave_type')
+      .eq('employee_id', employeeId);
+
+    if (error) {
+      console.error('خطأ في جلب إحصائيات الإجازات:', error);
+      return {
+        approved: 0,
+        pending: 0,
+        total: 0
+      };
+    }
+
+    const approved = data?.filter(req => req.status === 'approved').length || 0;
+    const pending = data?.filter(req => req.status === 'pending').length || 0;
+    const total = data?.length || 0;
+
+    return { approved, pending, total };
   }
 };
