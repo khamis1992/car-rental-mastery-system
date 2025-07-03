@@ -410,13 +410,9 @@ export const MaintenanceAlerts = () => {
                       </div>
                     </div>
                     
-                    {/* شارة الأولوية في المنتصف */}
-                    <div className="flex items-center">
+                    {/* شارة الأولوية والزر على اليسار */}
+                    <div className="flex items-center gap-3">
                       {getPriorityBadge(alert.priority)}
-                    </div>
-                    
-                    {/* زر الإخفاء على اليسار */}
-                    <div className="flex items-center">
                       <Button
                         size="sm"
                         variant="outline"
