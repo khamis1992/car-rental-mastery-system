@@ -209,7 +209,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                 {/* القسم */}
                 <TableCell className="text-right">
                   <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                    {record.employees?.department}
+                    {record.employees?.departments?.department_name || 'غير محدد'}
                   </Badge>
                 </TableCell>
 

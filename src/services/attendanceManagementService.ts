@@ -22,6 +22,11 @@ export interface AttendanceRecord {
     last_name: string;
     position: string;
     department: string;
+    departments?: {
+      id: string;
+      department_name: string;
+      department_code: string;
+    };
   };
   office_locations?: {
     name: string;
@@ -60,7 +65,12 @@ export const attendanceManagementService = {
           first_name,
           last_name,
           position,
-          department
+          department,
+          departments!department_id(
+            id,
+            department_name,
+            department_code
+          )
         ),
         office_locations(
           name,
@@ -95,7 +105,7 @@ export const attendanceManagementService = {
     // تطبيق فلتر القسم والبحث النصي
     if (filters?.department && records) {
       records = records.filter(record => 
-        record.employees?.department === filters.department
+        record.employees?.departments?.department_name === filters.department
       );
     }
     
@@ -172,14 +182,14 @@ export const attendanceManagementService = {
   // جلب قائمة الأقسام للفلترة
   async getDepartmentsForFilter() {
     const { data, error } = await supabase
-      .from('employees')
-      .select('department')
-      .eq('status', 'active');
+      .from('departments')
+      .select('department_name')
+      .eq('is_active', true)
+      .order('department_name');
     
     if (error) throw error;
     
-    const departments = [...new Set(data?.map(emp => emp.department).filter(Boolean))];
-    return departments;
+    return data?.map(dept => dept.department_name) || [];
   },
 
   // تحديث سجل حضور
@@ -228,7 +238,7 @@ export const attendanceManagementService = {
     const csvRows = records.map(record => [
       record.employees?.employee_number || '',
       `${record.employees?.first_name || ''} ${record.employees?.last_name || ''}`.trim(),
-      record.employees?.department || '',
+      record.employees?.departments?.department_name || 'غير محدد',
       record.date,
       record.check_in_time || '',
       record.check_out_time || '',
