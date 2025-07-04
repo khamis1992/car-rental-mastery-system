@@ -11,13 +11,11 @@ import {
   FileText, 
   Clock, 
   User,
-  Star,
-  TrendingUp
+  Star
 } from 'lucide-react';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { CompletedContractStats } from '@/components/Contracts/Completed/CompletedContractStats';
 import { CompletedContractDetails } from '@/components/Contracts/Completed/CompletedContractDetails';
-import { CompletedContractActions } from '@/components/Contracts/Completed/CompletedContractActions';
 import { CompletedContractTimeline } from '@/components/Contracts/Completed/CompletedContractTimeline';
 import { contractService } from '@/services/contractService';
 
@@ -67,11 +65,6 @@ const CompletedStage = () => {
     } catch (error) {
       console.error('Error loading contract stats:', error);
     }
-  };
-
-  const handleContractUpdate = () => {
-    loadContractData();
-    loadContractStats();
   };
 
   if (loading) {
@@ -169,11 +162,7 @@ const CompletedStage = () => {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="actions" className="rtl-flex gap-2">
-            <TrendingUp className="w-4 h-4" />
-            الإجراءات
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="timeline" className="rtl-flex gap-2">
             <Clock className="w-4 h-4" />
             الجدول الزمني
@@ -201,13 +190,6 @@ const CompletedStage = () => {
 
         <TabsContent value="timeline" className="space-y-6">
           <CompletedContractTimeline contract={contract} />
-        </TabsContent>
-
-        <TabsContent value="actions" className="space-y-6">
-          <CompletedContractActions 
-            contract={contract}
-            onContractUpdate={handleContractUpdate}
-          />
         </TabsContent>
       </Tabs>
       </div>
