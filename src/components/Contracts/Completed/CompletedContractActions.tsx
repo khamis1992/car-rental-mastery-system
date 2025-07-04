@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Download, 
   FileText, 
-  Star, 
-  MessageSquare, 
   RefreshCw, 
   Share2,
   Printer,
@@ -25,9 +21,6 @@ export const CompletedContractActions: React.FC<CompletedContractActionsProps> =
   contract,
   onContractUpdate
 }) => {
-  const [isRatingOpen, setIsRatingOpen] = useState(false);
-  const [rating, setRating] = useState(5);
-  const [feedback, setFeedback] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -89,28 +82,6 @@ export const CompletedContractActions: React.FC<CompletedContractActionsProps> =
     }
   };
 
-  const handleSubmitRating = async () => {
-    setIsLoading(true);
-    try {
-      // هنا سيتم حفظ التقييم في قاعدة البيانات
-      toast({
-        title: "تم بنجاح",
-        description: "تم حفظ تقييمك للعقد",
-      });
-      setIsRatingOpen(false);
-      if (onContractUpdate) {
-        onContractUpdate();
-      }
-    } catch (error) {
-      toast({
-        title: "خطأ",
-        description: "فشل في حفظ التقييم",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const actions = [
     {
@@ -167,83 +138,6 @@ export const CompletedContractActions: React.FC<CompletedContractActionsProps> =
         </CardContent>
       </Card>
 
-      {/* تقييم العقد */}
-      <Card className="card-elegant">
-        <CardHeader>
-          <CardTitle className="rtl-title flex items-center gap-2">
-            <Star className="w-5 h-5" />
-            تقييم ومراجعة العقد
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            ساعدنا في تحسين خدماتنا من خلال تقييم تجربتك مع هذا العقد
-          </p>
-          
-          <Dialog open={isRatingOpen} onOpenChange={setIsRatingOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="rtl-flex gap-2">
-                <MessageSquare className="w-4 h-4" />
-                إضافة تقييم
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle className="rtl-title">تقييم العقد</DialogTitle>
-              </DialogHeader>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">تقييم العقد (من 1 إلى 5)</label>
-                  <div className="flex gap-1 mt-2">
-                    {[1, 2, 3, 4, 5].map((value) => (
-                      <button
-                        key={value}
-                        onClick={() => setRating(value)}
-                        className={`p-1 transition-colors ${
-                          value <= rating 
-                            ? 'text-yellow-400' 
-                            : 'text-muted-foreground hover:text-yellow-300'
-                        }`}
-                      >
-                        <Star className={`w-6 h-6 ${value <= rating ? 'fill-current' : ''}`} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium">ملاحظات إضافية</label>
-                  <Textarea
-                    value={feedback}
-                    onChange={(e) => setFeedback(e.target.value)}
-                    placeholder="اكتب ملاحظاتك حول تجربة استئجار هذه المركبة..."
-                    className="mt-2"
-                    rows={3}
-                  />
-                </div>
-                
-                <div className="flex gap-2 pt-4">
-                  <Button 
-                    onClick={handleSubmitRating}
-                    disabled={isLoading}
-                    className="flex-1"
-                  >
-                    حفظ التقييم
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setIsRatingOpen(false)}
-                    className="flex-1"
-                  >
-                    إلغاء
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </CardContent>
-      </Card>
 
       {/* أرشفة العقد */}
       <Card className="card-elegant">
