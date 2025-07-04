@@ -152,10 +152,10 @@ const Leaves = () => {
   const getLeaveTypeBadge = (type: string) => {
     const typeConfig = {
       annual: { label: 'إجازة سنوية', variant: 'default' as const },
-      sick: { label: 'إجازة مرضية', variant: 'secondary' as const },
-      maternity: { label: 'إجازة أمومة', variant: 'outline' as const },
-      emergency: { label: 'ظروف طارئة', variant: 'destructive' as const },
-      unpaid: { label: 'إجازة بدون راتب', variant: 'secondary' as const },
+      sick: { label: 'إجازة مرضية', variant: 'destructive' as const },
+      maternity: { label: 'إجازة أمومة', variant: 'secondary' as const },
+      emergency: { label: 'ظروف طارئة', variant: 'outline' as const },
+      unpaid: { label: 'إجازة بدون راتب', variant: 'outline' as const },
     };
 
     const config = typeConfig[type as keyof typeof typeConfig] || typeConfig.annual;
