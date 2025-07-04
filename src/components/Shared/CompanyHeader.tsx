@@ -19,7 +19,7 @@ export const CompanyHeader: React.FC<CompanyHeaderProps> = ({
       <div className={`${isPrint ? 'mb-4' : 'mb-3'}`}>
         <div className="inline-flex items-center justify-center">
           <img 
-            src="/lovable-uploads/ab29ad47-ee4e-4e76-aac1-0652adafa064.png" 
+            src="/lovable-uploads/cf0ef0ce-1c56-4da0-b065-8c130f4f182f.png" 
             alt="شعار شركة ساپتكو الخليج - SAPTCO GULF Logo"
             className={`${isPrint ? 'h-24 w-auto' : 'h-16 w-auto'} object-contain`}
           />
