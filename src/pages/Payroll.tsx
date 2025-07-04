@@ -15,61 +15,7 @@ const Payroll = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [monthFilter, setMonthFilter] = useState('');
 
-  const mockPayrollData = [
-    {
-      id: '1',
-      employee_name: 'أحمد محمد',
-      employee_number: 'EMP0001',
-      pay_period_start: '2024-01-01',
-      pay_period_end: '2024-01-31',
-      basic_salary: 1200.000,
-      overtime_amount: 150.000,
-      allowances: 100.000,
-      bonuses: 0,
-      deductions: 50.000,
-      tax_deduction: 60.000,
-      social_insurance: 72.000,
-      gross_salary: 1450.000,
-      net_salary: 1268.000,
-      status: 'paid',
-      paid_at: '2024-02-01'
-    },
-    {
-      id: '2',
-      employee_name: 'فاطمة أحمد',
-      employee_number: 'EMP0002',
-      pay_period_start: '2024-01-01',
-      pay_period_end: '2024-01-31',
-      basic_salary: 1000.000,
-      overtime_amount: 75.000,
-      allowances: 80.000,
-      bonuses: 50.000,
-      deductions: 0,
-      tax_deduction: 50.000,
-      social_insurance: 60.000,
-      gross_salary: 1205.000,
-      net_salary: 1095.000,
-      status: 'approved',
-      approved_at: '2024-01-30'
-    },
-    {
-      id: '3',
-      employee_name: 'محمد علي',
-      employee_number: 'EMP0003',
-      pay_period_start: '2024-01-01',
-      pay_period_end: '2024-01-31',
-      basic_salary: 800.000,
-      overtime_amount: 0,
-      allowances: 60.000,
-      bonuses: 0,
-      deductions: 25.000,
-      tax_deduction: 40.000,
-      social_insurance: 48.000,
-      gross_salary: 860.000,
-      net_salary: 747.000,
-      status: 'draft'
-    }
-  ];
+  const mockPayrollData: any[] = [];
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -168,7 +114,7 @@ const Payroll = () => {
               <DollarSign className="w-8 h-8 text-blue-500" />
               <div>
                 <p className="text-sm text-muted-foreground">الرواتب المدفوعة</p>
-                <p className="text-2xl font-bold">1</p>
+                <p className="text-2xl font-bold">{mockPayrollData.filter(p => p.status === 'paid').length}</p>
                 <p className="text-xs text-muted-foreground">من أصل {filteredPayroll.length}</p>
               </div>
             </div>
