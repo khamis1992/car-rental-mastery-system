@@ -589,9 +589,6 @@ const Leaves = () => {
                         >
                           عرض
                         </Button>
-                        {request.status === 'pending' && (
-                          <Button variant="outline" size="sm">إلغاء</Button>
-                        )}
                       </div>
                       
                       <div className="flex-1 text-right mr-4">
