@@ -20,12 +20,14 @@ interface ContractDetailsDialogProps {
   contractId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onDataUpdate?: () => void; // Add callback for data updates
 }
 
 export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
   contractId,
   open,
   onOpenChange,
+  onDataUpdate,
 }) => {
   const [contract, setContract] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -157,7 +159,8 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
 
       if (error) throw error;
 
-      loadContract();
+      await loadContract();
+      onDataUpdate?.(); // Notify parent component of data changes
       
       const statusMessage = updateData.status === 'pending' 
         ? ' وتم تحديث حالة العقد إلى "في انتظار التسليم"'
@@ -254,14 +257,20 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           contract={contract}
           open={showDeliveryForm}
           onOpenChange={setShowDeliveryForm}
-          onSuccess={loadContract}
+          onSuccess={async () => {
+            await loadContract();
+            onDataUpdate?.();
+          }}
         />
 
         <ContractReturnForm
           contract={contract}
           open={showReturnForm}
           onOpenChange={setShowReturnForm}
-          onSuccess={loadContract}
+          onSuccess={async () => {
+            await loadContract();
+            onDataUpdate?.();
+          }}
         />
 
         {/* Payment Form */}
@@ -269,7 +278,10 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           contract={contract}
           open={showPaymentForm}
           onOpenChange={setShowPaymentForm}
-          onSuccess={loadContract}
+          onSuccess={async () => {
+            await loadContract();
+            onDataUpdate?.();
+          }}
         />
 
         {/* PDF Preview */}

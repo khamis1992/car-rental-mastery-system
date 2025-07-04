@@ -175,6 +175,7 @@ const Contracts = () => {
           contractId={selectedContractId}
           open={contractDetailsOpen}
           onOpenChange={setContractDetailsOpen}
+          onDataUpdate={loadData}
         />
       </ErrorBoundary>
     </div>
