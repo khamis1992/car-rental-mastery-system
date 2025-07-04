@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+import { cn, getStartOfToday, getStartOfDate } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -436,7 +436,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) => date < new Date()}
+                            disabled={(date) => date < getStartOfToday()}
                             initialFocus
                             className="pointer-events-auto"
                           />
@@ -477,7 +477,10 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) => date < (form.getValues('start_date') || new Date())}
+                            disabled={(date) => {
+                              const startDate = form.getValues('start_date');
+                              return date < (startDate ? getStartOfDate(startDate) : getStartOfToday());
+                            }}
                             initialFocus
                             className="pointer-events-auto"
                           />
