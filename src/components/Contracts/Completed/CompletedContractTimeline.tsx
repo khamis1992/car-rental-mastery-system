@@ -137,12 +137,12 @@ export const CompletedContractTimeline: React.FC<CompletedContractTimelineProps>
                     {formatDateTime(event.timestamp)}
                   </Badge>
                   <div className="flex items-center gap-2">
-                    <div className={`flex items-center justify-center w-8 h-8 rounded-full ${getStatusColor(event.status)}`}>
-                      {event.icon}
-                    </div>
                     <h4 className="text-sm font-medium text-foreground">
                       {event.title}
                     </h4>
+                    <div className={`flex items-center justify-center w-8 h-8 rounded-full ${getStatusColor(event.status)}`}>
+                      {event.icon}
+                    </div>
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground text-right">
