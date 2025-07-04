@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { ContractForm } from '@/components/Contracts/ContractForm';
+import { BilingualContractForm } from '@/components/Contracts/BilingualContractForm';
 import { ContractsList } from '@/components/Contracts/ContractsList';
 import { ContractMonitoring } from '@/components/Contracts/ContractMonitoring';
 import { ContractStats } from '@/components/Contracts/ContractStats';
@@ -19,6 +21,7 @@ const Contracts = () => {
   const { toast } = useToast();
   useAbortErrorHandler(); // Handle abort errors gracefully
   const [contractFormOpen, setContractFormOpen] = useState(false);
+  const [bilingualFormOpen, setBilingualFormOpen] = useState(false);
   const [selectedQuotationForContract, setSelectedQuotationForContract] = useState<string>('');
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
   const [contractDetailsOpen, setContractDetailsOpen] = useState(false);
@@ -93,13 +96,31 @@ const Contracts = () => {
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             مزامنة شاملة
           </Button>
-          <Button 
-            className="btn-primary flex items-center gap-2"
-            onClick={() => setContractFormOpen(true)}
-          >
-            <Plus className="w-4 h-4" />
-            عقد جديد
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="btn-primary flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                عقد جديد
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem 
+                onClick={() => setContractFormOpen(true)}
+                className="cursor-pointer"
+              >
+                <Plus className="w-4 h-4 ml-2" />
+                عقد عادي
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => setBilingualFormOpen(true)}
+                className="cursor-pointer"
+              >
+                <Plus className="w-4 h-4 ml-2" />
+                عقد ثنائي اللغة
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -194,6 +215,19 @@ const Contracts = () => {
             if (error) throw error;
             return data;
           }}
+          onSuccess={handleFormSuccess}
+        />
+      </ErrorBoundary>
+
+      {/* نموذج إنشاء عقد ثنائي اللغة */}
+      <ErrorBoundary>
+        <BilingualContractForm
+          open={bilingualFormOpen}
+          onOpenChange={(open) => {
+            setBilingualFormOpen(open);
+          }}
+          customers={customers}
+          vehicles={vehicles}
           onSuccess={handleFormSuccess}
         />
       </ErrorBoundary>
