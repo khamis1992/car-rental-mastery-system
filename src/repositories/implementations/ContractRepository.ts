@@ -253,16 +253,21 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
   }
 
   async getContractStats() {
-    const { data: totalCount, error: totalError } = await supabase
+    const { count: totalCount, error: totalError } = await supabase
       .from('contracts')
       .select('*', { count: 'exact', head: true });
 
-    const { data: activeCount, error: activeError } = await supabase
+    const { count: activeCount, error: activeError } = await supabase
       .from('contracts')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'active');
 
-    const { data: endingToday, error: endingError } = await supabase
+    const { count: completedCount, error: completedError } = await supabase
+      .from('contracts')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'completed');
+
+    const { count: endingToday, error: endingError } = await supabase
       .from('contracts')
       .select('*', { count: 'exact', head: true })
       .eq('end_date', new Date().toISOString().split('T')[0])
@@ -279,16 +284,17 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
       .gte('created_at', startOfMonth.toISOString())
       .in('status', ['active', 'completed']);
 
-    if (totalError || activeError || endingError || revenueError) {
-      throw totalError || activeError || endingError || revenueError;
+    if (totalError || activeError || completedError || endingError || revenueError) {
+      throw totalError || activeError || completedError || endingError || revenueError;
     }
 
     const totalRevenue = monthlyRevenue?.reduce((sum, contract) => sum + (contract.final_amount || 0), 0) || 0;
 
     return {
-      total: totalCount?.length || 0,
-      active: activeCount?.length || 0,
-      endingToday: endingToday?.length || 0,
+      total: totalCount || 0,
+      active: activeCount || 0,
+      completed: completedCount || 0,
+      endingToday: endingToday || 0,
       monthlyRevenue: totalRevenue,
     };
   }

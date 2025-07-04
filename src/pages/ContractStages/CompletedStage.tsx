@@ -60,7 +60,7 @@ const CompletedStage = () => {
       // يمكن إضافة المزيد من الإحصائيات هنا
       setContractStats({
         totalRevenue: stats.monthlyRevenue,
-        completedCount: stats.total,
+        completedCount: stats.completed,
         averageRating: 4.5, // يمكن حسابها من قاعدة البيانات
         onTimeCompletionRate: 85 // يمكن حسابها من قاعدة البيانات
       });
