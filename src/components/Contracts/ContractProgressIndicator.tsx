@@ -192,12 +192,16 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
                         className={cn(
                           "rounded-full flex items-center justify-center border-2 transition-all duration-300 shadow-sm",
                           sizeClasses[size],
+                          // Final completed stage - distinctive green with stronger styling
                           step.status === 'completed' && currentStatus === 'completed' && step.id === 'completed' 
-                            ? "bg-gradient-to-br from-green-500 to-green-600 border-green-500 text-white shadow-green-200 shadow-lg"
+                            ? "bg-gradient-to-br from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-emerald-200 shadow-lg ring-2 ring-emerald-200/50"
+                            // Regular completed steps - simple green
                             : step.status === 'completed' 
-                            ? "bg-green-500 border-green-500 text-white shadow-green-200"
+                            ? "bg-emerald-500 border-emerald-500 text-white"
+                            // Current active step - blue with animation
                             : step.status === 'current' 
-                            ? "bg-gradient-to-br from-primary to-primary/90 border-primary text-white animate-pulse shadow-primary/30 shadow-md"
+                            ? "bg-gradient-to-br from-blue-500 to-blue-600 border-blue-500 text-white animate-pulse shadow-blue-200 shadow-md"
+                            // Pending steps - muted
                             : "bg-muted border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/50",
                           interactive && contractData && "cursor-pointer hover:scale-110 hover:shadow-lg transition-transform duration-200"
                         )}
@@ -230,12 +234,12 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
                 {/* خط الاتصال إلى الخطوة التالية */}
                 {!isLast && (
                   <div className="flex-1 mx-2">
-                    <div
-                      className={cn(
-                        "h-0.5 transition-all duration-300",
-                        step.status === 'completed' ? "bg-green-500" : "bg-muted-foreground/30"
-                      )}
-                    />
+                     <div
+                       className={cn(
+                         "h-0.5 transition-all duration-300",
+                         step.status === 'completed' ? "bg-emerald-500" : "bg-muted-foreground/30"
+                       )}
+                     />
                   </div>
                 )}
               </div>
@@ -243,14 +247,18 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
               {/* تسميات الخطوات */}
               {showLabels && (
                 <div className="mt-3 text-center">
-                  <div
-                    className={cn(
-                      "text-sm font-medium transition-colors duration-300",
-                      step.status === 'completed' && "text-green-600",
-                      step.status === 'current' && "text-primary",
-                      step.status === 'pending' && "text-muted-foreground"
-                    )}
-                  >
+                   <div
+                     className={cn(
+                       "text-sm font-medium transition-colors duration-300",
+                       step.status === 'completed' && currentStatus === 'completed' && step.id === 'completed'
+                         ? "text-emerald-600 font-semibold"
+                         : step.status === 'completed' 
+                         ? "text-emerald-600"
+                         : step.status === 'current' 
+                         ? "text-blue-600 font-medium"
+                         : "text-muted-foreground"
+                     )}
+                   >
                     {step.title}
                   </div>
                   {size !== 'sm' && (
