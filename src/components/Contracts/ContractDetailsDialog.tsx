@@ -56,7 +56,7 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
         setCurrentStage('pending');
       } else if (contract.delivery_completed_at && !contract.actual_end_date) {
         // Vehicle has been delivered but not yet returned
-        setCurrentStage('delivery');
+        setCurrentStage('return');
       } else if (contract.actual_end_date && !contract.payment_registered_at) {
         // Vehicle has been returned but payment not registered
         setCurrentStage('payment');

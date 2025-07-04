@@ -335,6 +335,65 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
     </div>
   );
 
+  const renderReturnStage = () => (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-right">
+            <CheckCircle className="w-5 h-5" />
+            حالة الاستلام
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {contract.actual_end_date ? (
+            <div className="bg-green-100 p-4 rounded-lg border border-green-300">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <h3 className="font-medium text-green-900">تم استلام المركبة بنجاح</h3>
+              </div>
+              <p className="text-green-800 text-sm">
+                تاريخ الاستلام: {formatDate(contract.actual_end_date)}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="text-center">
+                <CheckCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">جاهز للاستلام</h3>
+                <p className="text-muted-foreground mb-4">المركبة جاهزة للاستلام من العميل</p>
+                <Button onClick={onShowReturn} className="px-8">
+                  بدء عملية الاستلام
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {contract.return_photos && contract.return_photos.length > 0 && (
+            <div className="text-right">
+              <div className="flex items-center gap-2 mb-2">
+                <Camera className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium">صور الاستلام</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                تم رفع {contract.return_photos.length} صورة
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+        <h3 className="font-medium text-red-900 mb-2 text-right">المهام المطلوبة:</h3>
+        <ul className="list-disc list-inside text-red-800 space-y-1 text-right">
+          <li>فحص حالة المركبة عند الاستلام</li>
+          <li>توثيق أي أضرار أو مشاكل</li>
+          <li>تسجيل قراءة العداد النهائية</li>
+          <li>التأكد من إرجاع جميع الملحقات</li>
+        </ul>
+      </div>
+    </div>
+  );
+
   const renderCompletedStage = () => (
     <div className="space-y-6">
       <Card>
@@ -395,6 +454,8 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
         return renderPendingStage();
       case 'delivery':
         return renderDeliveryStage();
+      case 'return':
+        return renderReturnStage();
       case 'payment':
         return renderPaymentStage();
       case 'completed':
