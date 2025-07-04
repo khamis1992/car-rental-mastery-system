@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import { SearchProvider } from "@/contexts/SearchContext";
+import { ContractsRealtimeProvider } from "@/contexts/ContractsRealtimeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Layout } from "@/components/Layout/Layout";
 import { GlobalErrorBoundary } from "@/components/ErrorBoundary/GlobalErrorBoundary";
@@ -70,10 +71,11 @@ const App = () => (
   <GlobalErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <NotificationProvider>
-          <SettingsProvider>
-            <SearchProvider>
-              <TooltipProvider>
+        <ContractsRealtimeProvider>
+          <NotificationProvider>
+            <SettingsProvider>
+              <SearchProvider>
+                <TooltipProvider>
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
@@ -246,6 +248,7 @@ const App = () => (
             </SearchProvider>
           </SettingsProvider>
         </NotificationProvider>
+        </ContractsRealtimeProvider>
       </AuthProvider>
     </QueryClientProvider>
   </GlobalErrorBoundary>

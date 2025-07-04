@@ -9,7 +9,7 @@ import { ContractsList } from '@/components/Contracts/ContractsList';
 import { ContractMonitoring } from '@/components/Contracts/ContractMonitoring';
 import { ContractStats } from '@/components/Contracts/ContractStats';
 import { ContractDetailsDialog } from '@/components/Contracts/ContractDetailsDialog';
-import { useContractsOptimized } from '@/hooks/useContractsOptimized';
+import { useContractsEnhanced } from '@/hooks/useContractsEnhanced';
 import { supabase } from '@/integrations/supabase/client';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AbortErrorBoundary, useAbortErrorHandler } from '@/components/ErrorBoundary/AbortErrorBoundary';
@@ -31,10 +31,16 @@ const Contracts = () => {
     contractStats,
     loading,
     errors,
+    isConnected,
+    lastSync,
     loadData,
     refreshSingleContractFromServer,
     updateSingleContract,
-  } = useContractsOptimized();
+    activateContract,
+    completeContract,
+    updateStatus,
+    syncAllContracts,
+  } = useContractsEnhanced();
 
   // التحقق من وجود quotation parameter في URL
   useEffect(() => {
@@ -65,15 +71,27 @@ const Contracts = () => {
         </div>
         
         <div className="flex items-center gap-2">
+          {!isConnected && (
+            <div className="flex items-center gap-1 text-sm text-muted-foreground bg-yellow-50 px-2 py-1 rounded">
+              <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+              غير متصل
+            </div>
+          )}
+          {isConnected && (
+            <div className="flex items-center gap-1 text-sm text-green-600 bg-green-50 px-2 py-1 rounded">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              متصل
+            </div>
+          )}
           <Button 
             variant="outline"
             size="sm"
-            onClick={() => loadData()}
+            onClick={syncAllContracts}
             disabled={loading}
             className="flex items-center gap-2"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            تحديث
+            مزامنة شاملة
           </Button>
           <Button 
             className="btn-primary flex items-center gap-2"
@@ -125,8 +143,8 @@ const Contracts = () => {
             setContractDetailsOpen(true);
           }}
           onEdit={(id) => console.log('Edit contract:', id)}
-          onActivate={(id) => console.log('Activate contract:', id)}
-          onComplete={(id) => console.log('Complete contract:', id)}
+          onActivate={(id) => activateContract(id, new Date().toISOString().split('T')[0])}
+          onComplete={(id) => completeContract(id, new Date().toISOString().split('T')[0])}
           onStatusUpdate={() => {
             // تحديث فوري بدون إعادة تحميل كامل
             toast({
@@ -188,7 +206,7 @@ const Contracts = () => {
           onOpenChange={setContractDetailsOpen}
           onDataUpdate={() => {
             if (selectedContractId) {
-              refreshSingleContractFromServer(selectedContractId, true);
+              refreshSingleContractFromServer(selectedContractId);
             }
           }}
         />
