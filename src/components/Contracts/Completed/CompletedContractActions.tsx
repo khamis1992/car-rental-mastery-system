@@ -44,7 +44,9 @@ export const CompletedContractActions: React.FC<CompletedContractActionsProps> =
   };
 
   const handlePrint = () => {
-    window.print();
+    // فتح صفحة الطباعة في نافذة جديدة
+    const printUrl = `/contracts/print/${contract.id}`;
+    window.open(printUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
   };
 
   const handleSendEmail = async () => {
