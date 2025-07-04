@@ -129,10 +129,31 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
   };
 
   const handleAdvanceToNextStage = async () => {
-    if (!contract || contract.status !== 'draft') return;
+    if (!contract) return;
     
     try {
-      await contractService.updateContractStatus(contract.id, 'pending');
+      let updateData: any = {};
+      let successMessage = '';
+
+      if (contract.status === 'draft') {
+        // Advance from draft to pending
+        updateData.status = 'pending';
+        successMessage = 'تم الانتقال إلى مرحلة التوقيع';
+      } else if (contract.status === 'pending' && contract.customer_signature && contract.company_signature) {
+        // Advance from pending (with both signatures) to delivery stage
+        // We don't change status here, just move to delivery stage view
+        setCurrentStage('delivery');
+        toast({
+          title: "تم بنجاح",
+          description: "تم الانتقال إلى مرحلة التسليم",
+        });
+        return;
+      } else {
+        throw new Error('Cannot advance to next stage');
+      }
+
+      // Update contract status for draft to pending transition
+      await contractService.updateContractStatus(contract.id, updateData.status);
       await loadContract(); // Reload to get updated data
       if (onDataUpdate) {
         onDataUpdate();
@@ -140,7 +161,7 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
       
       toast({
         title: "تم بنجاح",
-        description: "تم الانتقال إلى مرحلة التوقيع",
+        description: successMessage,
       });
     } catch (error) {
       console.error('Error advancing to next stage:', error);

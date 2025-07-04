@@ -41,13 +41,6 @@ export const ContractHeader: React.FC<ContractHeaderProps> = ({
           {getStatusBadge(contract.status)}
           
           {/* Contract Actions */}
-          {contract.status === 'pending' && !contract.delivery_completed_at && (
-            <Button variant="default" size="sm" onClick={onShowDelivery}>
-              <Truck className="w-4 h-4 mr-2" />
-              تسليم المركبة
-            </Button>
-          )}
-
           {contract.status === 'pending' && contract.delivery_completed_at && !contract.payment_registered_at && onShowPayment && (
             <Button variant="default" size="sm" onClick={onShowPayment}>
               <CreditCard className="w-4 h-4 mr-2" />

@@ -196,6 +196,15 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
           <li>التأكد من اكتمال جميع التوقيعات</li>
         </ul>
       </div>
+
+      {/* Advance to Next Stage Button - Show when both signatures are complete */}
+      {contract.customer_signature && contract.company_signature && contract.status === 'pending' && onAdvanceToNextStage && (
+        <div className="flex justify-end">
+          <Button onClick={onAdvanceToNextStage} className="px-8">
+            الانتقال للمرحلة التالية
+          </Button>
+        </div>
+      )}
     </div>
   );
 
