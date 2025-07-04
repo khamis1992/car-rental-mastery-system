@@ -49,35 +49,7 @@ const Attendance = () => {
     }
   }, []);
 
-  const mockAttendanceData = [
-    {
-      id: '1',
-      date: '2024-01-15',
-      check_in_time: '08:00',
-      check_out_time: '17:00',
-      total_hours: 8.0,
-      overtime_hours: 0,
-      status: 'present'
-    },
-    {
-      id: '2',
-      date: '2024-01-14',
-      check_in_time: '08:15',
-      check_out_time: '17:30',
-      total_hours: 8.25,
-      overtime_hours: 0.25,
-      status: 'late'
-    },
-    {
-      id: '3',
-      date: '2024-01-13',
-      check_in_time: null,
-      check_out_time: null,
-      total_hours: 0,
-      overtime_hours: 0,
-      status: 'absent'
-    }
-  ];
+  const mockAttendanceData: any[] = [];
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -136,7 +108,7 @@ const Attendance = () => {
                 <div className="rtl-info-item justify-center mb-2">
                   <AlertCircle className="w-8 h-8 text-warning" />
                 </div>
-                <div className="text-2xl font-bold text-warning mb-1">12</div>
+                <div className="text-2xl font-bold text-warning mb-1">0</div>
                 <div className="text-sm text-muted-foreground">ساعات إضافية</div>
               </CardContent>
             </Card>
@@ -146,7 +118,7 @@ const Attendance = () => {
                 <div className="rtl-info-item justify-center mb-2">
                   <Clock className="w-8 h-8 text-primary" />
                 </div>
-                <div className="text-2xl font-bold text-primary mb-1">176</div>
+                <div className="text-2xl font-bold text-primary mb-1">0</div>
                 <div className="text-sm text-muted-foreground">ساعات العمل</div>
               </CardContent>
             </Card>
@@ -156,7 +128,7 @@ const Attendance = () => {
                 <div className="rtl-info-item justify-center mb-2">
                   <XCircle className="w-8 h-8 text-danger" />
                 </div>
-                <div className="text-2xl font-bold text-danger mb-1">1</div>
+                <div className="text-2xl font-bold text-danger mb-1">0</div>
                 <div className="text-sm text-muted-foreground">أيام الغياب</div>
               </CardContent>
             </Card>
@@ -166,7 +138,7 @@ const Attendance = () => {
                 <div className="rtl-info-item justify-center mb-2">
                   <CheckCircle className="w-8 h-8 text-success" />
                 </div>
-                <div className="text-2xl font-bold text-success mb-1">22</div>
+                <div className="text-2xl font-bold text-success mb-1">0</div>
                 <div className="text-sm text-muted-foreground">أيام الحضور</div>
               </CardContent>
             </Card>
@@ -255,38 +227,8 @@ const Attendance = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {mockAttendanceData.map((record) => (
-                      <Card key={record.id} className="border-muted hover:shadow-md transition-all">
-                        <CardContent className="p-6">
-                          <div className="rtl-header mb-4">
-                            {getStatusBadge(record.status)}
-                            <h3 className="font-semibold text-lg">
-                              {format(new Date(record.date), 'dd MMMM yyyy', { locale: ar })}
-                            </h3>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div className="rtl-info-item">
-                              <span className="font-semibold">{record.check_in_time || 'لم يسجل'}</span>
-                              <span className="text-muted-foreground">الحضور</span>
-                            </div>
-                            <div className="rtl-info-item">
-                              <span className="font-semibold">{record.check_out_time || 'لم يسجل'}</span>
-                              <span className="text-muted-foreground">الانصراف</span>
-                            </div>
-                            <div className="rtl-info-item">
-                              <span className="font-semibold">{record.total_hours} ساعة</span>
-                              <span className="text-muted-foreground">ساعات العمل</span>
-                            </div>
-                            <div className="rtl-info-item">
-                              <span className="font-semibold">{record.overtime_hours} ساعة</span>
-                              <span className="text-muted-foreground">ساعات إضافية</span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                  <div className="text-center py-8 text-muted-foreground">
+                    لا توجد سجلات حضور متاحة
                   </div>
                 </CardContent>
               </Card>
