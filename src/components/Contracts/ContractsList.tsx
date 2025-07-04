@@ -224,11 +224,7 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                           vehicle_info: contract.vehicle_info
                         }}
                            onStatusUpdate={() => {
-                              toast({
-                                title: "تم التحديث",
-                                description: "تم تحديث حالة العقد بنجاح",
-                              });
-                              // Immediate update without debouncing to prevent UI flickering
+                              // تحديث محلي فوري - لا حاجة لإعادة تحميل البيانات
                               if (onStatusUpdate) {
                                 onStatusUpdate();
                               }
@@ -260,6 +256,7 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                           vehicle_info: contract.vehicle_info,
                          }}
                          onUpdate={() => {
+                           // تحديث محلي فوري
                            if (onStatusUpdate) {
                              onStatusUpdate();
                            }

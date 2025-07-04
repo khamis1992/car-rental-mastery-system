@@ -3,18 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
 import { ContractForm } from '@/components/Contracts/ContractForm';
 import { ContractsList } from '@/components/Contracts/ContractsList';
 import { ContractMonitoring } from '@/components/Contracts/ContractMonitoring';
 import { ContractStats } from '@/components/Contracts/ContractStats';
 import { ContractDetailsDialog } from '@/components/Contracts/ContractDetailsDialog';
-import { useContractsDataRefactored } from '@/hooks/useContractsDataRefactored';
+import { useContractsOptimized } from '@/hooks/useContractsOptimized';
 import { supabase } from '@/integrations/supabase/client';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AbortErrorBoundary, useAbortErrorHandler } from '@/components/ErrorBoundary/AbortErrorBoundary';
 
 const Contracts = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   useAbortErrorHandler(); // Handle abort errors gracefully
   const [contractFormOpen, setContractFormOpen] = useState(false);
   const [selectedQuotationForContract, setSelectedQuotationForContract] = useState<string>('');
@@ -30,11 +32,9 @@ const Contracts = () => {
     loading,
     errors,
     loadData,
-    refreshContracts,
-    refreshSingleContract,
-    updateContractOptimistically,
-    debouncedContractRefresh,
-  } = useContractsDataRefactored();
+    refreshSingleContractFromServer,
+    updateSingleContract,
+  } = useContractsOptimized();
 
   // التحقق من وجود quotation parameter في URL
   useEffect(() => {
@@ -126,7 +126,13 @@ const Contracts = () => {
           onEdit={(id) => console.log('Edit contract:', id)}
           onActivate={(id) => console.log('Activate contract:', id)}
           onComplete={(id) => console.log('Complete contract:', id)}
-          onStatusUpdate={() => debouncedContractRefresh()}
+          onStatusUpdate={() => {
+            // تحديث فوري بدون إعادة تحميل كامل
+            toast({
+              title: "تم التحديث",
+              description: "تم تحديث حالة العقد بنجاح",
+            });
+          }}
         />
       </ErrorBoundary>
 
@@ -181,7 +187,7 @@ const Contracts = () => {
           onOpenChange={setContractDetailsOpen}
           onDataUpdate={() => {
             if (selectedContractId) {
-              debouncedContractRefresh(selectedContractId);
+              refreshSingleContractFromServer(selectedContractId, true);
             }
           }}
         />

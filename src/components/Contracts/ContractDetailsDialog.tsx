@@ -140,6 +140,9 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
             company_signed_at: new Date().toISOString()
           };
 
+      // تحديث محلي فوري (optimistic update)
+      const updatedContract = { ...contract, ...updateData };
+      
       // Check if this completes the signing process
       const hasCustomerSignature = type === 'customer' || contract.customer_signature;
       const hasCompanySignature = type === 'company' || contract.company_signature;
@@ -147,7 +150,11 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
       // If both signatures are now present and status is draft, move to pending
       if (hasCustomerSignature && hasCompanySignature && contract.status === 'draft') {
         updateData.status = 'pending';
+        updatedContract.status = 'pending';
       }
+
+      // تحديث فوري للحالة المحلية
+      setContract(updatedContract);
 
       const { error } = await supabase
         .from('contracts')
@@ -159,8 +166,8 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
 
       if (error) throw error;
 
+      // تحديث البيانات الفعلية
       await loadContract();
-      // Immediate notification to prevent UI flickering
       if (onDataUpdate) {
         onDataUpdate();
       }
@@ -175,6 +182,8 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
       });
     } catch (error) {
       console.error('Error saving signature:', error);
+      // إعادة تحميل البيانات في حالة الخطأ
+      await loadContract();
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء حفظ التوقيع",
