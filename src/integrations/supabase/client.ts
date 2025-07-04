@@ -51,23 +51,3 @@ supabase.auth.onAuthStateChange((event, session) => {
     console.log('🔄 Auth token refreshed successfully');
   }
 });
-
-// إضافة interceptor للتعامل مع الأخطاء
-const originalFrom = supabase.from;
-supabase.from = function(table: string) {
-  const query = originalFrom.call(this, table);
-  
-  // تحسين معالجة الأخطاء
-  const originalSelect = query.select;
-  query.select = function(...args: any[]) {
-    return originalSelect.apply(this, args).catch((error: any) => {
-      const result = handleError(error, `supabase-${table}-select`);
-      if (!result.handled) {
-        throw error;
-      }
-      return { data: null, error };
-    });
-  };
-  
-  return query;
-};
