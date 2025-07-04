@@ -240,11 +240,6 @@ export const ViolationsList: React.FC<ViolationsListProps> = ({
                     </TableCell>
                     <TableCell>
                       {format(new Date(violation.violation_date), 'dd/MM/yyyy', { locale: ar })}
-                      {violation.violation_time && (
-                        <div className="text-sm text-muted-foreground">
-                          {violation.violation_time}
-                        </div>
-                      )}
                     </TableCell>
                     <TableCell>
                       <div>

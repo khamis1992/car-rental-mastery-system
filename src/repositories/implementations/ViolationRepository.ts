@@ -12,10 +12,17 @@ export class ViolationRepository extends BaseRepository<TrafficViolation> implem
       .select(`
         *,
         violation_types (
+          id,
           violation_code,
           violation_name_ar,
+          violation_name_en,
+          base_fine_amount,
+          points,
           category,
-          severity_level
+          severity_level,
+          is_active,
+          created_at,
+          updated_at
         ),
         customers (
           name,
@@ -44,10 +51,17 @@ export class ViolationRepository extends BaseRepository<TrafficViolation> implem
       .select(`
         *,
         violation_types (
+          id,
           violation_code,
           violation_name_ar,
+          violation_name_en,
+          base_fine_amount,
+          points,
           category,
-          severity_level
+          severity_level,
+          is_active,
+          created_at,
+          updated_at
         ),
         vehicles (
           license_plate,
@@ -72,10 +86,17 @@ export class ViolationRepository extends BaseRepository<TrafficViolation> implem
       .select(`
         *,
         violation_types (
+          id,
           violation_code,
           violation_name_ar,
+          violation_name_en,
+          base_fine_amount,
+          points,
           category,
-          severity_level
+          severity_level,
+          is_active,
+          created_at,
+          updated_at
         ),
         customers (
           name,
@@ -99,10 +120,17 @@ export class ViolationRepository extends BaseRepository<TrafficViolation> implem
       .select(`
         *,
         violation_types (
+          id,
           violation_code,
           violation_name_ar,
+          violation_name_en,
+          base_fine_amount,
+          points,
           category,
-          severity_level
+          severity_level,
+          is_active,
+          created_at,
+          updated_at
         ),
         customers (
           name,
@@ -140,10 +168,17 @@ export class ViolationRepository extends BaseRepository<TrafficViolation> implem
       .select(`
         *,
         violation_types (
+          id,
           violation_code,
           violation_name_ar,
+          violation_name_en,
+          base_fine_amount,
+          points,
           category,
-          severity_level
+          severity_level,
+          is_active,
+          created_at,
+          updated_at
         ),
         customers (
           name,

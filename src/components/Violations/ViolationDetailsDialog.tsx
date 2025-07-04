@@ -217,13 +217,7 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
                       <span className="font-medium">
                         {format(new Date(violation.violation_date), 'dd/MM/yyyy', { locale: ar })}
                       </span>
-                    </div>
-                    {violation.violation_time && (
-                      <div>
-                        <span className="text-muted-foreground block">وقت المخالفة:</span>
-                        <span className="font-medium">{violation.violation_time}</span>
-                      </div>
-                    )}
+                     </div>
                     {violation.location && (
                       <div>
                         <span className="text-muted-foreground block">المكان:</span>

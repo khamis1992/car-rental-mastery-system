@@ -19,7 +19,6 @@ export interface TrafficViolation {
   violation_number: string;
   violation_type_id: string;
   violation_date: string;
-  violation_time?: string;
   location?: string;
   description?: string;
   vehicle_id: string;

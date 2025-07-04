@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -57,7 +57,6 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
   const [formData, setFormData] = useState({
     violation_type_id: '',
     violation_date: new Date().toISOString().split('T')[0],
-    violation_time: '',
     location: '',
     description: '',
     notes: ''
@@ -161,13 +160,19 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
         total_amount: selectedViolationType.base_fine_amount
       });
 
+      toast({
+        title: 'تم إنشاء المخالفة',
+        description: 'تم إنشاء المخالفة المرورية بنجاح',
+      });
+
       onSuccess();
       resetForm();
     } catch (error) {
       console.error('Error creating violation:', error);
+      const errorMessage = error instanceof Error ? error.message : 'حدث خطأ غير محدد';
       toast({
         title: 'خطأ في إنشاء المخالفة',
-        description: 'حدث خطأ أثناء إنشاء المخالفة',
+        description: `فشل في إنشاء المخالفة: ${errorMessage}`,
         variant: 'destructive'
       });
     } finally {
@@ -179,7 +184,6 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
     setFormData({
       violation_type_id: '',
       violation_date: new Date().toISOString().split('T')[0],
-      violation_time: '',
       location: '',
       description: '',
       notes: ''
@@ -194,6 +198,9 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>إضافة مخالفة مرورية جديدة</DialogTitle>
+          <DialogDescription>
+            قم بإدخال بيانات المخالفة المرورية الجديدة
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -272,7 +279,7 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
               <CardTitle className="text-lg">تفاصيل المخالفة</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="violation_date">تاريخ المخالفة *</Label>
                   <Input
@@ -281,16 +288,6 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
                     value={formData.violation_date}
                     onChange={(e) => setFormData(prev => ({ ...prev, violation_date: e.target.value }))}
                     required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="violation_time">وقت المخالفة</Label>
-                  <Input
-                    id="violation_time"
-                    type="time"
-                    value={formData.violation_time}
-                    onChange={(e) => setFormData(prev => ({ ...prev, violation_time: e.target.value }))}
                   />
                 </div>
 

@@ -57,10 +57,17 @@ export const violationService = {
       .select(`
         *,
         violation_types (
+          id,
           violation_code,
           violation_name_ar,
+          violation_name_en,
+          base_fine_amount,
+          points,
           category,
-          severity_level
+          severity_level,
+          is_active,
+          created_at,
+          updated_at
         ),
         customers (
           name,
@@ -112,7 +119,6 @@ export const violationService = {
         violation_number: violationNumber,
         violation_type_id: violation.violation_type_id!,
         violation_date: violation.violation_date!,
-        violation_time: violation.violation_time,
         location: violation.location,
         description: violation.description,
         vehicle_id: violation.vehicle_id!,
@@ -246,10 +252,17 @@ export const violationService = {
       .select(`
         *,
         violation_types (
+          id,
           violation_code,
           violation_name_ar,
+          violation_name_en,
+          base_fine_amount,
+          points,
           category,
-          severity_level
+          severity_level,
+          is_active,
+          created_at,
+          updated_at
         ),
         customers (
           name,
