@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,9 +21,12 @@ export const useContractsDataRefactored = () => {
   const { toast } = useToast();
   const { user, session, loading: authLoading } = useAuth();
   
-  // Add ref for managing abort controllers
+  // Add ref for managing abort controllers and debouncing
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
   const isMountedRef = useRef(true);
+  const pendingUpdatesRef = useRef<Set<string>>(new Set());
+  const lastUpdateTimeRef = useRef<number>(0);
+  const updateTimeoutRef = useRef<NodeJS.Timeout>();
 
   const contractService = serviceContainer.getContractBusinessService();
   const quotationService = serviceContainer.getQuotationBusinessService();
@@ -239,6 +242,56 @@ export const useContractsDataRefactored = () => {
     }
   };
 
+  // Debounced contract refresh to prevent multiple simultaneous updates
+  const debouncedContractRefresh = useCallback((contractId?: string) => {
+    const now = Date.now();
+    const timeSinceLastUpdate = now - lastUpdateTimeRef.current;
+    
+    // Clear existing timeout
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current);
+    }
+    
+    // If this contract is already being updated, skip
+    if (contractId && pendingUpdatesRef.current.has(contractId)) {
+      console.log(`🔄 Contract ${contractId} update already pending, skipping`);
+      return;
+    }
+    
+    // Mark contract as pending update
+    if (contractId) {
+      pendingUpdatesRef.current.add(contractId);
+    }
+    
+    const executeUpdate = async () => {
+      try {
+        lastUpdateTimeRef.current = Date.now();
+        
+        if (contractId) {
+          await refreshSingleContract(contractId);
+          pendingUpdatesRef.current.delete(contractId);
+        } else {
+          // Full refresh - only if no pending single updates
+          if (pendingUpdatesRef.current.size === 0) {
+            await refreshContracts(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error in debounced refresh:', error);
+        if (contractId) {
+          pendingUpdatesRef.current.delete(contractId);
+        }
+      }
+    };
+    
+    // If it's been less than 500ms since last update, debounce
+    if (timeSinceLastUpdate < 500) {
+      updateTimeoutRef.current = setTimeout(executeUpdate, 500 - timeSinceLastUpdate);
+    } else {
+      executeUpdate();
+    }
+  }, []);
+
   // Refresh single contract by ID without affecting the list
   const refreshSingleContract = async (contractId: string) => {
     try {
@@ -281,8 +334,12 @@ export const useContractsDataRefactored = () => {
       );
     } catch (error) {
       console.error('Error refreshing single contract:', error);
-      // Fallback to full refresh if single contract refresh fails
-      await refreshContracts(true);
+      // Don't fallback to full refresh to prevent clearing the list
+      toast({
+        title: "خطأ في التحديث",
+        description: "فشل في تحديث بيانات العقد",
+        variant: "destructive"
+      });
     }
   };
 
@@ -354,6 +411,11 @@ export const useContractsDataRefactored = () => {
     
     return () => {
       isMountedRef.current = false;
+      // Clear pending updates
+      pendingUpdatesRef.current.clear();
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
       // Cancel all pending requests
       abortControllersRef.current.forEach((controller, key) => {
         controller.abort();
@@ -375,5 +437,6 @@ export const useContractsDataRefactored = () => {
     refreshContracts,
     refreshSingleContract,
     updateContractOptimistically,
+    debouncedContractRefresh,
   };
 };

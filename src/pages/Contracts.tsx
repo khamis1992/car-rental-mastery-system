@@ -33,6 +33,7 @@ const Contracts = () => {
     refreshContracts,
     refreshSingleContract,
     updateContractOptimistically,
+    debouncedContractRefresh,
   } = useContractsDataRefactored();
 
   // التحقق من وجود quotation parameter في URL
@@ -125,7 +126,7 @@ const Contracts = () => {
           onEdit={(id) => console.log('Edit contract:', id)}
           onActivate={(id) => console.log('Activate contract:', id)}
           onComplete={(id) => console.log('Complete contract:', id)}
-          onStatusUpdate={refreshContracts}
+          onStatusUpdate={() => debouncedContractRefresh()}
         />
       </ErrorBoundary>
 
@@ -180,7 +181,7 @@ const Contracts = () => {
           onOpenChange={setContractDetailsOpen}
           onDataUpdate={() => {
             if (selectedContractId) {
-              refreshSingleContract(selectedContractId);
+              debouncedContractRefresh(selectedContractId);
             }
           }}
         />
