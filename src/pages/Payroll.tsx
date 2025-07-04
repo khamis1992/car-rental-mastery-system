@@ -188,7 +188,7 @@ const Payroll = () => {
         <TabsContent value="current">
           <Card>
             <CardHeader>
-              <CardTitle>رواتب الشهر الحالي</CardTitle>
+              <CardTitle className="text-right">رواتب الشهر الحالي</CardTitle>
               
               {/* فلاتر البحث */}
               <div className="flex flex-wrap gap-4 mt-4">
