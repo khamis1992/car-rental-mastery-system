@@ -157,24 +157,26 @@ export const useContractsOptimized = () => {
     }
   }, [contractService, toast]);
 
-  // محسن: تحميل العقود مرة واحدة فقط وتخزينها في الـ cache
+  // تحميل العقود الأولي مع معالجة أفضل للأخطاء
   const loadContractsInitial = useCallback(async () => {
     try {
       const data = await contractService.getAllContracts();
       
       if (!isMountedRef.current) return;
       
-      // تحديث القائمة والـ cache
       const sortedContracts = data.sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       
+      // تحديث واحد للحالة لتجنب إعادة الرندر المتعددة
       setContracts(sortedContracts);
       
+      // تحديث الـ cache
       const cache = cacheRef.current;
       const now = Date.now();
+      cache.contracts.clear(); // مسح القديم
       
-      data.forEach(contract => {
+      sortedContracts.forEach(contract => {
         cache.contracts.set(contract.id, contract);
         cache.lastUpdated.set(contract.id, now);
       });

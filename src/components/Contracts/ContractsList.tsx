@@ -277,7 +277,12 @@ export const ContractsList: React.FC<ContractsListProps> = ({
         contractId={selectedContractId}
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
-        onDataUpdate={onStatusUpdate}
+          onDataUpdate={() => {
+            // لا نحتاج لإعادة تحميل، فقط إظهار رسالة نجاح
+            if (onStatusUpdate) {
+              onStatusUpdate();
+            }
+          }}
       />
     </div>
   );

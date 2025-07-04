@@ -47,6 +47,7 @@ const Contracts = () => {
   }, []);
 
   const handleFormSuccess = () => {
+    // تحديث ذكي بدلاً من إعادة تحميل كامل
     loadData();
   };
 
