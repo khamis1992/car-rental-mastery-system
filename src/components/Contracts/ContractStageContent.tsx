@@ -227,6 +227,9 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
               <p className="text-green-800 text-sm">
                 تاريخ التسليم: {formatDate(contract.delivery_completed_at)}
               </p>
+              <p className="text-green-700 text-sm mt-1 font-medium">
+                يمكنك الآن الانتقال لمرحلة الدفع لتفعيل العقد
+              </p>
             </div>
           ) : (
             <div className="space-y-4">

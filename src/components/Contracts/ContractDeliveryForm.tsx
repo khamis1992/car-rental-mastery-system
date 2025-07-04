@@ -90,31 +90,44 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
     setLoading(true);
 
     try {
+      // Update contract with delivery information
       const { error } = await supabase
         .from('contracts')
         .update({
           ...deliveryData,
           pickup_mileage: deliveryData.pickup_mileage ? parseInt(deliveryData.pickup_mileage) : null,
           pickup_damages: JSON.parse(JSON.stringify(deliveryData.pickup_damages)), // Convert to Json
-          delivery_completed_at: new Date().toISOString()
+          delivery_completed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         })
         .eq('id', contract.id);
 
       if (error) throw error;
 
       // Update vehicle status to rented
-      await supabase
+      const { error: vehicleError } = await supabase
         .from('vehicles')
         .update({ status: 'rented' })
         .eq('id', contract.vehicle_id);
 
+      if (vehicleError) {
+        console.error('Error updating vehicle status:', vehicleError);
+        // Don't fail the entire operation for vehicle status update
+      }
+
       toast({
         title: "تم بنجاح",
-        description: "تم تسليم المركبة بنجاح. يجب تسجيل الدفع لتفعيل العقد.",
+        description: "تم تسليم المركبة بنجاح. الآن يمكن الانتقال لمرحلة الدفع.",
       });
 
-      onSuccess();
+      // Close dialog first
       onOpenChange(false);
+      
+      // Call onSuccess to trigger parent updates
+      if (onSuccess) {
+        onSuccess();
+      }
+      
     } catch (error) {
       console.error('Error delivering vehicle:', error);
       toast({
