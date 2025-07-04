@@ -2,6 +2,7 @@ import StatsCard from "@/components/Dashboard/StatsCard";
 import QuickActions from "@/components/Dashboard/QuickActions";
 import RecentContracts from "@/components/Dashboard/RecentContracts";
 import FleetOverview from "@/components/Dashboard/FleetOverview";
+import DailyTasksChecklist from "@/components/Dashboard/DailyTasksChecklist";
 import { 
   User, 
   Calendar, 
@@ -11,9 +12,12 @@ import {
   DollarSign
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useContractsDataRefactored } from "@/hooks/useContractsDataRefactored";
+import { formatCurrencyKWD } from "@/lib/currency";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { contractStats, customers, loading } = useContractsDataRefactored();
 
   return (
     <div className="container mx-auto px-6 py-8">
@@ -31,46 +35,59 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in">
           <StatsCard
             title="إجمالي العقود"
-            value="0"
+            value={loading ? "..." : contractStats.total.toString()}
             subtitle="هذا الشهر"
             icon={<FileText className="w-5 h-5" />}
-            trend={{ value: "لا توجد بيانات", type: "neutral" }}
+            trend={{ 
+              value: loading ? "..." : `${contractStats.active} نشط`, 
+              type: contractStats.active > 0 ? "up" : "neutral" 
+            }}
             actionText="عرض التفاصيل"
             onActionClick={() => navigate('/contracts')}
           />
           <StatsCard
             title="العملاء النشطين"
-            value="0"
+            value={loading ? "..." : customers.length.toString()}
             subtitle="عميل مسجل"
             icon={<User className="w-5 h-5" />}
-            trend={{ value: "لا توجد بيانات", type: "neutral" }}
+            trend={{ 
+              value: loading ? "..." : `${customers.length} مسجل`, 
+              type: customers.length > 0 ? "up" : "neutral" 
+            }}
             actionText="إدارة العملاء"
             onActionClick={() => navigate('/customers')}
           />
           <StatsCard
-            title="الإيرادات اليوم"
-            value="0 د.ك"
-            subtitle="من 0 عقد"
+            title="الإيرادات الشهرية"
+            value={loading ? "..." : formatCurrencyKWD(contractStats.monthlyRevenue)}
+            subtitle={`من ${contractStats.active} عقد نشط`}
             icon={<DollarSign className="w-5 h-5" />}
-            trend={{ value: "لا توجد بيانات", type: "neutral" }}
+            trend={{ 
+              value: loading ? "..." : contractStats.monthlyRevenue > 0 ? "إيجابي" : "لا توجد إيرادات", 
+              type: contractStats.monthlyRevenue > 0 ? "up" : "neutral" 
+            }}
             actionText="التقارير المالية"
             onActionClick={() => navigate('/analytics')}
           />
           <StatsCard
             title="العقود المنتهية اليوم"
-            value="0"
-            subtitle="لا توجد عقود"
+            value={loading ? "..." : contractStats.endingToday.toString()}
+            subtitle={contractStats.endingToday > 0 ? "تحتاج متابعة" : "لا توجد عقود"}
             icon={<Calendar className="w-5 h-5" />}
-            trend={{ value: "لا توجد بيانات", type: "neutral" }}
+            trend={{ 
+              value: loading ? "..." : contractStats.endingToday > 0 ? "تحتاج انتباه" : "كله تمام", 
+              type: contractStats.endingToday > 0 ? "down" : "up" 
+            }}
             actionText="متابعة الآن"
             onActionClick={() => navigate('/contracts')}
           />
         </div>
 
         {/* قسم الإجراءات السريعة ونظرة عامة على الأسطول */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 animate-fade-in">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-fade-in">
           <QuickActions />
           <FleetOverview />
+          <DailyTasksChecklist />
         </div>
 
         {/* المحتوى الرئيسي */}
