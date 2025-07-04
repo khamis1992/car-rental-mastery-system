@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { handleError, createSafeAbortController } from '@/utils/errorHandling';
 
 interface Profile {
   id: string;
@@ -42,65 +43,135 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string, retryCount = 0): Promise<Profile | null> => {
+    if (!userId) return null;
+    
+    // إنشاء AbortController للتحكم في الطلب
+    const controller = createSafeAbortController(10000); // 10 ثواني timeout
+    
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
+        .abortSignal(controller.signal)
         .single();
       
       if (error) {
-        console.error('خطأ في جلب الملف الشخصي:', error);
+        const errorResult = handleError(error, 'auth-fetchProfile');
+        
+        // إعادة المحاولة للأخطاء المؤقتة
+        if (errorResult.retry && retryCount < 2) {
+          console.log(`🔄 Retrying fetch profile, attempt ${retryCount + 1}`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+          return fetchProfile(userId, retryCount + 1);
+        }
+        
+        if (errorResult.shouldLog) {
+          console.error('❌ خطأ في جلب الملف الشخصي:', error);
+        }
         return null;
       }
       
       return data;
-    } catch (error) {
-      console.error('خطأ في جلب الملف الشخصي:', error);
+    } catch (error: any) {
+      const errorResult = handleError(error, 'auth-fetchProfile-catch');
+      
+      if (!errorResult.handled) {
+        console.error('❌ خطأ غير متوقع في جلب الملف الشخصي:', error);
+      }
+      
       return null;
+    } finally {
+      if (!controller.signal.aborted) {
+        controller.abort();
+      }
     }
-  };
+  }, []);
 
   useEffect(() => {
-    // إعداد مستمع تغيير حالة المصادقة
+    let isMounted = true;
+    
+    // إعداد مستمع تغيير حالة المصادقة مع معالجة محسنة للأخطاء
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+        if (!isMounted) return;
         
-        if (session?.user && event === 'SIGNED_IN') {
-          // جلب الملف الشخصي بشكل غير متزامن
-          setTimeout(async () => {
-            const userProfile = await fetchProfile(session.user.id);
-            setProfile(userProfile);
-          }, 1000); // تأخير قصير للسماح للواجهة بالتحميل
-        } else {
-          setProfile(null);
+        try {
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          console.log(`🔐 Auth event: ${event}`, session?.user?.email);
+          
+          if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+            // جلب الملف الشخصي مع تأخير قصير لضمان استقرار الجلسة
+            const delay = event === 'SIGNED_IN' ? 500 : 0;
+            setTimeout(async () => {
+              if (!isMounted) return;
+              
+              const userProfile = await fetchProfile(session.user.id);
+              if (isMounted) {
+                setProfile(userProfile);
+              }
+            }, delay);
+          } else if (event === 'SIGNED_OUT') {
+            setProfile(null);
+            // تنظيف البيانات المحلية
+            localStorage.removeItem('profile-cache');
+          }
+          
+          setLoading(false);
+        } catch (error) {
+          handleError(error, 'auth-onAuthStateChange');
+          if (isMounted) {
+            setLoading(false);
+          }
         }
-        
-        setLoading(false);
       }
     );
 
-    // التحقق من الجلسة الحالية
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        setTimeout(async () => {
+    // التحقق من الجلسة الحالية مع معالجة أفضل للأخطاء
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          const errorResult = handleError(error, 'auth-getSession');
+          if (errorResult.shouldLog) {
+            console.error('❌ خطأ في جلب الجلسة:', error);
+          }
+        }
+        
+        if (!isMounted) return;
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
           const userProfile = await fetchProfile(session.user.id);
-          setProfile(userProfile);
+          if (isMounted) {
+            setProfile(userProfile);
+          }
+        }
+        
+        if (isMounted) {
           setLoading(false);
-        }, 0);
-      } else {
-        setLoading(false);
+        }
+      } catch (error) {
+        handleError(error, 'auth-initialize');
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-    });
+    };
 
-    return () => subscription.unsubscribe();
-  }, []);
+    initializeAuth();
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [fetchProfile]);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({

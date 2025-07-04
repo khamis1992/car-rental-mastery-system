@@ -9,6 +9,8 @@ import { SettingsProvider } from "@/contexts/SettingsContext";
 import { SearchProvider } from "@/contexts/SearchContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Layout } from "@/components/Layout/Layout";
+import { GlobalErrorBoundary } from "@/components/ErrorBoundary/GlobalErrorBoundary";
+import { setupGlobalErrorHandling } from "@/utils/errorHandling";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Customers from "./pages/Customers";
@@ -38,189 +40,215 @@ import { ContractStageRouter } from "./components/Contracts/ContractStageRouter"
 import AttendanceReminderWrapper from "@/components/Attendance/AttendanceReminderWrapper";
 import { SearchDialog } from "@/components/Search/SearchDialog";
 
-const queryClient = new QueryClient();
+// إعداد معالج الأخطاء العام
+setupGlobalErrorHandling();
+
+// إعداد QueryClient مع معالجة محسنة للأخطاء
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error: any) => {
+        // تجنب إعادة المحاولة للأخطاء التي لا تحتاج إعادة محاولة
+        if (error?.name === 'AbortError') return false;
+        if (error?.code === 'PGRST301') return false; // JWT errors
+        return failureCount < 2;
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      staleTime: 5 * 60 * 1000, // 5 دقائق
+      gcTime: 10 * 60 * 1000, // 10 دقائق (تم تغيير cacheTime إلى gcTime في الإصدار الجديد)
+    },
+    mutations: {
+      retry: (failureCount, error: any) => {
+        if (error?.name === 'AbortError') return false;
+        return failureCount < 1; // إعادة محاولة واحدة فقط للمطالبات
+      },
+    },
+  },
+});
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <NotificationProvider>
-        <SettingsProvider>
-          <SearchProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Index />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/customers" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Customers />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/fleet" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Fleet />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/quotations" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Quotations />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/contracts" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Contracts />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/invoicing" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Invoicing />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/accounting" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Accounting />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/settings" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Settings />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/notifications" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Notifications />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/analytics" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Analytics />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/communications" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Communications />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/maintenance" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Maintenance />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/violations" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <TrafficViolations />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/employees" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Employees />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/attendance" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Attendance />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/leaves" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Leaves />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/payroll" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Payroll />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  {/* Contract stage routes */}
-                  <Route path="/contracts/stage/draft/:contractId" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <DraftStage />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/contracts/stage/pending/:contractId" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <PendingStage />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/contracts/stage/active/:contractId" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <ActiveStage />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/contracts/stage/payment/:contractId" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <PaymentStage />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/contracts/stage/completed/:contractId" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <CompletedStage />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  {/* Public routes */}
-                  <Route path="/public-quotation/:token" element={<PublicQuotation />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <AttendanceReminderWrapper />
-                <SearchDialog />
-              </BrowserRouter>
-            </TooltipProvider>
-          </SearchProvider>
-        </SettingsProvider>
-      </NotificationProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+  <GlobalErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <NotificationProvider>
+          <SettingsProvider>
+            <SearchProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Index />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/customers" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Customers />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/fleet" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Fleet />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/quotations" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Quotations />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/contracts" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Contracts />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/invoicing" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Invoicing />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/accounting" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Accounting />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/settings" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Settings />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/notifications" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Notifications />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/analytics" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Analytics />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/communications" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Communications />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/maintenance" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Maintenance />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/violations" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <TrafficViolations />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/employees" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Employees />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/attendance" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Attendance />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/leaves" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Leaves />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/payroll" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Payroll />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    {/* Contract stage routes */}
+                    <Route path="/contracts/stage/draft/:contractId" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <DraftStage />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/contracts/stage/pending/:contractId" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <PendingStage />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/contracts/stage/active/:contractId" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <ActiveStage />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/contracts/stage/payment/:contractId" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <PaymentStage />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/contracts/stage/completed/:contractId" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <CompletedStage />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    {/* Public routes */}
+                    <Route path="/public-quotation/:token" element={<PublicQuotation />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  <AttendanceReminderWrapper />
+                  <SearchDialog />
+                </BrowserRouter>
+              </TooltipProvider>
+            </SearchProvider>
+          </SettingsProvider>
+        </NotificationProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </GlobalErrorBoundary>
 );
 
 export default App;

@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { serviceContainer } from '@/services/Container/ServiceContainer';
 import { ContractWithDetails } from '@/services/contractService';
+import { handleError, createSafeAbortController } from '@/utils/errorHandling';
 
 interface ContractsCache {
   contracts: Map<string, ContractWithDetails>;
@@ -192,7 +193,7 @@ export const useContractsOptimized = () => {
 
   const loadQuotations = useCallback(async () => {
     const key = 'quotations';
-    const controller = new AbortController();
+    const controller = createSafeAbortController(15000); // 15 ثانية timeout
     abortControllersRef.current.set(key, controller);
     
     try {
@@ -203,11 +204,16 @@ export const useContractsOptimized = () => {
       setQuotations(activeQuotations);
       setErrors(prev => ({ ...prev, quotations: '' }));
     } catch (error: any) {
-      if (error.name === 'AbortError' || error.message?.includes('abort')) return;
+      const errorResult = handleError(error, 'contracts-loadQuotations');
+      
+      if (errorResult.handled && !errorResult.shouldLog) return;
       
       console.error('Error loading quotations:', error);
-      if (isMountedRef.current) {
-        setErrors(prev => ({ ...prev, quotations: error.message || 'فشل في تحميل عروض الأسعار' }));
+      if (isMountedRef.current && errorResult.shouldLog) {
+        setErrors(prev => ({ 
+          ...prev, 
+          quotations: errorResult.message || error.message || 'فشل في تحميل عروض الأسعار' 
+        }));
       }
     } finally {
       abortControllersRef.current.delete(key);
@@ -216,7 +222,7 @@ export const useContractsOptimized = () => {
 
   const loadCustomers = useCallback(async () => {
     const key = 'customers';
-    const controller = new AbortController();
+    const controller = createSafeAbortController(10000); // 10 ثواني timeout
     abortControllersRef.current.set(key, controller);
     
     try {
@@ -234,11 +240,16 @@ export const useContractsOptimized = () => {
       setCustomers(data || []);
       setErrors(prev => ({ ...prev, customers: '' }));
     } catch (error: any) {
-      if (error.name === 'AbortError' || error.message?.includes('abort')) return;
+      const errorResult = handleError(error, 'contracts-loadCustomers');
+      
+      if (errorResult.handled && !errorResult.shouldLog) return;
       
       console.error('Error loading customers:', error);
-      if (isMountedRef.current) {
-        setErrors(prev => ({ ...prev, customers: error.message || 'فشل في تحميل العملاء' }));
+      if (isMountedRef.current && errorResult.shouldLog) {
+        setErrors(prev => ({ 
+          ...prev, 
+          customers: errorResult.message || error.message || 'فشل في تحميل العملاء' 
+        }));
       }
     } finally {
       abortControllersRef.current.delete(key);
@@ -247,7 +258,7 @@ export const useContractsOptimized = () => {
 
   const loadVehicles = useCallback(async () => {
     const key = 'vehicles';
-    const controller = new AbortController();
+    const controller = createSafeAbortController(10000); // 10 ثواني timeout
     abortControllersRef.current.set(key, controller);
     
     try {
@@ -264,11 +275,16 @@ export const useContractsOptimized = () => {
       setVehicles(data || []);
       setErrors(prev => ({ ...prev, vehicles: '' }));
     } catch (error: any) {
-      if (error.name === 'AbortError' || error.message?.includes('abort')) return;
+      const errorResult = handleError(error, 'contracts-loadVehicles');
+      
+      if (errorResult.handled && !errorResult.shouldLog) return;
       
       console.error('Error loading vehicles:', error);
-      if (isMountedRef.current) {
-        setErrors(prev => ({ ...prev, vehicles: error.message || 'فشل في تحميل المركبات' }));
+      if (isMountedRef.current && errorResult.shouldLog) {
+        setErrors(prev => ({ 
+          ...prev, 
+          vehicles: errorResult.message || error.message || 'فشل في تحميل المركبات' 
+        }));
       }
     } finally {
       abortControllersRef.current.delete(key);
