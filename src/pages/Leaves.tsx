@@ -453,14 +453,6 @@ const Leaves = () => {
                   <Button type="submit" className="flex-1" disabled={isLoading}>
                     {isLoading ? 'جاري الإرسال...' : 'إرسال الطلب'}
                   </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => setIsDialogOpen(false)}
-                    className="flex-1"
-                  >
-                    إلغاء
-                  </Button>
                 </div>
               </form>
             </Form>
