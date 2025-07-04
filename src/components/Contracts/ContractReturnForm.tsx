@@ -97,14 +97,15 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
     setLoading(true);
 
     try {
-      // First, update the contract with return details without completing it
+      // Update the contract with return details and complete it
       const { error } = await supabase
         .from('contracts')
         .update({
           ...returnData,
           return_mileage: returnData.return_mileage ? parseInt(returnData.return_mileage) : null,
           return_damages: JSON.parse(JSON.stringify(returnData.return_damages)), // Convert to Json
-          // Don't set status to 'completed' yet - let the payment stage handle that
+          status: 'completed', // Mark contract as completed when vehicle is returned
+          updated_at: new Date().toISOString()
         })
         .eq('id', contract.id);
 
@@ -118,7 +119,7 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
 
       toast({
         title: "تم بنجاح",
-        description: "تم استلام المركبة بنجاح. يمكنك الآن الانتقال لمرحلة الدفع لإنهاء العقد.",
+        description: "تم استلام المركبة وإنهاء العقد بنجاح.",
       });
 
       onSuccess();

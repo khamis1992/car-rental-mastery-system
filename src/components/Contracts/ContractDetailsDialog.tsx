@@ -64,7 +64,10 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
       // Auto-determine current stage based on contract status and timestamps
       let determinedStage = 'draft';
       
-      if (contract.status === 'draft') {
+      if (contract.status === 'completed') {
+        // Contract is completed - final stage
+        determinedStage = 'completed';
+      } else if (contract.status === 'draft') {
         determinedStage = 'draft';
       } else if (contract.status === 'pending' && (!contract.customer_signature || !contract.company_signature)) {
         determinedStage = 'pending';
@@ -75,16 +78,14 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
         // Vehicle has been delivered but payment not registered
         console.log('✅ ContractDetailsDialog: Should move to payment stage - delivery completed at:', contract.delivery_completed_at);
         determinedStage = 'payment';
-      } else if (contract.payment_registered_at && !contract.actual_end_date) {
-        // Payment registered but vehicle not yet returned
+      } else if (contract.payment_registered_at && contract.status === 'active' && !contract.actual_end_date) {
+        // Payment registered and contract is active but vehicle not yet returned
         determinedStage = 'return';
-      } else if (contract.actual_end_date && contract.status !== 'completed') {
-        // Vehicle has been returned but contract not completed
-        determinedStage = 'completed';
-      } else if (contract.status === 'completed') {
+      } else if (contract.actual_end_date || contract.status === 'completed') {
+        // Vehicle has been returned or contract completed
         determinedStage = 'completed';
       } else {
-        // Fallback based on status
+        // Fallback - determine based on current status
         determinedStage = contract.status === 'active' ? 'return' : 'draft';
       }
       
@@ -204,10 +205,14 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           description: "تم الانتقال إلى مرحلة الاستلام",
         });
         return;
-      } else if (contract.actual_end_date && contract.status !== 'completed') {
-        // Advance from return to completed
-        updateData.status = 'completed';
-        successMessage = 'تم إنهاء العقد بنجاح';
+      } else if (contract.status === 'completed' || contract.actual_end_date) {
+        // Contract is already completed
+        setCurrentStage('completed');
+        toast({
+          title: "العقد مكتمل",
+          description: "تم إنهاء العقد بالفعل",
+        });
+        return;
       } else {
         throw new Error('Cannot advance to next stage');
       }
