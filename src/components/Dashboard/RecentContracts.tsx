@@ -87,7 +87,7 @@ const RecentContracts = () => {
                   <div>
                     <div className="font-medium">{contract.contract_number}</div>
                     <div className="text-sm text-muted-foreground">
-                      {contract.customers?.name || 'عميل غير محدد'}
+                      {contract.customer_name || 'عميل غير محدد'}
                     </div>
                   </div>
                 </div>
