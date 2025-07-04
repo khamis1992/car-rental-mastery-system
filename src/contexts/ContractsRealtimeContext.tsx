@@ -89,6 +89,8 @@ export const ContractsRealtimeProvider: React.FC<ContractsRealtimeProviderProps>
           terms_and_conditions,
           notes,
           created_at,
+          delivery_completed_at,
+          payment_registered_at,
           customers(name, phone),
           vehicles(make, model, vehicle_number)
         `)
@@ -127,6 +129,9 @@ export const ContractsRealtimeProvider: React.FC<ContractsRealtimeProviderProps>
         customer_id: contract.customer_id,
         vehicle_id: contract.vehicle_id,
         quotation_id: contract.quotation_id,
+        // Add missing fields for stage determination
+        delivery_completed_at: contract.delivery_completed_at,
+        payment_registered_at: contract.payment_registered_at,
       })) as ContractWithDetails[];
 
       if (isMountedRef.current) {
@@ -219,9 +224,31 @@ export const ContractsRealtimeProvider: React.FC<ContractsRealtimeProviderProps>
         .select(`
           id,
           contract_number,
-          status,
+          customer_id,
+          vehicle_id,
+          quotation_id,
+          start_date,
+          end_date,
+          actual_start_date,
+          actual_end_date,
+          rental_days,
+          contract_type,
+          daily_rate,
+          total_amount,
+          discount_amount,
+          tax_amount,
+          security_deposit,
+          insurance_amount,
           final_amount,
-          updated_at,
+          status,
+          pickup_location,
+          return_location,
+          special_conditions,
+          terms_and_conditions,
+          notes,
+          created_at,
+          delivery_completed_at,
+          payment_registered_at,
           customers(name, phone),
           vehicles(make, model, vehicle_number)
         `)
@@ -232,13 +259,38 @@ export const ContractsRealtimeProvider: React.FC<ContractsRealtimeProviderProps>
 
       if (data) {
         const updates = {
-          status: data.status,
-          final_amount: data.final_amount,
+          id: data.id,
+          contract_number: data.contract_number,
           customer_name: data.customers?.name || 'غير محدد',
           customer_phone: data.customers?.phone || '',
           vehicle_info: data.vehicles 
             ? `${data.vehicles.make} ${data.vehicles.model} - ${data.vehicles.vehicle_number}`
             : 'غير محدد',
+          start_date: data.start_date,
+          end_date: data.end_date,
+          actual_start_date: data.actual_start_date,
+          actual_end_date: data.actual_end_date,
+          rental_days: data.rental_days,
+          contract_type: data.contract_type,
+          daily_rate: data.daily_rate,
+          total_amount: data.total_amount,
+          discount_amount: data.discount_amount || 0,
+          tax_amount: data.tax_amount || 0,
+          security_deposit: data.security_deposit || 0,
+          insurance_amount: data.insurance_amount || 0,
+          final_amount: data.final_amount,
+          status: data.status,
+          pickup_location: data.pickup_location,
+          return_location: data.return_location,
+          special_conditions: data.special_conditions,
+          terms_and_conditions: data.terms_and_conditions,
+          notes: data.notes,
+          created_at: data.created_at,
+          customer_id: data.customer_id,
+          vehicle_id: data.vehicle_id,
+          quotation_id: data.quotation_id,
+          delivery_completed_at: data.delivery_completed_at,
+          payment_registered_at: data.payment_registered_at,
         };
 
         updateContract(contractId, updates);

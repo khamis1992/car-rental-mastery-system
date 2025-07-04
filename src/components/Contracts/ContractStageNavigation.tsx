@@ -97,7 +97,7 @@ export const ContractStageNavigation: React.FC<ContractStageNavigationProps> = (
           const isClickable = status === 'completed' || status === 'current';
           
           return (
-            <React.Fragment key={stage.id}>
+            <div key={stage.id} className="flex items-center gap-2">
               <Button
                 variant={currentStage === stage.id ? "default" : "ghost"}
                 size="sm"
@@ -117,7 +117,7 @@ export const ContractStageNavigation: React.FC<ContractStageNavigationProps> = (
               {index < stages.length - 1 && (
                 <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
               )}
-            </React.Fragment>
+            </div>
           );
         })}
       </div>
