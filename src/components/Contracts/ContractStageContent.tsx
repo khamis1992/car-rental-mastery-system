@@ -264,6 +264,15 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
           <li>تأكيد استلام العميل</li>
         </ul>
       </div>
+
+      {/* Advance to Next Stage Button - Show when delivery is completed */}
+      {contract.delivery_completed_at && !contract.payment_registered_at && onAdvanceToNextStage && (
+        <div className="flex justify-end">
+          <Button onClick={onAdvanceToNextStage} className="px-8">
+            الانتقال لمرحلة الدفع
+          </Button>
+        </div>
+      )}
     </div>
   );
 
@@ -332,6 +341,15 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
           <li>تأكيد اكتمال الدفع</li>
         </ul>
       </div>
+
+      {/* Advance to Next Stage Button - Show when payment is registered */}
+      {contract.payment_registered_at && contract.status === 'active' && !contract.actual_end_date && onAdvanceToNextStage && (
+        <div className="flex justify-end">
+          <Button onClick={onAdvanceToNextStage} className="px-8">
+            الانتقال لمرحلة الاستلام
+          </Button>
+        </div>
+      )}
     </div>
   );
 
@@ -391,6 +409,15 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
           <li>التأكد من إرجاع جميع الملحقات</li>
         </ul>
       </div>
+
+      {/* Advance to Next Stage Button - Show when vehicle is returned */}
+      {contract.actual_end_date && contract.status !== 'completed' && onAdvanceToNextStage && (
+        <div className="flex justify-end">
+          <Button onClick={onAdvanceToNextStage} className="px-8">
+            إنهاء العقد
+          </Button>
+        </div>
+      )}
     </div>
   );
 
@@ -454,10 +481,10 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
         return renderPendingStage();
       case 'delivery':
         return renderDeliveryStage();
-      case 'return':
-        return renderReturnStage();
       case 'payment':
         return renderPaymentStage();
+      case 'return':
+        return renderReturnStage();
       case 'completed':
         return renderCompletedStage();
       default:

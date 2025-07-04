@@ -116,6 +116,11 @@ export class ContractBusinessService {
       throw new Error('Delivery must be completed before registering payment');
     }
 
-    return await this.contractRepository.markPaymentRegistered(id);
+    // Register payment and set status to active
+    return await this.contractRepository.updateContract(id, {
+      payment_registered_at: new Date().toISOString(),
+      status: 'active',
+      updated_at: new Date().toISOString()
+    });
   }
 }

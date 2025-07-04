@@ -44,18 +44,18 @@ export const ContractStageNavigation: React.FC<ContractStageNavigationProps> = (
       completed: contract.delivery_completed_at
     },
     {
-      id: 'return',
-      name: 'الاستلام',
-      icon: CheckCircle,
-      description: 'استلام المركبة من العميل',
-      completed: contract.actual_end_date
-    },
-    {
       id: 'payment',
       name: 'الدفع',
       icon: CreditCard,
       description: 'تسجيل المدفوعات',
       completed: contract.payment_registered_at
+    },
+    {
+      id: 'return',
+      name: 'الاستلام',
+      icon: CheckCircle,
+      description: 'استلام المركبة من العميل',
+      completed: contract.actual_end_date
     },
     {
       id: 'completed',

@@ -54,20 +54,20 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
         setCurrentStage('draft');
       } else if (contract.status === 'pending' && !contract.delivery_completed_at) {
         setCurrentStage('pending');
-      } else if (contract.delivery_completed_at && !contract.actual_end_date) {
-        // Vehicle has been delivered but not yet returned
+      } else if (contract.delivery_completed_at && !contract.payment_registered_at) {
+        // Vehicle has been delivered but payment not registered
+        setCurrentStage('delivery');
+      } else if (contract.payment_registered_at && !contract.actual_end_date) {
+        // Payment registered but vehicle not yet returned
+        setCurrentStage('payment');
+      } else if (contract.actual_end_date && contract.status !== 'completed') {
+        // Vehicle has been returned but contract not completed
         setCurrentStage('return');
-      } else if (contract.actual_end_date && !contract.payment_registered_at) {
-        // Vehicle has been returned but payment not registered
-        setCurrentStage('payment');
-      } else if (contract.payment_registered_at && contract.status !== 'completed') {
-        // Payment registered but contract not completed
-        setCurrentStage('payment');
       } else if (contract.status === 'completed') {
         setCurrentStage('completed');
       } else {
         // Fallback based on status
-        setCurrentStage(contract.status === 'active' ? 'delivery' : 'draft');
+        setCurrentStage(contract.status === 'active' ? 'payment' : 'draft');
       }
     }
   }, [contract]);
@@ -147,20 +147,39 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
         // Advance from draft to pending
         updateData.status = 'pending';
         successMessage = 'تم الانتقال إلى مرحلة التوقيع';
-      } else if (contract.status === 'pending' && contract.customer_signature && contract.company_signature) {
+      } else if (contract.status === 'pending' && contract.customer_signature && contract.company_signature && !contract.delivery_completed_at) {
         // Advance from pending (with both signatures) to delivery stage
-        // We don't change status here, just move to delivery stage view
         setCurrentStage('delivery');
         toast({
           title: "تم بنجاح",
           description: "تم الانتقال إلى مرحلة التسليم",
         });
         return;
+      } else if (contract.delivery_completed_at && !contract.payment_registered_at) {
+        // Advance from delivery to payment stage
+        setCurrentStage('payment');
+        toast({
+          title: "تم بنجاح",
+          description: "تم الانتقال إلى مرحلة الدفع",
+        });
+        return;
+      } else if (contract.payment_registered_at && contract.status === 'active' && !contract.actual_end_date) {
+        // Advance from payment to return stage
+        setCurrentStage('return');
+        toast({
+          title: "تم بنجاح",
+          description: "تم الانتقال إلى مرحلة الاستلام",
+        });
+        return;
+      } else if (contract.actual_end_date && contract.status !== 'completed') {
+        // Advance from return to completed
+        updateData.status = 'completed';
+        successMessage = 'تم إنهاء العقد بنجاح';
       } else {
         throw new Error('Cannot advance to next stage');
       }
 
-      // Update contract status for draft to pending transition
+      // Update contract status for transitions that require database update
       await contractService.updateContractStatus(contract.id, updateData.status);
       await loadContract(); // Reload to get updated data
       if (onDataUpdate) {
