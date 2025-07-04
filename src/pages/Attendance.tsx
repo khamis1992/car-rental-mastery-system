@@ -119,23 +119,14 @@ const Attendance = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-soft" dir="rtl">
-      {/* Header Section */}
-      <div className="bg-gradient-primary text-white p-6 shadow-elegant">
-        <div className="container mx-auto">
-          <div className="rtl-header">
-            <div className="rtl-title text-white">
-              <Calendar className="w-8 h-8" />
-              <div>
-                <h1 className="text-3xl font-bold text-white">نظام الحضور والانصراف</h1>
-                <p className="text-white/80 mt-1">تسجيل الحضور ومتابعة ساعات العمل</p>
-              </div>
-            </div>
-          </div>
+    <div className="container mx-auto p-6 space-y-6" dir="rtl">
+      {/* العنوان والإجراءات */}
+      <div className="flex justify-between items-center">
+        <div className="text-right">
+          <h1 className="text-3xl font-bold">نظام الحضور والانصراف</h1>
+          <p className="text-muted-foreground">تسجيل الحضور ومتابعة ساعات العمل</p>
         </div>
       </div>
-
-      <div className="container mx-auto p-6 space-y-8">
 
         {/* Statistics Cards */}
         {!isAdmin && (
@@ -302,7 +293,6 @@ const Attendance = () => {
             </TabsContent>
           </Tabs>
         )}
-      </div>
     </div>
   );
 };
