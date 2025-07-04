@@ -50,6 +50,16 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
   React.useEffect(() => {
     if (contract) {
       console.log('🔄 ContractDetailsDialog: Contract updated, determining stage');
+      console.log('🔍 ContractDetailsDialog: Full contract data:', {
+        id: contract.id,
+        status: contract.status,
+        customer_signature: !!contract.customer_signature,
+        company_signature: !!contract.company_signature,
+        delivery_completed_at: contract.delivery_completed_at,
+        payment_registered_at: contract.payment_registered_at,
+        actual_end_date: contract.actual_end_date,
+        contract_number: contract.contract_number
+      });
       
       // Auto-determine current stage based on contract status and timestamps
       let determinedStage = 'draft';
@@ -63,6 +73,7 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
         determinedStage = 'delivery';
       } else if (contract.delivery_completed_at && !contract.payment_registered_at) {
         // Vehicle has been delivered but payment not registered
+        console.log('✅ ContractDetailsDialog: Should move to payment stage - delivery completed at:', contract.delivery_completed_at);
         determinedStage = 'payment';
       } else if (contract.payment_registered_at && !contract.actual_end_date) {
         // Payment registered but vehicle not yet returned

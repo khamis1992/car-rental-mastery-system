@@ -90,8 +90,16 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
     setLoading(true);
 
     try {
+      console.log('🚚 ContractDeliveryForm: Starting delivery submission for contract:', contract.id);
+      console.log('🚚 ContractDeliveryForm: Delivery data to save:', {
+        ...deliveryData,
+        delivery_completed_at: new Date().toISOString(),
+        pickup_mileage: deliveryData.pickup_mileage ? parseInt(deliveryData.pickup_mileage) : null,
+        pickup_damages: deliveryData.pickup_damages?.length || 0
+      });
+
       // Update contract with delivery information
-      const { error } = await supabase
+      const { data: updatedContract, error } = await supabase
         .from('contracts')
         .update({
           ...deliveryData,
@@ -100,9 +108,20 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
           delivery_completed_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
-        .eq('id', contract.id);
+        .eq('id', contract.id)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('🚚 ContractDeliveryForm: Error updating contract:', error);
+        throw error;
+      }
+
+      console.log('✅ ContractDeliveryForm: Contract updated successfully:', {
+        id: updatedContract?.id,
+        delivery_completed_at: updatedContract?.delivery_completed_at,
+        status: updatedContract?.status
+      });
 
       // Update vehicle status to rented
       const { error: vehicleError } = await supabase
@@ -125,6 +144,7 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
       
       // Call onSuccess to trigger parent updates
       if (onSuccess) {
+        console.log('🚚 ContractDeliveryForm: Calling onSuccess callback');
         onSuccess();
       }
       
