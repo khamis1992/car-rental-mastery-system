@@ -128,6 +128,30 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
     }
   };
 
+  const handleAdvanceToNextStage = async () => {
+    if (!contract || contract.status !== 'draft') return;
+    
+    try {
+      await contractService.updateContractStatus(contract.id, 'pending');
+      await loadContract(); // Reload to get updated data
+      if (onDataUpdate) {
+        onDataUpdate();
+      }
+      
+      toast({
+        title: "تم بنجاح",
+        description: "تم الانتقال إلى مرحلة التوقيع",
+      });
+    } catch (error) {
+      console.error('Error advancing to next stage:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء الانتقال للمرحلة التالية",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSignatureSaved = async (signature: string, type: 'customer' | 'company') => {
     try {
       const updateData: any = type === 'customer' 
@@ -236,6 +260,7 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           onShowDelivery={() => setShowDeliveryForm(true)}
           onShowReturn={() => setShowReturnForm(true)}
           onShowPayment={() => setShowPaymentForm(true)}
+          onAdvanceToNextStage={handleAdvanceToNextStage}
         />
 
         {/* Print Template */}

@@ -26,6 +26,7 @@ interface ContractStageContentProps {
   onShowDelivery: () => void;
   onShowReturn: () => void;
   onShowPayment: () => void;
+  onAdvanceToNextStage?: () => void;
 }
 
 export const ContractStageContent: React.FC<ContractStageContentProps> = ({
@@ -35,10 +36,16 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
   onShowCompanySignature,
   onShowDelivery,
   onShowReturn,
-  onShowPayment
+  onShowPayment,
+  onAdvanceToNextStage
 }) => {
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('ar-SA');
+    return new Date(date).toLocaleDateString('ar', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      calendar: 'gregory'
+    });
   };
 
   const formatCurrency = (amount: number) => {
@@ -111,6 +118,14 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
           <li>إعداد الوثائق المطلوبة</li>
         </ul>
       </div>
+
+      {contract.status === 'draft' && onAdvanceToNextStage && (
+        <div className="flex justify-end">
+          <Button onClick={onAdvanceToNextStage} className="px-8">
+            الانتقال للمرحلة التالية
+          </Button>
+        </div>
+      )}
     </div>
   );
 
