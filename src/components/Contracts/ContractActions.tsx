@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, CheckCircle, Trash2 } from 'lucide-react';
+import { CalendarIcon, CheckCircle, Trash2, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -95,8 +95,25 @@ export const ContractActions: React.FC<ContractActionsProps> = ({ contract, onUp
     }
   };
 
+  const handlePrint = () => {
+    // فتح نافذة جديدة لطباعة العقد
+    const printUrl = `/contracts/print/${contract.id}`;
+    window.open(printUrl, '_blank');
+  };
+
   return (
     <div className="flex items-center gap-1">
+      {/* Print Contract */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handlePrint}
+        className="text-blue-600 hover:text-blue-700"
+        title="طباعة العقد"
+      >
+        <Printer className="w-4 h-4" />
+      </Button>
+
       {/* Only show Complete Contract button for active contracts */}
       {contract.status === 'active' && (
         <Button
