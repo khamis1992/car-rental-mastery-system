@@ -34,6 +34,7 @@ import PendingStage from "./pages/ContractStages/PendingStage";
 import ActiveStage from "./pages/ContractStages/ActiveStage";
 import PaymentStage from "./pages/ContractStages/PaymentStage";
 import CompletedStage from "./pages/ContractStages/CompletedStage";
+import { ContractStageRouter } from "./components/Contracts/ContractStageRouter";
 import AttendanceReminderWrapper from "@/components/Attendance/AttendanceReminderWrapper";
 import { SearchDialog } from "@/components/Search/SearchDialog";
 

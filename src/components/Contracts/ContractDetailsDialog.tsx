@@ -10,6 +10,8 @@ import { ContractHeader } from './ContractHeader';
 import { ContractInfoSections } from './ContractInfoSections';
 import { ContractSignatureSection } from './ContractSignatureSection';
 import { ContractPDFPreview } from './ContractPDFPreview';
+import { ContractStageNavigation } from './ContractStageNavigation';
+import { ContractStageContent } from './ContractStageContent';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { downloadContractPDF } from '@/lib/contract/contractPDFService';
@@ -34,6 +36,7 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
   const [showReturnForm, setShowReturnForm] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showPDFPreview, setShowPDFPreview] = useState(false);
+  const [currentStage, setCurrentStage] = useState<string>('draft');
   const { toast } = useToast();
 
   React.useEffect(() => {
@@ -41,6 +44,23 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
       loadContract();
     }
   }, [contractId, open]);
+
+  React.useEffect(() => {
+    if (contract) {
+      // Auto-determine current stage based on contract status
+      if (contract.status === 'draft') {
+        setCurrentStage('draft');
+      } else if (contract.status === 'pending' && !contract.delivery_completed_at) {
+        setCurrentStage('pending');
+      } else if (contract.delivery_completed_at && !contract.payment_registered_at) {
+        setCurrentStage('delivery');
+      } else if (contract.payment_registered_at && contract.status !== 'completed') {
+        setCurrentStage('payment');
+      } else if (contract.status === 'completed') {
+        setCurrentStage('completed');
+      }
+    }
+  }, [contract]);
 
   const loadContract = async () => {
     if (!contractId) return;
@@ -177,7 +197,7 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <ContractHeader
           contract={contract}
           onPrint={handlePrint}
@@ -187,12 +207,20 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           onShowPayment={() => setShowPaymentForm(true)}
         />
 
-        <ContractInfoSections contract={contract} />
+        <ContractStageNavigation
+          currentStage={currentStage}
+          onStageChange={setCurrentStage}
+          contract={contract}
+        />
 
-        <ContractSignatureSection
+        <ContractStageContent
+          stage={currentStage}
           contract={contract}
           onShowCustomerSignature={() => setShowCustomerSignature(true)}
           onShowCompanySignature={() => setShowCompanySignature(true)}
+          onShowDelivery={() => setShowDeliveryForm(true)}
+          onShowReturn={() => setShowReturnForm(true)}
+          onShowPayment={() => setShowPaymentForm(true)}
         />
 
         {/* Print Template */}
