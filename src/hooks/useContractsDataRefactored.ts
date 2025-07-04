@@ -191,6 +191,43 @@ export const useContractsDataRefactored = () => {
     }
   };
 
+  // Partial refresh function that doesn't clear existing data
+  const refreshContracts = async () => {
+    const key = 'contracts-refresh';
+    const controller = new AbortController();
+    abortControllersRef.current.set(key, controller);
+    
+    try {
+      const data = await contractService.getAllContracts();
+      
+      if (!isMountedRef.current || controller.signal.aborted) {
+        console.log('🔄 Contracts refresh cancelled');
+        return;
+      }
+      
+      setContracts(data);
+      setErrors(prev => ({ ...prev, contracts: '' }));
+      
+      // Also refresh stats silently
+      const contractStatsData = await contractService.getContractStats();
+      if (!controller.signal.aborted) {
+        setContractStats(contractStatsData);
+      }
+    } catch (error: any) {
+      if (error.name === 'AbortError' || error.message?.includes('abort')) {
+        console.log('🔄 Contracts refresh was cancelled');
+        return;
+      }
+      
+      console.error('Error refreshing contracts:', error);
+      if (isMountedRef.current) {
+        setErrors(prev => ({ ...prev, contracts: error.message || 'فشل في تحديث العقود' }));
+      }
+    } finally {
+      abortControllersRef.current.delete(key);
+    }
+  };
+
   const loadData = async (retryCount = 0) => {
     // Don't load data if authentication is still loading or user is not authenticated
     if (authLoading) {
@@ -277,5 +314,6 @@ export const useContractsDataRefactored = () => {
     loading,
     errors,
     loadData,
+    refreshContracts,
   };
 };

@@ -30,6 +30,7 @@ const Contracts = () => {
     loading,
     errors,
     loadData,
+    refreshContracts,
   } = useContractsDataRefactored();
 
   // التحقق من وجود quotation parameter في URL
@@ -122,7 +123,7 @@ const Contracts = () => {
           onEdit={(id) => console.log('Edit contract:', id)}
           onActivate={(id) => console.log('Activate contract:', id)}
           onComplete={(id) => console.log('Complete contract:', id)}
-          onStatusUpdate={loadData}
+          onStatusUpdate={refreshContracts}
         />
       </ErrorBoundary>
 
@@ -175,7 +176,7 @@ const Contracts = () => {
           contractId={selectedContractId}
           open={contractDetailsOpen}
           onOpenChange={setContractDetailsOpen}
-          onDataUpdate={loadData}
+          onDataUpdate={refreshContracts}
         />
       </ErrorBoundary>
     </div>
