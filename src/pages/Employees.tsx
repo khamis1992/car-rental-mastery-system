@@ -163,7 +163,7 @@ const Employees = () => {
                 <Users className="w-8 h-8 text-primary" />
                 <div>
                   <p className="text-sm text-muted-foreground">إجمالي الموظفين</p>
-                  <p className="text-2xl font-bold">24</p>
+                  <p className="text-2xl font-bold">{employees.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -175,7 +175,7 @@ const Employees = () => {
                 <UserCheck className="w-8 h-8 text-green-500" />
                 <div>
                   <p className="text-sm text-muted-foreground">الموظفون النشطون</p>
-                  <p className="text-2xl font-bold">22</p>
+                  <p className="text-2xl font-bold">{employees.filter(emp => emp.status === 'active').length}</p>
                 </div>
               </div>
             </CardContent>
@@ -187,7 +187,7 @@ const Employees = () => {
                 <UserX className="w-8 h-8 text-red-500" />
                 <div>
                   <p className="text-sm text-muted-foreground">منتهي الخدمة</p>
-                  <p className="text-2xl font-bold">2</p>
+                  <p className="text-2xl font-bold">{employees.filter(emp => emp.status === 'terminated').length}</p>
                 </div>
               </div>
             </CardContent>
@@ -199,7 +199,11 @@ const Employees = () => {
                 <Users className="w-8 h-8 text-blue-500" />
                 <div>
                   <p className="text-sm text-muted-foreground">التعيينات الجديدة</p>
-                  <p className="text-2xl font-bold">3</p>
+                  <p className="text-2xl font-bold">{employees.filter(emp => {
+                    const thirtyDaysAgo = new Date();
+                    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                    return new Date(emp.created_at) >= thirtyDaysAgo;
+                  }).length}</p>
                   <p className="text-xs text-muted-foreground">هذا الشهر</p>
                 </div>
               </div>
