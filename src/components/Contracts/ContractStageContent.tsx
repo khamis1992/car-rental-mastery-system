@@ -427,47 +427,80 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-right">
             <CheckCircle className="w-5 h-5" />
-            حالة الاستلام
+            العقد مكتمل
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {contract.status === 'completed' ? (
-            <div className="bg-green-100 p-4 rounded-lg border border-green-300">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <h3 className="font-medium text-green-900">تم إنهاء العقد بنجاح</h3>
-              </div>
-              <ul className="list-disc list-inside text-green-800 space-y-1 text-right mt-3">
-                <li>تم استلام المركبة من العميل</li>
-                <li>تم فحص حالة المركبة</li>
-                <li>تم إنهاء جميع المعاملات المالية</li>
-                <li>تم إغلاق العقد رسمياً</li>
-              </ul>
+          <div className="bg-green-100 p-4 rounded-lg border border-green-300">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <h3 className="font-medium text-green-900">تم إنهاء العقد بنجاح</h3>
             </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="text-center">
-                <CheckCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">جاهز للاستلام</h3>
-                <p className="text-muted-foreground mb-4">المركبة جاهزة للاستلام من العميل</p>
-                <Button onClick={onShowReturn} className="px-8">
-                  بدء عملية الاستلام
-                </Button>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="text-right">
+                <span className="text-sm text-green-700 font-medium">تاريخ البدء:</span>
+                <p className="text-green-800">{formatDate(contract.actual_start_date || contract.start_date)}</p>
+              </div>
+              <div className="text-right">
+                <span className="text-sm text-green-700 font-medium">تاريخ الانتهاء:</span>
+                <p className="text-green-800">{formatDate(contract.actual_end_date)}</p>
+              </div>
+              <div className="text-right">
+                <span className="text-sm text-green-700 font-medium">مدة الإيجار:</span>
+                <p className="text-green-800">{contract.rental_days} يوم</p>
+              </div>
+              <div className="text-right">
+                <span className="text-sm text-green-700 font-medium">المبلغ النهائي:</span>
+                <p className="text-green-800 font-semibold">{formatCurrency(contract.final_amount)}</p>
               </div>
             </div>
-          )}
+          </div>
 
-          {contract.return_photos && contract.return_photos.length > 0 && (
-            <div className="text-right">
-              <div className="flex items-center gap-2 mb-2">
-                <Camera className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium">صور الاستلام</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                تم رفع {contract.return_photos.length} صورة
-              </p>
-            </div>
-          )}
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-4">
+                <h4 className="font-medium text-blue-900 text-right mb-2">المراحل المكتملة</h4>
+                <ul className="list-disc list-inside text-blue-800 space-y-1 text-right text-sm">
+                  <li>إنشاء العقد وتوقيعه</li>
+                  <li>تسليم المركبة للعميل</li>
+                  <li>تسجيل المدفوعات</li>
+                  <li>استلام المركبة من العميل</li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-purple-50 border-purple-200">
+              <CardContent className="p-4">
+                <h4 className="font-medium text-purple-900 text-right mb-2">معلومات إضافية</h4>
+                <div className="space-y-2 text-sm">
+                  {contract.pickup_photos && contract.pickup_photos.length > 0 && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-purple-800">{contract.pickup_photos.length}</span>
+                      <span className="text-purple-700">صور التسليم</span>
+                    </div>
+                  )}
+                  {contract.return_photos && contract.return_photos.length > 0 && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-purple-800">{contract.return_photos.length}</span>
+                      <span className="text-purple-700">صور الاستلام</span>
+                    </div>
+                  )}
+                  {contract.pickup_mileage && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-purple-800">{contract.pickup_mileage.toLocaleString()} كم</span>
+                      <span className="text-purple-700">العداد عند التسليم</span>
+                    </div>
+                  )}
+                  {contract.return_mileage && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-purple-800">{contract.return_mileage.toLocaleString()} كم</span>
+                      <span className="text-purple-700">العداد عند الاستلام</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </CardContent>
       </Card>
     </div>
