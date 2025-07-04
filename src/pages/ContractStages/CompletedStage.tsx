@@ -14,7 +14,7 @@ import {
   Star,
   TrendingUp
 } from 'lucide-react';
-import { ContractStageWrapper } from '@/components/Contracts/ContractStageWrapper';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { CompletedContractStats } from '@/components/Contracts/Completed/CompletedContractStats';
 import { CompletedContractDetails } from '@/components/Contracts/Completed/CompletedContractDetails';
 import { CompletedContractActions } from '@/components/Contracts/Completed/CompletedContractActions';
@@ -76,7 +76,7 @@ const CompletedStage = () => {
 
   if (loading) {
     return (
-      <ContractStageWrapper stageName="مرحلة الاستلام" stageDescription="استلام المركبة وإنهاء العقد">
+      <div className="p-6 space-y-6">
         <div className="animate-pulse space-y-6">
           <div className="h-8 bg-muted rounded w-1/3"></div>
           <div className="h-32 bg-muted rounded"></div>
@@ -86,13 +86,13 @@ const CompletedStage = () => {
             <div className="h-24 bg-muted rounded"></div>
           </div>
         </div>
-      </ContractStageWrapper>
+      </div>
     );
   }
 
   if (!contract) {
     return (
-      <ContractStageWrapper stageName="مرحلة الاستلام" stageDescription="استلام المركبة وإنهاء العقد">
+      <div className="p-6 space-y-6">
         <div className="text-center py-12">
           <h2 className="text-xl font-semibold text-muted-foreground mb-4">
             لم يتم العثور على العقد
@@ -106,12 +106,13 @@ const CompletedStage = () => {
             العودة للعقود
           </Button>
         </div>
-      </ContractStageWrapper>
+      </div>
     );
   }
 
   return (
-    <ContractStageWrapper stageName="مرحلة الاستلام" stageDescription="استلام المركبة وإنهاء العقد">
+    <ErrorBoundary>
+      <div className="p-6 space-y-6">
       {/* Header Section */}
       <div className="flex items-center justify-between mb-8">
         <div className="text-right">
@@ -209,7 +210,8 @@ const CompletedStage = () => {
           />
         </TabsContent>
       </Tabs>
-    </ContractStageWrapper>
+      </div>
+    </ErrorBoundary>
   );
 };
 
