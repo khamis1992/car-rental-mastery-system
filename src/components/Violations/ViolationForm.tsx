@@ -58,7 +58,6 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
     violation_type_id: '',
     violation_date: new Date().toISOString().split('T')[0],
     location: '',
-    description: '',
     notes: ''
   });
 
@@ -185,7 +184,6 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
       violation_type_id: '',
       violation_date: new Date().toISOString().split('T')[0],
       location: '',
-      description: '',
       notes: ''
     });
     setSelectedCustomerId('');
@@ -300,17 +298,6 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
                     placeholder="مكان المخالفة"
                   />
                 </div>
-              </div>
-
-              <div>
-                <Label htmlFor="description">وصف المخالفة</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="وصف تفصيلي للمخالفة"
-                  rows={3}
-                />
               </div>
             </CardContent>
           </Card>
