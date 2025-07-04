@@ -170,21 +170,21 @@ const CompletedStage = () => {
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview" className="rtl-flex gap-2">
-            <BarChart3 className="w-4 h-4" />
-            نظرة عامة
-          </TabsTrigger>
-          <TabsTrigger value="details" className="rtl-flex gap-2">
-            <FileText className="w-4 h-4" />
-            التفاصيل
+          <TabsTrigger value="actions" className="rtl-flex gap-2">
+            <TrendingUp className="w-4 h-4" />
+            الإجراءات
           </TabsTrigger>
           <TabsTrigger value="timeline" className="rtl-flex gap-2">
             <Clock className="w-4 h-4" />
             الجدول الزمني
           </TabsTrigger>
-          <TabsTrigger value="actions" className="rtl-flex gap-2">
-            <TrendingUp className="w-4 h-4" />
-            الإجراءات
+          <TabsTrigger value="details" className="rtl-flex gap-2">
+            <FileText className="w-4 h-4" />
+            التفاصيل
+          </TabsTrigger>
+          <TabsTrigger value="overview" className="rtl-flex gap-2">
+            <BarChart3 className="w-4 h-4" />
+            نظرة عامة
           </TabsTrigger>
         </TabsList>
 
