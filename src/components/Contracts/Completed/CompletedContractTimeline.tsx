@@ -142,14 +142,14 @@ export const CompletedContractTimeline: React.FC<CompletedContractTimelineProps>
                 {/* محتوى الحدث */}
                 <div className="flex-1 min-w-0 pb-6">
                   <div className="flex items-center justify-between mb-1">
-                    <h4 className="text-sm font-medium text-foreground">
-                      {event.title}
-                    </h4>
                     <Badge variant="outline" className="text-xs">
                       {formatDateTime(event.timestamp)}
                     </Badge>
+                    <h4 className="text-sm font-medium text-foreground">
+                      {event.title}
+                    </h4>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground text-right">
                     {event.description}
                   </p>
                 </div>
