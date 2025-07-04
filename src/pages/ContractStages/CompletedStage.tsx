@@ -10,8 +10,7 @@ import {
   BarChart3, 
   FileText, 
   Clock, 
-  User,
-  Star
+  User
 } from 'lucide-react';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { CompletedContractStats } from '@/components/Contracts/Completed/CompletedContractStats';
@@ -151,10 +150,6 @@ const CompletedStage = () => {
                 تم استلام المركبة وإنهاء جميع المعاملات المالية بنجاح في {' '}
                 {contract.actual_end_date ? new Date(contract.actual_end_date).toLocaleDateString('ar-KW') : 'التاريخ المحدد'}
               </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-yellow-400 fill-current" />
-              <span className="text-sm font-medium">تقييم ممتاز</span>
             </div>
           </div>
         </CardContent>
