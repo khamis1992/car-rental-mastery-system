@@ -191,8 +191,19 @@ export const useContractsDataRefactored = () => {
     }
   };
 
+  // Optimistic update function for single contract changes
+  const updateContractOptimistically = (contractId: string, updates: Partial<ContractWithDetails>) => {
+    setContracts(prev => 
+      prev.map(contract => 
+        contract.id === contractId 
+          ? { ...contract, ...updates }
+          : contract
+      )
+    );
+  };
+
   // Partial refresh function that doesn't clear existing data
-  const refreshContracts = async () => {
+  const refreshContracts = async (silent = false) => {
     const key = 'contracts-refresh';
     const controller = new AbortController();
     abortControllersRef.current.set(key, controller);
@@ -220,11 +231,58 @@ export const useContractsDataRefactored = () => {
       }
       
       console.error('Error refreshing contracts:', error);
-      if (isMountedRef.current) {
+      if (isMountedRef.current && !silent) {
         setErrors(prev => ({ ...prev, contracts: error.message || 'فشل في تحديث العقود' }));
       }
     } finally {
       abortControllersRef.current.delete(key);
+    }
+  };
+
+  // Refresh single contract by ID without affecting the list
+  const refreshSingleContract = async (contractId: string) => {
+    try {
+      const updatedContract = await contractService.getContractById(contractId);
+      const contractWithDetails = {
+        id: updatedContract.id,
+        contract_number: updatedContract.contract_number,
+        customer_name: updatedContract.customers.name,
+        customer_phone: updatedContract.customers.phone,
+        vehicle_info: `${updatedContract.vehicles.make} ${updatedContract.vehicles.model} - ${updatedContract.vehicles.vehicle_number}`,
+        start_date: updatedContract.start_date,
+        end_date: updatedContract.end_date,
+        actual_start_date: updatedContract.actual_start_date,
+        actual_end_date: updatedContract.actual_end_date,
+        rental_days: updatedContract.rental_days,
+        contract_type: updatedContract.contract_type,
+        daily_rate: updatedContract.daily_rate,
+        total_amount: updatedContract.total_amount,
+        discount_amount: updatedContract.discount_amount || 0,
+        tax_amount: updatedContract.tax_amount || 0,
+        security_deposit: updatedContract.security_deposit || 0,
+        insurance_amount: updatedContract.insurance_amount || 0,
+        final_amount: updatedContract.final_amount,
+        status: updatedContract.status,
+        pickup_location: updatedContract.pickup_location,
+        return_location: updatedContract.return_location,
+        special_conditions: updatedContract.special_conditions,
+        terms_and_conditions: updatedContract.terms_and_conditions,
+        notes: updatedContract.notes,
+        created_at: updatedContract.created_at,
+        customer_id: updatedContract.customer_id,
+        vehicle_id: updatedContract.vehicle_id,
+        quotation_id: updatedContract.quotation_id,
+      } as ContractWithDetails;
+
+      setContracts(prev => 
+        prev.map(contract => 
+          contract.id === contractId ? contractWithDetails : contract
+        )
+      );
+    } catch (error) {
+      console.error('Error refreshing single contract:', error);
+      // Fallback to full refresh if single contract refresh fails
+      await refreshContracts(true);
     }
   };
 
@@ -315,5 +373,7 @@ export const useContractsDataRefactored = () => {
     errors,
     loadData,
     refreshContracts,
+    refreshSingleContract,
+    updateContractOptimistically,
   };
 };

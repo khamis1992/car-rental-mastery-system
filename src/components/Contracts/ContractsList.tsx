@@ -211,28 +211,29 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                     <div className="font-medium">{contract.final_amount.toFixed(3)} د.ك</div>
                   </TableCell>
                    <TableCell>
-                     <ContractProgressIndicator
-                       currentStatus={contract.status}
-                       showLabels={false}
-                       size="sm"
-                       interactive={true}
-                       contractData={{
-                         id: contract.id,
-                         status: contract.status,
-                         contract_number: contract.contract_number,
-                         customer_name: contract.customer_name,
-                         vehicle_info: contract.vehicle_info
-                       }}
-                         onStatusUpdate={() => {
-                           toast({
-                             title: "تم التحديث",
-                             description: "تم تحديث حالة العقد بنجاح",
-                           });
-                           if (onStatusUpdate) {
-                             onStatusUpdate();
-                           }
-                         }}
-                     />
+                      <ContractProgressIndicator
+                        currentStatus={contract.status}
+                        showLabels={false}
+                        size="sm"
+                        interactive={true}
+                        contractData={{
+                          id: contract.id,
+                          status: contract.status,
+                          contract_number: contract.contract_number,
+                          customer_name: contract.customer_name,
+                          vehicle_info: contract.vehicle_info
+                        }}
+                          onStatusUpdate={() => {
+                            toast({
+                              title: "تم التحديث",
+                              description: "تم تحديث حالة العقد بنجاح",
+                            });
+                            // Trigger a silent refresh to update the list without disruption
+                            if (onStatusUpdate) {
+                              onStatusUpdate();
+                            }
+                          }}
+                      />
                    </TableCell>
                   <TableCell>
                     {getStatusBadge(contract.status)}
