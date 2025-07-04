@@ -40,7 +40,7 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
   const [selectedDamage, setSelectedDamage] = useState<DamageArea | null>(null);
   const [tempDamage, setTempDamage] = useState<DamageArea | null>(null);
   const [isNewDamage, setIsNewDamage] = useState(false);
-  const [activeTab, setActiveTab] = useState('diagram');
+  const [activeTab, setActiveTab] = useState('summary');
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const { toast } = useToast();
@@ -233,17 +233,17 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="photos" className="flex items-center gap-2 flex-row-reverse">
-              <Camera className="w-4 h-4" />
-              الصور والملاحظات
+            <TabsTrigger value="summary" className="flex items-center gap-2 flex-row-reverse">
+              <List className="w-4 h-4" />
+              ملخص الحالة
             </TabsTrigger>
             <TabsTrigger value="diagram" className="flex items-center gap-2 flex-row-reverse">
               <Map className="w-4 h-4" />
               المخطط التفاعلي
             </TabsTrigger>
-            <TabsTrigger value="summary" className="flex items-center gap-2 flex-row-reverse">
-              <List className="w-4 h-4" />
-              ملخص الحالة
+            <TabsTrigger value="photos" className="flex items-center gap-2 flex-row-reverse">
+              <Camera className="w-4 h-4" />
+              الصور والملاحظات
             </TabsTrigger>
           </TabsList>
 
