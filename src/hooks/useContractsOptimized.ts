@@ -38,45 +38,45 @@ export const useContractsOptimized = () => {
   const contractService = serviceContainer.getContractBusinessService();
   const quotationService = serviceContainer.getQuotationBusinessService();
 
-  // محسن: إدارة العقود كـ computed value من الـ cache
-  const contracts = Array.from(cacheRef.current.contracts.values()).sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
+  // تحويل العقود إلى state عادي لمنع الاختفاء
+  const [contracts, setContracts] = useState<ContractWithDetails[]>([]);
 
-  // محسن: تحديث محدد للعقد بدون إزالة الباقي
+  // تحديث فوري وآمن للعقد
   const updateSingleContract = useCallback((contractId: string, updates: Partial<ContractWithDetails>) => {
+    setContracts(prevContracts => {
+      return prevContracts.map(contract => 
+        contract.id === contractId 
+          ? { ...contract, ...updates }
+          : contract
+      );
+    });
+    
+    // تحديث الـ cache أيضاً
     const cache = cacheRef.current;
     const existing = cache.contracts.get(contractId);
-    
     if (existing) {
-      // تحديث محلي فوري (optimistic)
       const updated = { ...existing, ...updates };
       cache.contracts.set(contractId, updated);
       cache.lastUpdated.set(contractId, Date.now());
-      
-      // إجبار إعادة الرندر
-      setContractStats(prev => ({ ...prev }));
     }
   }, []);
 
-  // محسن: إضافة عقد جديد بدون تحديث كامل
+  // إضافة عقد جديد للقائمة والـ cache
   const addContract = useCallback((contract: ContractWithDetails) => {
+    setContracts(prevContracts => [...prevContracts, contract]);
+    
     const cache = cacheRef.current;
     cache.contracts.set(contract.id, contract);
     cache.lastUpdated.set(contract.id, Date.now());
-    
-    // إجبار إعادة الرندر
-    setContractStats(prev => ({ ...prev }));
   }, []);
 
-  // محسن: حذف عقد محدد
+  // حذف عقد من القائمة والـ cache
   const removeContract = useCallback((contractId: string) => {
+    setContracts(prevContracts => prevContracts.filter(c => c.id !== contractId));
+    
     const cache = cacheRef.current;
     cache.contracts.delete(contractId);
     cache.lastUpdated.delete(contractId);
-    
-    // إجبار إعادة الرندر
-    setContractStats(prev => ({ ...prev }));
   }, []);
 
   // محسن: تحميل عقد واحد من الخادم
@@ -123,12 +123,19 @@ export const useContractsOptimized = () => {
         quotation_id: updatedContract.quotation_id,
       } as ContractWithDetails;
 
-      // تحديث الـ cache مباشرة
-      cacheRef.current.contracts.set(contractId, contractWithDetails);
-      cacheRef.current.lastUpdated.set(contractId, Date.now());
+      // تحديث فوري بدون إعادة تحديد القائمة
+      setContracts(prevContracts => {
+        return prevContracts.map(contract => 
+          contract.id === contractId 
+            ? { ...contract, ...contractWithDetails }
+            : contract
+        );
+      });
       
-      // إجبار إعادة الرندر
-      setContractStats(prev => ({ ...prev }));
+      // تحديث الـ cache
+      const cache = cacheRef.current;
+      cache.contracts.set(contractId, contractWithDetails);
+      cache.lastUpdated.set(contractId, Date.now());
       
       if (!silent) {
         toast({
@@ -157,7 +164,13 @@ export const useContractsOptimized = () => {
       
       if (!isMountedRef.current) return;
       
-      // تحديث الـ cache
+      // تحديث القائمة والـ cache
+      const sortedContracts = data.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      
+      setContracts(sortedContracts);
+      
       const cache = cacheRef.current;
       const now = Date.now();
       
