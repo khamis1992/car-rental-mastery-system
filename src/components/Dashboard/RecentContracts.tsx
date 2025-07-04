@@ -7,35 +7,7 @@ import { useNavigate } from "react-router-dom";
 const RecentContracts = () => {
   const navigate = useNavigate();
   
-  const contracts = [
-    {
-      id: "C001",
-      customerName: "محمد أحمد علي",
-      carModel: "تويوتا كامري 2023",
-      startDate: "2024-01-01",
-      endDate: "2024-01-07",
-      status: "نشط",
-      amount: "12 د.ك"
-    },
-    {
-      id: "C002", 
-      customerName: "فاطمة سالم",
-      carModel: "هونداي النترا 2022",
-      startDate: "2024-01-02",
-      endDate: "2024-01-05",
-      status: "منتهي",
-      amount: "8 د.ك"
-    },
-    {
-      id: "C003",
-      customerName: "خالد المطيري", 
-      carModel: "نيسان ألتيما 2023",
-      startDate: "2024-01-03",
-      endDate: "2024-01-10",
-      status: "نشط",
-      amount: "15 د.ك"
-    }
-  ];
+  const contracts: any[] = [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -62,30 +34,8 @@ const RecentContracts = () => {
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {contracts.map((contract) => (
-            <div key={contract.id} className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
-              <div className="flex items-center gap-4">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <User className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <div className="font-medium text-foreground">{contract.customerName}</div>
-                  <div className="text-sm text-muted-foreground">{contract.carModel}</div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                    <Calendar className="w-3 h-3" />
-                    {contract.startDate} - {contract.endDate}
-                  </div>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="font-semibold text-foreground mb-1">{contract.amount}</div>
-                <Badge className={getStatusColor(contract.status)}>
-                  {contract.status}
-                </Badge>
-              </div>
-            </div>
-          ))}
+        <div className="text-center py-8 text-muted-foreground">
+          لا توجد عقود حديثة متاحة
         </div>
       </CardContent>
     </Card>

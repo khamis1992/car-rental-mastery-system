@@ -4,19 +4,14 @@ import { Progress } from "@/components/ui/progress";
 
 const FleetOverview = () => {
   const fleetData = {
-    totalCars: 45,
-    availableCars: 18,
-    rentedCars: 22,
-    maintenanceCars: 5,
-    occupancyRate: 78
+    totalCars: 0,
+    availableCars: 0,
+    rentedCars: 0,
+    maintenanceCars: 0,
+    occupancyRate: 0
   };
 
-  const carsByType = [
-    { type: "سيدان", count: 20, color: "bg-primary" },
-    { type: "دفع رباعي", count: 15, color: "bg-accent" },
-    { type: "هاتشباك", count: 7, color: "bg-success" },
-    { type: "ميني باص", count: 3, color: "bg-warning" }
-  ];
+  const carsByType: any[] = [];
 
   return (
     <Card className="card-elegant">
@@ -58,16 +53,8 @@ const FleetOverview = () => {
         {/* السيارات حسب النوع */}
         <div>
           <h4 className="font-medium mb-3 text-foreground">السيارات حسب النوع</h4>
-          <div className="space-y-2">
-            {carsByType.map((car) => (
-              <div key={car.type} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${car.color}`}></div>
-                  <span className="text-sm text-foreground">{car.type}</span>
-                </div>
-                <Badge variant="secondary">{car.count}</Badge>
-              </div>
-            ))}
+          <div className="text-center py-4 text-muted-foreground">
+            لا توجد بيانات أسطول متاحة
           </div>
         </div>
       </CardContent>

@@ -31,37 +31,37 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in">
           <StatsCard
             title="إجمالي العقود"
-            value="142"
+            value="0"
             subtitle="هذا الشهر"
             icon={<FileText className="w-5 h-5" />}
-            trend={{ value: "+12% من الشهر الماضي", type: "up" }}
+            trend={{ value: "لا توجد بيانات", type: "neutral" }}
             actionText="عرض التفاصيل"
             onActionClick={() => navigate('/contracts')}
           />
           <StatsCard
             title="العملاء النشطين"
-            value="89"
+            value="0"
             subtitle="عميل مسجل"
             icon={<User className="w-5 h-5" />}
-            trend={{ value: "+5 عملاء جدد", type: "up" }}
+            trend={{ value: "لا توجد بيانات", type: "neutral" }}
             actionText="إدارة العملاء"
             onActionClick={() => navigate('/customers')}
           />
           <StatsCard
             title="الإيرادات اليوم"
-            value="1,250 د.ك"
-            subtitle="من 22 عقد"
+            value="0 د.ك"
+            subtitle="من 0 عقد"
             icon={<DollarSign className="w-5 h-5" />}
-            trend={{ value: "+18% عن أمس", type: "up" }}
+            trend={{ value: "لا توجد بيانات", type: "neutral" }}
             actionText="التقارير المالية"
             onActionClick={() => navigate('/analytics')}
           />
           <StatsCard
             title="العقود المنتهية اليوم"
-            value="7"
-            subtitle="تحتاج متابعة"
+            value="0"
+            subtitle="لا توجد عقود"
             icon={<Calendar className="w-5 h-5" />}
-            trend={{ value: "2 متأخرة", type: "down" }}
+            trend={{ value: "لا توجد بيانات", type: "neutral" }}
             actionText="متابعة الآن"
             onActionClick={() => navigate('/contracts')}
           />
