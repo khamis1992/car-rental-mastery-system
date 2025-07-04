@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Circle, Clock, FileText, PenTool, Truck, DollarSign, Package } from 'lucide-react';
+import { CheckCircle, CheckCircle2, Circle, Clock, FileText, PenTool, Truck, DollarSign, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -188,21 +188,29 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div
+                       <div
                         className={cn(
-                          "rounded-full flex items-center justify-center border-2 transition-all duration-300",
+                          "rounded-full flex items-center justify-center border-2 transition-all duration-300 shadow-sm",
                           sizeClasses[size],
-                          step.status === 'completed' && "bg-green-500 border-green-500 text-white",
-                          step.status === 'current' && "bg-primary border-primary text-white animate-pulse",
-                          step.status === 'pending' && "bg-muted border-muted-foreground/30 text-muted-foreground",
-                          interactive && contractData && "cursor-pointer hover:scale-110 hover:shadow-lg"
+                          step.status === 'completed' && currentStatus === 'completed' && step.id === 'completed' 
+                            ? "bg-gradient-to-br from-green-500 to-green-600 border-green-500 text-white shadow-green-200 shadow-lg"
+                            : step.status === 'completed' 
+                            ? "bg-green-500 border-green-500 text-white shadow-green-200"
+                            : step.status === 'current' 
+                            ? "bg-gradient-to-br from-primary to-primary/90 border-primary text-white animate-pulse shadow-primary/30 shadow-md"
+                            : "bg-muted border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/50",
+                          interactive && contractData && "cursor-pointer hover:scale-110 hover:shadow-lg transition-transform duration-200"
                         )}
                         onClick={() => interactive && contractData && handleStepClick(step.id)}
                       >
                         {step.status === 'completed' ? (
-                          <CheckCircle className={iconSizeClasses[size]} />
+                          currentStatus === 'completed' && step.id === 'completed' ? (
+                            <CheckCircle2 className={cn(iconSizeClasses[size], "drop-shadow-sm")} />
+                          ) : (
+                            <CheckCircle className={iconSizeClasses[size]} />
+                          )
                         ) : step.status === 'current' ? (
-                          <Clock className={iconSizeClasses[size]} />
+                          <Clock className={cn(iconSizeClasses[size], "animate-pulse")} />
                         ) : (
                           <Icon className={iconSizeClasses[size]} />
                         )}
