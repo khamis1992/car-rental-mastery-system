@@ -119,64 +119,78 @@ const Attendance = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-soft" dir="rtl">
-      {/* Header Section */}
-      <div className="bg-gradient-primary text-white p-6 shadow-elegant">
-        <div className="container mx-auto">
-          <div className="rtl-header">
-            <div className="rtl-title text-white">
-              <Calendar className="w-8 h-8" />
-              <div>
-                <h1 className="text-3xl font-bold text-white">نظام الحضور والانصراف</h1>
-                <p className="text-white/80 mt-1">تسجيل الحضور ومتابعة ساعات العمل</p>
-              </div>
-            </div>
+    <div className="min-h-screen bg-background font-['Tajawal']" dir="rtl">
+      {/* العنوان مع خلفية زرقاء داكنة */}
+      <div className="bg-[#1E3A8A] text-white p-6 shadow-lg">
+      <div className="container mx-auto flex items-center justify-start">
+        <div className="text-left flex items-center gap-4">
+          <Calendar className="w-8 h-8 text-white" />
+          <div>
+            <h1 className="text-3xl font-bold">نظام الحضور والانصراف</h1>
+            <p className="text-blue-100 mt-1">تسجيل الحضور ومتابعة ساعات العمل</p>
           </div>
         </div>
+      </div>
       </div>
 
       <div className="container mx-auto p-6 space-y-8">
 
-        {/* Statistics Cards */}
+        {/* قسم المقاييس - 4 كروت متساوية العرض */}
         {!isAdmin && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="card-elegant text-center">
+            <Card className="shadow-md rounded-lg border border-gray-200">
               <CardContent className="p-6">
-                <div className="rtl-info-item justify-center mb-2">
-                  <AlertCircle className="w-8 h-8 text-warning" />
+                <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                  <div className="flex-shrink-0">
+                    <span className="text-3xl">⚠️</span>
+                  </div>
+                  <div className="text-right flex-1">
+                    <p className="text-sm text-muted-foreground">ساعات إضافية</p>
+                    <p className="text-3xl font-bold text-orange-600">12</p>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-warning mb-1">12</div>
-                <div className="text-sm text-muted-foreground">ساعات إضافية</div>
               </CardContent>
             </Card>
 
-            <Card className="card-elegant text-center">
+            <Card className="shadow-md rounded-lg border border-gray-200">
               <CardContent className="p-6">
-                <div className="rtl-info-item justify-center mb-2">
-                  <Clock className="w-8 h-8 text-primary" />
+                <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                  <div className="flex-shrink-0">
+                    <Clock className="w-8 h-8 text-blue-500" />
+                  </div>
+                  <div className="text-right flex-1">
+                    <p className="text-sm text-muted-foreground">ساعات العمل</p>
+                    <p className="text-3xl font-bold text-blue-600">176</p>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-primary mb-1">176</div>
-                <div className="text-sm text-muted-foreground">ساعات العمل</div>
               </CardContent>
             </Card>
 
-            <Card className="card-elegant text-center">
+            <Card className="shadow-md rounded-lg border border-gray-200">
               <CardContent className="p-6">
-                <div className="rtl-info-item justify-center mb-2">
-                  <XCircle className="w-8 h-8 text-danger" />
+                <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                  <div className="flex-shrink-0">
+                    <XCircle className="w-8 h-8 text-red-500" />
+                  </div>
+                  <div className="text-right flex-1">
+                    <p className="text-sm text-muted-foreground">أيام الغياب</p>
+                    <p className="text-3xl font-bold text-red-600">1</p>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-danger mb-1">1</div>
-                <div className="text-sm text-muted-foreground">أيام الغياب</div>
               </CardContent>
             </Card>
 
-            <Card className="card-elegant text-center">
+            <Card className="shadow-md rounded-lg border border-gray-200">
               <CardContent className="p-6">
-                <div className="rtl-info-item justify-center mb-2">
-                  <CheckCircle className="w-8 h-8 text-success" />
+                <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                  <div className="flex-shrink-0">
+                    <CheckCircle className="w-8 h-8 text-green-500" />
+                  </div>
+                  <div className="text-right flex-1">
+                    <p className="text-sm text-muted-foreground">أيام الحضور</p>
+                    <p className="text-3xl font-bold text-green-600">22</p>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-success mb-1">22</div>
-                <div className="text-sm text-muted-foreground">أيام الحضور</div>
               </CardContent>
             </Card>
           </div>
@@ -186,66 +200,59 @@ const Attendance = () => {
         {isAdmin ? (
           <AttendanceManagement />
         ) : (
-          /* Employee Tabs Section */
+          /* قسم التبويبات للموظفين العاديين */
           <Tabs defaultValue="today" className="space-y-6">
-            <div className="rtl-header">
-              <TabsList className="bg-muted">
-                <TabsTrigger value="today" className="rtl-button">
-                  <Clock className="w-4 h-4" />
-                  اليوم
-                </TabsTrigger>
-                <TabsTrigger value="history" className="rtl-button">
-                  <FileText className="w-4 h-4" />
+            <div className="flex justify-end">
+              <TabsList className="bg-gray-100 p-1 rounded-full">
+                <TabsTrigger 
+                  value="history" 
+                  className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                >
                   السجل
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="today" 
+                  className="rounded-full px-6 py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                >
+                  اليوم
                 </TabsTrigger>
               </TabsList>
             </div>
 
             <TabsContent value="today">
-              <Card className="card-elegant">
-                <CardHeader>
-                  <CardTitle className="rtl-title">
-                    <Clock className="w-5 h-5" />
-                    حضور اليوم
-                  </CardTitle>
+              <Card className="shadow-lg rounded-lg">
+                <CardHeader className="text-right">
+                  <CardTitle className="text-xl">حضور اليوم</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {isCheckedIn ? (
                     <div className="space-y-6">
-                      <div className="bg-success/10 border border-success/20 rounded-lg p-6">
-                        <div className="rtl-header">
-                          <Badge className="bg-success text-success-foreground">حاضر</Badge>
-                          <div>
-                            <h3 className="font-semibold text-success">تم تسجيل الحضور</h3>
-                            <p className="text-sm text-success/80">
-                              الوقت: {checkInTime && format(checkInTime, 'HH:mm', { locale: ar })}
-                            </p>
-                          </div>
+                      <div className="flex items-center justify-between p-6 border border-green-200 rounded-lg bg-green-50">
+                        <Badge variant="default" className="bg-green-600">حاضر</Badge>
+                        <div className="text-right">
+                          <h3 className="font-semibold text-green-800">تم تسجيل الحضور</h3>
+                          <p className="text-sm text-green-600">
+                            الوقت: {checkInTime && format(checkInTime, 'HH:mm', { locale: ar })}
+                          </p>
                         </div>
                       </div>
                       
-                      <Card className="border-muted">
-                        <CardContent className="p-6">
-                          <h3 className="rtl-title mb-4">
-                            <Users className="w-4 h-4" />
-                            إحصائيات اليوم
-                          </h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="rtl-info-item">
-                              <span className="font-semibold">{calculateWorkingHours()} ساعة</span>
-                              <span className="text-muted-foreground">ساعات العمل</span>
-                            </div>
-                            <div className="rtl-info-item">
-                              <span className="font-semibold text-success">حاضر</span>
-                              <span className="text-muted-foreground">الحالة</span>
-                            </div>
+                      <div className="p-6 border rounded-lg">
+                        <h3 className="font-semibold mb-4 text-right">إحصائيات اليوم</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div className="text-right">
+                            <span className="text-muted-foreground">ساعات العمل:</span>
+                            <span className="mr-2 font-semibold">{calculateWorkingHours()} ساعة</span>
                           </div>
-                        </CardContent>
-                      </Card>
+                          <div className="text-right">
+                            <span className="text-muted-foreground">الحالة:</span>
+                            <span className="mr-2 text-green-600 font-semibold">حاضر</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                       <div className="text-muted-foreground text-lg">
                         لم يتم تسجيل الحضور بعد
                       </div>
@@ -256,45 +263,44 @@ const Attendance = () => {
             </TabsContent>
 
             <TabsContent value="history">
-              <Card className="card-elegant">
+              <Card className="shadow-lg rounded-lg">
                 <CardHeader>
-                  <CardTitle className="rtl-title">
-                    <FileText className="w-5 h-5" />
-                    سجل الحضور
-                  </CardTitle>
+                  <CardTitle className="text-right">سجل الحضور</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {mockAttendanceData.map((record) => (
-                      <Card key={record.id} className="border-muted hover:shadow-md transition-all">
-                        <CardContent className="p-6">
-                          <div className="rtl-header mb-4">
-                            {getStatusBadge(record.status)}
-                            <h3 className="font-semibold text-lg">
-                              {format(new Date(record.date), 'dd MMMM yyyy', { locale: ar })}
-                            </h3>
+                      <div key={record.id} className="border rounded-lg p-6 hover:bg-gray-50 transition-colors">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1 text-right">
+                            <div className="flex items-center gap-4 mb-4 justify-end">
+                              {getStatusBadge(record.status)}
+                              <h3 className="font-semibold text-lg">
+                                {format(new Date(record.date), 'dd MMMM yyyy', { locale: ar })}
+                              </h3>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-right">
+                              <div>
+                                <span className="font-medium text-muted-foreground">الحضور:</span>
+                                <div className="font-semibold">{record.check_in_time || 'لم يسجل'}</div>
+                              </div>
+                              <div>
+                                <span className="font-medium text-muted-foreground">الانصراف:</span>
+                                <div className="font-semibold">{record.check_out_time || 'لم يسجل'}</div>
+                              </div>
+                              <div>
+                                <span className="font-medium text-muted-foreground">ساعات العمل:</span>
+                                <div className="font-semibold">{record.total_hours} ساعة</div>
+                              </div>
+                              <div>
+                                <span className="font-medium text-muted-foreground">ساعات إضافية:</span>
+                                <div className="font-semibold">{record.overtime_hours} ساعة</div>
+                              </div>
+                            </div>
                           </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div className="rtl-info-item">
-                              <span className="font-semibold">{record.check_in_time || 'لم يسجل'}</span>
-                              <span className="text-muted-foreground">الحضور</span>
-                            </div>
-                            <div className="rtl-info-item">
-                              <span className="font-semibold">{record.check_out_time || 'لم يسجل'}</span>
-                              <span className="text-muted-foreground">الانصراف</span>
-                            </div>
-                            <div className="rtl-info-item">
-                              <span className="font-semibold">{record.total_hours} ساعة</span>
-                              <span className="text-muted-foreground">ساعات العمل</span>
-                            </div>
-                            <div className="rtl-info-item">
-                              <span className="font-semibold">{record.overtime_hours} ساعة</span>
-                              <span className="text-muted-foreground">ساعات إضافية</span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </CardContent>
