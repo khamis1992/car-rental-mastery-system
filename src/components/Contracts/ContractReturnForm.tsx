@@ -97,19 +97,20 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
     setLoading(true);
 
     try {
+      // First, update the contract with return details without completing it
       const { error } = await supabase
         .from('contracts')
         .update({
           ...returnData,
           return_mileage: returnData.return_mileage ? parseInt(returnData.return_mileage) : null,
           return_damages: JSON.parse(JSON.stringify(returnData.return_damages)), // Convert to Json
-          status: 'completed'
+          // Don't set status to 'completed' yet - let the payment stage handle that
         })
         .eq('id', contract.id);
 
       if (error) throw error;
 
-      // Update vehicle status to available
+      // Update vehicle status to available since it's been returned
       await supabase
         .from('vehicles')
         .update({ status: 'available' })
@@ -117,7 +118,7 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
 
       toast({
         title: "تم بنجاح",
-        description: "تم استلام المركبة وإنهاء العقد بنجاح",
+        description: "تم استلام المركبة بنجاح. يمكنك الآن الانتقال لمرحلة الدفع لإنهاء العقد.",
       });
 
       onSuccess();
@@ -290,7 +291,7 @@ export const ContractReturnForm: React.FC<ContractReturnFormProps> = ({
               إلغاء
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'جاري الاستلام...' : 'تأكيد الاستلام وإنهاء العقد'}
+              {loading ? 'جاري الاستلام...' : 'تأكيد استلام المركبة'}
             </Button>
           </div>
         </form>
