@@ -192,9 +192,9 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
                         className={cn(
                           "rounded-full flex items-center justify-center border-2 transition-all duration-300 shadow-sm",
                           sizeClasses[size],
-                          // Final completed stage - distinctive green with stronger styling
+                          // Final completed stage - distinctive orange for return/receipt stage
                           step.status === 'completed' && currentStatus === 'completed' && step.id === 'completed' 
-                            ? "bg-gradient-to-br from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-emerald-200 shadow-lg ring-2 ring-emerald-200/50"
+                            ? "bg-gradient-to-br from-orange-500 to-orange-600 border-orange-500 text-white shadow-orange-200 shadow-lg ring-2 ring-orange-200/50"
                             // Regular completed steps - simple green
                             : step.status === 'completed' 
                             ? "bg-emerald-500 border-emerald-500 text-white"
@@ -250,10 +250,10 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
                    <div
                      className={cn(
                        "text-sm font-medium transition-colors duration-300",
-                       step.status === 'completed' && currentStatus === 'completed' && step.id === 'completed'
-                         ? "text-emerald-600 font-semibold"
-                         : step.status === 'completed' 
-                         ? "text-emerald-600"
+                        step.status === 'completed' && currentStatus === 'completed' && step.id === 'completed'
+                          ? "text-orange-600 font-semibold"
+                          : step.status === 'completed' 
+                          ? "text-emerald-600"
                          : step.status === 'current' 
                          ? "text-blue-600 font-medium"
                          : "text-muted-foreground"
