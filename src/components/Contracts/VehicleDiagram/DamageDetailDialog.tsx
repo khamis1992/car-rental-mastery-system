@@ -347,7 +347,14 @@ export const DamageDetailDialog: React.FC<DamageDetailDialogProps> = ({
           {/* Timestamp */}
           {editedDamage.timestamp && (
             <div className="text-xs text-muted-foreground">
-              تم التسجيل: {new Date(editedDamage.timestamp).toLocaleString('ar-SA')}
+              تم التسجيل: {new Date(editedDamage.timestamp).toLocaleString('ar', { 
+                calendar: 'gregory',
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
             </div>
           )}
 
