@@ -160,7 +160,10 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
       if (error) throw error;
 
       await loadContract();
-      onDataUpdate?.(); // Notify parent component of data changes
+      // Immediate notification to prevent UI flickering
+      if (onDataUpdate) {
+        onDataUpdate();
+      }
       
       const statusMessage = updateData.status === 'pending' 
         ? ' وتم تحديث حالة العقد إلى "في انتظار التسليم"'
@@ -259,7 +262,9 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           onOpenChange={setShowDeliveryForm}
           onSuccess={async () => {
             await loadContract();
-            onDataUpdate?.();
+            if (onDataUpdate) {
+              onDataUpdate();
+            }
           }}
         />
 
@@ -269,7 +274,9 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           onOpenChange={setShowReturnForm}
           onSuccess={async () => {
             await loadContract();
-            onDataUpdate?.();
+            if (onDataUpdate) {
+              onDataUpdate();
+            }
           }}
         />
 
@@ -280,7 +287,9 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           onOpenChange={setShowPaymentForm}
           onSuccess={async () => {
             await loadContract();
-            onDataUpdate?.();
+            if (onDataUpdate) {
+              onDataUpdate();
+            }
           }}
         />
 

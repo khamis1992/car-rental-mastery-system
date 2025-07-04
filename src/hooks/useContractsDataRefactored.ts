@@ -62,32 +62,21 @@ export const useContractsDataRefactored = () => {
   };
 
   const loadContracts = async () => {
-    const key = 'contracts';
-    const controller = new AbortController();
-    abortControllersRef.current.set(key, controller);
-    
     try {
       const data = await contractService.getAllContracts();
       
-      if (!isMountedRef.current || controller.signal.aborted) {
-        console.log('🔄 Contracts load cancelled');
+      if (!isMountedRef.current) {
+        console.log('🔄 Contracts load cancelled - component unmounted');
         return;
       }
       
       setContracts(data);
       setErrors(prev => ({ ...prev, contracts: '' }));
     } catch (error: any) {
-      if (error.name === 'AbortError' || error.message?.includes('abort')) {
-        console.log('🔄 Contracts request was cancelled');
-        return;
-      }
-      
       console.error('Error loading contracts:', error);
       if (isMountedRef.current) {
         setErrors(prev => ({ ...prev, contracts: error.message || 'فشل في تحميل العقود' }));
       }
-    } finally {
-      abortControllersRef.current.delete(key);
     }
   };
 
@@ -207,15 +196,11 @@ export const useContractsDataRefactored = () => {
 
   // Partial refresh function that doesn't clear existing data
   const refreshContracts = async (silent = false) => {
-    const key = 'contracts-refresh';
-    const controller = new AbortController();
-    abortControllersRef.current.set(key, controller);
-    
     try {
       const data = await contractService.getAllContracts();
       
-      if (!isMountedRef.current || controller.signal.aborted) {
-        console.log('🔄 Contracts refresh cancelled');
+      if (!isMountedRef.current) {
+        console.log('🔄 Contracts refresh cancelled - component unmounted');
         return;
       }
       
@@ -224,76 +209,44 @@ export const useContractsDataRefactored = () => {
       
       // Also refresh stats silently
       const contractStatsData = await contractService.getContractStats();
-      if (!controller.signal.aborted) {
+      if (isMountedRef.current) {
         setContractStats(contractStatsData);
       }
     } catch (error: any) {
-      if (error.name === 'AbortError' || error.message?.includes('abort')) {
-        console.log('🔄 Contracts refresh was cancelled');
-        return;
-      }
-      
       console.error('Error refreshing contracts:', error);
       if (isMountedRef.current && !silent) {
         setErrors(prev => ({ ...prev, contracts: error.message || 'فشل في تحديث العقود' }));
       }
-    } finally {
-      abortControllersRef.current.delete(key);
     }
   };
 
-  // Debounced contract refresh to prevent multiple simultaneous updates
-  const debouncedContractRefresh = useCallback((contractId?: string) => {
-    const now = Date.now();
-    const timeSinceLastUpdate = now - lastUpdateTimeRef.current;
-    
-    // Clear existing timeout
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current);
-    }
-    
-    // If this contract is already being updated, skip
-    if (contractId && pendingUpdatesRef.current.has(contractId)) {
-      console.log(`🔄 Contract ${contractId} update already pending, skipping`);
-      return;
-    }
-    
-    // Mark contract as pending update
+  // Immediate contract refresh without debouncing to prevent UI flickering
+  const immediateContractRefresh = useCallback((contractId?: string) => {
     if (contractId) {
-      pendingUpdatesRef.current.add(contractId);
-    }
-    
-    const executeUpdate = async () => {
-      try {
-        lastUpdateTimeRef.current = Date.now();
-        
-        if (contractId) {
-          await refreshSingleContract(contractId);
-          pendingUpdatesRef.current.delete(contractId);
-        } else {
-          // Full refresh - only if no pending single updates
-          if (pendingUpdatesRef.current.size === 0) {
-            await refreshContracts(true);
-          }
-        }
-      } catch (error) {
-        console.error('Error in debounced refresh:', error);
-        if (contractId) {
-          pendingUpdatesRef.current.delete(contractId);
-        }
-      }
-    };
-    
-    // If it's been less than 500ms since last update, debounce
-    if (timeSinceLastUpdate < 500) {
-      updateTimeoutRef.current = setTimeout(executeUpdate, 500 - timeSinceLastUpdate);
+      // For single contract updates, update immediately without aborting
+      refreshSingleContract(contractId).catch(error => {
+        console.error('Error in immediate single contract refresh:', error);
+      });
     } else {
-      executeUpdate();
+      // For full refresh, use debouncing only for bulk operations
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
+      
+      updateTimeoutRef.current = setTimeout(() => {
+        refreshContracts(true).catch(error => {
+          console.error('Error in immediate full refresh:', error);
+        });
+      }, 100); // Very short delay for bulk operations only
     }
   }, []);
 
+  // Legacy alias for compatibility
+  const debouncedContractRefresh = immediateContractRefresh;
+
   // Refresh single contract by ID without affecting the list
   const refreshSingleContract = async (contractId: string) => {
+    // Don't use abort controllers for single contract updates to prevent cancellation
     try {
       const updatedContract = await contractService.getContractById(contractId);
       const contractWithDetails = {
@@ -327,19 +280,21 @@ export const useContractsDataRefactored = () => {
         quotation_id: updatedContract.quotation_id,
       } as ContractWithDetails;
 
-      setContracts(prev => 
-        prev.map(contract => 
-          contract.id === contractId ? contractWithDetails : contract
-        )
-      );
+      // Update only the specific contract in the list without affecting others
+      setContracts(prev => {
+        const exists = prev.some(contract => contract.id === contractId);
+        if (exists) {
+          return prev.map(contract => 
+            contract.id === contractId ? contractWithDetails : contract
+          );
+        } else {
+          // If contract doesn't exist, add it (for new contracts)
+          return [...prev, contractWithDetails];
+        }
+      });
     } catch (error) {
       console.error('Error refreshing single contract:', error);
-      // Don't fallback to full refresh to prevent clearing the list
-      toast({
-        title: "خطأ في التحديث",
-        description: "فشل في تحديث بيانات العقد",
-        variant: "destructive"
-      });
+      // Silently fail to prevent UI disruption
     }
   };
 
@@ -438,5 +393,6 @@ export const useContractsDataRefactored = () => {
     refreshSingleContract,
     updateContractOptimistically,
     debouncedContractRefresh,
+    immediateContractRefresh,
   };
 };

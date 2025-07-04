@@ -224,15 +224,15 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                           vehicle_info: contract.vehicle_info
                         }}
                            onStatusUpdate={() => {
-                             toast({
-                               title: "تم التحديث",
-                               description: "تم تحديث حالة العقد بنجاح",
-                             });
-                             // Use immediate callback for status updates to prevent disappearing
-                             if (onStatusUpdate) {
-                               onStatusUpdate();
-                             }
-                           }}
+                              toast({
+                                title: "تم التحديث",
+                                description: "تم تحديث حالة العقد بنجاح",
+                              });
+                              // Immediate update without debouncing to prevent UI flickering
+                              if (onStatusUpdate) {
+                                onStatusUpdate();
+                              }
+                            }}
                       />
                    </TableCell>
                   <TableCell>
