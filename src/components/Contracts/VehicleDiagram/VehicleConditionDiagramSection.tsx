@@ -40,7 +40,7 @@ export const VehicleConditionDiagramSection: React.FC<VehicleConditionDiagramSec
   const [selectedDamage, setSelectedDamage] = useState<DamageArea | null>(null);
   const [tempDamage, setTempDamage] = useState<DamageArea | null>(null);
   const [isNewDamage, setIsNewDamage] = useState(false);
-  const [activeTab, setActiveTab] = useState('summary');
+  const [activeTab, setActiveTab] = useState('diagram');
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const { toast } = useToast();
