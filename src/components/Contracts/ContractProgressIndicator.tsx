@@ -88,6 +88,7 @@ export const ContractProgressIndicator: React.FC<ContractProgressIndicatorProps>
     return baseSteps.map((step, index) => ({
       ...step,
       status: 
+        status === 'completed' ? 'completed' :
         index < currentIndex ? 'completed' :
         index === currentIndex ? 'current' :
         'pending'
