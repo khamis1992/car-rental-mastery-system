@@ -127,35 +127,30 @@ export const CompletedContractTimeline: React.FC<CompletedContractTimelineProps>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="relative">
-          {/* الخط الزمني */}
-          <div className="absolute right-6 top-0 bottom-0 w-0.5 bg-border"></div>
-          
-          <div className="space-y-6">
-            {timelineEvents.map((event, index) => (
-              <div key={event.id} className="relative flex items-start gap-4">
-                {/* النقطة على الخط الزمني */}
-                <div className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full border-2 border-background ${getStatusColor(event.status)}`}>
-                  {event.icon}
-                </div>
-                
-                {/* محتوى الحدث */}
-                <div className="flex-1 min-w-0 pb-6">
-                  <div className="flex items-center justify-between mb-1">
-                    <Badge variant="outline" className="text-xs">
-                      {formatDateTime(event.timestamp)}
-                    </Badge>
+        <div className="space-y-6">
+          {timelineEvents.map((event, index) => (
+            <div key={event.id} className="flex items-start gap-4">
+              {/* محتوى الحدث */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <Badge variant="outline" className="text-xs">
+                    {formatDateTime(event.timestamp)}
+                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <div className={`flex items-center justify-center w-8 h-8 rounded-full ${getStatusColor(event.status)}`}>
+                      {event.icon}
+                    </div>
                     <h4 className="text-sm font-medium text-foreground">
                       {event.title}
                     </h4>
                   </div>
-                  <p className="text-sm text-muted-foreground text-right">
-                    {event.description}
-                  </p>
                 </div>
+                <p className="text-sm text-muted-foreground text-right">
+                  {event.description}
+                </p>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
         
         {/* ملخص المدة الزمنية */}
