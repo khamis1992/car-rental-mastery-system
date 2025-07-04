@@ -239,8 +239,6 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <ContractHeader
           contract={contract}
-          onPrint={handlePrint}
-          onDownloadPDF={handleDownloadPDF}
           onShowDelivery={() => setShowDeliveryForm(true)}
           onShowReturn={() => setShowReturnForm(true)}
           onShowPayment={() => setShowPaymentForm(true)}

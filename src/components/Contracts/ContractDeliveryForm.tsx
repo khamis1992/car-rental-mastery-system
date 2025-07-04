@@ -82,7 +82,7 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
     };
 
     loadContractData();
-  }, [contract, autoSave]);
+  }, [contract?.id]);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {

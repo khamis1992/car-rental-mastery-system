@@ -2,12 +2,10 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { FileText, Printer, Download, Truck, CheckCircle, CreditCard } from 'lucide-react';
+import { FileText, Truck, CheckCircle, CreditCard } from 'lucide-react';
 
 interface ContractHeaderProps {
   contract: any;
-  onPrint: () => void;
-  onDownloadPDF: () => void;
   onShowDelivery: () => void;
   onShowReturn: () => void;
   onShowPayment?: () => void;
@@ -15,8 +13,6 @@ interface ContractHeaderProps {
 
 export const ContractHeader: React.FC<ContractHeaderProps> = ({
   contract,
-  onPrint,
-  onDownloadPDF,
   onShowDelivery,
   onShowReturn,
   onShowPayment
@@ -65,15 +61,6 @@ export const ContractHeader: React.FC<ContractHeaderProps> = ({
               استلام المركبة
             </Button>
           )}
-          
-          <Button variant="outline" size="sm" onClick={onPrint}>
-            <Printer className="w-4 h-4 mr-2" />
-            طباعة
-          </Button>
-          <Button variant="outline" size="sm" onClick={onDownloadPDF}>
-            <Download className="w-4 h-4 mr-2" />
-            تحميل PDF
-          </Button>
         </div>
       </div>
     </DialogHeader>
