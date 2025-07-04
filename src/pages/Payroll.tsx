@@ -221,60 +221,60 @@ const Payroll = () => {
             
             <CardContent>
               <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>الموظف</TableHead>
-                      <TableHead>الراتب الأساسي</TableHead>
-                      <TableHead>الإضافات</TableHead>
-                      <TableHead>الخصومات</TableHead>
-                      <TableHead>الإجمالي</TableHead>
-                      <TableHead>الصافي</TableHead>
-                      <TableHead>الحالة</TableHead>
-                      <TableHead>الإجراءات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredPayroll.map((payroll) => (
-                      <TableRow key={payroll.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{payroll.employee_name}</div>
-                            <div className="text-sm text-muted-foreground">{payroll.employee_number}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{formatCurrency(payroll.basic_salary)}</TableCell>
-                        <TableCell>
-                          <div className="text-sm">
-                            <div>إضافي: {formatCurrency(payroll.overtime_amount)}</div>
-                            <div>بدلات: {formatCurrency(payroll.allowances)}</div>
-                            {payroll.bonuses > 0 && <div>مكافآت: {formatCurrency(payroll.bonuses)}</div>}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">
-                            {payroll.deductions > 0 && <div>خصومات: {formatCurrency(payroll.deductions)}</div>}
-                            <div>ضريبة: {formatCurrency(payroll.tax_deduction)}</div>
-                            <div>تأمين: {formatCurrency(payroll.social_insurance)}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-medium">{formatCurrency(payroll.gross_salary)}</TableCell>
-                        <TableCell className="font-medium text-green-600">{formatCurrency(payroll.net_salary)}</TableCell>
-                        <TableCell>{getStatusBadge(payroll.status)}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button variant="ghost" size="sm">
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Download className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>الإجراءات</TableHead>
+                        <TableHead>الحالة</TableHead>
+                        <TableHead>الصافي</TableHead>
+                        <TableHead>الإجمالي</TableHead>
+                        <TableHead>الخصومات</TableHead>
+                        <TableHead>الإضافات</TableHead>
+                        <TableHead>الراتب الأساسي</TableHead>
+                        <TableHead>الموظف</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredPayroll.map((payroll) => (
+                        <TableRow key={payroll.id}>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button variant="ghost" size="sm">
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                <Download className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(payroll.status)}</TableCell>
+                          <TableCell className="font-medium text-green-600">{formatCurrency(payroll.net_salary)}</TableCell>
+                          <TableCell className="font-medium">{formatCurrency(payroll.gross_salary)}</TableCell>
+                          <TableCell>
+                            <div className="text-sm">
+                              {payroll.deductions > 0 && <div>خصومات: {formatCurrency(payroll.deductions)}</div>}
+                              <div>ضريبة: {formatCurrency(payroll.tax_deduction)}</div>
+                              <div>تأمين: {formatCurrency(payroll.social_insurance)}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">
+                              <div>إضافي: {formatCurrency(payroll.overtime_amount)}</div>
+                              <div>بدلات: {formatCurrency(payroll.allowances)}</div>
+                              {payroll.bonuses > 0 && <div>مكافآت: {formatCurrency(payroll.bonuses)}</div>}
+                            </div>
+                          </TableCell>
+                          <TableCell>{formatCurrency(payroll.basic_salary)}</TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{payroll.employee_name}</div>
+                              <div className="text-sm text-muted-foreground">{payroll.employee_number}</div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
 
                 {filteredPayroll.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
