@@ -101,19 +101,11 @@ export const CompletedContractStats: React.FC<CompletedContractStatsProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary mb-1">
-                  {formatCurrencyKWD(contractStats.totalRevenue)}
-                </div>
-                <p className="text-sm text-muted-foreground">إجمالي الإيرادات</p>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary mb-1">
+                {formatCurrencyKWD(contractStats.totalRevenue)}
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary mb-1">
-                  {contractStats.completedCount}
-                </div>
-                <p className="text-sm text-muted-foreground">العقود المكتملة</p>
-              </div>
+              <p className="text-sm text-muted-foreground">إجمالي الإيرادات</p>
             </div>
           </CardContent>
         </Card>
