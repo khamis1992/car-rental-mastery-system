@@ -880,6 +880,54 @@ export type Database = {
         }
         Relationships: []
       }
+      contract_accounting_entries: {
+        Row: {
+          amount: number
+          contract_id: string
+          created_at: string | null
+          created_by: string | null
+          entry_type: string
+          id: string
+          journal_entry_id: string
+          notes: string | null
+        }
+        Insert: {
+          amount: number
+          contract_id: string
+          created_at?: string | null
+          created_by?: string | null
+          entry_type: string
+          id?: string
+          journal_entry_id: string
+          notes?: string | null
+        }
+        Update: {
+          amount?: number
+          contract_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          entry_type?: string
+          id?: string
+          journal_entry_id?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_accounting_entries_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_accounting_entries_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_extensions: {
         Row: {
           approved_at: string | null
@@ -1026,6 +1074,7 @@ export type Database = {
           fuel_level_return: string | null
           id: string
           insurance_amount: number | null
+          journal_entry_id: string | null
           notes: string | null
           payment_registered_at: string | null
           pickup_condition_notes: string | null
@@ -1072,6 +1121,7 @@ export type Database = {
           fuel_level_return?: string | null
           id?: string
           insurance_amount?: number | null
+          journal_entry_id?: string | null
           notes?: string | null
           payment_registered_at?: string | null
           pickup_condition_notes?: string | null
@@ -1118,6 +1168,7 @@ export type Database = {
           fuel_level_return?: string | null
           id?: string
           insurance_amount?: number | null
+          journal_entry_id?: string | null
           notes?: string | null
           payment_registered_at?: string | null
           pickup_condition_notes?: string | null
@@ -1149,6 +1200,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
             referencedColumns: ["id"]
           },
           {
@@ -3477,6 +3535,10 @@ export type Database = {
       }
       calculate_monthly_performance: {
         Args: { target_year: number; target_month: number }
+        Returns: string
+      }
+      create_contract_accounting_entry: {
+        Args: { contract_id: string; contract_data: Json }
         Returns: string
       }
       create_depreciation_entries: {

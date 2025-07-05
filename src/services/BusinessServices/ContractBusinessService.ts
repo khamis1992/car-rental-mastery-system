@@ -1,5 +1,6 @@
 import { IContractRepository } from '@/repositories/interfaces/IContractRepository';
 import { ContractWithDetails } from '@/services/contractService';
+import { contractAccountingService, ContractAccountingData } from '@/services/contractAccountingService';
 
 export class ContractBusinessService {
   constructor(private contractRepository: IContractRepository) {}
@@ -117,10 +118,93 @@ export class ContractBusinessService {
     }
 
     // Register payment and set status to active
-    return await this.contractRepository.updateContract(id, {
+    const result = await this.contractRepository.updateContract(id, {
       payment_registered_at: new Date().toISOString(),
       status: 'active',
       updated_at: new Date().toISOString()
     });
+
+    // إنشاء القيد المحاسبي عند تفعيل العقد
+    try {
+      await this.createAccountingEntry(contract);
+    } catch (error) {
+      console.error('فشل في إنشاء القيد المحاسبي للعقد:', error);
+      // لا نريد فشل العملية بسبب خطأ المحاسبة
+    }
+
+    return result;
+  }
+
+  // طرق تكامل المحاسبة
+  async createAccountingEntry(contract: any): Promise<string | null> {
+    try {
+      const contractAccountingData: ContractAccountingData = {
+        contract_id: contract.id,
+        customer_name: contract.customers?.name || 'غير محدد',
+        vehicle_info: contract.vehicles ? 
+          `${contract.vehicles.make} ${contract.vehicles.model} - ${contract.vehicles.vehicle_number}` : 'غير محدد',
+        contract_number: contract.contract_number,
+        total_amount: contract.total_amount || 0,
+        security_deposit: contract.security_deposit || 0,
+        insurance_amount: contract.insurance_amount || 0,
+        tax_amount: contract.tax_amount || 0,
+        discount_amount: contract.discount_amount || 0,
+        start_date: contract.start_date,
+        end_date: contract.end_date
+      };
+
+      return await contractAccountingService.createContractAccountingEntry(contractAccountingData);
+    } catch (error) {
+      console.error('خطأ في إنشاء القيد المحاسبي للعقد:', error);
+      throw error;
+    }
+  }
+
+  async hasAccountingEntries(contractId: string): Promise<boolean> {
+    return await contractAccountingService.hasAccountingEntries(contractId);
+  }
+
+  async getContractAccountingEntries(contractId: string) {
+    return await contractAccountingService.getContractAccountingEntries(contractId);
+  }
+
+  async getContractJournalEntry(contractId: string) {
+    return await contractAccountingService.getContractJournalEntry(contractId);
+  }
+
+  async createPaymentEntry(contractId: string, paymentData: {
+    customer_name: string;
+    vehicle_info: string;
+    amount: number;
+    payment_method: 'cash' | 'bank_transfer' | 'check';
+    payment_date?: string;
+    bank_account_id?: string;
+    reference_number?: string;
+  }): Promise<string> {
+    return await contractAccountingService.createContractPaymentEntry(contractId, paymentData);
+  }
+
+  async createDepositReturnEntry(contractId: string, depositData: {
+    customer_name: string;
+    vehicle_info: string;
+    deposit_amount: number;
+    deductions: number;
+    net_return: number;
+    return_date?: string;
+  }): Promise<string> {
+    return await contractAccountingService.createDepositReturnEntry(contractId, depositData);
+  }
+
+  async getContractAccountingReport(filters: {
+    startDate?: string;
+    endDate?: string;
+    customerId?: string;
+    status?: string;
+  }) {
+    return await contractAccountingService.getContractAccountingReport(filters);
+  }
+
+  async getContractAccountingSummary(period: { year: number; month?: number }) {
+    return await contractAccountingService.getContractAccountingSummary(period);
   }
 }
