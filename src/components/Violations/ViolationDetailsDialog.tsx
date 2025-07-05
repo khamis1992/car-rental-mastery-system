@@ -212,16 +212,16 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
                  </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-right">
+                    <div>
+                      <span className="text-muted-foreground block">تاريخ المخالفة:</span>
                       <span className="font-medium">
                         {format(new Date(violation.violation_date), 'dd/MM/yyyy', { locale: ar })}
                       </span>
-                      <span className="text-muted-foreground block">تاريخ المخالفة:</span>
-                    </div>
+                     </div>
                     {violation.location && (
-                      <div className="text-right">
-                        <span className="font-medium">{violation.location}</span>
+                      <div>
                         <span className="text-muted-foreground block">المكان:</span>
+                        <span className="font-medium">{violation.location}</span>
                       </div>
                     )}
                   </div>
