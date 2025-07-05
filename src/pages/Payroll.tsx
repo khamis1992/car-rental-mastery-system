@@ -299,7 +299,7 @@ const Payroll = () => {
 
       {/* التبويبات */}
       <Tabs defaultValue="current" className="space-y-4">
-        <TabsList className="flex-row-reverse">
+        <TabsList className="justify-end">
           <TabsTrigger value="settings">الإعدادات</TabsTrigger>
           <TabsTrigger value="reports">التقارير</TabsTrigger>
           <TabsTrigger value="history">سجل الرواتب</TabsTrigger>
