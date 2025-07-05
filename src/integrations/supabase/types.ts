@@ -3700,8 +3700,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      reprocess_missing_payment_entries: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       validate_accounting_balance: {
         Args: { journal_entry_id: string }
+        Returns: Json
+      }
+      validate_accounting_integrity: {
+        Args: Record<PropertyKey, never>
         Returns: Json
       }
       validate_chart_of_accounts: {

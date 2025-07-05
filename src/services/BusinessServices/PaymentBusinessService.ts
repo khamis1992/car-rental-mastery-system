@@ -23,21 +23,27 @@ export class PaymentBusinessService {
     await this.validatePaymentData(paymentData);
     const payment = await this.paymentRepository.createPayment(paymentData);
     
-    // إنشاء القيد المحاسبي للدفعة
+    // إنشاء القيد المحاسبي للدفعة مع معالجة محسنة للأخطاء
     try {
       const invoice = await this.invoiceRepository.getInvoiceById(paymentData.invoice_id);
       if (invoice) {
         const customerName = await this.getCustomerName(invoice.customer_id);
-        await this.accountingService.createPaymentAccountingEntry(payment.id, {
+        const journalEntryId = await this.accountingService.createPaymentAccountingEntry(payment.id, {
           customer_name: customerName,
           invoice_number: invoice.invoice_number,
           payment_amount: payment.amount,
           payment_method: payment.payment_method,
           payment_date: payment.payment_date
         });
+        
+        if (journalEntryId) {
+          console.log(`Payment accounting entry created successfully: ${journalEntryId}`);
+        }
       }
     } catch (error) {
-      console.warn('Failed to create accounting entry for payment:', error);
+      console.error('Failed to create accounting entry for payment:', error);
+      // نسجل الخطأ لكن لا نوقف العملية
+      // يمكن معالجة هذا لاحقاً من خلال خدمة التسوية
     }
     
     return payment;
