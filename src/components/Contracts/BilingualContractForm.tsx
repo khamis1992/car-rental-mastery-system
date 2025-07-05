@@ -254,79 +254,127 @@ export const BilingualContractForm: React.FC<BilingualContractFormProps> = ({
 
   const generateTermsAndConditions = (language: string) => {
     const termsAr = `
-الشروط والأحكام - عقد إيجار السيارات
+الشروط والأحكام العامة لعقد إيجار السيارات
 
-1. التعاريف والتفسير:
-- "الشركة": شركة تأجير السيارات المرخصة في دولة الكويت
-- "المستأجر": الشخص أو الجهة المتعاقدة على استئجار المركبة
-- "المركبة": السيارة محل عقد الإيجار
+أولاً: الالتزامات العامة للمستأجر
+1. يلتزم المستأجر بإبراز رخصة قيادة سارية المفعول وبطاقة هوية مدنية وجواز سفر (للوافدين) عند استلام المركبة.
+2. يجب ألا يقل عمر المستأجر عن 21 سنة، وأن يكون حاملاً لرخصة قيادة صالحة لمدة لا تقل عن سنة واحدة.
+3. يحق للشركة رفض تأجير المركبة دون إبداء الأسباب.
+4. يلتزم المستأجر بتوقيع عقد الإيجار وتسليم المبلغ المطلوب مقدماً.
 
-2. مدة الإيجار:
-- تبدأ مدة الإيجار من التاريخ والوقت المحددين في العقد
-- يجب إعادة المركبة في الموعد المحدد تماماً
-- التأخير في الإعادة يترتب عليه رسوم إضافية
+ثانياً: استخدام المركبة
+1. يلتزم المستأجر بقيادة المركبة بحذر وعناية وضمن حدود السرعة المسموحة.
+2. لا يحق للمستأجر استخدام المركبة لأغراض تجارية أو تعليم القيادة أو المشاركة في السباقات أو التجمعات غير المشروعة.
+3. يُمنع استخدام المركبة في المناطق الوعرة أو الطرق غير المعبدة إلا بإذن مسبق من الشركة.
+4. لا يجوز تأجير المركبة من الباطن أو السماح لغير المرخص لهم بقيادتها.
+5. يُمنع التدخين أو نقل المواد القابلة للاشتعال أو الحيوانات داخل المركبة إلا بإذن مسبق.
 
-3. الالتزامات المالية:
-- دفع كامل المبلغ المتفق عليه قبل تسليم المركبة
-- دفع مبلغ التأمين القابل للاسترداد
-- تحمل أي رسوم إضافية أو غرامات مرورية
+ثالثاً: مدة الإيجار والإعادة
+1. تبدأ مدة الإيجار من الوقت المحدد في العقد وتنتهي في الموعد المتفق عليه.
+2. يجب إعادة المركبة في نفس المكان والوقت المحددين في العقد.
+3. في حالة التأخير في الإعادة، يستحق عن كل ساعة تأخير أو جزء منها أجر يوم كامل.
+4. للشركة الحق في استرداد المركبة من أي مكان في حالة انتهاء مدة العقد دون الإعادة.
 
-4. استخدام المركبة:
-- استخدام المركبة للأغراض المشروعة فقط
-- عدم تأجير المركبة من الباطن
-- عدم استخدامها في أنشطة غير قانونية
+رابعاً: الأضرار والصيانة
+1. يتحمل المستأجر كامل تكاليف الأضرار التي تلحق بالمركبة أثناء فترة الإيجار.
+2. في حالة وقوع حادث، يجب إبلاغ الشرطة والشركة فوراً والحصول على تقرير مروري.
+3. يُمنع إجراء أي تصليحات أو تعديلات على المركبة دون إذن مسبق من الشركة.
+4. يتحمل المستأجر تكاليف الصيانة الدورية في حالة الإيجار طويل المدى.
 
-5. التأمين والأضرار:
-- المركبة مؤمنة ضد الحوادث والسرقة
-- المستأجر مسؤول عن الأضرار الناتجة عن الإهمال
-- يجب الإبلاغ عن أي حادث فوراً
+خامساً: المخالفات المرورية
+1. يتحمل المستأجر كامل المسؤولية عن جميع المخالفات المرورية التي ترتكب بالمركبة أثناء فترة الإيجار.
+2. للشركة الحق في خصم قيمة المخالفات من التأمين أو مطالبة المستأجر بها.
+3. يلتزم المستأجر بدفع رسوم إدارية إضافية عن كل مخالفة مرورية.
 
-6. إنهاء العقد:
-- يحق للشركة إنهاء العقد في حالة مخالفة الشروط
-- يجب إعادة المركبة في نفس حالة التسليم
-- التسوية النهائية تتم عند الإعادة
+سادساً: التأمين
+1. المركبة مؤمنة ضد الغير فقط، ولا يشمل التأمين الأضرار الناتجة عن سوء الاستخدام أو الإهمال.
+2. في حالة الحوادث، يتحمل المستأجر التحمل المقرر في بوليصة التأمين.
+3. لا يغطي التأمين سرقة الأشياء الشخصية أو الأضرار الداخلية للمركبة.
 
-7. القانون الحاكم:
-- يخضع هذا العقد لقوانين دولة الكويت
-- أي نزاع يحل عبر المحاكم الكويتية المختصة
+سابعاً: الدفع والضمانات
+1. يجب دفع كامل قيمة الإيجار مقدماً قبل استلام المركبة.
+2. يودع المستأجر مبلغاً كضمان لتغطية أي أضرار أو مخالفات، ويسترد عند إعادة المركبة سليمة.
+3. تقبل المدفوعات نقداً أو بالبطاقات الائتمانية المعتمدة.
+4. في حالة عدم الدفع، للشركة الحق في استرداد المركبة واتخاذ الإجراءات القانونية.
+
+ثامناً: القوة القاهرة
+لا تتحمل الشركة المسؤولية في حالات القوة القاهرة مثل الكوارث الطبيعية أو الحروب أو الاضطرابات، ويحق لها إنهاء العقد دون تعويض.
+
+تاسعاً: فسخ العقد
+1. للشركة الحق في فسخ العقد فوراً في حالة مخالفة أي من هذه الشروط.
+2. في حالة فسخ العقد من قبل المستأجر، لا يحق له استرداد المبالغ المدفوعة.
+3. للشركة الحق في الاحتفاظ بالضمان لتغطية أي التزامات معلقة.
+
+عاشراً: القانون الواجب التطبيق
+يخضع هذا العقد لقوانين دولة الكويت، وتختص المحاكم الكويتية بنظر أي نزاع ينشأ عنه.
+
+الحادي عشر: أحكام عامة
+1. هذا العقد يلغي أي اتفاقيات سابقة بين الطرفين.
+2. أي تعديل على هذا العقد يجب أن يكون كتابياً وموقعاً من الطرفين.
+3. إذا كان أي بند من بنود هذا العقد غير قابل للتنفيذ، فإن باقي البنود تبقى سارية المفعول.
+4. يعتبر هذا العقد ملزماً للطرفين وخلفائهما وورثتهما.
 `;
 
     const termsEn = `
-TERMS AND CONDITIONS - CAR RENTAL AGREEMENT
+GENERAL TERMS AND CONDITIONS FOR CAR RENTAL AGREEMENT
 
-1. Definitions and Interpretation:
-- "Company": The licensed car rental company in Kuwait
-- "Renter": The person or entity contracting for vehicle rental
-- "Vehicle": The car subject to this rental agreement
+First: General Obligations of the Renter
+1. The renter must present a valid driving license, civil ID, and passport (for expatriates) when receiving the vehicle.
+2. The renter must be at least 21 years old and hold a valid driving license for no less than one year.
+3. The company reserves the right to refuse vehicle rental without stating reasons.
+4. The renter must sign the rental agreement and pay the required amount in advance.
 
-2. Rental Period:
-- Rental period starts from the specified date and time in the contract
-- Vehicle must be returned at the exact specified time
-- Late return incurs additional charges
+Second: Vehicle Usage
+1. The renter must drive the vehicle carefully and cautiously within permitted speed limits.
+2. The renter may not use the vehicle for commercial purposes, driving instruction, racing, or illegal gatherings.
+3. Using the vehicle in rough terrain or unpaved roads is prohibited without prior company approval.
+4. Subletting the vehicle or allowing unlicensed persons to drive is not permitted.
+5. Smoking, transporting flammable materials, or animals inside the vehicle is prohibited without prior permission.
 
-3. Financial Obligations:
-- Payment of full agreed amount before vehicle delivery
-- Payment of refundable security deposit
-- Responsibility for additional fees or traffic violations
+Third: Rental Period and Return
+1. The rental period starts at the specified time in the contract and ends at the agreed time.
+2. The vehicle must be returned to the same location and time specified in the contract.
+3. In case of late return, each hour or part thereof incurs a full day's charge.
+4. The company has the right to retrieve the vehicle from any location if the contract expires without return.
 
-4. Vehicle Usage:
-- Use vehicle for lawful purposes only
-- No subletting of the vehicle
-- No use in illegal activities
+Fourth: Damages and Maintenance
+1. The renter bears full cost of damages to the vehicle during the rental period.
+2. In case of an accident, police and company must be notified immediately and a traffic report obtained.
+3. No repairs or modifications to the vehicle are allowed without prior company approval.
+4. The renter bears routine maintenance costs for long-term rentals.
 
-5. Insurance and Damages:
-- Vehicle is insured against accidents and theft
-- Renter responsible for damages due to negligence
-- Any accident must be reported immediately
+Fifth: Traffic Violations
+1. The renter bears full responsibility for all traffic violations committed with the vehicle during rental period.
+2. The company may deduct violation costs from the deposit or claim them from the renter.
+3. The renter must pay additional administrative fees for each traffic violation.
 
-6. Contract Termination:
-- Company may terminate contract for violation of terms
-- Vehicle must be returned in same condition as delivered
-- Final settlement upon return
+Sixth: Insurance
+1. The vehicle is insured for third party only; insurance does not cover damages from misuse or negligence.
+2. In case of accidents, the renter bears the deductible specified in the insurance policy.
+3. Insurance does not cover theft of personal items or internal vehicle damages.
 
-7. Governing Law:
-- This contract is governed by Kuwait laws
-- Any dispute resolved through Kuwait courts
+Seventh: Payment and Guarantees
+1. Full rental amount must be paid in advance before vehicle delivery.
+2. The renter deposits a security amount to cover damages or violations, refunded upon safe vehicle return.
+3. Payments accepted in cash or approved credit cards.
+4. In case of non-payment, the company may retrieve the vehicle and take legal action.
+
+Eighth: Force Majeure
+The company bears no responsibility in cases of force majeure such as natural disasters, wars, or disturbances, and may terminate the contract without compensation.
+
+Ninth: Contract Termination
+1. The company may terminate the contract immediately for violation of any terms.
+2. If the renter terminates the contract, no refund of paid amounts is due.
+3. The company may retain the deposit to cover any outstanding obligations.
+
+Tenth: Applicable Law
+This contract is governed by Kuwait laws, and Kuwait courts have jurisdiction over any arising disputes.
+
+Eleventh: General Provisions
+1. This contract supersedes any previous agreements between the parties.
+2. Any contract modifications must be written and signed by both parties.
+3. If any contract provision is unenforceable, remaining provisions remain valid.
+4. This contract is binding on both parties and their successors and heirs.
 `;
 
     switch (language) {
