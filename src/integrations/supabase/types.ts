@@ -3540,6 +3540,10 @@ export type Database = {
         Args: { target_year: number; target_month: number }
         Returns: string
       }
+      cleanup_duplicate_accounts: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       create_attendance_accounting_entry: {
         Args: { attendance_data: Json }
         Returns: string
@@ -3599,6 +3603,15 @@ export type Database = {
       extract_transaction_features: {
         Args: { description: string; amount: number; transaction_date?: string }
         Returns: Json
+      }
+      find_duplicate_accounts: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          account_name: string
+          account_type: string
+          count_duplicates: number
+          account_codes: string[]
+        }[]
       }
       fix_unbalanced_accounting_entries: {
         Args: Record<PropertyKey, never>
@@ -3683,8 +3696,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      reorganize_account_codes: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       validate_accounting_balance: {
         Args: { journal_entry_id: string }
+        Returns: Json
+      }
+      validate_chart_of_accounts: {
+        Args: Record<PropertyKey, never>
         Returns: Json
       }
     }
