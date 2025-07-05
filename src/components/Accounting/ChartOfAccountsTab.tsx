@@ -159,7 +159,6 @@ export const ChartOfAccountsTab = () => {
     <Card className="card-elegant">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>دليل الحسابات</CardTitle>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => { resetForm(); setEditingAccount(null); }}>
@@ -228,6 +227,7 @@ export const ChartOfAccountsTab = () => {
               </form>
             </DialogContent>
           </Dialog>
+          <CardTitle>دليل الحسابات</CardTitle>
         </div>
       </CardHeader>
       <CardContent>
