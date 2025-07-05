@@ -8,6 +8,7 @@ import { DollarSign, ArrowRight, Receipt, CreditCard, AlertTriangle, CheckCircle
 import { ContractStageWrapper } from '@/components/Contracts/ContractStageWrapper';
 import { InvoiceForm } from '@/components/Invoicing/InvoiceForm';
 import { PaymentForm } from '@/components/Invoicing/PaymentForm';
+import { InvoiceAndPaymentForm } from '@/components/Invoicing/InvoiceAndPaymentForm';
 import { supabase } from '@/integrations/supabase/client';
 import { serviceContainer } from '@/services/Container/ServiceContainer';
 import { useToast } from '@/hooks/use-toast';
@@ -27,6 +28,7 @@ const PaymentStage = () => {
   const [loading, setLoading] = useState(true);
   const [invoiceFormOpen, setInvoiceFormOpen] = useState(false);
   const [paymentFormOpen, setPaymentFormOpen] = useState(false);
+  const [invoiceAndPaymentFormOpen, setInvoiceAndPaymentFormOpen] = useState(false);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState<any>(null);
 
   const invoiceService = serviceContainer.getInvoiceBusinessService();
@@ -126,6 +128,10 @@ const PaymentStage = () => {
   const handleAddPayment = (invoice: any) => {
     setSelectedInvoiceForPayment(invoice);
     setPaymentFormOpen(true);
+  };
+
+  const handleCreateInvoiceAndPayment = () => {
+    setInvoiceAndPaymentFormOpen(true);
   };
 
   const handlePaymentSuccess = () => {
@@ -260,10 +266,17 @@ const PaymentStage = () => {
           <CardTitle>الفواتير</CardTitle>
           <div className="flex gap-2">
             {contract.status === 'completed' && invoices.length === 0 && (
-              <Button onClick={handleCreateInvoice} className="flex items-center gap-2">
-                <Receipt className="w-4 h-4" />
-                إنشاء فاتورة تلقائية
-              </Button>
+              <>
+                <Button onClick={handleCreateInvoiceAndPayment} className="flex items-center gap-2">
+                  <Receipt className="w-4 h-4" />
+                  <CreditCard className="w-4 h-4" />
+                  إنشاء فاتورة ودفعة
+                </Button>
+                <Button onClick={handleCreateInvoice} variant="outline" className="flex items-center gap-2">
+                  <Receipt className="w-4 h-4" />
+                  إنشاء فاتورة فقط
+                </Button>
+              </>
             )}
             <Button 
               onClick={() => setInvoiceFormOpen(true)} 
@@ -282,10 +295,17 @@ const PaymentStage = () => {
               <h3 className="text-lg font-medium text-muted-foreground mb-2">لا توجد فواتير</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 {contract.status === 'completed' 
-                  ? 'يمكنك إنشاء فاتورة تلقائية للعقد المكتمل'
+                  ? 'يمكنك إنشاء فاتورة مع دفعة مباشرة أو إنشاء فاتورة فقط'
                   : 'قم بإنشاء فاتورة عند اكتمال العقد'
                 }
               </p>
+              {contract.status === 'completed' && (
+                <Button onClick={handleCreateInvoiceAndPayment} className="mb-2">
+                  <Receipt className="w-4 h-4 ml-2" />
+                  <CreditCard className="w-4 h-4 ml-2" />
+                  إنشاء فاتورة ودفعة
+                </Button>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -471,6 +491,19 @@ const PaymentStage = () => {
           invoice={selectedInvoiceForPayment}
         />
       )}
+
+      <InvoiceAndPaymentForm
+        open={invoiceAndPaymentFormOpen}
+        onOpenChange={setInvoiceAndPaymentFormOpen}
+        onSuccess={() => {
+          toast({
+            title: "تم بنجاح",
+            description: "تم إنشاء الفاتورة وتسجيل الدفعة بنجاح",
+          });
+          loadContractData();
+        }}
+        contract={contract}
+      />
     </ContractStageWrapper>
   );
 };
