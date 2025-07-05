@@ -7,6 +7,7 @@ import { FileText, Download, BarChart3, PieChart, Calendar, Users } from 'lucide
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { attendanceManagementService, AttendanceStats } from '@/services/attendanceManagementService';
+import { attendanceReportsPDFService } from '@/lib/attendanceReportsPDFService';
 import { useToast } from '@/hooks/use-toast';
 
 export const AttendanceReports: React.FC = () => {
@@ -47,20 +48,36 @@ export const AttendanceReports: React.FC = () => {
         endDate: `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-31`
       };
 
-      const csv = await attendanceManagementService.exportAttendanceData(filters);
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `attendance_report_${selectedYear}_${selectedMonth}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // جلب بيانات الحضور
+      const attendanceData = await attendanceManagementService.getAllAttendanceRecords(filters);
+      
+      // تحديد عنوان التقرير والفترة
+      const reportTitle = reportTypes.find(type => type.value === reportType)?.label || 'تقرير الحضور';
+      const monthName = months.find(month => month.value === selectedMonth)?.label || '';
+      const period = `${monthName} ${selectedYear}`;
+      
+      // إعداد بيانات التقرير
+      const reportData = {
+        title: reportTitle,
+        period: period,
+        data: attendanceData,
+        stats: stats ? {
+          totalEmployees: stats.totalEmployees,
+          presentToday: stats.presentToday,
+          absentToday: stats.absentToday,
+          lateToday: stats.lateToday,
+          totalHours: stats.totalHoursThisMonth,
+          overtimeHours: stats.overtimeHoursThisMonth
+        } : undefined
+      };
+
+      // إنشاء وتحميل التقرير بصيغة PDF
+      await attendanceReportsPDFService.generateAttendanceReport(reportData);
+      await attendanceReportsPDFService.downloadReport(`تقرير_الحضور_${selectedYear}_${selectedMonth}.pdf`);
       
       toast({
         title: 'تم التصدير',
-        description: 'تم تصدير التقرير بنجاح'
+        description: 'تم تصدير تقرير PDF بنجاح'
       });
     } catch (error) {
       console.error('خطأ في التصدير:', error);
@@ -110,7 +127,7 @@ export const AttendanceReports: React.FC = () => {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-right">
-            اختر نوع التقرير والفترة الزمنية لتصدير تقارير مفصلة عن الحضور والانصراف
+            اختر نوع التقرير والفترة الزمنية لتصدير تقارير مفصلة عن الحضور والانصراف بصيغة PDF
           </p>
         </CardContent>
       </Card>
