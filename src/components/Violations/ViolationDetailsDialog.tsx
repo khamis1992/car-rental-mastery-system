@@ -209,15 +209,17 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
                      تفاصيل الحدث
                      <Calendar className="w-4 h-4" />
                    </CardTitle>
+                   <div className="flex justify-end text-right">
+                     <div>
+                       <span className="text-muted-foreground block">تاريخ المخالفة:</span>
+                       <span className="font-medium">
+                         {format(new Date(violation.violation_date), 'dd/MM/yyyy', { locale: ar })}
+                       </span>
+                     </div>
+                   </div>
                  </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <span className="text-muted-foreground block">تاريخ المخالفة:</span>
-                      <span className="font-medium">
-                        {format(new Date(violation.violation_date), 'dd/MM/yyyy', { locale: ar })}
-                      </span>
-                     </div>
                     {violation.location && (
                       <div>
                         <span className="text-muted-foreground block">المكان:</span>
