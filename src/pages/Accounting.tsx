@@ -162,7 +162,7 @@ const Accounting = () => {
         <TabsContent value="transactions" className="space-y-4">
           <Card className="card-elegant">
             <CardHeader>
-              <CardTitle>المعاملات الأخيرة</CardTitle>
+              <CardTitle className="text-right">المعاملات الأخيرة</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
