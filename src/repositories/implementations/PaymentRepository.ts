@@ -18,44 +18,62 @@ export class PaymentRepository extends BaseRepository<Payment> implements IPayme
   }
 
   async createPayment(paymentData: PaymentFormData): Promise<Payment> {
-    // Generate payment number
-    const { data: paymentNumber, error: numberError } = await supabase
-      .rpc('generate_payment_number');
+    try {
+      // Generate payment number
+      const { data: paymentNumber, error: numberError } = await supabase
+        .rpc('generate_payment_number');
 
-    if (numberError) throw numberError;
+      if (numberError) throw numberError;
 
-    // Get invoice to get contract and customer IDs
-    const { data: invoice, error: invoiceError } = await supabase
-      .from('invoices')
-      .select('contract_id, customer_id')
-      .eq('id', paymentData.invoice_id)
-      .single();
+      // Get invoice with customer data for validation
+      const { data: invoice, error: invoiceError } = await supabase
+        .from('invoices')
+        .select(`
+          contract_id, 
+          customer_id, 
+          invoice_number,
+          total_amount,
+          outstanding_amount,
+          customers(name)
+        `)
+        .eq('id', paymentData.invoice_id)
+        .single();
 
-    if (invoiceError) throw invoiceError;
+      if (invoiceError) throw invoiceError;
 
-    // Create payment
-    const { data: payment, error: paymentError } = await supabase
-      .from('payments')
-      .insert({
-        payment_number: paymentNumber,
-        invoice_id: paymentData.invoice_id,
-        contract_id: invoice.contract_id,
-        customer_id: invoice.customer_id,
-        amount: paymentData.amount,
-        payment_date: paymentData.payment_date,
-        payment_method: paymentData.payment_method,
-        transaction_reference: paymentData.transaction_reference,
-        bank_name: paymentData.bank_name,
-        check_number: paymentData.check_number,
-        notes: paymentData.notes,
-        status: 'completed',
-        created_by: (await supabase.auth.getUser()).data.user?.id,
-      })
-      .select()
-      .single();
+      // Validate payment amount
+      const outstandingAmount = invoice.outstanding_amount || invoice.total_amount;
+      if (paymentData.amount > outstandingAmount) {
+        throw new Error(`Payment amount (${paymentData.amount}) cannot exceed outstanding amount (${outstandingAmount})`);
+      }
 
-    if (paymentError) throw paymentError;
-    return payment as Payment;
+      // Create payment
+      const { data: payment, error: paymentError } = await supabase
+        .from('payments')
+        .insert({
+          payment_number: paymentNumber,
+          invoice_id: paymentData.invoice_id,
+          contract_id: invoice.contract_id,
+          customer_id: invoice.customer_id,
+          amount: paymentData.amount,
+          payment_date: paymentData.payment_date,
+          payment_method: paymentData.payment_method,
+          transaction_reference: paymentData.transaction_reference,
+          bank_name: paymentData.bank_name,
+          check_number: paymentData.check_number,
+          notes: paymentData.notes,
+          status: 'completed',
+          created_by: (await supabase.auth.getUser()).data.user?.id,
+        })
+        .select()
+        .single();
+
+      if (paymentError) throw paymentError;
+      return payment as Payment;
+    } catch (error) {
+      console.error('Error creating payment:', error);
+      throw new Error(`فشل في إنشاء الدفعة: ${error.message}`);
+    }
   }
 
   async updatePaymentStatus(id: string, status: Payment['status']): Promise<void> {

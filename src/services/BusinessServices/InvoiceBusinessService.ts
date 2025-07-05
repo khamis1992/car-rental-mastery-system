@@ -24,19 +24,23 @@ export class InvoiceBusinessService {
       this.validateInvoiceData(invoiceData);
       const invoice = await this.invoiceRepository.createInvoice(invoiceData);
       
-      // إنشاء القيد المحاسبي للفاتورة (بشكل اختياري)
+      // Create accounting entry for the invoice with improved error handling
       try {
         const customerName = await this.getCustomerName(invoice.customer_id);
-        await this.accountingService.createInvoiceAccountingEntry(invoice.id, {
+        const journalEntryId = await this.accountingService.createInvoiceAccountingEntry(invoice.id, {
           customer_name: customerName,
           invoice_number: invoice.invoice_number,
-          total_amount: invoice.total_amount,
+          total_amount: invoice.total_amount || 0,
           tax_amount: invoice.tax_amount || 0,
           discount_amount: invoice.discount_amount || 0
         });
+        
+        if (journalEntryId) {
+          console.log(`Invoice accounting entry created successfully: ${journalEntryId}`);
+        }
       } catch (accountingError) {
-        console.warn('Failed to create accounting entry for invoice:', accountingError);
-        // لا نوقف العملية بسبب خطأ في المحاسبة
+        console.error('Failed to create accounting entry for invoice:', accountingError);
+        // Log the error but don't stop the process - can be handled later via reconciliation service
       }
       
       return invoice;

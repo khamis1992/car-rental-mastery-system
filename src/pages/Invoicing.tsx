@@ -14,7 +14,7 @@ import { useContractsDataRefactored } from '@/hooks/useContractsDataRefactored';
 import { useInvoicingDataRefactored } from '@/hooks/useInvoicingDataRefactored';
 import { InvoiceWithDetails, Payment } from '@/types/invoice';
 
-// NOTE: This page now uses the Repository Pattern via useInvoicingDataRefactored and useContractsDataRefactored
+// Updated to use Repository Pattern with Business Services
 
 const Invoicing = () => {
   const [invoiceFormOpen, setInvoiceFormOpen] = useState(false);

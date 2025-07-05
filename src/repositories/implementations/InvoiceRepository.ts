@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BaseRepository } from '../base/BaseRepository';
 import { IInvoiceRepository } from '../interfaces/IInvoiceRepository';
 import { Invoice, InvoiceWithDetails, InvoiceFormData } from '@/types/invoice';
+import { calculateInvoiceTotals } from '@/utils/invoiceCalculations';
 
 export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoiceRepository {
   protected tableName = 'invoices' as const;
@@ -63,15 +64,12 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
 
       if (numberError) throw numberError;
 
-      // Calculate subtotal from items
-      const subtotal = invoiceData.items.reduce((sum, item) => 
-        sum + (item.quantity * item.unit_price), 0
+      // Calculate totals using the utility function
+      const { subtotal, taxAmount, discountAmount, totalAmount } = calculateInvoiceTotals(
+        invoiceData.items,
+        invoiceData.tax_amount || 0,
+        invoiceData.discount_amount || 0
       );
-
-      // Calculate totals
-      const taxAmount = invoiceData.tax_amount || 0;
-      const discountAmount = invoiceData.discount_amount || 0;
-      const totalAmount = subtotal + taxAmount - discountAmount;
 
       // Create invoice with proper calculations
       const { data: invoice, error: invoiceError } = await supabase

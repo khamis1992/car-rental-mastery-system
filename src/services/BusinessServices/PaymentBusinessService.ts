@@ -19,34 +19,38 @@ export class PaymentBusinessService {
   }
 
   async createPayment(paymentData: PaymentFormData): Promise<Payment> {
-    // Business logic for payment creation
-    await this.validatePaymentData(paymentData);
-    const payment = await this.paymentRepository.createPayment(paymentData);
-    
-    // إنشاء القيد المحاسبي للدفعة مع معالجة محسنة للأخطاء
     try {
-      const invoice = await this.invoiceRepository.getInvoiceById(paymentData.invoice_id);
-      if (invoice) {
-        const customerName = await this.getCustomerName(invoice.customer_id);
-        const journalEntryId = await this.accountingService.createPaymentAccountingEntry(payment.id, {
-          customer_name: customerName,
-          invoice_number: invoice.invoice_number,
-          payment_amount: payment.amount,
-          payment_method: payment.payment_method,
-          payment_date: payment.payment_date
-        });
-        
-        if (journalEntryId) {
-          console.log(`Payment accounting entry created successfully: ${journalEntryId}`);
+      // Business logic for payment creation
+      await this.validatePaymentData(paymentData);
+      const payment = await this.paymentRepository.createPayment(paymentData);
+      
+      // Create accounting entry for the payment with improved error handling
+      try {
+        const invoice = await this.invoiceRepository.getInvoiceById(paymentData.invoice_id);
+        if (invoice) {
+          const customerName = await this.getCustomerName(invoice.customer_id);
+          const journalEntryId = await this.accountingService.createPaymentAccountingEntry(payment.id, {
+            customer_name: customerName,
+            invoice_number: invoice.invoice_number,
+            payment_amount: payment.amount,
+            payment_method: payment.payment_method,
+            payment_date: payment.payment_date
+          });
+          
+          if (journalEntryId) {
+            console.log(`Payment accounting entry created successfully: ${journalEntryId}`);
+          }
         }
+      } catch (error) {
+        console.error('Failed to create accounting entry for payment:', error);
+        // Log the error but don't stop the process - can be handled later via reconciliation service
       }
+      
+      return payment;
     } catch (error) {
-      console.error('Failed to create accounting entry for payment:', error);
-      // نسجل الخطأ لكن لا نوقف العملية
-      // يمكن معالجة هذا لاحقاً من خلال خدمة التسوية
+      console.error('Error creating payment:', error);
+      throw new Error(`فشل في إنشاء الدفعة: ${error.message}`);
     }
-    
-    return payment;
   }
 
   async updatePaymentStatus(id: string, status: Payment['status']): Promise<void> {
