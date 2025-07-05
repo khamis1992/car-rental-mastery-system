@@ -9,6 +9,7 @@ import {
   CheckCircle,
   ChevronRight 
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ContractStageNavigationProps {
   currentStage: string;
@@ -21,6 +22,33 @@ export const ContractStageNavigation: React.FC<ContractStageNavigationProps> = (
   onStageChange,
   contract
 }) => {
+  const [paymentStatus, setPaymentStatus] = React.useState({ hasPayments: false, isFullyPaid: false });
+
+  React.useEffect(() => {
+    checkPaymentStatus();
+  }, [contract?.id]);
+
+  const checkPaymentStatus = async () => {
+    if (!contract?.id) return;
+    
+    try {
+      const { data: invoices } = await supabase
+        .from('invoices')
+        .select(`
+          outstanding_amount,
+          payments(id, amount, status)
+        `)
+        .eq('contract_id', contract.id);
+      
+      const hasPayments = invoices?.some(inv => inv.payments && inv.payments.length > 0);
+      const isFullyPaid = invoices?.every(inv => inv.outstanding_amount <= 0) && invoices?.length > 0;
+      
+      setPaymentStatus({ hasPayments, isFullyPaid });
+    } catch (error) {
+      console.error('Error checking payment status:', error);
+    }
+  };
+
   const stages = [
     {
       id: 'draft',
@@ -47,8 +75,8 @@ export const ContractStageNavigation: React.FC<ContractStageNavigationProps> = (
       id: 'payment',
       name: 'الدفع',
       icon: CreditCard,
-      description: 'تسجيل المدفوعات',
-      completed: contract.payment_registered_at
+      description: 'تسجيل المدفوعات والفواتير',
+      completed: paymentStatus.isFullyPaid
     },
     {
       id: 'return',

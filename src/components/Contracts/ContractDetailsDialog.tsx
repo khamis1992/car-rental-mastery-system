@@ -5,7 +5,7 @@ import { ContractPrintTemplate } from './ContractPrintTemplate';
 import { ElectronicSignature } from './ElectronicSignature';
 import { ContractDeliveryForm } from './ContractDeliveryForm';
 import { ContractReturnForm } from './ContractReturnForm';
-import { ContractPaymentForm } from './ContractPaymentForm';
+import { ContractPaymentDialog } from './ContractPaymentDialog';
 import { ContractHeader } from './ContractHeader';
 import { ContractInfoSections } from './ContractInfoSections';
 import { ContractSignatureSection } from './ContractSignatureSection';
@@ -61,7 +61,31 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
         contract_number: contract.contract_number
       });
       
-      // Auto-determine current stage based on contract status and timestamps
+      // Check payment status from invoices and payments
+      checkPaymentStatus();
+    }
+  }, [contract, contract?.status, contract?.delivery_completed_at, contract?.payment_registered_at, contract?.actual_end_date]);
+
+  const checkPaymentStatus = async () => {
+    if (!contract) return;
+    
+    try {
+      // Check if there are any invoices for this contract
+      const { data: invoices, error: invoicesError } = await supabase
+        .from('invoices')
+        .select(`
+          *,
+          payments(*)
+        `)
+        .eq('contract_id', contract.id);
+        
+      if (invoicesError) throw invoicesError;
+      
+      const hasInvoices = invoices && invoices.length > 0;
+      const hasPayments = invoices?.some(inv => inv.payments && inv.payments.length > 0);
+      const isFullyPaid = invoices?.every(inv => inv.outstanding_amount <= 0);
+      
+      // Auto-determine current stage based on contract status and payment status
       let determinedStage = 'draft';
       
       if (contract.status === 'completed') {
@@ -74,12 +98,12 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
       } else if ((contract.customer_signature && contract.company_signature) && !contract.delivery_completed_at) {
         // Both signatures completed but vehicle not yet delivered
         determinedStage = 'delivery';
-      } else if (contract.delivery_completed_at && !contract.payment_registered_at) {
-        // Vehicle has been delivered but payment not registered
+      } else if (contract.delivery_completed_at && (!hasInvoices || !isFullyPaid)) {
+        // Vehicle has been delivered but payment not completed
         console.log('✅ ContractDetailsDialog: Should move to payment stage - delivery completed at:', contract.delivery_completed_at);
         determinedStage = 'payment';
-      } else if (contract.payment_registered_at && contract.status === 'active' && !contract.actual_end_date) {
-        // Payment registered and contract is active but vehicle not yet returned
+      } else if (isFullyPaid && contract.status === 'active' && !contract.actual_end_date) {
+        // Payment completed and contract is active but vehicle not yet returned
         determinedStage = 'return';
       } else if (contract.actual_end_date || contract.status === 'completed') {
         // Vehicle has been returned or contract completed
@@ -94,7 +118,9 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
         customer_signature: !!contract.customer_signature,
         company_signature: !!contract.company_signature,
         delivery_completed_at: !!contract.delivery_completed_at,
-        payment_registered_at: !!contract.payment_registered_at,
+        hasInvoices,
+        hasPayments,
+        isFullyPaid,
         actual_end_date: !!contract.actual_end_date
       });
       
@@ -103,8 +129,10 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
         console.log('🎯 ContractDetailsDialog: Updating stage from', currentStage, 'to', determinedStage);
         setCurrentStage(determinedStage);
       }
+    } catch (error) {
+      console.error('Error checking payment status:', error);
     }
-  }, [contract, contract?.status, contract?.delivery_completed_at, contract?.payment_registered_at, contract?.actual_end_date]);
+  };
 
   const loadContract = async () => {
     if (!contractId) return;
@@ -189,15 +217,33 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           description: "تم الانتقال إلى مرحلة التسليم",
         });
         return;
-      } else if (contract.delivery_completed_at && !contract.payment_registered_at) {
-        // Advance from delivery to payment stage
-        setCurrentStage('payment');
-        toast({
-          title: "تم بنجاح",
-          description: "تم الانتقال إلى مرحلة الدفع",
-        });
-        return;
-      } else if (contract.payment_registered_at && contract.status === 'active' && !contract.actual_end_date) {
+      } else if (contract.delivery_completed_at) {
+        // Check payment status before advancing
+        const { data: invoices } = await supabase
+          .from('invoices')
+          .select('outstanding_amount')
+          .eq('contract_id', contract.id);
+        
+        const isFullyPaid = invoices?.every(inv => inv.outstanding_amount <= 0);
+        
+        if (!isFullyPaid) {
+          // Advance to payment stage
+          setCurrentStage('payment');
+          toast({
+            title: "تم بنجاح",
+            description: "تم الانتقال إلى مرحلة الدفع",
+          });
+          return;
+        } else {
+          // Advance to return stage
+          setCurrentStage('return');
+          toast({
+            title: "تم بنجاح",
+            description: "تم الانتقال إلى مرحلة الاستلام",
+          });
+          return;
+        }
+      } else if (contract.status === 'active' && !contract.actual_end_date) {
         // Advance from payment to return stage
         setCurrentStage('return');
         toast({
@@ -398,8 +444,8 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           }}
         />
 
-        {/* Payment Form */}
-        <ContractPaymentForm
+        {/* Payment Dialog */}
+        <ContractPaymentDialog
           contract={contract}
           open={showPaymentForm}
           onOpenChange={setShowPaymentForm}

@@ -17,6 +17,7 @@ import {
   Camera,
   Signature
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ContractStageContentProps {
   stage: string;
@@ -268,8 +269,8 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
         </ul>
       </div>
 
-      {/* Advance to Next Stage Button - Show when delivery is completed */}
-      {contract.delivery_completed_at && !contract.payment_registered_at && onAdvanceToNextStage && (
+      {/* Advance to Next Stage Button - Show when delivery is completed but payment not handled */}
+      {contract.delivery_completed_at && onAdvanceToNextStage && (
         <div className="flex justify-end">
           <Button onClick={onAdvanceToNextStage} className="px-8">
             الانتقال لمرحلة الدفع
@@ -279,38 +280,105 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
     </div>
   );
 
+  const [paymentStatus, setPaymentStatus] = React.useState({ 
+    hasInvoices: false, 
+    hasPayments: false, 
+    isFullyPaid: false,
+    totalOutstanding: 0,
+    invoices: [] as any[]
+  });
+
+  React.useEffect(() => {
+    checkPaymentStatus();
+  }, [contract?.id]);
+
+  const checkPaymentStatus = async () => {
+    if (!contract?.id) return;
+    
+    try {
+      const { data: invoices } = await supabase
+        .from('invoices')
+        .select(`
+          *,
+          payments(*)
+        `)
+        .eq('contract_id', contract.id);
+      
+      const hasInvoices = invoices && invoices.length > 0;
+      const hasPayments = invoices?.some(inv => inv.payments && inv.payments.length > 0);
+      const totalOutstanding = invoices?.reduce((sum, inv) => sum + (inv.outstanding_amount || 0), 0) || 0;
+      const isFullyPaid = hasInvoices && totalOutstanding <= 0;
+      
+      setPaymentStatus({ 
+        hasInvoices, 
+        hasPayments, 
+        isFullyPaid, 
+        totalOutstanding,
+        invoices: invoices || []
+      });
+    } catch (error) {
+      console.error('Error checking payment status:', error);
+    }
+  };
+
   const renderPaymentStage = () => (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-right">
             <CreditCard className="w-5 h-5" />
-            حالة المدفوعات
+            حالة المدفوعات والفواتير
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {contract.payment_registered_at ? (
+          {paymentStatus.isFullyPaid ? (
             <div className="bg-green-100 p-4 rounded-lg border border-green-300">
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircle className="w-5 h-5 text-green-600" />
-                <h3 className="font-medium text-green-900">تم تسجيل الدفع بنجاح</h3>
+                <h3 className="font-medium text-green-900">تم إنهاء جميع المدفوعات بنجاح</h3>
               </div>
               <p className="text-green-800 text-sm">
-                تاريخ التسجيل: {formatDate(contract.payment_registered_at)}
+                تم إصدار {paymentStatus.invoices.length} فاتورة وتسديدها بالكامل
               </p>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="text-center">
                 <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">في انتظار تسجيل الدفع</h3>
+                <h3 className="text-lg font-medium mb-2">إدارة الفواتير والمدفوعات</h3>
                 <p className="text-muted-foreground mb-4">
                   المبلغ الإجمالي: {formatCurrency(contract.final_amount)}
                 </p>
-                <Button onClick={onShowPayment} className="px-8">
-                  تسجيل الدفع
-                </Button>
+                {paymentStatus.totalOutstanding > 0 && (
+                  <p className="text-red-600 font-medium mb-4">
+                    المبلغ المستحق: {formatCurrency(paymentStatus.totalOutstanding)}
+                  </p>
+                )}
+                <div className="flex gap-2 justify-center">
+                  <Button onClick={onShowPayment} className="px-6">
+                    إدارة الفواتير والمدفوعات
+                  </Button>
+                </div>
               </div>
+            </div>
+          )}
+
+          {paymentStatus.invoices.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="font-medium text-right">الفواتير المصدرة:</h4>
+              {paymentStatus.invoices.map((invoice: any) => (
+                <div key={invoice.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="text-right">
+                    <p className="font-medium">فاتورة رقم: {invoice.invoice_number}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatCurrency(invoice.total_amount)} - متبقي: {formatCurrency(invoice.outstanding_amount)}
+                    </p>
+                  </div>
+                  <Badge variant={invoice.outstanding_amount <= 0 ? "default" : "secondary"}>
+                    {invoice.outstanding_amount <= 0 ? "مدفوعة" : "جزئية"}
+                  </Badge>
+                </div>
+              ))}
             </div>
           )}
 
@@ -338,15 +406,15 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
       <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
         <h3 className="font-medium text-purple-900 mb-2 text-right">المهام المطلوبة:</h3>
         <ul className="list-disc list-inside text-purple-800 space-y-1 text-right">
+          <li>إصدار الفواتير للعقد</li>
           <li>تسجيل الدفعات المستلمة</li>
-          <li>إصدار الفواتير</li>
-          <li>متابعة المتأخرات</li>
-          <li>تأكيد اكتمال الدفع</li>
+          <li>متابعة المتأخرات والمبالغ المستحقة</li>
+          <li>تأكيد اكتمال جميع المدفوعات</li>
         </ul>
       </div>
 
-      {/* Advance to Next Stage Button - Show when payment is registered */}
-      {contract.payment_registered_at && contract.status === 'active' && !contract.actual_end_date && onAdvanceToNextStage && (
+      {/* Advance to Next Stage Button - Show when payment is fully completed */}
+      {paymentStatus.isFullyPaid && contract.status === 'active' && !contract.actual_end_date && onAdvanceToNextStage && (
         <div className="flex justify-end">
           <Button onClick={onAdvanceToNextStage} className="px-8">
             الانتقال لمرحلة الاستلام
