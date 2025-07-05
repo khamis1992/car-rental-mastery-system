@@ -30,19 +30,46 @@ export class AutoInvoiceCreationService {
    */
   async createInvoiceAndPayment(data: AutoInvoiceAndPaymentData): Promise<AutoInvoiceAndPaymentResult> {
     try {
-      // 1. جلب بيانات العقد
+      // التحقق من صحة البيانات
+      if (!data.contractId || !data.paymentAmount || data.paymentAmount <= 0) {
+        throw new Error('بيانات غير صالحة: معرف العقد ومبلغ الدفعة مطلوبان');
+      }
+
+      // 1. جلب بيانات العقد مع التحقق من وجوده
       const contract = await this.getContractDetails(data.contractId);
       
+      if (!contract) {
+        throw new Error('العقد غير موجود');
+      }
+
       // 2. إنشاء الفاتورة تلقائياً
       const invoice = await this.createAutoInvoice(contract);
       
+      if (!invoice || !invoice.id) {
+        throw new Error('فشل في إنشاء الفاتورة');
+      }
+
       // 3. تسجيل الدفعة على الفاتورة
       const payment = await this.createPaymentForInvoice(invoice, data);
       
+      if (!payment || !payment.id) {
+        throw new Error('فشل في تسجيل الدفعة');
+      }
+
       return { invoice, payment };
     } catch (error) {
       console.error('Error in createInvoiceAndPayment:', error);
-      throw error;
+      
+      // إعطاء رسائل خطأ واضحة
+      if (error.message.includes('duplicate') || error.message.includes('unique')) {
+        throw new Error('الفاتورة موجودة بالفعل لهذا العقد');
+      }
+      
+      if (error.message.includes('foreign key') || error.message.includes('does not exist')) {
+        throw new Error('بيانات العقد أو العميل غير صحيحة');
+      }
+      
+      throw new Error(`خطأ في إنشاء الفاتورة والدفعة: ${error.message}`);
     }
   }
 

@@ -49,53 +49,74 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
   }
 
   async createInvoice(invoiceData: InvoiceFormData): Promise<Invoice> {
-    // Generate invoice number
-    const { data: invoiceNumber, error: numberError } = await supabase
-      .rpc('generate_invoice_number');
+    try {
+      // Generate invoice number
+      const { data: invoiceNumber, error: numberError } = await supabase
+        .rpc('generate_invoice_number');
 
-    if (numberError) throw numberError;
+      if (numberError) throw numberError;
 
-    // Create invoice
-    const { data: invoice, error: invoiceError } = await supabase
-      .from('invoices')
-      .insert({
-        invoice_number: invoiceNumber,
-        contract_id: invoiceData.contract_id,
-        customer_id: invoiceData.customer_id,
-        due_date: invoiceData.due_date,
-        invoice_type: invoiceData.invoice_type,
-        tax_amount: invoiceData.tax_amount || 0,
-        discount_amount: invoiceData.discount_amount || 0,
-        payment_terms: invoiceData.payment_terms,
-        notes: invoiceData.notes,
-        terms_and_conditions: invoiceData.terms_and_conditions,
-        created_by: (await supabase.auth.getUser()).data.user?.id,
-      })
-      .select()
-      .single();
+      // Calculate subtotal from items
+      const subtotal = invoiceData.items.reduce((sum, item) => 
+        sum + (item.quantity * item.unit_price), 0
+      );
 
-    if (invoiceError) throw invoiceError;
+      // Calculate totals
+      const taxAmount = invoiceData.tax_amount || 0;
+      const discountAmount = invoiceData.discount_amount || 0;
+      const totalAmount = subtotal + taxAmount - discountAmount;
 
-    // Create invoice items
-    const itemsData = invoiceData.items.map(item => ({
-      invoice_id: invoice.id,
-      description: item.description,
-      item_type: item.item_type,
-      quantity: item.quantity,
-      unit_price: item.unit_price,
-      total_price: item.quantity * item.unit_price,
-      start_date: item.start_date,
-      end_date: item.end_date,
-      daily_rate: item.daily_rate,
-    }));
+      // Create invoice with proper calculations
+      const { data: invoice, error: invoiceError } = await supabase
+        .from('invoices')
+        .insert({
+          invoice_number: invoiceNumber,
+          contract_id: invoiceData.contract_id,
+          customer_id: invoiceData.customer_id,
+          invoice_date: new Date().toISOString().split('T')[0],
+          due_date: invoiceData.due_date,
+          issue_date: new Date().toISOString().split('T')[0],
+          invoice_type: invoiceData.invoice_type,
+          subtotal: subtotal,
+          tax_amount: taxAmount,
+          discount_amount: discountAmount,
+          total_amount: totalAmount,
+          paid_amount: 0,
+          outstanding_amount: totalAmount,
+          payment_terms: invoiceData.payment_terms,
+          notes: invoiceData.notes,
+          terms_and_conditions: invoiceData.terms_and_conditions,
+          created_by: (await supabase.auth.getUser()).data.user?.id,
+        })
+        .select()
+        .single();
 
-    const { error: itemsError } = await supabase
-      .from('invoice_items')
-      .insert(itemsData);
+      if (invoiceError) throw invoiceError;
 
-    if (itemsError) throw itemsError;
+      // Create invoice items
+      const itemsData = invoiceData.items.map(item => ({
+        invoice_id: invoice.id,
+        description: item.description,
+        item_type: item.item_type,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        total_price: item.quantity * item.unit_price,
+        start_date: item.start_date,
+        end_date: item.end_date,
+        daily_rate: item.daily_rate,
+      }));
 
-    return invoice as Invoice;
+      const { error: itemsError } = await supabase
+        .from('invoice_items')
+        .insert(itemsData);
+
+      if (itemsError) throw itemsError;
+
+      return invoice as Invoice;
+    } catch (error) {
+      console.error('Error creating invoice:', error);
+      throw new Error(`فشل في إنشاء الفاتورة: ${error.message}`);
+    }
   }
 
   async updateInvoice(id: string, updates: Partial<Invoice>): Promise<Invoice> {

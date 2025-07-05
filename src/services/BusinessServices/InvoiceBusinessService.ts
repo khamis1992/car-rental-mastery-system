@@ -19,25 +19,31 @@ export class InvoiceBusinessService {
   }
 
   async createInvoice(invoiceData: InvoiceFormData): Promise<Invoice> {
-    // Business logic for invoice creation
-    this.validateInvoiceData(invoiceData);
-    const invoice = await this.invoiceRepository.createInvoice(invoiceData);
-    
-    // إنشاء القيد المحاسبي للفاتورة
     try {
-      const customerName = await this.getCustomerName(invoice.customer_id);
-      await this.accountingService.createInvoiceAccountingEntry(invoice.id, {
-        customer_name: customerName,
-        invoice_number: invoice.invoice_number,
-        total_amount: invoice.total_amount,
-        tax_amount: invoice.tax_amount || 0,
-        discount_amount: invoice.discount_amount || 0
-      });
+      // Business logic for invoice creation
+      this.validateInvoiceData(invoiceData);
+      const invoice = await this.invoiceRepository.createInvoice(invoiceData);
+      
+      // إنشاء القيد المحاسبي للفاتورة (بشكل اختياري)
+      try {
+        const customerName = await this.getCustomerName(invoice.customer_id);
+        await this.accountingService.createInvoiceAccountingEntry(invoice.id, {
+          customer_name: customerName,
+          invoice_number: invoice.invoice_number,
+          total_amount: invoice.total_amount,
+          tax_amount: invoice.tax_amount || 0,
+          discount_amount: invoice.discount_amount || 0
+        });
+      } catch (accountingError) {
+        console.warn('Failed to create accounting entry for invoice:', accountingError);
+        // لا نوقف العملية بسبب خطأ في المحاسبة
+      }
+      
+      return invoice;
     } catch (error) {
-      console.warn('Failed to create accounting entry for invoice:', error);
+      console.error('Error creating invoice:', error);
+      throw new Error(`فشل في إنشاء الفاتورة: ${error.message}`);
     }
-    
-    return invoice;
   }
 
   async updateInvoice(id: string, updates: Partial<Invoice>): Promise<Invoice> {
