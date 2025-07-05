@@ -211,7 +211,7 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
                    </CardTitle>
                    <div className="flex justify-end text-right">
                      <div>
-                       <span className="text-muted-foreground block">تاريخ المخالفة :</span>
+                       <span className="text-muted-foreground block">: تاريخ المخالفة</span>
                        <span className="font-medium">
                          {format(new Date(violation.violation_date), 'dd/MM/yyyy', { locale: ar })}
                        </span>
