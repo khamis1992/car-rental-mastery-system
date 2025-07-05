@@ -142,45 +142,45 @@ export const FinancialReportsTab = () => {
           <Card className="card-elegant">
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>ميزان المراجعة</CardTitle>
                 <Button variant="outline" onClick={() => exportReport('ميزان المراجعة')}>
                   <Download className="w-4 h-4 ml-2" />
                   تصدير
                 </Button>
+                <CardTitle>ميزان المراجعة</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-right">الرصيد الدائن</TableHead>
-                    <TableHead className="text-right">الرصيد المدين</TableHead>
-                    <TableHead className="text-right">اسم الحساب</TableHead>
                     <TableHead className="text-right">رقم الحساب</TableHead>
+                    <TableHead className="text-right">اسم الحساب</TableHead>
+                    <TableHead className="text-right">الرصيد المدين</TableHead>
+                    <TableHead className="text-right">الرصيد الدائن</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {trialBalance.map((account, index) => (
                     <TableRow key={index}>
-                      <TableCell className={`text-right ${account.credit_balance > 0 ? 'font-medium text-blue-600' : ''}`}>
-                        {account.credit_balance > 0 ? formatAmount(account.credit_balance) : '-'}
-                      </TableCell>
+                      <TableCell className="font-medium">{account.account_code}</TableCell>
+                      <TableCell>{account.account_name}</TableCell>
                       <TableCell className={`text-right ${account.debit_balance > 0 ? 'font-medium text-green-600' : ''}`}>
                         {account.debit_balance > 0 ? formatAmount(account.debit_balance) : '-'}
                       </TableCell>
-                      <TableCell>{account.account_name}</TableCell>
-                      <TableCell className="font-medium">{account.account_code}</TableCell>
+                      <TableCell className={`text-right ${account.credit_balance > 0 ? 'font-medium text-blue-600' : ''}`}>
+                        {account.credit_balance > 0 ? formatAmount(account.credit_balance) : '-'}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
                 <TableRow className="bg-muted font-bold">
-                  <TableCell className="text-right text-blue-600">
-                    {formatAmount(trialBalance.reduce((sum, acc) => sum + acc.credit_balance, 0))}
-                  </TableCell>
+                  <TableCell colSpan={2} className="text-right">الإجمالي</TableCell>
                   <TableCell className="text-right text-green-600">
                     {formatAmount(trialBalance.reduce((sum, acc) => sum + acc.debit_balance, 0))}
                   </TableCell>
-                  <TableCell colSpan={2} className="text-right">الإجمالي</TableCell>
+                  <TableCell className="text-right text-blue-600">
+                    {formatAmount(trialBalance.reduce((sum, acc) => sum + acc.credit_balance, 0))}
+                  </TableCell>
                 </TableRow>
               </Table>
               
@@ -198,11 +198,11 @@ export const FinancialReportsTab = () => {
           <Card className="card-elegant">
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>قائمة الدخل</CardTitle>
                 <Button variant="outline" onClick={() => exportReport('قائمة الدخل')}>
                   <Download className="w-4 h-4 ml-2" />
                   تصدير
                 </Button>
+                <CardTitle>قائمة الدخل</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -287,11 +287,11 @@ export const FinancialReportsTab = () => {
           <Card className="card-elegant">
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>الميزانية العمومية</CardTitle>
                 <Button variant="outline" onClick={() => exportReport('الميزانية العمومية')}>
                   <Download className="w-4 h-4 ml-2" />
                   تصدير
                 </Button>
+                <CardTitle>الميزانية العمومية</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
