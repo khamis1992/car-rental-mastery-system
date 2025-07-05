@@ -3597,6 +3597,10 @@ export type Database = {
         Args: { description: string; amount: number; transaction_date?: string }
         Returns: Json
       }
+      fix_unbalanced_accounting_entries: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       generate_asset_code: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -3675,6 +3679,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["user_role"]
         }
         Returns: boolean
+      }
+      validate_accounting_balance: {
+        Args: { journal_entry_id: string }
+        Returns: Json
       }
     }
     Enums: {

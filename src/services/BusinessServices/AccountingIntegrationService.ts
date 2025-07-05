@@ -17,7 +17,7 @@ export class AccountingIntegrationService {
     discount_amount?: number;
   }): Promise<string | null> {
     try {
-      const { data, error } = await supabase.rpc('create_invoice_accounting_entry', {
+      const { data, error } = await supabase.rpc('create_invoice_accounting_entry' as any, {
         invoice_id: invoiceId,
         invoice_data: {
           customer_name: invoiceData.customer_name,
@@ -33,7 +33,7 @@ export class AccountingIntegrationService {
         return null;
       }
 
-      return data;
+      return data as string;
     } catch (error) {
       console.warn('Failed to create invoice accounting entry:', error);
       return null;
@@ -51,7 +51,7 @@ export class AccountingIntegrationService {
     payment_date: string;
   }): Promise<string | null> {
     try {
-      const { data, error } = await supabase.rpc('create_payment_accounting_entry', {
+      const { data, error } = await supabase.rpc('create_payment_accounting_entry' as any, {
         payment_id: paymentId,
         payment_data: {
           customer_name: paymentData.customer_name,
@@ -67,7 +67,7 @@ export class AccountingIntegrationService {
         return null;
       }
 
-      return data;
+      return data as string;
     } catch (error) {
       console.warn('Failed to create payment accounting entry:', error);
       return null;
@@ -85,7 +85,7 @@ export class AccountingIntegrationService {
     vendor_name?: string;
   }): Promise<string | null> {
     try {
-      const { data, error } = await supabase.rpc('create_maintenance_accounting_entry', {
+      const { data, error } = await supabase.rpc('create_maintenance_accounting_entry' as any, {
         maintenance_id: maintenanceId,
         maintenance_data: {
           vehicle_info: maintenanceData.vehicle_info,
@@ -101,7 +101,7 @@ export class AccountingIntegrationService {
         return null;
       }
 
-      return data;
+      return data as string;
     } catch (error) {
       console.warn('Failed to create maintenance accounting entry:', error);
       return null;
@@ -120,7 +120,7 @@ export class AccountingIntegrationService {
     overtime_rate: number;
   }): Promise<string | null> {
     try {
-      const { data, error } = await supabase.rpc('create_attendance_accounting_entry', {
+      const { data, error } = await supabase.rpc('create_attendance_accounting_entry' as any, {
         attendance_data: {
           employee_name: attendanceData.employee_name,
           date: attendanceData.date,
@@ -138,7 +138,7 @@ export class AccountingIntegrationService {
         return null;
       }
 
-      return data;
+      return data as string;
     } catch (error) {
       console.warn('Failed to create attendance accounting entry:', error);
       return null;
@@ -163,13 +163,13 @@ export class AccountingIntegrationService {
     }>;
   }> {
     try {
-      const { data, error } = await supabase.rpc('get_accounting_entries_summary', {
+      const { data, error } = await supabase.rpc('get_accounting_entries_summary' as any, {
         filters: filters
       });
 
       if (error) throw error;
 
-      return data || {
+      return (data as any) || {
         total_entries: 0,
         total_debit: 0,
         total_credit: 0,
@@ -196,13 +196,13 @@ export class AccountingIntegrationService {
     difference: number;
   }> {
     try {
-      const { data, error } = await supabase.rpc('validate_accounting_balance', {
+      const { data, error } = await supabase.rpc('validate_accounting_balance' as any, {
         journal_entry_id: journalEntryId
       });
 
       if (error) throw error;
 
-      return data || {
+      return (data as any) || {
         is_balanced: false,
         total_debit: 0,
         total_credit: 0,
@@ -227,11 +227,11 @@ export class AccountingIntegrationService {
     remaining_unbalanced: number;
   }> {
     try {
-      const { data, error } = await supabase.rpc('fix_unbalanced_accounting_entries');
+      const { data, error } = await supabase.rpc('fix_unbalanced_accounting_entries' as any);
 
       if (error) throw error;
 
-      return data || {
+      return (data as any) || {
         fixed_entries: 0,
         remaining_unbalanced: 0
       };
