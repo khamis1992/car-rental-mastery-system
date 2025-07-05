@@ -410,11 +410,147 @@ const Payroll = () => {
         <TabsContent value="history">
           <Card>
             <CardHeader>
-              <CardTitle>سجل الرواتب</CardTitle>
+              <CardTitle className="text-right">سجل الرواتب</CardTitle>
+              
+              {/* فلاتر السجل التاريخي */}
+              <div className="flex flex-wrap gap-4 mt-4">
+                <Select value={monthFilter} onValueChange={setMonthFilter}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="الشهر" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">جميع الشهور</SelectItem>
+                    <SelectItem value="1">يناير</SelectItem>
+                    <SelectItem value="2">فبراير</SelectItem>
+                    <SelectItem value="3">مارس</SelectItem>
+                    <SelectItem value="4">أبريل</SelectItem>
+                    <SelectItem value="5">مايو</SelectItem>
+                    <SelectItem value="6">يونيو</SelectItem>
+                    <SelectItem value="7">يوليو</SelectItem>
+                    <SelectItem value="8">أغسطس</SelectItem>
+                    <SelectItem value="9">سبتمبر</SelectItem>
+                    <SelectItem value="10">أكتوبر</SelectItem>
+                    <SelectItem value="11">نوفمبر</SelectItem>
+                    <SelectItem value="12">ديسمبر</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="الحالة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">جميع الحالات</SelectItem>
+                    <SelectItem value="calculated">محسوب</SelectItem>
+                    <SelectItem value="approved">مُوافق عليه</SelectItem>
+                    <SelectItem value="paid">مدفوع</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <div className="flex-1 min-w-[200px]">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      placeholder="البحث باسم الموظف..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+              </div>
             </CardHeader>
+            
             <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                سجل الرواتب السابقة - قريباً
+              {/* إحصائيات سريعة للسجل */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-primary">{stats.totalCount}</p>
+                      <p className="text-sm text-muted-foreground">إجمالي السجلات</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-green-600">{stats.paidCount}</p>
+                      <p className="text-sm text-muted-foreground">الرواتب المدفوعة</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-blue-600">{formatCurrency(stats.totalNet)}</p>
+                      <p className="text-sm text-muted-foreground">إجمالي صافي الرواتب</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* جدول البيانات التاريخية */}
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>الإجراءات</TableHead>
+                      <TableHead>التاريخ</TableHead>
+                      <TableHead>الحالة</TableHead>
+                      <TableHead>الصافي</TableHead>
+                      <TableHead>الإجمالي</TableHead>
+                      <TableHead>الموظف</TableHead>
+                      <TableHead>الفترة</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {payrollData.map((payroll) => (
+                      <TableRow key={payroll.id}>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button variant="ghost" size="sm">
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {payroll.created_at ? format(new Date(payroll.created_at), 'dd/MM/yyyy', { locale: ar }) : '-'}
+                        </TableCell>
+                        <TableCell>{getStatusBadge(payroll.status)}</TableCell>
+                        <TableCell className="font-medium text-green-600">
+                          {formatCurrency(payroll.net_salary)}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {formatCurrency(payroll.gross_salary)}
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{payroll.employee_name}</div>
+                            <div className="text-sm text-muted-foreground">{payroll.employee_number}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {payroll.pay_period_start && payroll.pay_period_end ? 
+                            `${format(new Date(payroll.pay_period_start), 'dd/MM', { locale: ar })} - ${format(new Date(payroll.pay_period_end), 'dd/MM/yyyy', { locale: ar })}` 
+                            : '-'
+                          }
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+
+                {payrollData.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    لا توجد سجلات رواتب للمعايير المحددة
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
