@@ -1,4 +1,5 @@
 import { Invoice } from '@/types/invoice';
+import { CompanyBrandingService } from '@/services/companyBrandingService';
 
 export interface InvoicePDFOptions {
   includeTerms?: boolean;
@@ -6,7 +7,10 @@ export interface InvoicePDFOptions {
   watermark?: string;
 }
 
-export const generateInvoiceHTML = (invoice: any, options: InvoicePDFOptions = {}): string => {
+export const generateInvoiceHTML = async (invoice: any, options: InvoicePDFOptions = {}): Promise<string> => {
+  // تحميل إعدادات الشركة
+  const branding = await CompanyBrandingService.getCompanyBranding();
+  
   const formatCurrency = (amount: number) => `د.ك ${amount.toFixed(3)}`;
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ar-SA', {
@@ -27,6 +31,17 @@ export const generateInvoiceHTML = (invoice: any, options: InvoicePDFOptions = {
     };
     return statusMap[status] || status;
   };
+
+  // استخدام بيانات الشركة من قاعدة البيانات أو القيم الافتراضية
+  const companyNameAr = branding?.company_name_ar || 'شركة ساپتكو الخليج لتأجير السيارات';
+  const companyNameEn = branding?.company_name_en || 'SAPTCO GULF CAR RENTAL COMPANY';
+  const addressAr = branding?.address_ar || 'دولة الكويت';
+  const phone = branding?.phone || '+965 XXXX XXXX';
+  const email = branding?.email || 'info@saptcogulf.com';
+  const website = branding?.website || 'www.saptcougulf.com';
+  const logoUrl = branding?.logo_url || '/lovable-uploads/cf0ef0ce-1c56-4da0-b065-8c130f4f182f.png';
+  const headerImageUrl = branding?.header_image_url;
+  const footerImageUrl = branding?.footer_image_url;
 
   const getInvoiceTypeText = (type: string) => {
     const typeMap: Record<string, string> = {
@@ -308,12 +323,24 @@ export const generateInvoiceHTML = (invoice: any, options: InvoicePDFOptions = {
         <div class="content">
           <!-- Header -->
           <div class="header">
+            ${headerImageUrl ? `
+              <div style="text-align: center; margin-bottom: 20px;">
+                <img src="${headerImageUrl}" alt="صورة رأسية مخصصة" style="width: 100%; max-height: 120px; object-fit: contain;" />
+              </div>
+            ` : ''}
             <div class="company-info">
-              <div class="company-name">شركة تأجير السيارات</div>
+              ${logoUrl ? `
+                <div style="text-align: center; margin-bottom: 15px;">
+                  <img src="${logoUrl}" alt="شعار الشركة" style="height: 60px; width: auto; object-fit: contain;" />
+                </div>
+              ` : ''}
+              <div class="company-name">${companyNameAr}</div>
+              <div class="company-name" style="font-size: 18px; margin-bottom: 10px;">${companyNameEn}</div>
               <div class="company-details">
-                دولة الكويت<br>
-                هاتف: +965 1234 5678<br>
-                البريد الإلكتروني: info@carrental.com.kw
+                ${addressAr}<br>
+                هاتف: ${phone}<br>
+                البريد الإلكتروني: ${email}<br>
+                ${website ? `الموقع: ${website}` : ''}
               </div>
             </div>
             <div class="invoice-info">
@@ -446,7 +473,14 @@ export const generateInvoiceHTML = (invoice: any, options: InvoicePDFOptions = {
           
           <!-- Footer -->
           <div class="footer">
+            ${footerImageUrl ? `
+              <div style="text-align: center; margin-bottom: 15px;">
+                <img src="${footerImageUrl}" alt="صورة تذييل مخصصة" style="width: 100%; max-height: 80px; object-fit: contain;" />
+              </div>
+            ` : ''}
             <p>شكراً لاختياركم خدماتنا</p>
+            <p>${companyNameAr} - ${companyNameEn}</p>
+            <p>هاتف: ${phone} | البريد الإلكتروني: ${email}</p>
             <p>تم إنشاء هذه الفاتورة بتاريخ ${formatDate(new Date().toISOString())}</p>
           </div>
         </div>

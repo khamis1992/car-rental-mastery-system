@@ -2,6 +2,7 @@ import React from 'react';
 import { formatCurrencyKWD } from '@/lib/currency';
 import { formatDate, formatDateTime } from '@/lib/utils';
 import { CompanyHeader } from '@/components/Shared/CompanyHeader';
+import { CompanyFooter } from '@/components/Shared/CompanyFooter';
 
 interface ContractPrintTemplateProps {
   contract: any;
@@ -152,9 +153,10 @@ export const ContractPrintTemplate: React.FC<ContractPrintTemplateProps> = ({ co
       </div>
 
       {/* تذييل الصفحة */}
-      <div className="text-center mt-12 pt-6 border-t border-gray-300 text-sm text-gray-600">
+      <CompanyFooter variant="print" />
+      
+      <div className="text-center mt-4 pt-6 border-t border-gray-300 text-sm text-gray-600">
         <p>تم طباعة هذا العقد بتاريخ {formatDateTime(new Date().toISOString())}</p>
-        <p className="mt-1">شركة ساپتكو الخليج لتأجير السيارات - SAPTCO GULF</p>
       </div>
     </div>
   );
