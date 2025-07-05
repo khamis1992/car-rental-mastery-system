@@ -47,9 +47,9 @@ const Payroll = () => {
       
       const filters: PayrollFilters = {
         searchTerm: searchTerm || undefined,
-        status: statusFilter || undefined,
-        month: monthFilter ? parseInt(monthFilter) : undefined,
-        year: monthFilter ? new Date().getFullYear() : undefined
+        status: statusFilter && statusFilter !== 'all' ? statusFilter : undefined,
+        month: monthFilter && monthFilter !== 'all' ? parseInt(monthFilter) : undefined,
+        year: monthFilter && monthFilter !== 'all' ? new Date().getFullYear() : undefined
       };
 
       const data = await payrollService.getAllPayroll(filters);
@@ -419,7 +419,7 @@ const Payroll = () => {
                     <SelectValue placeholder="الشهر" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع الشهور</SelectItem>
+                    <SelectItem value="all">جميع الشهور</SelectItem>
                     <SelectItem value="1">يناير</SelectItem>
                     <SelectItem value="2">فبراير</SelectItem>
                     <SelectItem value="3">مارس</SelectItem>
@@ -440,7 +440,7 @@ const Payroll = () => {
                     <SelectValue placeholder="الحالة" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع الحالات</SelectItem>
+                    <SelectItem value="all">جميع الحالات</SelectItem>
                     <SelectItem value="calculated">محسوب</SelectItem>
                     <SelectItem value="approved">مُوافق عليه</SelectItem>
                     <SelectItem value="paid">مدفوع</SelectItem>
