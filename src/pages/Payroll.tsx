@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,16 +6,168 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DollarSign, Calculator, FileText, Download, Eye, Search } from 'lucide-react';
+import { DollarSign, Calculator, FileText, Download, Eye, Search, Plus, Settings } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { payrollService, PayrollWithDetails, PayrollFilters, PayrollSettings } from '@/services/payrollService';
+import { useToast } from '@/hooks/use-toast';
 
 const Payroll = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [monthFilter, setMonthFilter] = useState('');
+  const [payrollData, setPayrollData] = useState<PayrollWithDetails[]>([]);
+  const [stats, setStats] = useState({
+    totalGross: 0,
+    totalNet: 0,
+    totalDeductions: 0,
+    paidCount: 0,
+    totalCount: 0
+  });
+  const [settings, setSettings] = useState<PayrollSettings | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [calculating, setCalculating] = useState(false);
+  const { toast } = useToast();
 
-  const mockPayrollData: any[] = [];
+  // تحميل البيانات عند بدء التشغيل
+  useEffect(() => {
+    loadPayrollData();
+    loadPayrollStats();
+    loadPayrollSettings();
+  }, []);
+
+  // تحميل البيانات عند تغيير الفلاتر
+  useEffect(() => {
+    loadPayrollData();
+  }, [searchTerm, statusFilter, monthFilter]);
+
+  const loadPayrollData = async () => {
+    try {
+      setLoading(true);
+      
+      const filters: PayrollFilters = {
+        searchTerm: searchTerm || undefined,
+        status: statusFilter || undefined,
+        month: monthFilter ? parseInt(monthFilter) : undefined,
+        year: monthFilter ? new Date().getFullYear() : undefined
+      };
+
+      const data = await payrollService.getAllPayroll(filters);
+      setPayrollData(data);
+    } catch (error) {
+      console.error('خطأ في تحميل بيانات الرواتب:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ في تحميل بيانات الرواتب',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadPayrollStats = async () => {
+    try {
+      const statsData = await payrollService.getPayrollStats();
+      setStats(statsData);
+    } catch (error) {
+      console.error('خطأ في تحميل الإحصائيات:', error);
+    }
+  };
+
+  const loadPayrollSettings = async () => {
+    try {
+      const settingsData = await payrollService.getPayrollSettings();
+      setSettings(settingsData);
+    } catch (error) {
+      console.error('خطأ في تحميل الإعدادات:', error);
+    }
+  };
+
+  const handleCalculateMonthlyPayroll = async () => {
+    try {
+      setCalculating(true);
+      const currentMonth = new Date().getMonth() + 1;
+      const currentYear = new Date().getFullYear();
+      
+      const calculatedCount = await payrollService.calculateMonthlyPayroll(currentYear, currentMonth);
+      
+      toast({
+        title: 'تم حساب الرواتب',
+        description: `تم حساب ${calculatedCount} راتب بنجاح`
+      });
+      
+      // إعادة تحميل البيانات
+      await loadPayrollData();
+      await loadPayrollStats();
+    } catch (error) {
+      console.error('خطأ في حساب الرواتب:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ في حساب الرواتب',
+        variant: 'destructive'
+      });
+    } finally {
+      setCalculating(false);
+    }
+  };
+
+  const handleApprovePayroll = async (id: string) => {
+    try {
+      await payrollService.approvePayroll(id);
+      toast({
+        title: 'تم الموافقة',
+        description: 'تمت الموافقة على الراتب بنجاح'
+      });
+      await loadPayrollData();
+      await loadPayrollStats();
+    } catch (error) {
+      console.error('خطأ في الموافقة على الراتب:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ في الموافقة على الراتب',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleMarkAsPaid = async (id: string) => {
+    try {
+      await payrollService.markPayrollAsPaid(id);
+      toast({
+        title: 'تم التسديد',
+        description: 'تم تسجيل دفع الراتب بنجاح'
+      });
+      await loadPayrollData();
+      await loadPayrollStats();
+    } catch (error) {
+      console.error('خطأ في تسجيل الدفع:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ في تسجيل الدفع',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    if (!settings) return;
+    
+    try {
+      await payrollService.updatePayrollSettings(settings);
+      toast({
+        title: 'تم الحفظ',
+        description: 'تم حفظ إعدادات الرواتب بنجاح'
+      });
+    } catch (error) {
+      console.error('خطأ في حفظ الإعدادات:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ في حفظ الإعدادات',
+        variant: 'destructive'
+      });
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -33,19 +185,46 @@ const Payroll = () => {
     return `د.ك ${amount.toFixed(3)}`;
   };
 
-  const filteredPayroll = mockPayrollData.filter(payroll => {
-    const matchesSearch = searchTerm === '' || 
-      payroll.employee_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payroll.employee_number.toLowerCase().includes(searchTerm.toLowerCase());
+  const getActionButtons = (payroll: PayrollWithDetails) => {
+    const buttons = [
+      <Button key="view" variant="ghost" size="sm">
+        <Eye className="w-4 h-4" />
+      </Button>,
+      <Button key="download" variant="ghost" size="sm">
+        <Download className="w-4 h-4" />
+      </Button>
+    ];
 
-    const matchesStatus = statusFilter === '' || statusFilter === 'all' || payroll.status === statusFilter;
+    if (payroll.status === 'calculated') {
+      buttons.push(
+        <Button 
+          key="approve" 
+          variant="ghost" 
+          size="sm"
+          onClick={() => handleApprovePayroll(payroll.id)}
+          className="text-green-600 hover:text-green-700"
+        >
+          موافقة
+        </Button>
+      );
+    }
 
-    return matchesSearch && matchesStatus;
-  });
+    if (payroll.status === 'approved') {
+      buttons.push(
+        <Button 
+          key="paid" 
+          variant="ghost" 
+          size="sm"
+          onClick={() => handleMarkAsPaid(payroll.id)}
+          className="text-blue-600 hover:text-blue-700"
+        >
+          مدفوع
+        </Button>
+      );
+    }
 
-  const totalGrossSalary = filteredPayroll.reduce((sum, p) => sum + p.gross_salary, 0);
-  const totalNetSalary = filteredPayroll.reduce((sum, p) => sum + p.net_salary, 0);
-  const totalDeductions = filteredPayroll.reduce((sum, p) => sum + p.deductions + p.tax_deduction + p.social_insurance, 0);
+    return buttons;
+  };
 
   return (
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
@@ -75,7 +254,7 @@ const Payroll = () => {
               <DollarSign className="w-8 h-8 text-primary" />
               <div>
                 <p className="text-sm text-muted-foreground">إجمالي الرواتب</p>
-                <p className="text-2xl font-bold">{formatCurrency(totalGrossSalary)}</p>
+                <p className="text-2xl font-bold">{formatCurrency(stats.totalGross)}</p>
                 <p className="text-xs text-muted-foreground">هذا الشهر</p>
               </div>
             </div>
@@ -88,7 +267,7 @@ const Payroll = () => {
               <Calculator className="w-8 h-8 text-green-500" />
               <div>
                 <p className="text-sm text-muted-foreground">صافي الرواتب</p>
-                <p className="text-2xl font-bold">{formatCurrency(totalNetSalary)}</p>
+                <p className="text-2xl font-bold">{formatCurrency(stats.totalNet)}</p>
                 <p className="text-xs text-muted-foreground">بعد الخصومات</p>
               </div>
             </div>
@@ -101,7 +280,7 @@ const Payroll = () => {
               <FileText className="w-8 h-8 text-red-500" />
               <div>
                 <p className="text-sm text-muted-foreground">إجمالي الخصومات</p>
-                <p className="text-2xl font-bold">{formatCurrency(totalDeductions)}</p>
+                <p className="text-2xl font-bold">{formatCurrency(stats.totalDeductions)}</p>
                 <p className="text-xs text-muted-foreground">ضرائب وتأمينات</p>
               </div>
             </div>
@@ -114,8 +293,8 @@ const Payroll = () => {
               <DollarSign className="w-8 h-8 text-blue-500" />
               <div>
                 <p className="text-sm text-muted-foreground">الرواتب المدفوعة</p>
-                <p className="text-2xl font-bold">{mockPayrollData.filter(p => p.status === 'paid').length}</p>
-                <p className="text-xs text-muted-foreground">من أصل {filteredPayroll.length}</p>
+                <p className="text-2xl font-bold">{stats.paidCount}</p>
+                <p className="text-xs text-muted-foreground">من أصل {stats.totalCount}</p>
               </div>
             </div>
           </CardContent>
@@ -181,7 +360,7 @@ const Payroll = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredPayroll.map((payroll) => (
+                      {payrollData.map((payroll) => (
                         <TableRow key={payroll.id}>
                           <TableCell>
                             <div className="flex gap-2">
@@ -222,7 +401,7 @@ const Payroll = () => {
                     </TableBody>
                   </Table>
 
-                {filteredPayroll.length === 0 && (
+                {payrollData.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     لا توجد بيانات رواتب
                   </div>
