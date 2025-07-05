@@ -125,10 +125,10 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
         ) : (
           <Tabs defaultValue="details" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="details">التفاصيل</TabsTrigger>
-              <TabsTrigger value="payments">المدفوعات</TabsTrigger>
-              <TabsTrigger value="history">السجل</TabsTrigger>
               <TabsTrigger value="documents">المرفقات</TabsTrigger>
+              <TabsTrigger value="history">السجل</TabsTrigger>
+              <TabsTrigger value="payments">المدفوعات</TabsTrigger>
+              <TabsTrigger value="details">التفاصيل</TabsTrigger>
             </TabsList>
 
             <TabsContent value="details" className="space-y-6">
