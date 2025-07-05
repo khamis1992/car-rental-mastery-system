@@ -263,36 +263,17 @@ export const ChartOfAccountsTab = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-right">رقم الحساب</TableHead>
-              <TableHead className="text-right">اسم الحساب</TableHead>
-              <TableHead className="text-right">النوع</TableHead>
-              <TableHead className="text-right">الرصيد الحالي</TableHead>
-              <TableHead className="text-right">الحالة</TableHead>
               <TableHead className="text-right">الإجراءات</TableHead>
+              <TableHead className="text-right">الحالة</TableHead>
+              <TableHead className="text-right">الرصيد الحالي</TableHead>
+              <TableHead className="text-right">النوع</TableHead>
+              <TableHead className="text-right">اسم الحساب</TableHead>
+              <TableHead className="text-right">رقم الحساب</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredAccounts.map((account) => (
               <TableRow key={account.id}>
-                <TableCell className="font-medium">{account.account_code}</TableCell>
-                <TableCell>
-                  <div style={{ paddingRight: `${(account.level - 1) * 20}px` }}>
-                    {account.account_name}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">
-                    {getAccountTypeLabel(account.account_type)}
-                  </Badge>
-                </TableCell>
-                <TableCell className={`font-medium ${account.current_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatBalance(account.current_balance)}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={account.is_active ? 'default' : 'secondary'}>
-                    {account.is_active ? 'نشط' : 'غير نشط'}
-                  </Badge>
-                </TableCell>
                 <TableCell>
                   <div className="flex gap-2">
                     <Button
@@ -304,6 +285,25 @@ export const ChartOfAccountsTab = () => {
                     </Button>
                   </div>
                 </TableCell>
+                <TableCell>
+                  <Badge variant={account.is_active ? 'default' : 'secondary'}>
+                    {account.is_active ? 'نشط' : 'غير نشط'}
+                  </Badge>
+                </TableCell>
+                <TableCell className={`font-medium ${account.current_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {formatBalance(account.current_balance)}
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">
+                    {getAccountTypeLabel(account.account_type)}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div style={{ paddingRight: `${(account.level - 1) * 20}px` }}>
+                    {account.account_name}
+                  </div>
+                </TableCell>
+                <TableCell className="font-medium">{account.account_code}</TableCell>
               </TableRow>
             ))}
           </TableBody>
