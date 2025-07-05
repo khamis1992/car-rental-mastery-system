@@ -143,25 +143,25 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">رقم المخالفة:</span>
                       <span className="font-medium">{violation.violation_number}</span>
+                      <span className="text-muted-foreground">رقم المخالفة:</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">نوع المخالفة:</span>
                       <span className="font-medium">{violation.violation_types?.violation_name_ar}</span>
+                      <span className="text-muted-foreground">نوع المخالفة:</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">الحالة:</span>
                       {getStatusBadge(violation.status)}
+                      <span className="text-muted-foreground">الحالة:</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">المسؤولية:</span>
                       {getLiabilityBadge(violation.liability_determination)}
+                      <span className="text-muted-foreground">المسؤولية:</span>
                     </div>
                     {violation.liability_percentage !== 100 && (
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">نسبة المسؤولية:</span>
                         <span className="font-medium">{violation.liability_percentage}%</span>
+                        <span className="text-muted-foreground">نسبة المسؤولية:</span>
                       </div>
                     )}
                   </CardContent>
@@ -176,27 +176,27 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">مبلغ الغرامة:</span>
                       <span className="font-medium">{formatCurrency(violation.fine_amount)}</span>
+                      <span className="text-muted-foreground">مبلغ الغرامة:</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">رسوم المعالجة:</span>
                       <span className="font-medium">{formatCurrency(violation.processing_fee)}</span>
+                      <span className="text-muted-foreground">رسوم المعالجة:</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
-                      <span>المبلغ الإجمالي:</span>
                       <span>{formatCurrency(violation.total_amount)}</span>
+                      <span>المبلغ الإجمالي:</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">المبلغ المدفوع:</span>
                       <span className="font-medium text-green-600">{formatCurrency(violation.paid_amount)}</span>
+                      <span className="text-muted-foreground">المبلغ المدفوع:</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">المبلغ المستحق:</span>
                       <span className="font-medium text-red-600">
                         {formatCurrency(violation.total_amount - violation.paid_amount)}
                       </span>
+                      <span className="text-muted-foreground">المبلغ المستحق:</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -243,20 +243,20 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
                       معلومات العميل
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div>
-                      <span className="text-muted-foreground block">الاسم:</span>
-                      <span className="font-medium">{violation.customers?.name}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground block">رقم العميل:</span>
-                      <span className="font-medium">{violation.customers?.customer_number}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground block">رقم الهاتف:</span>
-                      <span className="font-medium">{violation.customers?.phone}</span>
-                    </div>
-                  </CardContent>
+                   <CardContent className="space-y-3">
+                     <div className="flex justify-between">
+                       <span className="font-medium">{violation.customers?.name}</span>
+                       <span className="text-muted-foreground">الاسم:</span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="font-medium">{violation.customers?.customer_number}</span>
+                       <span className="text-muted-foreground">رقم العميل:</span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="font-medium">{violation.customers?.phone}</span>
+                       <span className="text-muted-foreground">رقم الهاتف:</span>
+                     </div>
+                   </CardContent>
                 </Card>
 
                 <Card>
@@ -266,28 +266,28 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
                       معلومات المركبة
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div>
-                      <span className="text-muted-foreground block">رقم اللوحة:</span>
-                      <span className="font-medium">{violation.vehicles?.license_plate}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground block">النوع:</span>
-                      <span className="font-medium">
-                        {violation.vehicles?.make} {violation.vehicles?.model}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground block">رقم المركبة:</span>
-                      <span className="font-medium">{violation.vehicles?.vehicle_number}</span>
-                    </div>
-                    {violation.contracts && (
-                      <div>
-                        <span className="text-muted-foreground block">رقم العقد:</span>
-                        <span className="font-medium">{violation.contracts.contract_number}</span>
-                      </div>
-                    )}
-                  </CardContent>
+                   <CardContent className="space-y-3">
+                     <div className="flex justify-between">
+                       <span className="font-medium">{violation.vehicles?.license_plate}</span>
+                       <span className="text-muted-foreground">رقم اللوحة:</span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="font-medium">
+                         {violation.vehicles?.make} {violation.vehicles?.model}
+                       </span>
+                       <span className="text-muted-foreground">النوع:</span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="font-medium">{violation.vehicles?.vehicle_number}</span>
+                       <span className="text-muted-foreground">رقم المركبة:</span>
+                     </div>
+                     {violation.contracts && (
+                       <div className="flex justify-between">
+                         <span className="font-medium">{violation.contracts.contract_number}</span>
+                         <span className="text-muted-foreground">رقم العقد:</span>
+                       </div>
+                     )}
+                   </CardContent>
                 </Card>
               </div>
 
@@ -297,28 +297,28 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
                   <CardHeader>
                     <CardTitle>معلومات الجهة المصدرة</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {violation.official_violation_number && (
-                        <div>
-                          <span className="text-muted-foreground block">رقم المخالفة الرسمي:</span>
-                          <span className="font-medium">{violation.official_violation_number}</span>
-                        </div>
-                      )}
-                      {violation.issuing_authority && (
-                        <div>
-                          <span className="text-muted-foreground block">الجهة المصدرة:</span>
-                          <span className="font-medium">{violation.issuing_authority}</span>
-                        </div>
-                      )}
-                      {violation.officer_name && (
-                        <div>
-                          <span className="text-muted-foreground block">اسم الضابط:</span>
-                          <span className="font-medium">{violation.officer_name}</span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
+                   <CardContent className="space-y-3">
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                       {violation.official_violation_number && (
+                         <div className="flex justify-between">
+                           <span className="font-medium">{violation.official_violation_number}</span>
+                           <span className="text-muted-foreground">رقم المخالفة الرسمي:</span>
+                         </div>
+                       )}
+                       {violation.issuing_authority && (
+                         <div className="flex justify-between">
+                           <span className="font-medium">{violation.issuing_authority}</span>
+                           <span className="text-muted-foreground">الجهة المصدرة:</span>
+                         </div>
+                       )}
+                       {violation.officer_name && (
+                         <div className="flex justify-between">
+                           <span className="font-medium">{violation.officer_name}</span>
+                           <span className="text-muted-foreground">اسم الضابط:</span>
+                         </div>
+                       )}
+                     </div>
+                   </CardContent>
                 </Card>
               )}
 
