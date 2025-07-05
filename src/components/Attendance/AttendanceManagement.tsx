@@ -215,12 +215,19 @@ export const AttendanceManagement: React.FC = () => {
         <div className="flex justify-end">
           <TabsList>
             <TabsTrigger value="reports">التقارير</TabsTrigger>
-            <TabsTrigger value="filters">الفلاتر المتقدمة</TabsTrigger>
             <TabsTrigger value="records">سجلات الحضور</TabsTrigger>
           </TabsList>
         </div>
 
         <TabsContent value="records" className="space-y-4">
+          {/* الفلاتر المتقدمة */}
+          <AttendanceFiltersPanel
+            employees={employees}
+            departments={departments}
+            onApplyFilters={applyFilters}
+            currentFilters={filters}
+          />
+
           {/* البحث السريع */}
           <div className="flex items-center gap-4">
             <div className="relative flex-1 max-w-md">
@@ -249,15 +256,6 @@ export const AttendanceManagement: React.FC = () => {
             loading={loading}
             onUpdate={handleUpdateRecord}
             onDelete={handleDeleteRecord}
-          />
-        </TabsContent>
-
-        <TabsContent value="filters">
-          <AttendanceFiltersPanel
-            employees={employees}
-            departments={departments}
-            onApplyFilters={applyFilters}
-            currentFilters={filters}
           />
         </TabsContent>
 
