@@ -1,12 +1,18 @@
 import { IPaymentRepository } from '@/repositories/interfaces/IPaymentRepository';
 import { IInvoiceRepository } from '@/repositories/interfaces/IInvoiceRepository';
 import { Payment, PaymentFormData } from '@/types/invoice';
+import { AccountingIntegrationService } from './AccountingIntegrationService';
+import { supabase } from '@/integrations/supabase/client';
 
 export class PaymentBusinessService {
+  private accountingService: AccountingIntegrationService;
+
   constructor(
     private paymentRepository: IPaymentRepository,
     private invoiceRepository: IInvoiceRepository
-  ) {}
+  ) {
+    this.accountingService = new AccountingIntegrationService();
+  }
 
   async getPaymentsByInvoice(invoiceId: string): Promise<Payment[]> {
     return await this.paymentRepository.getPaymentsByInvoice(invoiceId);
@@ -15,7 +21,26 @@ export class PaymentBusinessService {
   async createPayment(paymentData: PaymentFormData): Promise<Payment> {
     // Business logic for payment creation
     await this.validatePaymentData(paymentData);
-    return await this.paymentRepository.createPayment(paymentData);
+    const payment = await this.paymentRepository.createPayment(paymentData);
+    
+    // إنشاء القيد المحاسبي للدفعة
+    try {
+      const invoice = await this.invoiceRepository.getInvoiceById(paymentData.invoice_id);
+      if (invoice) {
+        const customerName = await this.getCustomerName(invoice.customer_id);
+        await this.accountingService.createPaymentAccountingEntry(payment.id, {
+          customer_name: customerName,
+          invoice_number: invoice.invoice_number,
+          payment_amount: payment.amount,
+          payment_method: payment.payment_method,
+          payment_date: payment.payment_date
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to create accounting entry for payment:', error);
+    }
+    
+    return payment;
   }
 
   async updatePaymentStatus(id: string, status: Payment['status']): Promise<void> {
@@ -80,6 +105,24 @@ export class PaymentBusinessService {
 
     if (paymentData.payment_method === 'bank_transfer' && !paymentData.transaction_reference) {
       throw new Error('Transaction reference is required for bank transfers');
+    }
+  }
+
+  private async getCustomerName(customerId: string): Promise<string> {
+    try {
+      const { data: customer, error } = await supabase
+        .from('customers')
+        .select('name')
+        .eq('id', customerId)
+        .single();
+
+      if (error || !customer) {
+        return 'غير محدد';
+      }
+
+      return customer.name;
+    } catch (error) {
+      return 'غير محدد';
     }
   }
 }

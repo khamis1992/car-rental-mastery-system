@@ -1,8 +1,14 @@
 import { IInvoiceRepository } from '@/repositories/interfaces/IInvoiceRepository';
 import { Invoice, InvoiceWithDetails, InvoiceFormData } from '@/types/invoice';
+import { AccountingIntegrationService } from './AccountingIntegrationService';
+import { supabase } from '@/integrations/supabase/client';
 
 export class InvoiceBusinessService {
-  constructor(private invoiceRepository: IInvoiceRepository) {}
+  private accountingService: AccountingIntegrationService;
+
+  constructor(private invoiceRepository: IInvoiceRepository) {
+    this.accountingService = new AccountingIntegrationService();
+  }
 
   async getAllInvoices(): Promise<InvoiceWithDetails[]> {
     return await this.invoiceRepository.getInvoicesWithDetails();
@@ -15,7 +21,23 @@ export class InvoiceBusinessService {
   async createInvoice(invoiceData: InvoiceFormData): Promise<Invoice> {
     // Business logic for invoice creation
     this.validateInvoiceData(invoiceData);
-    return await this.invoiceRepository.createInvoice(invoiceData);
+    const invoice = await this.invoiceRepository.createInvoice(invoiceData);
+    
+    // إنشاء القيد المحاسبي للفاتورة
+    try {
+      const customerName = await this.getCustomerName(invoice.customer_id);
+      await this.accountingService.createInvoiceAccountingEntry(invoice.id, {
+        customer_name: customerName,
+        invoice_number: invoice.invoice_number,
+        total_amount: invoice.total_amount,
+        tax_amount: invoice.tax_amount || 0,
+        discount_amount: invoice.discount_amount || 0
+      });
+    } catch (error) {
+      console.warn('Failed to create accounting entry for invoice:', error);
+    }
+    
+    return invoice;
   }
 
   async updateInvoice(id: string, updates: Partial<Invoice>): Promise<Invoice> {
@@ -97,6 +119,24 @@ export class InvoiceBusinessService {
 
     if (!validTransitions[currentStatus]?.includes(newStatus)) {
       throw new Error(`Invalid status transition from ${currentStatus} to ${newStatus}`);
+    }
+  }
+
+  private async getCustomerName(customerId: string): Promise<string> {
+    try {
+      const { data: customer, error } = await supabase
+        .from('customers')
+        .select('name')
+        .eq('id', customerId)
+        .single();
+
+      if (error || !customer) {
+        return 'غير محدد';
+      }
+
+      return customer.name;
+    } catch (error) {
+      return 'غير محدد';
     }
   }
 }
