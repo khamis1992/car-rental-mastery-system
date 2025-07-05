@@ -176,13 +176,33 @@ const Payroll = () => {
         description: 'يتم إنشاء تقرير الرواتب الشهري...'
       });
       
-      // محاكاة إنشاء التقرير
-      setTimeout(() => {
-        toast({
-          title: 'تم إنشاء التقرير',
-          description: 'تم إنشاء تقرير الرواتب الشهري بنجاح'
-        });
-      }, 2000);
+      // تحويل بيانات الرواتب لصيغة التقرير
+      const reportData = payrollData.map(payroll => ({
+        id: payroll.id,
+        employee_name: payroll.employee_name,
+        employee_number: payroll.employee_number,
+        basic_salary: payroll.basic_salary,
+        allowances: payroll.allowances,
+        overtime_amount: payroll.overtime_amount,
+        bonuses: payroll.bonuses,
+        deductions: payroll.deductions,
+        tax_deduction: payroll.tax_deduction,
+        social_insurance: payroll.social_insurance,
+        gross_salary: payroll.gross_salary,
+        net_salary: payroll.net_salary,
+        status: payroll.status
+      }));
+
+      // استيراد خدمة PDF
+      const { payrollReportsPDFService } = await import('@/lib/payrollReportsPDFService');
+      
+      // إنشاء التقرير PDF
+      await payrollReportsPDFService.generateMonthlyPayrollReport(reportData);
+      
+      toast({
+        title: 'تم إنشاء التقرير',
+        description: 'تم إنشاء تقرير الرواتب الشهري وحفظه بنجاح'
+      });
     } catch (error) {
       console.error('خطأ في إنشاء التقرير:', error);
       toast({
@@ -200,18 +220,98 @@ const Payroll = () => {
         description: 'يتم إنشاء تقرير الخصومات...'
       });
       
-      // محاكاة إنشاء التقرير
-      setTimeout(() => {
-        toast({
-          title: 'تم إنشاء التقرير',
-          description: 'تم إنشاء تقرير الخصومات بنجاح'
-        });
-      }, 2000);
+      // تحويل بيانات الرواتب لصيغة التقرير
+      const reportData = payrollData.map(payroll => ({
+        id: payroll.id,
+        employee_name: payroll.employee_name,
+        employee_number: payroll.employee_number,
+        basic_salary: payroll.basic_salary,
+        allowances: payroll.allowances,
+        overtime_amount: payroll.overtime_amount,
+        bonuses: payroll.bonuses,
+        deductions: payroll.deductions,
+        tax_deduction: payroll.tax_deduction,
+        social_insurance: payroll.social_insurance,
+        gross_salary: payroll.gross_salary,
+        net_salary: payroll.net_salary,
+        status: payroll.status
+      }));
+
+      // استيراد خدمة PDF
+      const { payrollReportsPDFService } = await import('@/lib/payrollReportsPDFService');
+      
+      // إنشاء التقرير PDF
+      await payrollReportsPDFService.generateDeductionsReport(reportData);
+      
+      toast({
+        title: 'تم إنشاء التقرير',
+        description: 'تم إنشاء تقرير الخصومات وحفظه بنجاح'
+      });
     } catch (error) {
       console.error('خطأ في إنشاء التقرير:', error);
       toast({
         title: 'خطأ',
         description: 'حدث خطأ في إنشاء التقرير',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handlePreviewMonthlyReport = async () => {
+    try {
+      const reportData = payrollData.map(payroll => ({
+        id: payroll.id,
+        employee_name: payroll.employee_name,
+        employee_number: payroll.employee_number,
+        basic_salary: payroll.basic_salary,
+        allowances: payroll.allowances,
+        overtime_amount: payroll.overtime_amount,
+        bonuses: payroll.bonuses,
+        deductions: payroll.deductions,
+        tax_deduction: payroll.tax_deduction,
+        social_insurance: payroll.social_insurance,
+        gross_salary: payroll.gross_salary,
+        net_salary: payroll.net_salary,
+        status: payroll.status
+      }));
+
+      const { payrollReportsPDFService } = await import('@/lib/payrollReportsPDFService');
+      payrollReportsPDFService.previewReport(reportData, 'monthly');
+    } catch (error) {
+      console.error('خطأ في معاينة التقرير:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ في معاينة التقرير',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handlePreviewDeductionsReport = async () => {
+    try {
+      const reportData = payrollData.map(payroll => ({
+        id: payroll.id,
+        employee_name: payroll.employee_name,
+        employee_number: payroll.employee_number,
+        basic_salary: payroll.basic_salary,
+        allowances: payroll.allowances,
+        overtime_amount: payroll.overtime_amount,
+        bonuses: payroll.bonuses,
+        deductions: payroll.deductions,
+        tax_deduction: payroll.tax_deduction,
+        social_insurance: payroll.social_insurance,
+        gross_salary: payroll.gross_salary,
+        net_salary: payroll.net_salary,
+        status: payroll.status
+      }));
+
+      const { payrollReportsPDFService } = await import('@/lib/payrollReportsPDFService');
+      payrollReportsPDFService.previewReport(reportData, 'deductions');
+    } catch (error) {
+      console.error('خطأ في معاينة التقرير:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ في معاينة التقرير',
         variant: 'destructive'
       });
     }
@@ -611,26 +711,64 @@ const Payroll = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => handleGenerateMonthlyReport()}>
+                <Card className="border-2 hover:border-primary/20 transition-all duration-200">
                   <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 mb-4">
                       <FileText className="w-8 h-8 text-primary" />
                       <div>
                         <h3 className="font-medium">تقرير الرواتب الشهري</h3>
                         <p className="text-sm text-muted-foreground">تفصيل رواتب جميع الموظفين</p>
                       </div>
                     </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePreviewMonthlyReport()}
+                        className="flex-1"
+                      >
+                        <Eye className="w-4 h-4 ml-2" />
+                        معاينة HTML
+                      </Button>
+                      <Button
+                        onClick={() => handleGenerateMonthlyReport()}
+                        size="sm"
+                        className="flex-1"
+                      >
+                        <Download className="w-4 h-4 ml-2" />
+                        تحميل PDF
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
 
-                <Card className="hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => handleGenerateDeductionsReport()}>
+                <Card className="border-2 hover:border-primary/20 transition-all duration-200">
                   <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 mb-4">
                       <Calculator className="w-8 h-8 text-green-500" />
                       <div>
                         <h3 className="font-medium">تقرير الخصومات</h3>
                         <p className="text-sm text-muted-foreground">تفاصيل الضرائب والتأمينات</p>
                       </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePreviewDeductionsReport()}
+                        className="flex-1"
+                      >
+                        <Eye className="w-4 h-4 ml-2" />
+                        معاينة HTML
+                      </Button>
+                      <Button
+                        onClick={() => handleGenerateDeductionsReport()}
+                        size="sm"
+                        className="flex-1"
+                      >
+                        <Download className="w-4 h-4 ml-2" />
+                        تحميل PDF
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
