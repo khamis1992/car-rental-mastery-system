@@ -1,49 +1,74 @@
 import React from 'react';
-import { TrendingUp, DollarSign, FileText, Calendar, CreditCard, Receipt } from 'lucide-react';
+import { TrendingUp, DollarSign, FileText, Calendar, CreditCard, Receipt, RefreshCw } from 'lucide-react';
 import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
 import { JournalEntriesTab } from '@/components/Accounting/JournalEntriesTab';
 import { FinancialReportsTab } from '@/components/Accounting/FinancialReportsTab';
+import { AccountingBackfillTab } from '@/components/Accounting/AccountingBackfillTab';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrencyKWD } from '@/lib/currency';
+import { useAccountingData } from '@/hooks/useAccountingData';
 
 const Accounting = () => {
-  const financialStats = [
+  const { financialStats, recentTransactions, loading, error, refetch } = useAccountingData();
+
+  const displayStats = [
     {
       title: "الإيرادات الشهرية",
-      value: formatCurrencyKWD(0),
+      value: formatCurrencyKWD(financialStats.monthlyRevenue),
       change: "0%",
       icon: <TrendingUp className="w-6 h-6 text-green-500" />,
       trend: "up"
     },
     {
-      title: "المدفوعات المعلقة",
-      value: formatCurrencyKWD(0),
+      title: "المدفوعات المعلقة", 
+      value: formatCurrencyKWD(financialStats.pendingPayments),
       change: "0%",
       icon: <CreditCard className="w-6 h-6 text-orange-500" />,
       trend: "down"
     },
     {
       title: "إجمالي المصروفات",
-      value: formatCurrencyKWD(0),
+      value: formatCurrencyKWD(financialStats.totalExpenses),
       change: "0%",
       icon: <Receipt className="w-6 h-6 text-red-500" />,
       trend: "up"
     },
     {
       title: "صافي الربح",
-      value: formatCurrencyKWD(0),
+      value: formatCurrencyKWD(financialStats.netProfit),
       change: "0%",
       icon: <DollarSign className="w-6 h-6 text-green-600" />,
-      trend: "up"
+      trend: financialStats.netProfit >= 0 ? "up" : "down"
     }
   ];
 
-  const recentTransactions: any[] = [];
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex justify-center items-center h-64">
+          <RefreshCw className="w-8 h-8 animate-spin" />
+          <span className="mr-2">جاري تحميل البيانات المحاسبية...</span>
+        </div>
+      </div>
+    );
+  }
 
-  const monthlyReports: any[] = [];
+  if (error) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="text-center py-8">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={refetch} variant="outline">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            إعادة المحاولة
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -54,6 +79,10 @@ const Accounting = () => {
         </div>
         
         <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={refetch} className="flex items-center gap-2">
+            <RefreshCw className="w-4 h-4" />
+            تحديث البيانات
+          </Button>
           <Button variant="outline" className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />
             تقرير شهري
@@ -67,7 +96,7 @@ const Accounting = () => {
 
       {/* الإحصائيات المالية */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {financialStats.map((stat, index) => (
+        {displayStats.map((stat, index) => (
           <Card key={index} className="card-elegant">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -107,9 +136,7 @@ const Accounting = () => {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
-          <div className="text-center py-8 text-muted-foreground">
-            إعدادات النظام المحاسبي - قريباً
-          </div>
+          <AccountingBackfillTab />
         </TabsContent>
 
         <TabsContent value="transactions" className="space-y-4">
