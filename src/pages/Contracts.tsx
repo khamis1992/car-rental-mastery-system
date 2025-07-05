@@ -9,6 +9,7 @@ import { ContractsList } from '@/components/Contracts/ContractsList';
 import { ContractMonitoring } from '@/components/Contracts/ContractMonitoring';
 import { ContractStats } from '@/components/Contracts/ContractStats';
 import { ContractDetailsDialog } from '@/components/Contracts/ContractDetailsDialog';
+import { BilingualContractForm } from '@/components/Contracts/BilingualContractForm';
 import { useContractsEnhanced } from '@/hooks/useContractsEnhanced';
 import { supabase } from '@/integrations/supabase/client';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -19,6 +20,7 @@ const Contracts = () => {
   const { toast } = useToast();
   useAbortErrorHandler(); // Handle abort errors gracefully
   const [contractFormOpen, setContractFormOpen] = useState(false);
+  const [bilingualFormOpen, setBilingualFormOpen] = useState(false);
   const [selectedQuotationForContract, setSelectedQuotationForContract] = useState<string>('');
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
   const [contractDetailsOpen, setContractDetailsOpen] = useState(false);
@@ -98,7 +100,15 @@ const Contracts = () => {
             onClick={() => setContractFormOpen(true)}
           >
             <Plus className="w-4 h-4" />
-            عقد جديد
+            عقد عادي
+          </Button>
+          <Button 
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => setBilingualFormOpen(true)}
+          >
+            <Plus className="w-4 h-4" />
+            عقد ثنائي اللغة
           </Button>
         </div>
       </div>
@@ -155,7 +165,7 @@ const Contracts = () => {
         />
       </ErrorBoundary>
 
-      {/* نموذج إنشاء عقد */}
+      {/* نموذج إنشاء عقد عادي */}
       <ErrorBoundary>
         <ContractForm
           open={contractFormOpen}
@@ -194,6 +204,17 @@ const Contracts = () => {
             if (error) throw error;
             return data;
           }}
+          onSuccess={handleFormSuccess}
+        />
+      </ErrorBoundary>
+
+      {/* نموذج إنشاء عقد ثنائي اللغة */}
+      <ErrorBoundary>
+        <BilingualContractForm
+          open={bilingualFormOpen}
+          onOpenChange={setBilingualFormOpen}
+          customers={customers}
+          vehicles={vehicles}
           onSuccess={handleFormSuccess}
         />
       </ErrorBoundary>
