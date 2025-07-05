@@ -214,9 +214,9 @@ export const AttendanceManagement: React.FC = () => {
       <Tabs defaultValue="records" className="space-y-4">
         <div className="flex justify-end">
           <TabsList>
-            <TabsTrigger value="records">سجلات الحضور</TabsTrigger>
-            <TabsTrigger value="filters">الفلاتر المتقدمة</TabsTrigger>
             <TabsTrigger value="reports">التقارير</TabsTrigger>
+            <TabsTrigger value="filters">الفلاتر المتقدمة</TabsTrigger>
+            <TabsTrigger value="records">سجلات الحضور</TabsTrigger>
           </TabsList>
         </div>
 
