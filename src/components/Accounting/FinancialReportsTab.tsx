@@ -153,34 +153,34 @@ export const FinancialReportsTab = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-right">رقم الحساب</TableHead>
-                    <TableHead className="text-right">اسم الحساب</TableHead>
-                    <TableHead className="text-right">الرصيد المدين</TableHead>
                     <TableHead className="text-right">الرصيد الدائن</TableHead>
+                    <TableHead className="text-right">الرصيد المدين</TableHead>
+                    <TableHead className="text-right">اسم الحساب</TableHead>
+                    <TableHead className="text-right">رقم الحساب</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {trialBalance.map((account, index) => (
                     <TableRow key={index}>
-                      <TableCell className="font-medium">{account.account_code}</TableCell>
-                      <TableCell>{account.account_name}</TableCell>
-                      <TableCell className={`text-right ${account.debit_balance > 0 ? 'font-medium text-green-600' : ''}`}>
-                        {account.debit_balance > 0 ? formatAmount(account.debit_balance) : '-'}
-                      </TableCell>
                       <TableCell className={`text-right ${account.credit_balance > 0 ? 'font-medium text-blue-600' : ''}`}>
                         {account.credit_balance > 0 ? formatAmount(account.credit_balance) : '-'}
                       </TableCell>
+                      <TableCell className={`text-right ${account.debit_balance > 0 ? 'font-medium text-green-600' : ''}`}>
+                        {account.debit_balance > 0 ? formatAmount(account.debit_balance) : '-'}
+                      </TableCell>
+                      <TableCell>{account.account_name}</TableCell>
+                      <TableCell className="font-medium">{account.account_code}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
                 <TableRow className="bg-muted font-bold">
-                  <TableCell colSpan={2} className="text-right">الإجمالي</TableCell>
-                  <TableCell className="text-right text-green-600">
-                    {formatAmount(trialBalance.reduce((sum, acc) => sum + acc.debit_balance, 0))}
-                  </TableCell>
                   <TableCell className="text-right text-blue-600">
                     {formatAmount(trialBalance.reduce((sum, acc) => sum + acc.credit_balance, 0))}
                   </TableCell>
+                  <TableCell className="text-right text-green-600">
+                    {formatAmount(trialBalance.reduce((sum, acc) => sum + acc.debit_balance, 0))}
+                  </TableCell>
+                  <TableCell colSpan={2} className="text-right">الإجمالي</TableCell>
                 </TableRow>
               </Table>
               
