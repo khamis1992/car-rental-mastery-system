@@ -75,9 +75,9 @@ export const FinancialReportsTab = () => {
       {/* عناصر التحكم في التقارير */}
       <Card className="card-elegant">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5" />
+          <CardTitle className="flex items-center gap-2 justify-end">
             التقارير المالية
+            <BarChart3 className="w-5 h-5" />
           </CardTitle>
         </CardHeader>
         <CardContent>
