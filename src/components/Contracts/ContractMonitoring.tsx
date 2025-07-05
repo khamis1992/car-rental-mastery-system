@@ -15,7 +15,7 @@ import {
   XCircle
 } from 'lucide-react';
 import { format, differenceInDays, isAfter, isBefore, addDays } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar } from 'date-fns/locale/ar';
 import { contractService } from '@/services/contractService';
 
 interface ContractAlert {

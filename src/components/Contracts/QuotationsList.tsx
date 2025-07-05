@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { FileText, Eye, Edit, Trash2, Calendar, Share2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar } from 'date-fns/locale/ar';
 import { QuotationFiltersComponent, QuotationFilters } from './QuotationFilters';
 import { QuotationPreview } from './QuotationPreview';
 import { ShareLinkDialog } from './ShareLinkDialog';

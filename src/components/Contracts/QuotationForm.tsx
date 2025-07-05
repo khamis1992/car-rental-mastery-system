@@ -22,7 +22,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar } from 'date-fns/locale/ar';
 import { cn, getStartOfToday, getStartOfDate } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';

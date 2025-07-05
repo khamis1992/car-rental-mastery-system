@@ -7,7 +7,7 @@ import { Eye, Edit, Send, Download, MoreHorizontal } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { InvoiceWithDetails } from '@/types/invoice';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar } from 'date-fns/locale/ar';
 
 interface InvoicesListProps {
   invoices: InvoiceWithDetails[];

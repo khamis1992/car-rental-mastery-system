@@ -20,6 +20,17 @@ export const formatDate = (dateString: string | Date, options?: Intl.DateTimeFor
   return date.toLocaleDateString('ar-KW', defaultOptions);
 };
 
+// Safe locale import function to avoid initialization errors
+export const getArabicLocale = async () => {
+  try {
+    const { ar } = await import('date-fns/locale/ar');
+    return ar;
+  } catch (error) {
+    console.warn('Failed to load Arabic locale, falling back to default');
+    return undefined;
+  }
+};
+
 export const formatDateTime = (dateString: string | Date) => {
   return formatDate(dateString, {
     year: 'numeric',

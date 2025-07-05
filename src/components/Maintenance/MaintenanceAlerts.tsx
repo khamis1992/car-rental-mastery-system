@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle, Clock, Calendar, Wrench, Bell, CheckCircle, X } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar } from 'date-fns/locale/ar';
 
 interface MaintenanceAlert {
   id: string;
