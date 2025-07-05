@@ -2414,6 +2414,7 @@ export type Database = {
           basic_salary: number
           bonuses: number | null
           created_at: string
+          created_by: string | null
           deductions: number | null
           employee_id: string
           gross_salary: number
@@ -2439,6 +2440,7 @@ export type Database = {
           basic_salary: number
           bonuses?: number | null
           created_at?: string
+          created_by?: string | null
           deductions?: number | null
           employee_id: string
           gross_salary: number
@@ -2464,6 +2466,7 @@ export type Database = {
           basic_salary?: number
           bonuses?: number | null
           created_at?: string
+          created_by?: string | null
           deductions?: number | null
           employee_id?: string
           gross_salary?: number
