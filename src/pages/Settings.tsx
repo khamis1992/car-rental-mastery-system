@@ -15,6 +15,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { useToast } from '@/hooks/use-toast';
 import OfficeLocationManager from '@/components/Settings/OfficeLocationManager';
 import AddUserDialog from '@/components/Settings/AddUserDialog';
+import CompanyBrandingManager from '@/components/Settings/CompanyBrandingManager';
 
 const Settings = () => {
   const { profile } = useAuth();
@@ -160,8 +161,9 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue={activeTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="notifications">الإشعارات</TabsTrigger>
+          <TabsTrigger value="branding">العلامة التجارية</TabsTrigger>
           <TabsTrigger value="locations">مواقع المكاتب</TabsTrigger>
           <TabsTrigger value="users">إدارة المستخدمين</TabsTrigger>
           <TabsTrigger value="system">إعدادات النظام</TabsTrigger>
@@ -371,6 +373,10 @@ const Settings = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="branding" className="space-y-4">
+          <CompanyBrandingManager />
         </TabsContent>
 
         <TabsContent value="locations" className="space-y-4">

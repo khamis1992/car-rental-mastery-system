@@ -808,6 +808,78 @@ export type Database = {
           },
         ]
       }
+      company_branding: {
+        Row: {
+          address_ar: string | null
+          address_en: string | null
+          commercial_registration: string | null
+          company_name_ar: string | null
+          company_name_en: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          footer_height: number | null
+          footer_image_url: string | null
+          header_height: number | null
+          header_image_url: string | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          phone: string | null
+          show_footer: boolean | null
+          show_header: boolean | null
+          tax_number: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address_ar?: string | null
+          address_en?: string | null
+          commercial_registration?: string | null
+          company_name_ar?: string | null
+          company_name_en?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          footer_height?: number | null
+          footer_image_url?: string | null
+          header_height?: number | null
+          header_image_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          phone?: string | null
+          show_footer?: boolean | null
+          show_header?: boolean | null
+          tax_number?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address_ar?: string | null
+          address_en?: string | null
+          commercial_registration?: string | null
+          company_name_ar?: string | null
+          company_name_en?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          footer_height?: number | null
+          footer_image_url?: string | null
+          header_height?: number | null
+          header_image_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          phone?: string | null
+          show_footer?: boolean | null
+          show_header?: boolean | null
+          tax_number?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       contract_extensions: {
         Row: {
           approved_at: string | null
