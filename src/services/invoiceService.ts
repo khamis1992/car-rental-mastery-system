@@ -9,7 +9,10 @@ export const invoiceService = {
       .select(`
         *,
         customers!inner(name, phone),
-        contracts!inner(contract_number, vehicles!inner(make, model, vehicle_number))
+        contracts!inner(
+          contract_number,
+          vehicles!inner(make, model, vehicle_number)
+        )
       `)
       .order('created_at', { ascending: false });
 
