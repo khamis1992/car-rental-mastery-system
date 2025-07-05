@@ -35,7 +35,10 @@ export const RejectLeaveDialog: React.FC<RejectLeaveDialogProps> = ({
         
         <div className="space-y-4">
           <div>
-            <Label htmlFor="rejection-reason">سبب الرفض</Label>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium">السبب</span>
+              <span className="text-sm font-medium">سبب الرفض</span>
+            </div>
             <Textarea
               id="rejection-reason"
               placeholder="اكتب سبب رفض طلب الإجازة..."
