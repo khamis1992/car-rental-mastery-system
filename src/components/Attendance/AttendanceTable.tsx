@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Edit2, Trash2, Clock, User, MapPin, Calendar, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale/ar';
+import { ar } from 'date-fns/locale';
 import { AttendanceRecord } from '@/services/attendanceManagementService';
 
 interface AttendanceTableProps {

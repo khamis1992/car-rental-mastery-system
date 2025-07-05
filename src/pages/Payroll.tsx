@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Switch } from '@/components/ui/switch';
 import { DollarSign, Calculator, FileText, Download, Eye, Search, Plus, Settings, Clock } from 'lucide-react';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale/ar';
+import { ar } from 'date-fns/locale';
 import { payrollService, PayrollWithDetails, PayrollFilters, PayrollSettings } from '@/services/payrollService';
 import { useToast } from '@/hooks/use-toast';
 

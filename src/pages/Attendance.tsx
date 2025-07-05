@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Clock, MapPin, Calendar, CheckCircle, XCircle, AlertCircle, FileText, Users } from 'lucide-react';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale/ar';
+import { ar } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
 import { AttendanceManagement } from '@/components/Attendance/AttendanceManagement';
 import { attendanceService } from '@/services/attendanceService';

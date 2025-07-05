@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { FileText, Eye, Edit, Calendar, MapPin, HelpCircle, TrendingUp, Receipt, AlertTriangle } from 'lucide-react';
 import { format, isToday, isThisWeek, isThisMonth, isThisQuarter, isThisYear } from 'date-fns';
-import { ar } from 'date-fns/locale/ar';
+import { ar } from 'date-fns/locale';
 import { ContractActions } from './ContractActions';
 import { ContractDetailsDialog } from './ContractDetailsDialog';
 import { ContractFiltersComponent, ContractFilters } from './ContractFilters';

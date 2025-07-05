@@ -9,7 +9,7 @@ import { Eye, Search, Filter, UserCheck, Bell, MoreHorizontal } from 'lucide-rea
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ViolationWithDetails } from '@/types/violation';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale/ar';
+import { ar } from 'date-fns/locale';
 
 interface ViolationsListProps {
   violations: ViolationWithDetails[];

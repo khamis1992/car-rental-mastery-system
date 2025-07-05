@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Clock, MapPin, CheckCircle, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale/ar';
+import { ar } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
 import { attendanceService } from '@/services/attendanceService';
 import { useToast } from '@/hooks/use-toast';

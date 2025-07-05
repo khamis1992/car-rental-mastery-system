@@ -2384,7 +2384,6 @@ export type Database = {
       payments: {
         Row: {
           amount: number
-          auto_generated_invoice: boolean | null
           bank_name: string | null
           check_number: string | null
           contract_id: string
@@ -2404,7 +2403,6 @@ export type Database = {
         }
         Insert: {
           amount: number
-          auto_generated_invoice?: boolean | null
           bank_name?: string | null
           check_number?: string | null
           contract_id: string
@@ -2424,7 +2422,6 @@ export type Database = {
         }
         Update: {
           amount?: number
-          auto_generated_invoice?: boolean | null
           bank_name?: string | null
           check_number?: string | null
           contract_id?: string
