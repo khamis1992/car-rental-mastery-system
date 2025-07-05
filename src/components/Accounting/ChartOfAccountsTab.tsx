@@ -274,8 +274,8 @@ export const ChartOfAccountsTab = () => {
           <TableBody>
             {filteredAccounts.map((account) => (
               <TableRow key={account.id}>
-                <TableCell>
-                  <div className="flex gap-2">
+                <TableCell className="text-right">
+                  <div className="flex gap-2 justify-end">
                     <Button
                       variant="outline"
                       size="sm"
@@ -285,25 +285,29 @@ export const ChartOfAccountsTab = () => {
                     </Button>
                   </div>
                 </TableCell>
-                <TableCell>
-                  <Badge variant={account.is_active ? 'default' : 'secondary'}>
-                    {account.is_active ? 'نشط' : 'غير نشط'}
-                  </Badge>
+                <TableCell className="text-right">
+                  <div className="flex justify-end">
+                    <Badge variant={account.is_active ? 'default' : 'secondary'}>
+                      {account.is_active ? 'نشط' : 'غير نشط'}
+                    </Badge>
+                  </div>
                 </TableCell>
-                <TableCell className={`font-medium ${account.current_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <TableCell className={`text-right font-medium ${account.current_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {formatBalance(account.current_balance)}
                 </TableCell>
-                <TableCell>
-                  <Badge variant="outline">
-                    {getAccountTypeLabel(account.account_type)}
-                  </Badge>
+                <TableCell className="text-right">
+                  <div className="flex justify-end">
+                    <Badge variant="outline">
+                      {getAccountTypeLabel(account.account_type)}
+                    </Badge>
+                  </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-right">
                   <div style={{ paddingRight: `${(account.level - 1) * 20}px` }}>
                     {account.account_name}
                   </div>
                 </TableCell>
-                <TableCell className="font-medium">{account.account_code}</TableCell>
+                <TableCell className="text-right font-medium">{account.account_code}</TableCell>
               </TableRow>
             ))}
           </TableBody>
