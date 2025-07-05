@@ -337,10 +337,10 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
 
             <TabsContent value="payments" className="space-y-6">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">المدفوعات</h3>
                 <Button onClick={() => setPaymentFormOpen(true)}>
                   إضافة دفعة
                 </Button>
+                <h3 className="text-lg font-semibold">المدفوعات</h3>
               </div>
 
               {payments.length === 0 ? (
