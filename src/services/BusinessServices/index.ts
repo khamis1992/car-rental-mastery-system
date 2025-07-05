@@ -12,3 +12,4 @@ export * from './WorkLocationBusinessService';
 export * from './VehicleBusinessService';
 export * from './MaintenanceBusinessService';
 export * from './AccountingIntegrationService';
+export * from './AutoInvoiceCreationService';

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Receipt, CreditCard, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { serviceContainer } from '@/services/Container/ServiceContainer';
-import { AutoInvoiceCreationService } from '@/services/BusinessServices/AutoInvoiceCreationService';
+import { AutoInvoiceCreationService } from '@/services/BusinessServices';
 import { formatCurrencyKWD } from '@/lib/currency';
 
 interface InvoiceAndPaymentFormProps {
@@ -48,10 +48,12 @@ export const InvoiceAndPaymentForm: React.FC<InvoiceAndPaymentFormProps> = ({
     notes: '',
   });
 
-  // إنشاء خدمة الإنشاء التلقائي
-  const invoiceService = serviceContainer.getInvoiceBusinessService();
-  const paymentService = serviceContainer.getPaymentBusinessService();
-  const autoService = new AutoInvoiceCreationService(invoiceService, paymentService);
+  // إنشاء خدمة الإنشاء التلقائي باستخدام useMemo لتجنب إعادة الإنشاء
+  const autoService = useMemo(() => {
+    const invoiceService = serviceContainer.getInvoiceBusinessService();
+    const paymentService = serviceContainer.getPaymentBusinessService();
+    return new AutoInvoiceCreationService(invoiceService, paymentService);
+  }, []);
 
   React.useEffect(() => {
     if (contract) {
