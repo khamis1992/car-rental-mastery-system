@@ -103,7 +103,7 @@ export const AttendanceReports: React.FC = () => {
       {/* عنوان التقارير */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-right">
+          <CardTitle className="flex items-center gap-2 flex-row-reverse text-right">
             <FileText className="h-6 w-6" />
             تقارير الحضور والانصراف
           </CardTitle>
