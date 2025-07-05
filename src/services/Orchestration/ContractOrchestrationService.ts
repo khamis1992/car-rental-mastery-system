@@ -4,6 +4,7 @@ import { ContractBusinessService } from '../BusinessServices/ContractBusinessSer
 import { VehicleBusinessService } from '../BusinessServices/VehicleBusinessService';
 import { InvoiceBusinessService } from '../BusinessServices/InvoiceBusinessService';
 import { Vehicle } from '@/repositories/interfaces/IVehicleRepository';
+import { vehicleStatusService } from '../VehicleStatusService';
 
 export interface ContractActivationRequest {
   contractId: string;
@@ -60,11 +61,23 @@ export class ContractOrchestrationService extends BaseOrchestrationService {
         name: 'updateVehicleStatus',
         execute: async () => {
           const contract = await this.contractService.getContractById(request.contractId);
-          await this.vehicleService.updateVehicleStatus(contract!.vehicle_id, 'rented');
+          await vehicleStatusService.updateVehicleStatus(
+            contract!.vehicle_id, 
+            'rented',
+            `تم تفعيل العقد ${request.contractId}`,
+            request.contractId,
+            'contract'
+          );
         },
         rollback: async () => {
           const contract = await this.contractService.getContractById(request.contractId);
-          await this.vehicleService.updateVehicleStatus(contract!.vehicle_id, 'available');
+          await vehicleStatusService.updateVehicleStatus(
+            contract!.vehicle_id, 
+            'available',
+            `تم التراجع عن تفعيل العقد ${request.contractId}`,
+            request.contractId,
+            'contract'
+          );
         },
       },
       {
@@ -137,11 +150,23 @@ export class ContractOrchestrationService extends BaseOrchestrationService {
         name: 'updateVehicleStatus',
         execute: async () => {
           const contract = await this.contractService.getContractById(request.contractId);
-          await this.vehicleService.updateVehicleStatus(contract!.vehicle_id, 'available');
+          await vehicleStatusService.updateVehicleStatus(
+            contract!.vehicle_id, 
+            'available',
+            `تم إكمال العقد ${request.contractId}`,
+            request.contractId,
+            'contract'
+          );
         },
         rollback: async () => {
           const contract = await this.contractService.getContractById(request.contractId);
-          await this.vehicleService.updateVehicleStatus(contract!.vehicle_id, 'rented');
+          await vehicleStatusService.updateVehicleStatus(
+            contract!.vehicle_id, 
+            'rented',
+            `تم التراجع عن إكمال العقد ${request.contractId}`,
+            request.contractId,
+            'contract'
+          );
         },
       },
       {
@@ -241,13 +266,25 @@ export class ContractOrchestrationService extends BaseOrchestrationService {
         execute: async () => {
           const contract = await this.contractService.getContractById(contractId);
           if (contract!.status === 'active') {
-            await this.vehicleService.updateVehicleStatus(contract!.vehicle_id, 'available');
+            await vehicleStatusService.updateVehicleStatus(
+              contract!.vehicle_id, 
+              'available',
+              `تم إلغاء العقد ${contractId}: ${reason}`,
+              contractId,
+              'contract'
+            );
           }
         },
         rollback: async () => {
           const contract = await this.contractService.getContractById(contractId);
           if (contract!.status === 'active') {
-            await this.vehicleService.updateVehicleStatus(contract!.vehicle_id, 'rented');
+            await vehicleStatusService.updateVehicleStatus(
+              contract!.vehicle_id, 
+              'rented',
+              `تم التراجع عن إلغاء العقد ${contractId}`,
+              contractId,
+              'contract'
+            );
           }
         },
       },
