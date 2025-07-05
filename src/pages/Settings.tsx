@@ -15,7 +15,6 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { useToast } from '@/hooks/use-toast';
 import OfficeLocationManager from '@/components/Settings/OfficeLocationManager';
 import AddUserDialog from '@/components/Settings/AddUserDialog';
-import { CompanyBrandingForm } from '@/components/Settings/CompanyBrandingForm';
 
 const Settings = () => {
   const { profile } = useAuth();
@@ -25,11 +24,11 @@ const Settings = () => {
   const activeTab = searchParams.get('tab') || 'company';
   
   const [companySettings, setCompanySettings] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    taxNumber: '',
+    name: 'شركة النجوم لتأجير السيارات',
+    email: 'info@najoomrentals.com',
+    phone: '+966501234567',
+    address: 'الرياض، المملكة العربية السعودية',
+    taxNumber: '1234567890',
     logo: ''
   });
 
@@ -161,12 +160,11 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue={activeTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="notifications">الإشعارات</TabsTrigger>
           <TabsTrigger value="locations">مواقع المكاتب</TabsTrigger>
           <TabsTrigger value="users">إدارة المستخدمين</TabsTrigger>
           <TabsTrigger value="system">إعدادات النظام</TabsTrigger>
-          <TabsTrigger value="branding">هوية الشركة</TabsTrigger>
           <TabsTrigger value="company">بيانات الشركة</TabsTrigger>
         </TabsList>
 
@@ -387,10 +385,6 @@ const Settings = () => {
               <OfficeLocationManager />
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="branding" className="space-y-4">
-          <CompanyBrandingForm />
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-4">

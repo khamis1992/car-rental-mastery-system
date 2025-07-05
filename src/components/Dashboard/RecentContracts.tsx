@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, Printer } from "lucide-react";
+import { Calendar, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { serviceContainer } from "@/services/Container/ServiceContainer";
@@ -52,11 +52,6 @@ const RecentContracts = () => {
     }
   };
 
-  const handlePrintContract = (contractId: string) => {
-    const printUrl = `/contracts/print/${contractId}`;
-    window.open(printUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-  };
-
   return (
     <Card className="card-elegant">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -96,29 +91,19 @@ const RecentContracts = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <div className="font-medium text-primary">
-                      {formatCurrencyKWD(contract.final_amount)}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge 
-                        variant={contract.status === 'active' ? 'default' : 'secondary'}
-                        className={getStatusColor(contract.status)}
-                      >
-                        {getStatusText(contract.status)}
-                      </Badge>
-                      <Calendar className="w-4 h-4 text-muted-foreground" />
-                    </div>
+                <div className="text-right">
+                  <div className="font-medium text-primary">
+                    {formatCurrencyKWD(contract.final_amount)}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handlePrintContract(contract.id)}
-                    className="text-muted-foreground hover:text-primary"
-                  >
-                    <Printer className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Badge 
+                      variant={contract.status === 'active' ? 'default' : 'secondary'}
+                      className={getStatusColor(contract.status)}
+                    >
+                      {getStatusText(contract.status)}
+                    </Badge>
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                  </div>
                 </div>
               </div>
             ))}

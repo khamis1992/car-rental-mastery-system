@@ -32,7 +32,7 @@ export const generateContractPDF = async (
   tempDiv.style.padding = '20mm';
 
   // محتوى العقد مع الصور المعالجة
-  tempDiv.innerHTML = await generateContractHTML(processedContract, options);
+  tempDiv.innerHTML = generateContractHTML(processedContract, options);
 
   document.body.appendChild(tempDiv);
 

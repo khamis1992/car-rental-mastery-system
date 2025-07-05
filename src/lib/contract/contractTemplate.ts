@@ -1,5 +1,4 @@
 import { ContractPDFData } from '@/types/contract';
-import { CompanyBrandingService } from '@/services/companyBrandingService';
 
 export interface PDFOptions {
   includePhotos?: boolean;
@@ -8,21 +7,7 @@ export interface PDFOptions {
   maxPhotosPerSection?: number;
 }
 
-export const generateContractHTML = async (contract: ContractPDFData, options: PDFOptions = {}): Promise<string> => {
-  // تحميل إعدادات الشركة
-  const branding = await CompanyBrandingService.getCompanyBranding();
-  
-  // استخدام بيانات الشركة من قاعدة البيانات أو القيم الافتراضية
-  const companyNameAr = branding?.company_name_ar || 'شركة ساپتكو الخليج لتأجير السيارات';
-  const companyNameEn = branding?.company_name_en || 'SAPTCO GULF CAR RENTAL COMPANY';
-  const addressAr = branding?.address_ar || 'دولة الكويت';
-  const addressEn = branding?.address_en || 'State of Kuwait';
-  const phone = branding?.phone || '+965 XXXX XXXX';
-  const email = branding?.email || 'info@saptcogulf.com';
-  const website = branding?.website || 'www.saptcogulf.com';
-  const logoUrl = branding?.logo_url || '/lovable-uploads/cf0ef0ce-1c56-4da0-b065-8c130f4f182f.png';
-  const headerImageUrl = branding?.header_image_url;
-  const footerImageUrl = branding?.footer_image_url;
+export const generateContractHTML = (contract: ContractPDFData, options: PDFOptions = {}): string => {
   const {
     includePhotos = false,
     includeComparison = false,
@@ -30,48 +15,17 @@ export const generateContractHTML = async (contract: ContractPDFData, options: P
     maxPhotosPerSection = 6
   } = options;
   return `
-    <div style="max-width: 170mm; margin: 0 auto; background: white; color: black; direction: rtl;">
-      <!-- Company Header -->
-      ${branding?.show_header !== false ? `
-      <div style="text-align: center; margin-bottom: 30px;">
-        ${headerImageUrl ? `
-        <div style="margin-bottom: 20px;">
-          <img 
-            src="${headerImageUrl}"
-            alt="صورة رأسية مخصصة للشركة"
-            style="width: 100%; object-fit: contain; height: ${branding?.header_height || 120}px;"
-          />
+    <div style="max-width: 170mm; margin: 0 auto; background: white; color: black;">
+      <!-- Header -->
+      <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #1e40af; padding-bottom: 20px;">
+        <h1 style="color: #1e40af; font-size: 28px; font-weight: bold; margin-bottom: 10px;">شركة تأجير السيارات</h1>
+        <p style="font-size: 18px; color: #666; margin: 5px 0;">عقد إيجار سيارة</p>
+        <div style="margin-top: 15px; font-size: 12px; color: #666;">
+          <p>الكويت - شارع الخليج العربي - صندوق بريد: 12345</p>
+          <p>هاتف: +965 1234 5678 | البريد الإلكتروني: info@carental.com</p>
         </div>
-        ` : ''}
-        
-        <div style="margin-bottom: 15px;">
-          <img 
-            src="${logoUrl}"
-            alt="شعار ${companyNameAr} - ${companyNameEn} Logo"
-            style="height: 80px; width: auto; object-fit: contain;"
-          />
-        </div>
-        
-        <h1 style="font-size: 32px; font-weight: bold; color: #333; margin-bottom: 8px;">
-          ${companyNameAr}
-        </h1>
-        <h2 style="font-size: 24px; font-weight: 600; color: #666; margin-bottom: 4px;">
-          ${companyNameEn}
-        </h2>
-        
-        <div style="font-size: 16px; color: #666; margin-bottom: 15px;">
-          <p>${addressAr} - ${addressEn}</p>
-          <div style="display: flex; align-items: center; justify-content: center; gap: 20px; font-size: 14px; margin-top: 8px;">
-            <span>📞 ${phone}</span>
-            <span>📧 ${email}</span>
-            <span>🌐 ${website}</span>
-          </div>
-        </div>
-        
-        <div style="border-top: 2px solid #2563eb; margin-top: 20px;"></div>
       </div>
-      ` : ''}
-      
+
       <!-- Contract Number and Date -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: #f8f9fa; padding: 15px; border-radius: 8px;">
         <div>
@@ -234,34 +188,11 @@ export const generateContractHTML = async (contract: ContractPDFData, options: P
         </div>
       </div>
 
-      <!-- Company Footer -->
-      ${branding?.show_footer !== false ? `
-      <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-        ${footerImageUrl ? `
-        <div style="margin-bottom: 15px;">
-          <img 
-            src="${footerImageUrl}"
-            alt="صورة تذييل مخصصة للشركة"
-            style="width: 100%; object-fit: contain; height: ${branding?.footer_height || 80}px;"
-          />
-        </div>
-        ` : ''}
-        
-        <div style="font-size: 14px; color: #666; line-height: 1.6;">
-          <p style="font-weight: 500;">${companyNameAr}</p>
-          <p style="font-weight: 500;">${companyNameEn}</p>
-          
-          <div style="display: flex; align-items: center; justify-content: center; gap: 15px; font-size: 12px; margin-top: 8px;">
-            <span>📞 ${phone}</span>
-            <span>📧 ${email}</span>
-            <span>🌐 ${website}</span>
-          </div>
-          
-          ${branding?.tax_number ? `<p style="font-size: 12px; margin-top: 5px;">الرقم الضريبي: ${branding.tax_number}</p>` : ''}
-          ${branding?.commercial_registration ? `<p style="font-size: 12px;">رقم السجل التجاري: ${branding.commercial_registration}</p>` : ''}
-        </div>
+      <!-- Footer -->
+      <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #666;">
+        <p>هذا العقد محرر من نسختين، يحتفظ كل طرف بنسخة أصلية</p>
+        <p style="margin-top: 8px;">تم إنشاء هذا العقد إلكترونياً في ${new Date().toLocaleDateString('ar-SA')}</p>
       </div>
-      ` : ''}
     </div>
   `;
 };

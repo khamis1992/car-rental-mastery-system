@@ -259,7 +259,7 @@ const CompactAddCustomerForm: React.FC<CompactAddCustomerFormProps> = ({ onCusto
                   id="name"
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder={customerType === 'company' ? 'اسم الشركة' : 'أحمد محمد'}
+                  placeholder={customerType === 'company' ? 'شركة النجوم' : 'أحمد محمد'}
                   required
                 />
               </div>

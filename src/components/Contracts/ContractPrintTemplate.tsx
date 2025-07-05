@@ -1,8 +1,6 @@
 import React from 'react';
 import { formatCurrencyKWD } from '@/lib/currency';
 import { formatDate, formatDateTime } from '@/lib/utils';
-import { CompanyHeader } from '@/components/Shared/CompanyHeader';
-import { CompanyFooter } from '@/components/Shared/CompanyFooter';
 
 interface ContractPrintTemplateProps {
   contract: any;
@@ -11,15 +9,12 @@ interface ContractPrintTemplateProps {
 export const ContractPrintTemplate: React.FC<ContractPrintTemplateProps> = ({ contract }) => {
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white text-black print:text-black print:bg-white print:p-4" dir="rtl">
-      {/* Company Header */}
-      <CompanyHeader variant="print" className="mb-8" />
-      
-      {/* معلومات العقد */}
-      <div className="text-center mb-8 border-b border-border pb-6">
-        <h2 className="text-2xl font-bold mb-2 text-primary">عقد إيجار مركبة</h2>
+      {/* رأس الصفحة */}
+      <div className="text-center mb-8 border-b-2 border-gray-800 pb-6">
+        <h1 className="text-3xl font-bold mb-2">عقد إيجار مركبة</h1>
         <div className="text-lg">
           <p>رقم العقد: <span className="font-bold">{contract.contract_number}</span></p>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-gray-600 mt-1">
             تاريخ الإنشاء: {formatDate(contract.created_at)}
           </p>
         </div>
@@ -147,15 +142,15 @@ export const ContractPrintTemplate: React.FC<ContractPrintTemplateProps> = ({ co
         <div className="text-center">
           <div className="border-t-2 border-gray-800 pt-2 mt-16">
             <p className="font-bold">توقيع الشركة</p>
+            <p className="text-sm text-gray-600 mt-1">شركة تأجير المركبات</p>
           </div>
         </div>
       </div>
 
-      {/* Company Footer */}
-      <CompanyFooter variant="print" className="mt-8" />
-      
-      <div className="text-center mt-4 pt-6 border-t border-border text-sm text-muted-foreground">
+      {/* تذييل الصفحة */}
+      <div className="text-center mt-12 pt-6 border-t border-gray-300 text-sm text-gray-600">
         <p>تم طباعة هذا العقد بتاريخ {formatDateTime(new Date().toISOString())}</p>
+        <p className="mt-1">نظام إدارة تأجير المركبات</p>
       </div>
     </div>
   );
