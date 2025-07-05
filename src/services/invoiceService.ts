@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Invoice, InvoiceWithDetails, InvoiceFormData, InvoiceItem } from '@/types/invoice';
+import { AccountingIntegrationService } from './BusinessServices/AccountingIntegrationService';
 
 export const invoiceService = {
   async getInvoicesWithDetails(): Promise<InvoiceWithDetails[]> {
@@ -8,8 +9,7 @@ export const invoiceService = {
       .select(`
         *,
         customers!inner(name, phone),
-        contracts!inner(contract_number),
-        contracts!inner(vehicles!inner(make, model, vehicle_number))
+        contracts!inner(contract_number, vehicles!inner(make, model, vehicle_number))
       `)
       .order('created_at', { ascending: false });
 
@@ -32,8 +32,7 @@ export const invoiceService = {
       .select(`
         *,
         customers(name, phone, email, address, national_id),
-        contracts(contract_number, daily_rate, start_date, end_date),
-        contracts(vehicles(make, model, year, license_plate, vehicle_number, color)),
+        contracts(contract_number, daily_rate, start_date, end_date, vehicles(make, model, year, license_plate, vehicle_number, color)),
         invoice_items(*),
         payments(*)
       `)
@@ -45,6 +44,8 @@ export const invoiceService = {
   },
 
   async createInvoice(invoiceData: InvoiceFormData): Promise<Invoice> {
+    const accountingService = new AccountingIntegrationService();
+    
     // Generate invoice number
     const { data: invoiceNumber, error: numberError } = await supabase
       .rpc('generate_invoice_number');
@@ -90,6 +91,24 @@ export const invoiceService = {
       .insert(itemsData);
 
     if (itemsError) throw itemsError;
+
+    // Get customer info for accounting entry
+    const { data: customer, error: customerError } = await supabase
+      .from('customers')
+      .select('name')
+      .eq('id', invoiceData.customer_id)
+      .single();
+
+    if (!customerError && customer) {
+      // Create accounting entry
+      await accountingService.createInvoiceAccountingEntry(invoice.id, {
+        customer_name: customer.name,
+        invoice_number: invoiceNumber,
+        total_amount: invoice.total_amount || 0,
+        tax_amount: invoice.tax_amount || 0,
+        discount_amount: invoice.discount_amount || 0,
+      });
+    }
 
     return invoice as Invoice;
   },

@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Payment, PaymentFormData } from '@/types/invoice';
+import { AccountingIntegrationService } from './BusinessServices/AccountingIntegrationService';
 
 export const paymentService = {
   async getPaymentsByInvoice(invoiceId: string): Promise<Payment[]> {
@@ -14,6 +15,8 @@ export const paymentService = {
   },
 
   async createPayment(paymentData: PaymentFormData): Promise<Payment> {
+    const accountingService = new AccountingIntegrationService();
+    
     // Generate payment number
     const { data: paymentNumber, error: numberError } = await supabase
       .rpc('generate_payment_number');
@@ -23,7 +26,7 @@ export const paymentService = {
     // Get invoice to get contract and customer IDs
     const { data: invoice, error: invoiceError } = await supabase
       .from('invoices')
-      .select('contract_id, customer_id')
+      .select('contract_id, customer_id, invoice_number, customers(name)')
       .eq('id', paymentData.invoice_id)
       .single();
 
@@ -51,6 +54,18 @@ export const paymentService = {
       .single();
 
     if (paymentError) throw paymentError;
+
+    // Create accounting entry
+    if (invoice.customers?.name) {
+      await accountingService.createPaymentAccountingEntry(payment.id, {
+        customer_name: invoice.customers.name,
+        invoice_number: invoice.invoice_number,
+        payment_amount: paymentData.amount,
+        payment_method: paymentData.payment_method,
+        payment_date: paymentData.payment_date,
+      });
+    }
+
     return payment as Payment;
   },
 
