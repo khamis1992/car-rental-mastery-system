@@ -2393,6 +2393,7 @@ export type Database = {
           customer_id: string
           id: string
           invoice_id: string
+          journal_entry_id: string | null
           notes: string | null
           payment_date: string
           payment_method: string
@@ -2413,6 +2414,7 @@ export type Database = {
           customer_id: string
           id?: string
           invoice_id: string
+          journal_entry_id?: string | null
           notes?: string | null
           payment_date?: string
           payment_method?: string
@@ -2433,6 +2435,7 @@ export type Database = {
           customer_id?: string
           id?: string
           invoice_id?: string
+          journal_entry_id?: string | null
           notes?: string | null
           payment_date?: string
           payment_method?: string
@@ -2462,6 +2465,13 @@ export type Database = {
             columns: ["invoice_id"]
             isOneToOne: false
             referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
             referencedColumns: ["id"]
           },
         ]
