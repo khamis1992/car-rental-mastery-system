@@ -2419,6 +2419,7 @@ export type Database = {
           employee_id: string
           gross_salary: number
           id: string
+          journal_entry_id: string | null
           net_salary: number
           notes: string | null
           overtime_amount: number | null
@@ -2445,6 +2446,7 @@ export type Database = {
           employee_id: string
           gross_salary: number
           id?: string
+          journal_entry_id?: string | null
           net_salary: number
           notes?: string | null
           overtime_amount?: number | null
@@ -2471,6 +2473,7 @@ export type Database = {
           employee_id?: string
           gross_salary?: number
           id?: string
+          journal_entry_id?: string | null
           net_salary?: number
           notes?: string | null
           overtime_amount?: number | null
@@ -2497,6 +2500,61 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_accounting_entries: {
+        Row: {
+          amount: number
+          created_at: string | null
+          created_by: string | null
+          entry_type: string
+          id: string
+          journal_entry_id: string
+          notes: string | null
+          payroll_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          created_by?: string | null
+          entry_type: string
+          id?: string
+          journal_entry_id: string
+          notes?: string | null
+          payroll_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          created_by?: string | null
+          entry_type?: string
+          id?: string
+          journal_entry_id?: string
+          notes?: string | null
+          payroll_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_accounting_entries_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_accounting_entries_payroll_id_fkey"
+            columns: ["payroll_id"]
+            isOneToOne: false
+            referencedRelation: "payroll"
             referencedColumns: ["id"]
           },
         ]
@@ -3424,6 +3482,10 @@ export type Database = {
       create_depreciation_entries: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      create_payroll_accounting_entry: {
+        Args: { payroll_id: string; payroll_data: Json }
+        Returns: string
       }
       create_vehicle_asset: {
         Args: { vehicle_id: string; vehicle_data: Json }
