@@ -325,12 +325,12 @@ export const ContractAccountingReports: React.FC<ContractAccountingReportsProps>
                             <div className="text-sm font-medium">
                               {contract.journal_entry.entry_number}
                             </div>
-                            <Badge variant="outline" size="sm">
+                            <Badge variant="outline">
                               {contract.journal_entry.status === 'posted' ? 'مرحل' : contract.journal_entry.status}
                             </Badge>
                           </div>
                         ) : (
-                          <Badge variant="destructive" size="sm">
+                          <Badge variant="destructive">
                             لم ينشأ بعد
                           </Badge>
                         )}
