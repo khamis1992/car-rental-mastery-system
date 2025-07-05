@@ -294,7 +294,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSuccess, mode }
                   id="name"
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder={customerType === 'company' ? 'شركة النجوم' : 'أحمد محمد'}
+                  placeholder={customerType === 'company' ? 'اسم الشركة' : 'أحمد محمد'}
                   required
                 />
               </div>

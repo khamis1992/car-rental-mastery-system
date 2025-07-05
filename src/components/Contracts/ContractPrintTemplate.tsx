@@ -147,7 +147,6 @@ export const ContractPrintTemplate: React.FC<ContractPrintTemplateProps> = ({ co
         <div className="text-center">
           <div className="border-t-2 border-gray-800 pt-2 mt-16">
             <p className="font-bold">توقيع الشركة</p>
-            <p className="text-sm text-gray-600 mt-1">شركة ساپتكو الخليج</p>
           </div>
         </div>
       </div>

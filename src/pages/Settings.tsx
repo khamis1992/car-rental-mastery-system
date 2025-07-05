@@ -25,11 +25,11 @@ const Settings = () => {
   const activeTab = searchParams.get('tab') || 'company';
   
   const [companySettings, setCompanySettings] = useState({
-    name: 'شركة النجوم لتأجير السيارات',
-    email: 'info@najoomrentals.com',
-    phone: '+966501234567',
-    address: 'الرياض، المملكة العربية السعودية',
-    taxNumber: '1234567890',
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    taxNumber: '',
     logo: ''
   });
 
