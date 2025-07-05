@@ -258,7 +258,6 @@ export const JournalEntriesTab = () => {
     <Card className="card-elegant">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>القيود المحاسبية</CardTitle>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => { resetForm(); setEditingEntry(null); }}>
@@ -418,6 +417,7 @@ export const JournalEntriesTab = () => {
               </form>
             </DialogContent>
           </Dialog>
+          <CardTitle>القيود المحاسبية</CardTitle>
         </div>
       </CardHeader>
       <CardContent>
@@ -451,32 +451,18 @@ export const JournalEntriesTab = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-right">رقم القيد</TableHead>
-              <TableHead className="text-right">التاريخ</TableHead>
-              <TableHead className="text-right">الوصف</TableHead>
-              <TableHead className="text-right">إجمالي المدين</TableHead>
-              <TableHead className="text-right">إجمالي الدائن</TableHead>
-              <TableHead className="text-right">الحالة</TableHead>
               <TableHead className="text-right">الإجراءات</TableHead>
+              <TableHead className="text-right">الحالة</TableHead>
+              <TableHead className="text-right">إجمالي الدائن</TableHead>
+              <TableHead className="text-right">إجمالي المدين</TableHead>
+              <TableHead className="text-right">الوصف</TableHead>
+              <TableHead className="text-right">التاريخ</TableHead>
+              <TableHead className="text-right">رقم القيد</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredEntries.map((entry) => (
               <TableRow key={entry.id}>
-                <TableCell className="font-medium">{entry.entry_number}</TableCell>
-                <TableCell>{new Date(entry.entry_date).toLocaleDateString('ar-KW', { calendar: 'gregory' })}</TableCell>
-                <TableCell className="max-w-xs truncate">{entry.description}</TableCell>
-                <TableCell className="font-medium text-green-600">
-                  {formatAmount(entry.total_debit)}
-                </TableCell>
-                <TableCell className="font-medium text-blue-600">
-                  {formatAmount(entry.total_credit)}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={getStatusVariant(entry.status)}>
-                    {getStatusLabel(entry.status)}
-                  </Badge>
-                </TableCell>
                 <TableCell>
                   <div className="flex gap-2">
                     {entry.status === 'draft' && (
@@ -511,6 +497,20 @@ export const JournalEntriesTab = () => {
                     </Button>
                   </div>
                 </TableCell>
+                <TableCell>
+                  <Badge variant={getStatusVariant(entry.status)}>
+                    {getStatusLabel(entry.status)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="font-medium text-blue-600">
+                  {formatAmount(entry.total_credit)}
+                </TableCell>
+                <TableCell className="font-medium text-green-600">
+                  {formatAmount(entry.total_debit)}
+                </TableCell>
+                <TableCell className="max-w-xs truncate">{entry.description}</TableCell>
+                <TableCell>{new Date(entry.entry_date).toLocaleDateString('ar-KW', { calendar: 'gregory' })}</TableCell>
+                <TableCell className="font-medium">{entry.entry_number}</TableCell>
               </TableRow>
             ))}
           </TableBody>
