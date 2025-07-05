@@ -405,7 +405,7 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
             </TabsContent>
 
             <TabsContent value="documents" className="space-y-6">
-              <h3 className="text-lg font-semibold">المرفقات والوثائق</h3>
+              <h3 className="text-lg font-semibold text-right">المرفقات والوثائق</h3>
               <Card>
                 <CardContent className="text-center py-8">
                   <p className="text-muted-foreground">لا توجد مرفقات</p>
