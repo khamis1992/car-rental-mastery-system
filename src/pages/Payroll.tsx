@@ -786,34 +786,6 @@ const Payroll = () => {
             <CardContent>
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-medium mb-4 text-right">إعدادات الضرائب</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-right block mb-1">نسبة الضريبة (%)</label>
-                      <Input type="number" defaultValue="5" className="text-right" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-right block mb-1">الحد الأدنى للضريبة</label>
-                      <Input type="number" defaultValue="0" className="text-right" />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-medium mb-4 text-right">إعدادات التأمين الاجتماعي</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-right block mb-1">نسبة التأمين الاجتماعي (%)</label>
-                      <Input type="number" defaultValue="6" className="text-right" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-right block mb-1">الحد الأقصى للتأمين</label>
-                      <Input type="number" defaultValue="2000" className="text-right" />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
                   <h3 className="text-lg font-medium mb-4 text-right">إعدادات الساعات الإضافية</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
