@@ -211,61 +211,61 @@ export const FinancialReportsTab = () => {
                   {/* الإيرادات */}
                   <div>
                     <h3 className="text-lg font-semibold mb-4 text-primary">الإيرادات</h3>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>إيرادات التشغيل</span>
-                        <span className="font-medium text-green-600">
-                          {formatAmount(incomeStatement.revenue.operating_revenue)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>إيرادات أخرى</span>
-                        <span className="font-medium text-green-600">
-                          {formatAmount(incomeStatement.revenue.other_revenue)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between font-semibold border-t pt-2">
-                        <span>إجمالي الإيرادات</span>
-                        <span className="text-green-600">
-                          {formatAmount(incomeStatement.revenue.total_revenue)}
-                        </span>
-                      </div>
-                    </div>
+                     <div className="space-y-2">
+                       <div className="flex justify-between">
+                         <span className="font-medium text-green-600">
+                           {formatAmount(incomeStatement.revenue.operating_revenue)}
+                         </span>
+                         <span>إيرادات التشغيل</span>
+                       </div>
+                       <div className="flex justify-between">
+                         <span className="font-medium text-green-600">
+                           {formatAmount(incomeStatement.revenue.other_revenue)}
+                         </span>
+                         <span>إيرادات أخرى</span>
+                       </div>
+                       <div className="flex justify-between font-semibold border-t pt-2">
+                         <span className="text-green-600">
+                           {formatAmount(incomeStatement.revenue.total_revenue)}
+                         </span>
+                         <span>إجمالي الإيرادات</span>
+                       </div>
+                     </div>
                   </div>
 
                   {/* المصروفات */}
                   <div>
                     <h3 className="text-lg font-semibold mb-4 text-destructive">المصروفات</h3>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>مصروفات التشغيل</span>
-                        <span className="font-medium text-red-600">
-                          {formatAmount(incomeStatement.expenses.operating_expense)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>مصروفات أخرى</span>
-                        <span className="font-medium text-red-600">
-                          {formatAmount(incomeStatement.expenses.other_expense)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between font-semibold border-t pt-2">
-                        <span>إجمالي المصروفات</span>
-                        <span className="text-red-600">
-                          {formatAmount(incomeStatement.expenses.total_expense)}
-                        </span>
-                      </div>
-                    </div>
+                     <div className="space-y-2">
+                       <div className="flex justify-between">
+                         <span className="font-medium text-red-600">
+                           {formatAmount(incomeStatement.expenses.operating_expense)}
+                         </span>
+                         <span>مصروفات التشغيل</span>
+                       </div>
+                       <div className="flex justify-between">
+                         <span className="font-medium text-red-600">
+                           {formatAmount(incomeStatement.expenses.other_expense)}
+                         </span>
+                         <span>مصروفات أخرى</span>
+                       </div>
+                       <div className="flex justify-between font-semibold border-t pt-2">
+                         <span className="text-red-600">
+                           {formatAmount(incomeStatement.expenses.total_expense)}
+                         </span>
+                         <span>إجمالي المصروفات</span>
+                       </div>
+                     </div>
                   </div>
 
                   {/* صافي الدخل */}
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between text-xl font-bold">
-                      <span>صافي الدخل</span>
-                      <span className={incomeStatement.net_income >= 0 ? 'text-green-600' : 'text-red-600'}>
-                        {formatAmount(incomeStatement.net_income)}
-                      </span>
-                    </div>
+                   <div className="border-t pt-4">
+                     <div className="flex justify-between text-xl font-bold">
+                       <span className={incomeStatement.net_income >= 0 ? 'text-green-600' : 'text-red-600'}>
+                         {formatAmount(incomeStatement.net_income)}
+                       </span>
+                       <span>صافي الدخل</span>
+                     </div>
                     <div className="mt-2">
                       <Badge variant={incomeStatement.net_income >= 0 ? 'default' : 'destructive'}>
                         {incomeStatement.net_income >= 0 ? 'ربح' : 'خسارة'}
@@ -300,26 +300,26 @@ export const FinancialReportsTab = () => {
                   {/* الأصول */}
                   <div>
                     <h3 className="text-lg font-semibold mb-4 text-primary">الأصول</h3>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>الأصول المتداولة</span>
-                        <span className="font-medium">
-                          {formatAmount(balanceSheet.assets.current_assets)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>الأصول الثابتة</span>
-                        <span className="font-medium">
-                          {formatAmount(balanceSheet.assets.fixed_assets)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between font-semibold border-t pt-2">
-                        <span>إجمالي الأصول</span>
-                        <span className="text-primary">
-                          {formatAmount(balanceSheet.assets.total_assets)}
-                        </span>
-                      </div>
-                    </div>
+                     <div className="space-y-2">
+                       <div className="flex justify-between">
+                         <span className="font-medium">
+                           {formatAmount(balanceSheet.assets.current_assets)}
+                         </span>
+                         <span>الأصول المتداولة</span>
+                       </div>
+                       <div className="flex justify-between">
+                         <span className="font-medium">
+                           {formatAmount(balanceSheet.assets.fixed_assets)}
+                         </span>
+                         <span>الأصول الثابتة</span>
+                       </div>
+                       <div className="flex justify-between font-semibold border-t pt-2">
+                         <span className="text-primary">
+                           {formatAmount(balanceSheet.assets.total_assets)}
+                         </span>
+                         <span>إجمالي الأصول</span>
+                       </div>
+                     </div>
                   </div>
 
                   {/* الخصوم وحقوق الملكية */}
@@ -327,53 +327,53 @@ export const FinancialReportsTab = () => {
                     <h3 className="text-lg font-semibold mb-4 text-destructive">الخصوم وحقوق الملكية</h3>
                     
                     {/* الخصوم */}
-                    <div className="space-y-2 mb-4">
-                      <h4 className="font-medium text-sm">الخصوم</h4>
-                      <div className="flex justify-between text-sm">
-                        <span>الخصوم المتداولة</span>
-                        <span className="font-medium">
-                          {formatAmount(balanceSheet.liabilities.current_liabilities)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span>الخصوم طويلة الأجل</span>
-                        <span className="font-medium">
-                          {formatAmount(balanceSheet.liabilities.long_term_liabilities)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between font-medium border-t pt-1">
-                        <span>إجمالي الخصوم</span>
-                        <span>{formatAmount(balanceSheet.liabilities.total_liabilities)}</span>
-                      </div>
-                    </div>
+                     <div className="space-y-2 mb-4">
+                       <h4 className="font-medium text-sm">الخصوم</h4>
+                       <div className="flex justify-between text-sm">
+                         <span className="font-medium">
+                           {formatAmount(balanceSheet.liabilities.current_liabilities)}
+                         </span>
+                         <span>الخصوم المتداولة</span>
+                       </div>
+                       <div className="flex justify-between text-sm">
+                         <span className="font-medium">
+                           {formatAmount(balanceSheet.liabilities.long_term_liabilities)}
+                         </span>
+                         <span>الخصوم طويلة الأجل</span>
+                       </div>
+                       <div className="flex justify-between font-medium border-t pt-1">
+                         <span>{formatAmount(balanceSheet.liabilities.total_liabilities)}</span>
+                         <span>إجمالي الخصوم</span>
+                       </div>
+                     </div>
 
                     {/* حقوق الملكية */}
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">حقوق الملكية</h4>
-                      <div className="flex justify-between text-sm">
-                        <span>رأس المال</span>
-                        <span className="font-medium">
-                          {formatAmount(balanceSheet.equity.capital)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span>الأرباح المحتجزة</span>
-                        <span className="font-medium">
-                          {formatAmount(balanceSheet.equity.retained_earnings)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between font-medium border-t pt-1">
-                        <span>إجمالي حقوق الملكية</span>
-                        <span>{formatAmount(balanceSheet.equity.total_equity)}</span>
-                      </div>
-                    </div>
+                     <div className="space-y-2">
+                       <h4 className="font-medium text-sm">حقوق الملكية</h4>
+                       <div className="flex justify-between text-sm">
+                         <span className="font-medium">
+                           {formatAmount(balanceSheet.equity.capital)}
+                         </span>
+                         <span>رأس المال</span>
+                       </div>
+                       <div className="flex justify-between text-sm">
+                         <span className="font-medium">
+                           {formatAmount(balanceSheet.equity.retained_earnings)}
+                         </span>
+                         <span>الأرباح المحتجزة</span>
+                       </div>
+                       <div className="flex justify-between font-medium border-t pt-1">
+                         <span>{formatAmount(balanceSheet.equity.total_equity)}</span>
+                         <span>إجمالي حقوق الملكية</span>
+                       </div>
+                     </div>
 
-                    <div className="flex justify-between font-semibold border-t pt-2 mt-4">
-                      <span>إجمالي الخصوم وحقوق الملكية</span>
-                      <span className="text-primary">
-                        {formatAmount(balanceSheet.liabilities.total_liabilities + balanceSheet.equity.total_equity)}
-                      </span>
-                    </div>
+                     <div className="flex justify-between font-semibold border-t pt-2 mt-4">
+                       <span className="text-primary">
+                         {formatAmount(balanceSheet.liabilities.total_liabilities + balanceSheet.equity.total_equity)}
+                       </span>
+                       <span>إجمالي الخصوم وحقوق الملكية</span>
+                     </div>
                   </div>
                 </div>
               ) : (
