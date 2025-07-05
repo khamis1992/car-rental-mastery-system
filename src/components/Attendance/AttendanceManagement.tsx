@@ -212,11 +212,13 @@ export const AttendanceManagement: React.FC = () => {
 
       {/* التبويبات */}
       <Tabs defaultValue="records" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="records">سجلات الحضور</TabsTrigger>
-          <TabsTrigger value="filters">الفلاتر المتقدمة</TabsTrigger>
-          <TabsTrigger value="reports">التقارير</TabsTrigger>
-        </TabsList>
+        <div className="flex justify-end">
+          <TabsList>
+            <TabsTrigger value="records">سجلات الحضور</TabsTrigger>
+            <TabsTrigger value="filters">الفلاتر المتقدمة</TabsTrigger>
+            <TabsTrigger value="reports">التقارير</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="records" className="space-y-4">
           {/* البحث السريع */}
