@@ -256,7 +256,19 @@ const Payroll = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
 
+      {/* التبويبات */}
+      <Tabs defaultValue="current" className="space-y-4">
+        <TabsList className="w-fit ml-auto">
+          <TabsTrigger value="settings">الإعدادات</TabsTrigger>
+          <TabsTrigger value="reports">التقارير</TabsTrigger>
+          <TabsTrigger value="history">سجل الرواتب</TabsTrigger>
+          <TabsTrigger value="current">الشهر الحالي</TabsTrigger>
+        </TabsList>
+
+      {/* باقي الإحصائيات */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
@@ -296,15 +308,6 @@ const Payroll = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* التبويبات */}
-      <Tabs defaultValue="current" className="space-y-4">
-        <TabsList className="w-fit ml-auto">
-          <TabsTrigger value="settings">الإعدادات</TabsTrigger>
-          <TabsTrigger value="reports">التقارير</TabsTrigger>
-          <TabsTrigger value="history">سجل الرواتب</TabsTrigger>
-          <TabsTrigger value="current">الشهر الحالي</TabsTrigger>
-        </TabsList>
 
         <TabsContent value="current">
           <Card>
