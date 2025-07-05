@@ -1312,19 +1312,31 @@ Eleventh: General Provisions
                       </div>
                     </div>
 
-                    {/* Special Conditions and Notes */}
+                    {/* Terms and Conditions Preview */}
                     <div className="grid grid-cols-1 gap-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-5 h-5" />
+                          <h3 className="text-lg font-semibold">Contract Terms and Conditions / الشروط والأحكام</h3>
+                        </div>
+                        <div className="bg-muted/30 p-4 rounded-lg border max-h-96 overflow-y-auto">
+                          <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">
+                            {generateTermsAndConditions(watchedValues.contract_language || 'both')}
+                          </pre>
+                        </div>
+                      </div>
+
                       <FormField
                         control={form.control}
                         name="special_conditions"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Special Conditions / الشروط الخاصة</FormLabel>
+                            <FormLabel>Additional Special Conditions / شروط خاصة إضافية</FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
                                 rows={4}
-                                placeholder="Enter any special conditions / أدخل أي شروط خاصة"
+                                placeholder="Enter any additional special conditions / أدخل أي شروط خاصة إضافية"
                               />
                             </FormControl>
                             <FormMessage />
