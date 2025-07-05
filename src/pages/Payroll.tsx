@@ -559,7 +559,7 @@ const Payroll = () => {
         <TabsContent value="reports">
           <Card>
             <CardHeader>
-              <CardTitle>تقارير الرواتب</CardTitle>
+              <CardTitle className="text-right">تقارير الرواتب</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
