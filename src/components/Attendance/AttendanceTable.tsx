@@ -358,7 +358,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
 
                 {/* الموظف */}
                 <TableCell className="text-right py-4">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-row-reverse">
                     <Avatar className="h-10 w-10 border-2 border-primary/20">
                       <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                         {record.employees?.first_name?.charAt(0)}
