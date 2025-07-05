@@ -111,12 +111,12 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5" />
-            تفاصيل المخالفة المرورية - {violation.violation_number}
-          </DialogTitle>
-        </DialogHeader>
+         <DialogHeader>
+           <DialogTitle className="flex items-center gap-2 justify-end text-right">
+             تفاصيل المخالفة المرورية - {violation.violation_number}
+             <AlertTriangle className="w-5 h-5" />
+           </DialogTitle>
+         </DialogHeader>
 
         {loading ? (
           <div className="flex items-center justify-center py-8">
@@ -135,12 +135,12 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
               {/* معلومات عامة */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="w-4 h-4" />
-                      معلومات المخالفة
-                    </CardTitle>
-                  </CardHeader>
+                   <CardHeader>
+                     <CardTitle className="flex items-center gap-2 justify-end text-right">
+                       معلومات المخالفة
+                       <FileText className="w-4 h-4" />
+                     </CardTitle>
+                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex justify-between">
                       <span className="font-medium">{violation.violation_number}</span>
@@ -168,12 +168,12 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
                 </Card>
 
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <DollarSign className="w-4 h-4" />
-                      المعلومات المالية
-                    </CardTitle>
-                  </CardHeader>
+                   <CardHeader>
+                     <CardTitle className="flex items-center gap-2 justify-end text-right">
+                       المعلومات المالية
+                       <DollarSign className="w-4 h-4" />
+                     </CardTitle>
+                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex justify-between">
                       <span className="font-medium">{formatCurrency(violation.fine_amount)}</span>
@@ -204,12 +204,12 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
 
               {/* معلومات الحدث */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    تفاصيل الحدث
-                  </CardTitle>
-                </CardHeader>
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2 justify-end text-right">
+                     تفاصيل الحدث
+                     <Calendar className="w-4 h-4" />
+                   </CardTitle>
+                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -237,12 +237,12 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
               {/* معلومات العميل والمركبة */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <User className="w-4 h-4" />
-                      معلومات العميل
-                    </CardTitle>
-                  </CardHeader>
+                   <CardHeader>
+                     <CardTitle className="flex items-center gap-2 justify-end text-right">
+                       معلومات العميل
+                       <User className="w-4 h-4" />
+                     </CardTitle>
+                   </CardHeader>
                    <CardContent className="space-y-3">
                      <div className="flex justify-between">
                        <span className="font-medium">{violation.customers?.name}</span>
@@ -260,12 +260,12 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
                 </Card>
 
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Car className="w-4 h-4" />
-                      معلومات المركبة
-                    </CardTitle>
-                  </CardHeader>
+                   <CardHeader>
+                     <CardTitle className="flex items-center gap-2 justify-end text-right">
+                       معلومات المركبة
+                       <Car className="w-4 h-4" />
+                     </CardTitle>
+                   </CardHeader>
                    <CardContent className="space-y-3">
                      <div className="flex justify-between">
                        <span className="font-medium">{violation.vehicles?.license_plate}</span>
@@ -294,9 +294,9 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
               {/* معلومات الجهة المصدرة */}
               {(violation.official_violation_number || violation.issuing_authority || violation.officer_name) && (
                 <Card>
-                  <CardHeader>
-                    <CardTitle>معلومات الجهة المصدرة</CardTitle>
-                  </CardHeader>
+                   <CardHeader>
+                     <CardTitle className="text-right">معلومات الجهة المصدرة</CardTitle>
+                   </CardHeader>
                    <CardContent className="space-y-3">
                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                        {violation.official_violation_number && (
@@ -325,9 +325,9 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
               {/* ملاحظات */}
               {violation.notes && (
                 <Card>
-                  <CardHeader>
-                    <CardTitle>ملاحظات</CardTitle>
-                  </CardHeader>
+                   <CardHeader>
+                     <CardTitle className="text-right">ملاحظات</CardTitle>
+                   </CardHeader>
                   <CardContent>
                     <p className="text-sm bg-muted p-3 rounded-md">{violation.notes}</p>
                   </CardContent>
