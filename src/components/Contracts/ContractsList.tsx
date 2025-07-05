@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FileText, Eye, Edit, Calendar, MapPin, HelpCircle, TrendingUp } from 'lucide-react';
+import { FileText, Eye, Edit, Calendar, MapPin, HelpCircle, TrendingUp, Receipt, AlertTriangle } from 'lucide-react';
 import { format, isToday, isThisWeek, isThisMonth, isThisQuarter, isThisYear } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { ContractActions } from './ContractActions';
@@ -11,17 +11,22 @@ import { ContractDetailsDialog } from './ContractDetailsDialog';
 import { ContractFiltersComponent, ContractFilters } from './ContractFilters';
 import { CompactProgressIndicator, ContractProgressIndicator } from './ContractProgressIndicator';
 import { ContractHelp } from './ContractHelp';
+import { InvoiceForm } from '@/components/Invoicing/InvoiceForm';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { serviceContainer } from '@/services/Container/ServiceContainer';
 
 interface Contract {
   id: string;
   contract_number: string;
   customer_name: string;
+  customer_id: string;
   vehicle_info: string;
   start_date: string;
   end_date: string;
   rental_days: number;
   final_amount: number;
+  daily_rate: number;
   status: string;
   contract_type: string;
   created_at: string;
@@ -31,6 +36,7 @@ interface Contract {
 
 interface ContractsListProps {
   contracts: Contract[];
+  customers: any[];
   onView?: (id: string) => void;
   onEdit?: (id: string) => void;
   onActivate?: (id: string) => void;
@@ -40,6 +46,7 @@ interface ContractsListProps {
 
 export const ContractsList: React.FC<ContractsListProps> = ({
   contracts,
+  customers,
   onView,
   onEdit,
   onActivate,
@@ -49,12 +56,56 @@ export const ContractsList: React.FC<ContractsListProps> = ({
   const { toast } = useToast();
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [invoiceFormOpen, setInvoiceFormOpen] = useState(false);
+  const [selectedContractForInvoice, setSelectedContractForInvoice] = useState<string>('');
+  const [contractInvoices, setContractInvoices] = useState<Record<string, any[]>>({});
+  const [completedContractsWithoutInvoices, setCompletedContractsWithoutInvoices] = useState<string[]>([]);
   const [filters, setFilters] = useState<ContractFilters>({
     search: '',
     status: 'all',
     contractType: 'all',
     dateRange: 'all',
   });
+
+  // جلب الفواتير لكل عقد
+  React.useEffect(() => {
+    const fetchContractInvoices = async () => {
+      try {
+        const { data: invoices, error } = await supabase
+          .from('invoices')
+          .select('id, contract_id, status, total_amount, outstanding_amount')
+          .in('contract_id', contracts.map(c => c.id));
+
+        if (error) throw error;
+
+        const invoicesByContract: Record<string, any[]> = {};
+        invoices?.forEach(invoice => {
+          if (!invoicesByContract[invoice.contract_id]) {
+            invoicesByContract[invoice.contract_id] = [];
+          }
+          invoicesByContract[invoice.contract_id].push(invoice);
+        });
+
+        setContractInvoices(invoicesByContract);
+
+        // تحديد العقود المكتملة بدون فواتير
+        const completedWithoutInvoices = contracts
+          .filter(contract => 
+            contract.status === 'completed' && 
+            (!invoicesByContract[contract.id] || invoicesByContract[contract.id].length === 0)
+          )
+          .map(contract => contract.id);
+
+        setCompletedContractsWithoutInvoices(completedWithoutInvoices);
+      } catch (error) {
+        console.error('Error fetching contract invoices:', error);
+      }
+    };
+
+    if (contracts.length > 0) {
+      fetchContractInvoices();
+    }
+  }, [contracts]);
 
   const filteredContracts = useMemo(() => {
     return contracts.filter(contract => {
@@ -99,6 +150,40 @@ export const ContractsList: React.FC<ContractsListProps> = ({
       return true;
     });
   }, [contracts, filters]);
+
+  const handleCreateInvoice = (contractId: string) => {
+    setSelectedContractForInvoice(contractId);
+    setInvoiceFormOpen(true);
+  };
+
+  const handleInvoiceSuccess = () => {
+    // إعادة جلب الفواتير بعد إنشاء فاتورة جديدة
+    if (onStatusUpdate) {
+      onStatusUpdate();
+    }
+    toast({
+      title: "تم بنجاح",
+      description: "تم إنشاء الفاتورة بنجاح",
+    });
+  };
+
+  const getInvoiceStatus = (contractId: string) => {
+    const invoices = contractInvoices[contractId] || [];
+    if (invoices.length === 0) return null;
+    
+    const paidInvoices = invoices.filter(inv => inv.status === 'paid').length;
+    const totalInvoices = invoices.length;
+    const outstandingAmount = invoices.reduce((sum, inv) => sum + inv.outstanding_amount, 0);
+    
+    if (paidInvoices === totalInvoices) {
+      return { type: 'paid', label: 'مدفوعة بالكامل', color: 'text-green-600' };
+    } else if (paidInvoices > 0) {
+      return { type: 'partial', label: 'مدفوعة جزئياً', color: 'text-yellow-600' };
+    } else if (outstandingAmount > 0) {
+      return { type: 'outstanding', label: 'مستحقة', color: 'text-red-600' };
+    }
+    return { type: 'draft', label: 'مسودة', color: 'text-gray-600' };
+  };
   const getStatusBadge = (status: string) => {
     const statusMap = {
       draft: { label: 'مسودة', variant: 'secondary' as const },
@@ -172,6 +257,7 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                 <TableHead className="text-right">النوع</TableHead>
                 <TableHead className="text-right">فترة الإيجار</TableHead>
                 <TableHead className="text-right">المبلغ الإجمالي</TableHead>
+                <TableHead className="text-right">حالة الفاتورة</TableHead>
                 <TableHead className="text-right">التقدم</TableHead>
                 <TableHead className="text-right">الحالة</TableHead>
                 <TableHead className="text-right">الإجراءات</TableHead>
@@ -210,6 +296,51 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                   <TableCell>
                     <div className="font-medium">{contract.final_amount.toFixed(3)} د.ك</div>
                   </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {completedContractsWithoutInvoices.includes(contract.id) && (
+                        <div className="flex items-center gap-1 text-orange-600">
+                          <AlertTriangle className="w-4 h-4" />
+                          <span className="text-xs">بحاجة فاتورة</span>
+                        </div>
+                      )}
+                      {(() => {
+                        const invoiceStatus = getInvoiceStatus(contract.id);
+                        const invoiceCount = contractInvoices[contract.id]?.length || 0;
+                        
+                        if (invoiceCount > 0) {
+                          return (
+                            <div className="text-xs">
+                              <div className={`font-medium ${invoiceStatus?.color}`}>
+                                {invoiceStatus?.label}
+                              </div>
+                              <div className="text-muted-foreground">
+                                {invoiceCount} فاتورة
+                              </div>
+                            </div>
+                          );
+                        } else if (contract.status === 'completed') {
+                          return (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleCreateInvoice(contract.id)}
+                              className="flex items-center gap-1 text-xs"
+                            >
+                              <Receipt className="w-3 h-3" />
+                              إنشاء فاتورة
+                            </Button>
+                          );
+                        } else {
+                          return (
+                            <span className="text-xs text-muted-foreground">
+                              لا توجد فاتورة
+                            </span>
+                          );
+                        }
+                      })()}
+                    </div>
+                  </TableCell>
                    <TableCell>
                       <ContractProgressIndicator
                         currentStatus={contract.status}
@@ -247,21 +378,32 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                         <Eye className="w-4 h-4" />
                       </Button>
                       
-                      <ContractActions
-                        contract={{
-                          id: contract.id,
-                          status: contract.status,
-                          contract_number: contract.contract_number,
-                          customer_name: contract.customer_name,
-                          vehicle_info: contract.vehicle_info,
-                         }}
-                         onUpdate={() => {
-                           // تحديث محلي فوري
-                           if (onStatusUpdate) {
-                             onStatusUpdate();
-                           }
-                         }}
-                      />
+                        <ContractActions
+                          contract={{
+                            id: contract.id,
+                            status: contract.status,
+                            contract_number: contract.contract_number,
+                            customer_name: contract.customer_name,
+                            vehicle_info: contract.vehicle_info,
+                           }}
+                           onUpdate={() => {
+                             // تحديث محلي فوري
+                             if (onStatusUpdate) {
+                               onStatusUpdate();
+                             }
+                           }}
+                        />
+                        
+                        {contractInvoices[contract.id]?.length > 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCreateInvoice(contract.id)}
+                            className="flex items-center gap-1"
+                          >
+                            <Receipt className="w-4 h-4" />
+                          </Button>
+                        )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -283,6 +425,15 @@ export const ContractsList: React.FC<ContractsListProps> = ({
               onStatusUpdate();
             }
           }}
+      />
+
+      <InvoiceForm
+        open={invoiceFormOpen}
+        onOpenChange={setInvoiceFormOpen}
+        onSuccess={handleInvoiceSuccess}
+        contracts={contracts}
+        customers={customers}
+        preselectedContractId={selectedContractForInvoice}
       />
     </div>
   );

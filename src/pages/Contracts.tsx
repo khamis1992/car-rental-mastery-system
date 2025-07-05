@@ -138,6 +138,7 @@ const Contracts = () => {
       <ErrorBoundary>
         <ContractsList
           contracts={contracts}
+          customers={customers}
           onView={(id) => {
             setSelectedContractId(id);
             setContractDetailsOpen(true);
