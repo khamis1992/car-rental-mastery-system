@@ -376,7 +376,7 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
             </TabsContent>
 
             <TabsContent value="history" className="space-y-6">
-              <h3 className="text-lg font-semibold">سجل المخالفة</h3>
+              <h3 className="text-lg font-semibold text-right">سجل المخالفة</h3>
               {history.length === 0 ? (
                 <Card>
                   <CardContent className="text-center py-8">
