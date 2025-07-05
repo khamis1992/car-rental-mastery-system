@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Payroll, PayrollItem } from '@/types/hr';
+import { attendanceDeductionsService } from './attendanceDeductionsService';
 
 export interface PayrollWithDetails extends Payroll {
   employee_name?: string;
@@ -24,6 +25,14 @@ export interface PayrollSettings {
   working_days_per_month: number;
   tax_threshold: number;
   max_social_insurance: number;
+  // إعدادات خصومات الحضور
+  enable_late_deduction: boolean;
+  enable_absence_deduction: boolean;
+  working_hours_per_month: number;
+  grace_period_minutes: number;
+  late_deduction_multiplier: number;
+  official_work_start_time: string;
+  official_work_end_time: string;
 }
 
 // No mock data - using real database
@@ -35,7 +44,15 @@ const defaultSettings: PayrollSettings = {
   working_hours_per_day: 8,
   working_days_per_month: 22,
   tax_threshold: 0,
-  max_social_insurance: 2000
+  max_social_insurance: 2000,
+  // إعدادات خصومات الحضور
+  enable_late_deduction: true,
+  enable_absence_deduction: true,
+  working_hours_per_month: 240,
+  grace_period_minutes: 15,
+  late_deduction_multiplier: 1,
+  official_work_start_time: '08:00',
+  official_work_end_time: '17:00'
 };
 
 export const payrollService = {
@@ -171,6 +188,19 @@ export const payrollService = {
     
     const hourlyRate = basicSalary / (settings.working_days_per_month * settings.working_hours_per_day);
     const overtimeAmount = totalOvertimeHours * hourlyRate * settings.overtime_multiplier;
+    
+    // حساب خصومات التأخير والغياب
+    let attendanceDeductions = 0;
+    if (settings.enable_late_deduction || settings.enable_absence_deduction) {
+      const deductionCalculation = await attendanceDeductionsService.calculateEmployeeDeductions(
+        employeeId,
+        basicSalary,
+        periodStart,
+        periodEnd
+      );
+      attendanceDeductions = deductionCalculation.totalDeduction;
+    }
+    
     const grossSalary = basicSalary + overtimeAmount;
     const taxDeduction = grossSalary * (settings.tax_rate / 100);
     const socialInsurance = Math.min(grossSalary * (settings.social_insurance_rate / 100), settings.max_social_insurance);
@@ -183,7 +213,7 @@ export const payrollService = {
       overtime_amount: Math.round(overtimeAmount * 1000) / 1000,
       allowances: 0,
       bonuses: 0,
-      deductions: 0,
+      deductions: Math.round(attendanceDeductions * 1000) / 1000,
       tax_deduction: Math.round(taxDeduction * 1000) / 1000,
       social_insurance: Math.round(socialInsurance * 1000) / 1000,
       total_working_days: settings.working_days_per_month,
@@ -347,5 +377,37 @@ export const payrollService = {
     
     if (error) throw error;
     return data?.map(dept => dept.department_name) || [];
+  },
+
+  // تقرير تفصيلي لخصومات الحضور والغياب
+  async getAttendanceDeductionReport(employeeId: string, periodStart: string, periodEnd: string) {
+    return await attendanceDeductionsService.generateDeductionReport(employeeId, periodStart, periodEnd);
+  },
+
+  // تحديث إعدادات خصومات الحضور
+  async updateAttendanceDeductionSettings(settings: {
+    enable_late_deduction: boolean;
+    enable_absence_deduction: boolean;
+    working_hours_per_month: number;
+    grace_period_minutes: number;
+    late_deduction_multiplier: number;
+    official_work_start_time: string;
+    official_work_end_time: string;
+  }) {
+    // تحديث الإعدادات المحلية
+    Object.assign(defaultSettings, settings);
+    
+    // تحديث إعدادات خدمة خصومات الحضور
+    await attendanceDeductionsService.updateDeductionSettings({
+      enableLateDeduction: settings.enable_late_deduction,
+      enableAbsenceDeduction: settings.enable_absence_deduction,
+      workingHoursPerMonth: settings.working_hours_per_month,
+      gracePeriodMinutes: settings.grace_period_minutes,
+      lateDeductionMultiplier: settings.late_deduction_multiplier,
+      officialWorkStartTime: settings.official_work_start_time,
+      officialWorkEndTime: settings.official_work_end_time
+    });
+    
+    return defaultSettings;
   }
 };

@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
-import { DollarSign, Calculator, FileText, Download, Eye, Search, Plus, Settings } from 'lucide-react';
+import { DollarSign, Calculator, FileText, Download, Eye, Search, Plus, Settings, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { payrollService, PayrollWithDetails, PayrollFilters, PayrollSettings } from '@/services/payrollService';
@@ -156,9 +156,21 @@ const Payroll = () => {
     
     try {
       await payrollService.updatePayrollSettings(settings);
+      
+      // حفظ إعدادات خصومات الحضور
+      await payrollService.updateAttendanceDeductionSettings({
+        enable_late_deduction: settings.enable_late_deduction,
+        enable_absence_deduction: settings.enable_absence_deduction,
+        working_hours_per_month: settings.working_hours_per_month,
+        grace_period_minutes: settings.grace_period_minutes,
+        late_deduction_multiplier: settings.late_deduction_multiplier,
+        official_work_start_time: settings.official_work_start_time,
+        official_work_end_time: settings.official_work_end_time
+      });
+      
       toast({
         title: 'تم الحفظ',
-        description: 'تم حفظ إعدادات الرواتب بنجاح'
+        description: 'تم حفظ إعدادات الرواتب وخصومات الحضور بنجاح'
       });
     } catch (error) {
       console.error('خطأ في حفظ الإعدادات:', error);
@@ -811,18 +823,42 @@ const Payroll = () => {
                 <div>
                   <h3 className="text-lg font-medium mb-4 text-right">إعدادات خصم التأخير والغياب</h3>
                   <div className="space-y-4">
+                    <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock className="w-5 h-5 text-blue-600" />
+                        <h4 className="font-medium text-right text-blue-800">متكامل مع نظام الحضور</h4>
+                      </div>
+                      <p className="text-sm text-blue-700 text-right">
+                        يتم حساب خصومات التأخير والغياب تلقائياً بناءً على سجلات الحضور الفعلية للموظفين
+                      </p>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="text-sm font-medium text-right block mb-1">فعل خصم التأخير</label>
                         <div className="flex items-center justify-end gap-2">
-                          <Switch defaultChecked />
+                          <Switch 
+                            defaultChecked={settings?.enable_late_deduction ?? true}
+                            onCheckedChange={(checked) => {
+                              if (settings) {
+                                setSettings({...settings, enable_late_deduction: checked});
+                              }
+                            }}
+                          />
                           <span className="text-sm text-muted-foreground">تطبيق خصم التأخير</span>
                         </div>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-right block mb-1">فعل خصم الغياب</label>
                         <div className="flex items-center justify-end gap-2">
-                          <Switch defaultChecked />
+                          <Switch 
+                            defaultChecked={settings?.enable_absence_deduction ?? true}
+                            onCheckedChange={(checked) => {
+                              if (settings) {
+                                setSettings({...settings, enable_absence_deduction: checked});
+                              }
+                            }}
+                          />
                           <span className="text-sm text-muted-foreground">تطبيق خصم الغياب</span>
                         </div>
                       </div>
@@ -831,17 +867,44 @@ const Payroll = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label className="text-sm font-medium text-right block mb-1">ساعات العمل الشهرية</label>
-                        <Input type="number" defaultValue="240" className="text-right" placeholder="ساعات العمل في الشهر" />
+                        <Input 
+                          type="number" 
+                          value={settings?.working_hours_per_month || 240}
+                          onChange={(e) => {
+                            if (settings) {
+                              setSettings({...settings, working_hours_per_month: parseInt(e.target.value)});
+                            }
+                          }}
+                          className="text-right" 
+                          placeholder="ساعات العمل في الشهر" 
+                        />
                         <p className="text-xs text-muted-foreground text-right mt-1">30 يوم × 8 ساعات = 240 ساعة</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-right block mb-1">عدد دقائق السماح</label>
-                        <Input type="number" defaultValue="15" className="text-right" placeholder="دقائق السماح للتأخير" />
+                        <Input 
+                          type="number" 
+                          value={settings?.grace_period_minutes || 15}
+                          onChange={(e) => {
+                            if (settings) {
+                              setSettings({...settings, grace_period_minutes: parseInt(e.target.value)});
+                            }
+                          }}
+                          className="text-right" 
+                          placeholder="دقائق السماح للتأخير" 
+                        />
                         <p className="text-xs text-muted-foreground text-right mt-1">لا يتم خصم التأخير أقل من هذا العدد</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-right block mb-1">معامل خصم التأخير</label>
-                        <Select defaultValue="1">
+                        <Select 
+                          value={settings?.late_deduction_multiplier?.toString() || "1"}
+                          onValueChange={(value) => {
+                            if (settings) {
+                              setSettings({...settings, late_deduction_multiplier: parseFloat(value)});
+                            }
+                          }}
+                        >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
@@ -854,15 +917,48 @@ const Payroll = () => {
                       </div>
                     </div>
 
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-right block mb-1">وقت بداية العمل الرسمي</label>
+                        <Input 
+                          type="time" 
+                          value={settings?.official_work_start_time || "08:00"}
+                          onChange={(e) => {
+                            if (settings) {
+                              setSettings({...settings, official_work_start_time: e.target.value});
+                            }
+                          }}
+                          className="text-right" 
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-right block mb-1">وقت نهاية العمل الرسمي</label>
+                        <Input 
+                          type="time" 
+                          value={settings?.official_work_end_time || "17:00"}
+                          onChange={(e) => {
+                            if (settings) {
+                              setSettings({...settings, official_work_end_time: e.target.value});
+                            }
+                          }}
+                          className="text-right" 
+                        />
+                      </div>
+                    </div>
+
                     <div className="bg-blue-50 p-4 rounded-lg">
-                      <h4 className="font-medium text-right mb-2 text-blue-800">طريقة حساب الخصم:</h4>
+                      <h4 className="font-medium text-right mb-2 text-blue-800">طريقة حساب الخصم التلقائي:</h4>
                       <div className="text-sm text-blue-700 text-right space-y-1">
+                        <p>• <strong>خصم التأخير:</strong> يتم حسابه بناءً على سجلات تسجيل الدخول الفعلية</p>
+                        <p>• <strong>خصم الغياب:</strong> يتم حسابه للأيام التي لم يسجل فيها الموظف حضوره</p>
                         <p>• قيمة الساعة الواحدة = الراتب الأساسي ÷ ساعات العمل الشهرية</p>
                         <p>• خصم التأخير = (دقائق التأخير ÷ 60) × قيمة الساعة × معامل الخصم</p>
-                        <p>• خصم الغياب = ساعات الغياب × قيمة الساعة</p>
-                        <p className="font-medium">مثال: راتب 1000 د.ك، تأخير 30 دقيقة</p>
-                        <p>قيمة الساعة = 1000 ÷ 240 = 4.17 د.ك</p>
-                        <p>الخصم = (30 ÷ 60) × 4.17 × 1 = 2.08 د.ك</p>
+                        <p>• خصم الغياب = أيام الغياب × (قيمة الساعة × 8 ساعات)</p>
+                        <div className="border-t pt-2 mt-2">
+                          <p className="font-medium">مثال: راتب 1000 د.ك، تأخير 30 دقيقة</p>
+                          <p>قيمة الساعة = 1000 ÷ 240 = 4.17 د.ك</p>
+                          <p>الخصم = (30 ÷ 60) × 4.17 × 1 = 2.08 د.ك</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -870,7 +966,8 @@ const Payroll = () => {
 
                 <div className="flex justify-end">
                   <Button onClick={handleSaveSettings} className="px-8">
-                    حفظ الإعدادات
+                    <Settings className="w-4 h-4 ml-2" />
+                    حفظ جميع الإعدادات
                   </Button>
                 </div>
               </div>
