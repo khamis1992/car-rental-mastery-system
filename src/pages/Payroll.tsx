@@ -235,9 +235,9 @@ const Payroll = () => {
           <p className="text-muted-foreground">حساب ومعالجة رواتب الموظفين</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleCalculateMonthlyPayroll} disabled={calculating}>
             <Calculator className="w-4 h-4 ml-2" />
-            حساب الرواتب
+            {calculating ? 'جاري الحساب...' : 'حساب الرواتب'}
           </Button>
           <Button>
             <FileText className="w-4 h-4 ml-2" />

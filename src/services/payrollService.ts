@@ -141,19 +141,36 @@ export const payrollService = {
     if (error) throw error;
   },
 
-  // حساب الراتب تلقائياً بناءً على الحضور
+  // حساب الراتب تلقائياً بناءً على بيانات الموظف والحضور
   async calculatePayroll(employeeId: string, periodStart: string, periodEnd: string): Promise<Partial<Payroll>> {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // جلب بيانات الموظف
+    const { data: employee, error: employeeError } = await supabase
+      .from('employees')
+      .select('*')
+      .eq('id', employeeId)
+      .single();
 
-    // محاكاة حساب الراتب بناءً على الحضور
+    if (employeeError || !employee) {
+      throw new Error('لم يتم العثور على بيانات الموظف');
+    }
+
+    // حساب الحضور للفترة المحددة
+    const { data: attendanceData } = await supabase
+      .from('attendance')
+      .select('*')
+      .eq('employee_id', employeeId)
+      .gte('date', periodStart)
+      .lte('date', periodEnd);
+
     const settings = await this.getPayrollSettings();
     
-    // قيم تجريبية للحساب
-    const basicSalary = 1000;
-    const workingDays = 20;
-    const overtimeHours = 5;
+    // استخدام راتب الموظف الفعلي
+    const basicSalary = employee.salary;
+    const actualAttendanceDays = attendanceData?.length || settings.working_days_per_month;
+    const totalOvertimeHours = attendanceData?.reduce((sum, record) => sum + (record.overtime_hours || 0), 0) || 0;
+    
     const hourlyRate = basicSalary / (settings.working_days_per_month * settings.working_hours_per_day);
-    const overtimeAmount = overtimeHours * hourlyRate * settings.overtime_multiplier;
+    const overtimeAmount = totalOvertimeHours * hourlyRate * settings.overtime_multiplier;
     const grossSalary = basicSalary + overtimeAmount;
     const taxDeduction = grossSalary * (settings.tax_rate / 100);
     const socialInsurance = Math.min(grossSalary * (settings.social_insurance_rate / 100), settings.max_social_insurance);
@@ -170,8 +187,8 @@ export const payrollService = {
       tax_deduction: Math.round(taxDeduction * 1000) / 1000,
       social_insurance: Math.round(socialInsurance * 1000) / 1000,
       total_working_days: settings.working_days_per_month,
-      actual_working_days: workingDays,
-      overtime_hours: overtimeHours,
+      actual_working_days: actualAttendanceDays,
+      overtime_hours: totalOvertimeHours,
       status: 'calculated' as const
     };
   },
@@ -192,10 +209,72 @@ export const payrollService = {
 
   // حساب رواتب متعددة للشهر
   async calculateMonthlyPayroll(year: number, month: number): Promise<number> {
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+    const endDate = `${year}-${month.toString().padStart(2, '0')}-31`;
     
-    // محاكاة حساب رواتب متعددة
-    return Math.floor(Math.random() * 10) + 5; // إرجاع رقم عشوائي بين 5-15
+    // جلب جميع الموظفين النشطين
+    const { data: employees, error: employeesError } = await supabase
+      .from('employees')
+      .select('id, first_name, last_name, salary')
+      .eq('status', 'active');
+
+    if (employeesError) throw employeesError;
+    
+    let calculatedCount = 0;
+    
+    for (const employee of employees || []) {
+      // التحقق من وجود سجل راتب للفترة المحددة
+      const { data: existingPayroll } = await supabase
+        .from('payroll')
+        .select('id')
+        .eq('employee_id', employee.id)
+        .eq('pay_period_start', startDate)
+        .eq('pay_period_end', endDate)
+        .single();
+
+      if (!existingPayroll) {
+        // حساب الراتب للموظف
+        const payrollData = await this.calculatePayroll(employee.id, startDate, endDate);
+        
+        // إنشاء سجل الراتب
+        await this.createPayroll({
+          ...payrollData,
+          gross_salary: payrollData.basic_salary! + payrollData.overtime_amount! + payrollData.allowances! + payrollData.bonuses!,
+          net_salary: payrollData.basic_salary! + payrollData.overtime_amount! + payrollData.allowances! + payrollData.bonuses! - payrollData.deductions! - payrollData.tax_deduction! - payrollData.social_insurance!
+        } as Omit<Payroll, 'id' | 'created_at' | 'updated_at'>);
+        
+        calculatedCount++;
+      }
+    }
+    
+    return calculatedCount;
+  },
+
+  // إنشاء سجل راتب تلقائياً للموظف الجديد
+  async createPayrollForNewEmployee(employeeId: string): Promise<void> {
+    const currentMonth = new Date().getMonth() + 1;
+    const currentYear = new Date().getFullYear();
+    const startDate = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`;
+    const endDate = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-31`;
+    
+    // التحقق من عدم وجود سجل راتب للشهر الحالي
+    const { data: existingPayroll } = await supabase
+      .from('payroll')
+      .select('id')
+      .eq('employee_id', employeeId)
+      .eq('pay_period_start', startDate)
+      .eq('pay_period_end', endDate)
+      .single();
+
+    if (!existingPayroll) {
+      const payrollData = await this.calculatePayroll(employeeId, startDate, endDate);
+      
+      await this.createPayroll({
+        ...payrollData,
+        gross_salary: payrollData.basic_salary! + payrollData.overtime_amount! + payrollData.allowances! + payrollData.bonuses!,
+        net_salary: payrollData.basic_salary! + payrollData.overtime_amount! + payrollData.allowances! + payrollData.bonuses! - payrollData.deductions! - payrollData.tax_deduction! - payrollData.social_insurance!
+      } as Omit<Payroll, 'id' | 'created_at' | 'updated_at'>);
+    }
   },
 
   // موافقة على الراتب

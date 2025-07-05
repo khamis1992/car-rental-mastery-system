@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Employee } from '@/types/hr';
 import { supabase } from '@/integrations/supabase/client';
+import { payrollService } from '@/services/payrollService';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { 
@@ -163,9 +164,18 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
 
       if (error) throw error;
 
+      // إنشاء سجل راتب تلقائياً للموظف الجديد
+      try {
+        await payrollService.createPayrollForNewEmployee(data.id);
+        console.log('تم إنشاء سجل راتب للموظف الجديد');
+      } catch (payrollError) {
+        console.error('خطأ في إنشاء سجل الراتب:', payrollError);
+        // لا نوقف العملية في حالة فشل إنشاء سجل الراتب
+      }
+
       toast({
         title: 'تم إضافة الموظف بنجاح',
-        description: `تم إضافة ${formData.first_name} ${formData.last_name} إلى النظام`,
+        description: `تم إضافة ${formData.first_name} ${formData.last_name} إلى النظام وتم إنشاء سجل الراتب`,
       });
 
       onEmployeeAdded(data as Employee);
