@@ -1973,6 +1973,7 @@ export type Database = {
           invoice_number: string
           invoice_type: string
           issue_date: string
+          journal_entry_id: string | null
           notes: string | null
           outstanding_amount: number
           paid_amount: number
@@ -1999,6 +2000,7 @@ export type Database = {
           invoice_number: string
           invoice_type?: string
           issue_date?: string
+          journal_entry_id?: string | null
           notes?: string | null
           outstanding_amount?: number
           paid_amount?: number
@@ -2025,6 +2027,7 @@ export type Database = {
           invoice_number?: string
           invoice_type?: string
           issue_date?: string
+          journal_entry_id?: string | null
           notes?: string | null
           outstanding_amount?: number
           paid_amount?: number
@@ -2052,6 +2055,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
             referencedColumns: ["id"]
           },
         ]
