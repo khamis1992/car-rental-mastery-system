@@ -625,9 +625,9 @@ const Leaves = () => {
                         )}
 
                         {request.status === 'rejected' && request.rejection_reason && (
-                          <div className="text-sm text-red-600 mt-1">
-                            <span className="font-medium text-right">سبب الرفض:</span>
-                            <span className="mr-2 text-left block mt-1">{request.rejection_reason}</span>
+                          <div className="text-sm text-red-600 mt-1 text-right">
+                            <span className="font-medium">سبب الرفض:</span>
+                            <span className="mr-2">{request.rejection_reason}</span>
                           </div>
                         )}
                       </div>
@@ -735,8 +735,8 @@ const Leaves = () => {
 
               {selectedRequest.status === 'rejected' && selectedRequest.rejection_reason && (
                 <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                  <h4 className="font-medium text-red-800 mb-2 text-right">سبب الرفض</h4>
-                  <p className="text-sm text-red-700 text-left">{selectedRequest.rejection_reason}</p>
+                  <h4 className="font-medium text-red-800 mb-2">سبب الرفض</h4>
+                  <p className="text-sm text-red-700">{selectedRequest.rejection_reason}</p>
                 </div>
               )}
 
