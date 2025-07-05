@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Download, 
   Filter, 
   Search, 
   Users, 
@@ -15,11 +14,8 @@ import {
   CheckCircle,
   XCircle,
   Edit2,
-  Trash2,
-  RefreshCw
+  Trash2
 } from 'lucide-react';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { 
   attendanceManagementService, 
   AttendanceRecord, 
@@ -91,32 +87,6 @@ export const AttendanceManagement: React.FC = () => {
     }
   };
 
-  const handleExport = async () => {
-    try {
-      const csv = await attendanceManagementService.exportAttendanceData(filters);
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `attendance_report_${format(new Date(), 'yyyy-MM-dd')}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      toast({
-        title: 'تم التصدير',
-        description: 'تم تصدير البيانات بنجاح'
-      });
-    } catch (error) {
-      console.error('خطأ في التصدير:', error);
-      toast({
-        title: 'خطأ',
-        description: 'حدث خطأ في تصدير البيانات',
-        variant: 'destructive'
-      });
-    }
-  };
 
   const handleUpdateRecord = async (id: string, updates: Partial<AttendanceRecord>) => {
     try {
@@ -242,29 +212,11 @@ export const AttendanceManagement: React.FC = () => {
 
       {/* التبويبات */}
       <Tabs defaultValue="records" className="space-y-4">
-        <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="records">سجلات الحضور</TabsTrigger>
-            <TabsTrigger value="filters">الفلاتر المتقدمة</TabsTrigger>
-            <TabsTrigger value="reports">التقارير</TabsTrigger>
-          </TabsList>
-          
-          <div className="flex items-center gap-2">
-            <Button 
-              onClick={loadAttendanceRecords} 
-              variant="outline" 
-              size="sm"
-              disabled={loading}
-            >
-              <RefreshCw className="h-4 w-4 ml-2" />
-              تحديث
-            </Button>
-            <Button onClick={handleExport} variant="outline" size="sm">
-              <Download className="h-4 w-4 ml-2" />
-              تصدير CSV
-            </Button>
-          </div>
-        </div>
+        <TabsList>
+          <TabsTrigger value="records">سجلات الحضور</TabsTrigger>
+          <TabsTrigger value="filters">الفلاتر المتقدمة</TabsTrigger>
+          <TabsTrigger value="reports">التقارير</TabsTrigger>
+        </TabsList>
 
         <TabsContent value="records" className="space-y-4">
           {/* البحث السريع */}
