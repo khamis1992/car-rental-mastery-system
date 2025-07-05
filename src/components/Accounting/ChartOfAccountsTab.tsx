@@ -20,7 +20,6 @@ export const ChartOfAccountsTab = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<ChartOfAccount | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isTextReversed, setIsTextReversed] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -152,18 +151,6 @@ export const ChartOfAccountsTab = () => {
     return `د.ك ${amount.toFixed(3)}`;
   };
 
-  const reverseText = (text: string) => {
-    return isTextReversed ? text.split('').reverse().join('') : text;
-  };
-
-  const handleToggleTextReverse = () => {
-    setIsTextReversed(!isTextReversed);
-    toast({
-      title: isTextReversed ? 'تم إلغاء عكس النص' : 'تم تفعيل عكس النص',
-      description: isTextReversed ? 'النص يعرض بشكل طبيعي الآن' : 'النص يعرض معكوساً الآن',
-    });
-  };
-
   if (loading) {
     return <div className="flex justify-center items-center h-64">جاري التحميل...</div>;
   }
@@ -257,13 +244,6 @@ export const ChartOfAccountsTab = () => {
               />
             </div>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={handleToggleTextReverse}
-            className="min-w-fit whitespace-nowrap"
-          >
-            {isTextReversed ? 'إلغاء عكس النص' : 'عكس النص'}
-          </Button>
           <Select value={selectedType} onValueChange={setSelectedType}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="نوع الحساب" />
@@ -297,7 +277,7 @@ export const ChartOfAccountsTab = () => {
                 <TableCell className="font-medium">{account.account_code}</TableCell>
                 <TableCell>
                   <div style={{ paddingRight: `${(account.level - 1) * 20}px` }}>
-                    {reverseText(account.account_name)}
+                    {account.account_name}
                   </div>
                 </TableCell>
                 <TableCell>
