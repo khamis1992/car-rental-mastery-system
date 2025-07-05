@@ -168,13 +168,13 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/70 transition-colors">
-              <TableHead className="text-right font-semibold text-foreground">الموظف</TableHead>
-              <TableHead className="text-right font-semibold text-foreground">القسم</TableHead>
-              <TableHead className="text-right font-semibold text-foreground">التاريخ</TableHead>
-              <TableHead className="text-center font-semibold text-foreground">أوقات الدوام</TableHead>
-              <TableHead className="text-center font-semibold text-foreground">ساعات العمل</TableHead>
-              <TableHead className="text-right font-semibold text-foreground">الحالة</TableHead>
               <TableHead className="text-center font-semibold text-foreground">الإجراءات</TableHead>
+              <TableHead className="text-right font-semibold text-foreground">الحالة</TableHead>
+              <TableHead className="text-center font-semibold text-foreground">ساعات العمل</TableHead>
+              <TableHead className="text-center font-semibold text-foreground">أوقات الدوام</TableHead>
+              <TableHead className="text-right font-semibold text-foreground">التاريخ</TableHead>
+              <TableHead className="text-right font-semibold text-foreground">القسم</TableHead>
+              <TableHead className="text-right font-semibold text-foreground">الموظف</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -186,88 +186,6 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                   ${index % 2 === 0 ? 'bg-white' : 'bg-muted/10'}
                 `}
               >
-                {/* معلومات الموظف */}
-                <TableCell className="text-right py-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 border-2 border-primary/20">
-                      <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                        {record.employees?.first_name?.charAt(0)}
-                        {record.employees?.last_name?.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-semibold text-foreground">
-                        {record.employees?.first_name} {record.employees?.last_name}
-                      </div>
-                      <div className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full inline-block">
-                        {record.employees?.employee_number}
-                      </div>
-                    </div>
-                  </div>
-                </TableCell>
-
-                {/* القسم */}
-                <TableCell className="text-right">
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                    {record.employees?.departments?.department_name || 'غير محدد'}
-                  </Badge>
-                </TableCell>
-
-                {/* التاريخ */}
-                <TableCell className="text-right">
-                  <div className="flex items-center gap-1 text-sm">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    {formatDate(record.date)}
-                  </div>
-                </TableCell>
-
-                {/* أوقات الدوام */}
-                <TableCell className="text-center">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="text-xs text-muted-foreground">دخول:</span>
-                      {formatTime(record.check_in_time)}
-                    </div>
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="text-xs text-muted-foreground">خروج:</span>
-                      {formatTime(record.check_out_time)}
-                    </div>
-                  </div>
-                </TableCell>
-
-                {/* ساعات العمل */}
-                <TableCell className="text-center">
-                  <div className="space-y-2">
-                    {getWorkingHours(record.total_hours)}
-                    {record.overtime_hours && record.overtime_hours > 0 && (
-                      <div className="flex items-center justify-center gap-1">
-                        <AlertTriangle className="h-3 w-3 text-orange-500" />
-                        <span className="text-xs text-orange-600 font-medium">
-                          +{record.overtime_hours.toFixed(1)} إضافي
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </TableCell>
-
-                {/* الحالة */}
-                <TableCell className="text-right">
-                  <div className="flex items-center gap-2">
-                    {getStatusBadge(record.status)}
-                    {record.manual_override && (
-                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
-                        يدوي
-                      </Badge>
-                    )}
-                  </div>
-                  {record.office_locations && (
-                    <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      {record.office_locations.name}
-                    </div>
-                  )}
-                </TableCell>
-
                 {/* الإجراءات */}
                 <TableCell className="text-center">
                   <div className="flex items-center justify-center gap-2">
@@ -373,6 +291,88 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                     >
                       <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
+                  </div>
+                </TableCell>
+
+                {/* الحالة */}
+                <TableCell className="text-right">
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(record.status)}
+                    {record.manual_override && (
+                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
+                        يدوي
+                      </Badge>
+                    )}
+                  </div>
+                  {record.office_locations && (
+                    <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                      <MapPin className="h-3 w-3" />
+                      {record.office_locations.name}
+                    </div>
+                  )}
+                </TableCell>
+
+                {/* ساعات العمل */}
+                <TableCell className="text-center">
+                  <div className="space-y-2">
+                    {getWorkingHours(record.total_hours)}
+                    {record.overtime_hours && record.overtime_hours > 0 && (
+                      <div className="flex items-center justify-center gap-1">
+                        <AlertTriangle className="h-3 w-3 text-orange-500" />
+                        <span className="text-xs text-orange-600 font-medium">
+                          +{record.overtime_hours.toFixed(1)} إضافي
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
+
+                {/* أوقات الدوام */}
+                <TableCell className="text-center">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-xs text-muted-foreground">دخول:</span>
+                      {formatTime(record.check_in_time)}
+                    </div>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-xs text-muted-foreground">خروج:</span>
+                      {formatTime(record.check_out_time)}
+                    </div>
+                  </div>
+                </TableCell>
+
+                {/* التاريخ */}
+                <TableCell className="text-right">
+                  <div className="flex items-center gap-1 text-sm">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    {formatDate(record.date)}
+                  </div>
+                </TableCell>
+
+                {/* القسم */}
+                <TableCell className="text-right">
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                    {record.employees?.departments?.department_name || 'غير محدد'}
+                  </Badge>
+                </TableCell>
+
+                {/* الموظف */}
+                <TableCell className="text-right py-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10 border-2 border-primary/20">
+                      <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                        {record.employees?.first_name?.charAt(0)}
+                        {record.employees?.last_name?.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-semibold text-foreground">
+                        {record.employees?.first_name} {record.employees?.last_name}
+                      </div>
+                      <div className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full inline-block">
+                        {record.employees?.employee_number}
+                      </div>
+                    </div>
                   </div>
                 </TableCell>
               </TableRow>
