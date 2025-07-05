@@ -29,6 +29,7 @@ const bilingualContractSchema = z.object({
   // Basic Information / المعلومات الأساسية
   customer_id: z.string().min(1, 'Customer is required / العميل مطلوب'),
   vehicle_id: z.string().min(1, 'Vehicle is required / المركبة مطلوبة'),
+  quotation_id: z.string().optional(),
   contract_language: z.enum(['ar', 'en', 'both']),
   
   // Contract Period / فترة العقد
@@ -104,6 +105,9 @@ interface BilingualContractFormProps {
     status: string;
     color?: string;
   }>;
+  quotations?: Array<{ id: string; quotation_number: string; customer_id: string; vehicle_id: string; final_amount: number }>;
+  selectedQuotation?: string;
+  onGetQuotationDetails?: (id: string) => Promise<any>;
   onSuccess?: () => void;
 }
 
@@ -112,9 +116,13 @@ export const BilingualContractForm: React.FC<BilingualContractFormProps> = ({
   onOpenChange,
   customers,
   vehicles,
+  quotations = [],
+  selectedQuotation,
+  onGetQuotationDetails,
   onSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingQuotation, setIsLoadingQuotation] = useState(false);
   const [currentTab, setCurrentTab] = useState('basic');
   const [showSignature, setShowSignature] = useState(false);
   const [signatureType, setSignatureType] = useState<'customer' | 'company'>('customer');
@@ -144,11 +152,79 @@ export const BilingualContractForm: React.FC<BilingualContractFormProps> = ({
       terms_accepted: false,
       privacy_policy_accepted: false,
       additional_drivers: [],
+      quotation_id: selectedQuotation,
     },
   });
 
   const watchedValues = form.watch();
   const selectedVehicle = vehicles.find(v => v.id === watchedValues.vehicle_id);
+  const selectedQuote = quotations.find(q => q.id === watchedValues.quotation_id);
+
+  // Auto-populate form when quotation is selected
+  React.useEffect(() => {
+    const loadQuotationData = async () => {
+      if (selectedQuotation && onGetQuotationDetails) {
+        console.log('Loading quotation data for:', selectedQuotation);
+        setIsLoadingQuotation(true);
+        
+        try {
+          const quotationDetails = await onGetQuotationDetails(selectedQuotation);
+          console.log('Quotation details loaded:', quotationDetails);
+          
+          // Determine contract type based on rental days
+          const startDate = new Date(quotationDetails.start_date);
+          const endDate = new Date(quotationDetails.end_date);
+          const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+          
+          let contractType: 'daily' | 'weekly' | 'monthly' | 'custom' = 'daily';
+          if (days >= 30) {
+            contractType = 'monthly';
+          } else if (days >= 7) {
+            contractType = 'weekly';
+          } else if (days === 1) {
+            contractType = 'daily';
+          } else {
+            contractType = 'custom';
+          }
+          
+          // Use form.reset() to populate all fields at once and trigger re-renders
+          const formData: Partial<BilingualContractFormData> = {
+            customer_id: quotationDetails.customer_id,
+            vehicle_id: quotationDetails.vehicle_id,
+            quotation_id: quotationDetails.id,
+            start_date: new Date(quotationDetails.start_date),
+            end_date: new Date(quotationDetails.end_date),
+            daily_rate: quotationDetails.daily_rate,
+            discount_amount: quotationDetails.discount_amount || 0,
+            tax_amount: quotationDetails.tax_amount || 0,
+            security_deposit: 0,
+            insurance_amount: 0,
+            contract_type: contractType,
+            special_conditions: quotationDetails.special_conditions || '',
+            terms_accepted: false,
+            privacy_policy_accepted: false,
+          };
+          
+          console.log('Setting form data:', formData);
+          form.reset({ ...form.getValues(), ...formData });
+          
+        } catch (error) {
+          console.error('Error loading quotation details:', error);
+        } finally {
+          setIsLoadingQuotation(false);
+        }
+      }
+    };
+
+    loadQuotationData();
+  }, [selectedQuotation, onGetQuotationDetails]);
+
+  // Update daily rate when vehicle changes
+  React.useEffect(() => {
+    if (selectedVehicle) {
+      form.setValue('daily_rate', selectedVehicle.daily_rate);
+    }
+  }, [selectedVehicle, form]);
 
   // Calculate amounts
   const calculateAmounts = () => {
@@ -197,6 +273,7 @@ export const BilingualContractForm: React.FC<BilingualContractFormProps> = ({
         contract_number: contractNumber,
         customer_id: data.customer_id,
         vehicle_id: data.vehicle_id,
+        quotation_id: data.quotation_id || null,
         start_date: format(data.start_date, 'yyyy-MM-dd'),
         end_date: format(data.end_date, 'yyyy-MM-dd'),
         rental_days: rentalDays,
@@ -226,6 +303,20 @@ export const BilingualContractForm: React.FC<BilingualContractFormProps> = ({
         .insert(contractData);
 
       if (error) throw error;
+
+      // Update quotation status if one was selected
+      if (data.quotation_id) {
+        console.log('Updating quotation status...');
+        const { error: quotationError } = await supabase
+          .from('quotations')
+          .update({ status: 'converted' })
+          .eq('id', data.quotation_id);
+        
+        if (quotationError) {
+          console.error('Error updating quotation:', quotationError);
+          // Don't throw here as contract is already created
+        }
+      }
 
       toast({
         title: 'Success / نجح',
@@ -422,11 +513,42 @@ TERMS AND CONDITIONS - CAR RENTAL AGREEMENT
                       Basic Information / المعلومات الأساسية
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="customer_id"
-                      render={({ field }) => (
+                   <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     {quotations.length > 0 && (
+                       <FormField
+                         control={form.control}
+                         name="quotation_id"
+                         render={({ field }) => (
+                           <FormItem>
+                             <FormLabel>Quotation / عرض السعر (Optional / اختياري)</FormLabel>
+                             <Select 
+                               key={`quotation-${field.value || 'empty'}`}
+                               onValueChange={field.onChange} 
+                               value={field.value}
+                             >
+                               <FormControl>
+                                 <SelectTrigger>
+                                   <SelectValue placeholder="Select existing quotation / اختر عرض سعر موجود" />
+                                 </SelectTrigger>
+                               </FormControl>
+                               <SelectContent>
+                                 {quotations.map((quotation) => (
+                                   <SelectItem key={quotation.id} value={quotation.id}>
+                                     {quotation.quotation_number} - {quotation.final_amount.toFixed(3)} KWD / د.ك
+                                   </SelectItem>
+                                 ))}
+                               </SelectContent>
+                             </Select>
+                             <FormMessage />
+                           </FormItem>
+                         )}
+                       />
+                     )}
+                     
+                     <FormField
+                       control={form.control}
+                       name="customer_id"
+                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Customer / العميل *</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
