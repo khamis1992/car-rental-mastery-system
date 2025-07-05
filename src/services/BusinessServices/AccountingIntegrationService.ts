@@ -17,6 +17,14 @@ export class AccountingIntegrationService {
     discount_amount?: number;
   }): Promise<string | null> {
     try {
+      console.log(`🔄 Creating accounting entry for invoice ${invoiceData.invoice_number} with amount ${invoiceData.total_amount}`);
+      
+      // Validate input data
+      if (!invoiceData.total_amount || invoiceData.total_amount <= 0) {
+        console.error('❌ Invalid invoice amount:', invoiceData.total_amount);
+        throw new Error('مبلغ الفاتورة يجب أن يكون أكبر من صفر');
+      }
+
       const { data, error } = await supabase.rpc('create_invoice_accounting_entry' as any, {
         invoice_id: invoiceId,
         invoice_data: {
@@ -29,14 +37,20 @@ export class AccountingIntegrationService {
       });
 
       if (error) {
-        console.warn('Failed to create invoice accounting entry:', error);
-        return null;
+        console.error('❌ Failed to create invoice accounting entry:', error);
+        throw new Error(`فشل في إنشاء القيد المحاسبي للفاتورة: ${error.message}`);
       }
 
+      if (!data) {
+        console.error('❌ No journal entry ID returned from accounting function');
+        throw new Error('لم يتم إرجاع معرف القيد المحاسبي');
+      }
+
+      console.log(`✅ Invoice accounting entry created successfully: ${data}`);
       return data as string;
     } catch (error) {
-      console.warn('Failed to create invoice accounting entry:', error);
-      return null;
+      console.error('❌ Invoice accounting integration error:', error);
+      throw error; // Re-throw to let business service handle it
     }
   }
 
@@ -51,6 +65,14 @@ export class AccountingIntegrationService {
     payment_date: string;
   }): Promise<string | null> {
     try {
+      console.log(`🔄 Creating accounting entry for payment ${paymentData.invoice_number} with amount ${paymentData.payment_amount}`);
+      
+      // Validate input data
+      if (!paymentData.payment_amount || paymentData.payment_amount <= 0) {
+        console.error('❌ Invalid payment amount:', paymentData.payment_amount);
+        throw new Error('مبلغ الدفعة يجب أن يكون أكبر من صفر');
+      }
+
       const { data, error } = await supabase.rpc('create_payment_accounting_entry' as any, {
         payment_id: paymentId,
         payment_data: {
@@ -63,14 +85,20 @@ export class AccountingIntegrationService {
       });
 
       if (error) {
-        console.warn('Failed to create payment accounting entry:', error);
-        return null;
+        console.error('❌ Failed to create payment accounting entry:', error);
+        throw new Error(`فشل في إنشاء القيد المحاسبي للدفعة: ${error.message}`);
       }
 
+      if (!data) {
+        console.error('❌ No journal entry ID returned from payment accounting function');
+        throw new Error('لم يتم إرجاع معرف القيد المحاسبي للدفعة');
+      }
+
+      console.log(`✅ Payment accounting entry created successfully: ${data}`);
       return data as string;
     } catch (error) {
-      console.warn('Failed to create payment accounting entry:', error);
-      return null;
+      console.error('❌ Payment accounting integration error:', error);
+      throw error; // Re-throw to let business service handle it
     }
   }
 

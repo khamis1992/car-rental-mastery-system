@@ -36,11 +36,12 @@ export class InvoiceBusinessService {
         });
         
         if (journalEntryId) {
-          console.log(`Invoice accounting entry created successfully: ${journalEntryId}`);
+          console.log(`✅ Invoice accounting entry created successfully: ${journalEntryId}`);
         }
-      } catch (accountingError) {
-        console.error('Failed to create accounting entry for invoice:', accountingError);
-        // Log the error but don't stop the process - can be handled later via reconciliation service
+      } catch (accountingError: any) {
+        console.error('❌ Failed to create accounting entry for invoice:', accountingError);
+        // Don't fail the entire invoice creation if accounting fails - log error for later reconciliation
+        console.warn(`⚠️ Invoice ${invoice.invoice_number} created but accounting entry failed. Manual reconciliation may be needed.`);
       }
       
       return invoice;

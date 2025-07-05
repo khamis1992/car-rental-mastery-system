@@ -3720,6 +3720,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      reprocess_missing_invoice_entries: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       reprocess_missing_payment_entries: {
         Args: Record<PropertyKey, never>
         Returns: Json

@@ -38,12 +38,13 @@ export class PaymentBusinessService {
           });
           
           if (journalEntryId) {
-            console.log(`Payment accounting entry created successfully: ${journalEntryId}`);
+            console.log(`✅ Payment accounting entry created successfully: ${journalEntryId}`);
           }
         }
-      } catch (error) {
-        console.error('Failed to create accounting entry for payment:', error);
-        // Log the error but don't stop the process - can be handled later via reconciliation service
+      } catch (accountingError: any) {
+        console.error('❌ Failed to create accounting entry for payment:', accountingError);
+        // Don't fail the entire payment creation if accounting fails - log error for later reconciliation
+        console.warn(`⚠️ Payment for invoice created but accounting entry failed. Manual reconciliation may be needed.`);
       }
       
       return payment;
