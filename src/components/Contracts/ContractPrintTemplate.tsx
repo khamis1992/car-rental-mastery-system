@@ -1,8 +1,6 @@
 import React from 'react';
 import { formatCurrencyKWD } from '@/lib/currency';
 import { formatDate, formatDateTime } from '@/lib/utils';
-import { CompanyHeader } from '@/components/Shared/CompanyHeader';
-import { CompanyFooter } from '@/components/Shared/CompanyFooter';
 
 interface ContractPrintTemplateProps {
   contract: any;
@@ -11,9 +9,6 @@ interface ContractPrintTemplateProps {
 export const ContractPrintTemplate: React.FC<ContractPrintTemplateProps> = ({ contract }) => {
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white text-black print:text-black print:bg-white print:p-4" dir="rtl">
-      {/* رأس الشركة */}
-      <CompanyHeader variant="print" />
-      
       {/* معلومات العقد */}
       <div className="text-center mb-8 border-b border-gray-300 pb-6">
         <h2 className="text-2xl font-bold mb-2 text-primary">عقد إيجار مركبة</h2>
@@ -151,9 +146,6 @@ export const ContractPrintTemplate: React.FC<ContractPrintTemplateProps> = ({ co
         </div>
       </div>
 
-      {/* تذييل الصفحة */}
-      <CompanyFooter variant="print" />
-      
       <div className="text-center mt-4 pt-6 border-t border-gray-300 text-sm text-gray-600">
         <p>تم طباعة هذا العقد بتاريخ {formatDateTime(new Date().toISOString())}</p>
       </div>

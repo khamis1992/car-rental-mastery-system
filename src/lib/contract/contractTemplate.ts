@@ -16,16 +16,6 @@ export const generateContractHTML = (contract: ContractPDFData, options: PDFOpti
   } = options;
   return `
     <div style="max-width: 170mm; margin: 0 auto; background: white; color: black;">
-      <!-- Header -->
-      <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #1e40af; padding-bottom: 20px;">
-        <h1 style="color: #1e40af; font-size: 28px; font-weight: bold; margin-bottom: 10px;">شركة تأجير السيارات</h1>
-        <p style="font-size: 18px; color: #666; margin: 5px 0;">عقد إيجار سيارة</p>
-        <div style="margin-top: 15px; font-size: 12px; color: #666;">
-          <p>الكويت - شارع الخليج العربي - صندوق بريد: 12345</p>
-          <p>هاتف: +965 1234 5678 | البريد الإلكتروني: info@carental.com</p>
-        </div>
-      </div>
-
       <!-- Contract Number and Date -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: #f8f9fa; padding: 15px; border-radius: 8px;">
         <div>
@@ -188,11 +178,6 @@ export const generateContractHTML = (contract: ContractPDFData, options: PDFOpti
         </div>
       </div>
 
-      <!-- Footer -->
-      <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #666;">
-        <p>هذا العقد محرر من نسختين، يحتفظ كل طرف بنسخة أصلية</p>
-        <p style="margin-top: 8px;">تم إنشاء هذا العقد إلكترونياً في ${new Date().toLocaleDateString('ar-SA')}</p>
-      </div>
     </div>
   `;
 };

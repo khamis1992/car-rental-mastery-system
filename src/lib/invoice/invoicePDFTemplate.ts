@@ -321,34 +321,12 @@ export const generateInvoiceHTML = async (invoice: any, options: InvoicePDFOptio
         ${options.watermark ? `<div class="watermark">${options.watermark}</div>` : ''}
         
         <div class="content">
-          <!-- Header -->
-          <div class="header">
-            ${headerImageUrl ? `
-              <div style="text-align: center; margin-bottom: 20px;">
-                <img src="${headerImageUrl}" alt="صورة رأسية مخصصة" style="width: 100%; max-height: 120px; object-fit: contain;" />
-              </div>
-            ` : ''}
-            <div class="company-info">
-              ${logoUrl ? `
-                <div style="text-align: center; margin-bottom: 15px;">
-                  <img src="${logoUrl}" alt="شعار الشركة" style="height: 60px; width: auto; object-fit: contain;" />
-                </div>
-              ` : ''}
-              <div class="company-name">${companyNameAr}</div>
-              <div class="company-name" style="font-size: 18px; margin-bottom: 10px;">${companyNameEn}</div>
-              <div class="company-details">
-                ${addressAr}<br>
-                هاتف: ${phone}<br>
-                البريد الإلكتروني: ${email}<br>
-                ${website ? `الموقع: ${website}` : ''}
-              </div>
-            </div>
-            <div class="invoice-info">
-              <div class="invoice-number">${invoice.invoice_number}</div>
-              <div class="invoice-type">${getInvoiceTypeText(invoice.invoice_type)}</div>
-              <div class="invoice-status status-${invoice.status}">
-                ${getStatusText(invoice.status)}
-              </div>
+          <!-- Invoice Header -->
+          <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #2563eb; padding-bottom: 20px;">
+            <div class="invoice-number">${invoice.invoice_number}</div>
+            <div class="invoice-type">${getInvoiceTypeText(invoice.invoice_type)}</div>
+            <div class="invoice-status status-${invoice.status}">
+              ${getStatusText(invoice.status)}
             </div>
           </div>
           
@@ -473,14 +451,6 @@ export const generateInvoiceHTML = async (invoice: any, options: InvoicePDFOptio
           
           <!-- Footer -->
           <div class="footer">
-            ${footerImageUrl ? `
-              <div style="text-align: center; margin-bottom: 15px;">
-                <img src="${footerImageUrl}" alt="صورة تذييل مخصصة" style="width: 100%; max-height: 80px; object-fit: contain;" />
-              </div>
-            ` : ''}
-            <p>شكراً لاختياركم خدماتنا</p>
-            <p>${companyNameAr} - ${companyNameEn}</p>
-            <p>هاتف: ${phone} | البريد الإلكتروني: ${email}</p>
             <p>تم إنشاء هذه الفاتورة بتاريخ ${formatDate(new Date().toISOString())}</p>
           </div>
         </div>
