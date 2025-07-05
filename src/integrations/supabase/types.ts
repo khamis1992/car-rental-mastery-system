@@ -3537,6 +3537,10 @@ export type Database = {
         Args: { target_year: number; target_month: number }
         Returns: string
       }
+      create_attendance_accounting_entry: {
+        Args: { attendance_data: Json }
+        Returns: string
+      }
       create_contract_accounting_entry: {
         Args: { contract_id: string; contract_data: Json }
         Returns: string
@@ -3544,6 +3548,18 @@ export type Database = {
       create_depreciation_entries: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      create_invoice_accounting_entry: {
+        Args: { invoice_id: string; invoice_data: Json }
+        Returns: string
+      }
+      create_maintenance_accounting_entry: {
+        Args: { maintenance_id: string; maintenance_data: Json }
+        Returns: string
+      }
+      create_payment_accounting_entry: {
+        Args: { payment_id: string; payment_data: Json }
+        Returns: string
       }
       create_payroll_accounting_entry: {
         Args: { payroll_id: string; payroll_data: Json }
@@ -3644,6 +3660,10 @@ export type Database = {
       generate_violation_payment_number: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_accounting_entries_summary: {
+        Args: { filters?: Json }
+        Returns: Json
       }
       get_user_role: {
         Args: { _user_id: string }
