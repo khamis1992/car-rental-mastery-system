@@ -4,11 +4,11 @@ import { Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { ContractForm } from '@/components/Contracts/ContractForm';
 import { ContractsList } from '@/components/Contracts/ContractsList';
 import { ContractMonitoring } from '@/components/Contracts/ContractMonitoring';
 import { ContractStats } from '@/components/Contracts/ContractStats';
 import { ContractDetailsDialog } from '@/components/Contracts/ContractDetailsDialog';
-import { BilingualContractForm } from '@/components/Contracts/BilingualContractForm';
 import { useContractsEnhanced } from '@/hooks/useContractsEnhanced';
 import { supabase } from '@/integrations/supabase/client';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -18,7 +18,7 @@ const Contracts = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   useAbortErrorHandler(); // Handle abort errors gracefully
-  const [bilingualFormOpen, setBilingualFormOpen] = useState(false);
+  const [contractFormOpen, setContractFormOpen] = useState(false);
   const [selectedQuotationForContract, setSelectedQuotationForContract] = useState<string>('');
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
   const [contractDetailsOpen, setContractDetailsOpen] = useState(false);
@@ -48,7 +48,7 @@ const Contracts = () => {
     const quotationId = urlParams.get('quotation');
     if (quotationId) {
       setSelectedQuotationForContract(quotationId);
-      setBilingualFormOpen(true);
+      setContractFormOpen(true);
     }
   }, []);
 
@@ -95,10 +95,10 @@ const Contracts = () => {
           </Button>
           <Button 
             className="btn-primary flex items-center gap-2"
-            onClick={() => setBilingualFormOpen(true)}
+            onClick={() => setContractFormOpen(true)}
           >
             <Plus className="w-4 h-4" />
-            إنشاء عقد جديد
+            عقد جديد
           </Button>
         </div>
       </div>
@@ -155,12 +155,12 @@ const Contracts = () => {
         />
       </ErrorBoundary>
 
-      {/* نموذج إنشاء عقد جديد */}
+      {/* نموذج إنشاء عقد */}
       <ErrorBoundary>
-        <BilingualContractForm
-          open={bilingualFormOpen}
+        <ContractForm
+          open={contractFormOpen}
           onOpenChange={(open) => {
-            setBilingualFormOpen(open);
+            setContractFormOpen(open);
             if (!open) {
               setSelectedQuotationForContract('');
             }

@@ -13,7 +13,6 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { contractService } from '@/services/contractService';
 import { supabase } from '@/integrations/supabase/client';
-import { ContractPrintDialog } from './ContractPrintDialog';
 
 interface ContractActionsProps {
   contract: {
@@ -29,7 +28,6 @@ interface ContractActionsProps {
 export const ContractActions: React.FC<ContractActionsProps> = ({ contract, onUpdate }) => {
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -98,7 +96,9 @@ export const ContractActions: React.FC<ContractActionsProps> = ({ contract, onUp
   };
 
   const handlePrint = () => {
-    setShowPrintDialog(true);
+    // فتح نافذة جديدة لطباعة العقد
+    const printUrl = `/contracts/print/${contract.id}`;
+    window.open(printUrl, '_blank');
   };
 
   return (
@@ -262,13 +262,6 @@ export const ContractActions: React.FC<ContractActionsProps> = ({ contract, onUp
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Print Contract Dialog */}
-      <ContractPrintDialog
-        open={showPrintDialog}
-        onOpenChange={setShowPrintDialog}
-        contractId={contract.id}
-      />
     </div>
   );
 };
