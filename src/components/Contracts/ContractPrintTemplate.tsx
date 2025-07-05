@@ -1,6 +1,8 @@
 import React from 'react';
 import { formatCurrencyKWD } from '@/lib/currency';
 import { formatDate, formatDateTime } from '@/lib/utils';
+import { CompanyHeader } from '@/components/Shared/CompanyHeader';
+import { CompanyFooter } from '@/components/Shared/CompanyFooter';
 
 interface ContractPrintTemplateProps {
   contract: any;
@@ -9,12 +11,15 @@ interface ContractPrintTemplateProps {
 export const ContractPrintTemplate: React.FC<ContractPrintTemplateProps> = ({ contract }) => {
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white text-black print:text-black print:bg-white print:p-4" dir="rtl">
+      {/* Company Header */}
+      <CompanyHeader variant="print" className="mb-8" />
+      
       {/* معلومات العقد */}
-      <div className="text-center mb-8 border-b border-gray-300 pb-6">
+      <div className="text-center mb-8 border-b border-border pb-6">
         <h2 className="text-2xl font-bold mb-2 text-primary">عقد إيجار مركبة</h2>
         <div className="text-lg">
           <p>رقم العقد: <span className="font-bold">{contract.contract_number}</span></p>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             تاريخ الإنشاء: {formatDate(contract.created_at)}
           </p>
         </div>
@@ -146,7 +151,10 @@ export const ContractPrintTemplate: React.FC<ContractPrintTemplateProps> = ({ co
         </div>
       </div>
 
-      <div className="text-center mt-4 pt-6 border-t border-gray-300 text-sm text-gray-600">
+      {/* Company Footer */}
+      <CompanyFooter variant="print" className="mt-8" />
+      
+      <div className="text-center mt-4 pt-6 border-t border-border text-sm text-muted-foreground">
         <p>تم طباعة هذا العقد بتاريخ {formatDateTime(new Date().toISOString())}</p>
       </div>
     </div>

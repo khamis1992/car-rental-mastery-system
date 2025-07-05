@@ -321,6 +321,47 @@ export const generateInvoiceHTML = async (invoice: any, options: InvoicePDFOptio
         ${options.watermark ? `<div class="watermark">${options.watermark}</div>` : ''}
         
         <div class="content">
+          <!-- Company Header -->
+          ${branding?.show_header !== false ? `
+          <div style="text-align: center; margin-bottom: 30px;">
+            ${headerImageUrl ? `
+            <div style="margin-bottom: 20px;">
+              <img 
+                src="${headerImageUrl}"
+                alt="صورة رأسية مخصصة للشركة"
+                style="width: 100%; object-fit: contain; height: ${branding?.header_height || 120}px;"
+              />
+            </div>
+            ` : ''}
+            
+            <div style="margin-bottom: 15px;">
+              <img 
+                src="${logoUrl}"
+                alt="شعار ${companyNameAr} - ${companyNameEn} Logo"
+                style="height: 80px; width: auto; object-fit: contain;"
+              />
+            </div>
+            
+            <h1 style="font-size: 32px; font-weight: bold; color: #333; margin-bottom: 8px;">
+              ${companyNameAr}
+            </h1>
+            <h2 style="font-size: 24px; font-weight: 600; color: #666; margin-bottom: 4px;">
+              ${companyNameEn}
+            </h2>
+            
+            <div style="font-size: 16px; color: #666; margin-bottom: 15px;">
+              <p>${addressAr} - Kuwait</p>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 20px; font-size: 14px; margin-top: 8px;">
+                <span>📞 ${phone}</span>
+                <span>📧 ${email}</span>
+                <span>🌐 ${website}</span>
+              </div>
+            </div>
+            
+            <div style="border-top: 2px solid #2563eb; margin-top: 20px;"></div>
+          </div>
+          ` : ''}
+          
           <!-- Invoice Header -->
           <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #2563eb; padding-bottom: 20px;">
             <div class="invoice-number">${invoice.invoice_number}</div>
@@ -447,6 +488,35 @@ export const generateInvoiceHTML = async (invoice: any, options: InvoicePDFOptio
               <div class="notes-title">الشروط والأحكام</div>
               <div class="notes-content">${invoice.terms_and_conditions}</div>
             </div>
+          ` : ''}
+          
+          <!-- Company Footer -->
+          ${branding?.show_footer !== false ? `
+          <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+            ${footerImageUrl ? `
+            <div style="margin-bottom: 15px;">
+              <img 
+                src="${footerImageUrl}"
+                alt="صورة تذييل مخصصة للشركة"
+                style="width: 100%; object-fit: contain; height: ${branding?.footer_height || 80}px;"
+              />
+            </div>
+            ` : ''}
+            
+            <div style="font-size: 14px; color: #666; line-height: 1.6;">
+              <p style="font-weight: 500;">${companyNameAr}</p>
+              <p style="font-weight: 500;">${companyNameEn}</p>
+              
+              <div style="display: flex; align-items: center; justify-content: center; gap: 15px; font-size: 12px; margin-top: 8px;">
+                <span>📞 ${phone}</span>
+                <span>📧 ${email}</span>
+                <span>🌐 ${website}</span>
+              </div>
+              
+              ${branding?.tax_number ? `<p style="font-size: 12px; margin-top: 5px;">الرقم الضريبي: ${branding.tax_number}</p>` : ''}
+              ${branding?.commercial_registration ? `<p style="font-size: 12px;">رقم السجل التجاري: ${branding.commercial_registration}</p>` : ''}
+            </div>
+          </div>
           ` : ''}
           
           <!-- Footer -->
