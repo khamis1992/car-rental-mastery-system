@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Switch } from '@/components/ui/switch';
 import { DollarSign, Calculator, FileText, Download, Eye, Search, Plus, Settings } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -780,43 +781,43 @@ const Payroll = () => {
         <TabsContent value="settings">
           <Card>
             <CardHeader>
-              <CardTitle>إعدادات الرواتب</CardTitle>
+              <CardTitle className="text-right">إعدادات الرواتب</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-medium mb-4">إعدادات الضرائب</h3>
+                  <h3 className="text-lg font-medium mb-4 text-right">إعدادات الضرائب</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium">نسبة الضريبة (%)</label>
-                      <Input type="number" defaultValue="5" className="mt-1" />
+                      <label className="text-sm font-medium text-right block mb-1">نسبة الضريبة (%)</label>
+                      <Input type="number" defaultValue="5" className="text-right" />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">الحد الأدنى للضريبة</label>
-                      <Input type="number" defaultValue="0" className="mt-1" />
+                      <label className="text-sm font-medium text-right block mb-1">الحد الأدنى للضريبة</label>
+                      <Input type="number" defaultValue="0" className="text-right" />
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-medium mb-4">إعدادات التأمين الاجتماعي</h3>
+                  <h3 className="text-lg font-medium mb-4 text-right">إعدادات التأمين الاجتماعي</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium">نسبة التأمين الاجتماعي (%)</label>
-                      <Input type="number" defaultValue="6" className="mt-1" />
+                      <label className="text-sm font-medium text-right block mb-1">نسبة التأمين الاجتماعي (%)</label>
+                      <Input type="number" defaultValue="6" className="text-right" />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">الحد الأقصى للتأمين</label>
-                      <Input type="number" defaultValue="2000" className="mt-1" />
+                      <label className="text-sm font-medium text-right block mb-1">الحد الأقصى للتأمين</label>
+                      <Input type="number" defaultValue="2000" className="text-right" />
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-medium mb-4">إعدادات الساعات الإضافية</h3>
+                  <h3 className="text-lg font-medium mb-4 text-right">إعدادات الساعات الإضافية</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium">معدل الساعة الإضافية</label>
+                      <label className="text-sm font-medium text-right block mb-1">معدل الساعة الإضافية</label>
                       <Select defaultValue="1.5">
                         <SelectTrigger>
                           <SelectValue />
@@ -829,13 +830,77 @@ const Payroll = () => {
                       </Select>
                     </div>
                     <div>
-                      <label className="text-sm font-medium">ساعات العمل اليومية</label>
-                      <Input type="number" defaultValue="8" className="mt-1" />
+                      <label className="text-sm font-medium text-right block mb-1">ساعات العمل اليومية</label>
+                      <Input type="number" defaultValue="8" className="text-right" />
                     </div>
                   </div>
                 </div>
 
-                <Button>حفظ الإعدادات</Button>
+                <div>
+                  <h3 className="text-lg font-medium mb-4 text-right">إعدادات خصم التأخير والغياب</h3>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-right block mb-1">فعل خصم التأخير</label>
+                        <div className="flex items-center justify-end gap-2">
+                          <Switch defaultChecked />
+                          <span className="text-sm text-muted-foreground">تطبيق خصم التأخير</span>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-right block mb-1">فعل خصم الغياب</label>
+                        <div className="flex items-center justify-end gap-2">
+                          <Switch defaultChecked />
+                          <span className="text-sm text-muted-foreground">تطبيق خصم الغياب</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-right block mb-1">ساعات العمل الشهرية</label>
+                        <Input type="number" defaultValue="240" className="text-right" placeholder="ساعات العمل في الشهر" />
+                        <p className="text-xs text-muted-foreground text-right mt-1">30 يوم × 8 ساعات = 240 ساعة</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-right block mb-1">عدد دقائق السماح</label>
+                        <Input type="number" defaultValue="15" className="text-right" placeholder="دقائق السماح للتأخير" />
+                        <p className="text-xs text-muted-foreground text-right mt-1">لا يتم خصم التأخير أقل من هذا العدد</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-right block mb-1">معامل خصم التأخير</label>
+                        <Select defaultValue="1">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">1x (عادي)</SelectItem>
+                            <SelectItem value="1.5">1.5x (مضاعف)</SelectItem>
+                            <SelectItem value="2">2x (مضاعف)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-right mb-2 text-blue-800">طريقة حساب الخصم:</h4>
+                      <div className="text-sm text-blue-700 text-right space-y-1">
+                        <p>• قيمة الساعة الواحدة = الراتب الأساسي ÷ ساعات العمل الشهرية</p>
+                        <p>• خصم التأخير = (دقائق التأخير ÷ 60) × قيمة الساعة × معامل الخصم</p>
+                        <p>• خصم الغياب = ساعات الغياب × قيمة الساعة</p>
+                        <p className="font-medium">مثال: راتب 1000 د.ك، تأخير 30 دقيقة</p>
+                        <p>قيمة الساعة = 1000 ÷ 240 = 4.17 د.ك</p>
+                        <p>الخصم = (30 ÷ 60) × 4.17 × 1 = 2.08 د.ك</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <Button onClick={handleSaveSettings} className="px-8">
+                    حفظ الإعدادات
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
