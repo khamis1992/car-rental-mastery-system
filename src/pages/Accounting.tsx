@@ -13,84 +13,37 @@ const Accounting = () => {
   const financialStats = [
     {
       title: "الإيرادات الشهرية",
-      value: formatCurrencyKWD(45000),
-      change: "+12%",
+      value: formatCurrencyKWD(0),
+      change: "0%",
       icon: <TrendingUp className="w-6 h-6 text-green-500" />,
       trend: "up"
     },
     {
       title: "المدفوعات المعلقة",
-      value: formatCurrencyKWD(8500),
-      change: "-5%",
+      value: formatCurrencyKWD(0),
+      change: "0%",
       icon: <CreditCard className="w-6 h-6 text-orange-500" />,
       trend: "down"
     },
     {
       title: "إجمالي المصروفات",
-      value: formatCurrencyKWD(12300),
-      change: "+3%",
+      value: formatCurrencyKWD(0),
+      change: "0%",
       icon: <Receipt className="w-6 h-6 text-red-500" />,
       trend: "up"
     },
     {
       title: "صافي الربح",
-      value: formatCurrencyKWD(32700),
-      change: "+18%",
+      value: formatCurrencyKWD(0),
+      change: "0%",
       icon: <DollarSign className="w-6 h-6 text-green-600" />,
       trend: "up"
     }
   ];
 
-  const recentTransactions = [
-    {
-      id: "TRX001",
-      type: "إيراد",
-      description: "دفعة عقد إيجار - CON000001",
-      amount: 2500,
-      date: "2025-01-01",
-      status: "مكتمل"
-    },
-    {
-      id: "TRX002", 
-      type: "مصروف",
-      description: "صيانة مركبة VEH0001",
-      amount: -800,
-      date: "2024-12-30",
-      status: "مكتمل"
-    },
-    {
-      id: "TRX003",
-      type: "إيراد",
-      description: "تأمين مركبة",
-      amount: 500,
-      date: "2024-12-29",
-      status: "معلق"
-    }
-  ];
+  const recentTransactions: any[] = [];
 
-  const monthlyReports = [
-    {
-      month: "ديسمبر 2024",
-      revenue: 42000,
-      expenses: 15000,
-      contracts: 28,
-      status: "مكتمل"
-    },
-    {
-      month: "نوفمبر 2024", 
-      revenue: 38000,
-      expenses: 13500,
-      contracts: 25,
-      status: "مكتمل"
-    },
-    {
-      month: "أكتوبر 2024",
-      revenue: 35000,
-      expenses: 12000,
-      contracts: 22,
-      status: "مكتمل"
-    }
-  ];
+  const monthlyReports: any[] = [];
 
   return (
     <div className="p-6 space-y-6">
@@ -166,29 +119,35 @@ const Accounting = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentTransactions.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-3 h-3 rounded-full ${
-                        transaction.type === 'إيراد' ? 'bg-green-500' : 'bg-red-500'
-                      }`} />
-                      <div>
-                        <p className="font-medium">{transaction.description}</p>
-                        <p className="text-sm text-muted-foreground">{transaction.id} • {transaction.date}</p>
+                {recentTransactions.length > 0 ? (
+                  recentTransactions.map((transaction) => (
+                    <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-3 h-3 rounded-full ${
+                          transaction.type === 'إيراد' ? 'bg-green-500' : 'bg-red-500'
+                        }`} />
+                        <div>
+                          <p className="font-medium">{transaction.description}</p>
+                          <p className="text-sm text-muted-foreground">{transaction.id} • {transaction.date}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                         <p className={`font-bold ${
+                           transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                         }`}>
+                           {transaction.amount > 0 ? '+' : ''}{formatCurrencyKWD(Math.abs(transaction.amount))}
+                         </p>
+                        <Badge variant={transaction.status === 'مكتمل' ? 'default' : 'secondary'}>
+                          {transaction.status}
+                        </Badge>
                       </div>
                     </div>
-                    <div className="text-right">
-                       <p className={`font-bold ${
-                         transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
-                       }`}>
-                         {transaction.amount > 0 ? '+' : ''}{formatCurrencyKWD(Math.abs(transaction.amount))}
-                       </p>
-                      <Badge variant={transaction.status === 'مكتمل' ? 'default' : 'secondary'}>
-                        {transaction.status}
-                      </Badge>
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    لا توجد معاملات مالية
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
@@ -199,72 +158,8 @@ const Accounting = () => {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="card-elegant">
-              <CardHeader>
-                <CardTitle>توزيع الإيرادات</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span>إيجارات يومية</span>
-                    <span className="font-bold">65%</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full" style={{ width: '65%' }}></div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span>إيجارات شهرية</span>
-                    <span className="font-bold">25%</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full" style={{ width: '25%' }}></div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span>رسوم إضافية</span>
-                    <span className="font-bold">10%</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full" style={{ width: '10%' }}></div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-elegant">
-              <CardHeader>
-                <CardTitle>توزيع المصروفات</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span>صيانة المركبات</span>
-                    <span className="font-bold">40%</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-red-500 h-2 rounded-full" style={{ width: '40%' }}></div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span>التأمين</span>
-                    <span className="font-bold">30%</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-red-500 h-2 rounded-full" style={{ width: '30%' }}></div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span>مصروفات إدارية</span>
-                    <span className="font-bold">30%</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-red-500 h-2 rounded-full" style={{ width: '30%' }}></div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="text-center py-8 text-muted-foreground">
+            التحليلات المالية - سيتم عرض البيانات عند وجود معاملات مالية
           </div>
         </TabsContent>
       </Tabs>
