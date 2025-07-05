@@ -51,29 +51,31 @@ export const AttendanceReports: React.FC = () => {
       // جلب بيانات الحضور
       const attendanceData = await attendanceManagementService.getAllAttendanceRecords(filters);
       
-      // تحديد عنوان التقرير والفترة
+      // تحديد عنوان التقرير
       const reportTitle = reportTypes.find(type => type.value === reportType)?.label || 'تقرير الحضور';
       const monthName = months.find(month => month.value === selectedMonth)?.label || '';
-      const period = `${monthName} ${selectedYear}`;
+      const fullTitle = `${reportTitle} - ${monthName} ${selectedYear}`;
       
-      // إعداد بيانات التقرير
-      const reportData = {
-        title: reportTitle,
-        period: period,
-        data: attendanceData,
-        stats: stats ? {
-          totalEmployees: stats.totalEmployees,
-          presentToday: stats.presentToday,
-          absentToday: stats.absentToday,
-          lateToday: stats.lateToday,
-          totalHours: stats.totalHoursThisMonth,
-          overtimeHours: stats.overtimeHoursThisMonth
-        } : undefined
-      };
+      // تحويل البيانات للتنسيق المطلوب
+      const formattedData = attendanceData.map(record => ({
+        id: record.id,
+        employee_name: record.employees?.first_name + ' ' + record.employees?.last_name || 'غير محدد',
+        employee_number: record.employees?.employee_number || 'غير محدد',
+        date: record.date,
+        check_in_time: record.check_in_time,
+        check_out_time: record.check_out_time,
+        total_hours: record.total_hours,
+        overtime_hours: record.overtime_hours,
+        status: record.check_in_time ? 'present' : 'absent',
+        department: record.employees?.department || 'غير محدد'
+      }));
 
-      // إنشاء وتحميل التقرير بصيغة PDF
-      await attendanceReportsPDFService.generateAttendanceReport(reportData);
-      await attendanceReportsPDFService.downloadReport(`تقرير_الحضور_${selectedYear}_${selectedMonth}.pdf`);
+      // تحميل التقرير مباشرة
+      await attendanceReportsPDFService.downloadReport(
+        formattedData,
+        reportType as 'daily' | 'monthly' | 'summary',
+        fullTitle
+      );
       
       toast({
         title: 'تم التصدير',
