@@ -3142,6 +3142,45 @@ export type Database = {
           },
         ]
       }
+      violation_accounting_entries: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          journal_entry_id: string
+          violation_payment_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          journal_entry_id: string
+          violation_payment_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          journal_entry_id?: string
+          violation_payment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "violation_accounting_entries_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "violation_accounting_entries_violation_payment_id_fkey"
+            columns: ["violation_payment_id"]
+            isOneToOne: false
+            referencedRelation: "violation_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       violation_history: {
         Row: {
           action_type: string
@@ -3214,7 +3253,7 @@ export type Database = {
           notes?: string | null
           payment_date?: string
           payment_method?: string
-          payment_number: string
+          payment_number?: string
           receipt_url?: string | null
           status?: string | null
           transaction_reference?: string | null
@@ -3389,6 +3428,26 @@ export type Database = {
       }
       create_vehicle_asset_with_hierarchy: {
         Args: { vehicle_id: string; vehicle_data: Json }
+        Returns: string
+      }
+      create_violation_accounting_entry: {
+        Args: {
+          payment_id: string
+          payment_amount: number
+          payment_date: string
+          violation_number: string
+          customer_name: string
+        }
+        Returns: string
+      }
+      create_violation_receivable_entry: {
+        Args: {
+          violation_id: string
+          violation_amount: number
+          violation_date: string
+          violation_number: string
+          customer_name: string
+        }
         Returns: string
       }
       extract_transaction_features: {

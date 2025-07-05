@@ -108,36 +108,60 @@ export const violationService = {
   },
 
   async createViolation(violation: Partial<TrafficViolation>): Promise<TrafficViolation> {
-    const { data: violationNumber } = await supabase.rpc('generate_violation_number');
-    
-    // الحصول على معلومات المستخدم بشكل آمن
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    const { data, error } = await supabase
-      .from('traffic_violations')
-      .insert([{
-        violation_number: violationNumber,
-        violation_type_id: violation.violation_type_id!,
-        violation_date: violation.violation_date!,
-        location: violation.location,
-        description: violation.description,
-        vehicle_id: violation.vehicle_id!,
-        contract_id: violation.contract_id,
-        customer_id: violation.customer_id!,
-        official_violation_number: violation.official_violation_number,
-        issuing_authority: violation.issuing_authority,
-        officer_name: violation.officer_name,
-        fine_amount: violation.fine_amount!,
-        processing_fee: violation.processing_fee || 0,
-        total_amount: violation.total_amount!,
-        notes: violation.notes,
-        created_by: user?.id
-      }])
-      .select()
-      .single();
+    try {
+      const { data: violationNumber } = await supabase.rpc('generate_violation_number');
+      
+      // الحصول على معلومات المستخدم بشكل آمن
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data, error } = await supabase
+        .from('traffic_violations')
+        .insert([{
+          violation_number: violationNumber,
+          violation_type_id: violation.violation_type_id!,
+          violation_date: violation.violation_date!,
+          location: violation.location,
+          description: violation.description,
+          vehicle_id: violation.vehicle_id!,
+          contract_id: violation.contract_id,
+          customer_id: violation.customer_id!,
+          official_violation_number: violation.official_violation_number,
+          issuing_authority: violation.issuing_authority,
+          officer_name: violation.officer_name,
+          fine_amount: violation.fine_amount!,
+          processing_fee: violation.processing_fee || 0,
+          total_amount: violation.total_amount!,
+          notes: violation.notes,
+          created_by: user?.id
+        }])
+        .select(`
+          *,
+          customers!inner (name),
+          violation_types!inner (violation_name_ar)
+        `)
+        .single();
 
-    if (error) throw error;
-    return data as TrafficViolation;
+      if (error) throw error;
+
+      // إنشاء قيد محاسبي للمديونية
+      try {
+        await supabase.rpc('create_violation_receivable_entry', {
+          violation_id: data.id,
+          violation_amount: data.total_amount,
+          violation_date: data.violation_date,
+          violation_number: data.violation_number,
+          customer_name: data.customers?.name || 'غير محدد'
+        });
+      } catch (accountingError) {
+        console.warn('Failed to create accounting entry for violation:', accountingError);
+        // لا نفشل العملية بأكملها إذا فشل القيد المحاسبي
+      }
+
+      return data as TrafficViolation;
+    } catch (error) {
+      console.error('Error creating violation:', error);
+      throw new Error('فشل في إنشاء المخالفة المرورية. يرجى المحاولة مرة أخرى.');
+    }
   },
 
   async updateViolation(id: string, updates: Partial<TrafficViolation>): Promise<TrafficViolation> {
@@ -190,28 +214,51 @@ export const violationService = {
   },
 
   async createViolationPayment(payment: Partial<ViolationPayment>): Promise<ViolationPayment> {
-    const { data: paymentNumber } = await supabase.rpc('generate_violation_payment_number');
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    const { data, error } = await supabase
-      .from('violation_payments')
-      .insert([{
-        payment_number: paymentNumber,
-        violation_id: payment.violation_id!,
-        amount: payment.amount!,
-        payment_date: payment.payment_date!,
-        payment_method: payment.payment_method!,
-        transaction_reference: payment.transaction_reference,
-        bank_name: payment.bank_name,
-        check_number: payment.check_number,
-        notes: payment.notes,
-        created_by: user?.id
-      }])
-      .select()
-      .single();
+    try {
+      // الحصول على معلومات المستخدم بشكل آمن
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!payment.violation_id) {
+        throw new Error('معرف المخالفة مطلوب');
+      }
 
-    if (error) throw error;
-    return data as ViolationPayment;
+      if (!payment.amount || payment.amount <= 0) {
+        throw new Error('مبلغ الدفعة يجب أن يكون أكبر من الصفر');
+      }
+
+      // إنشاء الدفعة بحالة مكتملة افتراضياً
+      const { data, error } = await supabase
+        .from('violation_payments')
+        .insert([{
+          violation_id: payment.violation_id,
+          amount: payment.amount,
+          payment_date: payment.payment_date!,
+          payment_method: payment.payment_method!,
+          transaction_reference: payment.transaction_reference,
+          bank_name: payment.bank_name,
+          check_number: payment.check_number,
+          notes: payment.notes,
+          status: 'completed', // تعيين الحالة كمكتملة افتراضياً
+          created_by: user?.id
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Database error creating payment:', error);
+        throw new Error('فشل في حفظ الدفعة في قاعدة البيانات');
+      }
+
+      return data as ViolationPayment;
+    } catch (error) {
+      console.error('Error creating violation payment:', error);
+      
+      if (error instanceof Error) {
+        throw error;
+      }
+      
+      throw new Error('فشل في تسجيل دفعة المخالفة. يرجى المحاولة مرة أخرى.');
+    }
   },
 
   // إحصائيات المخالفات

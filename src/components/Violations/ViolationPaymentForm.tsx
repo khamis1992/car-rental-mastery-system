@@ -56,7 +56,7 @@ export const ViolationPaymentForm: React.FC<ViolationPaymentFormProps> = ({
     if (formData.amount <= 0 || formData.amount > outstandingAmount) {
       toast({
         title: 'مبلغ غير صحيح',
-        description: `يجب أن يكون المبلغ بين 0 و د.ك ${outstandingAmount.toFixed(3)}`,
+        description: `يجب أن يكون المبلغ بين 0.001 و د.ك ${outstandingAmount.toFixed(3)}`,
         variant: 'destructive'
       });
       return;
@@ -71,17 +71,26 @@ export const ViolationPaymentForm: React.FC<ViolationPaymentFormProps> = ({
       });
 
       toast({
-        title: 'تم تسجيل الدفعة',
-        description: 'تم تسجيل دفعة المخالفة بنجاح'
+        title: 'تم تسجيل الدفعة بنجاح',
+        description: `تم تسجيل دفعة بقيمة د.ك ${formData.amount.toFixed(3)} وإنشاء القيد المحاسبي تلقائياً`
       });
 
       onSuccess();
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating payment:', error);
+      
+      let errorMessage = 'حدث خطأ أثناء تسجيل دفعة المخالفة';
+      
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
       toast({
         title: 'خطأ في تسجيل الدفعة',
-        description: 'حدث خطأ أثناء تسجيل دفعة المخالفة',
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
