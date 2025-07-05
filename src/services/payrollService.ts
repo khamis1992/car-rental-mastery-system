@@ -26,78 +26,7 @@ export interface PayrollSettings {
   max_social_insurance: number;
 }
 
-// Mock data for demonstration - will be replaced with real database calls when tables are ready
-const mockPayrollData: PayrollWithDetails[] = [
-  {
-    id: '1',
-    employee_id: 'emp1',
-    employee_name: 'أحمد علي محمد',
-    employee_number: 'EMP001',
-    pay_period_start: '2024-01-01',
-    pay_period_end: '2024-01-31',
-    basic_salary: 1000,
-    overtime_amount: 150,
-    allowances: 200,
-    bonuses: 100,
-    deductions: 50,
-    tax_deduction: 75,
-    social_insurance: 60,
-    gross_salary: 1450,
-    net_salary: 1265,
-    total_working_days: 22,
-    actual_working_days: 20,
-    overtime_hours: 8,
-    status: 'paid',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z'
-  },
-  {
-    id: '2',
-    employee_id: 'emp2',
-    employee_name: 'فاطمة حسن',
-    employee_number: 'EMP002',
-    pay_period_start: '2024-01-01',
-    pay_period_end: '2024-01-31',
-    basic_salary: 800,
-    overtime_amount: 0,
-    allowances: 150,
-    bonuses: 0,
-    deductions: 0,
-    tax_deduction: 40,
-    social_insurance: 48,
-    gross_salary: 950,
-    net_salary: 862,
-    total_working_days: 22,
-    actual_working_days: 22,
-    overtime_hours: 0,
-    status: 'approved',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z'
-  },
-  {
-    id: '3',
-    employee_id: 'emp3',
-    employee_name: 'محمد السعيد',
-    employee_number: 'EMP003',
-    pay_period_start: '2024-01-01',
-    pay_period_end: '2024-01-31',
-    basic_salary: 1200,
-    overtime_amount: 200,
-    allowances: 300,
-    bonuses: 150,
-    deductions: 100,
-    tax_deduction: 90,
-    social_insurance: 72,
-    gross_salary: 1850,
-    net_salary: 1588,
-    total_working_days: 22,
-    actual_working_days: 21,
-    overtime_hours: 12,
-    status: 'calculated',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z'
-  }
-];
+// No mock data - using real database
 
 const defaultSettings: PayrollSettings = {
   tax_rate: 5.0,
@@ -112,73 +41,104 @@ const defaultSettings: PayrollSettings = {
 export const payrollService = {
   // جلب جميع سجلات الرواتب مع التفاصيل
   async getAllPayroll(filters?: PayrollFilters): Promise<PayrollWithDetails[]> {
-    // محاكاة استدعاء قاعدة البيانات
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    let results = [...mockPayrollData];
+    let query = supabase
+      .from('payroll')
+      .select(`
+        *,
+        employees!employee_id(
+          id,
+          employee_number,
+          first_name,
+          last_name,
+          position,
+          department
+        )
+      `)
+      .order('created_at', { ascending: false });
 
     // تطبيق الفلاتر
     if (filters?.status && filters.status !== 'all') {
-      results = results.filter(payroll => payroll.status === filters.status);
+      query = query.eq('status', filters.status);
     }
 
-    if (filters?.searchTerm) {
-      const searchLower = filters.searchTerm.toLowerCase();
-      results = results.filter(payroll => 
-        payroll.employee_name?.toLowerCase().includes(searchLower) ||
-        payroll.employee_number?.toLowerCase().includes(searchLower)
-      );
+    if (filters?.employeeId) {
+      query = query.eq('employee_id', filters.employeeId);
     }
 
     if (filters?.month && filters?.year) {
-      const targetDate = `${filters.year}-${filters.month.toString().padStart(2, '0')}`;
+      const startDate = `${filters.year}-${filters.month.toString().padStart(2, '0')}-01`;
+      const endDate = `${filters.year}-${filters.month.toString().padStart(2, '0')}-31`;
+      query = query.gte('pay_period_start', startDate).lte('pay_period_end', endDate);
+    }
+
+    const { data, error } = await query;
+    
+    if (error) throw error;
+    
+    let results = (data || []).map(payroll => ({
+      ...payroll,
+      employee_name: payroll.employees ? `${payroll.employees.first_name} ${payroll.employees.last_name}` : '',
+      employee_number: payroll.employees?.employee_number || ''
+    }));
+
+    // فلترة البحث النصي
+    if (filters?.searchTerm) {
+      const searchLower = filters.searchTerm.toLowerCase();
       results = results.filter(payroll => 
-        payroll.pay_period_start.startsWith(targetDate)
+        payroll.employee_name.toLowerCase().includes(searchLower) ||
+        payroll.employee_number.toLowerCase().includes(searchLower)
       );
     }
 
-    return results;
+    // فلترة القسم
+    if (filters?.department) {
+      results = results.filter(payroll => 
+        payroll.employees?.department === filters.department
+      );
+    }
+
+    return results as PayrollWithDetails[];
   },
 
   // إنشاء سجل راتب جديد
   async createPayroll(payrollData: Omit<Payroll, 'id' | 'created_at' | 'updated_at'>): Promise<Payroll> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const newPayroll: Payroll = {
-      ...payrollData,
-      id: Date.now().toString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+    const { data, error } = await supabase
+      .from('payroll')
+      .insert({
+        ...payrollData,
+        created_by: (await supabase.auth.getUser()).data.user?.id
+      })
+      .select()
+      .single();
 
-    return newPayroll;
+    if (error) throw error;
+    return data as Payroll;
   },
 
   // تحديث سجل راتب
   async updatePayroll(id: string, updates: Partial<Payroll>): Promise<Payroll> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const index = mockPayrollData.findIndex(p => p.id === id);
-    if (index !== -1) {
-      mockPayrollData[index] = {
-        ...mockPayrollData[index],
+    const { data, error } = await supabase
+      .from('payroll')
+      .update({
         ...updates,
         updated_at: new Date().toISOString()
-      };
-      return mockPayrollData[index];
-    }
-    
-    throw new Error('سجل الراتب غير موجود');
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Payroll;
   },
 
   // حذف سجل راتب
   async deletePayroll(id: string): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const index = mockPayrollData.findIndex(p => p.id === id);
-    if (index !== -1) {
-      mockPayrollData.splice(index, 1);
-    }
+    const { error } = await supabase
+      .from('payroll')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
   },
 
   // حساب الراتب تلقائياً بناءً على الحضور
@@ -256,23 +216,25 @@ export const payrollService = {
 
   // إحصائيات الرواتب
   async getPayrollStats(month?: number, year?: number) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    let data = mockPayrollData;
+    let query = supabase.from('payroll').select('*');
     
     if (month && year) {
-      const targetDate = `${year}-${month.toString().padStart(2, '0')}`;
-      data = data.filter(payroll => 
-        payroll.pay_period_start.startsWith(targetDate)
-      );
+      const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+      const endDate = `${year}-${month.toString().padStart(2, '0')}-31`;
+      query = query.gte('pay_period_start', startDate).lte('pay_period_end', endDate);
     }
 
-    const totalGross = data.reduce((sum, p) => sum + p.gross_salary, 0);
-    const totalNet = data.reduce((sum, p) => sum + p.net_salary, 0);
-    const totalDeductions = data.reduce((sum, p) => 
-      sum + p.deductions + p.tax_deduction + p.social_insurance, 0);
-    const paidCount = data.filter(p => p.status === 'paid').length;
-    const totalCount = data.length;
+    const { data, error } = await query;
+    
+    if (error) throw error;
+
+    const payrollData = data || [];
+    const totalGross = payrollData.reduce((sum, p) => sum + (p.gross_salary || 0), 0);
+    const totalNet = payrollData.reduce((sum, p) => sum + (p.net_salary || 0), 0);
+    const totalDeductions = payrollData.reduce((sum, p) => 
+      sum + (p.deductions || 0) + (p.tax_deduction || 0) + (p.social_insurance || 0), 0);
+    const paidCount = payrollData.filter(p => p.status === 'paid').length;
+    const totalCount = payrollData.length;
 
     return {
       totalGross,
