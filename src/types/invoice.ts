@@ -131,3 +131,16 @@ export interface PaymentFormData {
   check_number?: string;
   notes?: string;
 }
+
+export interface DirectPaymentData {
+  contract_id: string;
+  customer_id: string;
+  amount: number;
+  payment_date: string;
+  payment_method: 'cash' | 'card' | 'bank_transfer' | 'check' | 'online';
+  transaction_reference?: string;
+  bank_name?: string;
+  check_number?: string;
+  notes?: string;
+  invoice_description?: string;
+}

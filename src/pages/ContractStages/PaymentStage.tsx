@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DollarSign, ArrowRight, Receipt, CreditCard, AlertTriangle, CheckCircle, Eye, Plus } from 'lucide-react';
+import { DollarSign, ArrowRight, Receipt, CreditCard, AlertTriangle, CheckCircle, Eye, Plus, Zap } from 'lucide-react';
 import { ContractStageWrapper } from '@/components/Contracts/ContractStageWrapper';
 import { InvoiceForm } from '@/components/Invoicing/InvoiceForm';
 import { PaymentForm } from '@/components/Invoicing/PaymentForm';
+import { DirectPaymentForm } from '@/components/Invoicing/DirectPaymentForm';
 import { supabase } from '@/integrations/supabase/client';
 import { serviceContainer } from '@/services/Container/ServiceContainer';
 import { useToast } from '@/hooks/use-toast';
@@ -27,6 +28,7 @@ const PaymentStage = () => {
   const [loading, setLoading] = useState(true);
   const [invoiceFormOpen, setInvoiceFormOpen] = useState(false);
   const [paymentFormOpen, setPaymentFormOpen] = useState(false);
+  const [directPaymentFormOpen, setDirectPaymentFormOpen] = useState(false);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState<any>(null);
 
   const invoiceService = serviceContainer.getInvoiceBusinessService();
@@ -259,6 +261,15 @@ const PaymentStage = () => {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>الفواتير</CardTitle>
           <div className="flex gap-2">
+            {/* دفعة مباشرة - بدون فاتورة مسبقة */}
+            <Button
+              onClick={() => setDirectPaymentFormOpen(true)}
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
+              <Zap className="w-4 h-4" />
+              دفعة مباشرة
+            </Button>
+            
             {contract.status === 'completed' && invoices.length === 0 && (
               <Button onClick={handleCreateInvoice} className="flex items-center gap-2">
                 <Receipt className="w-4 h-4" />
@@ -471,6 +482,15 @@ const PaymentStage = () => {
           invoice={selectedInvoiceForPayment}
         />
       )}
+
+      {/* نموذج الدفعة المباشرة */}
+      <DirectPaymentForm
+        open={directPaymentFormOpen}
+        onOpenChange={setDirectPaymentFormOpen}
+        onSuccess={handlePaymentSuccess}
+        contract={contract}
+        customer={contract?.customers}
+      />
     </ContractStageWrapper>
   );
 };
