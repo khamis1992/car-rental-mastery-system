@@ -11,7 +11,7 @@ export const invoiceService = {
         customers!inner(name, phone),
         contracts!inner(
           contract_number,
-          vehicles!inner(make, model, vehicle_number)
+          vehicles(make, model, vehicle_number)
         )
       `)
       .order('created_at', { ascending: false });

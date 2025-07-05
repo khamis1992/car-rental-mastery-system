@@ -12,8 +12,10 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
       .select(`
         *,
         customers!inner(name, phone),
-        contracts!inner(contract_number),
-        contracts!inner(vehicles!inner(make, model, vehicle_number))
+        contracts!inner(
+          contract_number,
+          vehicles(make, model, vehicle_number)
+        )
       `)
       .order('created_at', { ascending: false });
 
@@ -36,8 +38,13 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
       .select(`
         *,
         customers(name, phone, email, address, national_id),
-        contracts(contract_number, daily_rate, start_date, end_date),
-        contracts(vehicles(make, model, year, license_plate, vehicle_number, color)),
+        contracts(
+          contract_number, 
+          daily_rate, 
+          start_date, 
+          end_date,
+          vehicles(make, model, year, license_plate, vehicle_number, color)
+        ),
         invoice_items(*),
         payments(*)
       `)
