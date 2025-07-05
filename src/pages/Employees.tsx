@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Search, Users, UserCheck, UserX, Link, UserPlus } from 'lucide-react';
+import { Plus, Search, Users, UserCheck, UserX, Link, UserPlus, DollarSign } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AddEmployeeForm } from '@/components/Employees/AddEmployeeForm';
 import { LinkUserDialog } from '@/components/Employees/LinkUserDialog';
@@ -283,36 +283,45 @@ const Employees = () => {
                     <div key={employee.id} className="bg-gradient-to-r from-background to-accent/5 border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:border-primary/20">
                       {/* الهيدر - الاسم ورقم الموظف */}
                       <div className="flex justify-between items-start mb-6">
-                        <div className="flex gap-3">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleLinkUser(employee)}
-                            className="flex items-center gap-2 bg-success text-success-foreground border-success"
-                          >
-                            <Link className="w-3 h-3" />
-                            ربط حساب
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleEditEmployee(employee)}
-                            className="bg-warning text-warning-foreground border-warning"
-                          >
-                            تعديل
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => {
-                              setSelectedEmployee(employee);
-                              setShowDetailsDialog(true);
-                            }}
-                            className="bg-primary text-primary-foreground border-primary"
-                          >
-                            عرض
-                          </Button>
-                        </div>
+                         <div className="flex gap-3">
+                           <Button 
+                             variant="outline" 
+                             size="sm"
+                             onClick={() => window.open(`/payroll?employee=${employee.id}`, '_blank')}
+                             className="flex items-center gap-2 bg-green-500 text-white border-green-500 hover:bg-green-600"
+                           >
+                             <DollarSign className="w-3 h-3" />
+                             عرض الرواتب
+                           </Button>
+                           <Button 
+                             variant="outline" 
+                             size="sm"
+                             onClick={() => handleLinkUser(employee)}
+                             className="flex items-center gap-2 bg-success text-success-foreground border-success"
+                           >
+                             <Link className="w-3 h-3" />
+                             ربط حساب
+                           </Button>
+                           <Button 
+                             variant="outline" 
+                             size="sm"
+                             onClick={() => handleEditEmployee(employee)}
+                             className="bg-warning text-warning-foreground border-warning"
+                           >
+                             تعديل
+                           </Button>
+                           <Button 
+                             variant="outline" 
+                             size="sm"
+                             onClick={() => {
+                               setSelectedEmployee(employee);
+                               setShowDetailsDialog(true);
+                             }}
+                             className="bg-primary text-primary-foreground border-primary"
+                           >
+                             عرض
+                           </Button>
+                         </div>
                         
                         <div className="flex items-center gap-4">
                           <div className="text-right">

@@ -6,17 +6,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DollarSign, Calculator, FileText, Download, Eye, Search, Plus, Settings } from 'lucide-react';
+import { DollarSign, Calculator, FileText, Download, Eye, Search, Plus, Settings, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { payrollService, PayrollWithDetails, PayrollFilters, PayrollSettings } from '@/services/payrollService';
 import { useToast } from '@/hooks/use-toast';
+import { useSearchParams } from 'react-router-dom';
 
 const Payroll = () => {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [monthFilter, setMonthFilter] = useState('');
+  const [employeeFilter, setEmployeeFilter] = useState(searchParams.get('employee') || '');
+  const [departmentFilter, setDepartmentFilter] = useState('');
   const [payrollData, setPayrollData] = useState<PayrollWithDetails[]>([]);
+  const [employees, setEmployees] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [stats, setStats] = useState({
     totalGross: 0,
     totalNet: 0,
@@ -34,12 +40,26 @@ const Payroll = () => {
     loadPayrollData();
     loadPayrollStats();
     loadPayrollSettings();
+    loadEmployeesAndDepartments();
   }, []);
 
   // تحميل البيانات عند تغيير الفلاتر
   useEffect(() => {
     loadPayrollData();
-  }, [searchTerm, statusFilter, monthFilter]);
+  }, [searchTerm, statusFilter, monthFilter, employeeFilter, departmentFilter]);
+
+  const loadEmployeesAndDepartments = async () => {
+    try {
+      const [employeesData, departmentsData] = await Promise.all([
+        payrollService.getEmployeesForFilter(),
+        payrollService.getDepartmentsForFilter()
+      ]);
+      setEmployees(employeesData);
+      setDepartments(departmentsData);
+    } catch (error) {
+      console.error('خطأ في تحميل بيانات الموظفين والأقسام:', error);
+    }
+  };
 
   const loadPayrollData = async () => {
     try {
@@ -49,7 +69,9 @@ const Payroll = () => {
         searchTerm: searchTerm || undefined,
         status: statusFilter || undefined,
         month: monthFilter ? parseInt(monthFilter) : undefined,
-        year: monthFilter ? new Date().getFullYear() : undefined
+        year: monthFilter ? new Date().getFullYear() : undefined,
+        employeeId: employeeFilter || undefined,
+        department: departmentFilter || undefined
       };
 
       const data = await payrollService.getAllPayroll(filters);
@@ -235,9 +257,16 @@ const Payroll = () => {
           <p className="text-muted-foreground">حساب ومعالجة رواتب الموظفين</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
+          <Button 
+            variant="outline"
+            onClick={() => window.open('/employees', '_blank')}
+          >
+            <User className="w-4 h-4 ml-2" />
+            إدارة الموظفين
+          </Button>
+          <Button variant="outline" onClick={handleCalculateMonthlyPayroll} disabled={calculating}>
             <Calculator className="w-4 h-4 ml-2" />
-            حساب الرواتب
+            {calculating ? 'جاري الحساب...' : 'حساب الرواتب'}
           </Button>
           <Button>
             <FileText className="w-4 h-4 ml-2" />
@@ -341,6 +370,34 @@ const Payroll = () => {
                     <SelectItem value="paid">مدفوع</SelectItem>
                   </SelectContent>
                 </Select>
+
+                <Select value={employeeFilter} onValueChange={setEmployeeFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="الموظف" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">جميع الموظفين</SelectItem>
+                    {employees.map((emp: any) => (
+                      <SelectItem key={emp.id} value={emp.id}>
+                        {emp.first_name} {emp.last_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="القسم" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">جميع الأقسام</SelectItem>
+                    {departments.map((dept: any) => (
+                      <SelectItem key={dept} value={dept}>
+                        {dept}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </CardHeader>
             
@@ -391,9 +448,19 @@ const Payroll = () => {
                           </TableCell>
                           <TableCell>{formatCurrency(payroll.basic_salary)}</TableCell>
                           <TableCell>
-                            <div>
-                              <div className="font-medium">{payroll.employee_name}</div>
-                              <div className="text-sm text-muted-foreground">{payroll.employee_number}</div>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium">{payroll.employee_name}</div>
+                                <div className="text-sm text-muted-foreground">{payroll.employee_number}</div>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => window.open(`/employees?employee=${payroll.employee_id}`, '_blank')}
+                                className="text-primary hover:text-primary/80"
+                              >
+                                <User className="w-4 h-4" />
+                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>
