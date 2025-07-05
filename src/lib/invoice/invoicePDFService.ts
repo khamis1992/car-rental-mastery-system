@@ -23,7 +23,7 @@ export const generateInvoicePDF = async (
   tempDiv.style.direction = 'rtl';
 
   // محتوى الفاتورة
-  tempDiv.innerHTML = generateInvoiceHTML(invoice, options);
+  tempDiv.innerHTML = await generateInvoiceHTML(invoice, options);
 
   document.body.appendChild(tempDiv);
 
