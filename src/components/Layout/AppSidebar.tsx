@@ -237,13 +237,13 @@ export function AppSidebar() {
         <SidebarGroup>
           <CollapsibleTrigger asChild>
             <SidebarGroupLabel 
-              className={`cursor-pointer flex items-center justify-between hover:bg-sidebar-accent/50 rounded-md transition-colors ${
+              className={`cursor-pointer rtl-header hover:bg-sidebar-accent/50 rounded-md transition-colors ${
                 isGroupActive ? 'text-sidebar-accent-foreground bg-sidebar-accent/20' : ''
               }`}
             >
-              <div className="flex items-center gap-2">
-                <IconComponent className="w-4 h-4" />
+              <div className="rtl-flex">
                 {state === "expanded" && <span>{title}</span>}
+                <IconComponent className="w-4 h-4" />
               </div>
               {state === "expanded" && (
                 <div className="transition-transform duration-200">
@@ -265,10 +265,10 @@ export function AppSidebar() {
                        <NavLink 
                          to={item.url} 
                          end={item.url === "/"}
-                         className={`${getNavClassName(item.url)} flex items-center gap-2`}
+                         className={`${getNavClassName(item.url)} rtl-flex`}
                        >
-                         <item.icon className="w-4 h-4" />
                          {state === "expanded" && <span>{item.title}</span>}
+                         <item.icon className="w-4 h-4" />
                        </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -282,14 +282,11 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r" side="left">
+    <Sidebar className="border-l" side="right">
       <SidebarHeader className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="bg-gradient-primary p-2 rounded-lg shadow-glow">
-            <div className="text-primary-foreground font-bold text-lg">🚗</div>
-          </div>
+        <div className="rtl-flex gap-3">
           {state === "expanded" && (
-            <div className="flex-1 text-left">
+            <div className="flex-1 text-right">
               <h2 className="text-lg font-bold text-foreground">البشائر الخليجية</h2>
               {profile && (
                 <Badge className={`text-white text-xs ${getRoleColor(profile.role)}`}>
@@ -298,6 +295,9 @@ export function AppSidebar() {
               )}
             </div>
           )}
+          <div className="bg-gradient-primary p-2 rounded-lg shadow-glow">
+            <div className="text-primary-foreground font-bold text-lg">🚗</div>
+          </div>
         </div>
       </SidebarHeader>
 
