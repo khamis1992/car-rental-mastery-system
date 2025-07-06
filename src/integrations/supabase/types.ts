@@ -1275,6 +1275,7 @@ export type Database = {
           company_signed_at: string | null
           contract_number: string
           contract_type: Database["public"]["Enums"]["contract_type"]
+          cost_center_id: string | null
           created_at: string
           created_by: string | null
           customer_id: string
@@ -1322,6 +1323,7 @@ export type Database = {
           company_signed_at?: string | null
           contract_number: string
           contract_type: Database["public"]["Enums"]["contract_type"]
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           customer_id: string
@@ -1369,6 +1371,7 @@ export type Database = {
           company_signed_at?: string | null
           contract_number?: string
           contract_type?: Database["public"]["Enums"]["contract_type"]
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           customer_id?: string
@@ -1411,6 +1414,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "contracts_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "contracts_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
@@ -1440,41 +1457,140 @@ export type Database = {
           },
         ]
       }
+      cost_center_allocations: {
+        Row: {
+          allocation_amount: number | null
+          allocation_date: string | null
+          allocation_percentage: number | null
+          cost_center_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          notes: string | null
+          reference_id: string
+          reference_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          allocation_amount?: number | null
+          allocation_date?: string | null
+          allocation_percentage?: number | null
+          cost_center_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          reference_id: string
+          reference_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          allocation_amount?: number | null
+          allocation_date?: string | null
+          allocation_percentage?: number | null
+          cost_center_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          reference_id?: string
+          reference_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_center_allocations_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_center_allocations_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cost_centers: {
         Row: {
+          actual_spent: number | null
+          budget_amount: number | null
           cost_center_code: string
           cost_center_name: string
+          cost_center_type: string | null
           created_at: string
           created_by: string | null
+          department_id: string | null
           description: string | null
+          hierarchy_path: string | null
           id: string
           is_active: boolean | null
+          level: number | null
+          manager_id: string | null
           parent_id: string | null
           updated_at: string
         }
         Insert: {
+          actual_spent?: number | null
+          budget_amount?: number | null
           cost_center_code: string
           cost_center_name: string
+          cost_center_type?: string | null
           created_at?: string
           created_by?: string | null
+          department_id?: string | null
           description?: string | null
+          hierarchy_path?: string | null
           id?: string
           is_active?: boolean | null
+          level?: number | null
+          manager_id?: string | null
           parent_id?: string | null
           updated_at?: string
         }
         Update: {
+          actual_spent?: number | null
+          budget_amount?: number | null
           cost_center_code?: string
           cost_center_name?: string
+          cost_center_type?: string | null
           created_at?: string
           created_by?: string | null
+          department_id?: string | null
           description?: string | null
+          hierarchy_path?: string | null
           id?: string
           is_active?: boolean | null
+          level?: number | null
+          manager_id?: string | null
           parent_id?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "cost_centers_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_centers_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_centers_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "cost_centers_parent_id_fkey"
             columns: ["parent_id"]
@@ -1823,7 +1939,9 @@ export type Database = {
           national_id: string | null
           phone: string | null
           position: string
+          primary_cost_center_id: string | null
           salary: number
+          secondary_cost_center_id: string | null
           status: string
           updated_at: string
           user_id: string | null
@@ -1849,7 +1967,9 @@ export type Database = {
           national_id?: string | null
           phone?: string | null
           position: string
+          primary_cost_center_id?: string | null
           salary: number
+          secondary_cost_center_id?: string | null
           status?: string
           updated_at?: string
           user_id?: string | null
@@ -1875,7 +1995,9 @@ export type Database = {
           national_id?: string | null
           phone?: string | null
           position?: string
+          primary_cost_center_id?: string | null
           salary?: number
+          secondary_cost_center_id?: string | null
           status?: string
           updated_at?: string
           user_id?: string | null
@@ -1894,6 +2016,34 @@ export type Database = {
             columns: ["manager_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_primary_cost_center_id_fkey"
+            columns: ["primary_cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_primary_cost_center_id_fkey"
+            columns: ["primary_cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_secondary_cost_center_id_fkey"
+            columns: ["secondary_cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_secondary_cost_center_id_fkey"
+            columns: ["secondary_cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
             referencedColumns: ["id"]
           },
           {
@@ -2533,6 +2683,13 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_lines_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
             referencedColumns: ["id"]
           },
           {
@@ -3573,6 +3730,7 @@ export type Database = {
           asset_sequence_number: number | null
           body_type: string | null
           color: string
+          cost_center_id: string | null
           created_at: string
           created_by: string | null
           daily_rate: number
@@ -3619,6 +3777,7 @@ export type Database = {
           asset_sequence_number?: number | null
           body_type?: string | null
           color: string
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           daily_rate: number
@@ -3665,6 +3824,7 @@ export type Database = {
           asset_sequence_number?: number | null
           body_type?: string | null
           color?: string
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           daily_rate?: number
@@ -3718,6 +3878,20 @@ export type Database = {
             columns: ["asset_id"]
             isOneToOne: false
             referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
             referencedColumns: ["id"]
           },
         ]
@@ -4009,7 +4183,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      cost_center_report: {
+        Row: {
+          actual_spent: number | null
+          budget_amount: number | null
+          budget_utilization_percentage: number | null
+          contract_count: number | null
+          cost_center_code: string | null
+          cost_center_name: string | null
+          cost_center_type: string | null
+          department_name: string | null
+          employee_count: number | null
+          hierarchy_path: string | null
+          id: string | null
+          level: number | null
+          manager_name: string | null
+          variance: number | null
+          vehicle_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calculate_advanced_kpi: {
@@ -4031,6 +4224,10 @@ export type Database = {
       calculate_budget_variance: {
         Args: { budget_id: string }
         Returns: undefined
+      }
+      calculate_cost_center_actual_costs: {
+        Args: { cost_center_id_param: string }
+        Returns: number
       }
       calculate_financial_kpis: {
         Args: { for_date?: string }
@@ -4281,6 +4478,10 @@ export type Database = {
       safe_delete_contract: {
         Args: { contract_id_param: string; delete_related?: boolean }
         Returns: Json
+      }
+      update_all_cost_center_costs: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       validate_accounting_balance: {
         Args: { journal_entry_id: string }
