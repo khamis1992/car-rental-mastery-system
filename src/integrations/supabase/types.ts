@@ -3620,11 +3620,19 @@ export type Database = {
         Args: { invoice_id: string; invoice_data: Json }
         Returns: string
       }
+      create_invoice_receivable_entry: {
+        Args: { invoice_id: string; invoice_data: Json }
+        Returns: string
+      }
       create_maintenance_accounting_entry: {
         Args: { maintenance_id: string; maintenance_data: Json }
         Returns: string
       }
       create_payment_accounting_entry: {
+        Args: { payment_id: string; payment_data: Json }
+        Returns: string
+      }
+      create_payment_revenue_entry: {
         Args: { payment_id: string; payment_data: Json }
         Returns: string
       }
@@ -3672,6 +3680,10 @@ export type Database = {
           count_duplicates: number
           account_codes: string[]
         }[]
+      }
+      fix_double_revenue_entries: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       fix_unbalanced_accounting_entries: {
         Args: Record<PropertyKey, never>

@@ -24,7 +24,7 @@ export class PaymentBusinessService {
       await this.validatePaymentData(paymentData);
       const payment = await this.paymentRepository.createPayment(paymentData);
       
-      // Create accounting entry for the payment with improved error handling
+      // Create revenue entry for the payment (revenue is recorded when payment is received)
       try {
         const invoice = await this.invoiceRepository.getInvoiceById(paymentData.invoice_id);
         if (invoice) {
@@ -38,13 +38,13 @@ export class PaymentBusinessService {
           });
           
           if (journalEntryId) {
-            console.log(`✅ Payment accounting entry created successfully: ${journalEntryId} for payment ${payment.id}`);
+            console.log(`✅ Payment revenue entry created successfully: ${journalEntryId} for payment ${payment.id}`);
           }
         }
       } catch (accountingError: any) {
-        console.error(`❌ Failed to create accounting entry for payment ${payment.id}:`, accountingError);
+        console.error(`❌ Failed to create revenue entry for payment ${payment.id}:`, accountingError);
         // Don't fail the entire payment creation if accounting fails - log error for later reconciliation
-        console.warn(`⚠️ Payment for invoice ${paymentData.invoice_id} created but accounting entry failed. This payment can be reprocessed using the System Integrity tools.`);
+        console.warn(`⚠️ Payment for invoice ${paymentData.invoice_id} created but revenue entry failed. This payment can be reprocessed using the System Integrity tools.`);
       }
       
       return payment;

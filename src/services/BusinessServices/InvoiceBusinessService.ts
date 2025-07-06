@@ -24,7 +24,7 @@ export class InvoiceBusinessService {
       this.validateInvoiceData(invoiceData);
       const invoice = await this.invoiceRepository.createInvoice(invoiceData);
       
-      // Create accounting entry for the invoice with improved error handling
+      // Create receivable entry for the invoice (no revenue recorded yet)
       try {
         const customerName = await this.getCustomerName(invoice.customer_id);
         const journalEntryId = await this.accountingService.createInvoiceAccountingEntry(invoice.id, {
@@ -36,12 +36,12 @@ export class InvoiceBusinessService {
         });
         
         if (journalEntryId) {
-          console.log(`✅ Invoice accounting entry created successfully: ${journalEntryId}`);
+          console.log(`✅ Invoice receivable entry created successfully: ${journalEntryId}`);
         }
       } catch (accountingError: any) {
-        console.error('❌ Failed to create accounting entry for invoice:', accountingError);
+        console.error('❌ Failed to create receivable entry for invoice:', accountingError);
         // Don't fail the entire invoice creation if accounting fails - log error for later reconciliation
-        console.warn(`⚠️ Invoice ${invoice.invoice_number} created but accounting entry failed. Manual reconciliation may be needed.`);
+        console.warn(`⚠️ Invoice ${invoice.invoice_number} created but receivable entry failed. Manual reconciliation may be needed.`);
       }
       
       return invoice;

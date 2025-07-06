@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Play, AlertCircle, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import { Play, AlertCircle, CheckCircle, XCircle, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AccountingBackfillService } from '@/services/BusinessServices/AccountingBackfillService';
+import { AccountingIntegrationService } from '@/services/BusinessServices/AccountingIntegrationService';
 import { useToast } from '@/hooks/use-toast';
 
 interface BackfillResult {
@@ -26,9 +27,38 @@ export const AccountingBackfillTab = () => {
   const [results, setResults] = useState<BackfillResults | null>(null);
   const [currentStep, setCurrentStep] = useState<string>('');
   const [progress, setProgress] = useState(0);
+  const [isFixingRevenue, setIsFixingRevenue] = useState(false);
+  const [revenueFixResults, setRevenueFixResults] = useState<any>(null);
   const { toast } = useToast();
 
   const backfillService = new AccountingBackfillService();
+  const accountingService = new AccountingIntegrationService();
+
+  const fixDoubleRevenueEntries = async () => {
+    try {
+      setIsFixingRevenue(true);
+      setRevenueFixResults(null);
+
+      const results = await accountingService.fixDoubleRevenueEntries();
+      setRevenueFixResults(results);
+
+      toast({
+        title: 'اكتمل تصحيح الإيرادات المزدوجة',
+        description: `تم معالجة ${results.processed_count} عنصر، وتصحيح ${results.fixed_count} قيد${results.error_count > 0 ? ` مع ${results.error_count} خطأ` : ''}`,
+        variant: results.error_count > 0 ? 'destructive' : 'default'
+      });
+
+    } catch (error) {
+      console.error('Double revenue fix error:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل في تصحيح الإيرادات المزدوجة',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsFixingRevenue(false);
+    }
+  };
 
   const runBackfill = async () => {
     try {
@@ -144,6 +174,94 @@ export const AccountingBackfillTab = () => {
 
   return (
     <div className="space-y-6">
+      {/* Double Revenue Fix Section */}
+      <Card className="card-elegant border-orange-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-orange-700">
+            <AlertTriangle className="w-5 h-5" />
+            تصحيح الإيرادات المزدوجة
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert className="border-orange-200 bg-orange-50">
+            <AlertTriangle className="h-4 w-4 text-orange-600" />
+            <AlertDescription className="text-orange-800">
+              <strong>مهم:</strong> هذه العملية ستقوم بتحديد وتصحيح القيود المحاسبية التي تحتوي على إيرادات مزدوجة (مسجلة في الفاتورة والدفعة معاً).
+              سيتم إلغاء القيود الخاطئة وإعادة إنشائها بالطريقة الصحيحة.
+            </AlertDescription>
+          </Alert>
+
+          <div className="flex items-center gap-4">
+            <Button 
+              onClick={fixDoubleRevenueEntries} 
+              disabled={isFixingRevenue}
+              size="lg"
+              variant="outline"
+              className="flex items-center gap-2 border-orange-300 text-orange-700 hover:bg-orange-50"
+            >
+              {isFixingRevenue ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <AlertTriangle className="w-4 h-4" />
+              )}
+              {isFixingRevenue ? 'جاري التصحيح...' : 'تصحيح الإيرادات المزدوجة'}
+            </Button>
+          </div>
+
+          {revenueFixResults && (
+            <Card className="bg-gray-50 border-gray-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">نتائج التصحيح</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <p className="text-lg font-bold text-blue-600">{revenueFixResults.processed_count}</p>
+                    <p className="text-xs text-muted-foreground">تم فحصها</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-green-600">{revenueFixResults.fixed_count}</p>
+                    <p className="text-xs text-muted-foreground">تم تصحيحها</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-red-600">{revenueFixResults.error_count}</p>
+                    <p className="text-xs text-muted-foreground">أخطاء</p>
+                  </div>
+                </div>
+                
+                {revenueFixResults.results && revenueFixResults.results.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium mb-2">تفاصيل العمليات:</p>
+                    <div className="max-h-32 overflow-y-auto space-y-1">
+                      {revenueFixResults.results.slice(0, 5).map((result: any, index: number) => (
+                        <div key={index} className="text-xs p-2 bg-white rounded border">
+                          <span className="font-medium">فاتورة {result.invoice_number}:</span>
+                          <Badge 
+                            variant={result.status === 'fixed' ? 'default' : 'destructive'}
+                            className="ml-2 text-xs"
+                          >
+                            {result.status === 'fixed' ? 'تم التصحيح' : 'خطأ'}
+                          </Badge>
+                          {result.error_message && (
+                            <p className="text-red-600 mt-1">{result.error_message}</p>
+                          )}
+                        </div>
+                      ))}
+                      {revenueFixResults.results.length > 5 && (
+                        <p className="text-xs text-muted-foreground text-center">
+                          و {revenueFixResults.results.length - 5} عنصر آخر...
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Existing Backfill Section */}
       <Card className="card-elegant">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
