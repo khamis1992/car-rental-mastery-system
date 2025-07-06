@@ -16,7 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Shield, Calendar, FileText, Settings, Building, User } from 'lucide-react';
+import { Shield, Calendar, FileText, Settings, Building, AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { type VehicleFormData } from './types';
 
 interface InsuranceSectionProps {
@@ -35,8 +36,16 @@ export const InsuranceSection: React.FC<InsuranceSectionProps> = ({ control }) =
     <div className="bg-muted/30 rounded-xl p-6 border border-border/50">
       <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
         <Shield className="w-5 h-5 text-primary" />
-        التأمين والملكية
+        التأمين والملكية الأساسية
       </h3>
+      
+      <Alert className="mb-6 border-blue-200 bg-blue-50/50">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          يمكنك إضافة وإدارة التأمينات المتعددة بعد إنشاء المركبة من خلال صفحة تفاصيل المركبة.
+        </AlertDescription>
+      </Alert>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
           <FormField
@@ -44,7 +53,7 @@ export const InsuranceSection: React.FC<InsuranceSectionProps> = ({ control }) =
             name="insurance_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium text-foreground">نوع التأمين</FormLabel>
+                <FormLabel className="text-sm font-medium text-foreground">نوع التأمين الأساسي</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value || "comprehensive"}>
                   <FormControl>
                     <SelectTrigger className="h-12 bg-background/60 border-border/60 text-right">
@@ -57,6 +66,7 @@ export const InsuranceSection: React.FC<InsuranceSectionProps> = ({ control }) =
                   <SelectContent>
                     <SelectItem value="comprehensive">تأمين شامل</SelectItem>
                     <SelectItem value="third_party">تأمين ضد الغير</SelectItem>
+                    <SelectItem value="basic">تأمين أساسي</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -240,5 +250,4 @@ export const InsuranceSection: React.FC<InsuranceSectionProps> = ({ control }) =
         </div>
       </div>
     </div>
-  );
 };

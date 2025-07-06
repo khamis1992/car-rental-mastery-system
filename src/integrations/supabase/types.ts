@@ -3781,6 +3781,68 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_insurance: {
+        Row: {
+          coverage_amount: number | null
+          created_at: string | null
+          created_by: string | null
+          deductible_amount: number | null
+          expiry_date: string | null
+          id: string
+          insurance_company: string | null
+          insurance_type: string
+          is_active: boolean | null
+          notes: string | null
+          policy_number: string | null
+          premium_amount: number | null
+          start_date: string | null
+          updated_at: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          coverage_amount?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          deductible_amount?: number | null
+          expiry_date?: string | null
+          id?: string
+          insurance_company?: string | null
+          insurance_type: string
+          is_active?: boolean | null
+          notes?: string | null
+          policy_number?: string | null
+          premium_amount?: number | null
+          start_date?: string | null
+          updated_at?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          coverage_amount?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          deductible_amount?: number | null
+          expiry_date?: string | null
+          id?: string
+          insurance_company?: string | null
+          insurance_type?: string
+          is_active?: boolean | null
+          notes?: string | null
+          policy_number?: string | null
+          premium_amount?: number | null
+          start_date?: string | null
+          updated_at?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_insurance_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_maintenance: {
         Row: {
           completed_date: string | null
