@@ -85,6 +85,77 @@ export type Database = {
           },
         ]
       }
+      advanced_kpis: {
+        Row: {
+          alert_threshold_high: number | null
+          alert_threshold_low: number | null
+          calculation_formula: string
+          calculation_period: string
+          category: string
+          created_at: string
+          created_by: string | null
+          current_value: number | null
+          department_id: string | null
+          id: string
+          is_automated: boolean | null
+          kpi_code: string
+          kpi_name_ar: string
+          kpi_name_en: string | null
+          last_calculated_at: string | null
+          previous_value: number | null
+          target_value: number | null
+          updated_at: string
+        }
+        Insert: {
+          alert_threshold_high?: number | null
+          alert_threshold_low?: number | null
+          calculation_formula: string
+          calculation_period?: string
+          category: string
+          created_at?: string
+          created_by?: string | null
+          current_value?: number | null
+          department_id?: string | null
+          id?: string
+          is_automated?: boolean | null
+          kpi_code: string
+          kpi_name_ar: string
+          kpi_name_en?: string | null
+          last_calculated_at?: string | null
+          previous_value?: number | null
+          target_value?: number | null
+          updated_at?: string
+        }
+        Update: {
+          alert_threshold_high?: number | null
+          alert_threshold_low?: number | null
+          calculation_formula?: string
+          calculation_period?: string
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          current_value?: number | null
+          department_id?: string | null
+          id?: string
+          is_automated?: boolean | null
+          kpi_code?: string
+          kpi_name_ar?: string
+          kpi_name_en?: string | null
+          last_calculated_at?: string | null
+          previous_value?: number | null
+          target_value?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advanced_kpis_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_classifications: {
         Row: {
           ai_reasoning: string | null
@@ -188,6 +259,114 @@ export type Database = {
           recommended_actions?: string[] | null
         }
         Relationships: []
+      }
+      approvals: {
+        Row: {
+          amount: number | null
+          approval_comments: string | null
+          approval_level: number | null
+          approval_type: string
+          approved_at: string | null
+          approving_department_id: string
+          assigned_to: string | null
+          current_approver: string | null
+          expires_at: string | null
+          id: string
+          max_approval_level: number | null
+          priority: string
+          reference_id: string
+          reference_table: string
+          rejected_at: string | null
+          rejection_reason: string | null
+          request_details: Json | null
+          requested_at: string
+          requested_by: string
+          requesting_department_id: string
+          status: string
+        }
+        Insert: {
+          amount?: number | null
+          approval_comments?: string | null
+          approval_level?: number | null
+          approval_type: string
+          approved_at?: string | null
+          approving_department_id: string
+          assigned_to?: string | null
+          current_approver?: string | null
+          expires_at?: string | null
+          id?: string
+          max_approval_level?: number | null
+          priority?: string
+          reference_id: string
+          reference_table: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          request_details?: Json | null
+          requested_at?: string
+          requested_by: string
+          requesting_department_id: string
+          status?: string
+        }
+        Update: {
+          amount?: number | null
+          approval_comments?: string | null
+          approval_level?: number | null
+          approval_type?: string
+          approved_at?: string | null
+          approving_department_id?: string
+          assigned_to?: string | null
+          current_approver?: string | null
+          expires_at?: string | null
+          id?: string
+          max_approval_level?: number | null
+          priority?: string
+          reference_id?: string
+          reference_table?: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          request_details?: Json | null
+          requested_at?: string
+          requested_by?: string
+          requesting_department_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approvals_approving_department_id_fkey"
+            columns: ["approving_department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_current_approver_fkey"
+            columns: ["current_approver"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approvals_requesting_department_id_fkey"
+            columns: ["requesting_department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       asset_categories: {
         Row: {
@@ -1507,6 +1686,75 @@ export type Database = {
         }
         Relationships: []
       }
+      department_integrations: {
+        Row: {
+          assigned_employee_id: string | null
+          completion_date: string | null
+          created_at: string
+          created_by: string | null
+          department_id: string
+          due_date: string | null
+          id: string
+          integration_type: string
+          metadata: Json | null
+          notes: string | null
+          priority_level: number | null
+          reference_id: string
+          reference_table: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_employee_id?: string | null
+          completion_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          department_id: string
+          due_date?: string | null
+          id?: string
+          integration_type: string
+          metadata?: Json | null
+          notes?: string | null
+          priority_level?: number | null
+          reference_id: string
+          reference_table: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_employee_id?: string | null
+          completion_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          department_id?: string
+          due_date?: string | null
+          id?: string
+          integration_type?: string
+          metadata?: Json | null
+          notes?: string | null
+          priority_level?: number | null
+          reference_id?: string
+          reference_table?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "department_integrations_assigned_employee_id_fkey"
+            columns: ["assigned_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "department_integrations_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       departments: {
         Row: {
           created_at: string
@@ -1653,6 +1901,68 @@ export type Database = {
             columns: ["work_location_id"]
             isOneToOne: false
             referencedRelation: "work_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_integrations: {
+        Row: {
+          api_key_name: string | null
+          configuration: Json | null
+          created_at: string
+          created_by: string | null
+          department_id: string | null
+          endpoint_url: string | null
+          error_count: number | null
+          id: string
+          integration_name: string
+          integration_type: string
+          is_active: boolean | null
+          last_error: string | null
+          last_sync_at: string | null
+          sync_frequency: string | null
+          updated_at: string
+        }
+        Insert: {
+          api_key_name?: string | null
+          configuration?: Json | null
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          endpoint_url?: string | null
+          error_count?: number | null
+          id?: string
+          integration_name: string
+          integration_type: string
+          is_active?: boolean | null
+          last_error?: string | null
+          last_sync_at?: string | null
+          sync_frequency?: string | null
+          updated_at?: string
+        }
+        Update: {
+          api_key_name?: string | null
+          configuration?: Json | null
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          endpoint_url?: string | null
+          error_count?: number | null
+          id?: string
+          integration_name?: string
+          integration_type?: string
+          is_active?: boolean | null
+          last_error?: string | null
+          last_sync_at?: string | null
+          sync_frequency?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_integrations_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
             referencedColumns: ["id"]
           },
         ]
@@ -3078,6 +3388,98 @@ export type Database = {
           },
         ]
       }
+      transaction_log: {
+        Row: {
+          amount: number | null
+          created_at: string
+          customer_id: string | null
+          department_id: string | null
+          description: string
+          details: Json | null
+          employee_id: string | null
+          error_message: string | null
+          id: string
+          priority: string
+          processed_at: string | null
+          source_id: string
+          source_table: string
+          status: string
+          target_id: string | null
+          target_table: string | null
+          transaction_type: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          customer_id?: string | null
+          department_id?: string | null
+          description: string
+          details?: Json | null
+          employee_id?: string | null
+          error_message?: string | null
+          id?: string
+          priority?: string
+          processed_at?: string | null
+          source_id: string
+          source_table: string
+          status?: string
+          target_id?: string | null
+          target_table?: string | null
+          transaction_type: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          customer_id?: string | null
+          department_id?: string | null
+          description?: string
+          details?: Json | null
+          employee_id?: string | null
+          error_message?: string | null
+          id?: string
+          priority?: string
+          processed_at?: string | null
+          source_id?: string
+          source_table?: string
+          status?: string
+          target_id?: string | null
+          target_table?: string | null
+          transaction_type?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_log_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_log_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_log_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_log_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           granted_at: string
@@ -3558,11 +3960,70 @@ export type Database = {
         }
         Relationships: []
       }
+      workflow_steps: {
+        Row: {
+          created_at: string
+          department_id: string
+          estimated_duration_hours: number | null
+          id: string
+          is_active: boolean | null
+          is_approval_required: boolean | null
+          responsible_role: string | null
+          step_name: string
+          step_order: number
+          workflow_name: string
+        }
+        Insert: {
+          created_at?: string
+          department_id: string
+          estimated_duration_hours?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_approval_required?: boolean | null
+          responsible_role?: string | null
+          step_name: string
+          step_order: number
+          workflow_name: string
+        }
+        Update: {
+          created_at?: string
+          department_id?: string
+          estimated_duration_hours?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_approval_required?: boolean | null
+          responsible_role?: string | null
+          step_name?: string
+          step_order?: number
+          workflow_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_steps_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      calculate_advanced_kpi: {
+        Args: { kpi_code_param: string }
+        Returns: number
+      }
+      calculate_all_kpis: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          kpi_code: string
+          calculated_value: number
+          status: string
+        }[]
+      }
       calculate_book_value: {
         Args: { asset_cost: number; accumulated_depreciation: number }
         Returns: number
@@ -3603,6 +4064,20 @@ export type Database = {
       cleanup_duplicate_accounts: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      create_approval_request: {
+        Args: {
+          p_approval_type: string
+          p_reference_table: string
+          p_reference_id: string
+          p_requesting_dept_id: string
+          p_approving_dept_id: string
+          p_requested_by: string
+          p_amount?: number
+          p_details?: Json
+          p_priority?: string
+        }
+        Returns: string
       }
       create_attendance_accounting_entry: {
         Args: { attendance_data: Json }
@@ -3767,6 +4242,21 @@ export type Database = {
           _role: Database["public"]["Enums"]["user_role"]
         }
         Returns: boolean
+      }
+      log_transaction: {
+        Args: {
+          p_transaction_type: string
+          p_source_table: string
+          p_source_id: string
+          p_department_id?: string
+          p_employee_id?: string
+          p_customer_id?: string
+          p_vehicle_id?: string
+          p_amount?: number
+          p_description?: string
+          p_details?: Json
+        }
+        Returns: string
       }
       mark_contract_deleted: {
         Args: { contract_id_param: string; reason?: string }
