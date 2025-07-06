@@ -153,16 +153,16 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onEdit, onVie
         </div>
 
         {(isInsuranceExpiring || isRegistrationExpiring) && (
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex flex-wrap gap-1 mb-3">
             {isInsuranceExpiring && (
-              <Badge variant="destructive" className="text-xs flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" />
+              <Badge variant="destructive" className="text-xs">
+                <AlertTriangle className="w-3 h-3 mr-1" />
                 التأمين ينتهي قريباً
               </Badge>
             )}
             {isRegistrationExpiring && (
-              <Badge variant="destructive" className="text-xs flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
+              <Badge variant="destructive" className="text-xs">
+                <Calendar className="w-3 h-3 mr-1" />
                 الترخيص ينتهي قريباً
               </Badge>
             )}
