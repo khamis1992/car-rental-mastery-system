@@ -72,21 +72,21 @@ const Navbar = () => {
           {/* قائمة المستخدم */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 p-2">
+              <Button variant="ghost" className="rtl-flex gap-2 p-2">
+                <div className="text-right hidden md:block">
+                  <p className="text-sm font-medium">
+                    {profile?.full_name || user?.email || 'المستخدм'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {profile ? getRoleLabel(profile.role) : 'مستخدم'}
+                  </p>
+                </div>
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="/placeholder.svg" />
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     <User className="w-4 h-4" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="text-right hidden md:block">
-                  <p className="text-sm font-medium">
-                    {profile?.full_name || user?.email || 'المستخدم'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {profile ? getRoleLabel(profile.role) : 'مستخدم'}
-                  </p>
-                </div>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -103,33 +103,33 @@ const Navbar = () => {
               
               <DropdownMenuSeparator />
               
-              <DropdownMenuItem 
-                className="cursor-pointer"
-                onClick={() => navigate('/settings')}
-              >
-                <Settings className="w-4 h-4 ml-2" />
-                الإعدادات
-              </DropdownMenuItem>
+               <DropdownMenuItem 
+                 className="cursor-pointer rtl-flex"
+                 onClick={() => navigate('/settings')}
+               >
+                 الإعدادات
+                 <Settings className="w-4 h-4" />
+               </DropdownMenuItem>
               
               {(profile?.role === 'admin' || profile?.role === 'manager') && (
-                <DropdownMenuItem 
-                  className="cursor-pointer"
-                  onClick={() => navigate('/settings?tab=users')}
-                >
-                  <Shield className="w-4 h-4 ml-2" />
-                  إدارة المستخدمين
-                </DropdownMenuItem>
+                 <DropdownMenuItem 
+                   className="cursor-pointer rtl-flex"
+                   onClick={() => navigate('/settings?tab=users')}
+                 >
+                   إدارة المستخدمين
+                   <Shield className="w-4 h-4" />
+                 </DropdownMenuItem>
               )}
               
               <DropdownMenuSeparator />
               
-              <DropdownMenuItem 
-                className="cursor-pointer text-red-600"
-                onClick={handleSignOut}
-              >
-                <LogOut className="w-4 h-4 ml-2" />
-                تسجيل الخروج
-              </DropdownMenuItem>
+               <DropdownMenuItem 
+                 className="cursor-pointer text-red-600 rtl-flex"
+                 onClick={handleSignOut}
+               >
+                 تسجيل الخروج
+                 <LogOut className="w-4 h-4" />
+               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -137,17 +137,17 @@ const Navbar = () => {
         {/* شريط البحث وساعة الحضور */}
         <div className="flex items-center gap-4 flex-1 max-w-2xl mx-8">
           <div className="flex-1 max-w-md">
-            <Button
-              variant="outline"
-              className="w-full justify-start text-muted-foreground h-10 px-3"
-              onClick={() => setIsOpen(true)}
-            >
-              <Search className="w-4 h-4 ml-2" />
-              البحث في النظام...
-              <div className="ml-auto text-xs text-muted-foreground">
-                Ctrl+K
-              </div>
-            </Button>
+             <Button
+               variant="outline"
+               className="w-full rtl-flex text-muted-foreground h-10 px-3"
+               onClick={() => setIsOpen(true)}
+             >
+               <div className="mr-auto text-xs text-muted-foreground">
+                 Ctrl+K
+               </div>
+               البحث في النظام...
+               <Search className="w-4 h-4" />
+             </Button>
           </div>
           
           {/* ساعة الحضور */}
