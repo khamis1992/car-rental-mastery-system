@@ -60,7 +60,36 @@ const Navbar = () => {
 
   return (
     <header className="bg-card border-b border-border shadow-elegant px-6 py-3">
-      <div className="rtl-header">
+      <div className="flex items-center justify-between">
+        {/* زر الشريط الجانبي والتاريخ */}
+        <div className="flex items-center gap-4">
+          <SidebarTrigger />
+          <p className="text-muted-foreground text-sm flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            <span>{currentDate}</span>
+          </p>
+        </div>
+
+        {/* شريط البحث وساعة الحضور */}
+        <div className="flex items-center gap-4 flex-1 max-w-2xl mx-8">
+          <div className="flex-1 max-w-md">
+            <Button
+              variant="outline"
+              className="w-full justify-start text-muted-foreground h-10 px-3"
+              onClick={() => setIsOpen(true)}
+            >
+              <Search className="w-4 h-4 mr-2" />
+              البحث في النظام...
+              <div className="ml-auto text-xs text-muted-foreground">
+                Ctrl+K
+              </div>
+            </Button>
+          </div>
+          
+          {/* ساعة الحضور */}
+          <AttendanceClock />
+        </div>
+
         {/* منطقة المستخدم والإشعارات */}
         <div className="flex items-center gap-4">
           {/* أيقونة مهام اليوم */}
@@ -72,21 +101,21 @@ const Navbar = () => {
           {/* قائمة المستخدم */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="rtl-flex gap-2 p-2">
-                <div className="text-right hidden md:block">
-                  <p className="text-sm font-medium">
-                    {profile?.full_name || user?.email || 'المستخدм'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {profile ? getRoleLabel(profile.role) : 'مستخدم'}
-                  </p>
-                </div>
+              <Button variant="ghost" className="flex items-center gap-2 p-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="/placeholder.svg" />
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     <User className="w-4 h-4" />
                   </AvatarFallback>
                 </Avatar>
+                <div className="text-left hidden md:block">
+                  <p className="text-sm font-medium">
+                    {profile?.full_name || user?.email || 'المستخدم'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {profile ? getRoleLabel(profile.role) : 'مستخدم'}
+                  </p>
+                </div>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -103,64 +132,35 @@ const Navbar = () => {
               
               <DropdownMenuSeparator />
               
-               <DropdownMenuItem 
-                 className="cursor-pointer rtl-flex"
-                 onClick={() => navigate('/settings')}
-               >
-                 الإعدادات
-                 <Settings className="w-4 h-4" />
-               </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="cursor-pointer flex items-center gap-2"
+                onClick={() => navigate('/settings')}
+              >
+                <Settings className="w-4 h-4" />
+                الإعدادات
+              </DropdownMenuItem>
               
               {(profile?.role === 'admin' || profile?.role === 'manager') && (
-                 <DropdownMenuItem 
-                   className="cursor-pointer rtl-flex"
-                   onClick={() => navigate('/settings?tab=users')}
-                 >
-                   إدارة المستخدمين
-                   <Shield className="w-4 h-4" />
-                 </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer flex items-center gap-2"
+                  onClick={() => navigate('/settings?tab=users')}
+                >
+                  <Shield className="w-4 h-4" />
+                  إدارة المستخدمين
+                </DropdownMenuItem>
               )}
               
               <DropdownMenuSeparator />
               
-               <DropdownMenuItem 
-                 className="cursor-pointer text-red-600 rtl-flex"
-                 onClick={handleSignOut}
-               >
-                 تسجيل الخروج
-                 <LogOut className="w-4 h-4" />
-               </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="cursor-pointer text-red-600 flex items-center gap-2"
+                onClick={handleSignOut}
+              >
+                <LogOut className="w-4 h-4" />
+                تسجيل الخروج
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-
-        {/* شريط البحث وساعة الحضور */}
-        <div className="flex items-center gap-4 flex-1 max-w-2xl mx-8">
-          <div className="flex-1 max-w-md">
-             <Button
-               variant="outline"
-               className="w-full rtl-flex text-muted-foreground h-10 px-3"
-               onClick={() => setIsOpen(true)}
-             >
-               <div className="mr-auto text-xs text-muted-foreground">
-                 Ctrl+K
-               </div>
-               البحث في النظام...
-               <Search className="w-4 h-4" />
-             </Button>
-          </div>
-          
-          {/* ساعة الحضور */}
-          <AttendanceClock />
-        </div>
-
-        {/* زر الشريط الجانبي والتاريخ */}
-        <div className="rtl-flex gap-4">
-          <p className="text-muted-foreground text-sm rtl-flex">
-            <span>{currentDate}</span>
-            <Calendar className="w-4 h-4" />
-          </p>
-          <SidebarTrigger />
         </div>
 
       </div>

@@ -9,7 +9,7 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full" dir="rtl">
+      <div className="min-h-screen flex w-full" dir="ltr">
         <AppSidebar />
         <SidebarInset className="flex-1">
           <Navbar />

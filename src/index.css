@@ -126,7 +126,7 @@
   body {
     @apply bg-background text-foreground font-cairo;
     background: var(--gradient-bg);
-    direction: rtl;
+    direction: ltr;
   }
   
   /* خط Cairo للنصوص العربية */
