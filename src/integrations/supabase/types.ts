@@ -3772,6 +3772,10 @@ export type Database = {
         Args: { contract_id_param: string; reason?: string }
         Returns: Json
       }
+      migrate_to_deferred_revenue_system: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       reorganize_account_codes: {
         Args: Record<PropertyKey, never>
         Returns: Json
