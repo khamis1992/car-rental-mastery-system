@@ -3,6 +3,8 @@ import { ContractOrchestrationService } from './ContractOrchestrationService';
 import { InvoiceOrchestrationService } from './InvoiceOrchestrationService';
 import { NotificationEventHandler } from './EventHandlers/NotificationEventHandler';
 import { AnalyticsEventHandler } from './EventHandlers/AnalyticsEventHandler';
+import { AccountingEventHandler } from './EventHandlers/AccountingEventHandler';
+import { RealTimeAccountingNotificationSystem } from './RealTimeAccountingNotificationSystem';
 import { serviceContainer } from '../Container/ServiceContainer';
 
 export class OrchestrationContainer {
@@ -12,11 +14,15 @@ export class OrchestrationContainer {
   private invoiceOrchestration: InvoiceOrchestrationService;
   private notificationHandler: NotificationEventHandler;
   private analyticsHandler: AnalyticsEventHandler;
+  private accountingHandler: AccountingEventHandler;
+  private realTimeNotificationSystem: RealTimeAccountingNotificationSystem;
 
   private constructor() {
     this.eventBus = new EnhancedEventBus();
     this.notificationHandler = new NotificationEventHandler();
     this.analyticsHandler = new AnalyticsEventHandler();
+    this.accountingHandler = new AccountingEventHandler();
+    this.realTimeNotificationSystem = new RealTimeAccountingNotificationSystem();
     
     this.contractOrchestration = new ContractOrchestrationService(
       this.eventBus,
@@ -33,6 +39,7 @@ export class OrchestrationContainer {
     );
 
     this.setupEventHandlers();
+    this.initializeRealTimeSystem();
   }
 
   static getInstance(): OrchestrationContainer {
@@ -55,14 +62,60 @@ export class OrchestrationContainer {
       this.eventBus.on(eventType, handler);
     });
 
+    // Register accounting handlers
+    const accountingHandlers = this.accountingHandler.getHandlers();
+    Object.entries(accountingHandlers).forEach(([eventType, handler]) => {
+      this.eventBus.on(eventType, handler);
+    });
+
     // Set up cross-service event handlers
     this.eventBus.on('CONTRACT_COMPLETED', async (event) => {
       console.log('Contract completed, processing final operations:', event.payload);
+      
+      // Trigger accounting event
+      await this.eventBus.emit({
+        type: 'CONTRACT_ACCOUNTING',
+        payload: event.payload,
+        timestamp: new Date(),
+        source: 'ContractOrchestration'
+      });
     });
 
     this.eventBus.on('INVOICE_PAYMENT_PROCESSED', async (event) => {
       console.log('Payment processed, updating related records:', event.payload);
+      
+      // Trigger payment accounting event
+      await this.eventBus.emit({
+        type: 'PAYMENT_ACCOUNTING',
+        payload: event.payload,
+        timestamp: new Date(),
+        source: 'InvoiceOrchestration'
+      });
     });
+
+    // Real-time accounting integration
+    this.eventBus.on('*', async (event) => {
+      if (event.type.includes('ACCOUNTING')) {
+        await this.realTimeNotificationSystem.sendNotification({
+          type: 'transaction_processed',
+          data: {
+            entityType: event.payload?.entityType || 'unknown',
+            entityId: event.payload?.entityId || 'unknown',
+            description: `تمت معالجة ${event.type}`,
+            timestamp: event.timestamp
+          }
+        });
+      }
+    });
+  }
+
+  private async initializeRealTimeSystem() {
+    try {
+      await this.realTimeNotificationSystem.initialize();
+      console.log('✅ Real-Time Accounting Notification System initialized');
+    } catch (error) {
+      console.error('❌ Failed to initialize Real-Time Accounting System:', error);
+    }
   }
 
   getContractOrchestration(): ContractOrchestrationService {
@@ -83,6 +136,19 @@ export class OrchestrationContainer {
 
   getAnalyticsHandler(): AnalyticsEventHandler {
     return this.analyticsHandler;
+  }
+
+  getAccountingHandler(): AccountingEventHandler {
+    return this.accountingHandler;
+  }
+
+  getRealTimeNotificationSystem(): RealTimeAccountingNotificationSystem {
+    return this.realTimeNotificationSystem;
+  }
+
+  async shutdown(): Promise<void> {
+    await this.realTimeNotificationSystem.shutdown();
+    console.log('🔄 Orchestration Container shut down');
   }
 }
 
