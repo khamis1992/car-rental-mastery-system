@@ -65,9 +65,9 @@ const getVehicleTypeText = (type: string) => {
 const getOwnerTypeText = (ownerType: string | undefined) => {
   switch (ownerType) {
     case 'customer':
-      return 'عميل';
+      return 'مملوكة لعميل';
     case 'company':
-      return 'الشركة';
+      return 'مملوكة للشركة';
     default:
       return 'غير محدد';
   }
