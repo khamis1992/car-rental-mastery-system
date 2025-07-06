@@ -4489,6 +4489,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      fix_existing_contract_accounting: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       fix_unbalanced_accounting_entries: {
         Args: Record<PropertyKey, never>
         Returns: Json

@@ -29,6 +29,8 @@ export const AccountingBackfillTab = () => {
   const [progress, setProgress] = useState(0);
   const [isFixingRevenue, setIsFixingRevenue] = useState(false);
   const [revenueFixResults, setRevenueFixResults] = useState<any>(null);
+  const [isFixingContracts, setIsFixingContracts] = useState(false);
+  const [contractFixResults, setContractFixResults] = useState<any>(null);
   const { toast } = useToast();
 
   const backfillService = new AccountingBackfillService();
@@ -57,6 +59,32 @@ export const AccountingBackfillTab = () => {
       });
     } finally {
       setIsFixingRevenue(false);
+    }
+  };
+
+  const fixExistingContractAccounting = async () => {
+    try {
+      setIsFixingContracts(true);
+      setContractFixResults(null);
+
+      const results = await accountingService.fixExistingContractAccounting();
+      setContractFixResults(results);
+
+      toast({
+        title: 'اكتمل تصحيح قيود العقود',
+        description: `تم معالجة ${results.total_processed} عقد، وتصحيح ${results.fixed_count} قيد${results.error_count > 0 ? ` مع ${results.error_count} خطأ` : ''}`,
+        variant: results.error_count > 0 ? 'destructive' : 'default'
+      });
+
+    } catch (error) {
+      console.error('Contract accounting fix error:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل في تصحيح قيود العقود',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsFixingContracts(false);
     }
   };
 
@@ -250,6 +278,93 @@ export const AccountingBackfillTab = () => {
                       {revenueFixResults.results.length > 5 && (
                         <p className="text-xs text-muted-foreground text-center">
                           و {revenueFixResults.results.length - 5} عنصر آخر...
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Contract Accounting Fix Section */}
+      <Card className="card-elegant border-blue-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-blue-700">
+            <RefreshCw className="w-5 h-5" />
+            تصحيح قيود العقود للإيرادات المؤجلة
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert className="border-blue-200 bg-blue-50">
+            <AlertTriangle className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              <strong>تحديث نظام المحاسبة:</strong> هذه العملية ستقوم بتحويل قيود العقود الموجودة من نظام الإيراد المباشر
+              إلى نظام الإيرادات المؤجلة. سيتم تسجيل الإيراد عند الدفع بدلاً من تسجيله عند إنشاء العقد.
+            </AlertDescription>
+          </Alert>
+
+          <div className="flex items-center gap-4">
+            <Button 
+              onClick={fixExistingContractAccounting} 
+              disabled={isFixingContracts}
+              size="lg"
+              variant="outline"
+              className="flex items-center gap-2 border-blue-300 text-blue-700 hover:bg-blue-50"
+            >
+              {isFixingContracts ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              {isFixingContracts ? 'جاري التصحيح...' : 'تحويل إلى الإيرادات المؤجلة'}
+            </Button>
+          </div>
+
+          {contractFixResults && (
+            <Card className="bg-gray-50 border-gray-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">نتائج التصحيح</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <p className="text-lg font-bold text-blue-600">{contractFixResults.total_processed}</p>
+                    <p className="text-xs text-muted-foreground">تم فحصها</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-green-600">{contractFixResults.fixed_count}</p>
+                    <p className="text-xs text-muted-foreground">تم تصحيحها</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-red-600">{contractFixResults.error_count}</p>
+                    <p className="text-xs text-muted-foreground">أخطاء</p>
+                  </div>
+                </div>
+                
+                {contractFixResults.results && contractFixResults.results.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium mb-2">تفاصيل العمليات:</p>
+                    <div className="max-h-32 overflow-y-auto space-y-1">
+                      {contractFixResults.results.slice(0, 5).map((result: any, index: number) => (
+                        <div key={index} className="text-xs p-2 bg-white rounded border">
+                          <span className="font-medium">عقد {result.contract_number}:</span>
+                          <Badge 
+                            variant={result.status === 'fixed' ? 'default' : 'destructive'}
+                            className="ml-2 text-xs"
+                          >
+                            {result.status === 'fixed' ? 'تم التصحيح' : 'خطأ'}
+                          </Badge>
+                          {result.error_message && (
+                            <p className="text-red-600 mt-1">{result.error_message}</p>
+                          )}
+                        </div>
+                      ))}
+                      {contractFixResults.results.length > 5 && (
+                        <p className="text-xs text-muted-foreground text-center">
+                          و {contractFixResults.results.length - 5} عقد آخر...
                         </p>
                       )}
                     </div>

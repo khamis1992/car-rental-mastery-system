@@ -7,6 +7,58 @@ import { supabase } from '@/integrations/supabase/client';
 export class AccountingIntegrationService {
   
   /**
+   * إنشاء قيد محاسبي للعقد (مديونية + إيرادات مؤجلة)
+   */
+  async createContractAccountingEntry(contractId: string, contractData: {
+    customer_name: string;
+    vehicle_info: string;
+    total_amount: number;
+    security_deposit?: number;
+    insurance_amount?: number;
+    tax_amount?: number;
+    discount_amount?: number;
+  }): Promise<string | null> {
+    try {
+      console.log(`🔄 Creating deferred revenue entry for contract ${contractId} with amount ${contractData.total_amount}`);
+      
+      // Validate input data
+      if (!contractData.total_amount || contractData.total_amount <= 0) {
+        console.error('❌ Invalid contract amount:', contractData.total_amount);
+        throw new Error('مبلغ العقد يجب أن يكون أكبر من صفر');
+      }
+
+      const { data, error } = await supabase.rpc('create_contract_accounting_entry' as any, {
+        contract_id: contractId,  
+        contract_data: {
+          customer_name: contractData.customer_name,
+          vehicle_info: contractData.vehicle_info,
+          total_amount: contractData.total_amount,
+          security_deposit: contractData.security_deposit || 0,
+          insurance_amount: contractData.insurance_amount || 0,
+          tax_amount: contractData.tax_amount || 0,
+          discount_amount: contractData.discount_amount || 0
+        }
+      });
+
+      if (error) {
+        console.error('❌ Failed to create contract deferred revenue entry:', error);
+        throw new Error(`فشل في إنشاء قيد الإيرادات المؤجلة للعقد: ${error.message}`);
+      }
+
+      if (!data) {
+        console.error('❌ No journal entry ID returned from contract deferred revenue function');
+        throw new Error('لم يتم إرجاع معرف قيد الإيرادات المؤجلة');
+      }
+
+      console.log(`✅ Contract deferred revenue entry created successfully: ${data}`);
+      return data as string;
+    } catch (error) {
+      console.error('❌ Contract deferred revenue integration error:', error);
+      throw error; // Re-throw to let business service handle it
+    }
+  }
+
+  /**
    * إنشاء قيد محاسبي للفاتورة (مديونية + إيرادات مؤجلة)
    */
   async createInvoiceAccountingEntry(invoiceId: string, invoiceData: {
@@ -306,6 +358,45 @@ export class AccountingIntegrationService {
         processed_count: 0,
         fixed_count: 0,
         error_count: 0,
+        results: []
+      };
+    }
+  }
+
+  /**
+   * تصحيح قيود العقود الموجودة لتستخدم الإيرادات المؤجلة
+   */
+  async fixExistingContractAccounting(): Promise<{
+    fixed_count: number;
+    error_count: number;
+    total_processed: number;
+    results: any[];
+  }> {
+    try {
+      console.log('🔄 Fixing existing contract accounting entries...');
+      
+      const { data, error } = await supabase.rpc('fix_existing_contract_accounting' as any);
+
+      if (error) {
+        console.error('❌ Failed to fix existing contract accounting:', error);
+        throw error;
+      }
+
+      const result = (data as any) || {
+        fixed_count: 0,
+        error_count: 0,
+        total_processed: 0,
+        results: []
+      };
+
+      console.log(`✅ Contract accounting fix completed:`, result);
+      return result;
+    } catch (error) {
+      console.error('❌ Failed to fix existing contract accounting:', error);
+      return {
+        fixed_count: 0,
+        error_count: 0,
+        total_processed: 0,
         results: []
       };
     }
