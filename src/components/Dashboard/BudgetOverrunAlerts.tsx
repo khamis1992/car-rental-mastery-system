@@ -58,13 +58,13 @@ export const BudgetOverrunAlerts: React.FC = () => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="rtl-title">
+          <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-orange-500" />
             تنبيهات الميزانية
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-4 arabic-text">جاري التحميل...</div>
+          <div className="text-center py-4">جاري التحميل...</div>
         </CardContent>
       </Card>
     );
@@ -77,13 +77,13 @@ export const BudgetOverrunAlerts: React.FC = () => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="rtl-title">
+          <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-green-500" />
             تنبيهات الميزانية
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-4 text-muted-foreground arabic-text">
+          <div className="text-center py-4 text-muted-foreground">
             لا توجد تنبيهات حالياً - جميع مراكز التكلفة ضمن الميزانية
           </div>
         </CardContent>
@@ -94,10 +94,10 @@ export const BudgetOverrunAlerts: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="rtl-title">
+        <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-red-500" />
           تنبيهات الميزانية
-          <Badge variant="destructive" className="mr-2">
+          <Badge variant="destructive" className="ml-2">
             {visibleOverruns.length + visibleWarnings.length}
           </Badge>
         </CardTitle>
@@ -111,17 +111,17 @@ export const BudgetOverrunAlerts: React.FC = () => {
           return (
             <Alert key={costCenter.id} variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertDescription className="arabic-text">
+              <AlertDescription>
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <div className="font-medium rtl-title">
+                    <div className="font-medium">
                       {costCenter.cost_center_name}
                     </div>
-                    <div className="text-sm mt-1 arabic-text">
+                    <div className="text-sm mt-1">
                       تجاوز الميزانية بمبلغ {formatCurrencyKWD(overrun)} 
                       ({overrunPercentage.toFixed(1)}%)
                     </div>
-                    <div className="text-xs text-muted-foreground mt-1 arabic-text">
+                    <div className="text-xs text-muted-foreground mt-1">
                       الميزانية: {formatCurrencyKWD(costCenter.budget_amount)} | 
                       المصروف: {formatCurrencyKWD(costCenter.actual_spent)}
                     </div>
@@ -156,16 +156,16 @@ export const BudgetOverrunAlerts: React.FC = () => {
           return (
             <Alert key={costCenter.id}>
               <TrendingUp className="h-4 w-4" />
-              <AlertDescription className="arabic-text">
+              <AlertDescription>
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <div className="font-medium rtl-title">
+                    <div className="font-medium">
                       {costCenter.cost_center_name}
                     </div>
-                    <div className="text-sm mt-1 arabic-text">
+                    <div className="text-sm mt-1">
                       اقتراب من نفاد الميزانية - استخدام {utilization.toFixed(1)}%
                     </div>
-                    <div className="text-xs text-muted-foreground mt-1 arabic-text">
+                    <div className="text-xs text-muted-foreground mt-1">
                       المتبقي: {formatCurrencyKWD(remaining)}
                     </div>
                   </div>
