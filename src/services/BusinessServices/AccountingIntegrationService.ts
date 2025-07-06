@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 export class AccountingIntegrationService {
   
   /**
-   * إنشاء قيد محاسبي للفاتورة (مديونية فقط، بدون إيراد)
+   * إنشاء قيد محاسبي للفاتورة (مديونية + إيرادات مؤجلة)
    */
   async createInvoiceAccountingEntry(invoiceId: string, invoiceData: {
     customer_name: string;
@@ -17,7 +17,7 @@ export class AccountingIntegrationService {
     discount_amount?: number;
   }): Promise<string | null> {
     try {
-      console.log(`🔄 Creating receivable entry for invoice ${invoiceData.invoice_number} with amount ${invoiceData.total_amount}`);
+      console.log(`🔄 Creating deferred revenue entry for invoice ${invoiceData.invoice_number} with amount ${invoiceData.total_amount}`);
       
       // Validate input data
       if (!invoiceData.total_amount || invoiceData.total_amount <= 0) {
@@ -26,7 +26,7 @@ export class AccountingIntegrationService {
       }
 
       const { data, error } = await supabase.rpc('create_invoice_receivable_entry' as any, {
-        invoice_id: invoiceId,
+        invoice_id: invoiceId,  
         invoice_data: {
           customer_name: invoiceData.customer_name,
           invoice_number: invoiceData.invoice_number,
@@ -37,19 +37,19 @@ export class AccountingIntegrationService {
       });
 
       if (error) {
-        console.error('❌ Failed to create invoice receivable entry:', error);
-        throw new Error(`فشل في إنشاء قيد المديونية للفاتورة: ${error.message}`);
+        console.error('❌ Failed to create invoice deferred revenue entry:', error);
+        throw new Error(`فشل في إنشاء قيد الإيرادات المؤجلة للفاتورة: ${error.message}`);
       }
 
       if (!data) {
-        console.error('❌ No journal entry ID returned from receivable function');
-        throw new Error('لم يتم إرجاع معرف قيد المديونية');
+        console.error('❌ No journal entry ID returned from deferred revenue function');
+        throw new Error('لم يتم إرجاع معرف قيد الإيرادات المؤجلة');
       }
 
-      console.log(`✅ Invoice receivable entry created successfully: ${data}`);
+      console.log(`✅ Invoice deferred revenue entry created successfully: ${data}`);
       return data as string;
     } catch (error) {
-      console.error('❌ Invoice receivable integration error:', error);
+      console.error('❌ Invoice deferred revenue integration error:', error);
       throw error; // Re-throw to let business service handle it
     }
   }
