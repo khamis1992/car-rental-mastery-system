@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Download, Calendar, TrendingUp, BarChart3 } from 'lucide-react';
+import { FileText, Download, Calendar, TrendingUp, BarChart3, Building2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,11 +11,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TrialBalance, IncomeStatement, BalanceSheet } from '@/types/accounting';
 import { accountingService } from '@/services/accountingService';
 import { useToast } from '@/hooks/use-toast';
+import { CostCenterService, CostCenter } from '@/services/BusinessServices/CostCenterService';
+import { CostCenterFinancialAnalysis, AllCostCentersOverview } from './CostCenterFinancialAnalysis';
 
 export const FinancialReportsTab = () => {
   const [trialBalance, setTrialBalance] = useState<TrialBalance[]>([]);
   const [incomeStatement, setIncomeStatement] = useState<IncomeStatement | null>(null);
   const [balanceSheet, setBalanceSheet] = useState<BalanceSheet | null>(null);
+  const [costCenters, setCostCenters] = useState<CostCenter[]>([]);
+  const [selectedCostCenter, setSelectedCostCenter] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('current');
   const [dateRange, setDateRange] = useState({
@@ -23,10 +27,21 @@ export const FinancialReportsTab = () => {
     endDate: new Date().toISOString().split('T')[0]
   });
   const { toast } = useToast();
+  const costCenterService = new CostCenterService();
 
   useEffect(() => {
     loadReports();
+    loadCostCenters();
   }, []);
+
+  const loadCostCenters = async () => {
+    try {
+      const data = await costCenterService.getAllCostCenters();
+      setCostCenters(data);
+    } catch (error) {
+      console.error('Error loading cost centers:', error);
+    }
+  };
 
   const loadReports = async () => {
     setLoading(true);
@@ -81,7 +96,7 @@ export const FinancialReportsTab = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
             <div>
               <Label htmlFor="period">الفترة المالية</Label>
               <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
@@ -92,6 +107,23 @@ export const FinancialReportsTab = () => {
                   <SelectItem value="current">الفترة الحالية</SelectItem>
                   <SelectItem value="previous">الفترة السابقة</SelectItem>
                   <SelectItem value="custom">فترة مخصصة</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="cost_center">مركز التكلفة</Label>
+              <Select value={selectedCostCenter} onValueChange={setSelectedCostCenter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="جميع مراكز التكلفة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">جميع مراكز التكلفة</SelectItem>
+                  {costCenters.map((cc) => (
+                    <SelectItem key={cc.id} value={cc.id}>
+                      {cc.cost_center_name} ({cc.cost_center_code})
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -131,11 +163,37 @@ export const FinancialReportsTab = () => {
 
       {/* التقارير */}
       <Tabs defaultValue="trial-balance" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="cost-center-analysis">تحليل مراكز التكلفة</TabsTrigger>
           <TabsTrigger value="balance-sheet">الميزانية العمومية</TabsTrigger>
           <TabsTrigger value="income-statement">قائمة الدخل</TabsTrigger>
           <TabsTrigger value="trial-balance">ميزان المراجعة</TabsTrigger>
         </TabsList>
+
+        {/* تحليل مراكز التكلفة */}
+        <TabsContent value="cost-center-analysis">
+          <Card className="card-elegant">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <Button variant="outline" onClick={() => exportReport('تحليل مراكز التكلفة')}>
+                  <Download className="w-4 h-4 ml-2" />
+                  تصدير
+                </Button>
+                <CardTitle className="flex items-center gap-2 rtl-flex">
+                  <Building2 className="w-5 h-5" />
+                  تحليل مراكز التكلفة المالي
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {selectedCostCenter ? (
+                <CostCenterFinancialAnalysis costCenterId={selectedCostCenter} />
+              ) : (
+                <AllCostCentersOverview costCenters={costCenters} />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* ميزان المراجعة */}
         <TabsContent value="trial-balance">
