@@ -250,4 +250,5 @@ export const InsuranceSection: React.FC<InsuranceSectionProps> = ({ control }) =
         </div>
       </div>
     </div>
+  );
 };
