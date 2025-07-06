@@ -5,6 +5,7 @@ import { JournalEntriesTab } from '@/components/Accounting/JournalEntriesTab';
 import { FinancialReportsTab } from '@/components/Accounting/FinancialReportsTab';
 import { AccountingBackfillTab } from '@/components/Accounting/AccountingBackfillTab';
 import { PaymentReconciliationTab } from '@/components/Accounting/PaymentReconciliationTab';
+import { AccountingIntegrityChecker } from '@/components/Accounting/AccountingIntegrityChecker';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -119,7 +120,8 @@ const Accounting = () => {
       </div>
 
       <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
+          <TabsTrigger value="integrity">فحص السلامة</TabsTrigger>
           <TabsTrigger value="reconciliation">التسوية</TabsTrigger>
           <TabsTrigger value="analytics">التحليلات</TabsTrigger>
           <TabsTrigger value="settings">الإعدادات</TabsTrigger>
@@ -128,6 +130,10 @@ const Accounting = () => {
           <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
           <TabsTrigger value="transactions">المعاملات المالية</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="integrity" className="space-y-4">
+          <AccountingIntegrityChecker />
+        </TabsContent>
 
         <TabsContent value="reconciliation" className="space-y-4">
           <PaymentReconciliationTab />

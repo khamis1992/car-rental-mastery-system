@@ -136,28 +136,29 @@ export class ContractBusinessService {
   }
 
   // طرق تكامل المحاسبة
-  async createAccountingEntry(contract: any): Promise<string | null> {
-    try {
-      const contractAccountingData: ContractAccountingData = {
-        contract_id: contract.id,
-        customer_name: contract.customers?.name || 'غير محدد',
-        vehicle_info: contract.vehicles ? 
-          `${contract.vehicles.make} ${contract.vehicles.model} - ${contract.vehicles.vehicle_number}` : 'غير محدد',
-        contract_number: contract.contract_number,
-        total_amount: contract.total_amount || 0,
-        security_deposit: contract.security_deposit || 0,
-        insurance_amount: contract.insurance_amount || 0,
-        tax_amount: contract.tax_amount || 0,
-        discount_amount: contract.discount_amount || 0,
-        start_date: contract.start_date,
-        end_date: contract.end_date
-      };
+  async createAccountingEntry(contract: any): Promise<string> {
+    const contractAccountingData: ContractAccountingData = {
+      contract_id: contract.id,
+      customer_name: contract.customers?.name || 'غير محدد',
+      vehicle_info: contract.vehicles ? 
+        `${contract.vehicles.make} ${contract.vehicles.model} - ${contract.vehicles.vehicle_number}` : 'غير محدد',
+      contract_number: contract.contract_number,
+      total_amount: contract.total_amount || 0,
+      security_deposit: contract.security_deposit || 0,
+      insurance_amount: contract.insurance_amount || 0,
+      tax_amount: contract.tax_amount || 0,
+      discount_amount: contract.discount_amount || 0,
+      start_date: contract.start_date,
+      end_date: contract.end_date
+    };
 
-      return await contractAccountingService.createContractAccountingEntry(contractAccountingData);
-    } catch (error) {
-      console.error('خطأ في إنشاء القيد المحاسبي للعقد:', error);
-      throw error;
+    const journalEntryId = await contractAccountingService.createContractAccountingEntry(contractAccountingData);
+    
+    if (!journalEntryId) {
+      throw new Error('فشل في إنشاء القيد المحاسبي للعقد');
     }
+    
+    return journalEntryId;
   }
 
   async hasAccountingEntries(contractId: string): Promise<boolean> {
@@ -206,5 +207,20 @@ export class ContractBusinessService {
 
   async getContractAccountingSummary(period: { year: number; month?: number }) {
     return await contractAccountingService.getContractAccountingSummary(period);
+  }
+
+  // TODO: إضافة دالة createContract عند الحاجة
+
+  // وظيفة تحديث العقد بمعرف القيد
+  private async updateContractWithJournalEntry(contractId: string, journalEntryId: string): Promise<void> {
+    try {
+      await this.contractRepository.updateContract(contractId, {
+        journal_entry_id: journalEntryId,
+        updated_at: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Failed to update contract with journal entry ID:', error);
+      throw error;
+    }
   }
 }

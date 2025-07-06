@@ -151,6 +151,20 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
     if (error) throw error;
   }
 
+  async updateInvoiceJournalEntry(invoiceId: string, journalEntryId: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .update({ journal_entry_id: journalEntryId })
+        .eq('id', invoiceId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error updating invoice journal entry:', error);
+      throw new Error(`فشل في تحديث معرف القيد المحاسبي: ${error.message}`);
+    }
+  }
+
   async deleteInvoice(id: string): Promise<void> {
     const { error } = await supabase
       .from('invoices')

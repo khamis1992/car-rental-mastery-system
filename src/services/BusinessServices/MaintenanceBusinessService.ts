@@ -98,6 +98,7 @@ export class MaintenanceBusinessService {
       throw new Error('Maintenance record not found');
     }
 
+    // تحديث سجل الصيانة
     const { data: maintenance, error } = await supabase
       .from('vehicle_maintenance')
       .update({
@@ -110,19 +111,33 @@ export class MaintenanceBusinessService {
 
     if (error) throw error;
 
-    // إنشاء القيد المحاسبي عند تحديث الحالة إلى مكتملة
+    // إنشاء القيد المحاسبي عند الاكتمال - إجباري
     if (updates.status === 'completed' && existingMaintenance.status !== 'completed' && maintenance.cost) {
       try {
         const vehicleInfo = await this.getVehicleInfo(maintenance.vehicle_id);
-        await this.accountingService.createMaintenanceAccountingEntry(maintenance.id, {
+        const journalEntryId = await this.accountingService.createMaintenanceAccountingEntry(maintenance.id, {
           vehicle_info: vehicleInfo,
           maintenance_type: maintenance.maintenance_type,
           cost: maintenance.cost,
           maintenance_date: maintenance.completed_date || maintenance.scheduled_date || maintenance.created_at,
           vendor_name: maintenance.service_provider || 'غير محدد'
         });
-      } catch (error) {
-        console.warn('Failed to create accounting entry for maintenance:', error);
+
+        if (!journalEntryId) {
+          throw new Error('فشل في إنشاء القيد المحاسبي للصيانة');
+        }
+
+        // تحديث سجل الصيانة بمعرف القيد
+        await this.updateMaintenanceWithJournalEntry(maintenance.id, journalEntryId);
+
+      } catch (accountingError) {
+        // إرجاع حالة الصيانة إلى ما كانت عليه
+        await supabase
+          .from('vehicle_maintenance')
+          .update({ status: existingMaintenance.status })
+          .eq('id', id);
+        
+        throw new Error(`فشل في إنشاء القيد المحاسبي: ${accountingError.message}`);
       }
     }
 
@@ -228,6 +243,24 @@ export class MaintenanceBusinessService {
       return `${vehicle.make} ${vehicle.model} - ${vehicle.license_plate || vehicle.vehicle_number}`;
     } catch (error) {
       return `مركبة ${vehicleId}`;
+    }
+  }
+
+  // وظيفة تحديث سجل الصيانة بمعرف القيد
+  private async updateMaintenanceWithJournalEntry(maintenanceId: string, journalEntryId: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('vehicle_maintenance')
+        .update({ 
+          journal_entry_id: journalEntryId,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', maintenanceId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Failed to update maintenance with journal entry ID:', error);
+      throw error;
     }
   }
 }

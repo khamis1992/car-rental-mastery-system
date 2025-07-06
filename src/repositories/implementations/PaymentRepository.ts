@@ -85,6 +85,20 @@ export class PaymentRepository extends BaseRepository<Payment> implements IPayme
     if (error) throw error;
   }
 
+  async updatePaymentJournalEntry(paymentId: string, journalEntryId: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('payments')
+        .update({ journal_entry_id: journalEntryId })
+        .eq('id', paymentId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error updating payment journal entry:', error);
+      throw new Error(`فشل في تحديث معرف القيد المحاسبي: ${error.message}`);
+    }
+  }
+
   async deletePayment(id: string): Promise<void> {
     const { error } = await supabase
       .from('payments')

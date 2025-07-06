@@ -120,51 +120,67 @@ export const payrollService = {
 
   // إنشاء سجل راتب جديد مع القيود المحاسبية
   async createPayroll(payrollData: Omit<Payroll, 'id' | 'created_at' | 'updated_at'>): Promise<Payroll> {
-    const { data, error } = await supabase
-      .from('payroll')
-      .insert({
-        ...payrollData,
-        created_by: (await supabase.auth.getUser()).data.user?.id
-      })
-      .select()
-      .single();
+    try {
+      // إنشاء سجل الراتب
+      const { data, error } = await supabase
+        .from('payroll')
+        .insert(payrollData)
+        .select()
+        .single();
 
-    if (error) throw error;
+      if (error) throw error;
 
-    // إنشاء القيود المحاسبية للراتب تلقائياً إذا كان الراتب معتمد
-    if (payrollData.status === 'approved' || payrollData.status === 'paid') {
+      // إنشاء القيد المحاسبي - إجباري
       try {
-        // جلب بيانات الموظف
         const { data: employee } = await supabase
           .from('employees')
           .select('first_name, last_name, employee_number')
           .eq('id', payrollData.employee_id)
           .single();
 
-        if (employee) {
-          await payrollAccountingService.createPayrollAccountingEntry({
-            payroll_id: data.id,
-            employee_name: `${employee.first_name} ${employee.last_name}`,
-            employee_number: employee.employee_number,
-            pay_period: `${payrollData.pay_period_start} - ${payrollData.pay_period_end}`,
-            basic_salary: payrollData.basic_salary,
-            overtime_amount: payrollData.overtime_amount,
-            allowances: payrollData.allowances,
-            bonuses: payrollData.bonuses,
-            deductions: payrollData.deductions,
-            tax_deduction: payrollData.tax_deduction,
-            social_insurance: payrollData.social_insurance,
-            gross_salary: payrollData.gross_salary,
-            net_salary: payrollData.net_salary
-          });
+        if (!employee) {
+          throw new Error('بيانات الموظف غير موجودة');
         }
-      } catch (accountingError) {
-        console.error('خطأ في إنشاء القيود المحاسبية:', accountingError);
-        // لا نريد أن يفشل إنشاء الراتب بسبب خطأ محاسبي
-      }
-    }
 
-    return data as Payroll;
+        const journalEntryId = await payrollAccountingService.createPayrollAccountingEntry({
+          payroll_id: data.id,
+          employee_name: `${employee.first_name} ${employee.last_name}`,
+          employee_number: employee.employee_number,
+          pay_period: `${payrollData.pay_period_start} - ${payrollData.pay_period_end}`,
+          basic_salary: payrollData.basic_salary,
+          overtime_amount: payrollData.overtime_amount,
+          allowances: payrollData.allowances,
+          bonuses: payrollData.bonuses,
+          deductions: payrollData.deductions,
+          tax_deduction: payrollData.tax_deduction,
+          social_insurance: payrollData.social_insurance,
+          gross_salary: payrollData.gross_salary,
+          net_salary: payrollData.net_salary
+        });
+
+        if (!journalEntryId) {
+          throw new Error('فشل في إنشاء القيد المحاسبي للراتب');
+        }
+
+        // تحديث سجل الراتب بمعرف القيد
+        await this.updatePayrollWithJournalEntry(data.id, journalEntryId);
+
+      } catch (accountingError) {
+        // حذف سجل الراتب إذا فشل إنشاء القيد المحاسبي
+        try {
+          await supabase.from('payroll').delete().eq('id', data.id);
+        } catch (deleteError) {
+          console.error('Failed to rollback payroll after accounting error:', deleteError);
+        }
+        
+        throw new Error(`فشل في إنشاء القيد المحاسبي: ${accountingError.message}`);
+      }
+
+      return data as Payroll;
+    } catch (error) {
+      console.error('Error creating payroll:', error);
+      throw new Error(`فشل في إنشاء سجل الراتب: ${error.message}`);
+    }
   },
 
   // تحديث سجل راتب
@@ -536,5 +552,15 @@ export const payrollService = {
   // حذف القيود المحاسبية للراتب
   async deleteAccountingEntries(payrollId: string): Promise<void> {
     return await payrollAccountingService.deletePayrollAccountingEntries(payrollId);
+  },
+
+  // تحديث سجل الراتب بمعرف القيد
+  async updatePayrollWithJournalEntry(payrollId: string, journalEntryId: string): Promise<void> {
+    await supabase
+      .from('payroll')
+      .update({
+        journal_entry_id: journalEntryId
+      })
+      .eq('id', payrollId);
   }
 };

@@ -22,34 +22,64 @@ export class PaymentBusinessService {
     try {
       // Business logic for payment creation
       await this.validatePaymentData(paymentData);
+      
+      // الحصول على بيانات الفاتورة والعميل مبكراً
+      const invoice = await this.invoiceRepository.getInvoiceById(paymentData.invoice_id);
+      if (!invoice) {
+        throw new Error('الفاتورة غير موجودة');
+      }
+      
+      const customerName = await this.getCustomerName(invoice.customer_id);
+      
+      // إنشاء الدفعة
       const payment = await this.paymentRepository.createPayment(paymentData);
       
-      // Create accounting entry for the payment with improved error handling
+      // إنشاء القيد المحاسبي - إجباري، لا يُتجاهل الخطأ
       try {
-        const invoice = await this.invoiceRepository.getInvoiceById(paymentData.invoice_id);
-        if (invoice) {
-          const customerName = await this.getCustomerName(invoice.customer_id);
-          const journalEntryId = await this.accountingService.createPaymentAccountingEntry(payment.id, {
-            customer_name: customerName,
-            invoice_number: invoice.invoice_number,
-            payment_amount: payment.amount,
-            payment_method: payment.payment_method,
-            payment_date: payment.payment_date
-          });
-          
-          if (journalEntryId) {
-            console.log(`Payment accounting entry created successfully: ${journalEntryId}`);
-          }
+        const journalEntryId = await this.accountingService.createPaymentAccountingEntry(payment.id, {
+          customer_name: customerName,
+          invoice_number: invoice.invoice_number,
+          payment_amount: payment.amount,
+          payment_method: payment.payment_method,
+          payment_date: payment.payment_date
+        });
+        
+        if (!journalEntryId) {
+          throw new Error('فشل في إنشاء القيد المحاسبي للدفعة');
         }
-      } catch (error) {
-        console.error('Failed to create accounting entry for payment:', error);
-        // Log the error but don't stop the process - can be handled later via reconciliation service
+        
+        console.log(`Payment accounting entry created successfully: ${journalEntryId}`);
+        
+        // تحديث الدفعة بمعرف القيد
+        await this.updatePaymentWithJournalEntry(payment.id, journalEntryId);
+        
+      } catch (accountingError) {
+        console.error('Failed to create accounting entry for payment:', accountingError);
+        
+        // حذف الدفعة إذا فشل إنشاء القيد المحاسبي
+        try {
+          await this.paymentRepository.deletePayment(payment.id);
+        } catch (deleteError) {
+          console.error('Failed to rollback payment after accounting error:', deleteError);
+        }
+        
+        throw new Error(`فشل في إنشاء القيد المحاسبي: ${accountingError.message}`);
       }
       
       return payment;
     } catch (error) {
       console.error('Error creating payment:', error);
       throw new Error(`فشل في إنشاء الدفعة: ${error.message}`);
+    }
+  }
+
+  // وظيفة جديدة لتحديث الدفعة بمعرف القيد
+  private async updatePaymentWithJournalEntry(paymentId: string, journalEntryId: string): Promise<void> {
+    try {
+      await this.paymentRepository.updatePaymentJournalEntry(paymentId, journalEntryId);
+    } catch (error) {
+      console.error('Failed to update payment with journal entry ID:', error);
+      throw error;
     }
   }
 

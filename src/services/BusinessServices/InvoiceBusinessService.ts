@@ -22,11 +22,15 @@ export class InvoiceBusinessService {
     try {
       // Business logic for invoice creation
       this.validateInvoiceData(invoiceData);
+      
+      // الحصول على اسم العميل مسبقاً
+      const customerName = await this.getCustomerName(invoiceData.customer_id);
+      
+      // إنشاء الفاتورة
       const invoice = await this.invoiceRepository.createInvoice(invoiceData);
       
-      // Create accounting entry for the invoice with improved error handling
+      // إنشاء القيد المحاسبي - إجباري
       try {
-        const customerName = await this.getCustomerName(invoice.customer_id);
         const journalEntryId = await this.accountingService.createInvoiceAccountingEntry(invoice.id, {
           customer_name: customerName,
           invoice_number: invoice.invoice_number,
@@ -35,12 +39,22 @@ export class InvoiceBusinessService {
           discount_amount: invoice.discount_amount || 0
         });
         
-        if (journalEntryId) {
-          console.log(`Invoice accounting entry created successfully: ${journalEntryId}`);
+        if (!journalEntryId) {
+          throw new Error('فشل في إنشاء القيد المحاسبي للفاتورة');
         }
+        
+        // تحديث الفاتورة بمعرف القيد
+        await this.updateInvoiceWithJournalEntry(invoice.id, journalEntryId);
+        
       } catch (accountingError) {
-        console.error('Failed to create accounting entry for invoice:', accountingError);
-        // Log the error but don't stop the process - can be handled later via reconciliation service
+        // حذف الفاتورة إذا فشل إنشاء القيد المحاسبي
+        try {
+          await this.invoiceRepository.deleteInvoice(invoice.id);
+        } catch (deleteError) {
+          console.error('Failed to rollback invoice after accounting error:', deleteError);
+        }
+        
+        throw new Error(`فشل في إنشاء القيد المحاسبي: ${accountingError.message}`);
       }
       
       return invoice;
@@ -147,6 +161,16 @@ export class InvoiceBusinessService {
       return customer.name;
     } catch (error) {
       return 'غير محدد';
+    }
+  }
+
+  // وظيفة جديدة لتحديث الفاتورة بمعرف القيد
+  private async updateInvoiceWithJournalEntry(invoiceId: string, journalEntryId: string): Promise<void> {
+    try {
+      await this.invoiceRepository.updateInvoiceJournalEntry(invoiceId, journalEntryId);
+    } catch (error) {
+      console.error('Failed to update invoice with journal entry ID:', error);
+      throw error;
     }
   }
 }
