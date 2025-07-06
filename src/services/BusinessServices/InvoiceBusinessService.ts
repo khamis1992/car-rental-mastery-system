@@ -22,15 +22,11 @@ export class InvoiceBusinessService {
     try {
       // Business logic for invoice creation
       this.validateInvoiceData(invoiceData);
-      
-      // الحصول على اسم العميل مسبقاً
-      const customerName = await this.getCustomerName(invoiceData.customer_id);
-      
-      // إنشاء الفاتورة
       const invoice = await this.invoiceRepository.createInvoice(invoiceData);
       
       // Create receivable entry for the invoice (no revenue recorded yet)
       try {
+        const customerName = await this.getCustomerName(invoice.customer_id);
         const journalEntryId = await this.accountingService.createInvoiceAccountingEntry(invoice.id, {
           customer_name: customerName,
           invoice_number: invoice.invoice_number,
@@ -41,8 +37,6 @@ export class InvoiceBusinessService {
         
         if (journalEntryId) {
           console.log(`✅ Invoice receivable entry created successfully: ${journalEntryId}`);
-          // تحديث الفاتورة بمعرف القيد
-          await this.updateInvoiceWithJournalEntry(invoice.id, journalEntryId);
         }
       } catch (accountingError: any) {
         console.error('❌ Failed to create receivable entry for invoice:', accountingError);
@@ -154,16 +148,6 @@ export class InvoiceBusinessService {
       return customer.name;
     } catch (error) {
       return 'غير محدد';
-    }
-  }
-
-  // وظيفة جديدة لتحديث الفاتورة بمعرف القيد
-  private async updateInvoiceWithJournalEntry(invoiceId: string, journalEntryId: string): Promise<void> {
-    try {
-      await this.invoiceRepository.updateInvoiceJournalEntry(invoiceId, journalEntryId);
-    } catch (error) {
-      console.error('Failed to update invoice with journal entry ID:', error);
-      throw error;
     }
   }
 }

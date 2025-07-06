@@ -7,15 +7,6 @@ import { supabase } from '@/integrations/supabase/client';
 export class AccountingIntegrationService {
   
   /**
-   * إنشاء قيد محاسبي للعاتق - تم تحسينه مع منع التضاعف
-   */
-  async createContractAccountingEntry(contractData: any): Promise<string> {
-    // Implementation for contract accounting entry
-    // This would be implemented based on requirements
-    return '';
-  }
-
-  /**
    * إنشاء قيد محاسبي للفاتورة (مديونية فقط، بدون إيراد)
    */
   async createInvoiceAccountingEntry(invoiceId: string, invoiceData: {
@@ -24,24 +15,17 @@ export class AccountingIntegrationService {
     total_amount: number;
     tax_amount?: number;
     discount_amount?: number;
-  }): Promise<string> {
+  }): Promise<string | null> {
     try {
       console.log(`🔄 Creating receivable entry for invoice ${invoiceData.invoice_number} with amount ${invoiceData.total_amount}`);
       
-      // التحقق من عدم وجود قيد محاسبي مسبق
-      const existingEntry = await this.checkExistingInvoiceEntry(invoiceId);
-      if (existingEntry) {
-        console.log(`✅ Invoice already has accounting entry: ${existingEntry}`);
-        return existingEntry;
-      }
-
       // Validate input data
       if (!invoiceData.total_amount || invoiceData.total_amount <= 0) {
         console.error('❌ Invalid invoice amount:', invoiceData.total_amount);
         throw new Error('مبلغ الفاتورة يجب أن يكون أكبر من صفر');
       }
 
-      const { data, error } = await supabase.rpc('create_invoice_receivable_entry', {
+      const { data, error } = await supabase.rpc('create_invoice_receivable_entry' as any, {
         invoice_id: invoiceId,
         invoice_data: {
           customer_name: invoiceData.customer_name,
@@ -71,26 +55,6 @@ export class AccountingIntegrationService {
   }
 
   /**
-   * التحقق من وجود قيد محاسبي للفاتورة
-   */
-  private async checkExistingInvoiceEntry(invoiceId: string): Promise<string | null> {
-    try {
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('journal_entry_id')
-        .eq('id', invoiceId)
-        .single();
-      
-      if (error) throw error;
-      
-      return data?.journal_entry_id || null;
-    } catch (error) {
-      console.error('Error checking existing invoice entry:', error);
-      return null;
-    }
-  }
-
-  /**
    * إنشاء قيد محاسبي للدفعة (تسجيل الإيراد عند الدفع)
    */
   async createPaymentAccountingEntry(paymentId: string, paymentData: {
@@ -99,16 +63,9 @@ export class AccountingIntegrationService {
     payment_amount: number;
     payment_method: string;
     payment_date: string;
-  }): Promise<string> {
+  }): Promise<string | null> {
     try {
       console.log(`🔄 Creating revenue entry for payment ${paymentData.invoice_number} with amount ${paymentData.payment_amount}`);
-      
-      // التحقق من عدم وجود قيد محاسبي مسبق
-      const existingEntry = await this.checkExistingPaymentEntry(paymentId);
-      if (existingEntry) {
-        console.log(`✅ Payment already has accounting entry: ${existingEntry}`);
-        return existingEntry;
-      }
       
       // Validate input data
       if (!paymentData.payment_amount || paymentData.payment_amount <= 0) {
@@ -116,7 +73,7 @@ export class AccountingIntegrationService {
         throw new Error('مبلغ الدفعة يجب أن يكون أكبر من صفر');
       }
 
-      const { data, error } = await supabase.rpc('create_payment_revenue_entry', {
+      const { data, error } = await supabase.rpc('create_payment_revenue_entry' as any, {
         payment_id: paymentId,
         payment_data: {
           customer_name: paymentData.customer_name,
@@ -146,26 +103,6 @@ export class AccountingIntegrationService {
   }
 
   /**
-   * التحقق من وجود قيد محاسبي للدفعة
-   */
-  private async checkExistingPaymentEntry(paymentId: string): Promise<string | null> {
-    try {
-      const { data, error } = await supabase
-        .from('payments')
-        .select('journal_entry_id')
-        .eq('id', paymentId)
-        .single();
-      
-      if (error) throw error;
-      
-      return data?.journal_entry_id || null;
-    } catch (error) {
-      console.error('Error checking existing payment entry:', error);
-      return null;
-    }
-  }
-
-  /**
    * إنشاء قيد محاسبي لمصروفات الصيانة
    */
   async createMaintenanceAccountingEntry(maintenanceId: string, maintenanceData: {
@@ -174,16 +111,9 @@ export class AccountingIntegrationService {
     cost: number;
     maintenance_date: string;
     vendor_name?: string;
-  }): Promise<string> {
+  }): Promise<string | null> {
     try {
-      // التحقق من عدم وجود قيد محاسبي مسبق
-      const existingEntry = await this.checkExistingMaintenanceEntry(maintenanceId);
-      if (existingEntry) {
-        console.log(`Maintenance already has accounting entry: ${existingEntry}`);
-        return existingEntry;
-      }
-
-      const { data, error } = await supabase.rpc('create_maintenance_accounting_entry', {
+      const { data, error } = await supabase.rpc('create_maintenance_accounting_entry' as any, {
         maintenance_id: maintenanceId,
         maintenance_data: {
           vehicle_info: maintenanceData.vehicle_info,
@@ -195,37 +125,13 @@ export class AccountingIntegrationService {
       });
 
       if (error) {
-        console.error('Database error creating maintenance accounting entry:', error);
-        throw new Error(`فشل في إنشاء القيد المحاسبي للصيانة: ${error.message}`);
-      }
-
-      if (!data) {
-        throw new Error('لم يتم إرجاع معرف القيد المحاسبي من قاعدة البيانات');
+        console.warn('Failed to create maintenance accounting entry:', error);
+        return null;
       }
 
       return data as string;
     } catch (error) {
-      console.error('Error creating maintenance accounting entry:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * التحقق من وجود قيد محاسبي للصيانة
-   */
-  private async checkExistingMaintenanceEntry(maintenanceId: string): Promise<string | null> {
-    try {
-      const { data, error } = await supabase
-        .from('vehicle_maintenance')
-        .select('journal_entry_id')
-        .eq('id', maintenanceId)
-        .single();
-      
-      if (error) throw error;
-      
-      return data?.journal_entry_id || null;
-    } catch (error) {
-      console.error('Error checking existing maintenance entry:', error);
+      console.warn('Failed to create maintenance accounting entry:', error);
       return null;
     }
   }
@@ -240,9 +146,9 @@ export class AccountingIntegrationService {
     overtime_hours: number;
     hourly_rate: number;
     overtime_rate: number;
-  }): Promise<string> {
+  }): Promise<string | null> {
     try {
-      const { data, error } = await supabase.rpc('create_attendance_accounting_entry', {
+      const { data, error } = await supabase.rpc('create_attendance_accounting_entry' as any, {
         attendance_data: {
           employee_name: attendanceData.employee_name,
           date: attendanceData.date,
@@ -256,18 +162,14 @@ export class AccountingIntegrationService {
       });
 
       if (error) {
-        console.error('Database error creating attendance accounting entry:', error);
-        throw new Error(`فشل في إنشاء القيد المحاسبي للحضور: ${error.message}`);
-      }
-
-      if (!data) {
-        throw new Error('لم يتم إرجاع معرف القيد المحاسبي من قاعدة البيانات');
+        console.warn('Failed to create attendance accounting entry:', error);
+        return null;
       }
 
       return data as string;
     } catch (error) {
-      console.error('Error creating attendance accounting entry:', error);
-      throw error;
+      console.warn('Failed to create attendance accounting entry:', error);
+      return null;
     }
   }
 
