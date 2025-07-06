@@ -73,6 +73,17 @@ const getOwnerTypeText = (ownerType: string | undefined) => {
   }
 };
 
+const getOwnerTypeColor = (ownerType: string | undefined) => {
+  switch (ownerType) {
+    case 'customer':
+      return 'bg-blue-500/10 text-blue-700 border-blue-200';
+    case 'company':
+      return 'bg-green-500/10 text-green-700 border-green-200';
+    default:
+      return 'bg-gray-500/10 text-gray-700 border-gray-200';
+  }
+};
+
 export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onEdit, onView }) => {
   const isInsuranceExpiring = vehicle.insurance_expiry && 
     new Date(vehicle.insurance_expiry) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -99,7 +110,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onEdit, onVie
             <Badge className={getStatusColor(vehicle.status)}>
               {getStatusText(vehicle.status)}
             </Badge>
-            <Badge variant="outline" className="text-xs">
+            <Badge className={`text-xs ${getOwnerTypeColor(vehicle.owner_type)}`}>
               {getOwnerTypeText(vehicle.owner_type)}
             </Badge>
           </div>
