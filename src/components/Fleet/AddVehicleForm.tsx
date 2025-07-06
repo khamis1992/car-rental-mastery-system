@@ -149,7 +149,7 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             <Car className="w-6 h-6" />
             إضافة مركبة جديدة
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground">
+          <DialogDescription className="text-muted-foreground text-center">
             قم بملء النموذج أدناه لإضافة مركبة جديدة إلى الأسطول
           </DialogDescription>
         </DialogHeader>
