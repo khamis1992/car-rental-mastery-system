@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Vehicle } from '@/repositories/interfaces/IVehicleRepository';
 import { formatDate } from '@/lib/utils';
+import { getInsuranceTypeText } from '@/lib/insuranceUtils';
 
 interface VehicleDetailsDialogProps {
   vehicle: Vehicle | null;
@@ -225,15 +226,22 @@ export const VehicleDetailsDialog: React.FC<VehicleDetailsDialogProps> = ({
                     التأمين والترخيص
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-1">
-                    {vehicle.insurance_company && (
-                      <InfoRow 
-                        label="شركة التأمين" 
-                        value={vehicle.insurance_company} 
-                        icon={<Shield className="w-4 h-4" />} 
-                      />
-                    )}
+                 <CardContent>
+                   <div className="grid grid-cols-2 gap-x-8 gap-y-1">
+                     {vehicle.insurance_type && (
+                       <InfoRow 
+                         label="نوع التأمين" 
+                         value={getInsuranceTypeText(vehicle.insurance_type)} 
+                         icon={<Shield className="w-4 h-4" />} 
+                       />
+                     )}
+                     {vehicle.insurance_company && (
+                       <InfoRow 
+                         label="شركة التأمين" 
+                         value={vehicle.insurance_company} 
+                         icon={<Shield className="w-4 h-4" />} 
+                       />
+                     )}
                     {vehicle.insurance_policy_number && (
                       <InfoRow 
                         label="رقم وثيقة التأمين" 

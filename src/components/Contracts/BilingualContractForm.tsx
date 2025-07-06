@@ -948,7 +948,7 @@ Eleventh: General Provisions
                             <SelectContent>
                               <SelectItem value="basic">Basic / أساسي</SelectItem>
                               <SelectItem value="comprehensive">Comprehensive / شامل</SelectItem>
-                              <SelectItem value="third_party">Third Party / طرف ثالث</SelectItem>
+                              <SelectItem value="third_party">Third Party / ضد الغير</SelectItem>
                               <SelectItem value="none">None / لا يوجد</SelectItem>
                             </SelectContent>
                           </Select>

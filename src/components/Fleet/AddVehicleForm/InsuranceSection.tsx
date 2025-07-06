@@ -56,7 +56,7 @@ export const InsuranceSection: React.FC<InsuranceSectionProps> = ({ control }) =
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="comprehensive">تأمين شامل</SelectItem>
-                    <SelectItem value="third_party">تأمين طرف ثالث</SelectItem>
+                    <SelectItem value="third_party">تأمين ضد الغير</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
