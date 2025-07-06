@@ -107,7 +107,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onEdit, onVie
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <Badge className={getStatusColor(vehicle.status)}>
+            <Badge className={`${getStatusColor(vehicle.status)} justify-center`}>
               {getStatusText(vehicle.status)}
             </Badge>
             <Badge className={`text-xs ${getOwnerTypeColor(vehicle.owner_type)}`}>
