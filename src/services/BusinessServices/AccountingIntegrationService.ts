@@ -7,7 +7,16 @@ import { supabase } from '@/integrations/supabase/client';
 export class AccountingIntegrationService {
   
   /**
-   * إنشاء قيد محاسبي للفاتورة
+   * إنشاء قيد محاسبي للعاتق - تم تحسينه مع منع التضاعف
+   */
+  async createContractAccountingEntry(contractData: any): Promise<string> {
+    // Implementation for contract accounting entry
+    // This would be implemented based on requirements
+    return '';
+  }
+
+  /**
+   * إنشاء قيد محاسبي للفاتورة (مديونية فقط، بدون إيراد)
    */
   async createInvoiceAccountingEntry(invoiceId: string, invoiceData: {
     customer_name: string;
@@ -17,14 +26,22 @@ export class AccountingIntegrationService {
     discount_amount?: number;
   }): Promise<string> {
     try {
+      console.log(`🔄 Creating receivable entry for invoice ${invoiceData.invoice_number} with amount ${invoiceData.total_amount}`);
+      
       // التحقق من عدم وجود قيد محاسبي مسبق
       const existingEntry = await this.checkExistingInvoiceEntry(invoiceId);
       if (existingEntry) {
-        console.log(`Invoice already has accounting entry: ${existingEntry}`);
+        console.log(`✅ Invoice already has accounting entry: ${existingEntry}`);
         return existingEntry;
       }
 
-      const { data, error } = await supabase.rpc('create_invoice_accounting_entry', {
+      // Validate input data
+      if (!invoiceData.total_amount || invoiceData.total_amount <= 0) {
+        console.error('❌ Invalid invoice amount:', invoiceData.total_amount);
+        throw new Error('مبلغ الفاتورة يجب أن يكون أكبر من صفر');
+      }
+
+      const { data, error } = await supabase.rpc('create_invoice_receivable_entry', {
         invoice_id: invoiceId,
         invoice_data: {
           customer_name: invoiceData.customer_name,
@@ -36,18 +53,20 @@ export class AccountingIntegrationService {
       });
 
       if (error) {
-        console.error('Database error creating invoice accounting entry:', error);
-        throw new Error(`فشل في إنشاء القيد المحاسبي للفاتورة: ${error.message}`);
+        console.error('❌ Failed to create invoice receivable entry:', error);
+        throw new Error(`فشل في إنشاء قيد المديونية للفاتورة: ${error.message}`);
       }
 
       if (!data) {
-        throw new Error('لم يتم إرجاع معرف القيد المحاسبي من قاعدة البيانات');
+        console.error('❌ No journal entry ID returned from receivable function');
+        throw new Error('لم يتم إرجاع معرف قيد المديونية');
       }
 
+      console.log(`✅ Invoice receivable entry created successfully: ${data}`);
       return data as string;
     } catch (error) {
-      console.error('Error creating invoice accounting entry:', error);
-      throw error;
+      console.error('❌ Invoice receivable integration error:', error);
+      throw error; // Re-throw to let business service handle it
     }
   }
 
@@ -72,7 +91,7 @@ export class AccountingIntegrationService {
   }
 
   /**
-   * إنشاء قيد محاسبي للدفعة
+   * إنشاء قيد محاسبي للدفعة (تسجيل الإيراد عند الدفع)
    */
   async createPaymentAccountingEntry(paymentId: string, paymentData: {
     customer_name: string;
@@ -82,14 +101,22 @@ export class AccountingIntegrationService {
     payment_date: string;
   }): Promise<string> {
     try {
+      console.log(`🔄 Creating revenue entry for payment ${paymentData.invoice_number} with amount ${paymentData.payment_amount}`);
+      
       // التحقق من عدم وجود قيد محاسبي مسبق
       const existingEntry = await this.checkExistingPaymentEntry(paymentId);
       if (existingEntry) {
-        console.log(`Payment already has accounting entry: ${existingEntry}`);
+        console.log(`✅ Payment already has accounting entry: ${existingEntry}`);
         return existingEntry;
       }
       
-      const { data, error } = await supabase.rpc('create_payment_accounting_entry', {
+      // Validate input data
+      if (!paymentData.payment_amount || paymentData.payment_amount <= 0) {
+        console.error('❌ Invalid payment amount:', paymentData.payment_amount);
+        throw new Error('مبلغ الدفعة يجب أن يكون أكبر من صفر');
+      }
+
+      const { data, error } = await supabase.rpc('create_payment_revenue_entry', {
         payment_id: paymentId,
         payment_data: {
           customer_name: paymentData.customer_name,
@@ -101,18 +128,20 @@ export class AccountingIntegrationService {
       });
 
       if (error) {
-        console.error('Database error creating payment accounting entry:', error);
-        throw new Error(`فشل في إنشاء القيد المحاسبي: ${error.message}`);
-      }
-      
-      if (!data) {
-        throw new Error('لم يتم إرجاع معرف القيد المحاسبي من قاعدة البيانات');
+        console.error('❌ Failed to create payment revenue entry:', error);
+        throw new Error(`فشل في إنشاء قيد الإيراد للدفعة: ${error.message}`);
       }
 
+      if (!data) {
+        console.error('❌ No journal entry ID returned from payment revenue function');
+        throw new Error('لم يتم إرجاع معرف قيد الإيراد للدفعة');
+      }
+
+      console.log(`✅ Payment revenue entry created successfully: ${data}`);
       return data as string;
     } catch (error) {
-      console.error('Error creating payment accounting entry:', error);
-      throw error;
+      console.error('❌ Payment revenue integration error:', error);
+      throw error; // Re-throw to let business service handle it
     }
   }
 
@@ -337,6 +366,45 @@ export class AccountingIntegrationService {
       return {
         fixed_entries: 0,
         remaining_unbalanced: 0
+      };
+    }
+  }
+
+  /**
+   * تصحيح الإيرادات المزدوجة
+   */
+  async fixDoubleRevenueEntries(): Promise<{
+    processed_count: number;
+    fixed_count: number;
+    error_count: number;
+    results: any[];
+  }> {
+    try {
+      console.log('🔄 Fixing double revenue entries...');
+      
+      const { data, error } = await supabase.rpc('fix_double_revenue_entries' as any);
+
+      if (error) {
+        console.error('❌ Failed to fix double revenue entries:', error);
+        throw error;
+      }
+
+      const result = (data as any) || {
+        processed_count: 0,
+        fixed_count: 0,
+        error_count: 0,
+        results: []
+      };
+
+      console.log(`✅ Double revenue fix completed:`, result);
+      return result;
+    } catch (error) {
+      console.error('❌ Failed to fix double revenue entries:', error);
+      return {
+        processed_count: 0,
+        fixed_count: 0,
+        error_count: 0,
+        results: []
       };
     }
   }

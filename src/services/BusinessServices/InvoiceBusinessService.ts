@@ -29,7 +29,11 @@ export class InvoiceBusinessService {
       // إنشاء الفاتورة
       const invoice = await this.invoiceRepository.createInvoice(invoiceData);
       
+<<<<<<< HEAD
       // إنشاء القيد المحاسبي - إجباري
+=======
+      // Create receivable entry for the invoice (no revenue recorded yet)
+>>>>>>> 4f25b4f138ad579f7b53236824abd7472f545afc
       try {
         const journalEntryId = await this.accountingService.createInvoiceAccountingEntry(invoice.id, {
           customer_name: customerName,
@@ -39,6 +43,7 @@ export class InvoiceBusinessService {
           discount_amount: invoice.discount_amount || 0
         });
         
+<<<<<<< HEAD
         if (!journalEntryId) {
           throw new Error('فشل في إنشاء القيد المحاسبي للفاتورة');
         }
@@ -55,6 +60,15 @@ export class InvoiceBusinessService {
         }
         
         throw new Error(`فشل في إنشاء القيد المحاسبي: ${accountingError.message}`);
+=======
+        if (journalEntryId) {
+          console.log(`✅ Invoice receivable entry created successfully: ${journalEntryId}`);
+        }
+      } catch (accountingError: any) {
+        console.error('❌ Failed to create receivable entry for invoice:', accountingError);
+        // Don't fail the entire invoice creation if accounting fails - log error for later reconciliation
+        console.warn(`⚠️ Invoice ${invoice.invoice_number} created but receivable entry failed. Manual reconciliation may be needed.`);
+>>>>>>> 4f25b4f138ad579f7b53236824abd7472f545afc
       }
       
       return invoice;

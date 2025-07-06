@@ -928,6 +928,42 @@ export type Database = {
           },
         ]
       }
+      contract_deletion_log: {
+        Row: {
+          contract_id: string
+          contract_number: string
+          created_at: string
+          deleted_at: string
+          deleted_by: string | null
+          deletion_reason: string | null
+          deletion_type: string
+          id: string
+          related_records_deleted: Json | null
+        }
+        Insert: {
+          contract_id: string
+          contract_number: string
+          created_at?: string
+          deleted_at?: string
+          deleted_by?: string | null
+          deletion_reason?: string | null
+          deletion_type: string
+          id?: string
+          related_records_deleted?: Json | null
+        }
+        Update: {
+          contract_id?: string
+          contract_number?: string
+          created_at?: string
+          deleted_at?: string
+          deleted_by?: string | null
+          deletion_reason?: string | null
+          deletion_type?: string
+          id?: string
+          related_records_deleted?: Json | null
+        }
+        Relationships: []
+      }
       contract_extensions: {
         Row: {
           approved_at: string | null
@@ -3560,6 +3596,10 @@ export type Database = {
         Args: { target_year: number; target_month: number }
         Returns: string
       }
+      check_contract_related_records: {
+        Args: { contract_id_param: string }
+        Returns: Json
+      }
       cleanup_duplicate_accounts: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -3580,11 +3620,19 @@ export type Database = {
         Args: { invoice_id: string; invoice_data: Json }
         Returns: string
       }
+      create_invoice_receivable_entry: {
+        Args: { invoice_id: string; invoice_data: Json }
+        Returns: string
+      }
       create_maintenance_accounting_entry: {
         Args: { maintenance_id: string; maintenance_data: Json }
         Returns: string
       }
       create_payment_accounting_entry: {
+        Args: { payment_id: string; payment_data: Json }
+        Returns: string
+      }
+      create_payment_revenue_entry: {
         Args: { payment_id: string; payment_data: Json }
         Returns: string
       }
@@ -3632,6 +3680,10 @@ export type Database = {
           count_duplicates: number
           account_codes: string[]
         }[]
+      }
+      fix_double_revenue_entries: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       fix_unbalanced_accounting_entries: {
         Args: Record<PropertyKey, never>
@@ -3716,12 +3768,24 @@ export type Database = {
         }
         Returns: boolean
       }
+      mark_contract_deleted: {
+        Args: { contract_id_param: string; reason?: string }
+        Returns: Json
+      }
       reorganize_account_codes: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      reprocess_missing_invoice_entries: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
       reprocess_missing_payment_entries: {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      safe_delete_contract: {
+        Args: { contract_id_param: string; delete_related?: boolean }
         Returns: Json
       }
       validate_accounting_balance: {
