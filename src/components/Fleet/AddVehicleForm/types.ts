@@ -2,13 +2,14 @@ import { z } from 'zod';
 
 export const vehicleSchema = z.object({
   make: z.string().min(2, 'يجب إدخال الصانع'),
-  model: z.string().min(2, 'يجب إدخال الموديل'),
+  model: z.string().min(2, 'يجب إدخال الموديل'),  
   year: z.number().min(1900).max(new Date().getFullYear() + 1),
   color: z.string().min(2, 'يجب إدخال اللون'),
   vehicle_type: z.enum(['sedan', 'suv', 'hatchback', 'coupe', 'pickup', 'van', 'luxury']),
   license_plate: z.string().min(3, 'يجب إدخال رقم اللوحة'),
   vin_number: z.string().optional(),
   body_type: z.string().optional(),
+  cost_center_id: z.string().optional(),
   // Asset information
   asset_code: z.string().optional(),
   asset_code_hierarchy: z.string().optional(),

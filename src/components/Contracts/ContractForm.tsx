@@ -20,6 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 const contractSchema = z.object({
   customer_id: z.string().min(1, 'العميل مطلوب'),
   vehicle_id: z.string().min(1, 'المركبة مطلوبة'),
+  cost_center_id: z.string().optional(),
   quotation_id: z.string().optional(),
   start_date: z.date({ required_error: 'تاريخ البداية مطلوب' }),
   end_date: z.date({ required_error: 'تاريخ النهاية مطلوب' }),

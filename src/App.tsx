@@ -30,6 +30,7 @@ import Employees from "./pages/Employees";
 import Attendance from "./pages/Attendance";
 import Leaves from "./pages/Leaves";
 import Payroll from "./pages/Payroll";
+import CostCenters from "./pages/CostCenters";
 import NotFound from "./pages/NotFound";
 import PublicQuotation from "./pages/PublicQuotation";
 import DraftStage from "./pages/ContractStages/DraftStage";
@@ -198,6 +199,13 @@ const App = () => (
                       <ProtectedRoute>
                         <Layout>
                           <Payroll />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/cost-centers" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <CostCenters />
                         </Layout>
                       </ProtectedRoute>
                     } />

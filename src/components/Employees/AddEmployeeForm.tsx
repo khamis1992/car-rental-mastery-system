@@ -45,6 +45,7 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   const [hireDate, setHireDate] = useState<Date>();
   const [showBankDetails, setShowBankDetails] = useState(false);
   const [departments, setDepartments] = useState<any[]>([]);
+  const [costCenters, setCostCenters] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -54,6 +55,8 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     position: '',
     department: '',
     department_id: '',
+    primary_cost_center_id: '',
+    secondary_cost_center_id: '',
     salary: '',
     emergency_contact_name: '',
     emergency_contact_phone: '',
@@ -67,6 +70,7 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   useEffect(() => {
     if (open) {
       fetchDepartments();
+      fetchCostCenters();
     }
   }, [open]);
 
@@ -82,6 +86,31 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       setDepartments(data || []);
     } catch (error) {
       console.error('Error fetching departments:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في جلب الأقسام",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchCostCenters = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('cost_centers')
+        .select('id, cost_center_code, cost_center_name')
+        .eq('is_active', true)
+        .order('cost_center_name');
+
+      if (error) throw error;
+      setCostCenters(data || []);
+    } catch (error) {
+      console.error('Error fetching cost centers:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في جلب مراكز التكلفة",
+        variant: "destructive",
+      });
     }
   };
 
@@ -146,6 +175,8 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         position: formData.position,
         department: selectedDepartment?.department_name || null,
         department_id: formData.department_id || null,
+        primary_cost_center_id: formData.primary_cost_center_id || null,
+        secondary_cost_center_id: formData.secondary_cost_center_id || null,
         salary: parseFloat(formData.salary),
         hire_date: hireDate!.toISOString().split('T')[0],
         status: 'active' as const,
@@ -191,6 +222,8 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         position: '',
         department: '',
         department_id: '',
+        primary_cost_center_id: '',
+        secondary_cost_center_id: '',
         salary: '',
         emergency_contact_name: '',
         emergency_contact_phone: '',
@@ -471,6 +504,44 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                       هذا الحقل مطلوب
                     </p>
                   )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="primary_cost_center" className="flex items-center gap-1">
+                    مركز التكلفة الأساسي
+                  </Label>
+                  <Select value={formData.primary_cost_center_id} onValueChange={(value) => handleInputChange('primary_cost_center_id', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر مركز التكلفة الأساسي" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">بدون مركز تكلفة</SelectItem>
+                      {costCenters.map((cc) => (
+                        <SelectItem key={cc.id} value={cc.id}>
+                          {cc.cost_center_name} ({cc.cost_center_code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="secondary_cost_center" className="flex items-center gap-1">
+                    مركز التكلفة الثانوي
+                  </Label>
+                  <Select value={formData.secondary_cost_center_id} onValueChange={(value) => handleInputChange('secondary_cost_center_id', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر مركز التكلفة الثانوي" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">بدون مركز تكلفة</SelectItem>
+                      {costCenters.map((cc) => (
+                        <SelectItem key={cc.id} value={cc.id}>
+                          {cc.cost_center_name} ({cc.cost_center_code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardContent>
