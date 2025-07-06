@@ -34,8 +34,7 @@ export class PaymentBusinessService {
       // إنشاء الدفعة
       const payment = await this.paymentRepository.createPayment(paymentData);
       
-<<<<<<< HEAD
-      // إنشاء القيد المحاسبي - إجباري، لا يُتجاهل الخطأ
+      // Create revenue entry for the payment (revenue is recorded when payment is received)
       try {
         const journalEntryId = await this.accountingService.createPaymentAccountingEntry(payment.id, {
           customer_name: customerName,
@@ -45,49 +44,15 @@ export class PaymentBusinessService {
           payment_date: payment.payment_date
         });
         
-        if (!journalEntryId) {
-          throw new Error('فشل في إنشاء القيد المحاسبي للدفعة');
-        }
-        
-        console.log(`Payment accounting entry created successfully: ${journalEntryId}`);
-        
-        // تحديث الدفعة بمعرف القيد
-        await this.updatePaymentWithJournalEntry(payment.id, journalEntryId);
-        
-      } catch (accountingError) {
-        console.error('Failed to create accounting entry for payment:', accountingError);
-        
-        // حذف الدفعة إذا فشل إنشاء القيد المحاسبي
-        try {
-          await this.paymentRepository.deletePayment(payment.id);
-        } catch (deleteError) {
-          console.error('Failed to rollback payment after accounting error:', deleteError);
-        }
-        
-        throw new Error(`فشل في إنشاء القيد المحاسبي: ${accountingError.message}`);
-=======
-      // Create revenue entry for the payment (revenue is recorded when payment is received)
-      try {
-        const invoice = await this.invoiceRepository.getInvoiceById(paymentData.invoice_id);
-        if (invoice) {
-          const customerName = await this.getCustomerName(invoice.customer_id);
-          const journalEntryId = await this.accountingService.createPaymentAccountingEntry(payment.id, {
-            customer_name: customerName,
-            invoice_number: invoice.invoice_number,
-            payment_amount: payment.amount,
-            payment_method: payment.payment_method,
-            payment_date: payment.payment_date
-          });
-          
-          if (journalEntryId) {
-            console.log(`✅ Payment revenue entry created successfully: ${journalEntryId} for payment ${payment.id}`);
-          }
+        if (journalEntryId) {
+          console.log(`✅ Payment revenue entry created successfully: ${journalEntryId} for payment ${payment.id}`);
+          // تحديث الدفعة بمعرف القيد
+          await this.updatePaymentWithJournalEntry(payment.id, journalEntryId);
         }
       } catch (accountingError: any) {
         console.error(`❌ Failed to create revenue entry for payment ${payment.id}:`, accountingError);
         // Don't fail the entire payment creation if accounting fails - log error for later reconciliation
         console.warn(`⚠️ Payment for invoice ${paymentData.invoice_id} created but revenue entry failed. This payment can be reprocessed using the System Integrity tools.`);
->>>>>>> 4f25b4f138ad579f7b53236824abd7472f545afc
       }
       
       return payment;
