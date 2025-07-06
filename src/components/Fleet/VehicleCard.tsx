@@ -95,9 +95,14 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onEdit, onVie
               </p>
             </div>
           </div>
-          <Badge className={getStatusColor(vehicle.status)}>
-            {getStatusText(vehicle.status)}
-          </Badge>
+          <div className="flex flex-col gap-2">
+            <Badge className={getStatusColor(vehicle.status)}>
+              {getStatusText(vehicle.status)}
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              {getOwnerTypeText(vehicle.owner_type)}
+            </Badge>
+          </div>
         </div>
 
         <div className="space-y-2 mb-4">
@@ -112,10 +117,6 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onEdit, onVie
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">النوع:</span>
             <span className="font-medium">{getVehicleTypeText(vehicle.vehicle_type)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">المالك:</span>
-            <span className="font-medium">{getOwnerTypeText(vehicle.owner_type)}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">السعر اليومي:</span>
