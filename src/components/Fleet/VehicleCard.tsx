@@ -62,6 +62,17 @@ const getVehicleTypeText = (type: string) => {
   }
 };
 
+const getOwnerTypeText = (ownerType: string | undefined) => {
+  switch (ownerType) {
+    case 'customer':
+      return 'عميل';
+    case 'company':
+      return 'الشركة';
+    default:
+      return 'غير محدد';
+  }
+};
+
 export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onEdit, onView }) => {
   const isInsuranceExpiring = vehicle.insurance_expiry && 
     new Date(vehicle.insurance_expiry) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -101,6 +112,10 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onEdit, onVie
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">النوع:</span>
             <span className="font-medium">{getVehicleTypeText(vehicle.vehicle_type)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">المالك:</span>
+            <span className="font-medium">{getOwnerTypeText(vehicle.owner_type)}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">السعر اليومي:</span>
