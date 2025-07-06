@@ -3,6 +3,7 @@ import QuickActions from "@/components/Dashboard/QuickActions";
 import RecentContracts from "@/components/Dashboard/RecentContracts";
 import FleetOverview from "@/components/Dashboard/FleetOverview";
 import DailyTasksChecklist from "@/components/Dashboard/DailyTasksChecklist";
+import { BudgetOverrunAlerts } from "@/components/Dashboard/BudgetOverrunAlerts";
 import { 
   User, 
   Calendar, 
@@ -91,8 +92,9 @@ const Index = () => {
         </div>
 
         {/* المحتوى الرئيسي */}
-        <div className="grid grid-cols-1 gap-6 animate-fade-in">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 animate-fade-in">
           <RecentContracts />
+          <BudgetOverrunAlerts />
         </div>
     </div>
   );

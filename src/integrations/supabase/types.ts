@@ -4254,6 +4254,18 @@ export type Database = {
         Args: { target_year: number; target_month: number }
         Returns: string
       }
+      check_budget_overruns: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cost_center_id: string
+          cost_center_name: string
+          cost_center_code: string
+          budget_amount: number
+          actual_spent: number
+          overrun_amount: number
+          overrun_percentage: number
+        }[]
+      }
       check_contract_related_records: {
         Args: { contract_id_param: string }
         Returns: Json
@@ -4481,6 +4493,10 @@ export type Database = {
       }
       update_all_cost_center_costs: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_cost_center_actual_cost: {
+        Args: { cost_center_id: string }
         Returns: undefined
       }
       validate_accounting_balance: {
