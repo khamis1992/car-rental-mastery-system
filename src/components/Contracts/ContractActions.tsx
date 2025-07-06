@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, CheckCircle, Trash2, Printer } from 'lucide-react';
@@ -12,7 +13,7 @@ import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { contractService } from '@/services/contractService';
-import { supabase } from '@/integrations/supabase/client';
+import { contractDeletionService, RelatedRecords } from '@/services/contractDeletionService';
 
 interface ContractActionsProps {
   contract: {
@@ -29,6 +30,9 @@ export const ContractActions: React.FC<ContractActionsProps> = ({ contract, onUp
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [relatedRecords, setRelatedRecords] = useState<any>(null);
+  const [deleteOption, setDeleteOption] = useState<'cancel' | 'cascade' | 'soft'>('cancel');
+  const [deleteReason, setDeleteReason] = useState('');
   const { toast } = useToast();
 
   const [completeData, setCompleteData] = useState({
@@ -66,27 +70,57 @@ export const ContractActions: React.FC<ContractActionsProps> = ({ contract, onUp
     }
   };
 
+  const checkRelatedRecords = async () => {
+    try {
+      const data = await contractDeletionService.checkRelatedRecords(contract.id);
+      setRelatedRecords(data);
+    } catch (error: any) {
+      console.error('Error checking related records:', error);
+      toast({
+        title: 'خطأ في فحص البيانات المرتبطة',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteClick = async () => {
+    setShowDeleteDialog(true);
+    setDeleteOption('cancel');
+    setDeleteReason('');
+    await checkRelatedRecords();
+  };
+
   const handleDelete = async () => {
+    if (deleteOption === 'cancel') return;
+    
     setIsLoading(true);
     try {
-      // حذف العقد من قاعدة البيانات
-      const { error } = await supabase
-        .from('contracts')
-        .delete()
-        .eq('id', contract.id);
-
-      if (error) throw error;
+      let result;
       
-      toast({
-        title: 'تم حذف العقد بنجاح',
-        description: `العقد ${contract.contract_number} تم حذفه نهائياً`,
-      });
+      if (deleteOption === 'soft') {
+        // Mark as deleted instead of actually deleting
+        result = await contractDeletionService.markContractDeleted(contract.id, deleteReason || undefined);
+        
+        toast({
+          title: 'تم وسم العقد كمحذوف',
+          description: `العقد ${contract.contract_number} تم وسمه كمحذوف`,
+        });
+      } else if (deleteOption === 'cascade') {
+        // Delete contract and all related records
+        result = await contractDeletionService.cascadeDeleteContract(contract.id);
+        
+        toast({
+          title: 'تم حذف العقد والبيانات المرتبطة',
+          description: `العقد ${contract.contract_number} وجميع البيانات المرتبطة تم حذفها نهائياً`,
+        });
+      }
 
       setShowDeleteDialog(false);
       onUpdate();
     } catch (error: any) {
       toast({
-        title: 'خطأ في حذف العقد',
+        title: 'خطأ في العملية',
         description: error.message,
         variant: 'destructive',
       });
@@ -130,7 +164,7 @@ export const ContractActions: React.FC<ContractActionsProps> = ({ contract, onUp
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => setShowDeleteDialog(true)}
+        onClick={handleDeleteClick}
         className="text-destructive hover:text-destructive"
       >
         <Trash2 className="w-4 h-4" />
@@ -219,44 +253,157 @@ export const ContractActions: React.FC<ContractActionsProps> = ({ contract, onUp
 
       {/* Delete Contract Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>حذف العقد</DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4">
+          <div className="space-y-6">
+            {/* Contract Info */}
             <div className="text-center">
               <Trash2 className="w-16 h-16 text-destructive mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">هل أنت متأكد من حذف هذا العقد؟</h3>
-              <p className="text-sm text-muted-foreground mb-2">
-                العقد: <span className="font-medium">{contract.contract_number}</span>
-              </p>
-              <p className="text-sm text-muted-foreground mb-2">
-                العميل: <span className="font-medium">{contract.customer_name}</span>
-              </p>
-              <p className="text-sm text-muted-foreground mb-4">
-                المركبة: <span className="font-medium">{contract.vehicle_info}</span>
-              </p>
-              <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3">
-                <p className="text-sm text-destructive font-medium">
-                  ⚠️ تحذير: هذا الإجراء لا يمكن التراجع عنه
-                </p>
-                <p className="text-xs text-destructive mt-1">
-                  سيتم حذف العقد وجميع البيانات المرتبطة به نهائياً
-                </p>
+              <h3 className="text-lg font-medium mb-2">إدارة حذف العقد</h3>
+              <div className="bg-muted p-3 rounded-lg text-sm">
+                <p><span className="font-medium">العقد:</span> {contract.contract_number}</p>
+                <p><span className="font-medium">العميل:</span> {contract.customer_name}</p>
+                <p><span className="font-medium">المركبة:</span> {contract.vehicle_info}</p>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2">
+            {/* Related Records Info */}
+            {relatedRecords && (
+              <div className="space-y-4">
+                <h4 className="font-medium">البيانات المرتبطة بالعقد:</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="flex justify-between">
+                    <span>الفواتير:</span>
+                    <span className={relatedRecords.invoices > 0 ? 'text-orange-600 font-medium' : 'text-muted-foreground'}>
+                      {relatedRecords.invoices}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>الرسوم الإضافية:</span>
+                    <span className={relatedRecords.additional_charges > 0 ? 'text-orange-600 font-medium' : 'text-muted-foreground'}>
+                      {relatedRecords.additional_charges}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>الحوادث:</span>
+                    <span className={relatedRecords.incidents > 0 ? 'text-orange-600 font-medium' : 'text-muted-foreground'}>
+                      {relatedRecords.incidents}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>التمديدات:</span>
+                    <span className={relatedRecords.extensions > 0 ? 'text-orange-600 font-medium' : 'text-muted-foreground'}>
+                      {relatedRecords.extensions}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>التقييمات:</span>
+                    <span className={relatedRecords.evaluations > 0 ? 'text-orange-600 font-medium' : 'text-muted-foreground'}>
+                      {relatedRecords.evaluations}
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-medium">
+                    <span>إجمالي البيانات المرتبطة:</span>
+                    <span className={relatedRecords.total_related > 0 ? 'text-orange-600' : 'text-muted-foreground'}>
+                      {relatedRecords.total_related}
+                    </span>
+                  </div>
+                </div>
+
+                {relatedRecords.has_related_records && (
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                    <p className="text-sm text-orange-800 font-medium">
+                      ⚠️ تحذير: هناك بيانات مرتبطة بهذا العقد
+                    </p>
+                    <p className="text-xs text-orange-700 mt-1">
+                      يجب اختيار كيفية التعامل مع هذه البيانات
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Delete Options */}
+            <div className="space-y-4">
+              <Label className="text-base font-medium">اختر الإجراء المطلوب:</Label>
+              
+              <RadioGroup value={deleteOption} onValueChange={(value: 'cancel' | 'cascade' | 'soft') => setDeleteOption(value)}>
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <RadioGroupItem value="cancel" id="cancel" />
+                  <Label htmlFor="cancel" className="flex-1 cursor-pointer">
+                    <div>
+                      <p className="font-medium">إلغاء العملية</p>
+                      <p className="text-sm text-muted-foreground">عدم حذف العقد والاحتفاظ به كما هو</p>
+                    </div>
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <RadioGroupItem value="soft" id="soft" />
+                  <Label htmlFor="soft" className="flex-1 cursor-pointer">
+                    <div>
+                      <p className="font-medium text-blue-700">وسم العقد كمحذوف</p>
+                      <p className="text-sm text-muted-foreground">تغيير حالة العقد إلى "ملغي" مع الاحتفاظ بجميع البيانات (موصى به)</p>
+                    </div>
+                  </Label>
+                </div>
+
+                {relatedRecords?.has_related_records && (
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <RadioGroupItem value="cascade" id="cascade" />
+                    <Label htmlFor="cascade" className="flex-1 cursor-pointer">
+                      <div>
+                        <p className="font-medium text-red-700">حذف العقد وجميع البيانات المرتبطة</p>
+                        <p className="text-sm text-muted-foreground">حذف نهائي للعقد والفواتير والرسوم وجميع البيانات المرتبطة (غير قابل للاستعادة)</p>
+                      </div>
+                    </Label>
+                  </div>
+                )}
+              </RadioGroup>
+
+              {deleteOption === 'soft' && (
+                <div className="space-y-2">
+                  <Label htmlFor="deleteReason">سبب الحذف (اختياري)</Label>
+                  <Textarea
+                    id="deleteReason"
+                    value={deleteReason}
+                    onChange={(e) => setDeleteReason(e.target.value)}
+                    placeholder="أدخل سبب وسم العقد كمحذوف..."
+                    className="min-h-20"
+                  />
+                </div>
+              )}
+
+              {deleteOption === 'cascade' && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-sm text-red-800 font-medium mb-2">
+                    ⚠️ تحذير شديد: حذف نهائي
+                  </p>
+                  <ul className="text-xs text-red-700 space-y-1">
+                    <li>• سيتم حذف {relatedRecords?.invoices || 0} فاتورة نهائياً</li>
+                    <li>• سيتم حذف {relatedRecords?.additional_charges || 0} رسم إضافي نهائياً</li>
+                    <li>• سيتم حذف جميع البيانات المحاسبية المرتبطة</li>
+                    <li>• لا يمكن استعادة هذه البيانات بعد الحذف</li>
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-                إلغاء
+                إغلاق
               </Button>
               <Button 
-                variant="destructive" 
+                variant={deleteOption === 'cascade' ? 'destructive' : deleteOption === 'soft' ? 'default' : 'outline'}
                 onClick={handleDelete} 
-                disabled={isLoading}
+                disabled={isLoading || deleteOption === 'cancel'}
               >
-                {isLoading ? 'جاري الحذف...' : 'حذف العقد'}
+                {isLoading ? 'جاري المعالجة...' : 
+                 deleteOption === 'cascade' ? 'حذف نهائي' :
+                 deleteOption === 'soft' ? 'وسم كمحذوف' : 'اختر إجراء'}
               </Button>
             </div>
           </div>
