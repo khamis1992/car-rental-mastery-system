@@ -11,6 +11,7 @@ import { ViolationTypeRepository } from '@/repositories/implementations/Violatio
 import { ViolationPaymentRepository } from '@/repositories/implementations/ViolationPaymentRepository';
 import { WorkLocationRepository } from '@/repositories/implementations/WorkLocationRepository';
 import { VehicleRepository } from '@/repositories/implementations/VehicleRepository';
+import { VehicleInsuranceRepository } from '@/repositories/implementations/VehicleInsuranceRepository';
 
 // Business services
 import { ContractBusinessService } from '@/services/BusinessServices/ContractBusinessService';
@@ -25,6 +26,7 @@ import { ViolationTypeBusinessService } from '@/services/BusinessServices/Violat
 import { ViolationPaymentBusinessService } from '@/services/BusinessServices/ViolationPaymentBusinessService';
 import { WorkLocationBusinessService } from '@/services/BusinessServices/WorkLocationBusinessService';
 import { VehicleBusinessService } from '@/services/BusinessServices/VehicleBusinessService';
+import { VehicleInsuranceBusinessService } from '@/services/BusinessServices/VehicleInsuranceBusinessService';
 
 // Repository interfaces
 import { IContractRepository } from '@/repositories/interfaces/IContractRepository';
@@ -39,6 +41,7 @@ import { IViolationTypeRepository } from '@/repositories/interfaces/IViolationTy
 import { IViolationPaymentRepository } from '@/repositories/interfaces/IViolationPaymentRepository';
 import { IWorkLocationRepository } from '@/repositories/interfaces/IWorkLocationRepository';
 import { IVehicleRepository } from '@/repositories/interfaces/IVehicleRepository';
+import { IVehicleInsuranceRepository } from '@/repositories/interfaces/IVehicleInsuranceRepository';
 
 export class ServiceContainer {
   private static instance: ServiceContainer;
@@ -56,6 +59,7 @@ export class ServiceContainer {
   private violationPaymentRepository: IViolationPaymentRepository;
   private workLocationRepository: IWorkLocationRepository;
   private vehicleRepository: IVehicleRepository;
+  private vehicleInsuranceRepository: IVehicleInsuranceRepository;
   
   // Business service instances
   private contractBusinessService: ContractBusinessService;
@@ -70,6 +74,7 @@ export class ServiceContainer {
   private violationPaymentBusinessService: ViolationPaymentBusinessService;
   private workLocationBusinessService: WorkLocationBusinessService;
   private vehicleBusinessService: VehicleBusinessService;
+  private vehicleInsuranceBusinessService: VehicleInsuranceBusinessService;
 
   private constructor() {
     // Initialize repositories
@@ -85,6 +90,7 @@ export class ServiceContainer {
     this.violationPaymentRepository = new ViolationPaymentRepository();
     this.workLocationRepository = new WorkLocationRepository();
     this.vehicleRepository = new VehicleRepository();
+    this.vehicleInsuranceRepository = new VehicleInsuranceRepository();
     
     // Initialize business services with dependencies
     this.contractBusinessService = new ContractBusinessService(this.contractRepository);
@@ -99,6 +105,7 @@ export class ServiceContainer {
     this.violationPaymentBusinessService = new ViolationPaymentBusinessService(this.violationPaymentRepository);
     this.workLocationBusinessService = new WorkLocationBusinessService(this.workLocationRepository);
     this.vehicleBusinessService = new VehicleBusinessService(this.vehicleRepository);
+    this.vehicleInsuranceBusinessService = new VehicleInsuranceBusinessService(this.vehicleInsuranceRepository);
   }
 
   static getInstance(): ServiceContainer {
@@ -204,6 +211,10 @@ export class ServiceContainer {
 
   getVehicleBusinessService(): VehicleBusinessService {
     return this.vehicleBusinessService;
+  }
+
+  getVehicleInsuranceBusinessService(): VehicleInsuranceBusinessService {
+    return this.vehicleInsuranceBusinessService;
   }
 }
 

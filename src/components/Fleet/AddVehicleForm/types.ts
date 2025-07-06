@@ -41,6 +41,18 @@ export const vehicleSchema = z.object({
   residual_value: z.number().optional(),
   depreciation_method: z.enum(['straight_line', 'declining_balance']).default('straight_line'),
   previous_accumulated_depreciation: z.number().optional(),
+  // Multiple insurances support
+  insurances: z.array(z.object({
+    insurance_type: z.enum(['comprehensive', 'third_party', 'basic', 'collision', 'theft', 'fire', 'natural_disasters']),
+    insurance_company: z.string().optional(),
+    policy_number: z.string().optional(),
+    start_date: z.string().optional(),
+    expiry_date: z.string().optional(),
+    premium_amount: z.number().optional(),
+    coverage_amount: z.number().optional(),
+    deductible_amount: z.number().optional(),
+    notes: z.string().optional(),
+  })).optional().default([]),
   // Other fields
   registration_expiry: z.string().optional(),
   notes: z.string().optional(),

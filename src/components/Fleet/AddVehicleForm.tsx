@@ -15,7 +15,7 @@ import { BasicInfoSection } from './AddVehicleForm/BasicInfoSection';
 import { AssetInfoSection } from './AddVehicleForm/AssetInfoSection';
 import { PricingSection } from './AddVehicleForm/PricingSection';
 import { AdvancedPricingSection } from './AddVehicleForm/AdvancedPricingSection';
-import { InsuranceSection } from './AddVehicleForm/InsuranceSection';
+import { MultipleInsuranceSection } from './AddVehicleForm/MultipleInsuranceSection';
 import { AssetDepreciationSection } from './AddVehicleForm/AssetDepreciationSection';
 import { NotesSection } from './AddVehicleForm/NotesSection';
 import { FormActions } from './AddVehicleForm/FormActions';
@@ -81,11 +81,6 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         fuel_type: data.fuel_type || 'بنزين',
         transmission: data.transmission || 'أوتوماتيك',
         mileage: data.mileage || 0,
-        // Insurance fields
-        insurance_type: data.insurance_type || 'comprehensive',
-        insurance_company: data.insurance_company || undefined,
-        insurance_policy_number: data.insurance_policy_number || undefined,
-        insurance_expiry: data.insurance_expiry || undefined,
         // Owner type and asset fields
         owner_type: data.owner_type || 'company',
         purchase_date: data.purchase_date || undefined,
@@ -103,12 +98,38 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
 
       console.log('بيانات المركبة المعدة للإرسال:', vehicleData);
       
-      await vehicleService.createVehicle(vehicleData);
-      console.log('تم إنشاء المركبة بنجاح');
+      // Create vehicle first
+      const createdVehicle = await vehicleService.createVehicle(vehicleData);
+      console.log('تم إنشاء المركبة بنجاح:', createdVehicle);
+
+      // Create multiple insurances if provided
+      if (data.insurances && data.insurances.length > 0) {
+        const insuranceService = serviceContainer.getVehicleInsuranceBusinessService();
+        console.log('إنشاء التأمينات المتعددة:', data.insurances.length);
+        
+        for (const insurance of data.insurances) {
+          const insuranceData = {
+            vehicle_id: createdVehicle.id,
+            insurance_type: insurance.insurance_type,
+            insurance_company: insurance.insurance_company || undefined,
+            policy_number: insurance.policy_number || undefined,
+            start_date: insurance.start_date || undefined,
+            expiry_date: insurance.expiry_date || undefined,
+            premium_amount: insurance.premium_amount || undefined,
+            coverage_amount: insurance.coverage_amount || undefined,
+            deductible_amount: insurance.deductible_amount || undefined,
+            notes: insurance.notes || undefined,
+            is_active: true,
+          };
+          
+          await insuranceService.createInsurance(insuranceData);
+          console.log('تم إنشاء تأمين:', insurance.insurance_type);
+        }
+      }
 
       toast({
         title: 'تم إضافة المركبة',
-        description: `تم إضافة المركبة ${data.make} ${data.model} بنجاح إلى الأسطول`,
+        description: `تم إضافة المركبة ${data.make} ${data.model} مع ${data.insurances?.length || 0} تأمين بنجاح`,
       });
 
       form.reset();
@@ -160,7 +181,7 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             <AssetInfoSection control={form.control} />
             <PricingSection control={form.control} />
             <AdvancedPricingSection control={form.control} />
-            <InsuranceSection control={form.control} />
+            <MultipleInsuranceSection control={form.control} />
             <AssetDepreciationSection control={form.control} />
             <NotesSection control={form.control} />
             <FormActions 
