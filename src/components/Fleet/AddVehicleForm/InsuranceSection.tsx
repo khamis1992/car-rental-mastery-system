@@ -80,8 +80,8 @@ export const InsuranceSection: React.FC<InsuranceSectionProps> = ({ control }) =
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="company">ملك الشركة</SelectItem>
-                    <SelectItem value="customer">ملك العميل</SelectItem>
+                    <SelectItem value="company">مملوكة للشركة</SelectItem>
+                    <SelectItem value="customer">غير مملوكة للشركة</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
