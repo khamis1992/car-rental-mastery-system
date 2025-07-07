@@ -10,8 +10,10 @@ import {
   FileText,
   Users,
   Car,
-  DollarSign
+  DollarSign,
+  GitBranch
 } from 'lucide-react';
+import { SystemFlowchartDialog } from '@/components/Analytics/SystemFlowchartDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -23,6 +25,7 @@ import { formatCurrencyKWD } from '@/lib/currency';
 const Analytics = () => {
   const [dateRange, setDateRange] = useState('thisMonth');
   const [selectedPeriod, setSelectedPeriod] = useState('daily');
+  const [showFlowchart, setShowFlowchart] = useState(false);
 
   // Empty data arrays - to be replaced with real data
   const kpiData: any[] = [];
@@ -63,6 +66,15 @@ const Analytics = () => {
           <Button variant="outline">
             <RefreshCw className="w-4 h-4 mr-2" />
             تحديث
+          </Button>
+          
+          <Button 
+            variant="outline"
+            onClick={() => setShowFlowchart(true)}
+            className="flex items-center gap-2 flex-row-reverse"
+          >
+            <GitBranch className="w-4 h-4" />
+            مخطط تدفق النظام
           </Button>
           
           <Button className="btn-primary">
@@ -223,6 +235,12 @@ const Analytics = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* System Flowchart Dialog */}
+      <SystemFlowchartDialog 
+        open={showFlowchart}
+        onOpenChange={setShowFlowchart}
+      />
     </div>
   );
 };
