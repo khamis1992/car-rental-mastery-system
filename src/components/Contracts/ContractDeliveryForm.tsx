@@ -98,7 +98,7 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
         pickup_damages: deliveryData.pickup_damages?.length || 0
       });
 
-      // Update contract with delivery information
+      // Update contract with delivery information and activate it
       const { data: updatedContract, error } = await supabase
         .from('contracts')
         .update({
@@ -106,6 +106,7 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
           pickup_mileage: deliveryData.pickup_mileage ? parseInt(deliveryData.pickup_mileage) : null,
           pickup_damages: JSON.parse(JSON.stringify(deliveryData.pickup_damages)), // Convert to Json
           delivery_completed_at: new Date().toISOString(),
+          status: 'active', // Activate the contract upon delivery
           updated_at: new Date().toISOString()
         })
         .eq('id', contract.id)
@@ -120,7 +121,8 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
       console.log('✅ ContractDeliveryForm: Contract updated successfully:', {
         id: updatedContract?.id,
         delivery_completed_at: updatedContract?.delivery_completed_at,
-        status: updatedContract?.status
+        status: updatedContract?.status,
+        activated: true
       });
 
       // Update vehicle status to rented
@@ -136,7 +138,7 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
 
       toast({
         title: "تم بنجاح",
-        description: "تم تسليم المركبة بنجاح. الآن يمكن الانتقال لمرحلة الدفع.",
+        description: "تم تسليم المركبة وتفعيل العقد بنجاح. الآن يمكن الانتقال لمرحلة الدفع.",
       });
 
       // Close dialog first

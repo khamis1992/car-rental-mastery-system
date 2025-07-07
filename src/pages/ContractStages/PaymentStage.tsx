@@ -150,17 +150,28 @@ const PaymentStage = () => {
       // التحقق من حالة الدفع
       const { data: invoices } = await supabase
         .from('invoices')
-        .select('outstanding_amount')
+        .select('outstanding_amount, total_amount, status')
         .eq('contract_id', contractId);
       
-      const totalOutstanding = invoices?.reduce((sum, inv) => sum + inv.outstanding_amount, 0) || 0;
+      const totalOutstanding = invoices?.reduce((sum, inv) => sum + (inv.outstanding_amount || 0), 0) || 0;
+      const hasInvoices = invoices && invoices.length > 0;
+      
+      console.log('💰 PaymentStage: Checking payment completion:', {
+        contractId,
+        hasInvoices,
+        totalOutstanding,
+        invoicesCount: invoices?.length || 0
+      });
       
       // إذا كان الدفع مكتملاً، قم بتحديث حالة العقد وتسجيل تاريخ الدفع
-      if (totalOutstanding === 0 && invoices && invoices.length > 0) {
+      if (totalOutstanding === 0 && hasInvoices) {
+        console.log('✅ PaymentStage: Payment completed, updating contract');
+        
         await supabase
           .from('contracts')
           .update({ 
             payment_registered_at: new Date().toISOString(),
+            status: 'active', // Ensure contract is active after payment
             updated_at: new Date().toISOString()
           })
           .eq('id', contractId);
@@ -169,6 +180,9 @@ const PaymentStage = () => {
           title: "تم إكمال الدفع",
           description: "تم تحصيل جميع المدفوعات بنجاح. الانتقال إلى مرحلة الاستلام...",
         });
+
+        // Reload contract data to reflect changes
+        await loadContractData();
 
         // التقدم إلى المرحلة التالية بعد تأخير قصير
         setTimeout(() => {

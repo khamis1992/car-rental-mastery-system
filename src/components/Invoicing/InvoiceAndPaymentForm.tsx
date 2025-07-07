@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { serviceContainer } from '@/services/Container/ServiceContainer';
 import { AutoInvoiceCreationService } from '@/services/BusinessServices';
 import { formatCurrencyKWD } from '@/lib/currency';
+import { supabase } from '@/integrations/supabase/client';
 
 interface InvoiceAndPaymentFormProps {
   open: boolean;
@@ -82,6 +83,25 @@ export const InvoiceAndPaymentForm: React.FC<InvoiceAndPaymentFormProps> = ({
 
       // تحديث حالة العقد إذا كان الدفع مكتملاً
       await autoService.checkAndUpdateContractStatus(contract.id, formData.paymentAmount);
+      
+      // تحديث إضافي للتأكد من أن العقد نشط عند الدفع الكامل
+      const { data: updatedInvoices } = await supabase
+        .from('invoices')
+        .select('outstanding_amount')
+        .eq('contract_id', contract.id);
+      
+      const totalOutstanding = updatedInvoices?.reduce((sum, inv) => sum + (inv.outstanding_amount || 0), 0) || 0;
+      
+      if (totalOutstanding === 0) {
+        await supabase
+          .from('contracts')
+          .update({ 
+            payment_registered_at: new Date().toISOString(),
+            status: 'active',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', contract.id);
+      }
 
       toast({
         title: "تم بنجاح",

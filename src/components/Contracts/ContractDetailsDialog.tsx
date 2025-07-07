@@ -98,16 +98,23 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
       } else if ((contract.customer_signature && contract.company_signature) && !contract.delivery_completed_at) {
         // Both signatures completed but vehicle not yet delivered
         determinedStage = 'delivery';
-      } else if (contract.delivery_completed_at && (!hasInvoices || !isFullyPaid)) {
-        // Vehicle has been delivered but payment not completed
+      } else if (contract.delivery_completed_at && contract.status === 'active' && (!hasInvoices || !isFullyPaid)) {
+        // Vehicle has been delivered and contract is active but payment not completed
         console.log('✅ ContractDetailsDialog: Should move to payment stage - delivery completed at:', contract.delivery_completed_at);
         determinedStage = 'payment';
-      } else if (isFullyPaid && contract.status === 'active' && !contract.actual_end_date) {
+      } else if (isFullyPaid && contract.status === 'active' && contract.payment_registered_at && !contract.actual_end_date) {
         // Payment completed and contract is active but vehicle not yet returned
         determinedStage = 'return';
       } else if (contract.actual_end_date || contract.status === 'completed') {
         // Vehicle has been returned or contract completed
         determinedStage = 'completed';
+      } else if (contract.status === 'active' && !contract.actual_end_date) {
+        // Contract is active but determine next step
+        if (!hasInvoices || !isFullyPaid) {
+          determinedStage = 'payment';
+        } else {
+          determinedStage = 'return';
+        }
       } else {
         // Fallback - determine based on current status
         determinedStage = contract.status === 'active' ? 'return' : 'draft';
