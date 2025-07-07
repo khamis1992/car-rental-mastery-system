@@ -40,7 +40,6 @@ const quotationSchema = z.object({
   discount_amount: z.number().min(0).optional(),
   tax_amount: z.number().min(0).optional(),
   special_conditions: z.string().optional(),
-  terms_and_conditions: z.string().optional(),
 });
 
 type QuotationFormData = z.infer<typeof quotationSchema>;
@@ -53,14 +52,6 @@ interface QuotationFormProps {
   onSuccess?: () => void;
 }
 
-// الشروط والأحكام المحددة مسبقاً
-const predefinedTerms = [
-  'العميل مسؤول عن أي أضرار تحدث للمركبة أثناء فترة الإيجار',
-  'يجب إرجاع المركبة بنفس حالة التسليم',
-  'التأخير في إرجاع المركبة يستوجب رسوم إضافية',
-  'العميل مسؤول عن جميع المخالفات المرورية',
-  'يحق للشركة استرداد المركبة فوراً في حالة الاستخدام غير المشروع',
-];
 
 export const QuotationForm: React.FC<QuotationFormProps> = ({
   open,
@@ -70,9 +61,6 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({
   onSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedTerms, setSelectedTerms] = useState<string[]>([]);
-  const [customTerm, setCustomTerm] = useState('');
-  const [showCustomTermInput, setShowCustomTermInput] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<QuotationFormData>({
@@ -131,7 +119,6 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({
         tax_amount: data.tax_amount || 0,
         final_amount: finalAmount,
         special_conditions: data.special_conditions,
-        terms_and_conditions: data.terms_and_conditions,
         status: 'draft',
         valid_until: format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'), // Valid for 30 days
       };
@@ -169,22 +156,8 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({
 
   const handleClearForm = () => {
     form.reset();
-    setSelectedTerms([]);
-    setCustomTerm('');
-    setShowCustomTermInput(false);
   };
 
-  const addCustomTerm = () => {
-    if (customTerm.trim()) {
-      setSelectedTerms([...selectedTerms, customTerm.trim()]);
-      setCustomTerm('');
-      setShowCustomTermInput(false);
-    }
-  };
-
-  const removeTerm = (index: number) => {
-    setSelectedTerms(selectedTerms.filter((_, i) => i !== index));
-  };
 
   // التحقق من صحة التواريخ
   const validateDates = () => {
@@ -534,99 +507,6 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({
                   )}
                 />
 
-                {/* الشروط والأحكام المحددة مسبقاً */}
-                <div>
-                  <h4 className="text-sm font-medium text-foreground mb-3">الشروط والأحكام</h4>
-                  <div className="space-y-3">
-                    {predefinedTerms.map((term, index) => (
-                      <div key={index} className="flex items-center space-x-2 space-x-reverse">
-                        <input
-                          type="checkbox"
-                          id={`term-${index}`}
-                          className="rounded border-border"
-                          checked={selectedTerms.includes(term)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedTerms([...selectedTerms, term]);
-                            } else {
-                              setSelectedTerms(selectedTerms.filter(t => t !== term));
-                            }
-                          }}
-                        />
-                        <label htmlFor={`term-${index}`} className="text-sm text-foreground">
-                          {term}
-                        </label>
-                      </div>
-                    ))}
-                    
-                    {/* الشروط المخصصة */}
-                    {selectedTerms.filter(term => !predefinedTerms.includes(term)).map((term, index) => (
-                      <div key={`custom-${index}`} className="flex items-center justify-between bg-accent/10 p-2 rounded">
-                        <span className="text-sm">{term}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeTerm(selectedTerms.indexOf(term))}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          ×
-                        </Button>
-                      </div>
-                    ))}
-
-                    {/* إضافة شرط مخصص */}
-                    {showCustomTermInput ? (
-                      <div className="flex gap-2">
-                        <Input
-                          value={customTerm}
-                          onChange={(e) => setCustomTerm(e.target.value)}
-                          placeholder="اكتب شرط مخصص"
-                          className="bg-white"
-                          onKeyPress={(e) => e.key === 'Enter' && addCustomTerm()}
-                        />
-                        <Button type="button" onClick={addCustomTerm} size="sm">
-                          إضافة
-                        </Button>
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => {
-                            setShowCustomTermInput(false);
-                            setCustomTerm('');
-                          }}
-                        >
-                          إلغاء
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowCustomTermInput(true)}
-                        className="text-primary border-primary hover:bg-primary/10"
-                      >
-                        + إضافة شرط مخصص
-                      </Button>
-                    )}
-                  </div>
-
-                  {/* حقل مخفي للشروط المختارة */}
-                  <FormField
-                    control={form.control}
-                    name="terms_and_conditions"
-                    render={({ field }) => {
-                      // تحديث القيمة تلقائياً عند تغيير الشروط المختارة
-                      React.useEffect(() => {
-                        field.onChange(selectedTerms.join('\n• '));
-                      }, [selectedTerms, field]);
-
-                      return <input type="hidden" {...field} />;
-                    }}
-                  />
-                </div>
               </div>
 
               {/* أزرار الإجراءات */}
