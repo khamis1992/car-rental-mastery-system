@@ -10,6 +10,20 @@ interface FinancialStats {
   netProfit: number;
 }
 
+interface FinancialMetrics {
+  monthly_revenue: number;
+  actual_revenue: number;
+  total_expenses: number;
+  pending_payments: number;
+  cash_balance: number;
+  net_profit: number;
+  calculation_period: {
+    start_date: string;
+    end_date: string;
+  };
+  calculated_at: string;
+}
+
 interface RecentTransaction {
   id: string;
   description: string;
@@ -39,25 +53,59 @@ export const useAccountingData = () => {
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
       
-      // Get accounting summary for the current month
-      const summary = await accountingIntegrationService.getAccountingEntriesSummary({
-        date_from: monthStart.toISOString().split('T')[0],
-        date_to: monthEnd.toISOString().split('T')[0]
-      });
+      // Use the new calculate_financial_metrics function
+      const { data: metricsData, error: metricsError } = await supabase
+        .rpc('calculate_financial_metrics', {
+          start_date: monthStart.toISOString().split('T')[0],
+          end_date: monthEnd.toISOString().split('T')[0]
+        });
 
-      // Get revenue accounts (4xxx)
+      if (metricsError) throw metricsError;
+
+      // Handle the metrics data properly
+      let metrics: FinancialMetrics;
+      try {
+        metrics = (metricsData as unknown as FinancialMetrics) || {
+          monthly_revenue: 0,
+          actual_revenue: 0,
+          total_expenses: 0,
+          pending_payments: 0,
+          cash_balance: 0,
+          net_profit: 0,
+          calculation_period: { start_date: '', end_date: '' },
+          calculated_at: ''
+        };
+      } catch {
+        metrics = {
+          monthly_revenue: 0,
+          actual_revenue: 0,
+          total_expenses: 0,
+          pending_payments: 0,
+          cash_balance: 0,
+          net_profit: 0,
+          calculation_period: { start_date: '', end_date: '' },
+          calculated_at: ''
+        };
+      }
+      
+      // Update account balances first
+      await supabase.rpc('update_account_balances');
+
+      // Get updated revenue accounts (4xxx) - correct calculation for revenue accounts
       const { data: revenueAccounts, error: revenueError } = await supabase
         .from('chart_of_accounts')
         .select('current_balance')
-        .eq('account_type', 'revenue');
+        .eq('account_type', 'revenue')
+        .eq('is_active', true);
 
       if (revenueError) throw revenueError;
 
-      // Get expense accounts (5xxx)
+      // Get expense accounts (5xxx) - correct calculation for expense accounts
       const { data: expenseAccounts, error: expenseError } = await supabase
         .from('chart_of_accounts')
         .select('current_balance')
-        .eq('account_type', 'expense');
+        .eq('account_type', 'expense')
+        .eq('is_active', true);
 
       if (expenseError) throw expenseError;
 
@@ -69,13 +117,31 @@ export const useAccountingData = () => {
 
       if (invoicesError) throw invoicesError;
 
-      const monthlyRevenue = (revenueAccounts || []).reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
-      const totalExpenses = (expenseAccounts || []).reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
+      // Get cash balances from asset accounts
+      const { data: cashAccounts, error: cashError } = await supabase
+        .from('chart_of_accounts')
+        .select('current_balance')
+        .eq('account_type', 'asset')
+        .eq('account_category', 'current_asset')
+        .eq('is_active', true)
+        .or('account_name.ilike.%نقدية%,account_name.ilike.%صندوق%,account_name.ilike.%cash%');
+
+      if (cashError) throw cashError;
+
+      // Calculate totals with proper accounting logic
+      const monthlyRevenue = Math.abs((revenueAccounts || []).reduce((sum, acc) => sum + (acc.current_balance || 0), 0));
+      const totalExpenses = Math.abs((expenseAccounts || []).reduce((sum, acc) => sum + (acc.current_balance || 0), 0));
       const pendingPayments = (pendingInvoices || []).reduce((sum, inv) => sum + (inv.outstanding_amount || 0), 0);
-      const netProfit = monthlyRevenue - totalExpenses;
+      const cashBalance = (cashAccounts || []).reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
+      
+      // Use actual revenue from payments if available, otherwise use account balances
+      const actualRevenue = metrics.actual_revenue || 0;
+      const finalRevenue = actualRevenue > 0 ? actualRevenue : monthlyRevenue;
+      
+      const netProfit = finalRevenue - totalExpenses;
 
       return {
-        monthlyRevenue,
+        monthlyRevenue: finalRevenue,
         pendingPayments,
         totalExpenses,
         netProfit
