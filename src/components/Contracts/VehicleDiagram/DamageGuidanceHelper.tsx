@@ -114,11 +114,11 @@ export const DamageGuidanceHelper: React.FC<DamageGuidanceHelperProps> = ({
       </Card>
 
       {/* Usage Guide */}
-      <Alert className="border-blue-200 bg-blue-50 flex items-start gap-3">
+      <Alert className="border-blue-200 bg-blue-50 flex flex-row-reverse items-start gap-3">
         <HelpCircle className="h-4 w-4 text-blue-600 mt-0.5" />
-        <AlertDescription className="text-blue-700 text-left">
+        <AlertDescription className="text-blue-700 text-right">
           <strong>دليل الاستخدام:</strong>
-          <div className="mt-2 space-y-1">
+          <div className="mt-2 space-y-1 text-left">
             <div className="flex items-center gap-2">
               <span>•</span>
               <span>انقر على أي ضرر لعرض التفاصيل</span>
