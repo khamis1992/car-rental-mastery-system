@@ -149,11 +149,6 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Car className="w-5 h-5" />
-            مخطط المركبة التفاعلي - {typeLabel}
-            {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
-          </div>
           {!readonly && (
             <div className="flex gap-2">
               <Button
@@ -169,12 +164,12 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
               >
                 {isAddingDamage ? (
                   <>
-                    <X className="w-4 h-4 mr-2" />
+                    <X className="w-4 h-4 ml-2" />
                     إلغاء
                   </>
                 ) : (
                   <>
-                    <AlertTriangle className="w-4 h-4 mr-2" />
+                    <AlertTriangle className="w-4 h-4 ml-2" />
                     إضافة ضرر
                   </>
                 )}
@@ -205,6 +200,11 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
               )}
             </div>
           )}
+          <div className="flex items-center gap-2">
+            <Car className="w-5 h-5" />
+            مخطط المركبة التفاعلي - {typeLabel}
+            {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
