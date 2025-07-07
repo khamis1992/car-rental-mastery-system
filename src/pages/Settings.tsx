@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Settings as SettingsIcon, Users, Building, Shield, Bell, Database, Palette } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Building, Shield, Bell, Database, Palette, BookOpen, Download, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import OfficeLocationManager from '@/components/Settings/OfficeLocationManager';
 import AddUserDialog from '@/components/Settings/AddUserDialog';
 import CompanyBrandingManager from '@/components/Settings/CompanyBrandingManager';
+import { DocumentsPDFService } from '@/lib/documentsPDFService';
 
 const Settings = () => {
   const { profile } = useAuth();
@@ -126,6 +127,45 @@ const Settings = () => {
     });
   };
 
+  const handleDownloadGuide = async (guideType: string, guideName: string) => {
+    try {
+      const pdfService = new DocumentsPDFService();
+      
+      switch (guideType) {
+        case 'user-manual':
+          await pdfService.generateUserManualPDF();
+          break;
+        case 'contracts-guide':
+          await pdfService.generateContractsGuidePDF();
+          break;
+        case 'accounting-guide':
+          await pdfService.generateAccountingGuidePDF();
+          break;
+        case 'troubleshooting-guide':
+          await pdfService.generateTroubleshootingGuidePDF();
+          break;
+        case 'setup-guide':
+          await pdfService.generateSetupGuidePDF();
+          break;
+        default:
+          throw new Error('نوع الدليل غير مدعوم');
+      }
+      
+      pdfService.downloadPDF(guideName);
+      
+      toast({
+        title: "تم تحميل الدليل",
+        description: `تم تحميل ${guideName} بصيغة PDF بنجاح`,
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ في تحميل الدليل",
+        description: "حدث خطأ أثناء إنشاء ملف PDF",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Only allow admin and manager to access settings
   if (!profile || (profile.role !== 'admin' && profile.role !== 'manager')) {
     return (
@@ -161,7 +201,8 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue={activeTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="documentation">الأدلة والتوثيق</TabsTrigger>
           <TabsTrigger value="notifications">الإشعارات</TabsTrigger>
           <TabsTrigger value="branding">العلامة التجارية</TabsTrigger>
           <TabsTrigger value="locations">مواقع المكاتب</TabsTrigger>
@@ -389,6 +430,175 @@ const Settings = () => {
             </CardHeader>
             <CardContent>
               <OfficeLocationManager />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="documentation" className="space-y-4">
+          <Card className="card-elegant">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5" />
+                الأدلة والتوثيق
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="mb-6">
+                <h3 className="text-lg font-medium text-foreground mb-2">أدلة النظام</h3>
+                <p className="text-sm text-muted-foreground">
+                  تحميل الأدلة الشاملة لاستخدام النظام بصيغة PDF احترافية بحجم A4
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Card className="border-2 hover:border-primary/50 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <FileText className="w-6 h-6 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-foreground">دليل المستخدم</h4>
+                        <p className="text-sm text-muted-foreground">الدليل الشامل للنظام</p>
+                      </div>
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground mb-4">
+                      دليل شامل يغطي جميع أدوار المستخدمين، الواجهات، والعمليات الأساسية في النظام
+                    </p>
+                    
+                    <Button 
+                      className="w-full btn-primary flex items-center gap-2"
+                      onClick={() => handleDownloadGuide('user-manual', 'دليل_المستخدم')}
+                    >
+                      <Download className="w-4 h-4" />
+                      تحميل PDF
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-2 hover:border-primary/50 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
+                        <FileText className="w-6 h-6 text-green-500" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-foreground">دليل إدارة العقود</h4>
+                        <p className="text-sm text-muted-foreground">دورة حياة العقد كاملة</p>
+                      </div>
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground mb-4">
+                      شرح مفصل لجميع مراحل العقد من الإنشاء حتى الإكمال، تسليم واستقبال المركبات
+                    </p>
+                    
+                    <Button 
+                      className="w-full btn-primary flex items-center gap-2"
+                      onClick={() => handleDownloadGuide('contracts-guide', 'دليل_إدارة_العقود')}
+                    >
+                      <Download className="w-4 h-4" />
+                      تحميل PDF
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-2 hover:border-primary/50 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                        <FileText className="w-6 h-6 text-blue-500" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-foreground">دليل النظام المحاسبي</h4>
+                        <p className="text-sm text-muted-foreground">المحاسبة والتقارير المالية</p>
+                      </div>
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground mb-4">
+                      دليل شامل للنظام المحاسبي، دليل الحسابات، القيود المحاسبية والتقارير المالية
+                    </p>
+                    
+                    <Button 
+                      className="w-full btn-primary flex items-center gap-2"
+                      onClick={() => handleDownloadGuide('accounting-guide', 'دليل_النظام_المحاسبي')}
+                    >
+                      <Download className="w-4 h-4" />
+                      تحميل PDF
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-2 hover:border-primary/50 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center">
+                        <FileText className="w-6 h-6 text-red-500" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-foreground">دليل استكشاف الأخطاء</h4>
+                        <p className="text-sm text-muted-foreground">حل المشاكل الشائعة</p>
+                      </div>
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground mb-4">
+                      دليل شامل لحل جميع المشاكل الشائعة في النظام وإجراءات الطوارئ
+                    </p>
+                    
+                    <Button 
+                      className="w-full btn-primary flex items-center gap-2"
+                      onClick={() => handleDownloadGuide('troubleshooting-guide', 'دليل_استكشاف_الأخطاء')}
+                    >
+                      <Download className="w-4 h-4" />
+                      تحميل PDF
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-2 hover:border-primary/50 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                        <SettingsIcon className="w-6 h-6 text-orange-500" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-foreground">دليل الإعداد والتكوين</h4>
+                        <p className="text-sm text-muted-foreground">إعداد النظام الأولي</p>
+                      </div>
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground mb-4">
+                      دليل شامل لإعداد النظام، تكوين الشركة، المستخدمين والإعدادات الأولية
+                    </p>
+                    
+                    <Button 
+                      className="w-full btn-primary flex items-center gap-2"
+                      onClick={() => handleDownloadGuide('setup-guide', 'دليل_الإعداد_والتكوين')}
+                    >
+                      <Download className="w-4 h-4" />
+                      تحميل PDF
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="bg-muted/30 p-6 rounded-lg border">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-blue-500/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <BookOpen className="w-4 h-4 text-blue-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-foreground mb-2">ملاحظات مهمة حول الأدلة</h4>
+                    <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                      <li>جميع الأدلة محدثة ومتوافقة مع أحدث إصدار من النظام</li>
+                      <li>ملفات PDF بحجم A4 جاهزة للطباعة مع تنسيق احترافي</li>
+                      <li>تدعم الخط العربي مع تخطيط RTL مناسب للغة العربية</li>
+                      <li>تحتوي على صور توضيحية وأمثلة عملية من الواقع</li>
+                      <li>يتم تحديث الأدلة دورياً مع كل تحديث للنظام</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
