@@ -199,9 +199,28 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
   };
 
   const handleAdvanceToNextStage = async () => {
-    if (!contract) return;
+    if (!contract) {
+      console.error('No contract available for stage advancement');
+      toast({
+        title: "خطأ",
+        description: "لا يوجد عقد محدد",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
+      console.log('🔄 Attempting to advance contract stage:', {
+        contractId: contract.id,
+        currentStatus: contract.status,
+        customerSignature: !!contract.customer_signature,
+        companySignature: !!contract.company_signature,
+        deliveryCompleted: !!contract.delivery_completed_at,
+        paymentRegistered: !!contract.payment_registered_at,
+        actualEndDate: contract.actual_end_date,
+        currentStage: currentStage
+      });
+
       let updateData: any = {};
       let successMessage = '';
 
@@ -209,25 +228,55 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
         // Advance from draft to pending
         updateData.status = 'pending';
         successMessage = 'تم الانتقال إلى مرحلة التوقيع';
+        console.log('📝 Advancing from draft to pending');
       } else if (contract.status === 'pending' && contract.customer_signature && contract.company_signature && !contract.delivery_completed_at) {
         // Advance from pending (with both signatures) to delivery stage
+        console.log('🚚 Advancing to delivery stage');
         setCurrentStage('delivery');
         toast({
           title: "تم بنجاح",
           description: "تم الانتقال إلى مرحلة التسليم",
         });
         return;
-      } else if (contract.delivery_completed_at) {
+      } else if (contract.status === 'pending' && (!contract.customer_signature || !contract.company_signature)) {
+        // Contract is in pending but missing signatures
+        console.log('✍️ Contract needs signatures');
+        toast({
+          title: "التوقيع مطلوب",
+          description: "يجب توقيع العقد من الطرفين أولاً",
+          variant: "destructive",
+        });
+        return;
+      } else if (contract.delivery_completed_at && !contract.actual_end_date) {
         // Check payment status before advancing
-        const { data: invoices } = await supabase
+        console.log('💰 Checking payment status for delivered contract');
+        const { data: invoices, error: invoicesError } = await supabase
           .from('invoices')
-          .select('outstanding_amount')
+          .select('outstanding_amount, total_amount, status')
           .eq('contract_id', contract.id);
         
-        const isFullyPaid = invoices?.every(inv => inv.outstanding_amount <= 0);
+        if (invoicesError) {
+          console.error('Error checking invoices:', invoicesError);
+          throw invoicesError;
+        }
         
-        if (!isFullyPaid) {
-          // Advance to payment stage
+        const hasInvoices = invoices && invoices.length > 0;
+        const isFullyPaid = invoices?.every(inv => (inv.outstanding_amount || 0) <= 0);
+        
+        console.log('📊 Payment status:', { hasInvoices, isFullyPaid, invoices });
+        
+        if (!hasInvoices) {
+          // No invoices yet, advance to payment stage to create them
+          console.log('📄 No invoices found, going to payment stage');
+          setCurrentStage('payment');
+          toast({
+            title: "تم بنجاح",
+            description: "تم الانتقال إلى مرحلة الدفع",
+          });
+          return;
+        } else if (!isFullyPaid) {
+          // Has invoices but not fully paid
+          console.log('💳 Invoices exist but not fully paid');
           setCurrentStage('payment');
           toast({
             title: "تم بنجاح",
@@ -235,24 +284,27 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
           });
           return;
         } else {
-          // Advance to return stage
+          // Fully paid, advance to return stage
+          console.log('✅ Fully paid, advancing to return stage');
           setCurrentStage('return');
           toast({
             title: "تم بنجاح",
-            description: "تم الانتقال إلى مرحلة الاستلام",
+            description: "تم الانتقال إلى مرحلة الإستلام",
           });
           return;
         }
       } else if (contract.status === 'active' && !contract.actual_end_date) {
-        // Advance from payment to return stage
+        // Advance from active to return stage
+        console.log('🔄 Active contract advancing to return');
         setCurrentStage('return');
         toast({
           title: "تم بنجاح",
-          description: "تم الانتقال إلى مرحلة الاستلام",
+          description: "تم الانتقال إلى مرحلة الإستلام",
         });
         return;
       } else if (contract.status === 'completed' || contract.actual_end_date) {
         // Contract is already completed
+        console.log('✅ Contract already completed');
         setCurrentStage('completed');
         toast({
           title: "العقد مكتمل",
@@ -260,7 +312,18 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
         });
         return;
       } else {
-        throw new Error('Cannot advance to next stage');
+        // Log detailed state for debugging
+        console.error('❌ Cannot determine next stage for contract:', {
+          status: contract.status,
+          customerSignature: !!contract.customer_signature,
+          companySignature: !!contract.company_signature,
+          deliveryCompleted: !!contract.delivery_completed_at,
+          actualEndDate: contract.actual_end_date,
+          paymentRegistered: !!contract.payment_registered_at,
+          currentStage: currentStage
+        });
+        
+        throw new Error(`Cannot advance to next stage. Current state: status=${contract.status}, delivered=${!!contract.delivery_completed_at}, ended=${!!contract.actual_end_date}`);
       }
 
       // Update contract status for transitions that require database update
