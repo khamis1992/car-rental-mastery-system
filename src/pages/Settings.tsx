@@ -418,13 +418,13 @@ const Settings = () => {
         <TabsContent value="documentation" className="space-y-4">
           <Card className="card-elegant">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 flex-row-reverse">
                 <BookOpen className="w-5 h-5" />
                 الأدلة والتوثيق
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="mb-6">
+              <div className="mb-6 text-right">
                 <h3 className="text-lg font-medium text-foreground mb-2">أدلة النظام</h3>
                 <p className="text-sm text-muted-foreground">
                   تحميل الأدلة الشاملة لاستخدام النظام بصيغة PDF احترافية بحجم A4
@@ -433,23 +433,23 @@ const Settings = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Card className="border-2 hover:border-primary/50 transition-colors">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
+                  <CardContent className="p-6 text-right">
+                    <div className="flex items-center gap-3 mb-4 flex-row-reverse">
                       <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                         <FileText className="w-6 h-6 text-primary" />
                       </div>
-                      <div>
+                      <div className="text-right">
                         <h4 className="font-medium text-foreground">دليل المستخدم</h4>
                         <p className="text-sm text-muted-foreground">الدليل الشامل للنظام</p>
                       </div>
                     </div>
                     
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <p className="text-sm text-muted-foreground mb-4 text-right">
                       دليل شامل يغطي جميع أدوار المستخدمين، الواجهات، والعمليات الأساسية في النظام
                     </p>
                     
                     <Button 
-                      className="w-full btn-primary flex items-center gap-2"
+                      className="w-full btn-primary flex items-center gap-2 flex-row-reverse"
                       onClick={() => handleDownloadGuide('user-manual', 'دليل_المستخدم')}
                     >
                       <Download className="w-4 h-4" />
@@ -459,23 +459,23 @@ const Settings = () => {
                 </Card>
 
                 <Card className="border-2 hover:border-primary/50 transition-colors">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
+                  <CardContent className="p-6 text-right">
+                    <div className="flex items-center gap-3 mb-4 flex-row-reverse">
                       <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
                         <FileText className="w-6 h-6 text-green-500" />
                       </div>
-                      <div>
+                      <div className="text-right">
                         <h4 className="font-medium text-foreground">دليل إدارة العقود</h4>
                         <p className="text-sm text-muted-foreground">دورة حياة العقد كاملة</p>
                       </div>
                     </div>
                     
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <p className="text-sm text-muted-foreground mb-4 text-right">
                       شرح مفصل لجميع مراحل العقد من الإنشاء حتى الإكمال، تسليم واستقبال المركبات
                     </p>
                     
                     <Button 
-                      className="w-full btn-primary flex items-center gap-2"
+                      className="w-full btn-primary flex items-center gap-2 flex-row-reverse"
                       onClick={() => handleDownloadGuide('contracts-guide', 'دليل_إدارة_العقود')}
                     >
                       <Download className="w-4 h-4" />
@@ -485,23 +485,23 @@ const Settings = () => {
                 </Card>
 
                 <Card className="border-2 hover:border-primary/50 transition-colors">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
+                  <CardContent className="p-6 text-right">
+                    <div className="flex items-center gap-3 mb-4 flex-row-reverse">
                       <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
                         <FileText className="w-6 h-6 text-blue-500" />
                       </div>
-                      <div>
+                      <div className="text-right">
                         <h4 className="font-medium text-foreground">دليل النظام المحاسبي</h4>
                         <p className="text-sm text-muted-foreground">المحاسبة والتقارير المالية</p>
                       </div>
                     </div>
                     
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <p className="text-sm text-muted-foreground mb-4 text-right">
                       دليل شامل للنظام المحاسبي، دليل الحسابات، القيود المحاسبية والتقارير المالية
                     </p>
                     
                     <Button 
-                      className="w-full btn-primary flex items-center gap-2"
+                      className="w-full btn-primary flex items-center gap-2 flex-row-reverse"
                       onClick={() => handleDownloadGuide('accounting-guide', 'دليل_النظام_المحاسبي')}
                     >
                       <Download className="w-4 h-4" />
@@ -511,23 +511,23 @@ const Settings = () => {
                 </Card>
 
                 <Card className="border-2 hover:border-primary/50 transition-colors">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
+                  <CardContent className="p-6 text-right">
+                    <div className="flex items-center gap-3 mb-4 flex-row-reverse">
                       <div className="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center">
                         <FileText className="w-6 h-6 text-red-500" />
                       </div>
-                      <div>
+                      <div className="text-right">
                         <h4 className="font-medium text-foreground">دليل استكشاف الأخطاء</h4>
                         <p className="text-sm text-muted-foreground">حل المشاكل الشائعة</p>
                       </div>
                     </div>
                     
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <p className="text-sm text-muted-foreground mb-4 text-right">
                       دليل شامل لحل جميع المشاكل الشائعة في النظام وإجراءات الطوارئ
                     </p>
                     
                     <Button 
-                      className="w-full btn-primary flex items-center gap-2"
+                      className="w-full btn-primary flex items-center gap-2 flex-row-reverse"
                       onClick={() => handleDownloadGuide('troubleshooting-guide', 'دليل_استكشاف_الأخطاء')}
                     >
                       <Download className="w-4 h-4" />
@@ -537,23 +537,23 @@ const Settings = () => {
                 </Card>
 
                 <Card className="border-2 hover:border-primary/50 transition-colors">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
+                  <CardContent className="p-6 text-right">
+                    <div className="flex items-center gap-3 mb-4 flex-row-reverse">
                       <div className="w-12 h-12 bg-orange-500/10 rounded-lg flex items-center justify-center">
                         <SettingsIcon className="w-6 h-6 text-orange-500" />
                       </div>
-                      <div>
+                      <div className="text-right">
                         <h4 className="font-medium text-foreground">دليل الإعداد والتكوين</h4>
                         <p className="text-sm text-muted-foreground">إعداد النظام الأولي</p>
                       </div>
                     </div>
                     
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <p className="text-sm text-muted-foreground mb-4 text-right">
                       دليل شامل لإعداد النظام، تكوين الشركة، المستخدمين والإعدادات الأولية
                     </p>
                     
                     <Button 
-                      className="w-full btn-primary flex items-center gap-2"
+                      className="w-full btn-primary flex items-center gap-2 flex-row-reverse"
                       onClick={() => handleDownloadGuide('setup-guide', 'دليل_الإعداد_والتكوين')}
                     >
                       <Download className="w-4 h-4" />
@@ -564,13 +564,13 @@ const Settings = () => {
               </div>
 
               <div className="bg-muted/30 p-6 rounded-lg border">
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 flex-row-reverse text-right">
                   <div className="w-8 h-8 bg-blue-500/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <BookOpen className="w-4 h-4 text-blue-500" />
                   </div>
-                  <div>
+                  <div className="text-right">
                     <h4 className="font-medium text-foreground mb-2">ملاحظات مهمة حول الأدلة</h4>
-                    <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside text-right">
                       <li>جميع الأدلة محدثة ومتوافقة مع أحدث إصدار من النظام</li>
                       <li>تنسيق HTML محسن للطباعة بحجم A4 مع إمكانية حفظ كـ PDF</li>
                       <li>تدعم الخط العربي مع تخطيط RTL مناسب للغة العربية</li>
