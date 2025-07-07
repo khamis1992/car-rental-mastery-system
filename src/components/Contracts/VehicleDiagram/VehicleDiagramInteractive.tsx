@@ -355,26 +355,26 @@ export const VehicleDiagramInteractive: React.FC<VehicleDiagramInteractiveProps>
 
           {/* Enhanced Legend */}
           <div className="mt-4 p-3 border rounded-lg bg-muted/20">
-            <h4 className="font-medium text-sm mb-2">دليل الاستخدام:</h4>
+            <h4 className="font-medium text-sm mb-2 text-right">دليل الاستخدام:</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-              <div className="space-y-1">
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                  <span>ضرر بسيط (خدوش سطحية)</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                  <span>ضرر متوسط (تلف في الطلاء)</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <span>ضرر شديد (تلف هيكلي)</span>
-                </div>
+              <div className="space-y-1 text-muted-foreground order-2 md:order-1">
+                <p className="text-right">• انقر على أي ضرر لعرض التفاصيل</p>
+                <p className="text-right">• استخدم زر "إضافة ضرر" لتسجيل ضرر جديد</p>
+                <p className="text-right">• يُنصح بإضافة صور للأضرار الشديدة</p>
               </div>
-              <div className="space-y-1 text-muted-foreground">
-                <p>• انقر على أي ضرر لعرض التفاصيل</p>
-                <p>• استخدم زر "إضافة ضرر" لتسجيل ضرر جديد</p>
-                <p>• يُنصح بإضافة صور للأضرار الشديدة</p>
+              <div className="space-y-1 order-1 md:order-2">
+                <div className="flex items-center gap-1 justify-end">
+                  <span>ضرر بسيط (خدوش سطحية)</span>
+                  <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                </div>
+                <div className="flex items-center gap-1 justify-end">
+                  <span>ضرر متوسط (تلف في الطلاء)</span>
+                  <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                </div>
+                <div className="flex items-center gap-1 justify-end">
+                  <span>ضرر شديد (تلف هيكلي)</span>
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                </div>
               </div>
             </div>
           </div>
