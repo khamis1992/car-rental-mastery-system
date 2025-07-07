@@ -51,14 +51,24 @@ export const DamageGuidanceHelper: React.FC<DamageGuidanceHelperProps> = ({
           <HelpCircle className="h-4 w-4 mt-0.5" />
           <AlertDescription className="text-right">
             <strong>لبدء توثيق أضرار المركبة:</strong>
-            <br />
-            1. انقر على زر "إضافة ضرر" أعلاه
-            <br />
-            2. انقر على موقع الضرر في المخطط
-            <br />
-            3. أدخل وصف الضرر ومستواه
-            <br />
-            4. أضف صور توثيقية
+            <div className="mt-2 space-y-1">
+              <div className="flex items-center gap-2 justify-end">
+                <span>انقر على زر "إضافة ضرر" أعلاه</span>
+                <span className="font-bold">1.</span>
+              </div>
+              <div className="flex items-center gap-2 justify-end">
+                <span>انقر على موقع الضرر في المخطط</span>
+                <span className="font-bold">2.</span>
+              </div>
+              <div className="flex items-center gap-2 justify-end">
+                <span>أدخل وصف الضرر ومستواه</span>
+                <span className="font-bold">3.</span>
+              </div>
+              <div className="flex items-center gap-2 justify-end">
+                <span>أضف صور توثيقية</span>
+                <span className="font-bold">4.</span>
+              </div>
+            </div>
           </AlertDescription>
         </Alert>
       )}
