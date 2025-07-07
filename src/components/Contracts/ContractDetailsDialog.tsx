@@ -85,6 +85,27 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
       const hasPayments = invoices?.some(inv => inv.payments && inv.payments.length > 0);
       const isFullyPaid = invoices?.every(inv => inv.outstanding_amount <= 0);
       
+      // Auto-update contract status if delivered and paid but still pending
+      if (contract.delivery_completed_at && isFullyPaid && contract.status === 'pending') {
+        console.log('🔄 ContractDetailsDialog: Auto-updating contract status from pending to active');
+        const { error: updateError } = await supabase
+          .from('contracts')
+          .update({ 
+            status: 'active',
+            payment_registered_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', contract.id);
+        
+        if (updateError) {
+          console.error('Error updating contract status:', updateError);
+        } else {
+          // Reload contract data to reflect the status change
+          await loadContract();
+          return; // Exit early to let the effect run again with updated data
+        }
+      }
+      
       // Auto-determine current stage based on contract status and payment status
       let determinedStage = 'draft';
       
@@ -98,12 +119,15 @@ export const ContractDetailsDialog: React.FC<ContractDetailsDialogProps> = ({
       } else if ((contract.customer_signature && contract.company_signature) && !contract.delivery_completed_at) {
         // Both signatures completed but vehicle not yet delivered
         determinedStage = 'delivery';
-      } else if (contract.delivery_completed_at && contract.status === 'active' && (!hasInvoices || !isFullyPaid)) {
-        // Vehicle has been delivered and contract is active but payment not completed
+      } else if (contract.delivery_completed_at && !hasInvoices) {
+        // Vehicle delivered but no invoices yet - payment stage
+        determinedStage = 'payment';
+      } else if (contract.delivery_completed_at && hasInvoices && !isFullyPaid) {
+        // Vehicle delivered, invoices exist but not fully paid - payment stage
         console.log('✅ ContractDetailsDialog: Should move to payment stage - delivery completed at:', contract.delivery_completed_at);
         determinedStage = 'payment';
-      } else if (isFullyPaid && contract.status === 'active' && contract.payment_registered_at && !contract.actual_end_date) {
-        // Payment completed and contract is active but vehicle not yet returned
+      } else if (contract.delivery_completed_at && isFullyPaid && !contract.actual_end_date) {
+        // Vehicle delivered and fully paid but not yet returned - return stage
         determinedStage = 'return';
       } else if (contract.actual_end_date || contract.status === 'completed') {
         // Vehicle has been returned or contract completed
