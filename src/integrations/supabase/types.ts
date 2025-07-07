@@ -4420,6 +4420,10 @@ export type Database = {
         Args: { for_date?: string }
         Returns: number
       }
+      calculate_financial_metrics: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: Json
+      }
       calculate_forecast_accuracy: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -4693,6 +4697,10 @@ export type Database = {
       }
       safe_delete_contract: {
         Args: { contract_id_param: string; delete_related?: boolean }
+        Returns: Json
+      }
+      update_account_balances: {
+        Args: Record<PropertyKey, never>
         Returns: Json
       }
       update_all_cost_center_costs: {
