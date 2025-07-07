@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import OfficeLocationManager from '@/components/Settings/OfficeLocationManager';
 import AddUserDialog from '@/components/Settings/AddUserDialog';
 import CompanyBrandingManager from '@/components/Settings/CompanyBrandingManager';
-import { DocumentsPDFService } from '@/lib/documentsPDFService';
+import { HTMLDocumentsService } from '@/lib/htmlDocumentsService';
 
 const Settings = () => {
   const { profile } = useAuth();
@@ -129,38 +129,19 @@ const Settings = () => {
 
   const handleDownloadGuide = async (guideType: string, guideName: string) => {
     try {
-      const pdfService = new DocumentsPDFService();
+      const htmlService = new HTMLDocumentsService();
       
-      switch (guideType) {
-        case 'user-manual':
-          await pdfService.generateUserManualPDF();
-          break;
-        case 'contracts-guide':
-          await pdfService.generateContractsGuidePDF();
-          break;
-        case 'accounting-guide':
-          await pdfService.generateAccountingGuidePDF();
-          break;
-        case 'troubleshooting-guide':
-          await pdfService.generateTroubleshootingGuidePDF();
-          break;
-        case 'setup-guide':
-          await pdfService.generateSetupGuidePDF();
-          break;
-        default:
-          throw new Error('نوع الدليل غير مدعوم');
-      }
-      
-      pdfService.downloadPDF(guideName);
+      // فتح نافذة طباعة بتنسيق HTML
+      htmlService.openPrintWindow(guideType, guideName);
       
       toast({
-        title: "تم تحميل الدليل",
-        description: `تم تحميل ${guideName} بصيغة PDF بنجاح`,
+        title: "تم فتح نافذة الطباعة",
+        description: `يمكنك الآن طباعة ${guideName} أو حفظه كـ PDF`,
       });
     } catch (error) {
       toast({
-        title: "خطأ في تحميل الدليل",
-        description: "حدث خطأ أثناء إنشاء ملف PDF",
+        title: "خطأ في فتح الدليل",
+        description: "حدث خطأ أثناء فتح نافذة الطباعة",
         variant: "destructive",
       });
     }
@@ -472,7 +453,7 @@ const Settings = () => {
                       onClick={() => handleDownloadGuide('user-manual', 'دليل_المستخدم')}
                     >
                       <Download className="w-4 h-4" />
-                      تحميل PDF
+                      تحميل/طباعة
                     </Button>
                   </CardContent>
                 </Card>
@@ -498,7 +479,7 @@ const Settings = () => {
                       onClick={() => handleDownloadGuide('contracts-guide', 'دليل_إدارة_العقود')}
                     >
                       <Download className="w-4 h-4" />
-                      تحميل PDF
+                      تحميل/طباعة
                     </Button>
                   </CardContent>
                 </Card>
@@ -524,7 +505,7 @@ const Settings = () => {
                       onClick={() => handleDownloadGuide('accounting-guide', 'دليل_النظام_المحاسبي')}
                     >
                       <Download className="w-4 h-4" />
-                      تحميل PDF
+                      تحميل/طباعة
                     </Button>
                   </CardContent>
                 </Card>
@@ -550,7 +531,7 @@ const Settings = () => {
                       onClick={() => handleDownloadGuide('troubleshooting-guide', 'دليل_استكشاف_الأخطاء')}
                     >
                       <Download className="w-4 h-4" />
-                      تحميل PDF
+                      تحميل/طباعة
                     </Button>
                   </CardContent>
                 </Card>
@@ -576,7 +557,7 @@ const Settings = () => {
                       onClick={() => handleDownloadGuide('setup-guide', 'دليل_الإعداد_والتكوين')}
                     >
                       <Download className="w-4 h-4" />
-                      تحميل PDF
+                      تحميل/طباعة
                     </Button>
                   </CardContent>
                 </Card>
@@ -591,9 +572,10 @@ const Settings = () => {
                     <h4 className="font-medium text-foreground mb-2">ملاحظات مهمة حول الأدلة</h4>
                     <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
                       <li>جميع الأدلة محدثة ومتوافقة مع أحدث إصدار من النظام</li>
-                      <li>ملفات PDF بحجم A4 جاهزة للطباعة مع تنسيق احترافي</li>
+                      <li>تنسيق HTML محسن للطباعة بحجم A4 مع إمكانية حفظ كـ PDF</li>
                       <li>تدعم الخط العربي مع تخطيط RTL مناسب للغة العربية</li>
-                      <li>تحتوي على صور توضيحية وأمثلة عملية من الواقع</li>
+                      <li>تحتوي على تنسيق احترافي مع ألوان وعناوين منظمة</li>
+                      <li>يمكن طباعتها مباشرة من المتصفح أو حفظها كـ PDF</li>
                       <li>يتم تحديث الأدلة دورياً مع كل تحديث للنظام</li>
                     </ul>
                   </div>
