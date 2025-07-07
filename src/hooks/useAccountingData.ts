@@ -215,6 +215,17 @@ export const useAccountingData = () => {
 
   useEffect(() => {
     loadData();
+    
+    // Listen for accounting data updates
+    const handleAccountingUpdate = () => {
+      loadData();
+    };
+    
+    window.addEventListener('accounting-data-updated', handleAccountingUpdate);
+    
+    return () => {
+      window.removeEventListener('accounting-data-updated', handleAccountingUpdate);
+    };
   }, []);
 
   return {

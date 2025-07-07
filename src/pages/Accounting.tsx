@@ -7,6 +7,7 @@ import { AccountingBackfillTab } from '@/components/Accounting/AccountingBackfil
 import { PaymentReconciliationTab } from '@/components/Accounting/PaymentReconciliationTab';
 import { SystemIntegrityTab } from '@/components/Accounting/SystemIntegrityTab';
 import { AccountingEventMonitoringDashboard } from '@/components/Accounting/AccountingEventMonitoringDashboard';
+import { AccountingDataRefresh } from '@/components/Accounting/AccountingDataRefresh';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -154,6 +155,7 @@ const Accounting = () => {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
+          <AccountingDataRefresh />
           <AccountingBackfillTab />
         </TabsContent>
 
