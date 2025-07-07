@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Camera, X, Eye } from 'lucide-react';
@@ -125,91 +124,83 @@ export const VehicleConditionPhotos: React.FC<VehicleConditionPhotosProps> = ({
   const typeLabel = type === 'pickup' ? 'التسليم' : 'الاستلام';
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Camera className="w-5 h-5" />
-          حالة المركبة عند {typeLabel} - {vehicleInfo}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Photo Upload Section */}
-        <div>
-          <Label>صور حالة المركبة</Label>
-          <div className="mt-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              capture="environment"
-              onChange={handlePhotoCapture}
-              className="hidden"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="w-full mb-4"
-            >
-              <Camera className="w-4 h-4 mr-2" />
-              {uploading ? 'جاري الرفع...' : 'التقاط/رفع صور'}
-            </Button>
-          </div>
-
-          {/* Photo Grid */}
-          {photos.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-              {photos.map((photo, index) => (
-                <div key={index} className="relative group">
-                  <img
-                    src={photo}
-                    alt={`حالة المركبة ${index + 1}`}
-                    className="w-full h-32 object-cover rounded-lg border"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => removePhoto(photo, index)}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => window.open(photo, '_blank')}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Notes Section */}
-        <div>
-          <Label htmlFor={`notes-${type}`}>ملاحظات حالة المركبة</Label>
-          <Textarea
-            id={`notes-${type}`}
-            placeholder={`أدخل ملاحظات حول حالة المركبة عند ${typeLabel}...`}
-            value={notes}
-            onChange={(e) => handleNotesChange(e.target.value)}
-            rows={4}
-            className="mt-2"
+    <div className="space-y-4">
+      {/* Photo Upload Section */}
+      <div>
+        <Label className="text-right block">صور حالة المركبة</Label>
+        <div className="mt-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            capture="environment"
+            onChange={handlePhotoCapture}
+            className="hidden"
           />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="w-full mb-4 flex items-center gap-2 flex-row-reverse"
+          >
+            <Camera className="w-4 h-4" />
+            {uploading ? 'جاري الرفع...' : 'التقاط/رفع صور'}
+          </Button>
         </div>
 
-        {photos.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            <Camera className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>لم يتم التقاط أي صور لحالة المركبة بعد</p>
+        {/* Photo Grid */}
+        {photos.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+            {photos.map((photo, index) => (
+              <div key={index} className="relative group">
+                <img
+                  src={photo}
+                  alt={`حالة المركبة ${index + 1}`}
+                  className="w-full h-32 object-cover rounded-lg border"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => removePhoto(photo, index)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.open(photo, '_blank')}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Notes Section */}
+      <div>
+        <Label htmlFor={`notes-${type}`} className="text-right block">ملاحظات حالة المركبة</Label>
+        <Textarea
+          id={`notes-${type}`}
+          placeholder={`أدخل ملاحظات حول حالة المركبة عند ${typeLabel}...`}
+          value={notes}
+          onChange={(e) => handleNotesChange(e.target.value)}
+          rows={4}
+          className="mt-2 text-right"
+        />
+      </div>
+
+      {photos.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          <Camera className="w-12 h-12 mx-auto mb-4 opacity-50" />
+          <p>لم يتم التقاط أي صور لحالة المركبة بعد</p>
+        </div>
+      )}
+    </div>
   );
 };
