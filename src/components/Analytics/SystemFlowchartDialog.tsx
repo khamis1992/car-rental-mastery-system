@@ -136,8 +136,23 @@ export const SystemFlowchartDialog: React.FC<SystemFlowchartDialogProps> = ({
             {/* مرحلة البداية */}
             <div className="text-center">
               <div className="flow-box bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-full p-4 inline-block">
-                <div className="text-xl font-bold">🚀 بداية النظام</div>
+                <div className="text-xl font-bold mb-2">🚀 نظام إدارة تأجير المركبات المتكامل</div>
+                <div className="text-sm">تدفق البيانات والترابط بين الأنظمة</div>
               </div>
+            </div>
+
+            {/* مركز البيانات المركزي */}
+            <div className="relative">
+              <div className="text-center">
+                <div className="flow-box bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg p-6 inline-block">
+                  <div className="text-lg font-bold mb-2">🗄️ مركز البيانات المركزي</div>
+                  <div className="text-sm">قاعدة البيانات الموحدة - التكامل الكامل بين جميع الأنظمة</div>
+                </div>
+              </div>
+              
+              {/* خطوط الاتصال من وإلى مركز البيانات */}
+              <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-purple-400 to-indigo-400 opacity-50 -z-10"></div>
+              <div className="absolute top-0 left-1/2 w-0.5 h-full bg-gradient-to-b from-purple-400 to-indigo-400 opacity-50 -z-10"></div>
             </div>
 
             {/* السهم للأسفل */}
@@ -722,6 +737,284 @@ export const SystemFlowchartDialog: React.FC<SystemFlowchartDialogProps> = ({
                     <p className="text-xs text-purple-600">• تحديثات النظام</p>
                     <p className="text-xs text-purple-600">• إضافة ميزات جديدة</p>
                     <p className="text-xs text-purple-600">• تحسين الأداء</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* مخطط الترابط والتكامل بين الأنظمة */}
+            <div className="mt-12 border-t-4 border-gradient-to-r from-blue-500 to-purple-500 pt-8">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text px-4 py-3 inline-block">
+                  🔗 مخطط الترابط والتكامل بين الأنظمة
+                </h2>
+                <p className="text-muted-foreground mt-2">كيف تتفاعل وترتبط جميع أجزاء النظام مع بعضها البعض</p>
+              </div>
+
+              {/* مخطط الشبكة المترابطة */}
+              <div className="relative">
+                {/* الشبكة المركزية */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                  
+                  {/* النظام المالي والمحاسبي - العمود الأيسر */}
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <h3 className="text-lg font-bold text-emerald-700 mb-4">💰 النظام المالي والمحاسبي</h3>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="bg-emerald-50 border-2 border-emerald-200 rounded-lg p-3 relative">
+                        <h4 className="font-semibold text-emerald-800 text-sm">شجرة الحسابات</h4>
+                        <p className="text-xs text-emerald-600 mt-1">مركز جميع العمليات المالية</p>
+                        {/* خطوط الاتصال */}
+                        <div className="absolute -right-4 top-1/2 w-8 h-0.5 bg-emerald-400"></div>
+                      </div>
+                      
+                      <div className="bg-emerald-50 border-2 border-emerald-200 rounded-lg p-3 relative">
+                        <h4 className="font-semibold text-emerald-800 text-sm">القيود المحاسبية</h4>
+                        <p className="text-xs text-emerald-600 mt-1">تسجيل تلقائي من العقود والمدفوعات</p>
+                        <div className="absolute -right-4 top-1/2 w-8 h-0.5 bg-emerald-400"></div>
+                      </div>
+                      
+                      <div className="bg-emerald-50 border-2 border-emerald-200 rounded-lg p-3 relative">
+                        <h4 className="font-semibold text-emerald-800 text-sm">الفواتير والمدفوعات</h4>
+                        <p className="text-xs text-emerald-600 mt-1">ربط مباشر بالعقود والعملاء</p>
+                        <div className="absolute -right-4 top-1/2 w-8 h-0.5 bg-emerald-400"></div>
+                      </div>
+
+                      <div className="bg-emerald-50 border-2 border-emerald-200 rounded-lg p-3 relative">
+                        <h4 className="font-semibold text-emerald-800 text-sm">التقارير المالية</h4>
+                        <p className="text-xs text-emerald-600 mt-1">تجميع البيانات من جميع الأنظمة</p>
+                        <div className="absolute -right-4 top-1/2 w-8 h-0.5 bg-emerald-400"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* النظام الأساسي - العمود الوسط */}
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <h3 className="text-lg font-bold text-purple-700 mb-4">🎯 النظام الأساسي</h3>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="bg-purple-50 border-4 border-purple-300 rounded-lg p-4 relative">
+                        <h4 className="font-semibold text-purple-800">العقود والحجوزات</h4>
+                        <p className="text-xs text-purple-600 mt-1">مركز النظام - يؤثر على جميع الوحدات</p>
+                        
+                        {/* خطوط الاتصال متعددة الاتجاهات */}
+                        <div className="absolute -left-4 top-1/4 w-8 h-0.5 bg-purple-400"></div>
+                        <div className="absolute -right-4 top-1/4 w-8 h-0.5 bg-purple-400"></div>
+                        <div className="absolute left-1/2 -top-4 w-0.5 h-8 bg-purple-400"></div>
+                        <div className="absolute left-1/2 -bottom-4 w-0.5 h-8 bg-purple-400"></div>
+                      </div>
+                      
+                      <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-3 relative">
+                        <h4 className="font-semibold text-orange-800 text-sm">إدارة الأسطول</h4>
+                        <p className="text-xs text-orange-600 mt-1">حالة المركبات - تحديث مستمر</p>
+                        <div className="absolute -left-4 top-1/2 w-8 h-0.5 bg-orange-400"></div>
+                        <div className="absolute -right-4 top-1/2 w-8 h-0.5 bg-orange-400"></div>
+                      </div>
+                      
+                      <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3 relative">
+                        <h4 className="font-semibold text-blue-800 text-sm">إدارة العملاء</h4>
+                        <p className="text-xs text-blue-600 mt-1">بيانات مشتركة مع جميع الوحدات</p>
+                        <div className="absolute -left-4 top-1/2 w-8 h-0.5 bg-blue-400"></div>
+                        <div className="absolute -right-4 top-1/2 w-8 h-0.5 bg-blue-400"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* الأنظمة التشغيلية - العمود الأيمن */}
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <h3 className="text-lg font-bold text-indigo-700 mb-4">⚙️ الأنظمة التشغيلية</h3>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="bg-indigo-50 border-2 border-indigo-200 rounded-lg p-3 relative">
+                        <h4 className="font-semibold text-indigo-800 text-sm">الصيانة</h4>
+                        <p className="text-xs text-indigo-600 mt-1">ترتبط بالأسطول والمحاسبة</p>
+                        <div className="absolute -left-4 top-1/2 w-8 h-0.5 bg-indigo-400"></div>
+                      </div>
+                      
+                      <div className="bg-red-50 border-2 border-red-200 rounded-lg p-3 relative">
+                        <h4 className="font-semibold text-red-800 text-sm">المخالفات المرورية</h4>
+                        <p className="text-xs text-red-600 mt-1">ترتبط بالعقود والعملاء والمحاسبة</p>
+                        <div className="absolute -left-4 top-1/2 w-8 h-0.5 bg-red-400"></div>
+                      </div>
+                      
+                      <div className="bg-pink-50 border-2 border-pink-200 rounded-lg p-3 relative">
+                        <h4 className="font-semibold text-pink-800 text-sm">الموارد البشرية</h4>
+                        <p className="text-xs text-pink-600 mt-1">الحضور والرواتب → المحاسبة</p>
+                        <div className="absolute -left-4 top-1/2 w-8 h-0.5 bg-pink-400"></div>
+                      </div>
+
+                      <div className="bg-teal-50 border-2 border-teal-200 rounded-lg p-3 relative">
+                        <h4 className="font-semibold text-teal-800 text-sm">التحليلات والتقارير</h4>
+                        <p className="text-xs text-teal-600 mt-1">تجميع البيانات من جميع الأنظمة</p>
+                        <div className="absolute -left-4 top-1/2 w-8 h-0.5 bg-teal-400"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* تدفق البيانات الرئيسي */}
+                <div className="mt-12 mb-8">
+                  <h3 className="text-xl font-bold text-center text-gray-700 mb-6">🔄 تدفق البيانات الرئيسي</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-2 items-center">
+                    <div className="bg-gradient-to-r from-blue-100 to-blue-200 border-2 border-blue-300 rounded-lg p-3 text-center">
+                      <h4 className="font-semibold text-blue-800 text-sm">إنشاء العقد</h4>
+                      <p className="text-xs text-blue-600 mt-1">نقطة البداية</p>
+                    </div>
+                    
+                    <div className="flex justify-center items-center">
+                      <div className="flex items-center">
+                        <div className="w-6 h-0.5 bg-gray-400"></div>
+                        <div className="w-0 h-0 border-l-4 border-l-gray-400 border-t-2 border-t-transparent border-b-2 border-b-transparent"></div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gradient-to-r from-orange-100 to-orange-200 border-2 border-orange-300 rounded-lg p-3 text-center">
+                      <h4 className="font-semibold text-orange-800 text-sm">تحديث حالة المركبة</h4>
+                      <p className="text-xs text-orange-600 mt-1">تلقائي</p>
+                    </div>
+                    
+                    <div className="flex justify-center items-center">
+                      <div className="flex items-center">
+                        <div className="w-6 h-0.5 bg-gray-400"></div>
+                        <div className="w-0 h-0 border-l-4 border-l-gray-400 border-t-2 border-t-transparent border-b-2 border-b-transparent"></div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gradient-to-r from-emerald-100 to-emerald-200 border-2 border-emerald-300 rounded-lg p-3 text-center">
+                      <h4 className="font-semibold text-emerald-800 text-sm">إنشاء القيود المحاسبية</h4>
+                      <p className="text-xs text-emerald-600 mt-1">تلقائي</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* نقاط التكامل الحيوية */}
+                <div className="mt-8">
+                  <h3 className="text-xl font-bold text-center text-gray-700 mb-6">⚡ نقاط التكامل الحيوية</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg p-4">
+                      <div className="text-center mb-3">
+                        <div className="w-12 h-12 bg-purple-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
+                          <span className="text-lg">🔄</span>
+                        </div>
+                        <h4 className="font-semibold text-purple-800">المزامنة التلقائية</h4>
+                      </div>
+                      <div className="space-y-2 text-xs">
+                        <p className="text-purple-600">• العقد → حالة المركبة</p>
+                        <p className="text-purple-600">• الدفع → القيود المحاسبية</p>
+                        <p className="text-purple-600">• المخالفة → حساب العميل</p>
+                        <p className="text-purple-600">• الصيانة → سجل المركبة</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-4">
+                      <div className="text-center mb-3">
+                        <div className="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
+                          <span className="text-lg">📊</span>
+                        </div>
+                        <h4 className="font-semibold text-green-800">التقارير المدمجة</h4>
+                      </div>
+                      <div className="space-y-2 text-xs">
+                        <p className="text-green-600">• بيانات من جميع الوحدات</p>
+                        <p className="text-green-600">• تحديث فوري</p>
+                        <p className="text-green-600">• تحليل شامل</p>
+                        <p className="text-green-600">• مؤشرات أداء موحدة</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-lg p-4">
+                      <div className="text-center mb-3">
+                        <div className="w-12 h-12 bg-orange-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
+                          <span className="text-lg">🔔</span>
+                        </div>
+                        <h4 className="font-semibold text-orange-800">التنبيهات الذكية</h4>
+                      </div>
+                      <div className="space-y-2 text-xs">
+                        <p className="text-orange-600">• انتهاء العقود</p>
+                        <p className="text-orange-600">• مواعيد الصيانة</p>
+                        <p className="text-orange-600">• المدفوعات المتأخرة</p>
+                        <p className="text-orange-600">• حالات الطوارئ</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-4">
+                      <div className="text-center mb-3">
+                        <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
+                          <span className="text-lg">🔐</span>
+                        </div>
+                        <h4 className="font-semibold text-blue-800">أمان البيانات</h4>
+                      </div>
+                      <div className="space-y-2 text-xs">
+                        <p className="text-blue-600">• تشفير شامل</p>
+                        <p className="text-blue-600">• صلاحيات متدرجة</p>
+                        <p className="text-blue-600">• تسجيل العمليات</p>
+                        <p className="text-blue-600">• نسخ احتياطي تلقائي</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* مثال عملي للترابط */}
+                <div className="mt-12 bg-gradient-to-r from-gray-50 to-blue-50 border-2 border-gray-200 rounded-lg p-6">
+                  <h3 className="text-xl font-bold text-center text-gray-700 mb-6">📋 مثال عملي: رحلة العقد عبر النظام</h3>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-blue-800">إنشاء العقد</h4>
+                        <p className="text-sm text-blue-600">العميل يحجز مركبة → النظام ينشئ عقد جديد</p>
+                      </div>
+                      <div className="text-blue-500">→</div>
+                      <div className="bg-blue-100 rounded-lg p-2 text-xs text-blue-700">تحديث: حالة المركبة، دليل العملاء</div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-green-800">تسليم المركبة</h4>
+                        <p className="text-sm text-green-600">الموظف يسلم المركبة → النظام يسجل بيانات التسليم</p>
+                      </div>
+                      <div className="text-green-500">→</div>
+                      <div className="bg-green-100 rounded-lg p-2 text-xs text-green-700">قيد محاسبي تلقائي، تحديث حالة الأسطول</div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-purple-800">الدفع</h4>
+                        <p className="text-sm text-purple-600">العميل يدفع → النظام يسجل الدفعة</p>
+                      </div>
+                      <div className="text-purple-500">→</div>
+                      <div className="bg-purple-100 rounded-lg p-2 text-xs text-purple-700">قيود الدفع، تحديث حساب العميل، الفواتير</div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-orange-800">أثناء التأجير</h4>
+                        <p className="text-sm text-orange-600">صيانة أو مخالفة → النظام يربط بالعقد</p>
+                      </div>
+                      <div className="text-orange-500">→</div>
+                      <div className="bg-orange-100 rounded-lg p-2 text-xs text-orange-700">مصروفات إضافية، تحديث تكلفة العقد</div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold">5</div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-red-800">استلام المركبة</h4>
+                        <p className="text-sm text-red-600">انتهاء العقد → النظام يحسب التسوية النهائية</p>
+                      </div>
+                      <div className="text-red-500">→</div>
+                      <div className="bg-red-100 rounded-lg p-2 text-xs text-red-700">إغلاق القيود، تحرير المركبة، تقييم العميل</div>
+                    </div>
                   </div>
                 </div>
               </div>
