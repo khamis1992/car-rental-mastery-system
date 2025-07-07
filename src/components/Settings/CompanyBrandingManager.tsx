@@ -184,13 +184,13 @@ const CompanyBrandingManager: React.FC = () => {
   }) => (
     <Card className="card-elegant">
       <CardHeader>
-        <CardTitle className="rtl-title flex items-center gap-2 justify-end text-right">
-          <span>{title}</span>
+        <CardTitle className="rtl-title flex items-center gap-2 text-sm">
           {icon}
+          {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 text-right">
-        <p className="text-sm text-muted-foreground text-right">{description}</p>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">{description}</p>
         
         {currentUrl && (
           <div className="space-y-2">
@@ -203,10 +203,10 @@ const CompanyBrandingManager: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={() => handleRemoveImage(type)}
-              className="rtl-flex gap-2 justify-end"
+              className="rtl-flex gap-2"
             >
-              <span>حذف الصورة</span>
               <X className="w-4 h-4" />
+              حذف الصورة
             </Button>
           </div>
         )}
@@ -228,9 +228,9 @@ const CompanyBrandingManager: React.FC = () => {
             htmlFor={`${type}-upload`}
             className="cursor-pointer"
           >
-            <Button type="button" variant="outline" className="rtl-flex gap-2 justify-end">
-              <span>{currentUrl ? 'تغيير الصورة' : 'رفع صورة'}</span>
+            <Button type="button" variant="outline" className="rtl-flex gap-2">
               <Upload className="w-4 h-4" />
+              {currentUrl ? 'تغيير الصورة' : 'رفع صورة'}
             </Button>
           </Label>
         </div>
@@ -239,99 +239,91 @@ const CompanyBrandingManager: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 text-right" dir="rtl">
+    <div className="space-y-6">
       {/* معلومات الشركة الأساسية */}
       <Card className="card-elegant">
         <CardHeader>
-          <CardTitle className="rtl-title flex items-center gap-2 justify-end">
-            <span>معلومات الشركة</span>
+          <CardTitle className="rtl-title flex items-center gap-2">
             <Building className="w-5 h-5" />
+            معلومات الشركة
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 text-right">
+        <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="company_name_ar" className="text-right block">اسم الشركة (عربي)</Label>
+              <Label htmlFor="company_name_ar">اسم الشركة (عربي)</Label>
               <Input
                 id="company_name_ar"
                 value={data.company_name_ar || ''}
                 onChange={(e) => handleInputChange('company_name_ar', e.target.value)}
-                className="text-right"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="company_name_en" className="text-right block">اسم الشركة (إنجليزي)</Label>
+              <Label htmlFor="company_name_en">اسم الشركة (إنجليزي)</Label>
               <Input
                 id="company_name_en"
                 value={data.company_name_en || ''}
                 onChange={(e) => handleInputChange('company_name_en', e.target.value)}
-                className="text-right"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-right block">رقم الهاتف</Label>
+              <Label htmlFor="phone">رقم الهاتف</Label>
               <Input
                 id="phone"
                 value={data.phone || ''}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
-                className="text-right"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-right block">البريد الإلكتروني</Label>
+              <Label htmlFor="email">البريد الإلكتروني</Label>
               <Input
                 id="email"
                 type="email"
                 value={data.email || ''}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className="text-right"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="website" className="text-right block">الموقع الإلكتروني</Label>
+              <Label htmlFor="website">الموقع الإلكتروني</Label>
               <Input
                 id="website"
                 value={data.website || ''}
                 onChange={(e) => handleInputChange('website', e.target.value)}
-                className="text-right"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="tax_number" className="text-right block">الرقم الضريبي</Label>
+              <Label htmlFor="tax_number">الرقم الضريبي</Label>
               <Input
                 id="tax_number"
                 value={data.tax_number || ''}
                 onChange={(e) => handleInputChange('tax_number', e.target.value)}
-                className="text-right"
               />
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="address_ar" className="text-right block">العنوان (عربي)</Label>
+              <Label htmlFor="address_ar">العنوان (عربي)</Label>
               <Textarea
                 id="address_ar"
                 value={data.address_ar || ''}
                 onChange={(e) => handleInputChange('address_ar', e.target.value)}
                 rows={2}
-                className="text-right"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="address_en" className="text-right block">العنوان (إنجليزي)</Label>
+              <Label htmlFor="address_en">العنوان (إنجليزي)</Label>
               <Textarea
                 id="address_en"
                 value={data.address_en || ''}
                 onChange={(e) => handleInputChange('address_en', e.target.value)}
                 rows={2}
-                className="text-right"
               />
             </div>
           </div>
@@ -368,39 +360,39 @@ const CompanyBrandingManager: React.FC = () => {
       {/* إعدادات العرض */}
       <Card className="card-elegant">
         <CardHeader>
-          <CardTitle className="rtl-title flex items-center gap-2 justify-end">
-            <span>إعدادات العرض</span>
+          <CardTitle className="rtl-title flex items-center gap-2">
             <Eye className="w-5 h-5" />
+            إعدادات العرض
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 text-right">
+        <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="show_header">إظهار الرأس</Label>
+              <p className="text-sm text-muted-foreground">إظهار أو إخفاء منطقة الرأس في التقارير</p>
+            </div>
             <Switch
               id="show_header"
               checked={data.show_header || false}
               onCheckedChange={(checked) => handleInputChange('show_header', checked)}
             />
-            <div className="text-right">
-              <Label htmlFor="show_header" className="text-right">إظهار الرأس</Label>
-              <p className="text-sm text-muted-foreground text-right">إظهار أو إخفاء منطقة الرأس في التقارير</p>
-            </div>
           </div>
           
           <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="show_footer">إظهار التذييل</Label>
+              <p className="text-sm text-muted-foreground">إظهار أو إخفاء منطقة التذييل في التقارير</p>
+            </div>
             <Switch
               id="show_footer"
               checked={data.show_footer || false}
               onCheckedChange={(checked) => handleInputChange('show_footer', checked)}
             />
-            <div className="text-right">
-              <Label htmlFor="show_footer" className="text-right">إظهار التذييل</Label>
-              <p className="text-sm text-muted-foreground text-right">إظهار أو إخفاء منطقة التذييل في التقارير</p>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="header_height" className="text-right block">ارتفاع الرأس (بكسل)</Label>
+              <Label htmlFor="header_height">ارتفاع الرأس (بكسل)</Label>
               <Input
                 id="header_height"
                 type="number"
@@ -408,12 +400,11 @@ const CompanyBrandingManager: React.FC = () => {
                 max="300"
                 value={data.header_height || 120}
                 onChange={(e) => handleInputChange('header_height', parseInt(e.target.value))}
-                className="text-right"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="footer_height" className="text-right block">ارتفاع التذييل (بكسل)</Label>
+              <Label htmlFor="footer_height">ارتفاع التذييل (بكسل)</Label>
               <Input
                 id="footer_height"
                 type="number"
@@ -421,7 +412,6 @@ const CompanyBrandingManager: React.FC = () => {
                 max="200"
                 value={data.footer_height || 80}
                 onChange={(e) => handleInputChange('footer_height', parseInt(e.target.value))}
-                className="text-right"
               />
             </div>
           </div>
@@ -433,7 +423,7 @@ const CompanyBrandingManager: React.FC = () => {
         <Button 
           onClick={handleSave}
           disabled={loading}
-          className="btn-primary text-right"
+          className="btn-primary"
         >
           {loading ? 'جاري الحفظ...' : 'حفظ التغييرات'}
         </Button>
