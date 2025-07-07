@@ -113,49 +113,27 @@ export const DamageGuidanceHelper: React.FC<DamageGuidanceHelperProps> = ({
         </CardContent>
       </Card>
 
-      {/* Usage Guide */}
-      <Alert className="border-blue-200 bg-blue-50 flex flex-row-reverse items-start gap-3">
-        <HelpCircle className="h-4 w-4 text-blue-600 mt-0.5" />
-        <AlertDescription className="text-blue-700 text-right">
-          <strong>دليل الاستخدام:</strong>
-          <div className="mt-2 space-y-1 text-left">
-            <div className="flex items-center gap-2">
-              <span>•</span>
-              <span>انقر على أي ضرر لعرض التفاصيل</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span>•</span>
-              <span>استخدم زر "إضافة ضرر" لتسجيل ضرر جديد</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span>•</span>
-              <span>يُنصح بإضافة صور للأضرار الشديدة</span>
-            </div>
-          </div>
-        </AlertDescription>
-      </Alert>
-
       {/* Tips */}
       <Alert className="border-amber-200 bg-amber-50 flex flex-row-reverse items-start gap-3">
         <HelpCircle className="h-4 w-4 text-amber-600 mt-0.5" />
         <AlertDescription className="text-amber-700 text-right">
           <strong>نصائح للتوثيق الأمثل:</strong>
-          <div className="mt-2 space-y-1 text-left">
-            <div className="flex items-center gap-2">
-              <span>•</span>
+          <div className="mt-2 space-y-1">
+            <div className="flex items-center gap-2 justify-end">
               <span>اكتب وصفاً واضحاً ومفصلاً لكل ضرر</span>
-            </div>
-            <div className="flex items-center gap-2">
               <span>•</span>
+            </div>
+            <div className="flex items-center gap-2 justify-end">
               <span>التقط صوراً واضحة من زوايا مختلفة</span>
-            </div>
-            <div className="flex items-center gap-2">
               <span>•</span>
+            </div>
+            <div className="flex items-center gap-2 justify-end">
               <span>حدد مستوى الضرر بدقة (بسيط/متوسط/شديد)</span>
-            </div>
-            <div className="flex items-center gap-2">
               <span>•</span>
+            </div>
+            <div className="flex items-center gap-2 justify-end">
               <span>تأكد من توثيق جميع الأضرار المرئية</span>
+              <span>•</span>
             </div>
           </div>
         </AlertDescription>
