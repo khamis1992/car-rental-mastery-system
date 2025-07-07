@@ -114,22 +114,22 @@ export const DamageGuidanceHelper: React.FC<DamageGuidanceHelperProps> = ({
       </Card>
 
       {/* Usage Guide */}
-      <Alert className="border-blue-200 bg-blue-50 flex flex-row-reverse items-start gap-3">
+      <Alert className="border-blue-200 bg-blue-50 flex items-start gap-3">
         <HelpCircle className="h-4 w-4 text-blue-600 mt-0.5" />
-        <AlertDescription className="text-blue-700 text-right">
+        <AlertDescription className="text-blue-700 text-left">
           <strong>دليل الاستخدام:</strong>
           <div className="mt-2 space-y-1">
-            <div className="flex items-center gap-2 justify-end">
+            <div className="flex items-center gap-2">
+              <span>•</span>
               <span>انقر على أي ضرر لعرض التفاصيل</span>
-              <span>•</span>
             </div>
-            <div className="flex items-center gap-2 justify-end">
+            <div className="flex items-center gap-2">
+              <span>•</span>
               <span>استخدم زر "إضافة ضرر" لتسجيل ضرر جديد</span>
-              <span>•</span>
             </div>
-            <div className="flex items-center gap-2 justify-end">
-              <span>يُنصح بإضافة صور للأضرار الشديدة</span>
+            <div className="flex items-center gap-2">
               <span>•</span>
+              <span>يُنصح بإضافة صور للأضرار الشديدة</span>
             </div>
           </div>
         </AlertDescription>
