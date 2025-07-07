@@ -251,87 +251,87 @@ const CompanyBrandingManager: React.FC = () => {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="company_name_ar" className="rtl-label text-left">اسم الشركة (عربي)</Label>
+              <Label htmlFor="company_name_ar" className="rtl-label text-right">اسم الشركة (عربي)</Label>
               <Input
                 id="company_name_ar"
                 value={data.company_name_ar || ''}
                 onChange={(e) => handleInputChange('company_name_ar', e.target.value)}
-                className="text-left"
+                className="text-right"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="company_name_en" className="rtl-label text-left">اسم الشركة (إنجليزي)</Label>
+              <Label htmlFor="company_name_en" className="rtl-label text-right">اسم الشركة (إنجليزي)</Label>
               <Input
                 id="company_name_en"
                 value={data.company_name_en || ''}
                 onChange={(e) => handleInputChange('company_name_en', e.target.value)}
-                className="text-left"
+                className="text-right"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="phone" className="rtl-label text-left">رقم الهاتف</Label>
+              <Label htmlFor="phone" className="rtl-label text-right">رقم الهاتف</Label>
               <Input
                 id="phone"
                 value={data.phone || ''}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
-                className="text-left"
+                className="text-right"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="email" className="rtl-label text-left">البريد الإلكتروني</Label>
+              <Label htmlFor="email" className="rtl-label text-right">البريد الإلكتروني</Label>
               <Input
                 id="email"
                 type="email"
                 value={data.email || ''}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className="text-left"
+                className="text-right"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="website" className="rtl-label text-left">الموقع الإلكتروني</Label>
+              <Label htmlFor="website" className="rtl-label text-right">الموقع الإلكتروني</Label>
               <Input
                 id="website"
                 value={data.website || ''}
                 onChange={(e) => handleInputChange('website', e.target.value)}
-                className="text-left"
+                className="text-right"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="tax_number" className="rtl-label text-left">الرقم الضريبي</Label>
+              <Label htmlFor="tax_number" className="rtl-label text-right">الرقم الضريبي</Label>
               <Input
                 id="tax_number"
                 value={data.tax_number || ''}
                 onChange={(e) => handleInputChange('tax_number', e.target.value)}
-                className="text-left"
+                className="text-right"
               />
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="address_ar" className="rtl-label text-left">العنوان (عربي)</Label>
+              <Label htmlFor="address_ar" className="rtl-label text-right">العنوان (عربي)</Label>
               <Textarea
                 id="address_ar"
                 value={data.address_ar || ''}
                 onChange={(e) => handleInputChange('address_ar', e.target.value)}
                 rows={2}
-                className="text-left"
+                className="text-right"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="address_en" className="rtl-label text-left">العنوان (إنجليزي)</Label>
+              <Label htmlFor="address_en" className="rtl-label text-right">العنوان (إنجليزي)</Label>
               <Textarea
                 id="address_en"
                 value={data.address_en || ''}
                 onChange={(e) => handleInputChange('address_en', e.target.value)}
                 rows={2}
-                className="text-left"
+                className="text-right"
               />
             </div>
           </div>
