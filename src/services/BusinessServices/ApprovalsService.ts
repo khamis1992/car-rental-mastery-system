@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { UserHelperService } from './UserHelperService';
 
 export interface Approval {
   id: string;
@@ -312,14 +313,19 @@ export class ApprovalsService {
     try {
       // الحصول على معلومات الموافقة
       const approval = await this.getApprovalById(approvalId);
-      if (!approval) return;
+      if (!approval) {
+        console.warn('Approval not found for logging action:', approvalId);
+        return;
+      }
 
-      // إنشاء سجل في transaction_log
-      await supabase.rpc('log_transaction', {
+      // Convert user_id to employee_id if needed
+      // The userId parameter might be either a user_id or employee_id
+      // The database function will handle the conversion automatically
+      const { data, error } = await supabase.rpc('log_transaction', {
         p_transaction_type: `approval_${action}`,
         p_source_table: 'approvals',
         p_source_id: approvalId,
-        p_employee_id: userId,
+        p_employee_id: userId, // The database function will handle user_id to employee_id conversion
         p_amount: approval.amount,
         p_description: `${action} موافقة ${approval.approval_type}`,
         p_details: {
@@ -330,6 +336,12 @@ export class ApprovalsService {
           reference_id: approval.reference_id
         }
       });
+
+      if (error) {
+        console.error('Database error logging approval action:', error);
+      } else {
+        console.log('Successfully logged approval action:', { approvalId, action, transactionId: data });
+      }
     } catch (error) {
       console.error('Error logging approval action:', error);
       // لا نرمي خطأ هنا لتجنب فشل العملية الأساسية

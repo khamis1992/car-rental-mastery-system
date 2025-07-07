@@ -27,6 +27,8 @@ import { ViolationPaymentBusinessService } from '@/services/BusinessServices/Vio
 import { WorkLocationBusinessService } from '@/services/BusinessServices/WorkLocationBusinessService';
 import { VehicleBusinessService } from '@/services/BusinessServices/VehicleBusinessService';
 import { VehicleInsuranceBusinessService } from '@/services/BusinessServices/VehicleInsuranceBusinessService';
+import { TransactionLogService } from '@/services/BusinessServices/TransactionLogService';
+import { ApprovalsService } from '@/services/BusinessServices/ApprovalsService';
 
 // Repository interfaces
 import { IContractRepository } from '@/repositories/interfaces/IContractRepository';
@@ -75,6 +77,8 @@ export class ServiceContainer {
   private workLocationBusinessService: WorkLocationBusinessService;
   private vehicleBusinessService: VehicleBusinessService;
   private vehicleInsuranceBusinessService: VehicleInsuranceBusinessService;
+  private transactionLogService: TransactionLogService;
+  private approvalsService: ApprovalsService;
 
   private constructor() {
     // Initialize repositories
@@ -106,6 +110,8 @@ export class ServiceContainer {
     this.workLocationBusinessService = new WorkLocationBusinessService(this.workLocationRepository);
     this.vehicleBusinessService = new VehicleBusinessService(this.vehicleRepository);
     this.vehicleInsuranceBusinessService = new VehicleInsuranceBusinessService(this.vehicleInsuranceRepository);
+    this.transactionLogService = new TransactionLogService();
+    this.approvalsService = new ApprovalsService();
   }
 
   static getInstance(): ServiceContainer {
@@ -215,6 +221,14 @@ export class ServiceContainer {
 
   getVehicleInsuranceBusinessService(): VehicleInsuranceBusinessService {
     return this.vehicleInsuranceBusinessService;
+  }
+
+  getTransactionLogService(): TransactionLogService {
+    return this.transactionLogService;
+  }
+
+  getApprovalsService(): ApprovalsService {
+    return this.approvalsService;
   }
 }
 

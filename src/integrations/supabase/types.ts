@@ -4639,18 +4639,31 @@ export type Database = {
         Returns: boolean
       }
       log_transaction: {
-        Args: {
-          p_transaction_type: string
-          p_source_table: string
-          p_source_id: string
-          p_department_id?: string
-          p_employee_id?: string
-          p_customer_id?: string
-          p_vehicle_id?: string
-          p_amount?: number
-          p_description?: string
-          p_details?: Json
-        }
+        Args:
+          | {
+              p_transaction_type: string
+              p_source_table: string
+              p_source_id: string
+              p_department_id?: string
+              p_employee_id?: string
+              p_customer_id?: string
+              p_vehicle_id?: string
+              p_amount?: number
+              p_description?: string
+              p_details?: Json
+            }
+          | {
+              p_transaction_type: string
+              p_source_table: string
+              p_source_id: string
+              p_department_id?: string
+              p_employee_id?: string
+              p_customer_id?: string
+              p_vehicle_id?: string
+              p_amount?: number
+              p_description?: string
+              p_details?: Json
+            }
         Returns: string
       }
       mark_contract_deleted: {
