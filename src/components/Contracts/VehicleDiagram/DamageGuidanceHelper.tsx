@@ -54,19 +54,19 @@ export const DamageGuidanceHelper: React.FC<DamageGuidanceHelperProps> = ({
             <div className="mt-2 space-y-1">
               <div className="flex items-center gap-2 justify-end">
                 <span>انقر على زر "إضافة ضرر" أعلاه</span>
-                <span className="font-bold">1.</span>
+                <span className="font-bold">.1</span>
               </div>
               <div className="flex items-center gap-2 justify-end">
                 <span>انقر على موقع الضرر في المخطط</span>
-                <span className="font-bold">2.</span>
+                <span className="font-bold">.2</span>
               </div>
               <div className="flex items-center gap-2 justify-end">
                 <span>أدخل وصف الضرر ومستواه</span>
-                <span className="font-bold">3.</span>
+                <span className="font-bold">.3</span>
               </div>
               <div className="flex items-center gap-2 justify-end">
                 <span>أضف صور توثيقية</span>
-                <span className="font-bold">4.</span>
+                <span className="font-bold">.4</span>
               </div>
             </div>
           </AlertDescription>
