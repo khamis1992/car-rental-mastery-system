@@ -132,11 +132,14 @@ export class TransactionLogService {
     } = {}
   ): Promise<string> {
     try {
+      // Ensure sourceId is a valid UUID
+      const sourceUuid = sourceId; // Assume it's already a UUID string
+      
       // The employeeId might be a user_id or employee_id, let the database function handle conversion
       const { data, error } = await supabase.rpc('log_transaction', {
         p_transaction_type: transactionType,
         p_source_table: sourceTable,
-        p_source_id: sourceId,
+        p_source_id: sourceUuid, // Now properly passing as UUID
         p_department_id: options.departmentId || null,
         p_employee_id: options.employeeId || null, // Database function handles user_id to employee_id conversion
         p_customer_id: options.customerId || null,

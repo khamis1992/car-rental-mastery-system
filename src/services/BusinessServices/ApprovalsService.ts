@@ -318,30 +318,29 @@ export class ApprovalsService {
         return;
       }
 
-      // Convert user_id to employee_id if needed
-      // The userId parameter might be either a user_id or employee_id
-      // The database function will handle the conversion automatically
-      const { data, error } = await supabase.rpc('log_transaction', {
-        p_transaction_type: `approval_${action}`,
-        p_source_table: 'approvals',
-        p_source_id: approvalId,
-        p_employee_id: userId, // The database function will handle user_id to employee_id conversion
-        p_amount: approval.amount,
-        p_description: `${action} موافقة ${approval.approval_type}`,
-        p_details: {
-          approval_id: approvalId,
-          action: action,
-          comments: comments,
-          reference_table: approval.reference_table,
-          reference_id: approval.reference_id
+      // Use TransactionLogService instead of direct RPC call
+      const { TransactionLogService } = await import('./TransactionLogService');
+      const transactionLogService = new TransactionLogService();
+      
+      await transactionLogService.logTransaction(
+        `approval_${action}`,
+        'approvals',
+        approvalId, // TransactionLogService will handle the UUID conversion
+        `${action} موافقة ${approval.approval_type}`,
+        {
+          employeeId: userId, // The database function will handle user_id to employee_id conversion
+          amount: approval.amount,
+          details: {
+            approval_id: approvalId,
+            action: action,
+            comments: comments,
+            reference_table: approval.reference_table,
+            reference_id: approval.reference_id
+          }
         }
-      });
+      );
 
-      if (error) {
-        console.error('Database error logging approval action:', error);
-      } else {
-        console.log('Successfully logged approval action:', { approvalId, action, transactionId: data });
-      }
+      console.log('Successfully logged approval action:', { approvalId, action });
     } catch (error) {
       console.error('Error logging approval action:', error);
       // لا نرمي خطأ هنا لتجنب فشل العملية الأساسية
