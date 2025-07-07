@@ -47,9 +47,9 @@ export const DamageGuidanceHelper: React.FC<DamageGuidanceHelperProps> = ({
     <div className="space-y-3">
       {/* Quick Start Guide */}
       {totalDamages === 0 && (
-        <Alert>
-          <HelpCircle className="h-4 w-4" />
-          <AlertDescription>
+        <Alert className="flex flex-row-reverse items-start gap-3">
+          <HelpCircle className="h-4 w-4 mt-0.5" />
+          <AlertDescription className="text-right">
             <strong>لبدء توثيق أضرار المركبة:</strong>
             <br />
             1. انقر على زر "إضافة ضرر" أعلاه
