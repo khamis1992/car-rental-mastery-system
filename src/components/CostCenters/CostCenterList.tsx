@@ -19,14 +19,14 @@ interface CostCenterListProps {
 
 const CostCenterList = ({ costCenters, onRefresh, isLoading }: CostCenterListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
   const [editingCostCenter, setEditingCostCenter] = useState<CostCenter | null>(null);
   const costCenterService = new CostCenterService();
 
   const filteredCostCenters = costCenters.filter(cc => {
     const matchesSearch = cc.cost_center_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          cc.cost_center_code.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = !typeFilter || cc.cost_center_type === typeFilter;
+    const matchesType = typeFilter === 'all' || cc.cost_center_type === typeFilter;
     return matchesSearch && matchesType;
   });
 
@@ -95,8 +95,8 @@ const CostCenterList = ({ costCenters, onRefresh, isLoading }: CostCenterListPro
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="تصفية حسب النوع" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">جميع الأنواع</SelectItem>
+                <SelectContent>
+                  <SelectItem value="all">جميع الأنواع</SelectItem>
                 <SelectItem value="operational">تشغيلي</SelectItem>
                 <SelectItem value="administrative">إداري</SelectItem>
                 <SelectItem value="revenue">إيرادات</SelectItem>

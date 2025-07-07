@@ -104,9 +104,11 @@ const CostCenterForm = ({ costCenter, onClose, onSuccess }: CostCenterFormProps)
   };
 
   const handleInputChange = (field: keyof CreateCostCenterData, value: any) => {
+    // Convert "none" back to empty string for optional fields
+    const processedValue = value === 'none' ? '' : value;
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: processedValue
     }));
   };
 
@@ -187,7 +189,7 @@ const CostCenterForm = ({ costCenter, onClose, onSuccess }: CostCenterFormProps)
                   <SelectValue placeholder="اختر القسم" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">بدون قسم</SelectItem>
+                  <SelectItem value="none">بدون قسم</SelectItem>
                   {departments?.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>
                       {dept.department_name}
@@ -207,7 +209,7 @@ const CostCenterForm = ({ costCenter, onClose, onSuccess }: CostCenterFormProps)
                   <SelectValue placeholder="اختر المدير" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">بدون مدير</SelectItem>
+                  <SelectItem value="none">بدون مدير</SelectItem>
                   {employees?.map((emp) => (
                     <SelectItem key={emp.id} value={emp.id}>
                       {emp.first_name} {emp.last_name}
@@ -227,8 +229,8 @@ const CostCenterForm = ({ costCenter, onClose, onSuccess }: CostCenterFormProps)
               <SelectTrigger>
                 <SelectValue placeholder="اختر مركز التكلفة الأب" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">مركز تكلفة رئيسي</SelectItem>
+                <SelectContent>
+                  <SelectItem value="none">مركز تكلفة رئيسي</SelectItem>
                 {parentCostCenters?.filter(cc => cc.id !== costCenter?.id).map((cc) => (
                   <SelectItem key={cc.id} value={cc.id}>
                     {cc.cost_center_name} ({cc.cost_center_code})
