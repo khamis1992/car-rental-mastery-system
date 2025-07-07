@@ -184,13 +184,13 @@ const CompanyBrandingManager: React.FC = () => {
   }) => (
     <Card className="card-elegant">
       <CardHeader>
-        <CardTitle className="rtl-title flex items-center gap-2 text-sm text-right">
+        <CardTitle className="rtl-title flex items-center gap-2 text-sm text-left">
           {icon}
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground text-right">{description}</p>
+        <p className="text-sm text-muted-foreground text-left">{description}</p>
         
         {currentUrl && (
           <div className="space-y-2">
@@ -243,7 +243,7 @@ const CompanyBrandingManager: React.FC = () => {
       {/* معلومات الشركة الأساسية */}
       <Card className="card-elegant">
         <CardHeader>
-        <CardTitle className="rtl-title flex items-center gap-2 text-right">
+          <CardTitle className="rtl-title flex items-center gap-2 text-left">
             <Building className="w-5 h-5" />
             معلومات الشركة
           </CardTitle>
@@ -251,87 +251,87 @@ const CompanyBrandingManager: React.FC = () => {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="company_name_ar" className="rtl-label text-right">اسم الشركة (عربي)</Label>
+              <Label htmlFor="company_name_ar" className="rtl-label text-left">اسم الشركة (عربي)</Label>
               <Input
                 id="company_name_ar"
                 value={data.company_name_ar || ''}
                 onChange={(e) => handleInputChange('company_name_ar', e.target.value)}
-                className="text-right"
+                className="text-left"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="company_name_en" className="rtl-label text-right">اسم الشركة (إنجليزي)</Label>
+              <Label htmlFor="company_name_en" className="rtl-label text-left">اسم الشركة (إنجليزي)</Label>
               <Input
                 id="company_name_en"
                 value={data.company_name_en || ''}
                 onChange={(e) => handleInputChange('company_name_en', e.target.value)}
-                className="text-right"
+                className="text-left"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="phone" className="rtl-label text-right">رقم الهاتف</Label>
+              <Label htmlFor="phone" className="rtl-label text-left">رقم الهاتف</Label>
               <Input
                 id="phone"
                 value={data.phone || ''}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
-                className="text-right"
+                className="text-left"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="email" className="rtl-label text-right">البريد الإلكتروني</Label>
+              <Label htmlFor="email" className="rtl-label text-left">البريد الإلكتروني</Label>
               <Input
                 id="email"
                 type="email"
                 value={data.email || ''}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className="text-right"
+                className="text-left"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="website" className="rtl-label text-right">الموقع الإلكتروني</Label>
+              <Label htmlFor="website" className="rtl-label text-left">الموقع الإلكتروني</Label>
               <Input
                 id="website"
                 value={data.website || ''}
                 onChange={(e) => handleInputChange('website', e.target.value)}
-                className="text-right"
+                className="text-left"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="tax_number" className="rtl-label text-right">الرقم الضريبي</Label>
+              <Label htmlFor="tax_number" className="rtl-label text-left">الرقم الضريبي</Label>
               <Input
                 id="tax_number"
                 value={data.tax_number || ''}
                 onChange={(e) => handleInputChange('tax_number', e.target.value)}
-                className="text-right"
+                className="text-left"
               />
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="address_ar" className="rtl-label text-right">العنوان (عربي)</Label>
+              <Label htmlFor="address_ar" className="rtl-label text-left">العنوان (عربي)</Label>
               <Textarea
                 id="address_ar"
                 value={data.address_ar || ''}
                 onChange={(e) => handleInputChange('address_ar', e.target.value)}
                 rows={2}
-                className="text-right"
+                className="text-left"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="address_en" className="rtl-label text-right">العنوان (إنجليزي)</Label>
+              <Label htmlFor="address_en" className="rtl-label text-left">العنوان (إنجليزي)</Label>
               <Textarea
                 id="address_en"
                 value={data.address_en || ''}
                 onChange={(e) => handleInputChange('address_en', e.target.value)}
                 rows={2}
-                className="text-right"
+                className="text-left"
               />
             </div>
           </div>
@@ -368,16 +368,16 @@ const CompanyBrandingManager: React.FC = () => {
       {/* إعدادات العرض */}
       <Card className="card-elegant">
         <CardHeader>
-          <CardTitle className="rtl-title flex items-center gap-2 text-right">
+          <CardTitle className="rtl-title flex items-center gap-2 text-left">
             <Eye className="w-5 h-5" />
             إعدادات العرض
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="text-right">
-              <Label htmlFor="show_header" className="rtl-label text-right">إظهار الرأس</Label>
-              <p className="text-sm text-muted-foreground text-right">إظهار أو إخفاء منطقة الرأس في التقارير</p>
+            <div className="text-left">
+              <Label htmlFor="show_header" className="rtl-label text-left">إظهار الرأس</Label>
+              <p className="text-sm text-muted-foreground text-left">إظهار أو إخفاء منطقة الرأس في التقارير</p>
             </div>
             <Switch
               id="show_header"
@@ -387,9 +387,9 @@ const CompanyBrandingManager: React.FC = () => {
           </div>
           
           <div className="flex items-center justify-between">
-            <div className="text-right">
-              <Label htmlFor="show_footer" className="rtl-label text-right">إظهار التذييل</Label>
-              <p className="text-sm text-muted-foreground text-right">إظهار أو إخفاء منطقة التذييل في التقارير</p>
+            <div className="text-left">
+              <Label htmlFor="show_footer" className="rtl-label text-left">إظهار التذييل</Label>
+              <p className="text-sm text-muted-foreground text-left">إظهار أو إخفاء منطقة التذييل في التقارير</p>
             </div>
             <Switch
               id="show_footer"
@@ -400,7 +400,7 @@ const CompanyBrandingManager: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="header_height" className="rtl-label text-right">ارتفاع الرأس (بكسل)</Label>
+              <Label htmlFor="header_height" className="rtl-label text-left">ارتفاع الرأس (بكسل)</Label>
               <Input
                 id="header_height"
                 type="number"
@@ -408,12 +408,12 @@ const CompanyBrandingManager: React.FC = () => {
                 max="300"
                 value={data.header_height || 120}
                 onChange={(e) => handleInputChange('header_height', parseInt(e.target.value))}
-                className="text-right"
+                className="text-left"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="footer_height" className="rtl-label text-right">ارتفاع التذييل (بكسل)</Label>
+              <Label htmlFor="footer_height" className="rtl-label text-left">ارتفاع التذييل (بكسل)</Label>
               <Input
                 id="footer_height"
                 type="number"
@@ -421,7 +421,7 @@ const CompanyBrandingManager: React.FC = () => {
                 max="200"
                 value={data.footer_height || 80}
                 onChange={(e) => handleInputChange('footer_height', parseInt(e.target.value))}
-                className="text-right"
+                className="text-left"
               />
             </div>
           </div>
