@@ -67,7 +67,6 @@ export const DamageGuidanceHelper: React.FC<DamageGuidanceHelperProps> = ({
       <Card className="bg-muted/20">
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-medium">حالة التوثيق</h4>
             <div className="flex gap-2">
               <Badge variant={totalDamages > 0 ? "default" : "secondary"}>
                 {totalDamages} ضرر مسجل
@@ -76,6 +75,7 @@ export const DamageGuidanceHelper: React.FC<DamageGuidanceHelperProps> = ({
                 {hasPhotos ? "يوجد" : "لا يوجد"} صور
               </Badge>
             </div>
+            <h4 className="text-sm font-medium">حالة التوثيق</h4>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
