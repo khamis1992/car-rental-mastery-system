@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { UserHelperService } from './UserHelperService';
 
 export interface CostCenter {
   id: string;
@@ -148,24 +149,32 @@ export class CostCenterService {
   }
 
   async createCostCenter(costCenterData: CreateCostCenterData): Promise<CostCenter> {
-    const { data, error } = await supabase
-      .from('cost_centers')
-      .insert([{
-        ...costCenterData,
-        budget_amount: costCenterData.budget_amount || 0,
-        actual_spent: 0,
-        is_active: true,
-        created_by: (await supabase.auth.getUser()).data.user?.id
-      }])
-      .select()
-      .single();
+    try {
+      // Get current user's employee ID
+      const employeeId = await UserHelperService.getCurrentUserEmployeeId();
+      
+      const { data, error } = await supabase
+        .from('cost_centers')
+        .insert([{
+          ...costCenterData,
+          budget_amount: costCenterData.budget_amount || 0,
+          actual_spent: 0,
+          is_active: true,
+          created_by: employeeId
+        }])
+        .select()
+        .single();
 
-    if (error) {
+      if (error) {
+        console.error('Error creating cost center:', error);
+        throw new Error(`فشل في إنشاء مركز التكلفة: ${error.message}`);
+      }
+
+      return data;
+    } catch (error) {
       console.error('Error creating cost center:', error);
-      throw new Error(`فشل في إنشاء مركز التكلفة: ${error.message}`);
+      throw new Error(`فشل في إنشاء مركز التكلفة: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`);
     }
-
-    return data;
   }
 
   async updateCostCenter(id: string, updates: Partial<CreateCostCenterData>): Promise<void> {
@@ -257,22 +266,30 @@ export class CostCenterService {
     allocation_amount: number;
     notes?: string;
   }): Promise<CostCenterAllocation> {
-    const { data, error } = await supabase
-      .from('cost_center_allocations')
-      .insert([{
-        ...allocationData,
-        allocation_percentage: allocationData.allocation_percentage || 100,
-        created_by: (await supabase.auth.getUser()).data.user?.id
-      }])
-      .select()
-      .single();
+    try {
+      // Get current user's employee ID
+      const employeeId = await UserHelperService.getCurrentUserEmployeeId();
+      
+      const { data, error } = await supabase
+        .from('cost_center_allocations')
+        .insert([{
+          ...allocationData,
+          allocation_percentage: allocationData.allocation_percentage || 100,
+          created_by: employeeId
+        }])
+        .select()
+        .single();
 
-    if (error) {
+      if (error) {
+        console.error('Error creating cost center allocation:', error);
+        throw new Error(`فشل في إنشاء توزيع التكلفة: ${error.message}`);
+      }
+
+      return data;
+    } catch (error) {
       console.error('Error creating cost center allocation:', error);
-      throw new Error(`فشل في إنشاء توزيع التكلفة: ${error.message}`);
+      throw new Error(`فشل في إنشاء توزيع التكلفة: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`);
     }
-
-    return data;
   }
 
   async getAllocationsByReference(referenceType: string, referenceId: string): Promise<CostCenterAllocation[]> {

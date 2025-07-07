@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { UserHelperService } from './UserHelperService';
 
 export interface TransactionLogEntry {
   id: string;
@@ -130,25 +131,66 @@ export class TransactionLogService {
       details?: any;
     } = {}
   ): Promise<string> {
-    const { data, error } = await supabase.rpc('log_transaction', {
-      p_transaction_type: transactionType,
-      p_source_table: sourceTable,
-      p_source_id: sourceId,
-      p_department_id: options.departmentId || null,
-      p_employee_id: options.employeeId || null,
-      p_customer_id: options.customerId || null,
-      p_vehicle_id: options.vehicleId || null,
-      p_amount: options.amount || 0,
-      p_description: description,
-      p_details: options.details || {}
-    });
+    try {
+      // The employeeId might be a user_id or employee_id, let the database function handle conversion
+      const { data, error } = await supabase.rpc('log_transaction', {
+        p_transaction_type: transactionType,
+        p_source_table: sourceTable,
+        p_source_id: sourceId,
+        p_department_id: options.departmentId || null,
+        p_employee_id: options.employeeId || null, // Database function handles user_id to employee_id conversion
+        p_customer_id: options.customerId || null,
+        p_vehicle_id: options.vehicleId || null,
+        p_amount: options.amount || 0,
+        p_description: description,
+        p_details: options.details || {}
+      });
 
-    if (error) {
+      if (error) {
+        console.error('Database error logging transaction:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
+
+      console.log('Successfully logged transaction:', { 
+        transactionType, 
+        sourceTable, 
+        sourceId, 
+        transactionId: data 
+      });
+      
+      return data;
+    } catch (error) {
       console.error('Error logging transaction:', error);
-      throw new Error(`فشل في تسجيل المعاملة: ${error.message}`);
+      throw new Error(`فشل في تسجيل المعاملة: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`);
     }
+  }
 
-    return data;
+  /**
+   * Helper method to log transaction with current user
+   */
+  async logTransactionForCurrentUser(
+    transactionType: string,
+    sourceTable: string,
+    sourceId: string,
+    description: string,
+    options: Omit<Parameters<typeof this.logTransaction>[4], 'employeeId'> = {}
+  ): Promise<string> {
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Use the current user's ID - the database function will handle conversion
+      return await this.logTransaction(transactionType, sourceTable, sourceId, description, {
+        ...options,
+        employeeId: user.id // Pass user_id, database function will convert to employee_id
+      });
+    } catch (error) {
+      console.error('Error logging transaction for current user:', error);
+      throw error;
+    }
   }
 
   async updateTransactionStatus(id: string, status: string, errorMessage?: string): Promise<void> {

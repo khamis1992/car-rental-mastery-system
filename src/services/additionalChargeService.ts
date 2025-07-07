@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { UserHelperService } from './BusinessServices/UserHelperService';
 import { AdditionalCharge } from '@/types/invoice';
 
 export const additionalChargeService = {
@@ -29,17 +30,29 @@ export const additionalChargeService = {
   },
 
   async createCharge(chargeData: Omit<AdditionalCharge, 'id' | 'created_at' | 'updated_at' | 'created_by'>): Promise<AdditionalCharge> {
-    const { data: charge, error } = await supabase
-      .from('additional_charges')
-      .insert({
-        ...chargeData,
-        created_by: (await supabase.auth.getUser()).data.user?.id,
-      })
-      .select()
-      .single();
+    try {
+      // Get current user's employee ID
+      const employeeId = await UserHelperService.getCurrentUserEmployeeId();
+      
+      const { data: charge, error } = await supabase
+        .from('additional_charges')
+        .insert({
+          ...chargeData,
+          created_by: employeeId,
+        })
+        .select()
+        .single();
 
-    if (error) throw error;
-    return charge as AdditionalCharge;
+      if (error) {
+        console.error('Error creating additional charge:', error);
+        throw new Error(`فشل في إنشاء الرسم الإضافي: ${error.message}`);
+      }
+
+      return charge as AdditionalCharge;
+    } catch (error) {
+      console.error('Error creating additional charge:', error);
+      throw new Error(`فشل في إنشاء الرسم الإضافي: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`);
+    }
   },
 
   async updateChargeStatus(id: string, status: AdditionalCharge['status'], invoiceId?: string): Promise<void> {

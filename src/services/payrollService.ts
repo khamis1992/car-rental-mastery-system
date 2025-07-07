@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { UserHelperService } from './BusinessServices/UserHelperService';
 import { Payroll, PayrollItem } from '@/types/hr';
 import { attendanceDeductionsService } from './attendanceDeductionsService';
 import { payrollAccountingService } from './payrollAccountingService';
@@ -120,51 +121,62 @@ export const payrollService = {
 
   // إنشاء سجل راتب جديد مع القيود المحاسبية
   async createPayroll(payrollData: Omit<Payroll, 'id' | 'created_at' | 'updated_at'>): Promise<Payroll> {
-    const { data, error } = await supabase
-      .from('payroll')
-      .insert({
-        ...payrollData,
-        created_by: (await supabase.auth.getUser()).data.user?.id
-      })
-      .select()
-      .single();
+    try {
+      // Get current user's employee ID
+      const employeeId = await UserHelperService.getCurrentUserEmployeeId();
+      
+      const { data, error } = await supabase
+        .from('payroll')
+        .insert({
+          ...payrollData,
+          created_by: employeeId
+        })
+        .select()
+        .single();
 
-    if (error) throw error;
-
-    // إنشاء القيود المحاسبية للراتب تلقائياً إذا كان الراتب معتمد
-    if (payrollData.status === 'approved' || payrollData.status === 'paid') {
-      try {
-        // جلب بيانات الموظف
-        const { data: employee } = await supabase
-          .from('employees')
-          .select('first_name, last_name, employee_number')
-          .eq('id', payrollData.employee_id)
-          .single();
-
-        if (employee) {
-          await payrollAccountingService.createPayrollAccountingEntry({
-            payroll_id: data.id,
-            employee_name: `${employee.first_name} ${employee.last_name}`,
-            employee_number: employee.employee_number,
-            pay_period: `${payrollData.pay_period_start} - ${payrollData.pay_period_end}`,
-            basic_salary: payrollData.basic_salary,
-            overtime_amount: payrollData.overtime_amount,
-            allowances: payrollData.allowances,
-            bonuses: payrollData.bonuses,
-            deductions: payrollData.deductions,
-            tax_deduction: payrollData.tax_deduction,
-            social_insurance: payrollData.social_insurance,
-            gross_salary: payrollData.gross_salary,
-            net_salary: payrollData.net_salary
-          });
-        }
-      } catch (accountingError) {
-        console.error('خطأ في إنشاء القيود المحاسبية:', accountingError);
-        // لا نريد أن يفشل إنشاء الراتب بسبب خطأ محاسبي
+      if (error) {
+        console.error('Error creating payroll record:', error);
+        throw new Error(`فشل في إنشاء سجل الراتب: ${error.message}`);
       }
-    }
 
-    return data as Payroll;
+      // إنشاء القيود المحاسبية للراتب تلقائياً إذا كان الراتب معتمد
+      if (payrollData.status === 'approved' || payrollData.status === 'paid') {
+        try {
+          // جلب بيانات الموظف
+          const { data: employee } = await supabase
+            .from('employees')
+            .select('first_name, last_name, employee_number')
+            .eq('id', payrollData.employee_id)
+            .single();
+
+          if (employee) {
+            await payrollAccountingService.createPayrollAccountingEntry({
+              payroll_id: data.id,
+              employee_name: `${employee.first_name} ${employee.last_name}`,
+              employee_number: employee.employee_number,
+              pay_period: `${payrollData.pay_period_start} - ${payrollData.pay_period_end}`,
+              basic_salary: payrollData.basic_salary,
+              overtime_amount: payrollData.overtime_amount,
+              allowances: payrollData.allowances,
+              bonuses: payrollData.bonuses,
+              deductions: payrollData.deductions,
+              tax_deduction: payrollData.tax_deduction,
+              social_insurance: payrollData.social_insurance,
+              gross_salary: payrollData.gross_salary,
+              net_salary: payrollData.net_salary
+            });
+          }
+        } catch (accountingError) {
+          console.error('خطأ في إنشاء القيود المحاسبية:', accountingError);
+          // لا نريد أن يفشل إنشاء الراتب بسبب خطأ محاسبي
+        }
+      }
+
+      return data as Payroll;
+    } catch (error) {
+      console.error('Error creating payroll record:', error);
+      throw new Error(`فشل في إنشاء سجل الراتب: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`);
+    }
   },
 
   // تحديث سجل راتب

@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { UserHelperService } from './UserHelperService';
 import { AccountingIntegrationService } from './AccountingIntegrationService';
 
 export interface MaintenanceRecord {
@@ -59,37 +60,48 @@ export class MaintenanceBusinessService {
   }
 
   async createMaintenance(maintenanceData: MaintenanceFormData): Promise<MaintenanceRecord> {
-    this.validateMaintenanceData(maintenanceData);
-    
-    const { data: maintenance, error } = await supabase
-      .from('vehicle_maintenance')
-      .insert({
-        ...maintenanceData,
-        status: 'pending',
-        created_by: (await supabase.auth.getUser()).data.user?.id
-      })
-      .select()
-      .single();
+    try {
+      this.validateMaintenanceData(maintenanceData);
+      
+      // Get current user's employee ID
+      const employeeId = await UserHelperService.getCurrentUserEmployeeId();
+      
+      const { data: maintenance, error } = await supabase
+        .from('vehicle_maintenance')
+        .insert({
+          ...maintenanceData,
+          status: 'pending',
+          created_by: employeeId
+        })
+        .select()
+        .single();
 
-    if (error) throw error;
-
-    // إنشاء القيد المحاسبي للصيانة عند اكتمالها
-    if (maintenance.status === 'completed' && maintenance.cost) {
-      try {
-        const vehicleInfo = await this.getVehicleInfo(maintenance.vehicle_id);
-        await this.accountingService.createMaintenanceAccountingEntry(maintenance.id, {
-          vehicle_info: vehicleInfo,
-          maintenance_type: maintenance.maintenance_type,
-          cost: maintenance.cost,
-          maintenance_date: maintenance.completed_date || maintenance.scheduled_date || maintenance.created_at,
-          vendor_name: maintenance.service_provider || 'غير محدد'
-        });
-      } catch (error) {
-        console.warn('Failed to create accounting entry for maintenance:', error);
+      if (error) {
+        console.error('Error creating maintenance record:', error);
+        throw new Error(`فشل في إنشاء سجل الصيانة: ${error.message}`);
       }
-    }
 
-    return maintenance;
+      // إنشاء القيد المحاسبي للصيانة عند اكتمالها
+      if (maintenance.status === 'completed' && maintenance.cost) {
+        try {
+          const vehicleInfo = await this.getVehicleInfo(maintenance.vehicle_id);
+          await this.accountingService.createMaintenanceAccountingEntry(maintenance.id, {
+            vehicle_info: vehicleInfo,
+            maintenance_type: maintenance.maintenance_type,
+            cost: maintenance.cost,
+            maintenance_date: maintenance.completed_date || maintenance.scheduled_date || maintenance.created_at,
+            vendor_name: maintenance.service_provider || 'غير محدد'
+          });
+        } catch (error) {
+          console.warn('Failed to create accounting entry for maintenance:', error);
+        }
+      }
+
+      return maintenance;
+    } catch (error) {
+      console.error('Error creating maintenance record:', error);
+      throw new Error(`فشل في إنشاء سجل الصيانة: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`);
+    }
   }
 
   async updateMaintenance(id: string, updates: Partial<MaintenanceRecord>): Promise<MaintenanceRecord> {
