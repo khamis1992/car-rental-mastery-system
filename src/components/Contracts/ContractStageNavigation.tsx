@@ -41,7 +41,7 @@ export const ContractStageNavigation: React.FC<ContractStageNavigationProps> = (
         .eq('contract_id', contract.id);
       
       const hasPayments = invoices?.some(inv => inv.payments && inv.payments.length > 0);
-      const isFullyPaid = invoices?.every(inv => inv.outstanding_amount <= 0) && invoices?.length > 0;
+      const isFullyPaid = (invoices?.every(inv => inv.outstanding_amount <= 0) && invoices?.length > 0) || contract.payment_registered_at;
       
       setPaymentStatus({ hasPayments, isFullyPaid });
     } catch (error) {

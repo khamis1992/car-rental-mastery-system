@@ -80,6 +80,9 @@ export const InvoiceAndPaymentForm: React.FC<InvoiceAndPaymentFormProps> = ({
         notes: formData.notes || undefined,
       });
 
+      // تحديث حالة العقد إذا كان الدفع مكتملاً
+      await autoService.checkAndUpdateContractStatus(contract.id, formData.paymentAmount);
+
       toast({
         title: "تم بنجاح",
         description: `تم إنشاء الفاتورة رقم ${result.invoice.invoice_number} وتسجيل الدفعة رقم ${result.payment.payment_number}`,

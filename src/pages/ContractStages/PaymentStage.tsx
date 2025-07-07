@@ -134,12 +134,50 @@ const PaymentStage = () => {
     setInvoiceAndPaymentFormOpen(true);
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = async () => {
     toast({
       title: "تم بنجاح",
       description: "تم تسجيل الدفعة بنجاح",
     });
-    loadContractData();
+    await loadContractData();
+    
+    // التحقق من اكتمال الدفع وتقدم إلى المرحلة التالية
+    await checkAndAdvanceStage();
+  };
+
+  const checkAndAdvanceStage = async () => {
+    try {
+      // التحقق من حالة الدفع
+      const { data: invoices } = await supabase
+        .from('invoices')
+        .select('outstanding_amount')
+        .eq('contract_id', contractId);
+      
+      const totalOutstanding = invoices?.reduce((sum, inv) => sum + inv.outstanding_amount, 0) || 0;
+      
+      // إذا كان الدفع مكتملاً، قم بتحديث حالة العقد وتسجيل تاريخ الدفع
+      if (totalOutstanding === 0 && invoices && invoices.length > 0) {
+        await supabase
+          .from('contracts')
+          .update({ 
+            payment_registered_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', contractId);
+
+        toast({
+          title: "تم إكمال الدفع",
+          description: "تم تحصيل جميع المدفوعات بنجاح. الانتقال إلى مرحلة الاستلام...",
+        });
+
+        // التقدم إلى المرحلة التالية بعد تأخير قصير
+        setTimeout(() => {
+          navigate(`/contracts/stages/return/${contractId}`);
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error checking payment completion:', error);
+    }
   };
 
   const getStatusBadge = (status: string, type: 'invoice' | 'payment' = 'invoice') => {
@@ -495,12 +533,13 @@ const PaymentStage = () => {
       <InvoiceAndPaymentForm
         open={invoiceAndPaymentFormOpen}
         onOpenChange={setInvoiceAndPaymentFormOpen}
-        onSuccess={() => {
+        onSuccess={async () => {
           toast({
             title: "تم بنجاح",
             description: "تم إنشاء الفاتورة وتسجيل الدفعة بنجاح",
           });
-          loadContractData();
+          await loadContractData();
+          await checkAndAdvanceStage();
         }}
         contract={contract}
       />

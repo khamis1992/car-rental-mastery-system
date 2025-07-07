@@ -178,4 +178,33 @@ export class AutoInvoiceCreationService {
       return false;
     }
   }
+
+  /**
+   * التحقق من حالة الدفع وتحديث العقد إذا لزم الأمر
+   */
+  async checkAndUpdateContractStatus(contractId: string, paymentAmount: number): Promise<void> {
+    try {
+      // التحقق من إجمالي المبلغ المستحق في جميع الفواتير
+      const { data: invoices } = await supabase
+        .from('invoices')
+        .select('outstanding_amount')
+        .eq('contract_id', contractId);
+
+      const totalOutstanding = invoices?.reduce((sum, inv) => sum + inv.outstanding_amount, 0) || 0;
+
+      // إذا تم تحصيل جميع المدفوعات، قم بتحديث تاريخ تسجيل الدفع
+      if (totalOutstanding === 0) {
+        await supabase
+          .from('contracts')
+          .update({ 
+            payment_registered_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', contractId);
+      }
+    } catch (error) {
+      console.error('Error updating contract payment status:', error);
+      // لا نرمي الخطأ هنا لأن الفاتورة والدفعة تمت بنجاح
+    }
+  }
 }
