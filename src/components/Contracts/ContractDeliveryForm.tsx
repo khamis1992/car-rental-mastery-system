@@ -225,11 +225,11 @@ export const ContractDeliveryForm: React.FC<ContractDeliveryFormProps> = ({
             </CardContent>
           </Card>
 
-          {/* Vehicle Condition at Pickup */}
+          {/* Vehicle Condition Details */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 justify-end text-right">
-                حالة المركبة عند التسليم
+                تفاصيل حالة المركبة
                 <Gauge className="w-4 h-4" />
               </CardTitle>
             </CardHeader>
