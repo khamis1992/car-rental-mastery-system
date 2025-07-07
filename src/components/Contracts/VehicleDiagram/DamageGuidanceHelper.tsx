@@ -114,18 +114,28 @@ export const DamageGuidanceHelper: React.FC<DamageGuidanceHelperProps> = ({
       </Card>
 
       {/* Tips */}
-      <Alert className="border-amber-200 bg-amber-50">
-        <HelpCircle className="h-4 w-4 text-amber-600" />
-        <AlertDescription className="text-amber-700">
+      <Alert className="border-amber-200 bg-amber-50 flex flex-row-reverse items-start gap-3">
+        <HelpCircle className="h-4 w-4 text-amber-600 mt-0.5" />
+        <AlertDescription className="text-amber-700 text-right">
           <strong>نصائح للتوثيق الأمثل:</strong>
-          <br />
-          • اكتب وصفاً واضحاً ومفصلاً لكل ضرر
-          <br />
-          • التقط صوراً واضحة من زوايا مختلفة
-          <br />
-          • حدد مستوى الضرر بدقة (بسيط/متوسط/شديد)
-          <br />
-          • تأكد من توثيق جميع الأضرار المرئية
+          <div className="mt-2 space-y-1">
+            <div className="flex items-center gap-2 justify-end">
+              <span>اكتب وصفاً واضحاً ومفصلاً لكل ضرر</span>
+              <span>•</span>
+            </div>
+            <div className="flex items-center gap-2 justify-end">
+              <span>التقط صوراً واضحة من زوايا مختلفة</span>
+              <span>•</span>
+            </div>
+            <div className="flex items-center gap-2 justify-end">
+              <span>حدد مستوى الضرر بدقة (بسيط/متوسط/شديد)</span>
+              <span>•</span>
+            </div>
+            <div className="flex items-center gap-2 justify-end">
+              <span>تأكد من توثيق جميع الأضرار المرئية</span>
+              <span>•</span>
+            </div>
+          </div>
         </AlertDescription>
       </Alert>
     </div>
