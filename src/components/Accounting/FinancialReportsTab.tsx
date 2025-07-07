@@ -19,7 +19,7 @@ export const FinancialReportsTab = () => {
   const [incomeStatement, setIncomeStatement] = useState<IncomeStatement | null>(null);
   const [balanceSheet, setBalanceSheet] = useState<BalanceSheet | null>(null);
   const [costCenters, setCostCenters] = useState<CostCenter[]>([]);
-  const [selectedCostCenter, setSelectedCostCenter] = useState<string>('');
+  const [selectedCostCenter, setSelectedCostCenter] = useState<string>('all');
   const [loading, setLoading] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('current');
   const [dateRange, setDateRange] = useState({
@@ -118,7 +118,7 @@ export const FinancialReportsTab = () => {
                   <SelectValue placeholder="جميع مراكز التكلفة" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">جميع مراكز التكلفة</SelectItem>
+                  <SelectItem value="all">جميع مراكز التكلفة</SelectItem>
                   {costCenters.map((cc) => (
                     <SelectItem key={cc.id} value={cc.id}>
                       {cc.cost_center_name} ({cc.cost_center_code})
@@ -186,7 +186,7 @@ export const FinancialReportsTab = () => {
               </div>
             </CardHeader>
             <CardContent>
-              {selectedCostCenter ? (
+              {selectedCostCenter && selectedCostCenter !== 'all' ? (
                 <CostCenterFinancialAnalysis costCenterId={selectedCostCenter} />
               ) : (
                 <AllCostCentersOverview costCenters={costCenters} />
