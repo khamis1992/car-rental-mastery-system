@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { FileText, PenTool, Truck, CreditCard, CheckCircle, Clock, User, Car, Calendar, DollarSign, MapPin, Camera, Signature, Receipt } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ReceiptPrintTemplate } from '@/components/Invoicing/ReceiptPrintTemplate';
+
 interface ContractStageContentProps {
   stage: string;
   contract: any;
@@ -236,12 +236,6 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
     invoices: [] as any[]
   });
 
-  const [showReceiptPrint, setShowReceiptPrint] = useState(false);
-  const [receiptData, setReceiptData] = useState<{
-    invoice: any;
-    latestPayment: any;
-    companyBranding: any;
-  } | null>(null);
   React.useEffect(() => {
     checkPaymentStatus();
   }, [contract?.id]);
@@ -269,6 +263,203 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
       console.error('Error checking payment status:', error);
     }
   };
+  const generateReceiptHTML = (invoice: any, latestPayment: any, companyBranding: any) => {
+    const paymentMethodText = {
+      cash: 'نقداً',
+      card: 'بطاقة ائتمان',
+      bank_transfer: 'حوالة بنكية',
+      check: 'شيك',
+      online: 'دفع إلكتروني'
+    }[latestPayment.payment_method] || latestPayment.payment_method;
+
+    return `
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>إيصال استلام دفعة</title>
+        <style>
+          body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: white;
+            color: black;
+            direction: rtl;
+            text-align: right;
+          }
+          .receipt-container {
+            max-width: 4xl;
+            margin: 0 auto;
+            border: 2px solid black;
+            padding: 32px;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 32px;
+            border-bottom: 2px solid black;
+            padding-bottom: 20px;
+          }
+          .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 12px;
+          }
+          .receipt-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+            background: #f5f5f5;
+            padding: 12px;
+          }
+          .info-section {
+            margin-bottom: 20px;
+          }
+          .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dotted #999;
+          }
+          .info-label {
+            font-weight: bold;
+            width: 40%;
+          }
+          .info-value {
+            width: 60%;
+            text-align: left;
+          }
+          .amount-section {
+            background: #f5f5f5;
+            border: 2px solid black;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+          }
+          .amount-label {
+            font-size: 16px;
+            margin-bottom: 12px;
+          }
+          .amount-value {
+            font-size: 30px;
+            font-weight: bold;
+          }
+          .footer {
+            margin-top: 40px;
+            text-align: center;
+            border-top: 2px solid black;
+            padding-top: 20px;
+          }
+          @media print {
+            body {
+              margin: 0;
+              padding: 20px;
+            }
+            .receipt-container {
+              border: none;
+              margin: 0;
+              padding: 20px;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="receipt-container">
+          <div class="header">
+            <div class="company-name">
+              ${companyBranding?.company_name_ar || 'شركة ساپتكو الخليج لتأجير السيارات'}
+            </div>
+            <div>${companyBranding?.address_ar || 'دولة الكويت'}</div>
+            <div>هاتف: ${companyBranding?.phone || '+965 XXXX XXXX'}</div>
+          </div>
+          
+          <div class="receipt-title">
+            إيصال استلام دفعة
+          </div>
+          
+          <div class="info-section">
+            <div class="info-row">
+              <span class="info-label">رقم الإيصال:</span>
+              <span class="info-value">REC-${invoice.invoice_number}-${Date.now()}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">اسم العميل:</span>
+              <span class="info-value">${contract.customers?.name || 'غير محدد'}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">رقم الهاتف:</span>
+              <span class="info-value">${contract.customers?.phone || ''}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">رقم العقد:</span>
+              <span class="info-value">${contract.contract_number}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">المركبة:</span>
+              <span class="info-value">
+                ${contract.vehicles?.make} ${contract.vehicles?.model} - ${contract.vehicles?.license_plate}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">رقم الفاتورة:</span>
+              <span class="info-value">${invoice.invoice_number}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">تاريخ الدفع:</span>
+              <span class="info-value">
+                ${new Date(latestPayment.payment_date).toLocaleDateString('ar')}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">طريقة الدفع:</span>
+              <span class="info-value">${paymentMethodText}</span>
+            </div>
+            ${latestPayment.reference_number ? `
+              <div class="info-row">
+                <span class="info-label">رقم المرجع:</span>
+                <span class="info-value">${latestPayment.reference_number}</span>
+              </div>
+            ` : ''}
+          </div>
+          
+          <div class="amount-section">
+            <div class="amount-label">المبلغ المستلم</div>
+            <div class="amount-value">
+              ${latestPayment.amount.toLocaleString()} د.ك
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <div class="info-row">
+              <span class="info-label">إجمالي الفاتورة:</span>
+              <span class="info-value">${invoice.total_amount.toLocaleString()} د.ك</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">المبلغ المتبقي:</span>
+              <span class="info-value">${invoice.outstanding_amount.toLocaleString()} د.ك</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">حالة الدفع:</span>
+              <span class="info-value">
+                ${invoice.outstanding_amount > 0 ? 'دفع جزئي' : 'مدفوع بالكامل'}
+              </span>
+            </div>
+          </div>
+          
+          <div class="footer">
+            <div>شكراً لثقتكم بخدماتنا</div>
+            <div style="font-size: 12px; margin-top: 8px;">
+              تاريخ الطباعة: ${new Date().toLocaleDateString('ar')} - ${new Date().toLocaleTimeString('ar')}
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  };
+
   const handlePrintReceipt = async (invoice: any) => {
     try {
       // Check if invoice has payments
@@ -293,23 +484,28 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
         .eq('is_active', true)
         .single();
 
-      // Set receipt data and show print template
-      setReceiptData({
-        invoice,
-        latestPayment,
-        companyBranding
-      });
-      setShowReceiptPrint(true);
+      // Generate and open print window
+      const htmlContent = generateReceiptHTML(invoice, latestPayment, companyBranding);
+      const printWindow = window.open('', '_blank');
+      
+      if (printWindow) {
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        
+        // Wait for content to load then open print dialog
+        printWindow.onload = () => {
+          setTimeout(() => {
+            printWindow.print();
+          }, 500);
+        };
 
-      // Use setTimeout to ensure the component is rendered before printing
-      setTimeout(() => {
-        window.print();
-      }, 100);
-
-      toast({
-        title: "جاري طباعة الإيصال",
-        description: "تم تحضير الإيصال للطباعة"
-      });
+        toast({
+          title: "تم فتح نافذة الطباعة",
+          description: "يمكنك الآن طباعة الإيصال أو حفظه كـ PDF"
+        });
+      } else {
+        throw new Error('فشل في فتح نافذة الطباعة. تأكد من السماح بالنوافذ المنبثقة.');
+      }
     } catch (error) {
       console.error('Error preparing receipt for print:', error);
       toast({
@@ -568,18 +764,6 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
       <div className="space-y-6">
         {renderStageContent()}
       </div>
-      
-      {/* Print Receipt Template - Hidden on screen, visible when printing */}
-      {showReceiptPrint && receiptData && (
-        <div className="hidden print:block fixed inset-0 bg-white z-50">
-          <ReceiptPrintTemplate
-            invoice={receiptData.invoice}
-            contract={contract}
-            latestPayment={receiptData.latestPayment}
-            companyBranding={receiptData.companyBranding}
-          />
-        </div>
-      )}
     </>
   );
 };
