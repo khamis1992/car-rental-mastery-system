@@ -293,34 +293,34 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
             max-width: 4xl;
             margin: 0 auto;
             border: 2px solid black;
-            padding: 32px;
+            padding: 20px;
           }
           .header {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 16px;
             border-bottom: 2px solid black;
-            padding-bottom: 20px;
+            padding-bottom: 12px;
           }
           .company-name {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 12px;
-          }
-          .receipt-title {
             font-size: 20px;
             font-weight: bold;
-            margin: 20px 0;
+            margin-bottom: 4px;
+          }
+          .receipt-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 12px 0;
             text-align: center;
             background: #f5f5f5;
-            padding: 12px;
+            padding: 8px;
           }
           .info-section {
-            margin-bottom: 20px;
+            margin-bottom: 12px;
           }
           .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
+            padding: 4px 0;
             border-bottom: 1px dotted #999;
           }
           .info-label {
@@ -334,23 +334,23 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
           .amount-section {
             background: #f5f5f5;
             border: 2px solid black;
-            padding: 20px;
+            padding: 12px;
             text-align: center;
-            margin: 20px 0;
+            margin: 12px 0;
           }
           .amount-label {
-            font-size: 16px;
-            margin-bottom: 12px;
+            font-size: 14px;
+            margin-bottom: 6px;
           }
           .amount-value {
-            font-size: 30px;
+            font-size: 24px;
             font-weight: bold;
           }
           .footer {
-            margin-top: 40px;
+            margin-top: 16px;
             text-align: center;
             border-top: 2px solid black;
-            padding-top: 20px;
+            padding-top: 12px;
           }
           @media print {
             body {
