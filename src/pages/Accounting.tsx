@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, DollarSign, FileText, Calendar, CreditCard, Receipt, RefreshCw } from 'lucide-react';
+import { TrendingUp, DollarSign, FileText, Calendar, CreditCard, Receipt, RefreshCw, Printer, Eye } from 'lucide-react';
 import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
 import { JournalEntriesTab } from '@/components/Accounting/JournalEntriesTab';
 import { FinancialReportsTab } from '@/components/Accounting/FinancialReportsTab';
@@ -13,11 +13,98 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatCurrencyKWD } from '@/lib/currency';
 import { useAccountingData } from '@/hooks/useAccountingData';
+import { downloadPaymentReceiptPDF } from '@/lib/paymentReceiptPDFService';
+import { PaymentReceipt } from '@/types/payment-receipt';
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 const Accounting = () => {
   const { financialStats, recentTransactions, loading, error, refetch } = useAccountingData();
+  const [payments, setPayments] = React.useState<any[]>([]);
+  const [paymentLoading, setPaymentLoading] = React.useState(false);
+
+  // جلب المدفوعات
+  const fetchPayments = async () => {
+    try {
+      setPaymentLoading(true);
+      const { data, error } = await supabase
+        .from('payments')
+        .select(`
+          *,
+          invoices (
+            invoice_number,
+            total_amount,
+            contracts (
+              contract_number,
+              customers (name, phone),
+              vehicles (make, model, license_plate)
+            )
+          )
+        `)
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      setPayments(data || []);
+    } catch (error) {
+      console.error('Error fetching payments:', error);
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchPayments();
+  }, []);
+
+  const handlePrintPaymentReceipt = async (payment: any) => {
+    try {
+      const invoice = payment.invoices;
+      const contract = invoice?.contracts;
+      
+      if (!invoice || !contract) {
+        alert('لا يمكن العثور على بيانات العقد أو الفاتورة');
+        return;
+      }
+
+      const receipt: PaymentReceipt = {
+        receipt_number: payment.payment_number,
+        payment_date: payment.payment_date,
+        customer_name: contract.customers?.name || 'غير محدد',
+        customer_phone: contract.customers?.phone || undefined,
+        contract_number: contract.contract_number,
+        vehicle_info: contract.vehicles ? 
+          `${contract.vehicles.make} ${contract.vehicles.model} - ${contract.vehicles.license_plate}` : 
+          'غير محدد',
+        payment_amount: payment.amount,
+        payment_method: payment.payment_method,
+        transaction_reference: payment.transaction_reference || undefined,
+        bank_name: payment.bank_name || undefined,
+        check_number: payment.check_number || undefined,
+        invoice_number: invoice.invoice_number,
+        total_invoice_amount: invoice.total_amount,
+        remaining_amount: invoice.outstanding_amount || 0,
+        notes: payment.notes || undefined,
+        company_info: {
+          name: 'شركة تأجير المركبات',
+          address: 'الكويت',
+          phone: '+965 1234 5678',
+          email: 'info@rental.com'
+        }
+      };
+
+      await downloadPaymentReceiptPDF(receipt);
+      
+    } catch (error) {
+      console.error('Error printing payment receipt:', error);
+      alert('فشل في طباعة إيصال الدفع');
+    }
+  };
 
   const displayStats = [
     {
@@ -122,8 +209,9 @@ const Accounting = () => {
         ))}
       </div>
 
-      <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-9">
+      <Tabs defaultValue="payments" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-10">
+          <TabsTrigger value="payments">المدفوعات</TabsTrigger>
           <TabsTrigger value="monitoring">المراقبة المباشرة</TabsTrigger>
           <TabsTrigger value="integrity">سلامة النظام</TabsTrigger>
           <TabsTrigger value="reconciliation">التسوية</TabsTrigger>
@@ -134,6 +222,97 @@ const Accounting = () => {
           <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
           <TabsTrigger value="transactions">المعاملات المالية</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="payments" className="space-y-4">
+          <Card className="card-elegant">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-right">سجل المدفوعات</CardTitle>
+              <Button 
+                variant="outline" 
+                onClick={fetchPayments}
+                disabled={paymentLoading}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${paymentLoading ? 'animate-spin' : ''}`} />
+                تحديث
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {paymentLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="w-6 h-6 animate-spin ml-2" />
+                  <span>جاري تحميل المدفوعات...</span>
+                </div>
+              ) : payments.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  لا توجد مدفوعات مسجلة
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>رقم الدفعة</TableHead>
+                        <TableHead>العميل</TableHead>
+                        <TableHead>رقم العقد</TableHead>
+                        <TableHead>رقم الفاتورة</TableHead>
+                        <TableHead>المبلغ</TableHead>
+                        <TableHead>طريقة الدفع</TableHead>
+                        <TableHead>تاريخ الدفع</TableHead>
+                        <TableHead>الإجراءات</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {payments.map((payment) => (
+                        <TableRow key={payment.id}>
+                          <TableCell className="font-medium">{payment.payment_number}</TableCell>
+                          <TableCell>
+                            {payment.invoices?.contracts?.customers?.name || 'غير محدد'}
+                          </TableCell>
+                          <TableCell>
+                            {payment.invoices?.contracts?.contract_number || 'غير محدد'}
+                          </TableCell>
+                          <TableCell>
+                            {payment.invoices?.invoice_number || 'غير محدد'}
+                          </TableCell>
+                          <TableCell className="font-bold text-green-600">
+                            {formatCurrencyKWD(payment.amount)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {payment.payment_method === 'cash' ? 'نقد' : 
+                               payment.payment_method === 'card' ? 'بطاقة' : 
+                               payment.payment_method === 'bank_transfer' ? 'تحويل بنكي' :
+                               payment.payment_method === 'check' ? 'شيك' :
+                               payment.payment_method === 'online' ? 'دفع إلكتروني' :
+                               payment.payment_method}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {format(new Date(payment.payment_date), 'dd/MM/yyyy', { locale: ar })}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handlePrintPaymentReceipt(payment)}
+                                className="flex items-center gap-1"
+                              >
+                                <Printer className="w-4 h-4" />
+                                طباعة الإيصال
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="monitoring" className="space-y-4">
           <AccountingEventMonitoringDashboard />
