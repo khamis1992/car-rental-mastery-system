@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { TrendingUp, DollarSign, FileText, Calendar, CreditCard, Receipt, RefreshCw } from 'lucide-react';
 import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
 import { JournalEntriesTab } from '@/components/Accounting/JournalEntriesTab';
@@ -15,17 +15,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrencyKWD } from '@/lib/currency';
 import { useAccountingData } from '@/hooks/useAccountingData';
-import { PaymentsList } from '@/components/Invoicing/PaymentsList';
-import { downloadPaymentReceiptPDF } from '@/lib/paymentReceiptPDFService';
-import { PaymentReceipt } from '@/types/payment-receipt';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 const Accounting = () => {
   const { financialStats, recentTransactions, loading, error, refetch } = useAccountingData();
-  const { toast } = useToast();
-  const [paymentsLoading, setPaymentsLoading] = useState(false);
-  const [payments, setPayments] = useState<any[]>([]);
 
   const displayStats = [
     {
@@ -57,134 +49,6 @@ const Accounting = () => {
       trend: financialStats.netProfit >= 0 ? "up" : "down"
     }
   ];
-
-  // جلب البيانات
-  const fetchPayments = async () => {
-    try {
-      setPaymentsLoading(true);
-      const { data, error } = await supabase
-        .from('payments')
-        .select(`
-          *,
-          customers (name, phone),
-          invoices (invoice_number, total_amount, outstanding_amount),
-          contracts (contract_number, vehicles (make, model, license_plate))
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setPayments(data || []);
-    } catch (error) {
-      console.error('Error fetching payments:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في جلب بيانات المدفوعات",
-        variant: "destructive",
-      });
-    } finally {
-      setPaymentsLoading(false);
-    }
-  };
-
-  // معالجة طباعة الإيصال
-  const handlePrintReceipt = async (paymentId: string) => {
-    try {
-      const { data: payment, error } = await supabase
-        .from('payments')
-        .select(`
-          *,
-          customers (name, phone),
-          invoices (invoice_number, total_amount, outstanding_amount),
-          contracts (
-            contract_number,
-            vehicles (make, model, license_plate)
-          )
-        `)
-        .eq('id', paymentId)
-        .single();
-
-      if (error) throw error;
-      if (!payment) return;
-
-      const receipt: PaymentReceipt = {
-        receipt_number: payment.payment_number,
-        payment_date: payment.payment_date,
-        customer_name: payment.customers?.name || 'غير محدد',
-        customer_phone: payment.customers?.phone || undefined,
-        contract_number: payment.contracts?.contract_number || 'غير محدد',
-        vehicle_info: payment.contracts?.vehicles ? 
-          `${payment.contracts.vehicles.make} ${payment.contracts.vehicles.model} - ${payment.contracts.vehicles.license_plate}` : 
-          'غير محدد',
-        payment_amount: payment.amount,
-        payment_method: payment.payment_method,
-        transaction_reference: payment.transaction_reference || undefined,
-        bank_name: payment.bank_name || undefined,
-        check_number: payment.check_number || undefined,
-        invoice_number: payment.invoices?.invoice_number || 'غير محدد',
-        total_invoice_amount: payment.invoices?.total_amount || 0,
-        remaining_amount: payment.invoices?.outstanding_amount || 0,
-        notes: payment.notes || undefined,
-        company_info: {
-          name: 'شركة تأجير المركبات',
-          address: 'الكويت',
-          phone: '+965 1234 5678',
-          email: 'info@rental.com'
-        }
-      };
-
-      await downloadPaymentReceiptPDF(receipt);
-      
-      toast({
-        title: "تم بنجاح",
-        description: "تم تحميل إيصال الدفع بنجاح",
-      });
-    } catch (error) {
-      console.error('Error printing receipt:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في طباعة الإيصال",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // معالجة عرض الدفعة
-  const handleViewPayment = (paymentId: string) => {
-    // يمكن إضافة نافذة لعرض تفاصيل الدفعة
-    console.log('View payment:', paymentId);
-  };
-
-  // معالجة تغيير حالة الدفعة
-  const handlePaymentStatusChange = async (paymentId: string, status: string) => {
-    try {
-      const { error } = await supabase
-        .from('payments')
-        .update({ status, updated_at: new Date().toISOString() })
-        .eq('id', paymentId);
-
-      if (error) throw error;
-
-      toast({
-        title: "تم بنجاح",
-        description: "تم تحديث حالة الدفعة بنجاح",
-      });
-
-      // إعادة تحميل البيانات
-      fetchPayments();
-    } catch (error) {
-      console.error('Error updating payment status:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في تحديث حالة الدفعة",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // جلب البيانات عند تحميل المكون
-  React.useEffect(() => {
-    fetchPayments();
-  }, []);
 
   if (loading) {
     return (
@@ -259,7 +123,7 @@ const Accounting = () => {
       </div>
 
       <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-10">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="monitoring">المراقبة المباشرة</TabsTrigger>
           <TabsTrigger value="integrity">سلامة النظام</TabsTrigger>
           <TabsTrigger value="reconciliation">التسوية</TabsTrigger>
@@ -268,7 +132,6 @@ const Accounting = () => {
           <TabsTrigger value="reports">التقارير المالية</TabsTrigger>
           <TabsTrigger value="journal">القيود المحاسبية</TabsTrigger>
           <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
-          <TabsTrigger value="payments">المدفوعات</TabsTrigger>
           <TabsTrigger value="transactions">المعاملات المالية</TabsTrigger>
         </TabsList>
 
@@ -337,17 +200,6 @@ const Accounting = () => {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="payments" className="space-y-4">
-          <PaymentsList 
-            payments={payments}
-            loading={paymentsLoading}
-            onRefresh={fetchPayments}
-            onView={handleViewPayment}
-            onPrintReceipt={handlePrintReceipt}
-            onStatusChange={handlePaymentStatusChange}
-          />
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-4">
