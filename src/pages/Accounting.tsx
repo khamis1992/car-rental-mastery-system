@@ -171,17 +171,8 @@ const Accounting = () => {
                 {recentTransactions.length > 0 ? (
                   recentTransactions.map((transaction) => (
                     <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-3 h-3 rounded-full ${
-                          transaction.type === 'إيراد' ? 'bg-green-500' : 'bg-red-500'
-                        }`} />
-                        <div>
-                          <p className="font-medium">{transaction.description}</p>
-                          <p className="text-sm text-muted-foreground">{transaction.id} • {transaction.date}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                         <p className={`font-bold ${
+                      <div className="text-left">
+                         <p className={`font-bold text-lg ${
                            transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
                          }`}>
                            {transaction.amount > 0 ? '+' : ''}{formatCurrencyKWD(Math.abs(transaction.amount))}
@@ -189,6 +180,15 @@ const Accounting = () => {
                         <Badge variant={transaction.status === 'مكتمل' ? 'default' : 'secondary'}>
                           {transaction.status}
                         </Badge>
+                      </div>
+                      <div className="flex items-center gap-3 text-right">
+                        <div>
+                          <p className="font-medium">{transaction.description}</p>
+                          <p className="text-sm text-muted-foreground">{transaction.id} • {transaction.date}</p>
+                        </div>
+                        <div className={`w-3 h-3 rounded-full ${
+                          transaction.type === 'إيراد' ? 'bg-red-500' : 'bg-red-500'
+                        }`} />
                       </div>
                     </div>
                   ))
