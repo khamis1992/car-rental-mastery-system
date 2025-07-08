@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DollarSign, ArrowRight, Receipt, CreditCard, AlertTriangle, CheckCircle, Eye, Plus } from 'lucide-react';
+import { DollarSign, ArrowRight, Receipt, CreditCard, AlertTriangle, CheckCircle, Eye, Plus, Printer } from 'lucide-react';
 import { ContractStageWrapper } from '@/components/Contracts/ContractStageWrapper';
 import { InvoiceForm } from '@/components/Invoicing/InvoiceForm';
 import { PaymentForm } from '@/components/Invoicing/PaymentForm';
@@ -15,6 +15,8 @@ import { useToast } from '@/hooks/use-toast';
 import { formatCurrencyKWD } from '@/lib/currency';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { downloadPaymentReceiptPDF } from '@/lib/paymentReceiptPDFService';
+import { PaymentReceipt } from '@/types/payment-receipt';
 
 const PaymentStage = () => {
   const { contractId } = useParams<{ contractId: string }>();
@@ -191,6 +193,66 @@ const PaymentStage = () => {
       }
     } catch (error) {
       console.error('Error checking payment completion:', error);
+    }
+  };
+
+  const handlePrintPaymentReceipt = async (payment: any) => {
+    try {
+      // الحصول على تفاصيل الفاتورة المرتبطة
+      const { data: invoiceData } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('id', payment.invoice_id)
+        .single();
+
+      if (!invoiceData) {
+        toast({
+          title: "خطأ",
+          description: "لم يتم العثور على الفاتورة المرتبطة",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const receipt: PaymentReceipt = {
+        receipt_number: payment.payment_number,
+        payment_date: payment.payment_date,
+        customer_name: contract.customers?.name || 'غير محدد',
+        customer_phone: contract.customers?.phone || undefined,
+        contract_number: contract.contract_number,
+        vehicle_info: contract.vehicles ? 
+          `${contract.vehicles.make} ${contract.vehicles.model} - ${contract.vehicles.license_plate}` : 
+          'غير محدد',
+        payment_amount: payment.amount,
+        payment_method: payment.payment_method,
+        transaction_reference: payment.transaction_reference || undefined,
+        bank_name: payment.bank_name || undefined,
+        check_number: payment.check_number || undefined,
+        invoice_number: invoiceData.invoice_number,
+        total_invoice_amount: invoiceData.total_amount,
+        remaining_amount: invoiceData.outstanding_amount,
+        notes: payment.notes || undefined,
+        company_info: {
+          name: 'شركة تأجير المركبات',
+          address: 'الكويت',
+          phone: '+965 1234 5678',
+          email: 'info@rental.com'
+        }
+      };
+
+      await downloadPaymentReceiptPDF(receipt);
+      
+      toast({
+        title: "تم بنجاح",
+        description: "تم تحميل إيصال الدفع بنجاح",
+      });
+    } catch (error) {
+      console.error('Error printing payment receipt:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في طباعة إيصال الدفع",
+        variant: "destructive",
+      });
     }
   };
 
@@ -443,6 +505,7 @@ const PaymentStage = () => {
                     <TableHead>طريقة الدفع</TableHead>
                     <TableHead>تاريخ الدفع</TableHead>
                     <TableHead>الحالة</TableHead>
+                    <TableHead>الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -462,6 +525,17 @@ const PaymentStage = () => {
                         {format(new Date(payment.payment_date), 'dd/MM/yyyy', { locale: ar })}
                       </TableCell>
                       <TableCell>{getStatusBadge(payment.status, 'payment')}</TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handlePrintPaymentReceipt(payment)}
+                          className="flex items-center gap-1"
+                        >
+                          <Printer className="w-4 h-4" />
+                          طباعة الإيصال
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

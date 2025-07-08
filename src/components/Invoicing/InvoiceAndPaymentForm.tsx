@@ -13,6 +13,8 @@ import { serviceContainer } from '@/services/Container/ServiceContainer';
 import { AutoInvoiceCreationService } from '@/services/BusinessServices';
 import { formatCurrencyKWD } from '@/lib/currency';
 import { supabase } from '@/integrations/supabase/client';
+import { downloadPaymentReceiptPDF } from '@/lib/paymentReceiptPDFService';
+import { PaymentReceipt } from '@/types/payment-receipt';
 
 interface InvoiceAndPaymentFormProps {
   open: boolean;
@@ -39,6 +41,8 @@ export const InvoiceAndPaymentForm: React.FC<InvoiceAndPaymentFormProps> = ({
 }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [showPrintOption, setShowPrintOption] = useState(false);
+  const [lastCreatedPayment, setLastCreatedPayment] = useState<any>(null);
   const [formData, setFormData] = useState<FormData>({
     paymentAmount: contract?.final_amount || 0,
     paymentDate: new Date().toISOString().split('T')[0],
@@ -103,13 +107,18 @@ export const InvoiceAndPaymentForm: React.FC<InvoiceAndPaymentFormProps> = ({
           .eq('id', contract.id);
       }
 
+      // حفظ بيانات الدفعة الأخيرة للطباعة
+      setLastCreatedPayment({
+        payment: result.payment,
+        invoice: result.invoice,
+        contract: contract
+      });
+      setShowPrintOption(true);
+
       toast({
         title: "تم بنجاح",
         description: `تم إنشاء الفاتورة رقم ${result.invoice.invoice_number} وتسجيل الدفعة رقم ${result.payment.payment_number}`,
       });
-
-      onSuccess();
-      onOpenChange(false);
       
       // إعادة تعيين النموذج
       setFormData({
@@ -130,6 +139,72 @@ export const InvoiceAndPaymentForm: React.FC<InvoiceAndPaymentFormProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePrintReceipt = async () => {
+    if (!lastCreatedPayment) return;
+
+    try {
+      const { payment, invoice, contract } = lastCreatedPayment;
+      
+      const receipt: PaymentReceipt = {
+        receipt_number: payment.payment_number,
+        payment_date: payment.payment_date,
+        customer_name: contract.customers?.name || 'غير محدد',
+        customer_phone: contract.customers?.phone || undefined,
+        contract_number: contract.contract_number,
+        vehicle_info: contract.vehicles ? 
+          `${contract.vehicles.make} ${contract.vehicles.model} - ${contract.vehicles.license_plate}` : 
+          'غير محدد',
+        payment_amount: payment.amount,
+        payment_method: payment.payment_method,
+        transaction_reference: payment.transaction_reference || undefined,
+        bank_name: payment.bank_name || undefined,
+        check_number: payment.check_number || undefined,
+        invoice_number: invoice.invoice_number,
+        total_invoice_amount: invoice.total_amount,
+        remaining_amount: invoice.outstanding_amount,
+        notes: payment.notes || undefined,
+        company_info: {
+          name: 'شركة تأجير المركبات',
+          address: 'الكويت',
+          phone: '+965 1234 5678',
+          email: 'info@rental.com'
+        }
+      };
+
+      await downloadPaymentReceiptPDF(receipt);
+      
+      toast({
+        title: "تم بنجاح",
+        description: "تم تحميل إيصال الدفع بنجاح",
+      });
+    } catch (error) {
+      console.error('Error printing receipt:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في طباعة الإيصال",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setShowPrintOption(false);
+    setLastCreatedPayment(null);
+    onSuccess();
+    onOpenChange(false);
+    
+    // إعادة تعيين النموذج
+    setFormData({
+      paymentAmount: 0,
+      paymentDate: new Date().toISOString().split('T')[0],
+      paymentMethod: 'cash',
+      transactionReference: '',
+      bankName: '',
+      checkNumber: '',
+      notes: '',
+    });
   };
 
   if (!contract) return null;
@@ -387,18 +462,40 @@ export const InvoiceAndPaymentForm: React.FC<InvoiceAndPaymentFormProps> = ({
           </Card>
 
           {/* الإجراءات */}
-          <div className="flex gap-2 justify-end">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => onOpenChange(false)}
-            >
-              إلغاء
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'جاري المعالجة...' : 'إنشاء الفاتورة وتسجيل الدفعة'}
-            </Button>
-          </div>
+          {showPrintOption ? (
+            <div className="space-y-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                <p className="text-green-800 font-medium mb-3">
+                  تم إنشاء الفاتورة وتسجيل الدفعة بنجاح!
+                </p>
+                <p className="text-green-700 text-sm mb-4">
+                  هل تريد طباعة إيصال الدفع؟
+                </p>
+                <div className="flex gap-2 justify-center">
+                  <Button onClick={handlePrintReceipt} className="flex items-center gap-2">
+                    <Receipt className="w-4 h-4" />
+                    طباعة الإيصال
+                  </Button>
+                  <Button variant="outline" onClick={handleCloseDialog}>
+                    تخطي الطباعة
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex gap-2 justify-end">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => onOpenChange(false)}
+              >
+                إلغاء
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? 'جاري المعالجة...' : 'إنشاء الفاتورة وتسجيل الدفعة'}
+              </Button>
+            </div>
+          )}
         </form>
       </DialogContent>
     </Dialog>
