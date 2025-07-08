@@ -487,7 +487,12 @@ export const InvoiceAndPaymentForm: React.FC<InvoiceAndPaymentFormProps> = ({
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => onOpenChange(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onOpenChange(false);
+                }}
+                disabled={loading}
               >
                 إلغاء
               </Button>
