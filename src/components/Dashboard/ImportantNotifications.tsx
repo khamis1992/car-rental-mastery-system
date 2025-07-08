@@ -2,10 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bell, AlertTriangle, Info, CheckCircle, X } from "lucide-react";
-import { useUnifiedNotifications } from "@/hooks/useUnifiedNotifications";
+import { useNotifications } from "@/contexts/NotificationContext";
 
 const ImportantNotifications = () => {
-  const { notifications, handleDismiss, stats } = useUnifiedNotifications();
+  const { notifications, deleteNotification } = useNotifications();
   
   // عرض الإشعارات ذات الأولوية العالية فقط (أول 5)
   const importantNotifications = notifications
@@ -90,7 +90,7 @@ const ImportantNotifications = () => {
                   variant="ghost"
                   size="sm"
                   className="h-6 w-6 p-0 hover:bg-muted"
-                  onClick={() => handleDismiss(notification)}
+                  onClick={() => deleteNotification(notification.id)}
                 >
                   <X className="w-3 h-3" />
                 </Button>

@@ -5,17 +5,22 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { useUnifiedNotifications } from '@/hooks/useUnifiedNotifications';
+import { useNotifications } from '@/contexts/NotificationContext';
 import { cn } from '@/lib/utils';
 
 export const NotificationCenter = () => {
   const [open, setOpen] = useState(false);
   const { 
     notifications,
-    handleDismiss,
-    handleMarkAsRead,
-    stats
-  } = useUnifiedNotifications();
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification
+  } = useNotifications();
+  
+  const criticalCount = notifications.filter(n => n.priority === 'urgent' || n.priority === 'high').length;
+  const urgentCount = notifications.filter(n => n.priority === 'urgent').length;
+  const highCount = notifications.filter(n => n.priority === 'high').length;
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -45,12 +50,12 @@ export const NotificationCenter = () => {
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
-          {stats.criticalCount > 0 && (
+          {criticalCount > 0 && (
             <Badge 
               variant="destructive" 
               className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
             >
-              {stats.criticalCount}
+              {criticalCount}
             </Badge>
           )}
         </Button>
@@ -64,13 +69,11 @@ export const NotificationCenter = () => {
               الإشعارات
             </div>
             <div className="flex items-center gap-2">
-              {stats.unread > 0 && (
+              {unreadCount > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
-                    notifications.filter(n => !n.read).forEach(n => handleMarkAsRead(n));
-                  }}
+                  onClick={markAllAsRead}
                   className="text-xs"
                 >
                   <Check className="w-4 h-4 mr-1" />
@@ -86,16 +89,16 @@ export const NotificationCenter = () => {
 
         <div className="mt-6">
           {/* إحصائيات سريعة */}
-          {stats.criticalCount > 0 && (
+          {criticalCount > 0 && (
             <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 mb-4">
               <div className="flex items-center gap-2 text-destructive">
                 <Bell className="w-4 h-4" />
                 <span className="font-medium text-sm">تنبيهات مهمة</span>
               </div>
               <p className="text-xs text-destructive/80 mt-1">
-                {stats.urgent > 0 && `${stats.urgent} عاجل`}
-                {stats.urgent > 0 && stats.high > 0 && ' • '}
-                {stats.high > 0 && `${stats.high} مرتفع`}
+                {urgentCount > 0 && `${urgentCount} عاجل`}
+                {urgentCount > 0 && highCount > 0 && ' • '}
+                {highCount > 0 && `${highCount} مرتفع`}
               </p>
             </div>
           )}
@@ -118,7 +121,7 @@ export const NotificationCenter = () => {
                       "p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer",
                       !notification.read && "bg-primary/5 border-primary/20"
                     )}
-                    onClick={() => handleMarkAsRead(notification)}
+                    onClick={() => markAsRead(notification.id)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3 flex-1">
@@ -163,7 +166,7 @@ export const NotificationCenter = () => {
                                 size="sm"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleDismiss(notification);
+                                  deleteNotification(notification.id);
                                 }}
                                 className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
                               >
