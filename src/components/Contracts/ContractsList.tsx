@@ -367,43 +367,21 @@ export const ContractsList: React.FC<ContractsListProps> = ({
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedContractId(contract.id);
-                          setDetailsDialogOpen(true);
-                        }}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      
-                        <ContractActions
-                          contract={{
-                            id: contract.id,
-                            status: contract.status,
-                            contract_number: contract.contract_number,
-                            customer_name: contract.customer_name,
-                            vehicle_info: contract.vehicle_info,
-                           }}
-                           onUpdate={() => {
-                             // تحديث محلي فوري
-                             if (onStatusUpdate) {
-                               onStatusUpdate();
-                             }
-                           }}
-                        />
-                        
-                        {contractInvoices[contract.id]?.length > 0 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleCreateInvoice(contract.id)}
-                            className="flex items-center gap-1"
-                          >
-                            <Receipt className="w-4 h-4" />
-                          </Button>
-                        )}
+                      <ContractActions
+                        contract={{
+                          id: contract.id,
+                          status: contract.status,
+                          contract_number: contract.contract_number,
+                          customer_name: contract.customer_name,
+                          vehicle_info: contract.vehicle_info,
+                         }}
+                         onUpdate={() => {
+                           // تحديث محلي فوري
+                           if (onStatusUpdate) {
+                             onStatusUpdate();
+                           }
+                         }}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>

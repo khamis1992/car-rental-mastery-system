@@ -149,18 +149,6 @@ export const ContractActions: React.FC<ContractActionsProps> = ({ contract, onUp
         <Printer className="w-4 h-4" />
       </Button>
 
-      {/* Only show Complete Contract button for active contracts */}
-      {contract.status === 'active' && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowCompleteDialog(true)}
-          className="text-green-600 hover:text-green-700"
-        >
-          <CheckCircle className="w-4 h-4" />
-        </Button>
-      )}
-
       {/* Delete Contract */}
       <Button
         variant="ghost"
