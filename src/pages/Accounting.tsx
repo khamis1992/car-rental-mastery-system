@@ -168,30 +168,30 @@ const Accounting = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentTransactions.length > 0 ? (
-                  recentTransactions.map((transaction) => (
-                    <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-3 h-3 rounded-full ${
-                          transaction.type === 'إيراد' ? 'bg-green-500' : 'bg-red-500'
-                        }`} />
-                        <div>
-                          <p className="font-medium">{transaction.description}</p>
-                          <p className="text-sm text-muted-foreground">{transaction.id} • {transaction.date}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                         <p className={`font-bold ${
-                           transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
-                         }`}>
-                           {transaction.amount > 0 ? '+' : ''}{formatCurrencyKWD(Math.abs(transaction.amount))}
-                         </p>
-                        <Badge variant={transaction.status === 'مكتمل' ? 'default' : 'secondary'}>
-                          {transaction.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))
+        {recentTransactions.length > 0 ? (
+          recentTransactions.slice().reverse().map((transaction) => (
+            <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${
+                  transaction.type === 'إيراد' ? 'bg-green-500' : 'bg-red-500'
+                }`} />
+                <div>
+                  <p className="font-medium">{transaction.description}</p>
+                  <p className="text-sm text-muted-foreground">{transaction.id} • {transaction.date}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                 <p className={`font-bold ${
+                   transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                 }`}>
+                   {transaction.amount > 0 ? '+' : ''}{formatCurrencyKWD(Math.abs(transaction.amount))}
+                 </p>
+                <Badge variant={transaction.status === 'مكتمل' ? 'default' : 'secondary'}>
+                  {transaction.status}
+                </Badge>
+              </div>
+            </div>
+          ))
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     لا توجد معاملات مالية
