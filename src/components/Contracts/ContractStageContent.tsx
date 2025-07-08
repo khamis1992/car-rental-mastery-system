@@ -371,7 +371,7 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
               {paymentStatus.invoices.map((invoice: any) => <div key={invoice.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                   <div className="flex items-center gap-2">
                     {/* Print Receipt Button - Only show for invoices with payments */}
-                    {invoice.payments && invoice.payments.length > 0 && <Button size="sm" variant="outline" onClick={() => handlePrintReceipt(invoice)} className="flex items-center gap-1 text-xs text-zinc-50 bg-green-500 hover:bg-green-400">
+                    {invoice.payments && invoice.payments.length > 0 && <Button size="sm" variant="outline" onClick={() => handlePrintReceipt(invoice)} className="flex items-center gap-1 text-xs">
                         <Receipt className="w-3 h-3" />
                         طباعة إيصال
                       </Button>}
