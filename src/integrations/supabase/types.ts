@@ -4392,6 +4392,10 @@ export type Database = {
       }
     }
     Functions: {
+      analyze_deferred_revenue_account: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       audit_orphaned_entries: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -4474,6 +4478,10 @@ export type Database = {
         Returns: Json
       }
       correct_account_balance: {
+        Args: { account_code_param: string }
+        Returns: Json
+      }
+      correct_account_balance_enhanced: {
         Args: { account_code_param: string }
         Returns: Json
       }
@@ -4619,6 +4627,10 @@ export type Database = {
       generate_journal_entry_number: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      generate_orphaned_entries_impact_report: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       generate_payment_number: {
         Args: Record<PropertyKey, never>
