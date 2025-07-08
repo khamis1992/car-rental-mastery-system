@@ -451,7 +451,6 @@ export const JournalEntriesTab = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-right">الإجراءات</TableHead>
               <TableHead className="text-right">الحالة</TableHead>
               <TableHead className="text-right">إجمالي الدائن</TableHead>
               <TableHead className="text-right">إجمالي المدين</TableHead>
@@ -463,40 +462,6 @@ export const JournalEntriesTab = () => {
           <TableBody>
             {filteredEntries.map((entry) => (
               <TableRow key={entry.id}>
-                <TableCell>
-                  <div className="flex gap-2">
-                    {entry.status === 'draft' && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePost(entry.id)}
-                          title="ترحيل القيد"
-                        >
-                          <Check className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setEditingEntry(entry);
-                            setIsDialogOpen(true);
-                          }}
-                          title="تعديل القيد"
-                        >
-                          <Edit className="w-3 h-3" />
-                        </Button>
-                      </>
-                    )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      title="عرض التفاصيل"
-                    >
-                      <FileText className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </TableCell>
                 <TableCell>
                   <Badge variant={getStatusVariant(entry.status)}>
                     {getStatusLabel(entry.status)}
