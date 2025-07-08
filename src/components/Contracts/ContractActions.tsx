@@ -130,10 +130,20 @@ export const ContractActions: React.FC<ContractActionsProps> = ({ contract, onUp
     }
   };
 
-  const handlePrint = () => {
-    // فتح نافذة جديدة لطباعة العقد
-    const printUrl = `/contracts/print/${contract.id}`;
-    window.open(printUrl, '_blank');
+  const handlePrint = async () => {
+    try {
+      const { ContractHTMLPrintService } = await import('@/lib/contractHTMLPrintService');
+      await ContractHTMLPrintService.printContract(contract.id, {
+        includePhotos: true,
+        photoQuality: 'medium'
+      });
+    } catch (error: any) {
+      toast({
+        title: 'خطأ في الطباعة',
+        description: error.message || 'فشل في طباعة العقد',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
