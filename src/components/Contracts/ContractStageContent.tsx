@@ -2,26 +2,10 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  FileText, 
-  PenTool, 
-  Truck, 
-  CreditCard, 
-  CheckCircle,
-  Clock,
-  User,
-  Car,
-  Calendar,
-  DollarSign,
-  MapPin,
-  Camera,
-  Signature,
-  Receipt
-} from 'lucide-react';
+import { FileText, PenTool, Truck, CreditCard, CheckCircle, Clock, User, Car, Calendar, DollarSign, MapPin, Camera, Signature, Receipt } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { downloadPaymentReceiptPDF } from '@/lib/paymentReceiptPDFService';
-
 interface ContractStageContentProps {
   stage: string;
   contract: any;
@@ -32,7 +16,6 @@ interface ContractStageContentProps {
   onShowPayment: () => void;
   onAdvanceToNextStage?: () => void;
 }
-
 export const ContractStageContent: React.FC<ContractStageContentProps> = ({
   stage,
   contract,
@@ -43,7 +26,9 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
   onShowPayment,
   onAdvanceToNextStage
 }) => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('ar', {
       year: 'numeric',
@@ -52,13 +37,10 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
       calendar: 'gregory'
     });
   };
-
   const formatCurrency = (amount: number) => {
     return `${amount.toLocaleString()} د.ك`;
   };
-
-  const renderDraftStage = () => (
-    <div className="space-y-6">
+  const renderDraftStage = () => <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-right">
@@ -105,12 +87,10 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
             </div>
           </div>
 
-          {contract.special_conditions && (
-            <div className="text-right">
+          {contract.special_conditions && <div className="text-right">
               <span className="text-sm font-medium">الشروط الخاصة:</span>
               <p className="text-sm text-muted-foreground mt-1">{contract.special_conditions}</p>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
 
@@ -124,18 +104,13 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
         </ul>
       </div>
 
-      {contract.status === 'draft' && onAdvanceToNextStage && (
-        <div className="flex justify-end">
+      {contract.status === 'draft' && onAdvanceToNextStage && <div className="flex justify-end">
           <Button onClick={onAdvanceToNextStage} className="px-8">
             الانتقال للمرحلة التالية
           </Button>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderPendingStage = () => (
-    <div className="space-y-6">
+        </div>}
+    </div>;
+  const renderPendingStage = () => <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-right">
@@ -152,19 +127,11 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
                 </Badge>
                 <span className="text-sm font-medium">توقيع العميل</span>
               </div>
-              {contract.customer_signature ? (
-                <div className="text-xs text-muted-foreground">
+              {contract.customer_signature ? <div className="text-xs text-muted-foreground">
                   تم التوقيع في: {formatDate(contract.customer_signed_at)}
-                </div>
-              ) : (
-                <Button 
-                  size="sm" 
-                  onClick={onShowCustomerSignature}
-                  className="w-full"
-                >
+                </div> : <Button size="sm" onClick={onShowCustomerSignature} className="w-full">
                   طلب التوقيع من العميل
-                </Button>
-              )}
+                </Button>}
             </div>
             
             <div className="text-right">
@@ -174,19 +141,11 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
                 </Badge>
                 <span className="text-sm font-medium">توقيع الشركة</span>
               </div>
-              {contract.company_signature ? (
-                <div className="text-xs text-muted-foreground">
+              {contract.company_signature ? <div className="text-xs text-muted-foreground">
                   تم التوقيع في: {formatDate(contract.company_signed_at)}
-                </div>
-              ) : (
-                <Button 
-                  size="sm" 
-                  onClick={onShowCompanySignature}
-                  className="w-full"
-                >
+                </div> : <Button size="sm" onClick={onShowCompanySignature} className="w-full">
                   توقيع باسم الشركة
-                </Button>
-              )}
+                </Button>}
             </div>
           </div>
         </CardContent>
@@ -203,18 +162,13 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
       </div>
 
       {/* Advance to Next Stage Button - Show when both signatures are complete */}
-      {contract.customer_signature && contract.company_signature && contract.status === 'pending' && onAdvanceToNextStage && (
-        <div className="flex justify-end">
+      {contract.customer_signature && contract.company_signature && contract.status === 'pending' && onAdvanceToNextStage && <div className="flex justify-end">
           <Button onClick={onAdvanceToNextStage} className="px-8">
             الانتقال للمرحلة التالية
           </Button>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderDeliveryStage = () => (
-    <div className="space-y-6">
+        </div>}
+    </div>;
+  const renderDeliveryStage = () => <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-right">
@@ -223,8 +177,7 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {contract.delivery_completed_at ? (
-            <div className="bg-green-100 p-4 rounded-lg border border-green-300">
+          {contract.delivery_completed_at ? <div className="bg-green-100 p-4 rounded-lg border border-green-300">
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircle className="w-5 h-5 text-green-600" />
                 <h3 className="font-medium text-green-900">تم تسليم المركبة بنجاح</h3>
@@ -235,9 +188,7 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
               <p className="text-green-700 text-sm mt-1 font-medium">
                 يمكنك الآن الانتقال لمرحلة الدفع لتفعيل العقد
               </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
+            </div> : <div className="space-y-4">
               <div className="text-center">
                 <Truck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium mb-2">جاهز للتسليم</h3>
@@ -246,11 +197,9 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
                   بدء عملية التسليم
                 </Button>
               </div>
-            </div>
-          )}
+            </div>}
 
-          {contract.pickup_photos && contract.pickup_photos.length > 0 && (
-            <div className="text-right">
+          {contract.pickup_photos && contract.pickup_photos.length > 0 && <div className="text-right">
               <div className="flex items-center gap-2 mb-2">
                 <Camera className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm font-medium">صور التسليم</span>
@@ -258,8 +207,7 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
               <p className="text-sm text-muted-foreground">
                 تم رفع {contract.pickup_photos.length} صورة
               </p>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
 
@@ -274,49 +222,39 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
       </div>
 
       {/* Advance to Next Stage Button - Show when delivery is completed but payment not handled */}
-      {contract.delivery_completed_at && onAdvanceToNextStage && (
-        <div className="flex justify-end">
+      {contract.delivery_completed_at && onAdvanceToNextStage && <div className="flex justify-end">
           <Button onClick={onAdvanceToNextStage} className="px-8">
             الانتقال لمرحلة الدفع
           </Button>
-        </div>
-      )}
-    </div>
-  );
-
-  const [paymentStatus, setPaymentStatus] = React.useState({ 
-    hasInvoices: false, 
-    hasPayments: false, 
+        </div>}
+    </div>;
+  const [paymentStatus, setPaymentStatus] = React.useState({
+    hasInvoices: false,
+    hasPayments: false,
     isFullyPaid: false,
     totalOutstanding: 0,
     invoices: [] as any[]
   });
-
   React.useEffect(() => {
     checkPaymentStatus();
   }, [contract?.id]);
-
   const checkPaymentStatus = async () => {
     if (!contract?.id) return;
-    
     try {
-      const { data: invoices } = await supabase
-        .from('invoices')
-        .select(`
+      const {
+        data: invoices
+      } = await supabase.from('invoices').select(`
           *,
           payments(*)
-        `)
-        .eq('contract_id', contract.id);
-      
+        `).eq('contract_id', contract.id);
       const hasInvoices = invoices && invoices.length > 0;
       const hasPayments = invoices?.some(inv => inv.payments && inv.payments.length > 0);
       const totalOutstanding = invoices?.reduce((sum, inv) => sum + (inv.outstanding_amount || 0), 0) || 0;
       const isFullyPaid = hasInvoices && totalOutstanding <= 0;
-      
-      setPaymentStatus({ 
-        hasInvoices, 
-        hasPayments, 
-        isFullyPaid, 
+      setPaymentStatus({
+        hasInvoices,
+        hasPayments,
+        isFullyPaid,
         totalOutstanding,
         invoices: invoices || []
       });
@@ -324,7 +262,6 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
       console.error('Error checking payment status:', error);
     }
   };
-
   const handlePrintReceipt = async (invoice: any) => {
     try {
       // Check if invoice has payments
@@ -332,22 +269,18 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
         toast({
           title: "خطأ",
           description: "لا توجد مدفوعات مسجلة لهذه الفاتورة",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
 
       // Use the most recent payment for the receipt
-      const latestPayment = invoice.payments.sort((a: any, b: any) => 
-        new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime()
-      )[0];
+      const latestPayment = invoice.payments.sort((a: any, b: any) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())[0];
 
       // Get company branding info
-      const { data: companyBranding } = await supabase
-        .from('company_branding')
-        .select('*')
-        .eq('is_active', true)
-        .single();
+      const {
+        data: companyBranding
+      } = await supabase.from('company_branding').select('*').eq('is_active', true).single();
 
       // Create receipt data
       const receiptData = {
@@ -377,35 +310,28 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
       // Generate and download PDF
       toast({
         title: "جاري إنشاء الإيصال...",
-        description: "يرجى الانتظار",
+        description: "يرجى الانتظار"
       });
-
-      await downloadPaymentReceiptPDF(
-        receiptData,
-        `receipt_${invoice.invoice_number}_${new Date().toISOString().split('T')[0]}.pdf`,
-        { includeWatermark: false, language: 'ar' },
-        (step: string, progress: number) => {
-          console.log(`${step}: ${progress}%`);
-        }
-      );
-
+      await downloadPaymentReceiptPDF(receiptData, `receipt_${invoice.invoice_number}_${new Date().toISOString().split('T')[0]}.pdf`, {
+        includeWatermark: false,
+        language: 'ar'
+      }, (step: string, progress: number) => {
+        console.log(`${step}: ${progress}%`);
+      });
       toast({
         title: "تم إنشاء الإيصال بنجاح",
-        description: "تم تحميل إيصال الدفع",
+        description: "تم تحميل إيصال الدفع"
       });
-
     } catch (error) {
       console.error('Error generating receipt:', error);
       toast({
         title: "خطأ في إنشاء الإيصال",
         description: "حدث خطأ أثناء إنشاء إيصال الدفع",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
-  const renderPaymentStage = () => (
-    <div className="space-y-6">
+  const renderPaymentStage = () => <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-right">
@@ -414,8 +340,7 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {paymentStatus.isFullyPaid ? (
-            <div className="bg-green-100 p-4 rounded-lg border border-green-300">
+          {paymentStatus.isFullyPaid ? <div className="bg-green-100 p-4 rounded-lg border border-green-300">
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircle className="w-5 h-5 text-green-600" />
                 <h3 className="font-medium text-green-900">تم إنهاء جميع المدفوعات بنجاح</h3>
@@ -423,47 +348,33 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
               <p className="text-green-800 text-sm">
                 تم إصدار {paymentStatus.invoices.length} فاتورة وتسديدها بالكامل
               </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
+            </div> : <div className="space-y-4">
               <div className="text-center">
                 <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium mb-2">إدارة الفواتير والمدفوعات</h3>
                 <p className="text-muted-foreground mb-4">
                   المبلغ الإجمالي: {formatCurrency(contract.final_amount)}
                 </p>
-                {paymentStatus.totalOutstanding > 0 && (
-                  <p className="text-red-600 font-medium mb-4">
+                {paymentStatus.totalOutstanding > 0 && <p className="text-red-600 font-medium mb-4">
                     المبلغ المستحق: {formatCurrency(paymentStatus.totalOutstanding)}
-                  </p>
-                )}
+                  </p>}
                 <div className="flex gap-2 justify-center">
                   <Button onClick={onShowPayment} className="px-6">
                     إدارة الفواتير والمدفوعات
                   </Button>
                 </div>
               </div>
-            </div>
-          )}
+            </div>}
 
-          {paymentStatus.invoices.length > 0 && (
-            <div className="space-y-3">
+          {paymentStatus.invoices.length > 0 && <div className="space-y-3">
               <h4 className="font-medium text-right">الفواتير المصدرة:</h4>
-              {paymentStatus.invoices.map((invoice: any) => (
-                <div key={invoice.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+              {paymentStatus.invoices.map((invoice: any) => <div key={invoice.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                   <div className="flex items-center gap-2">
                     {/* Print Receipt Button - Only show for invoices with payments */}
-                    {invoice.payments && invoice.payments.length > 0 && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handlePrintReceipt(invoice)}
-                        className="flex items-center gap-1 text-xs"
-                      >
+                    {invoice.payments && invoice.payments.length > 0 && <Button size="sm" variant="outline" onClick={() => handlePrintReceipt(invoice)} className="flex items-center gap-1 text-xs text-zinc-50 bg-green-500 hover:bg-green-400">
                         <Receipt className="w-3 h-3" />
                         طباعة إيصال
-                      </Button>
-                    )}
+                      </Button>}
                     <Badge variant={invoice.outstanding_amount <= 0 ? "default" : "secondary"}>
                       {invoice.outstanding_amount <= 0 ? "مدفوعة" : "جزئية"}
                     </Badge>
@@ -474,10 +385,8 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
                       {formatCurrency(invoice.total_amount)} - متبقي: {formatCurrency(invoice.outstanding_amount)}
                     </p>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                </div>)}
+            </div>}
 
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="text-right">
@@ -511,18 +420,13 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
       </div>
 
       {/* Advance to Next Stage Button - Show when payment is fully completed */}
-      {paymentStatus.isFullyPaid && contract.status === 'active' && !contract.actual_end_date && onAdvanceToNextStage && (
-        <div className="flex justify-end">
+      {paymentStatus.isFullyPaid && contract.status === 'active' && !contract.actual_end_date && onAdvanceToNextStage && <div className="flex justify-end">
           <Button onClick={onAdvanceToNextStage} className="px-8">
             الانتقال لمرحلة الاستلام
           </Button>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderReturnStage = () => (
-    <div className="space-y-6">
+        </div>}
+    </div>;
+  const renderReturnStage = () => <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-right">
@@ -531,8 +435,7 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {contract.actual_end_date ? (
-            <div className="bg-green-100 p-4 rounded-lg border border-green-300">
+          {contract.actual_end_date ? <div className="bg-green-100 p-4 rounded-lg border border-green-300">
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircle className="w-5 h-5 text-green-600" />
                 <h3 className="font-medium text-green-900">تم استلام المركبة بنجاح</h3>
@@ -540,9 +443,7 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
               <p className="text-green-800 text-sm">
                 تاريخ الاستلام: {formatDate(contract.actual_end_date)}
               </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
+            </div> : <div className="space-y-4">
               <div className="text-center">
                 <CheckCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium mb-2">جاهز للاستلام</h3>
@@ -551,11 +452,9 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
                   بدء عملية الاستلام
                 </Button>
               </div>
-            </div>
-          )}
+            </div>}
 
-          {contract.return_photos && contract.return_photos.length > 0 && (
-            <div className="text-right">
+          {contract.return_photos && contract.return_photos.length > 0 && <div className="text-right">
               <div className="flex items-center gap-2 mb-2">
                 <Camera className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm font-medium">صور الاستلام</span>
@@ -563,8 +462,7 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
               <p className="text-sm text-muted-foreground">
                 تم رفع {contract.return_photos.length} صورة
               </p>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
 
@@ -579,18 +477,13 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
       </div>
 
       {/* Advance to Next Stage Button - Show when vehicle is returned */}
-      {contract.actual_end_date && contract.status !== 'completed' && onAdvanceToNextStage && (
-        <div className="flex justify-end">
+      {contract.actual_end_date && contract.status !== 'completed' && onAdvanceToNextStage && <div className="flex justify-end">
           <Button onClick={onAdvanceToNextStage} className="px-8">
             إنهاء العقد
           </Button>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderCompletedStage = () => (
-    <div className="space-y-6">
+        </div>}
+    </div>;
+  const renderCompletedStage = () => <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-right">
@@ -641,39 +534,29 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
               <CardContent className="p-4">
                 <h4 className="font-medium text-purple-900 text-right mb-2">معلومات إضافية</h4>
                 <div className="space-y-2 text-sm">
-                  {contract.pickup_photos && contract.pickup_photos.length > 0 && (
-                    <div className="flex items-center justify-between">
+                  {contract.pickup_photos && contract.pickup_photos.length > 0 && <div className="flex items-center justify-between">
                       <span className="text-purple-800">{contract.pickup_photos.length}</span>
                       <span className="text-purple-700">صور التسليم</span>
-                    </div>
-                  )}
-                  {contract.return_photos && contract.return_photos.length > 0 && (
-                    <div className="flex items-center justify-between">
+                    </div>}
+                  {contract.return_photos && contract.return_photos.length > 0 && <div className="flex items-center justify-between">
                       <span className="text-purple-800">{contract.return_photos.length}</span>
                       <span className="text-purple-700">صور الاستلام</span>
-                    </div>
-                  )}
-                  {contract.pickup_mileage && (
-                    <div className="flex items-center justify-between">
+                    </div>}
+                  {contract.pickup_mileage && <div className="flex items-center justify-between">
                       <span className="text-purple-800">{contract.pickup_mileage.toLocaleString()} كم</span>
                       <span className="text-purple-700">العداد عند التسليم</span>
-                    </div>
-                  )}
-                  {contract.return_mileage && (
-                    <div className="flex items-center justify-between">
+                    </div>}
+                  {contract.return_mileage && <div className="flex items-center justify-between">
                       <span className="text-purple-800">{contract.return_mileage.toLocaleString()} كم</span>
                       <span className="text-purple-700">العداد عند الاستلام</span>
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </CardContent>
             </Card>
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
-
+    </div>;
   const renderStageContent = () => {
     switch (stage) {
       case 'draft':
@@ -692,10 +575,7 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
         return renderDraftStage();
     }
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {renderStageContent()}
-    </div>
-  );
+    </div>;
 };
