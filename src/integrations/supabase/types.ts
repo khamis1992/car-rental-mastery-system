@@ -4392,6 +4392,10 @@ export type Database = {
       }
     }
     Functions: {
+      audit_orphaned_entries: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       calculate_advanced_kpi: {
         Args: { kpi_code_param: string }
         Returns: number
@@ -4463,6 +4467,14 @@ export type Database = {
       }
       cleanup_duplicate_accounts: {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      cleanup_orphaned_journal_entries: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      correct_account_balance: {
+        Args: { account_code_param: string }
         Returns: Json
       }
       create_approval_request: {
@@ -4680,6 +4692,10 @@ export type Database = {
         Returns: Json
       }
       migrate_to_deferred_revenue_system: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      periodic_accounting_maintenance: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }

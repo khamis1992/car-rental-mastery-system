@@ -8,6 +8,7 @@ import { PaymentReconciliationTab } from '@/components/Accounting/PaymentReconci
 import { SystemIntegrityTab } from '@/components/Accounting/SystemIntegrityTab';
 import { AccountingEventMonitoringDashboard } from '@/components/Accounting/AccountingEventMonitoringDashboard';
 import { AccountingDataRefresh } from '@/components/Accounting/AccountingDataRefresh';
+import { AccountingMaintenanceTools } from '@/components/Accounting/AccountingMaintenanceTools';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -156,6 +157,7 @@ const Accounting = () => {
 
         <TabsContent value="settings" className="space-y-4">
           <AccountingDataRefresh />
+          <AccountingMaintenanceTools />
           <AccountingBackfillTab />
         </TabsContent>
 
