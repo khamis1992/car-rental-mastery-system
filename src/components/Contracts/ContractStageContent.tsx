@@ -293,34 +293,34 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
             max-width: 4xl;
             margin: 0 auto;
             border: 2px solid black;
-            padding: 20px;
+            padding: 32px;
           }
           .header {
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 32px;
             border-bottom: 2px solid black;
-            padding-bottom: 12px;
+            padding-bottom: 20px;
           }
           .company-name {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
-            margin-bottom: 4px;
+            margin-bottom: 12px;
           }
           .receipt-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
-            margin: 12px 0;
+            margin: 20px 0;
             text-align: center;
             background: #f5f5f5;
-            padding: 8px;
+            padding: 12px;
           }
           .info-section {
-            margin-bottom: 12px;
+            margin-bottom: 20px;
           }
           .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 4px 0;
+            padding: 8px 0;
             border-bottom: 1px dotted #999;
           }
           .info-label {
@@ -334,23 +334,23 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
           .amount-section {
             background: #f5f5f5;
             border: 2px solid black;
-            padding: 12px;
+            padding: 20px;
             text-align: center;
-            margin: 12px 0;
+            margin: 20px 0;
           }
           .amount-label {
-            font-size: 14px;
-            margin-bottom: 6px;
+            font-size: 16px;
+            margin-bottom: 12px;
           }
           .amount-value {
-            font-size: 24px;
+            font-size: 30px;
             font-weight: bold;
           }
           .footer {
-            margin-top: 16px;
+            margin-top: 40px;
             text-align: center;
             border-top: 2px solid black;
-            padding-top: 12px;
+            padding-top: 20px;
           }
           @media print {
             body {
