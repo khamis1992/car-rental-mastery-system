@@ -15,9 +15,12 @@ import {
   DollarSign,
   MapPin,
   Camera,
-  Signature
+  Signature,
+  Receipt
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { downloadPaymentReceiptPDF } from '@/lib/paymentReceiptPDFService';
 
 interface ContractStageContentProps {
   stage: string;
@@ -40,6 +43,7 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
   onShowPayment,
   onAdvanceToNextStage
 }) => {
+  const { toast } = useToast();
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('ar', {
       year: 'numeric',
@@ -321,6 +325,85 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
     }
   };
 
+  const handlePrintReceipt = async (invoice: any) => {
+    try {
+      // Check if invoice has payments
+      if (!invoice.payments || invoice.payments.length === 0) {
+        toast({
+          title: "خطأ",
+          description: "لا توجد مدفوعات مسجلة لهذه الفاتورة",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Use the most recent payment for the receipt
+      const latestPayment = invoice.payments.sort((a: any, b: any) => 
+        new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime()
+      )[0];
+
+      // Get company branding info
+      const { data: companyBranding } = await supabase
+        .from('company_branding')
+        .select('*')
+        .eq('is_active', true)
+        .single();
+
+      // Create receipt data
+      const receiptData = {
+        receipt_number: `REC-${invoice.invoice_number}-${Date.now()}`,
+        customer_name: contract.customers?.name || 'غير محدد',
+        customer_phone: contract.customers?.phone || '',
+        contract_number: contract.contract_number,
+        vehicle_info: `${contract.vehicles?.make} ${contract.vehicles?.model} - ${contract.vehicles?.license_plate}`,
+        invoice_number: invoice.invoice_number,
+        total_invoice_amount: invoice.total_amount,
+        payment_amount: latestPayment.amount,
+        remaining_amount: invoice.outstanding_amount,
+        payment_date: latestPayment.payment_date,
+        payment_method: latestPayment.payment_method,
+        transaction_reference: latestPayment.reference_number || '',
+        bank_name: latestPayment.bank_name || '',
+        check_number: latestPayment.check_number || '',
+        notes: latestPayment.notes || '',
+        company_info: {
+          name: companyBranding?.company_name_ar || 'شركة ساپتكو الخليج لتأجير السيارات',
+          address: companyBranding?.address_ar || 'دولة الكويت',
+          phone: companyBranding?.phone || '+965 XXXX XXXX',
+          email: companyBranding?.email || 'info@saptcogulf.com'
+        }
+      };
+
+      // Generate and download PDF
+      toast({
+        title: "جاري إنشاء الإيصال...",
+        description: "يرجى الانتظار",
+      });
+
+      await downloadPaymentReceiptPDF(
+        receiptData,
+        `receipt_${invoice.invoice_number}_${new Date().toISOString().split('T')[0]}.pdf`,
+        { includeWatermark: false, language: 'ar' },
+        (step: string, progress: number) => {
+          console.log(`${step}: ${progress}%`);
+        }
+      );
+
+      toast({
+        title: "تم إنشاء الإيصال بنجاح",
+        description: "تم تحميل إيصال الدفع",
+      });
+
+    } catch (error) {
+      console.error('Error generating receipt:', error);
+      toast({
+        title: "خطأ في إنشاء الإيصال",
+        description: "حدث خطأ أثناء إنشاء إيصال الدفع",
+        variant: "destructive",
+      });
+    }
+  };
+
   const renderPaymentStage = () => (
     <div className="space-y-6">
       <Card>
@@ -368,15 +451,29 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
               <h4 className="font-medium text-right">الفواتير المصدرة:</h4>
               {paymentStatus.invoices.map((invoice: any) => (
                 <div key={invoice.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    {/* Print Receipt Button - Only show for invoices with payments */}
+                    {invoice.payments && invoice.payments.length > 0 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handlePrintReceipt(invoice)}
+                        className="flex items-center gap-1 text-xs"
+                      >
+                        <Receipt className="w-3 h-3" />
+                        طباعة إيصال
+                      </Button>
+                    )}
+                    <Badge variant={invoice.outstanding_amount <= 0 ? "default" : "secondary"}>
+                      {invoice.outstanding_amount <= 0 ? "مدفوعة" : "جزئية"}
+                    </Badge>
+                  </div>
                   <div className="text-right">
                     <p className="font-medium">فاتورة رقم: {invoice.invoice_number}</p>
                     <p className="text-sm text-muted-foreground">
                       {formatCurrency(invoice.total_amount)} - متبقي: {formatCurrency(invoice.outstanding_amount)}
                     </p>
                   </div>
-                  <Badge variant={invoice.outstanding_amount <= 0 ? "default" : "secondary"}>
-                    {invoice.outstanding_amount <= 0 ? "مدفوعة" : "جزئية"}
-                  </Badge>
                 </div>
               ))}
             </div>
