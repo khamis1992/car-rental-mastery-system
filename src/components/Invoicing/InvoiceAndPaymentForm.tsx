@@ -69,6 +69,16 @@ export const InvoiceAndPaymentForm: React.FC<InvoiceAndPaymentFormProps> = ({
     }
   }, [contract]);
 
+  // إعادة تعيين الحالات عند فتح/إغلاق الحوار
+  React.useEffect(() => {
+    if (!open) {
+      // إعادة تعيين جميع الحالات عند إغلاق الحوار
+      setShowPrintOption(false);
+      setLastCreatedPayment(null);
+      setLoading(false);
+    }
+  }, [open]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -192,12 +202,11 @@ export const InvoiceAndPaymentForm: React.FC<InvoiceAndPaymentFormProps> = ({
   const handleCloseDialog = () => {
     setShowPrintOption(false);
     setLastCreatedPayment(null);
-    onSuccess();
-    onOpenChange(false);
+    setLoading(false);
     
-    // إعادة تعيين النموذج
+    // إعادة تعيين النموذج للقيم الافتراضية
     setFormData({
-      paymentAmount: 0,
+      paymentAmount: contract?.final_amount || 0,
       paymentDate: new Date().toISOString().split('T')[0],
       paymentMethod: 'cash',
       transactionReference: '',
@@ -205,12 +214,23 @@ export const InvoiceAndPaymentForm: React.FC<InvoiceAndPaymentFormProps> = ({
       checkNumber: '',
       notes: '',
     });
+    
+    onSuccess();
+    onOpenChange(false);
   };
 
   if (!contract) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(newOpen) => {
+      if (!newOpen) {
+        // إعادة تعيين الحالات عند إغلاق الحوار
+        setShowPrintOption(false);
+        setLastCreatedPayment(null);
+        setLoading(false);
+      }
+      onOpenChange(newOpen);
+    }}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
