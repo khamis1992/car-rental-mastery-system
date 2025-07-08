@@ -28,9 +28,6 @@ export const generatePaymentReceiptHTML = (
     <html dir="rtl" lang="ar">
     <head>
       <meta charset="UTF-8">
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
       <style>
         * {
           margin: 0;
@@ -42,35 +39,33 @@ export const generatePaymentReceiptHTML = (
           font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
           direction: rtl;
           font-size: 14px;
-          line-height: 1.5;
-          color: #1a202c;
-          background: #f7fafc;
-          padding: 20px;
+          line-height: 1.6;
+          color: #1a1a1a;
+          background: white;
         }
         
         .receipt-container {
-          max-width: 700px;
+          max-width: 600px;
           margin: 0 auto;
+          padding: 20px;
           background: white;
-          border-radius: 12px;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-          overflow: hidden;
+          border: 2px solid #e5e7eb;
+          border-radius: 8px;
           position: relative;
         }
         
         ${includeWatermark ? `
         .receipt-container::before {
-          content: '';
+          content: 'إيصال دفع';
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' font-size='12' fill='%23f1f5f9' text-anchor='middle' dy='.3em' transform='rotate(-45 50 50)'%3Eإيصال مدفوع%3C/text%3E%3C/svg%3E");
-          background-repeat: repeat;
-          opacity: 0.1;
-          pointer-events: none;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-45deg);
+          font-size: 60px;
+          color: rgba(168, 162, 255, 0.1);
+          font-weight: bold;
           z-index: 1;
+          pointer-events: none;
         }
         ` : ''}
         
@@ -79,292 +74,147 @@ export const generatePaymentReceiptHTML = (
           z-index: 2;
         }
         
-        /* Header Section */
         .header {
-          background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-          color: white;
-          padding: 30px;
           text-align: center;
-          position: relative;
-        }
-        
-        .header::after {
-          content: '';
-          position: absolute;
-          bottom: -10px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 0;
-          height: 0;
-          border-left: 20px solid transparent;
-          border-right: 20px solid transparent;
-          border-top: 10px solid #1a202c;
-        }
-        
-        .company-logo {
-          width: 60px;
-          height: 60px;
-          background: white;
-          border-radius: 50%;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 24px;
-          font-weight: bold;
-          color: #1a202c;
-          margin-bottom: 15px;
+          margin-bottom: 30px;
+          border-bottom: 3px solid #8b5cf6;
+          padding-bottom: 20px;
         }
         
         .company-name {
-          font-size: 26px;
-          font-weight: 700;
+          font-size: 24px;
+          font-weight: bold;
+          color: #8b5cf6;
           margin-bottom: 8px;
-          letter-spacing: 0.5px;
-        }
-        
-        .company-details {
-          font-size: 14px;
-          opacity: 0.9;
-          line-height: 1.6;
-        }
-        
-        /* Receipt Header */
-        .receipt-header {
-          background: #f8fafc;
-          border-bottom: 3px solid #e2e8f0;
-          padding: 25px 30px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
         }
         
         .receipt-title {
-          font-size: 22px;
-          font-weight: 600;
-          color: #1a202c;
+          font-size: 20px;
+          font-weight: bold;
+          color: #1f2937;
+          margin-bottom: 10px;
         }
         
         .receipt-number {
-          background: #1a202c;
+          background: linear-gradient(135deg, #8b5cf6, #a855f7);
           color: white;
-          padding: 12px 20px;
-          border-radius: 8px;
-          font-weight: 600;
+          padding: 8px 16px;
+          border-radius: 20px;
+          display: inline-block;
+          font-weight: bold;
           font-size: 16px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        /* Content Section */
-        .content {
-          padding: 30px;
         }
         
         .info-section {
-          margin-bottom: 25px;
+          margin-bottom: 20px;
         }
         
-        .section-header {
-          background: #f1f5f9;
-          margin: 0 -30px 20px -30px;
-          padding: 12px 30px;
+        .section-title {
+          background: #f3f4f6;
+          padding: 10px 15px;
+          border-right: 4px solid #8b5cf6;
+          font-weight: bold;
+          color: #374151;
+          margin-bottom: 15px;
+        }
+        
+        .info-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          margin-bottom: 20px;
+        }
+        
+        .info-item {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 0;
+          border-bottom: 1px dotted #d1d5db;
+        }
+        
+        .info-label {
           font-weight: 600;
-          color: #334155;
-          font-size: 16px;
-          border-left: 4px solid #1a202c;
+          color: #4b5563;
+          min-width: 120px;
         }
         
-        .info-table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-        
-        .info-table td {
-          padding: 12px 0;
-          border-bottom: 1px solid #e2e8f0;
-          vertical-align: top;
-        }
-        
-        .info-table td:first-child {
-          font-weight: 500;
-          color: #4a5568;
-          width: 35%;
-        }
-        
-        .info-table td:last-child {
-          color: #1a202c;
+        .info-value {
+          color: #1f2937;
           font-weight: 500;
         }
         
-        /* Amount Section */
         .amount-section {
-          background: linear-gradient(135deg, #f0fff4 0%, #f7fafc 100%);
-          border: 2px solid #68d391;
+          background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+          border: 2px solid #0ea5e9;
           border-radius: 12px;
-          padding: 25px;
+          padding: 20px;
+          margin: 20px 0;
           text-align: center;
-          margin: 25px 0;
-          position: relative;
-        }
-        
-        .amount-section::before {
-          content: '';
-          position: absolute;
-          top: -2px;
-          left: -2px;
-          right: -2px;
-          bottom: -2px;
-          background: linear-gradient(135deg, #68d391, #38b2ac);
-          border-radius: 12px;
-          z-index: -1;
         }
         
         .amount-label {
           font-size: 16px;
-          color: #22543d;
+          color: #0369a1;
           margin-bottom: 8px;
-          font-weight: 500;
         }
         
         .amount-value {
-          font-size: 32px;
-          font-weight: 700;
-          color: #1a202c;
-          font-family: 'Cairo', monospace;
+          font-size: 28px;
+          font-weight: bold;
+          color: #0c4a6e;
         }
         
-        /* Status Section */
-        .status-section {
-          background: #fefefe;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          padding: 20px;
-          margin: 20px 0;
-        }
-        
-        .status-item {
-          display: flex;
-          justify-content: space-between;
-          padding: 8px 0;
-          font-size: 15px;
-        }
-        
-        .status-item:not(:last-child) {
-          border-bottom: 1px dotted #cbd5e0;
-        }
-        
-        .status-label {
-          font-weight: 500;
-          color: #4a5568;
-        }
-        
-        .status-value {
-          font-weight: 600;
-        }
-        
-        .status-value.positive {
-          color: #38a169;
-        }
-        
-        .status-value.negative {
-          color: #e53e3e;
-        }
-        
-        /* Notes Section */
-        .notes-section {
-          background: #fffbeb;
-          border: 1px solid #f6e05e;
-          border-radius: 8px;
-          padding: 20px;
-          margin: 25px 0;
-        }
-        
-        .notes-title {
-          font-weight: 600;
-          color: #744210;
-          margin-bottom: 10px;
-          font-size: 15px;
-        }
-        
-        .notes-text {
-          color: #744210;
-          line-height: 1.6;
-        }
-        
-        /* Footer Sections */
-        .signature-section {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 40px;
-          margin: 40px 0 30px 0;
-          padding-top: 30px;
-          border-top: 2px solid #e2e8f0;
-        }
-        
-        .signature-box {
-          text-align: center;
-        }
-        
-        .signature-label {
-          font-weight: 600;
-          color: #4a5568;
-          margin-bottom: 15px;
-          font-size: 15px;
-        }
-        
-        .signature-line {
-          height: 50px;
-          border-bottom: 2px solid #1a202c;
-          margin-bottom: 8px;
-        }
-        
-        .signature-name {
-          font-size: 12px;
-          color: #718096;
-        }
-        
-        /* Final Footer */
         .footer {
-          background: #f8fafc;
-          padding: 25px 30px;
-          text-align: center;
-          border-top: 1px solid #e2e8f0;
           margin-top: 30px;
-        }
-        
-        .footer-message {
-          font-size: 18px;
-          font-weight: 600;
-          color: #1a202c;
-          margin-bottom: 10px;
+          text-align: center;
+          border-top: 2px solid #e5e7eb;
+          padding-top: 20px;
         }
         
         .print-info {
           font-size: 12px;
-          color: #718096;
+          color: #6b7280;
           margin-top: 15px;
         }
         
-        /* Utility Classes */
-        .text-center { text-align: center; }
-        .font-bold { font-weight: 700; }
-        .font-semibold { font-weight: 600; }
-        .text-sm { font-size: 12px; }
-        .text-lg { font-size: 18px; }
-        .mb-2 { margin-bottom: 8px; }
-        .mb-4 { margin-bottom: 16px; }
-        
-        @media print {
-          body { background: white; padding: 0; }
-          .receipt-container { 
-            box-shadow: none; 
-            border-radius: 0;
-            max-width: none;
-          }
+        .signature-section {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 40px;
+          margin-top: 30px;
         }
         
-        @page {
-          margin: 15mm;
-          size: A4;
+        .signature-box {
+          text-align: center;
+          border-top: 2px solid #d1d5db;
+          padding-top: 10px;
+        }
+        
+        .notes-section {
+          background: #fef7cd;
+          border: 1px solid #fbbf24;
+          border-radius: 8px;
+          padding: 15px;
+          margin: 20px 0;
+        }
+        
+        .notes-title {
+          font-weight: bold;
+          color: #92400e;
+          margin-bottom: 8px;
+        }
+        
+        .notes-text {
+          color: #92400e;
+        }
+        
+        @media print {
+          .receipt-container {
+            border: none;
+            box-shadow: none;
+            margin: 0;
+            padding: 10px;
+          }
         }
       </style>
     </head>
@@ -373,151 +223,130 @@ export const generatePaymentReceiptHTML = (
         <div class="receipt-content">
           <!-- Header -->
           <div class="header">
-            <div class="company-logo">
-              شت
-            </div>
             <div class="company-name">${receipt.company_info.name}</div>
-            <div class="company-details">
-              ${receipt.company_info.address ? `${receipt.company_info.address}<br>` : ''}
-              ${receipt.company_info.phone ? `هاتف: ${receipt.company_info.phone}` : ''}
-              ${receipt.company_info.email ? ` • البريد الإلكتروني: ${receipt.company_info.email}` : ''}
-            </div>
-          </div>
-          
-          <!-- Receipt Header -->
-          <div class="receipt-header">
-            <div class="receipt-title">إيصال استلام دفعة</div>
+            ${receipt.company_info.address ? `<div style="font-size: 14px; color: #6b7280;">${receipt.company_info.address}</div>` : ''}
+            ${receipt.company_info.phone ? `<div style="font-size: 14px; color: #6b7280;">هاتف: ${receipt.company_info.phone}</div>` : ''}
+            ${receipt.company_info.email ? `<div style="font-size: 14px; color: #6b7280;">البريد الإلكتروني: ${receipt.company_info.email}</div>` : ''}
+            
+            <div class="receipt-title">إيصال دفعة</div>
             <div class="receipt-number">${receipt.receipt_number}</div>
           </div>
           
-          <div class="content">
-            <!-- Customer Information -->
-            <div class="info-section">
-              <div class="section-header">بيانات العميل</div>
-              <table class="info-table">
-                <tr>
-                  <td>اسم العميل</td>
-                  <td>${receipt.customer_name}</td>
-                </tr>
-                ${receipt.customer_phone ? `
-                <tr>
-                  <td>رقم الهاتف</td>
-                  <td>${receipt.customer_phone}</td>
-                </tr>
-                ` : ''}
-              </table>
-            </div>
-            
-            <!-- Contract Information -->
-            <div class="info-section">
-              <div class="section-header">بيانات العقد والمركبة</div>
-              <table class="info-table">
-                <tr>
-                  <td>رقم العقد</td>
-                  <td><strong>${receipt.contract_number}</strong></td>
-                </tr>
-                <tr>
-                  <td>المركبة</td>
-                  <td>${receipt.vehicle_info}</td>
-                </tr>
-                <tr>
-                  <td>رقم الفاتورة</td>
-                  <td>${receipt.invoice_number}</td>
-                </tr>
-                <tr>
-                  <td>إجمالي قيمة الفاتورة</td>
-                  <td><strong>${formatCurrencyKWD(receipt.total_invoice_amount)}</strong></td>
-                </tr>
-              </table>
-            </div>
-            
-            <!-- Payment Details -->
-            <div class="info-section">
-              <div class="section-header">تفاصيل عملية الدفع</div>
-              <table class="info-table">
-                <tr>
-                  <td>تاريخ الدفع</td>
-                  <td>${format(new Date(receipt.payment_date), 'dd MMMM yyyy', { locale: ar })}</td>
-                </tr>
-                <tr>
-                  <td>طريقة الدفع</td>
-                  <td><strong>${paymentMethodText}</strong></td>
-                </tr>
-                ${receipt.transaction_reference ? `
-                <tr>
-                  <td>رقم المعاملة / المرجع</td>
-                  <td>${receipt.transaction_reference}</td>
-                </tr>
-                ` : ''}
-                ${receipt.bank_name ? `
-                <tr>
-                  <td>البنك</td>
-                  <td>${receipt.bank_name}</td>
-                </tr>
-                ` : ''}
-                ${receipt.check_number ? `
-                <tr>
-                  <td>رقم الشيك</td>
-                  <td>${receipt.check_number}</td>
-                </tr>
-                ` : ''}
-              </table>
-            </div>
-            
-            <!-- Amount Section -->
-            <div class="amount-section">
-              <div class="amount-label">المبلغ المستلم</div>
-              <div class="amount-value">${formatCurrencyKWD(receipt.payment_amount)}</div>
-            </div>
-            
-            <!-- Payment Status -->
-            <div class="status-section">
-              <div class="status-item">
-                <span class="status-label">المبلغ المتبقي من الفاتورة:</span>
-                <span class="status-value ${receipt.remaining_amount > 0 ? 'negative' : 'positive'}">
-                  ${formatCurrencyKWD(receipt.remaining_amount)}
-                </span>
+          <!-- Customer Info -->
+          <div class="info-section">
+            <div class="section-title">معلومات العميل</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">اسم العميل:</span>
+                <span class="info-value">${receipt.customer_name}</span>
               </div>
-              <div class="status-item">
-                <span class="status-label">حالة الدفع:</span>
-                <span class="status-value ${receipt.remaining_amount > 0 ? 'negative' : 'positive'}">
-                  ${receipt.remaining_amount > 0 ? 'دفع جزئي' : 'مدفوع بالكامل'}
-                </span>
+              ${receipt.customer_phone ? `
+              <div class="info-item">
+                <span class="info-label">رقم الهاتف:</span>
+                <span class="info-value">${receipt.customer_phone}</span>
+              </div>
+              ` : ''}
+            </div>
+          </div>
+          
+          <!-- Contract Info -->
+          <div class="info-section">
+            <div class="section-title">معلومات العقد</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">رقم العقد:</span>
+                <span class="info-value">${receipt.contract_number}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">المركبة:</span>
+                <span class="info-value">${receipt.vehicle_info}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">رقم الفاتورة:</span>
+                <span class="info-value">${receipt.invoice_number}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">إجمالي الفاتورة:</span>
+                <span class="info-value">${formatCurrencyKWD(receipt.total_invoice_amount)}</span>
               </div>
             </div>
-            
-            ${receipt.notes ? `
-            <!-- Notes -->
-            <div class="notes-section">
-              <div class="notes-title">ملاحظات إضافية:</div>
-              <div class="notes-text">${receipt.notes}</div>
+          </div>
+          
+          <!-- Payment Info -->
+          <div class="info-section">
+            <div class="section-title">تفاصيل الدفعة</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">تاريخ الدفع:</span>
+                <span class="info-value">${format(new Date(receipt.payment_date), 'dd/MM/yyyy', { locale: ar })}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">طريقة الدفع:</span>
+                <span class="info-value">${paymentMethodText}</span>
+              </div>
+              ${receipt.transaction_reference ? `
+              <div class="info-item">
+                <span class="info-label">رقم المعاملة:</span>
+                <span class="info-value">${receipt.transaction_reference}</span>
+              </div>
+              ` : ''}
+              ${receipt.bank_name ? `
+              <div class="info-item">
+                <span class="info-label">البنك:</span>
+                <span class="info-value">${receipt.bank_name}</span>
+              </div>
+              ` : ''}
+              ${receipt.check_number ? `
+              <div class="info-item">
+                <span class="info-label">رقم الشيك:</span>
+                <span class="info-value">${receipt.check_number}</span>
+              </div>
+              ` : ''}
             </div>
-            ` : ''}
-            
-            <!-- Signature Section -->
-            <div class="signature-section">
-              <div class="signature-box">
-                <div class="signature-label">توقيع المسؤول المالي</div>
-                <div class="signature-line"></div>
-                <div class="signature-name">الاسم: ........................</div>
-              </div>
-              <div class="signature-box">
-                <div class="signature-label">توقيع العميل</div>
-                <div class="signature-line"></div>
-                <div class="signature-name">الاسم: ........................</div>
-              </div>
+          </div>
+          
+          <!-- Amount Section -->
+          <div class="amount-section">
+            <div class="amount-label">المبلغ المدفوع</div>
+            <div class="amount-value">${formatCurrencyKWD(receipt.payment_amount)}</div>
+          </div>
+          
+          <!-- Remaining Amount -->
+          <div class="info-section">
+            <div class="info-item">
+              <span class="info-label" style="font-size: 16px;">المبلغ المتبقي:</span>
+              <span class="info-value" style="font-size: 16px; font-weight: bold; color: ${receipt.remaining_amount > 0 ? '#dc2626' : '#059669'};">
+                ${formatCurrencyKWD(receipt.remaining_amount)}
+              </span>
+            </div>
+          </div>
+          
+          ${receipt.notes ? `
+          <!-- Notes -->
+          <div class="notes-section">
+            <div class="notes-title">ملاحظات:</div>
+            <div class="notes-text">${receipt.notes}</div>
+          </div>
+          ` : ''}
+          
+          <!-- Signature Section -->
+          <div class="signature-section">
+            <div class="signature-box">
+              <div style="font-weight: bold; margin-bottom: 5px;">توقيع المحاسب</div>
+              <div style="height: 40px;"></div>
+            </div>
+            <div class="signature-box">
+              <div style="font-weight: bold; margin-bottom: 5px;">توقيع العميل</div>
+              <div style="height: 40px;"></div>
             </div>
           </div>
           
           <!-- Footer -->
           <div class="footer">
-            <div class="footer-message">شكراً لثقتكم بخدماتنا</div>
-            <div style="font-size: 13px; color: #4a5568; margin-top: 8px;">
-              هذا الإيصال صالح ومعتمد ولا يحتاج لختم أو توقيع إضافي
-            </div>
+            <div style="font-weight: bold; color: #8b5cf6;">شكراً لتعاملكم معنا</div>
             ${printDateTime ? `
             <div class="print-info">
-              تاريخ ووقت الطباعة: ${format(new Date(), 'dd/MM/yyyy - HH:mm', { locale: ar })}
+              تم الطباعة في: ${format(new Date(), 'dd/MM/yyyy - HH:mm', { locale: ar })}
             </div>
             ` : ''}
           </div>
