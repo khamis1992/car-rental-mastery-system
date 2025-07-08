@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FileText, PenTool, Truck, CreditCard, CheckCircle, Clock, User, Car, Calendar, DollarSign, MapPin, Camera, Signature, Receipt } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { downloadPaymentReceiptPDF } from '@/lib/paymentReceiptPDFService';
+import { ReceiptPrintTemplate } from '@/components/Invoicing/ReceiptPrintTemplate';
 interface ContractStageContentProps {
   stage: string;
   contract: any;
@@ -235,6 +235,13 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
     totalOutstanding: 0,
     invoices: [] as any[]
   });
+
+  const [showReceiptPrint, setShowReceiptPrint] = useState(false);
+  const [receiptData, setReceiptData] = useState<{
+    invoice: any;
+    latestPayment: any;
+    companyBranding: any;
+  } | null>(null);
   React.useEffect(() => {
     checkPaymentStatus();
   }, [contract?.id]);
@@ -275,212 +282,39 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
       }
 
       // Use the most recent payment for the receipt
-      const latestPayment = invoice.payments.sort((a: any, b: any) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())[0];
+      const latestPayment = invoice.payments.sort((a: any, b: any) => 
+        new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime()
+      )[0];
 
       // Get company branding info
-      const { data: companyBranding } = await supabase.from('company_branding').select('*').eq('is_active', true).single();
+      const { data: companyBranding } = await supabase
+        .from('company_branding')
+        .select('*')
+        .eq('is_active', true)
+        .single();
 
-      // Format payment method text
-      const paymentMethodText = {
-        cash: 'نقداً',
-        card: 'بطاقة ائتمان',
-        bank_transfer: 'حوالة بنكية',
-        check: 'شيك',
-        online: 'دفع إلكتروني'
-      }[latestPayment.payment_method] || latestPayment.payment_method;
+      // Set receipt data and show print template
+      setReceiptData({
+        invoice,
+        latestPayment,
+        companyBranding
+      });
+      setShowReceiptPrint(true);
 
-      // Create HTML content for printing
-      const receiptHTML = `
-        <!DOCTYPE html>
-        <html dir="rtl" lang="ar">
-        <head>
-          <meta charset="UTF-8">
-          <title>إيصال دفع - ${invoice.invoice_number}</title>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-              font-family: 'Arial', sans-serif; 
-              direction: rtl; 
-              font-size: 14px; 
-              line-height: 1.6; 
-              color: #000;
-              padding: 20px;
-            }
-            .receipt-container { 
-              max-width: 800px; 
-              margin: 0 auto; 
-              background: white; 
-              border: 2px solid #000;
-              padding: 30px;
-            }
-            .header { 
-              text-align: center; 
-              margin-bottom: 30px; 
-              border-bottom: 2px solid #000;
-              padding-bottom: 20px;
-            }
-            .company-name { 
-              font-size: 24px; 
-              font-weight: bold; 
-              margin-bottom: 10px; 
-            }
-            .receipt-title { 
-              font-size: 20px; 
-              font-weight: bold; 
-              margin: 20px 0; 
-              text-align: center;
-              background: #f0f0f0;
-              padding: 10px;
-            }
-            .info-section { 
-              margin-bottom: 20px; 
-            }
-            .info-row { 
-              display: flex; 
-              justify-content: space-between; 
-              padding: 8px 0; 
-              border-bottom: 1px dotted #ccc; 
-            }
-            .info-label { 
-              font-weight: bold; 
-              width: 40%; 
-            }
-            .info-value { 
-              width: 60%; 
-              text-align: left; 
-            }
-            .amount-section { 
-              background: #f9f9f9; 
-              border: 2px solid #000; 
-              padding: 20px; 
-              text-align: center; 
-              margin: 20px 0; 
-            }
-            .amount-label { 
-              font-size: 16px; 
-              margin-bottom: 10px; 
-            }
-            .amount-value { 
-              font-size: 28px; 
-              font-weight: bold; 
-            }
-            .footer { 
-              margin-top: 40px; 
-              text-align: center; 
-              border-top: 2px solid #000; 
-              padding-top: 20px; 
-            }
-            @media print {
-              body { padding: 0; }
-              .receipt-container { border: none; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="receipt-container">
-            <div class="header">
-              <div class="company-name">${companyBranding?.company_name_ar || 'شركة ساپتكو الخليج لتأجير السيارات'}</div>
-              <div>${companyBranding?.address_ar || 'دولة الكويت'}</div>
-              <div>هاتف: ${companyBranding?.phone || '+965 XXXX XXXX'}</div>
-            </div>
-            
-            <div class="receipt-title">إيصال استلام دفعة</div>
-            
-            <div class="info-section">
-              <div class="info-row">
-                <span class="info-label">رقم الإيصال:</span>
-                <span class="info-value">REC-${invoice.invoice_number}-${Date.now()}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">اسم العميل:</span>
-                <span class="info-value">${contract.customers?.name || 'غير محدد'}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">رقم الهاتف:</span>
-                <span class="info-value">${contract.customers?.phone || ''}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">رقم العقد:</span>
-                <span class="info-value">${contract.contract_number}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">المركبة:</span>
-                <span class="info-value">${contract.vehicles?.make} ${contract.vehicles?.model} - ${contract.vehicles?.license_plate}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">رقم الفاتورة:</span>
-                <span class="info-value">${invoice.invoice_number}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">تاريخ الدفع:</span>
-                <span class="info-value">${new Date(latestPayment.payment_date).toLocaleDateString('ar')}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">طريقة الدفع:</span>
-                <span class="info-value">${paymentMethodText}</span>
-              </div>
-              ${latestPayment.reference_number ? `
-              <div class="info-row">
-                <span class="info-label">رقم المرجع:</span>
-                <span class="info-value">${latestPayment.reference_number}</span>
-              </div>
-              ` : ''}
-            </div>
-            
-            <div class="amount-section">
-              <div class="amount-label">المبلغ المستلم</div>
-              <div class="amount-value">${latestPayment.amount.toLocaleString()} د.ك</div>
-            </div>
-            
-            <div class="info-section">
-              <div class="info-row">
-                <span class="info-label">إجمالي الفاتورة:</span>
-                <span class="info-value">${invoice.total_amount.toLocaleString()} د.ك</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">المبلغ المتبقي:</span>
-                <span class="info-value">${invoice.outstanding_amount.toLocaleString()} د.ك</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">حالة الدفع:</span>
-                <span class="info-value">${invoice.outstanding_amount > 0 ? 'دفع جزئي' : 'مدفوع بالكامل'}</span>
-              </div>
-            </div>
-            
-            <div class="footer">
-              <div style="margin-bottom: 10px;">شكراً لثقتكم بخدماتنا</div>
-              <div style="font-size: 12px;">تاريخ الطباعة: ${new Date().toLocaleDateString('ar')} - ${new Date().toLocaleTimeString('ar')}</div>
-            </div>
-          </div>
-        </body>
-        </html>
-      `;
+      // Use setTimeout to ensure the component is rendered before printing
+      setTimeout(() => {
+        window.print();
+      }, 100);
 
-      // Open print window
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(receiptHTML);
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-        
-        toast({
-          title: "تم فتح نافذة الطباعة",
-          description: "يمكنك الآن طباعة الإيصال"
-        });
-      } else {
-        toast({
-          title: "خطأ في فتح نافذة الطباعة",
-          description: "يرجى السماح بفتح النوافذ المنبثقة",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Error printing receipt:', error);
       toast({
-        title: "خطأ في طباعة الإيصال",
-        description: "حدث خطأ أثناء طباعة الإيصال",
+        title: "جاري طباعة الإيصال",
+        description: "تم تحضير الإيصال للطباعة"
+      });
+    } catch (error) {
+      console.error('Error preparing receipt for print:', error);
+      toast({
+        title: "خطأ في تحضير الإيصال",
+        description: "حدث خطأ أثناء تحضير الإيصال للطباعة",
         variant: "destructive"
       });
     }
@@ -729,7 +563,23 @@ export const ContractStageContent: React.FC<ContractStageContentProps> = ({
         return renderDraftStage();
     }
   };
-  return <div className="space-y-6">
-      {renderStageContent()}
-    </div>;
+  return (
+    <>
+      <div className="space-y-6">
+        {renderStageContent()}
+      </div>
+      
+      {/* Print Receipt Template - Hidden on screen, visible when printing */}
+      {showReceiptPrint && receiptData && (
+        <div className="hidden print:block fixed inset-0 bg-white z-50">
+          <ReceiptPrintTemplate
+            invoice={receiptData.invoice}
+            contract={contract}
+            latestPayment={receiptData.latestPayment}
+            companyBranding={receiptData.companyBranding}
+          />
+        </div>
+      )}
+    </>
+  );
 };
