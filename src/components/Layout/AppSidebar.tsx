@@ -78,11 +78,6 @@ const financialItems = [
     url: "/cost-centers", 
     icon: Building2 
   },
-  { 
-    title: "التحليلات", 
-    url: "/analytics", 
-    icon: BarChart3 
-  },
 ];
 
 // إدارة الأسطول

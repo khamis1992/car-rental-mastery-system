@@ -22,7 +22,7 @@ import Invoicing from "./pages/Invoicing";
 import Accounting from "./pages/Accounting";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
-import Analytics from "./pages/Analytics";
+
 import Communications from "./pages/Communications";
 import Maintenance from "./pages/Maintenance";
 import TrafficViolations from "./pages/TrafficViolations";
@@ -143,13 +143,6 @@ const App = () => (
                       <ProtectedRoute>
                         <Layout>
                           <Notifications />
-                        </Layout>
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/analytics" element={
-                      <ProtectedRoute>
-                        <Layout>
-                          <Analytics />
                         </Layout>
                       </ProtectedRoute>
                     } />

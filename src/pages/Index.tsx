@@ -68,7 +68,7 @@ const Index = () => {
               type: contractStats.monthlyRevenue > 0 ? "up" : "neutral" 
             }}
             actionText="التقارير المالية"
-            onActionClick={() => navigate('/analytics')}
+            onActionClick={() => navigate('/financial-reports')}
           />
           <StatsCard
             title="العقود المنتهية اليوم"

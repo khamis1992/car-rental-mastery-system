@@ -2,7 +2,7 @@ import { EnhancedEventBus } from './EnhancedEventBus';
 import { ContractOrchestrationService } from './ContractOrchestrationService';
 import { InvoiceOrchestrationService } from './InvoiceOrchestrationService';
 import { NotificationEventHandler } from './EventHandlers/NotificationEventHandler';
-import { AnalyticsEventHandler } from './EventHandlers/AnalyticsEventHandler';
+
 import { AccountingEventHandler } from './EventHandlers/AccountingEventHandler';
 import { RealTimeAccountingNotificationSystem } from './RealTimeAccountingNotificationSystem';
 import { serviceContainer } from '../Container/ServiceContainer';
@@ -13,14 +13,14 @@ export class OrchestrationContainer {
   private contractOrchestration: ContractOrchestrationService;
   private invoiceOrchestration: InvoiceOrchestrationService;
   private notificationHandler: NotificationEventHandler;
-  private analyticsHandler: AnalyticsEventHandler;
+  
   private accountingHandler: AccountingEventHandler;
   private realTimeNotificationSystem: RealTimeAccountingNotificationSystem;
 
   private constructor() {
     this.eventBus = new EnhancedEventBus();
     this.notificationHandler = new NotificationEventHandler();
-    this.analyticsHandler = new AnalyticsEventHandler();
+    
     this.accountingHandler = new AccountingEventHandler();
     this.realTimeNotificationSystem = new RealTimeAccountingNotificationSystem();
     
@@ -56,11 +56,6 @@ export class OrchestrationContainer {
       this.eventBus.on(eventType, handler);
     });
 
-    // Register analytics handlers
-    const analyticsHandlers = this.analyticsHandler.getHandlers();
-    Object.entries(analyticsHandlers).forEach(([eventType, handler]) => {
-      this.eventBus.on(eventType, handler);
-    });
 
     // Register accounting handlers
     const accountingHandlers = this.accountingHandler.getHandlers();
@@ -134,9 +129,6 @@ export class OrchestrationContainer {
     return this.notificationHandler;
   }
 
-  getAnalyticsHandler(): AnalyticsEventHandler {
-    return this.analyticsHandler;
-  }
 
   getAccountingHandler(): AccountingEventHandler {
     return this.accountingHandler;

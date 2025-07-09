@@ -187,7 +187,7 @@ export const EventCategories = {
   HR: 'hr',
   SYSTEM: 'system',
   NOTIFICATIONS: 'notifications',
-  ANALYTICS: 'analytics'
+  
 } as const;
 
 export type EventCategory = typeof EventCategories[keyof typeof EventCategories];
