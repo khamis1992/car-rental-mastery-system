@@ -200,11 +200,13 @@ const CostCenterReports = ({ report, isLoading }: CostCenterReportsProps) => {
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium rtl-title">
-                            {item.cost_center_name}
-                          </div>
-                          <div className="text-sm text-muted-foreground font-mono">
-                            {item.cost_center_code}
+                          <div className="flex items-center gap-2 rtl-flex">
+                            <div className="font-medium">
+                              {item.cost_center_name}
+                            </div>
+                            <div className="text-sm text-muted-foreground font-mono">
+                              ({item.cost_center_code})
+                            </div>
                           </div>
                           <div className="text-xs text-muted-foreground">
                             المستوى {item.level}
