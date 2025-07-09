@@ -376,6 +376,11 @@ export class CostCenterService {
             referenceDetails = `مصروف - ${allocation.reference_id}`;
             break;
             
+          case 'manual':
+            // For manual allocations, use the notes field as description
+            referenceDetails = allocation.notes || 'توزيع يدوي';
+            break;
+            
           default:
             referenceDetails = allocation.reference_id;
         }

@@ -43,7 +43,8 @@ const CostCenterAllocations = () => {
     { value: 'contract', label: 'عقد', icon: FileText },
     { value: 'employee', label: 'موظف', icon: Users },
     { value: 'vehicle', label: 'مركبة', icon: Car },
-    { value: 'expense', label: 'مصروف', icon: TrendingUp }
+    { value: 'expense', label: 'مصروف', icon: TrendingUp },
+    { value: 'manual', label: 'توزيع يدوي', icon: Plus }
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
