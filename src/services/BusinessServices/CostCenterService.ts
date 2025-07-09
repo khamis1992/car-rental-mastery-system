@@ -311,6 +311,23 @@ export class CostCenterService {
     return data || [];
   }
 
+  async getAllAllocations(): Promise<CostCenterAllocation[]> {
+    const { data, error } = await supabase
+      .from('cost_center_allocations')
+      .select(`
+        *,
+        cost_center:cost_centers(cost_center_code, cost_center_name)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching cost center allocations:', error);
+      throw new Error(`فشل في جلب توزيعات التكلفة: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
   async getAllocationsByCostCenter(costCenterId: string): Promise<CostCenterAllocation[]> {
     const { data, error } = await supabase
       .from('cost_center_allocations')

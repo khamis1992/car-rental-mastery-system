@@ -33,8 +33,11 @@ const CostCenterAllocations = () => {
     queryFn: () => costCenterService.getAllCostCenters()
   });
 
-  // جلب التوزيعات (سيتم تطبيقها لاحقاً)
-  const allocations: CostCenterAllocation[] = [];
+  // جلب التوزيعات
+  const { data: allocations = [], isLoading, error, refetch } = useQuery({
+    queryKey: ['cost-center-allocations'],
+    queryFn: () => costCenterService.getAllAllocations()
+  });
 
   const referenceTypes = [
     { value: 'contract', label: 'عقد', icon: FileText },
@@ -49,6 +52,7 @@ const CostCenterAllocations = () => {
     try {
       await costCenterService.createAllocation(allocationData);
       toast.success('تم إنشاء توزيع التكلفة بنجاح');
+      refetch(); // تحديث البيانات
       setShowAddForm(false);
       setAllocationData({
         reference_type: '',
@@ -72,6 +76,7 @@ const CostCenterAllocations = () => {
     try {
       await costCenterService.deleteAllocation(id);
       toast.success('تم حذف التوزيع بنجاح');
+      refetch(); // تحديث البيانات
     } catch (error: any) {
       console.error('Error deleting allocation:', error);
       toast.error(error.message || 'فشل في حذف التوزيع');
@@ -218,6 +223,14 @@ const CostCenterAllocations = () => {
           </div>
         </CardHeader>
         <CardContent>
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-red-600 text-sm">
+                {error instanceof Error ? error.message : 'حدث خطأ في جلب البيانات'}
+              </p>
+            </div>
+          )}
+          
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -232,14 +245,20 @@ const CostCenterAllocations = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {allocations.length === 0 ? (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      جاري تحميل البيانات...
+                    </TableCell>
+                  </TableRow>
+                ) : allocations.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       لا توجد توزيعات تكلفة حالياً
                     </TableCell>
                   </TableRow>
                 ) : (
-                  allocations.map((allocation) => {
+                  allocations.map((allocation: any) => {
                     const Icon = getReferenceTypeIcon(allocation.reference_type);
                     return (
                       <TableRow key={allocation.id}>
@@ -255,8 +274,16 @@ const CostCenterAllocations = () => {
                           {allocation.reference_id}
                         </TableCell>
                         <TableCell>
-                          {/* سيتم عرض اسم مركز التكلفة هنا */}
-                          {allocation.cost_center_id}
+                          <div className="text-right">
+                            <div className="font-medium">
+                              {allocation.cost_center?.cost_center_name || 'غير محدد'}
+                            </div>
+                            {allocation.cost_center?.cost_center_code && (
+                              <div className="text-sm text-muted-foreground">
+                                {allocation.cost_center.cost_center_code}
+                              </div>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">
@@ -264,10 +291,20 @@ const CostCenterAllocations = () => {
                           </Badge>
                         </TableCell>
                         <TableCell className="font-medium">
-                          {allocation.allocation_amount.toLocaleString()} د.ك
+                          {allocation.allocation_amount?.toLocaleString('ar-KW', {
+                            minimumFractionDigits: 3,
+                            maximumFractionDigits: 3
+                          })} د.ك
                         </TableCell>
                         <TableCell>
-                          {new Date(allocation.allocation_date).toLocaleDateString('ar-SA')}
+                          {allocation.allocation_date 
+                            ? new Date(allocation.allocation_date).toLocaleDateString('ar-SA', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })
+                            : 'غير محدد'
+                          }
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2 rtl-flex">
