@@ -262,7 +262,7 @@ const Settings = () => {
         <TabsContent value="system" className="space-y-4">
           <Card className="card-elegant">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 rtl-flex rtl-title">
                 <SettingsIcon className="w-5 h-5" />
                 إعدادات النظام العامة
               </CardTitle>
@@ -270,38 +270,42 @@ const Settings = () => {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="currency">العملة الافتراضية</Label>
+                  <Label htmlFor="currency" className="rtl-label text-right">العملة الافتراضية</Label>
                   <Input
                     id="currency"
                     value={systemSettings.defaultCurrency}
                     onChange={(e) => handleSystemSettingChange('defaultCurrency', e.target.value)}
+                    className="text-right"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="timezone">المنطقة الزمنية</Label>
+                  <Label htmlFor="timezone" className="rtl-label text-right">المنطقة الزمنية</Label>
                   <Input
                     id="timezone"
                     value={systemSettings.timeZone}
                     onChange={(e) => handleSystemSettingChange('timeZone', e.target.value)}
+                    className="text-right"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="dateFormat">تنسيق التاريخ</Label>
+                  <Label htmlFor="dateFormat" className="rtl-label text-right">تنسيق التاريخ</Label>
                   <Input
                     id="dateFormat"
                     value={systemSettings.dateFormat}
                     onChange={(e) => handleSystemSettingChange('dateFormat', e.target.value)}
+                    className="text-right"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="language">اللغة</Label>
+                  <Label htmlFor="language" className="rtl-label text-right">اللغة</Label>
                   <Input
                     id="language"
                     value={systemSettings.language}
                     onChange={(e) => handleSystemSettingChange('language', e.target.value)}
+                    className="text-right"
                   />
                 </div>
               </div>
@@ -309,7 +313,7 @@ const Settings = () => {
               <Separator />
               
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">إعدادات التنبيهات</h3>
+                <h3 className="text-lg font-medium rtl-title">إعدادات التنبيهات</h3>
                 
                 <div className="flex items-center justify-between">
                   <Switch
@@ -318,7 +322,7 @@ const Settings = () => {
                     onCheckedChange={(checked) => handleSystemSettingChange('emailNotifications', checked)}
                   />
                   <div className="text-right">
-                    <Label htmlFor="emailNotifications">إشعارات البريد الإلكتروني</Label>
+                    <Label htmlFor="emailNotifications" className="rtl-label">إشعارات البريد الإلكتروني</Label>
                     <p className="text-sm text-muted-foreground">تلقي إشعارات عبر البريد الإلكتروني</p>
                   </div>
                 </div>
@@ -330,7 +334,7 @@ const Settings = () => {
                     onCheckedChange={(checked) => handleSystemSettingChange('smsNotifications', checked)}
                   />
                   <div className="text-right">
-                    <Label htmlFor="smsNotifications">إشعارات الرسائل النصية</Label>
+                    <Label htmlFor="smsNotifications" className="rtl-label">إشعارات الرسائل النصية</Label>
                     <p className="text-sm text-muted-foreground">تلقي إشعارات عبر الرسائل النصية</p>
                   </div>
                 </div>
@@ -342,7 +346,7 @@ const Settings = () => {
                     onCheckedChange={(checked) => handleSystemSettingChange('maintenanceMode', checked)}
                   />
                   <div className="text-right">
-                    <Label htmlFor="maintenanceMode">وضع الصيانة</Label>
+                    <Label htmlFor="maintenanceMode" className="rtl-label">وضع الصيانة</Label>
                     <p className="text-sm text-muted-foreground">تعطيل النظام مؤقتاً للصيانة</p>
                   </div>
                 </div>
