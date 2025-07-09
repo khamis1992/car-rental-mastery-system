@@ -85,12 +85,6 @@ const CostCenters = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between rtl-flex">
-        <div>
-          <h1 className="text-3xl font-bold rtl-title">مراكز التكلفة</h1>
-          <p className="text-muted-foreground">
-            إدارة شاملة لمراكز التكلفة والميزانيات
-          </p>
-        </div>
         <div className="flex gap-2 rtl-flex">
           <Button onClick={handleUpdateCosts} variant="outline" className="gap-2 rtl-flex">
             <TrendingUp className="h-4 w-4" />
@@ -100,6 +94,12 @@ const CostCenters = () => {
             <Plus className="h-4 w-4" />
             إضافة مركز تكلفة
           </Button>
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold rtl-title">مراكز التكلفة</h1>
+          <p className="text-muted-foreground">
+            إدارة شاملة لمراكز التكلفة والميزانيات
+          </p>
         </div>
       </div>
 
