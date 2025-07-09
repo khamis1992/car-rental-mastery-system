@@ -4,9 +4,6 @@ import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
 import { JournalEntriesTab } from '@/components/Accounting/JournalEntriesTab';
 import { FinancialReportsTab } from '@/components/Accounting/FinancialReportsTab';
 import { AccountingBackfillTab } from '@/components/Accounting/AccountingBackfillTab';
-import { PaymentReconciliationTab } from '@/components/Accounting/PaymentReconciliationTab';
-import { SystemIntegrityTab } from '@/components/Accounting/SystemIntegrityTab';
-import { AccountingEventMonitoringDashboard } from '@/components/Accounting/AccountingEventMonitoringDashboard';
 import { AccountingDataRefresh } from '@/components/Accounting/AccountingDataRefresh';
 import { AccountingMaintenanceTools } from '@/components/Accounting/AccountingMaintenanceTools';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -123,28 +120,13 @@ const Accounting = () => {
       </div>
 
       <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-8">
-          <TabsTrigger value="monitoring">المراقبة المباشرة</TabsTrigger>
-          <TabsTrigger value="integrity">سلامة النظام</TabsTrigger>
-          <TabsTrigger value="reconciliation">التسوية</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="analytics">التحليلات</TabsTrigger>
           <TabsTrigger value="reports">التقارير المالية</TabsTrigger>
           <TabsTrigger value="journal">القيود المحاسبية</TabsTrigger>
           <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
           <TabsTrigger value="transactions">المعاملات المالية</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="monitoring" className="space-y-4">
-          <AccountingEventMonitoringDashboard />
-        </TabsContent>
-
-        <TabsContent value="integrity" className="space-y-4">
-          <SystemIntegrityTab />
-        </TabsContent>
-
-        <TabsContent value="reconciliation" className="space-y-4">
-          <PaymentReconciliationTab />
-        </TabsContent>
 
         <TabsContent value="accounts" className="space-y-4">
           <ChartOfAccountsTab />
