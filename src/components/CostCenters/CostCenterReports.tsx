@@ -120,16 +120,16 @@ const CostCenterReports = ({ report, isLoading }: CostCenterReportsProps) => {
             <Table className="table-header-horizontal">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="rtl-title">الاستخدام</TableHead>
-                  <TableHead className="rtl-title">الانحراف</TableHead>
-                  <TableHead className="rtl-title">المصروف</TableHead>
-                  <TableHead className="rtl-title">الميزانية</TableHead>
-                  <TableHead className="rtl-title">العقود</TableHead>
-                  <TableHead className="rtl-title">الموظفين</TableHead>
-                  <TableHead className="rtl-title">المدير</TableHead>
-                  <TableHead className="rtl-title">القسم</TableHead>
-                  <TableHead className="rtl-title">النوع</TableHead>
-                  <TableHead className="rtl-title">مركز التكلفة</TableHead>
+                  <TableHead className="text-right">الاستخدام</TableHead>
+                  <TableHead className="text-right">الانحراف</TableHead>
+                  <TableHead className="text-right">المصروف</TableHead>
+                  <TableHead className="text-right">الميزانية</TableHead>
+                  <TableHead className="text-right">العقود</TableHead>
+                  <TableHead className="text-right">الموظفين</TableHead>
+                  <TableHead className="text-right">المدير</TableHead>
+                  <TableHead className="text-right">القسم</TableHead>
+                  <TableHead className="text-right">النوع</TableHead>
+                  <TableHead className="text-right">مركز التكلفة</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
