@@ -462,16 +462,16 @@ export const JournalEntriesTab = () => {
           <TableBody>
             {filteredEntries.map((entry) => (
               <TableRow key={entry.id}>
-                <TableCell className="font-medium">{entry.entry_number}</TableCell>
-                <TableCell>{new Date(entry.entry_date).toLocaleDateString('ar-KW', { calendar: 'gregory' })}</TableCell>
-                <TableCell className="max-w-xs truncate">{entry.description}</TableCell>
-                <TableCell className="font-medium text-green-600">
+                <TableCell className="font-medium text-right">{entry.entry_number}</TableCell>
+                <TableCell className="text-right">{new Date(entry.entry_date).toLocaleDateString('ar-KW', { calendar: 'gregory' })}</TableCell>
+                <TableCell className="max-w-xs truncate text-right">{entry.description}</TableCell>
+                <TableCell className="font-medium text-green-600 text-right">
                   {formatAmount(entry.total_debit)}
                 </TableCell>
-                <TableCell className="font-medium text-blue-600">
+                <TableCell className="font-medium text-blue-600 text-right">
                   {formatAmount(entry.total_credit)}
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-right">
                   <Badge variant={getStatusVariant(entry.status)}>
                     {getStatusLabel(entry.status)}
                   </Badge>
