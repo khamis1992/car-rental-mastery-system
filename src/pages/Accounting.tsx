@@ -120,8 +120,7 @@ const Accounting = () => {
       </div>
 
       <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="analytics">التحليلات</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="reports">التقارير المالية</TabsTrigger>
           <TabsTrigger value="journal">القيود المحاسبية</TabsTrigger>
           <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
@@ -181,11 +180,6 @@ const Accounting = () => {
           <FinancialReportsTab />
         </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-4">
-          <div className="text-center py-8 text-muted-foreground">
-            التحليلات المالية - سيتم عرض البيانات عند وجود معاملات مالية
-          </div>
-        </TabsContent>
       </Tabs>
     </div>
   );
