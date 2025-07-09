@@ -13,7 +13,7 @@ import {
   DollarSign,
   GitBranch
 } from 'lucide-react';
-import { SystemFlowchartDialog } from '@/components/Analytics/SystemFlowchartDialog';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -32,7 +32,7 @@ import { formatCurrencyKWD } from '@/lib/currency';
 const Analytics = () => {
   const [dateRange, setDateRange] = useState('thisMonth');
   const [selectedPeriod, setSelectedPeriod] = useState('daily');
-  const [showFlowchart, setShowFlowchart] = useState(false);
+  
 
   // Fetch analytics data
   const {
@@ -100,14 +100,6 @@ const Analytics = () => {
             تحديث
           </Button>
           
-          <Button 
-            variant="outline"
-            onClick={() => setShowFlowchart(true)}
-            className="gap-2 rtl-flex"
-          >
-            <GitBranch className="w-4 h-4" />
-            مخطط تدفق النظام
-          </Button>
           
           <Button className="btn-primary gap-2 rtl-flex">
             <Download className="w-4 h-4" />
@@ -190,11 +182,6 @@ const Analytics = () => {
         </TabsContent>
       </Tabs>
 
-      {/* System Flowchart Dialog */}
-      <SystemFlowchartDialog 
-        open={showFlowchart}
-        onOpenChange={setShowFlowchart}
-      />
     </div>
   );
 };

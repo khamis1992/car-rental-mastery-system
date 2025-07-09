@@ -17,6 +17,7 @@ import OfficeLocationManager from '@/components/Settings/OfficeLocationManager';
 import AddUserDialog from '@/components/Settings/AddUserDialog';
 import CompanyBrandingManager from '@/components/Settings/CompanyBrandingManager';
 import { HTMLDocumentsService } from '@/lib/htmlDocumentsService';
+import { SystemFlowchartSection } from '@/components/Settings/SystemFlowchartSection';
 
 const Settings = () => {
   const { profile } = useAuth();
@@ -432,14 +433,16 @@ const Settings = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <SystemFlowchartSection />
+                
                 <Card className="border-2 hover:border-primary/50 transition-colors">
                   <CardContent className="p-6 text-right">
-                    <div className="flex items-center gap-3 mb-4 flex-row-reverse">
+                    <div className="flex items-center gap-3 mb-4 rtl-flex">
                       <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                         <FileText className="w-6 h-6 text-primary" />
                       </div>
-                      <div className="text-right">
-                        <h4 className="font-medium text-foreground">دليل المستخدم</h4>
+                      <div>
+                        <h4 className="font-medium text-foreground rtl-title">دليل المستخدم</h4>
                         <p className="text-sm text-muted-foreground">الدليل الشامل للنظام</p>
                       </div>
                     </div>
