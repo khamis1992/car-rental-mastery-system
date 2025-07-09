@@ -196,7 +196,7 @@ const Settings = () => {
         <TabsContent value="company" className="space-y-4">
           <Card className="card-elegant">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 rtl-flex rtl-title">
                 <Building className="w-5 h-5" />
                 معلومات الشركة
               </CardTitle>
@@ -204,50 +204,55 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="companyName">اسم الشركة</Label>
+                  <Label htmlFor="companyName" className="rtl-label text-right">اسم الشركة</Label>
                   <Input
                     id="companyName"
                     value={companySettings.name}
                     onChange={(e) => handleCompanySettingChange('name', e.target.value)}
+                    className="text-right"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="companyEmail">البريد الإلكتروني</Label>
+                  <Label htmlFor="companyEmail" className="rtl-label text-right">البريد الإلكتروني</Label>
                   <Input
                     id="companyEmail"
                     type="email"
                     value={companySettings.email}
                     onChange={(e) => handleCompanySettingChange('email', e.target.value)}
+                    className="text-right"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="companyPhone">رقم الهاتف</Label>
+                  <Label htmlFor="companyPhone" className="rtl-label text-right">رقم الهاتف</Label>
                   <Input
                     id="companyPhone"
                     value={companySettings.phone}
                     onChange={(e) => handleCompanySettingChange('phone', e.target.value)}
+                    className="text-right"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="taxNumber">الرقم الضريبي</Label>
+                  <Label htmlFor="taxNumber" className="rtl-label text-right">الرقم الضريبي</Label>
                   <Input
                     id="taxNumber"
                     value={companySettings.taxNumber}
                     onChange={(e) => handleCompanySettingChange('taxNumber', e.target.value)}
+                    className="text-right"
                   />
                 </div>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="companyAddress">العنوان</Label>
+                <Label htmlFor="companyAddress" className="rtl-label text-right">العنوان</Label>
                 <Textarea
                   id="companyAddress"
                   value={companySettings.address}
                   onChange={(e) => handleCompanySettingChange('address', e.target.value)}
                   rows={3}
+                  className="text-right"
                 />
               </div>
             </CardContent>
