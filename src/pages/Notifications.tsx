@@ -136,31 +136,31 @@ const Notifications = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between rtl-flex">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={markAllAsRead} className="rtl-flex">
+            <Check className="w-4 h-4" />
+            تحديد الكل كمقروء
+          </Button>
+          <Button className="btn-primary rtl-flex">
+            <Bell className="w-4 h-4" />
+            إعدادات الإشعارات
+          </Button>
+        </div>
+        
         <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2 rtl-flex rtl-title">
             <Bell className="w-8 h-8" />
             الإشعارات والتنبيهات
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-right">
             إدارة جميع الإشعارات والتنبيهات الخاصة بالنظام
             {unreadCount > 0 && (
-              <span className="mr-2">
+              <span className="ml-2">
                 <Badge className="bg-red-500 text-white">{unreadCount} غير مقروء</Badge>
               </span>
             )}
           </p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={markAllAsRead}>
-            <Check className="w-4 h-4 mr-2" />
-            تحديد الكل كمقروء
-          </Button>
-          <Button className="btn-primary">
-            <Bell className="w-4 h-4 mr-2" />
-            إعدادات الإشعارات
-          </Button>
         </div>
       </div>
 
@@ -177,7 +177,7 @@ const Notifications = () => {
         <TabsContent value="all" className="space-y-4">
           <Card className="card-elegant">
             <CardHeader>
-              <CardTitle>جميع الإشعارات</CardTitle>
+              <CardTitle className="rtl-title">جميع الإشعارات</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -188,33 +188,7 @@ const Notifications = () => {
                       !notification.read ? 'bg-muted/50 border-primary/20' : ''
                     }`}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3 flex-1">
-                        {getNotificationIcon(notification.type)}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className={`font-medium ${!notification.read ? 'font-bold' : ''}`}>
-                              {notification.title}
-                            </h3>
-                            <Badge className={getPriorityColor(notification.priority)}>
-                              {notification.priority === 'urgent' ? 'عاجل' : 
-                               notification.priority === 'high' ? 'مهم' :
-                               notification.priority === 'medium' ? 'متوسط' : 'عادي'}
-                            </Badge>
-                            <Badge variant="outline">
-                              {getCategoryLabel(notification.category)}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            {notification.message}
-                          </p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Clock className="w-3 h-3" />
-                            {notification.time}
-                          </div>
-                        </div>
-                      </div>
-                      
+                    <div className="flex items-start justify-between rtl-flex">
                       <div className="flex items-center gap-2">
                         {!notification.read && (
                           <Button
@@ -233,6 +207,32 @@ const Notifications = () => {
                           <X className="w-4 h-4" />
                         </Button>
                       </div>
+                      
+                      <div className="flex items-start gap-3 flex-1 text-right">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1 justify-end rtl-flex">
+                            <Badge variant="outline">
+                              {getCategoryLabel(notification.category)}
+                            </Badge>
+                            <Badge className={getPriorityColor(notification.priority)}>
+                              {notification.priority === 'urgent' ? 'عاجل' : 
+                               notification.priority === 'high' ? 'مهم' :
+                               notification.priority === 'medium' ? 'متوسط' : 'عادي'}
+                            </Badge>
+                            <h3 className={`font-medium ${!notification.read ? 'font-bold' : ''} rtl-title`}>
+                              {notification.title}
+                            </h3>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-2 text-right">
+                            {notification.message}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground justify-end rtl-flex">
+                            {notification.time}
+                            <Clock className="w-3 h-3" />
+                          </div>
+                        </div>
+                        {getNotificationIcon(notification.type)}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -245,7 +245,7 @@ const Notifications = () => {
           <TabsContent key={category} value={category} className="space-y-4">
             <Card className="card-elegant">
               <CardHeader>
-                <CardTitle>إشعارات {getCategoryLabel(category)}</CardTitle>
+                <CardTitle className="rtl-title">إشعارات {getCategoryLabel(category)}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -256,30 +256,7 @@ const Notifications = () => {
                         !notification.read ? 'bg-muted/50 border-primary/20' : ''
                       }`}
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-3 flex-1">
-                          {getNotificationIcon(notification.type)}
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className={`font-medium ${!notification.read ? 'font-bold' : ''}`}>
-                                {notification.title}
-                              </h3>
-                              <Badge className={getPriorityColor(notification.priority)}>
-                                {notification.priority === 'urgent' ? 'عاجل' : 
-                                 notification.priority === 'high' ? 'مهم' :
-                                 notification.priority === 'medium' ? 'متوسط' : 'عادي'}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground mb-2">
-                              {notification.message}
-                            </p>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <Clock className="w-3 h-3" />
-                              {notification.time}
-                            </div>
-                          </div>
-                        </div>
-                        
+                       <div className="flex items-start justify-between rtl-flex">
                         <div className="flex items-center gap-2">
                           {!notification.read && (
                             <Button
@@ -298,6 +275,29 @@ const Notifications = () => {
                             <X className="w-4 h-4" />
                           </Button>
                         </div>
+                        
+                        <div className="flex items-start gap-3 flex-1 text-right">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1 justify-end rtl-flex">
+                              <Badge className={getPriorityColor(notification.priority)}>
+                                {notification.priority === 'urgent' ? 'عاجل' : 
+                                 notification.priority === 'high' ? 'مهم' :
+                                 notification.priority === 'medium' ? 'متوسط' : 'عادي'}
+                              </Badge>
+                              <h3 className={`font-medium ${!notification.read ? 'font-bold' : ''} rtl-title`}>
+                                {notification.title}
+                              </h3>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2 text-right">
+                              {notification.message}
+                            </p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground justify-end rtl-flex">
+                              {notification.time}
+                              <Clock className="w-3 h-3" />
+                            </div>
+                          </div>
+                          {getNotificationIcon(notification.type)}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -310,119 +310,119 @@ const Notifications = () => {
         <TabsContent value="settings" className="space-y-4">
           <Card className="card-elegant">
             <CardHeader>
-              <CardTitle>إعدادات الإشعارات</CardTitle>
+              <CardTitle className="rtl-title">إعدادات الإشعارات</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h3 className="font-medium mb-4">أنواع الإشعارات</h3>
+                <h3 className="font-medium mb-4 rtl-title">أنواع الإشعارات</h3>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>إشعارات انتهاء العقود</Label>
-                      <p className="text-sm text-muted-foreground">تنبيه قبل انتهاء العقود</p>
-                    </div>
+                  <div className="flex items-center justify-between rtl-flex">
                     <Switch
                       checked={settings.contractExpiry}
                       onCheckedChange={(checked) => 
                         setSettings(prev => ({ ...prev, contractExpiry: checked }))
                       }
                     />
+                    <div className="text-right">
+                      <Label className="rtl-label">إشعارات انتهاء العقود</Label>
+                      <p className="text-sm text-muted-foreground">تنبيه قبل انتهاء العقود</p>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>تنبيهات الصيانة</Label>
-                      <p className="text-sm text-muted-foreground">إشعارات الصيانة المجدولة والعاجلة</p>
-                    </div>
+                  <div className="flex items-center justify-between rtl-flex">
                     <Switch
                       checked={settings.maintenanceAlerts}
                       onCheckedChange={(checked) => 
                         setSettings(prev => ({ ...prev, maintenanceAlerts: checked }))
                       }
                     />
+                    <div className="text-right">
+                      <Label className="rtl-label">تنبيهات الصيانة</Label>
+                      <p className="text-sm text-muted-foreground">إشعارات الصيانة المجدولة والعاجلة</p>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>تذكير المدفوعات</Label>
-                      <p className="text-sm text-muted-foreground">تنبيه عند استحقاق المدفوعات</p>
-                    </div>
+                  <div className="flex items-center justify-between rtl-flex">
                     <Switch
                       checked={settings.paymentReminders}
                       onCheckedChange={(checked) => 
                         setSettings(prev => ({ ...prev, paymentReminders: checked }))
                       }
                     />
+                    <div className="text-right">
+                      <Label className="rtl-label">تذكير المدفوعات</Label>
+                      <p className="text-sm text-muted-foreground">تنبيه عند استحقاق المدفوعات</p>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>العملاء الجدد</Label>
-                      <p className="text-sm text-muted-foreground">إشعار عند تسجيل عميل جديد</p>
-                    </div>
+                  <div className="flex items-center justify-between rtl-flex">
                     <Switch
                       checked={settings.newCustomers}
                       onCheckedChange={(checked) => 
                         setSettings(prev => ({ ...prev, newCustomers: checked }))
                       }
                     />
+                    <div className="text-right">
+                      <Label className="rtl-label">العملاء الجدد</Label>
+                      <p className="text-sm text-muted-foreground">إشعار عند تسجيل عميل جديد</p>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>انتهاء التأمين</Label>
-                      <p className="text-sm text-muted-foreground">تنبيه قبل انتهاء تأمين المركبات</p>
-                    </div>
+                  <div className="flex items-center justify-between rtl-flex">
                     <Switch
                       checked={settings.insuranceExpiry}
                       onCheckedChange={(checked) => 
                         setSettings(prev => ({ ...prev, insuranceExpiry: checked }))
                       }
                     />
+                    <div className="text-right">
+                      <Label className="rtl-label">انتهاء التأمين</Label>
+                      <p className="text-sm text-muted-foreground">تنبيه قبل انتهاء تأمين المركبات</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div>
-                <h3 className="font-medium mb-4">طرق التنبيه</h3>
+                <h3 className="font-medium mb-4 rtl-title">طرق التنبيه</h3>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>إشعارات البريد الإلكتروني</Label>
-                      <p className="text-sm text-muted-foreground">إرسال إشعارات عبر البريد الإلكتروني</p>
-                    </div>
+                  <div className="flex items-center justify-between rtl-flex">
                     <Switch
                       checked={settings.emailNotifications}
                       onCheckedChange={(checked) => 
                         setSettings(prev => ({ ...prev, emailNotifications: checked }))
                       }
                     />
+                    <div className="text-right">
+                      <Label className="rtl-label">إشعارات البريد الإلكتروني</Label>
+                      <p className="text-sm text-muted-foreground">إرسال إشعارات عبر البريد الإلكتروني</p>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>الرسائل النصية</Label>
-                      <p className="text-sm text-muted-foreground">إرسال تنبيهات عبر الرسائل النصية</p>
-                    </div>
+                  <div className="flex items-center justify-between rtl-flex">
                     <Switch
                       checked={settings.smsNotifications}
                       onCheckedChange={(checked) => 
                         setSettings(prev => ({ ...prev, smsNotifications: checked }))
                       }
                     />
+                    <div className="text-right">
+                      <Label className="rtl-label">الرسائل النصية</Label>
+                      <p className="text-sm text-muted-foreground">إرسال تنبيهات عبر الرسائل النصية</p>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>الإشعارات الفورية</Label>
-                      <p className="text-sm text-muted-foreground">إشعارات فورية في المتصفح</p>
-                    </div>
+                  <div className="flex items-center justify-between rtl-flex">
                     <Switch
                       checked={settings.pushNotifications}
                       onCheckedChange={(checked) => 
                         setSettings(prev => ({ ...prev, pushNotifications: checked }))
                       }
                     />
+                    <div className="text-right">
+                      <Label className="rtl-label">الإشعارات الفورية</Label>
+                      <p className="text-sm text-muted-foreground">إشعارات فورية في المتصفح</p>
+                    </div>
                   </div>
                 </div>
               </div>
