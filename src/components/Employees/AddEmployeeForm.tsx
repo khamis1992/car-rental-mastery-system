@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Employee } from '@/types/hr';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 import { payrollService } from '@/services/payrollService';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -41,6 +42,7 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   onEmployeeAdded
 }) => {
   const { toast } = useToast();
+  const { currentTenant } = useTenant();
   const [loading, setLoading] = useState(false);
   const [hireDate, setHireDate] = useState<Date>();
   const [showBankDetails, setShowBankDetails] = useState(false);
@@ -184,12 +186,13 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         emergency_contact_phone: formData.emergency_contact_phone || null,
         bank_account_number: formData.bank_account_number || null,
         bank_name: formData.bank_name || null,
-        address: formData.address || null
+        address: formData.address || null,
+        tenant_id: currentTenant?.id || ''
       };
 
       const { data, error } = await supabase
         .from('employees')
-        .insert([employeeData])
+        .insert(employeeData)
         .select()
         .single();
 

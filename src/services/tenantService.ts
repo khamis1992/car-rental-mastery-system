@@ -25,7 +25,13 @@ export class TenantService {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(tenant => ({
+      ...tenant,
+      status: tenant.status as Tenant['status'],
+      subscription_plan: tenant.subscription_plan as Tenant['subscription_plan'],
+      subscription_status: tenant.subscription_status as Tenant['subscription_status'],
+      settings: (tenant.settings as Record<string, any>) || {}
+    }));
   }
 
   // Create new tenant (onboarding)
@@ -86,7 +92,13 @@ export class TenantService {
       }
     }
 
-    return tenant;
+    return {
+      ...tenant,
+      status: tenant.status as Tenant['status'],
+      subscription_plan: tenant.subscription_plan as Tenant['subscription_plan'],
+      subscription_status: tenant.subscription_status as Tenant['subscription_status'],
+      settings: (tenant.settings as Record<string, any>) || {}
+    };
   }
 
   // Update tenant settings
@@ -99,7 +111,13 @@ export class TenantService {
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      status: data.status as Tenant['status'],
+      subscription_plan: data.subscription_plan as Tenant['subscription_plan'],
+      subscription_status: data.subscription_status as Tenant['subscription_status'],
+      settings: (data.settings as Record<string, any>) || {}
+    };
   }
 
   // Get tenant users
@@ -114,7 +132,11 @@ export class TenantService {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(user => ({
+      ...user,
+      role: user.role as TenantUser['role'],
+      status: user.status as TenantUser['status']
+    }));
   }
 
   // Invite user to tenant
@@ -177,7 +199,10 @@ export class TenantService {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(history => ({
+      ...history,
+      billing_period: history.billing_period as SubscriptionHistory['billing_period']
+    }));
   }
 
   // Check tenant limits

@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 import { Loader2 } from 'lucide-react';
 
 interface AddUserDialogProps {
@@ -16,6 +17,7 @@ interface AddUserDialogProps {
 
 const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onOpenChange, onUserAdded }) => {
   const { toast } = useToast();
+  const { currentTenant } = useTenant();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -63,7 +65,8 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onOpenChange, onUse
           department: formData.department,
           salary: parseFloat(formData.salary),
           hire_date: new Date().toISOString().split('T')[0],
-          status: 'active'
+          status: 'active',
+          tenant_id: currentTenant?.id || ''
         });
 
       if (employeeError) throw employeeError;

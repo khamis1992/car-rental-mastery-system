@@ -47,6 +47,16 @@ export class PaymentRepository extends BaseRepository<Payment> implements IPayme
         throw new Error(`Payment amount (${paymentData.amount}) cannot exceed outstanding amount (${outstandingAmount})`);
       }
 
+      // Get current user and tenant info
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Get tenant_id from user's tenant_users relationship
+      const { data: tenantUser } = await supabase
+        .from('tenant_users')
+        .select('tenant_id')
+        .eq('user_id', user?.id)
+        .single();
+
       // Create payment
       const { data: payment, error: paymentError } = await supabase
         .from('payments')
@@ -63,7 +73,8 @@ export class PaymentRepository extends BaseRepository<Payment> implements IPayme
           check_number: paymentData.check_number,
           notes: paymentData.notes,
           status: 'completed',
-          created_by: (await supabase.auth.getUser()).data.user?.id,
+          created_by: user?.id,
+          tenant_id: tenantUser?.tenant_id || ''
         })
         .select()
         .single();

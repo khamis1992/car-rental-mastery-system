@@ -71,6 +71,16 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
         invoiceData.discount_amount || 0
       );
 
+      // Get current user and tenant info
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Get tenant_id from user's tenant_users relationship
+      const { data: tenantUser } = await supabase
+        .from('tenant_users')
+        .select('tenant_id')
+        .eq('user_id', user?.id)
+        .single();
+
       // Create invoice with proper calculations
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
@@ -91,7 +101,8 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
           payment_terms: invoiceData.payment_terms,
           notes: invoiceData.notes,
           terms_and_conditions: invoiceData.terms_and_conditions,
-          created_by: (await supabase.auth.getUser()).data.user?.id,
+          created_by: user?.id,
+          tenant_id: tenantUser?.tenant_id || ''
         })
         .select()
         .single();

@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useTenant } from '@/contexts/TenantContext';
 import { Building2, AlertCircle } from 'lucide-react';
 
 interface Department {
@@ -40,6 +41,7 @@ export const DepartmentForm: React.FC<DepartmentFormProps> = ({
   onDepartmentSaved
 }) => {
   const { toast } = useToast();
+  const { currentTenant } = useTenant();
   const [loading, setLoading] = useState(false);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [formData, setFormData] = useState({
@@ -159,10 +161,11 @@ export const DepartmentForm: React.FC<DepartmentFormProps> = ({
         
         const { data, error } = await supabase
           .from('departments')
-          .insert([{
+          .insert({
             ...departmentData,
-            department_code: codeData
-          }])
+            department_code: codeData,
+            tenant_id: currentTenant?.id || ''
+          })
           .select()
           .single();
 

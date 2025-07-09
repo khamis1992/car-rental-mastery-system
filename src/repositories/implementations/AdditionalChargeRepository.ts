@@ -32,12 +32,23 @@ export class AdditionalChargeRepository extends BaseRepository<AdditionalCharge>
     return (data || []) as AdditionalCharge[];
   }
 
-  async createCharge(chargeData: Omit<AdditionalCharge, 'id' | 'created_at' | 'updated_at' | 'created_by'>): Promise<AdditionalCharge> {
+  async createCharge(chargeData: Omit<AdditionalCharge, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'tenant_id'>): Promise<AdditionalCharge> {
+    // Get current user for tenant info
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    // Get tenant_id from user's tenant_users relationship
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .single();
+
     const { data: charge, error } = await supabase
       .from('additional_charges')
       .insert({
         ...chargeData,
-        created_by: (await supabase.auth.getUser()).data.user?.id,
+        created_by: user?.id,
+        tenant_id: tenantUser?.tenant_id || ''
       })
       .select()
       .single();

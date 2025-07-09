@@ -154,15 +154,24 @@ export class CostCenterService {
       // Get current user's employee ID
       const employeeId = await UserHelperService.getCurrentUserEmployeeId();
       
+      // Get tenant_id from user's tenant_users relationship
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: tenantUser } = await supabase
+        .from('tenant_users')
+        .select('tenant_id')
+        .eq('user_id', user?.id)
+        .single();
+
       const { data, error } = await supabase
         .from('cost_centers')
-        .insert([{
+        .insert({
           ...costCenterData,
           budget_amount: costCenterData.budget_amount || 0,
           actual_spent: 0,
           is_active: true,
-          created_by: employeeId
-        }])
+          created_by: employeeId,
+          tenant_id: tenantUser?.tenant_id || ''
+        })
         .select()
         .single();
 

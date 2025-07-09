@@ -29,16 +29,25 @@ export const additionalChargeService = {
     return (data || []) as AdditionalCharge[];
   },
 
-  async createCharge(chargeData: Omit<AdditionalCharge, 'id' | 'created_at' | 'updated_at' | 'created_by'>): Promise<AdditionalCharge> {
+  async createCharge(chargeData: Omit<AdditionalCharge, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'tenant_id'>): Promise<AdditionalCharge> {
     try {
       // Get current user's employee ID
       const employeeId = await UserHelperService.getCurrentUserEmployeeId();
+      
+      // Get tenant_id from user's tenant_users relationship
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: tenantUser } = await supabase
+        .from('tenant_users')
+        .select('tenant_id')
+        .eq('user_id', user?.id)
+        .single();
       
       const { data: charge, error } = await supabase
         .from('additional_charges')
         .insert({
           ...chargeData,
           created_by: employeeId,
+          tenant_id: tenantUser?.tenant_id || ''
         })
         .select()
         .single();

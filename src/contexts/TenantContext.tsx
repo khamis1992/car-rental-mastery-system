@@ -58,7 +58,7 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
 
       if (tenantUser && tenantUser.tenant) {
         setCurrentTenant(tenantUser.tenant as Tenant);
-        setCurrentUserRole(tenantUser.role);
+        setCurrentUserRole(tenantUser.role as TenantUser['role']);
       } else {
         // User is not associated with any tenant
         setCurrentTenant(null);
@@ -93,7 +93,7 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
 
       if (tenantUser && tenantUser.tenant) {
         setCurrentTenant(tenantUser.tenant as Tenant);
-        setCurrentUserRole(tenantUser.role);
+        setCurrentUserRole(tenantUser.role as TenantUser['role']);
         
         // Store selected tenant in localStorage for persistence
         localStorage.setItem('selectedTenantId', tenantId);
