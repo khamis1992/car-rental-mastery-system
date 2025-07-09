@@ -279,10 +279,10 @@ const CostCenterAllocations = () => {
                         </TableCell>
                         <TableCell>
                           {allocation.allocation_date 
-                            ? new Date(allocation.allocation_date).toLocaleDateString('ar-SA', {
+                            ? new Date(allocation.allocation_date).toLocaleDateString('en-GB', {
                                 year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
+                                month: '2-digit',
+                                day: '2-digit'
                               })
                             : 'غير محدد'
                           }
