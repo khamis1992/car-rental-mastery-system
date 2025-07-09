@@ -42,13 +42,8 @@ const Analytics = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">التحليلات والتقارير المتقدمة</h1>
-          <p className="text-muted-foreground">نظرة شاملة ومفصلة على أداء الأعمال</p>
-        </div>
-        
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between rtl-flex">
+        <div className="flex gap-2 rtl-flex">
           <Select value={dateRange} onValueChange={setDateRange}>
             <SelectTrigger className="w-40">
               <SelectValue />
@@ -63,24 +58,29 @@ const Analytics = () => {
             </SelectContent>
           </Select>
           
-          <Button variant="outline">
-            <RefreshCw className="w-4 h-4 mr-2" />
+          <Button variant="outline" className="gap-2 rtl-flex">
+            <RefreshCw className="w-4 h-4" />
             تحديث
           </Button>
           
           <Button 
             variant="outline"
             onClick={() => setShowFlowchart(true)}
-            className="flex items-center gap-2 flex-row-reverse"
+            className="gap-2 rtl-flex"
           >
             <GitBranch className="w-4 h-4" />
             مخطط تدفق النظام
           </Button>
           
-          <Button className="btn-primary">
-            <Download className="w-4 h-4 mr-2" />
+          <Button className="btn-primary gap-2 rtl-flex">
+            <Download className="w-4 h-4" />
             تصدير التقرير
           </Button>
+        </div>
+        
+        <div>
+          <h1 className="text-3xl font-bold text-foreground rtl-title">التحليلات والتقارير المتقدمة</h1>
+          <p className="text-muted-foreground">نظرة شاملة ومفصلة على أداء الأعمال</p>
         </div>
       </div>
 
@@ -89,11 +89,11 @@ const Analytics = () => {
         {kpiData.map((kpi, index) => (
           <Card key={index} className="card-elegant">
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{kpi.title}</p>
-                  <p className="text-2xl font-bold">{kpi.value}</p>
-                  <div className="flex items-center gap-1 mt-1">
+              <div className="flex items-center justify-between rtl-flex">
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground rtl-title">{kpi.title}</p>
+                  <p className="text-2xl font-bold rtl-title">{kpi.value}</p>
+                  <div className="flex items-center gap-1 mt-1 rtl-flex">
                     <TrendingUp className="w-4 h-4 text-green-500" />
                     <span className="text-sm text-green-500">{kpi.change}</span>
                   </div>
@@ -118,7 +118,7 @@ const Analytics = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card className="card-elegant">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 rtl-flex">
                   <BarChart3 className="w-5 h-5" />
                   الإيرادات الشهرية
                 </CardTitle>
@@ -132,7 +132,7 @@ const Analytics = () => {
 
             <Card className="card-elegant">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 rtl-flex">
                   <PieChart className="w-5 h-5" />
                   توزيع الإيرادات حسب نوع السيارة
                 </CardTitle>
@@ -149,7 +149,7 @@ const Analytics = () => {
         <TabsContent value="fleet" className="space-y-4">
           <Card className="card-elegant">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 rtl-flex">
                 <Car className="w-5 h-5" />
                 تحليل أداء الأسطول
               </CardTitle>
@@ -166,7 +166,7 @@ const Analytics = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card className="card-elegant">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 rtl-flex">
                   <Users className="w-5 h-5" />
                   شرائح العملاء
                 </CardTitle>
@@ -180,7 +180,7 @@ const Analytics = () => {
 
             <Card className="card-elegant">
               <CardHeader>
-                <CardTitle>إحصائيات العملاء</CardTitle>
+                <CardTitle className="rtl-title">إحصائيات العملاء</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -196,7 +196,7 @@ const Analytics = () => {
         <TabsContent value="performance" className="space-y-4">
           <Card className="card-elegant">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 rtl-flex">
                 <TrendingUp className="w-5 h-5" />
                 أفضل السيارات أداءً
               </CardTitle>
@@ -213,7 +213,7 @@ const Analytics = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card className="card-elegant">
               <CardHeader>
-                <CardTitle>الاتجاهات الشهرية</CardTitle>
+                <CardTitle className="rtl-title">الاتجاهات الشهرية</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8 text-muted-foreground">
@@ -224,7 +224,7 @@ const Analytics = () => {
 
             <Card className="card-elegant">
               <CardHeader>
-                <CardTitle>توقعات الأداء</CardTitle>
+                <CardTitle className="rtl-title">توقعات الأداء</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8 text-muted-foreground">
