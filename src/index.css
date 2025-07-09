@@ -288,19 +288,20 @@
     }
   }
   
-  /* Table headers horizontal layout */
-  th {
-    writing-mode: horizontal-tb !important;
-    text-orientation: mixed !important;
-    white-space: nowrap;
-  }
-  
-  /* Ensure all table headers are horizontal */
-  .table-header-horizontal th {
-    writing-mode: horizontal-tb !important;
-    text-orientation: mixed !important;
-    transform: none !important;
-    white-space: nowrap;
-    text-align: right;
-  }
+}
+
+/* Table headers horizontal layout - High specificity outside layers */
+th {
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  white-space: nowrap;
+}
+
+/* Ensure all table headers are horizontal */
+.table-header-horizontal th {
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  transform: none !important;
+  white-space: nowrap;
+  text-align: right;
 }
