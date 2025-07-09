@@ -120,16 +120,16 @@ const CostCenterReports = ({ report, isLoading }: CostCenterReportsProps) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="rtl-title">مركز التكلفة</TableHead>
-                  <TableHead className="rtl-title">النوع</TableHead>
-                  <TableHead className="rtl-title">القسم</TableHead>
-                  <TableHead className="rtl-title">المدير</TableHead>
-                  <TableHead className="rtl-title">الموظفين</TableHead>
-                  <TableHead className="rtl-title">العقود</TableHead>
-                  <TableHead className="rtl-title">الميزانية</TableHead>
-                  <TableHead className="rtl-title">المصروف</TableHead>
-                  <TableHead className="rtl-title">الانحراف</TableHead>
                   <TableHead className="rtl-title">الاستخدام</TableHead>
+                  <TableHead className="rtl-title">الانحراف</TableHead>
+                  <TableHead className="rtl-title">المصروف</TableHead>
+                  <TableHead className="rtl-title">الميزانية</TableHead>
+                  <TableHead className="rtl-title">العقود</TableHead>
+                  <TableHead className="rtl-title">الموظفين</TableHead>
+                  <TableHead className="rtl-title">المدير</TableHead>
+                  <TableHead className="rtl-title">القسم</TableHead>
+                  <TableHead className="rtl-title">النوع</TableHead>
+                  <TableHead className="rtl-title">مركز التكلفة</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -149,54 +149,6 @@ const CostCenterReports = ({ report, isLoading }: CostCenterReportsProps) => {
                   report.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell>
-                        <div>
-                          <div className="font-medium rtl-title">
-                            {item.cost_center_name}
-                          </div>
-                          <div className="text-sm text-muted-foreground font-mono">
-                            {item.cost_center_code}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            المستوى {item.level}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">
-                          {getCostCenterTypeLabel(item.cost_center_type)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {item.department_name || '-'}
-                      </TableCell>
-                      <TableCell>
-                        {item.manager_name || '-'}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="outline">
-                          {item.employee_count}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="outline">
-                          {item.contract_count}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {item.budget_amount.toLocaleString()} د.ك
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {item.actual_spent.toLocaleString()} د.ك
-                      </TableCell>
-                      <TableCell>
-                        <div className={`font-medium ${getVarianceColor(item.variance)}`}>
-                          {Math.abs(item.variance).toLocaleString()} د.ك
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {item.variance > 0 ? 'توفير' : 'تجاوز'}
-                        </div>
-                      </TableCell>
-                      <TableCell>
                         <div className="space-y-1">
                           <Progress 
                             value={Math.min(item.budget_utilization_percentage, 100)}
@@ -208,6 +160,54 @@ const CostCenterReports = ({ report, isLoading }: CostCenterReportsProps) => {
                             }>
                             {item.budget_utilization_percentage.toFixed(1)}%
                             </span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className={`font-medium ${getVarianceColor(item.variance)}`}>
+                          {Math.abs(item.variance).toLocaleString()} د.ك
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {item.variance > 0 ? 'توفير' : 'تجاوز'}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {item.actual_spent.toLocaleString()} د.ك
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {item.budget_amount.toLocaleString()} د.ك
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="outline">
+                          {item.contract_count}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="outline">
+                          {item.employee_count}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {item.manager_name || '-'}
+                      </TableCell>
+                      <TableCell>
+                        {item.department_name || '-'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">
+                          {getCostCenterTypeLabel(item.cost_center_type)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium rtl-title">
+                            {item.cost_center_name}
+                          </div>
+                          <div className="text-sm text-muted-foreground font-mono">
+                            {item.cost_center_code}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            المستوى {item.level}
                           </div>
                         </div>
                       </TableCell>
