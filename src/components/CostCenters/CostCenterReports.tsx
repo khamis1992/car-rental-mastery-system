@@ -124,12 +124,12 @@ const CostCenterReports = ({ report, isLoading }: CostCenterReportsProps) => {
                   <TableHead className="rtl-title">النوع</TableHead>
                   <TableHead className="rtl-title">القسم</TableHead>
                   <TableHead className="rtl-title">المدير</TableHead>
+                  <TableHead className="rtl-title">الموظفين</TableHead>
+                  <TableHead className="rtl-title">العقود</TableHead>
                   <TableHead className="rtl-title">الميزانية</TableHead>
                   <TableHead className="rtl-title">المصروف</TableHead>
                   <TableHead className="rtl-title">الانحراف</TableHead>
                   <TableHead className="rtl-title">الاستخدام</TableHead>
-                  <TableHead className="rtl-title">الموظفين</TableHead>
-                  <TableHead className="rtl-title">العقود</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -172,6 +172,16 @@ const CostCenterReports = ({ report, isLoading }: CostCenterReportsProps) => {
                       <TableCell>
                         {item.manager_name || '-'}
                       </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="outline">
+                          {item.employee_count}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="outline">
+                          {item.contract_count}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="font-medium">
                         {item.budget_amount.toLocaleString()} د.ك
                       </TableCell>
@@ -200,16 +210,6 @@ const CostCenterReports = ({ report, isLoading }: CostCenterReportsProps) => {
                             </span>
                           </div>
                         </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="outline">
-                          {item.employee_count}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="outline">
-                          {item.contract_count}
-                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))
