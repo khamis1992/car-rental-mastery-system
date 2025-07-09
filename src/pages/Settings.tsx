@@ -307,39 +307,39 @@ const Settings = () => {
                 <h3 className="text-lg font-medium">إعدادات التنبيهات</h3>
                 
                 <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="emailNotifications">إشعارات البريد الإلكتروني</Label>
-                    <p className="text-sm text-muted-foreground">تلقي إشعارات عبر البريد الإلكتروني</p>
-                  </div>
                   <Switch
                     id="emailNotifications"
                     checked={systemSettings.emailNotifications}
                     onCheckedChange={(checked) => handleSystemSettingChange('emailNotifications', checked)}
                   />
+                  <div className="text-right">
+                    <Label htmlFor="emailNotifications">إشعارات البريد الإلكتروني</Label>
+                    <p className="text-sm text-muted-foreground">تلقي إشعارات عبر البريد الإلكتروني</p>
+                  </div>
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="smsNotifications">إشعارات الرسائل النصية</Label>
-                    <p className="text-sm text-muted-foreground">تلقي إشعارات عبر الرسائل النصية</p>
-                  </div>
                   <Switch
                     id="smsNotifications"
                     checked={systemSettings.smsNotifications}
                     onCheckedChange={(checked) => handleSystemSettingChange('smsNotifications', checked)}
                   />
+                  <div className="text-right">
+                    <Label htmlFor="smsNotifications">إشعارات الرسائل النصية</Label>
+                    <p className="text-sm text-muted-foreground">تلقي إشعارات عبر الرسائل النصية</p>
+                  </div>
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="maintenanceMode">وضع الصيانة</Label>
-                    <p className="text-sm text-muted-foreground">تعطيل النظام مؤقتاً للصيانة</p>
-                  </div>
                   <Switch
                     id="maintenanceMode"
                     checked={systemSettings.maintenanceMode}
                     onCheckedChange={(checked) => handleSystemSettingChange('maintenanceMode', checked)}
                   />
+                  <div className="text-right">
+                    <Label htmlFor="maintenanceMode">وضع الصيانة</Label>
+                    <p className="text-sm text-muted-foreground">تعطيل النظام مؤقتاً للصيانة</p>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -599,54 +599,54 @@ const Settings = () => {
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <Switch defaultChecked />
+                  <div className="text-right">
                     <Label>إشعارات العقود المنتهية</Label>
                     <p className="text-sm text-muted-foreground">تنبيه عند انتهاء صلاحية العقود</p>
                   </div>
-                  <Switch defaultChecked />
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <div>
+                  <Switch defaultChecked />
+                  <div className="text-right">
                     <Label>إشعارات الصيانة المجدولة</Label>
                     <p className="text-sm text-muted-foreground">تنبيه قبل موعد الصيانة المجدولة</p>
                   </div>
-                  <Switch defaultChecked />
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <div>
+                  <Switch defaultChecked />
+                  <div className="text-right">
                     <Label>إشعارات المدفوعات المتأخرة</Label>
                     <p className="text-sm text-muted-foreground">تنبيه عند تأخر المدفوعات</p>
                   </div>
-                  <Switch defaultChecked />
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <div>
+                  <Switch />
+                  <div className="text-right">
                     <Label>إشعارات العملاء الجدد</Label>
                     <p className="text-sm text-muted-foreground">تنبيه عند تسجيل عميل جديد</p>
                   </div>
-                  <Switch />
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <div>
+                  <Switch defaultChecked />
+                  <div className="text-right">
                     <Label>إشعارات انتهاء التأمين</Label>
                     <p className="text-sm text-muted-foreground">تنبيه قبل انتهاء تأمين المركبات</p>
                   </div>
-                  <Switch defaultChecked />
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <div>
-                    <Label>تفعيل نظام الحضور والغياب</Label>
-                    <p className="text-sm text-muted-foreground">إظهار أو إخفاء تبويبة الحضور والغياب من القائمة الرئيسية</p>
-                  </div>
                    <Switch 
                      checked={systemSettings.attendanceEnabled}
                      onCheckedChange={(checked) => handleSystemSettingChange('attendanceEnabled', checked)}
                    />
+                  <div className="text-right">
+                    <Label>تفعيل نظام الحضور والغياب</Label>
+                    <p className="text-sm text-muted-foreground">إظهار أو إخفاء تبويبة الحضور والغياب من القائمة الرئيسية</p>
+                  </div>
                 </div>
               </div>
             </CardContent>
