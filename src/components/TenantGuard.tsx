@@ -1,16 +1,15 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/contexts/TenantContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import TenantGuard from './TenantGuard';
 
-interface ProtectedRouteProps {
+interface TenantGuardProps {
   children: React.ReactNode;
-  requiredRole?: 'admin' | 'manager' | 'accountant' | 'technician' | 'receptionist';
+  requiredRole?: 'super_admin' | 'tenant_admin' | 'manager' | 'accountant' | 'receptionist' | 'user';
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
-  const { user, profile, loading } = useAuth();
+const TenantGuard: React.FC<TenantGuardProps> = ({ children, requiredRole }) => {
+  const { currentTenant, currentUserRole, loading } = useTenant();
 
   if (loading) {
     return (
@@ -22,20 +21,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
               <Skeleton key={i} className="h-32 w-full" />
             ))}
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Skeleton className="h-64 w-full" />
-            <Skeleton className="h-64 w-full" />
-          </div>
         </div>
       </div>
     );
   }
 
-  if (!user) {
-    return <Navigate to="/auth" replace />;
+  if (!currentTenant) {
+    return <Navigate to="/tenants" replace />;
   }
 
-  if (requiredRole && profile && profile.role !== requiredRole && profile.role !== 'admin') {
+  if (requiredRole && currentUserRole && currentUserRole !== requiredRole && currentUserRole !== 'super_admin') {
     return (
       <div className="min-h-screen bg-gradient-soft flex items-center justify-center">
         <div className="text-center">
@@ -50,7 +45,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     );
   }
 
-  return <TenantGuard>{children}</TenantGuard>;
+  return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default TenantGuard;

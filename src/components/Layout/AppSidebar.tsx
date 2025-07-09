@@ -17,7 +17,8 @@ import {
   DollarSign,
   UserCheck,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Crown
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -34,6 +35,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
+import { useTenant } from "@/contexts/TenantContext";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -137,10 +139,20 @@ const systemItems = [
   },
 ];
 
+// إدارة المؤسسات (لمديري النظام فقط)
+const tenantItems = [
+  { 
+    title: "المؤسسات", 
+    url: "/tenants", 
+    icon: Crown 
+  },
+];
+
 export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const { profile } = useAuth();
+  const { currentUserRole } = useTenant();
   const currentPath = location.pathname;
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({
     core: false,
@@ -302,6 +314,7 @@ export function AppSidebar() {
         {renderMenuGroup(fleetManagementItems, "fleet", "إدارة الأسطول", Car)}
         {renderMenuGroup(filteredHrItems, "hr", "الموارد البشرية", UserCheck)}
         {renderMenuGroup(systemItems, "system", "النظام", Settings)}
+        {currentUserRole === 'super_admin' && renderMenuGroup(tenantItems, "tenants", "إدارة المؤسسات", Crown)}
       </SidebarContent>
     </Sidebar>
   );

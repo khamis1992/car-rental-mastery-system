@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import { SearchProvider } from "@/contexts/SearchContext";
@@ -31,6 +32,7 @@ import Attendance from "./pages/Attendance";
 import Leaves from "./pages/Leaves";
 import Payroll from "./pages/Payroll";
 import CostCenters from "./pages/CostCenters";
+import Tenants from "./pages/Tenants";
 import NotFound from "./pages/NotFound";
 import PublicQuotation from "./pages/PublicQuotation";
 import DraftStage from "./pages/ContractStages/DraftStage";
@@ -73,7 +75,8 @@ const App = () => (
   <GlobalErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ContractsRealtimeProvider>
+        <TenantProvider>
+          <ContractsRealtimeProvider>
           <NotificationProvider>
             <SettingsProvider>
               <SearchProvider>
@@ -195,13 +198,20 @@ const App = () => (
                         </Layout>
                       </ProtectedRoute>
                     } />
-                    <Route path="/cost-centers" element={
-                      <ProtectedRoute>
-                        <Layout>
-                          <CostCenters />
-                        </Layout>
-                      </ProtectedRoute>
-                    } />
+                     <Route path="/cost-centers" element={
+                       <ProtectedRoute>
+                         <Layout>
+                           <CostCenters />
+                         </Layout>
+                       </ProtectedRoute>
+                     } />
+                     <Route path="/tenants" element={
+                       <ProtectedRoute>
+                         <Layout>
+                           <Tenants />
+                         </Layout>
+                       </ProtectedRoute>
+                     } />
                     {/* Contract stage routes */}
                     <Route path="/contracts/stage/draft/:contractId" element={
                       <ProtectedRoute>
@@ -257,9 +267,10 @@ const App = () => (
               </TooltipProvider>
             </SearchProvider>
           </SettingsProvider>
-        </NotificationProvider>
-        </ContractsRealtimeProvider>
-      </AuthProvider>
+         </NotificationProvider>
+         </ContractsRealtimeProvider>
+        </TenantProvider>
+       </AuthProvider>
     </QueryClientProvider>
   </GlobalErrorBoundary>
 );
