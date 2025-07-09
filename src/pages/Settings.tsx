@@ -359,17 +359,17 @@ const Settings = () => {
           <Card className="card-elegant">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
+                <Button 
+                  className="btn-primary rtl-flex"
+                  onClick={() => setIsAddUserDialogOpen(true)}
+                >
+                  <Users className="w-4 h-4" />
+                  إضافة مستخدم
+                </Button>
+                <CardTitle className="flex items-center gap-2 rtl-flex rtl-title">
                   <Users className="w-5 h-5" />
                   إدارة المستخدمين
                 </CardTitle>
-                <Button 
-                  className="btn-primary"
-                  onClick={() => setIsAddUserDialogOpen(true)}
-                >
-                  <Users className="w-4 h-4 mr-2" />
-                  إضافة مستخدم
-                </Button>
               </div>
             </CardHeader>
             <CardContent>
