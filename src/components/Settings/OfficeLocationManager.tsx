@@ -135,17 +135,20 @@ const OfficeLocationManager: React.FC = () => {
     <div className="space-y-6">
       {/* رأس القسم */}
       <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-medium">إدارة مواقع المكاتب</h3>
-          <p className="text-sm text-muted-foreground">
-            إدارة المواقع المسموحة لتسجيل الحضور
-          </p>
-        </div>
-        
         <Button onClick={handleAddLocation} className="btn-primary">
           <Plus className="w-4 h-4 ml-2" />
           إضافة موقع جديد
         </Button>
+        
+        <div className="text-right">
+          <div className="flex items-center gap-2 justify-end">
+            <h3 className="text-lg font-medium">إدارة مواقع المكاتب</h3>
+            <MapPin className="w-5 h-5 text-primary" />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            إدارة المواقع المسموحة لتسجيل الحضور
+          </p>
+        </div>
       </div>
 
       {/* إحصائيات سريعة */}
@@ -153,10 +156,12 @@ const OfficeLocationManager: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-primary" />
+              <AlertCircle className="w-5 h-5 text-orange-500" />
               <div>
-                <p className="text-sm text-muted-foreground">إجمالي المواقع</p>
-                <p className="text-xl font-bold">{locations.length}</p>
+                <p className="text-sm text-muted-foreground">المواقع المعطلة</p>
+                <p className="text-xl font-bold text-orange-600">
+                  {locations.filter(l => !l.is_active).length}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -179,12 +184,10 @@ const OfficeLocationManager: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-orange-500" />
+              <MapPin className="w-5 h-5 text-primary" />
               <div>
-                <p className="text-sm text-muted-foreground">المواقع المعطلة</p>
-                <p className="text-xl font-bold text-orange-600">
-                  {locations.filter(l => !l.is_active).length}
-                </p>
+                <p className="text-sm text-muted-foreground">إجمالي المواقع</p>
+                <p className="text-xl font-bold">{locations.length}</p>
               </div>
             </div>
           </CardContent>
@@ -290,12 +293,14 @@ const OfficeLocationManager: React.FC = () => {
       )}
 
       {/* تنبيه */}
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          تأكد من دقة إحداثيات المواقع ونطاقاتها لضمان عمل نظام الحضور بشكل صحيح. 
-          يمكن للموظفين تسجيل الحضور فقط من المواقع النشطة.
-        </AlertDescription>
+      <Alert className="text-right">
+        <div className="flex items-start gap-2 justify-end">
+          <AlertDescription className="text-right">
+            تأكد من دقة إحداثيات المواقع ونطاقاتها لضمان عمل نظام الحضور بشكل صحيح. 
+            يمكن للموظفين تسجيل الحضور فقط من المواقع النشطة.
+          </AlertDescription>
+          <AlertCircle className="h-4 w-4" />
+        </div>
       </Alert>
 
       {/* نموذج إضافة/تعديل موقع */}
