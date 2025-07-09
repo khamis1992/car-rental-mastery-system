@@ -135,20 +135,29 @@ const OfficeLocationManager: React.FC = () => {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-      {/* رأس القسم */}
-      <div className="flex items-start justify-end">
-        <div className="text-right">
-          <div className="flex items-center gap-2 justify-end">
-            <h3 className="text-lg font-medium">إدارة مواقع المكاتب</h3>
-            <MapPin className="w-5 h-5 text-primary" />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            إدارة المواقع المسموحة لتسجيل الحضور
-          </p>
-          <Button onClick={handleAddLocation} className="btn-primary mt-3">
-            <Plus className="w-4 h-4 ml-2" />
+      {/* رأس الصفحة */}
+      <div className="bg-white dark:bg-card p-6 rounded-xl border border-border/50 shadow-sm mb-6" style={{ fontFamily: 'Cairo, system-ui, sans-serif' }}>
+        <div className="flex items-center justify-between">
+          {/* زر الإضافة على اليسار */}
+          <Button onClick={handleAddLocation} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2">
+            <Plus className="w-5 h-5" />
             إضافة موقع جديد
           </Button>
+          
+          {/* العنوان والوصف على اليمين */}
+          <div className="text-right">
+            {/* العنوان الرئيسي */}
+            <div className="flex items-center gap-3 justify-end mb-2">
+              <h1 className="text-2xl font-bold text-foreground">إدارة مواقع المكاتب</h1>
+              <div className="text-2xl">🏢</div>
+            </div>
+            
+            {/* السطر الفرعي */}
+            <div className="flex items-center gap-2 justify-end">
+              <p className="text-muted-foreground text-base">إدارة المواقع المسموحة لتسجيل الحضور</p>
+              <div className="text-lg">📍</div>
+            </div>
+          </div>
         </div>
       </div>
 
