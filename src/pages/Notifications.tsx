@@ -316,7 +316,7 @@ const Notifications = () => {
               <div>
                 <h3 className="font-medium mb-4 rtl-title">أنواع الإشعارات</h3>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between rtl-flex">
+                  <div className="flex items-center justify-between">
                     <Switch
                       checked={settings.contractExpiry}
                       onCheckedChange={(checked) => 
@@ -329,7 +329,7 @@ const Notifications = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between rtl-flex">
+                  <div className="flex items-center justify-between">
                     <Switch
                       checked={settings.maintenanceAlerts}
                       onCheckedChange={(checked) => 
@@ -342,7 +342,7 @@ const Notifications = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between rtl-flex">
+                  <div className="flex items-center justify-between">
                     <Switch
                       checked={settings.paymentReminders}
                       onCheckedChange={(checked) => 
@@ -355,7 +355,7 @@ const Notifications = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between rtl-flex">
+                  <div className="flex items-center justify-between">
                     <Switch
                       checked={settings.newCustomers}
                       onCheckedChange={(checked) => 
@@ -368,7 +368,7 @@ const Notifications = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between rtl-flex">
+                  <div className="flex items-center justify-between">
                     <Switch
                       checked={settings.insuranceExpiry}
                       onCheckedChange={(checked) => 
@@ -386,7 +386,7 @@ const Notifications = () => {
               <div>
                 <h3 className="font-medium mb-4 rtl-title">طرق التنبيه</h3>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between rtl-flex">
+                  <div className="flex items-center justify-between">
                     <Switch
                       checked={settings.emailNotifications}
                       onCheckedChange={(checked) => 
@@ -399,7 +399,7 @@ const Notifications = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between rtl-flex">
+                  <div className="flex items-center justify-between">
                     <Switch
                       checked={settings.smsNotifications}
                       onCheckedChange={(checked) => 
@@ -412,7 +412,7 @@ const Notifications = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between rtl-flex">
+                  <div className="flex items-center justify-between">
                     <Switch
                       checked={settings.pushNotifications}
                       onCheckedChange={(checked) => 
