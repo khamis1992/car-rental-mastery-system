@@ -188,7 +188,7 @@ const Notifications = () => {
                       !notification.read ? 'bg-muted/50 border-primary/20' : ''
                     }`}
                   >
-                    <div className="flex items-start justify-between rtl-flex">
+                    <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
                         {!notification.read && (
                           <Button
@@ -208,9 +208,10 @@ const Notifications = () => {
                         </Button>
                       </div>
                       
-                      <div className="flex items-start gap-3 flex-1 text-right">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1 justify-end rtl-flex">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="flex-1 text-right">
+                          <div className="flex items-center gap-2 mb-1 justify-end flex-row-reverse">
+                            {getNotificationIcon(notification.type)}
                             <Badge variant="outline">
                               {getCategoryLabel(notification.category)}
                             </Badge>
@@ -226,12 +227,11 @@ const Notifications = () => {
                           <p className="text-sm text-muted-foreground mb-2 text-right">
                             {notification.message}
                           </p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground justify-end rtl-flex">
-                            {notification.time}
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground justify-end flex-row-reverse">
                             <Clock className="w-3 h-3" />
+                            {notification.time}
                           </div>
                         </div>
-                        {getNotificationIcon(notification.type)}
                       </div>
                     </div>
                   </div>
@@ -256,7 +256,7 @@ const Notifications = () => {
                         !notification.read ? 'bg-muted/50 border-primary/20' : ''
                       }`}
                     >
-                       <div className="flex items-start justify-between rtl-flex">
+                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2">
                           {!notification.read && (
                             <Button
@@ -276,9 +276,10 @@ const Notifications = () => {
                           </Button>
                         </div>
                         
-                        <div className="flex items-start gap-3 flex-1 text-right">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1 justify-end rtl-flex">
+                        <div className="flex items-start gap-3 flex-1">
+                          <div className="flex-1 text-right">
+                            <div className="flex items-center gap-2 mb-1 justify-end flex-row-reverse">
+                              {getNotificationIcon(notification.type)}
                               <Badge className={getPriorityColor(notification.priority)}>
                                 {notification.priority === 'urgent' ? 'عاجل' : 
                                  notification.priority === 'high' ? 'مهم' :
@@ -291,12 +292,11 @@ const Notifications = () => {
                             <p className="text-sm text-muted-foreground mb-2 text-right">
                               {notification.message}
                             </p>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground justify-end rtl-flex">
-                              {notification.time}
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground justify-end flex-row-reverse">
                               <Clock className="w-3 h-3" />
+                              {notification.time}
                             </div>
                           </div>
-                          {getNotificationIcon(notification.type)}
                         </div>
                       </div>
                     </div>
