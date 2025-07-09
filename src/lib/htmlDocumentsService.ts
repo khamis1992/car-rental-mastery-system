@@ -522,7 +522,7 @@ export class HTMLDocumentsService {
                 <li><strong>5111:</strong> علاوات ومكافآت</li>
                 <li><strong>5112:</strong> ساعات إضافية</li>
                 <li><strong>5120:</strong> استهلاك المركبات</li>
-                <li><strong>5130:</strong> صيانة وإصلاح المركبات</li>
+                <li><strong>5101:</strong> صيانة وإصلاح المركبات</li>
                 <li><strong>5140:</strong> تأمين المركبات</li>
                 <li><strong>5150:</strong> وقود المركبات</li>
               </ul>
