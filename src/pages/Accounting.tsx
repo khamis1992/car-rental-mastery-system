@@ -9,7 +9,6 @@ import { SystemIntegrityTab } from '@/components/Accounting/SystemIntegrityTab';
 import { AccountingEventMonitoringDashboard } from '@/components/Accounting/AccountingEventMonitoringDashboard';
 import { AccountingDataRefresh } from '@/components/Accounting/AccountingDataRefresh';
 import { AccountingMaintenanceTools } from '@/components/Accounting/AccountingMaintenanceTools';
-import { AutomationSettingsTab } from '@/components/Accounting/AutomationSettingsTab';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -124,12 +123,11 @@ const Accounting = () => {
       </div>
 
       <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="monitoring">المراقبة المباشرة</TabsTrigger>
           <TabsTrigger value="integrity">سلامة النظام</TabsTrigger>
           <TabsTrigger value="reconciliation">التسوية</TabsTrigger>
           <TabsTrigger value="analytics">التحليلات</TabsTrigger>
-          <TabsTrigger value="automation">الأتمتة</TabsTrigger>
           <TabsTrigger value="reports">التقارير المالية</TabsTrigger>
           <TabsTrigger value="journal">القيود المحاسبية</TabsTrigger>
           <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
@@ -154,10 +152,6 @@ const Accounting = () => {
 
         <TabsContent value="journal" className="space-y-4">
           <JournalEntriesTab />
-        </TabsContent>
-
-        <TabsContent value="automation" className="space-y-4">
-          <AutomationSettingsTab />
         </TabsContent>
 
         <TabsContent value="transactions" className="space-y-4">
