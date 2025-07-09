@@ -135,57 +135,57 @@ const OfficeLocationManager: React.FC = () => {
     <div className="space-y-6">
       {/* رأس القسم */}
       <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-medium">إدارة مواقع المكاتب</h3>
+        <Button onClick={handleAddLocation} className="btn-primary rtl-flex">
+          <Plus className="w-4 h-4" />
+          إضافة موقع جديد
+        </Button>
+        
+        <div className="text-right">
+          <h3 className="text-lg font-medium rtl-title">إدارة مواقع المكاتب</h3>
           <p className="text-sm text-muted-foreground">
             إدارة المواقع المسموحة لتسجيل الحضور
           </p>
         </div>
-        
-        <Button onClick={handleAddLocation} className="btn-primary">
-          <Plus className="w-4 h-4 ml-2" />
-          إضافة موقع جديد
-        </Button>
       </div>
 
       {/* إحصائيات سريعة */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-primary" />
-              <div>
+            <div className="flex items-center gap-2 flex-row-reverse">
+              <div className="text-right">
                 <p className="text-sm text-muted-foreground">إجمالي المواقع</p>
                 <p className="text-xl font-bold">{locations.length}</p>
               </div>
+              <MapPin className="w-5 h-5 text-primary" />
             </div>
           </CardContent>
         </Card>
         
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-green-500" />
-              <div>
+            <div className="flex items-center gap-2 flex-row-reverse">
+              <div className="text-right">
                 <p className="text-sm text-muted-foreground">المواقع النشطة</p>
                 <p className="text-xl font-bold text-green-600">
                   {locations.filter(l => l.is_active).length}
                 </p>
               </div>
+              <Users className="w-5 h-5 text-green-500" />
             </div>
           </CardContent>
         </Card>
         
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-orange-500" />
-              <div>
+            <div className="flex items-center gap-2 flex-row-reverse">
+              <div className="text-right">
                 <p className="text-sm text-muted-foreground">المواقع المعطلة</p>
                 <p className="text-xl font-bold text-orange-600">
                   {locations.filter(l => !l.is_active).length}
                 </p>
               </div>
+              <AlertCircle className="w-5 h-5 text-orange-500" />
             </div>
           </CardContent>
         </Card>
@@ -200,8 +200,8 @@ const OfficeLocationManager: React.FC = () => {
             <p className="text-muted-foreground mb-4">
               ابدأ بإضافة موقع المكتب الأول لتمكين نظام الحضور
             </p>
-            <Button onClick={handleAddLocation} className="btn-primary">
-              <Plus className="w-4 h-4 ml-2" />
+            <Button onClick={handleAddLocation} className="btn-primary rtl-flex">
+              <Plus className="w-4 h-4" />
               إضافة موقع جديد
             </Button>
           </CardContent>
@@ -212,34 +212,6 @@ const OfficeLocationManager: React.FC = () => {
             <Card key={location.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h4 className="text-lg font-medium">{location.name}</h4>
-                      <Badge variant={location.is_active ? "default" : "secondary"}>
-                        {location.is_active ? 'نشط' : 'معطل'}
-                      </Badge>
-                    </div>
-                    
-                    {location.address && (
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {location.address}
-                      </p>
-                    )}
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">الإحداثيات: </span>
-                        <span className="font-mono">
-                          {formatCoordinates(location.latitude, location.longitude)}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">النطاق: </span>
-                        <span>{location.radius} متر</span>
-                      </div>
-                    </div>
-                  </div>
-                  
                   <div className="flex items-center gap-2">
                     {/* التفعيل/الإلغاء */}
                     <div className="flex items-center gap-2">
@@ -281,6 +253,34 @@ const OfficeLocationManager: React.FC = () => {
                         <Trash2 className="w-4 h-4" />
                       )}
                     </Button>
+                  </div>
+                  
+                  <div className="flex-1 text-right">
+                    <div className="flex items-center gap-3 mb-3 justify-end flex-row-reverse">
+                      <Badge variant={location.is_active ? "default" : "secondary"}>
+                        {location.is_active ? 'نشط' : 'معطل'}
+                      </Badge>
+                      <h4 className="text-lg font-medium">{location.name}</h4>
+                    </div>
+                    
+                    {location.address && (
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {location.address}
+                      </p>
+                    )}
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-right">
+                      <div>
+                        <span className="text-muted-foreground">الإحداثيات: </span>
+                        <span className="font-mono">
+                          {formatCoordinates(location.latitude, location.longitude)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">النطاق: </span>
+                        <span>{location.radius} متر</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
