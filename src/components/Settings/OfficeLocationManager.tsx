@@ -134,12 +134,7 @@ const OfficeLocationManager: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* رأس القسم */}
-      <div className="flex items-center justify-between">
-        <Button onClick={handleAddLocation} className="btn-primary">
-          <Plus className="w-4 h-4 ml-2" />
-          إضافة موقع جديد
-        </Button>
-        
+      <div className="flex items-start justify-end">
         <div className="text-right">
           <div className="flex items-center gap-2 justify-end">
             <h3 className="text-lg font-medium">إدارة مواقع المكاتب</h3>
@@ -148,6 +143,10 @@ const OfficeLocationManager: React.FC = () => {
           <p className="text-sm text-muted-foreground">
             إدارة المواقع المسموحة لتسجيل الحضور
           </p>
+          <Button onClick={handleAddLocation} className="btn-primary mt-3">
+            <Plus className="w-4 h-4 ml-2" />
+            إضافة موقع جديد
+          </Button>
         </div>
       </div>
 
