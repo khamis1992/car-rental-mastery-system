@@ -32,6 +32,7 @@ export interface CostCenterAllocation {
   created_by?: string;
   created_at: string;
   updated_at: string;
+  reference_details?: string; // إضافة الحقل الجديد
 }
 
 export interface CostCenterReport {
@@ -330,13 +331,17 @@ export class CostCenterService {
       let referenceDetails = '';
       
       try {
+        console.log('Processing allocation:', allocation.reference_type, allocation.reference_id);
+        
         switch (allocation.reference_type) {
           case 'contract':
             const { data: contract } = await supabase
               .from('contracts')
               .select('contract_number, customer:customers(name)')
               .eq('id', allocation.reference_id)
-              .single();
+              .maybeSingle();
+            
+            console.log('Contract data:', contract);
             
             if (contract) {
               referenceDetails = `عقد ${contract.contract_number} - ${contract.customer?.name || 'عميل غير معروف'}`;
@@ -348,7 +353,7 @@ export class CostCenterService {
               .from('employees')
               .select('first_name, last_name, employee_number')
               .eq('id', allocation.reference_id)
-              .single();
+              .maybeSingle();
             
             if (employee) {
               referenceDetails = `${employee.first_name} ${employee.last_name} (${employee.employee_number})`;
@@ -360,7 +365,7 @@ export class CostCenterService {
               .from('vehicles')
               .select('make, model, license_plate, vehicle_number')
               .eq('id', allocation.reference_id)
-              .single();
+              .maybeSingle();
             
             if (vehicle) {
               referenceDetails = `${vehicle.make} ${vehicle.model} - ${vehicle.license_plate} (${vehicle.vehicle_number})`;
@@ -379,10 +384,13 @@ export class CostCenterService {
         referenceDetails = allocation.reference_id;
       }
       
-      return {
+      const result = {
         ...allocation,
         reference_details: referenceDetails || allocation.reference_id
       };
+      
+      console.log('Final allocation with details:', result);
+      return result;
     }));
 
     return allocationsWithDetails;
