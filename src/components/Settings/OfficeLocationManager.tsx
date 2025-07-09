@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   MapPin, 
   Plus, 
@@ -132,7 +133,8 @@ const OfficeLocationManager: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <TooltipProvider>
+      <div className="space-y-6">
       {/* رأس القسم */}
       <div className="flex items-start justify-end">
         <div className="text-right">
@@ -209,80 +211,111 @@ const OfficeLocationManager: React.FC = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-6">
           {locations.map((location) => (
-            <Card key={location.id} className="hover:shadow-md transition-shadow">
+            <Card key={location.id} className="hover:shadow-lg transition-all duration-300 bg-white dark:bg-card rounded-xl border border-border/50" style={{ fontFamily: 'Cairo, system-ui, sans-serif' }}>
               <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h4 className="text-lg font-medium">{location.name}</h4>
-                      <Badge variant={location.is_active ? "default" : "secondary"}>
-                        {location.is_active ? 'نشط' : 'معطل'}
-                      </Badge>
+                {/* رأس البطاقة - الاسم والحالة */}
+                <div className="flex items-center justify-between mb-4 border-b border-border/20 pb-4">
+                  <div className="flex items-center gap-3">
+                    <Badge variant={location.is_active ? "default" : "secondary"} className="px-3 py-1 text-sm font-medium">
+                      {location.is_active ? 'نشط' : 'معطل'}
+                    </Badge>
+                  </div>
+                  <h4 className="text-xl font-semibold text-right">{location.name}</h4>
+                </div>
+                
+                {/* تفاصيل الموقع */}
+                <div className="space-y-3 text-right mb-6">
+                  {location.address && (
+                    <div className="flex items-center justify-end gap-2">
+                      <span className="text-muted-foreground text-sm">{location.address}</span>
+                      <MapPin className="w-4 h-4 text-muted-foreground" />
                     </div>
-                    
-                    {location.address && (
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {location.address}
-                      </p>
-                    )}
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">الإحداثيات: </span>
-                        <span className="font-mono">
-                          {formatCoordinates(location.latitude, location.longitude)}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">النطاق: </span>
-                        <span>{location.radius} متر</span>
-                      </div>
-                    </div>
+                  )}
+                  
+                  <div className="flex items-center justify-end gap-2">
+                    <span className="font-mono text-sm">{formatCoordinates(location.latitude, location.longitude)}</span>
+                    <span className="text-muted-foreground text-sm">الإحداثيات:</span>
                   </div>
                   
+                  <div className="flex items-center justify-end gap-2">
+                    <span className="text-sm">{location.radius} متر</span>
+                    <span className="text-muted-foreground text-sm">النطاق:</span>
+                  </div>
+                </div>
+                
+                {/* شريط الأزرار */}
+                <div className="flex items-center justify-between pt-4 border-t border-border/20">
+                  {/* الأزرار على اليسار */}
                   <div className="flex items-center gap-2">
-                    {/* التفعيل/الإلغاء */}
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={location.is_active}
-                        onCheckedChange={() => handleToggleActive(location)}
-                      />
-                    </div>
-                    
-                    {/* فتح في الخريطة */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openInMap(location)}
-                      title="فتح في خرائط جوجل"
-                    >
-                      <Navigation className="w-4 h-4" />
-                    </Button>
+                    {/* حذف */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteLocation(location)}
+                          disabled={deletingId === location.id}
+                          className="p-2 h-9 w-9 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20"
+                        >
+                          {deletingId === location.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        <p>حذف الموقع</p>
+                      </TooltipContent>
+                    </Tooltip>
                     
                     {/* تعديل */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditLocation(location)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditLocation(location)}
+                          className="p-2 h-9 w-9 hover:bg-primary/10 hover:text-primary hover:border-primary/20"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        <p>تعديل الموقع</p>
+                      </TooltipContent>
+                    </Tooltip>
                     
-                    {/* حذف */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteLocation(location)}
-                      disabled={deletingId === location.id}
-                    >
-                      {deletingId === location.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="w-4 h-4" />
-                      )}
-                    </Button>
+                    {/* فتح في الخريطة */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openInMap(location)}
+                          className="p-2 h-9 w-9 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-950 dark:hover:text-blue-400"
+                        >
+                          <Navigation className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        <p>فتح في خرائط جوجل</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  
+                  {/* مفتاح التفعيل على اليمين */}
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-muted-foreground">
+                      {location.is_active ? 'مفعل' : 'معطل'}
+                    </span>
+                    <Switch
+                      checked={location.is_active}
+                      onCheckedChange={() => handleToggleActive(location)}
+                      className="data-[state=checked]:bg-green-500"
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -312,7 +345,8 @@ const OfficeLocationManager: React.FC = () => {
         onSuccess={loadLocations}
         editingLocation={editingLocation}
       />
-    </div>
+      </div>
+    </TooltipProvider>
   );
 };
 
