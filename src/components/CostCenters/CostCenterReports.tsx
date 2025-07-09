@@ -117,7 +117,7 @@ const CostCenterReports = ({ report, isLoading }: CostCenterReportsProps) => {
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
-            <Table>
+            <Table className="table-header-horizontal">
               <TableHeader>
                 <TableRow>
                   <TableHead className="rtl-title">الاستخدام</TableHead>
