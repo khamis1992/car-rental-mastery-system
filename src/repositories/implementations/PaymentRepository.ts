@@ -106,15 +106,28 @@ export class PaymentRepository extends BaseRepository<Payment> implements IPayme
   }
 
   async getPaymentStats() {
+    // Get current user's tenant ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+
+    const tenantId = tenantUser?.tenant_id || '';
+
     const { data: totalCount, error: totalError } = await supabase
       .from('payments')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'completed');
+      .eq('status', 'completed')
+      .eq('tenant_id', tenantId);
 
     const { data: totalValue, error: valueError } = await supabase
       .from('payments')
       .select('amount')
-      .eq('status', 'completed');
+      .eq('status', 'completed')
+      .eq('tenant_id', tenantId);
 
     // Get this month's payments
     const startOfMonth = new Date();
@@ -125,6 +138,7 @@ export class PaymentRepository extends BaseRepository<Payment> implements IPayme
       .from('payments')
       .select('amount')
       .eq('status', 'completed')
+      .eq('tenant_id', tenantId)
       .gte('payment_date', startOfMonth.toISOString().split('T')[0]);
 
     if (totalError || valueError || monthlyError) {
@@ -142,6 +156,15 @@ export class PaymentRepository extends BaseRepository<Payment> implements IPayme
   }
 
   async getRecentPayments(limit: number = 10) {
+    // Get current user's tenant ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+
     const { data, error } = await supabase
       .from('payments')
       .select(`
@@ -150,6 +173,7 @@ export class PaymentRepository extends BaseRepository<Payment> implements IPayme
         customers(name)
       `)
       .eq('status', 'completed')
+      .eq('tenant_id', tenantUser?.tenant_id || '')
       .order('created_at', { ascending: false })
       .limit(limit);
 

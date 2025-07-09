@@ -7,6 +7,15 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
   protected tableName = 'contracts' as const;
 
   async getContractsWithDetails(): Promise<ContractWithDetails[]> {
+    // Get current user's tenant ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+
     const { data, error } = await supabase
       .from('contracts')
       .select(`
@@ -38,6 +47,7 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
         customers(name, phone),
         vehicles(make, model, vehicle_number)
       `)
+      .eq('tenant_id', tenantUser?.tenant_id || '')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -75,6 +85,15 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
   }
 
   async getContractById(id: string) {
+    // Get current user's tenant ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+
     const { data, error } = await supabase
       .from('contracts')
       .select(`
@@ -125,6 +144,7 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
         quotations(quotation_number)
       `)
       .eq('id', id)
+      .eq('tenant_id', tenantUser?.tenant_id || '')
       .single();
 
     if (error) throw error;
@@ -253,25 +273,40 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
   }
 
   async getContractStats() {
+    // Get current user's tenant ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+
+    const tenantId = tenantUser?.tenant_id || '';
+
     const { count: totalCount, error: totalError } = await supabase
       .from('contracts')
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
+      .eq('tenant_id', tenantId);
 
     const { count: activeCount, error: activeError } = await supabase
       .from('contracts')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'active');
+      .eq('status', 'active')
+      .eq('tenant_id', tenantId);
 
     const { count: completedCount, error: completedError } = await supabase
       .from('contracts')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'completed');
+      .eq('status', 'completed')
+      .eq('tenant_id', tenantId);
 
     const { count: endingToday, error: endingError } = await supabase
       .from('contracts')
       .select('*', { count: 'exact', head: true })
       .eq('end_date', new Date().toISOString().split('T')[0])
-      .eq('status', 'active');
+      .eq('status', 'active')
+      .eq('tenant_id', tenantId);
 
     // Calculate this month's revenue
     const startOfMonth = new Date();
@@ -282,7 +317,8 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
       .from('contracts')
       .select('final_amount')
       .gte('created_at', startOfMonth.toISOString())
-      .in('status', ['active', 'completed']);
+      .in('status', ['active', 'completed'])
+      .eq('tenant_id', tenantId);
 
     if (totalError || activeError || completedError || endingError || revenueError) {
       throw totalError || activeError || completedError || endingError || revenueError;
@@ -300,6 +336,15 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
   }
 
   async getRecentContracts(limit: number = 5) {
+    // Get current user's tenant ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+
     const { data, error } = await supabase
       .from('contracts')
       .select(`
@@ -311,6 +356,7 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
         customers(name),
         vehicles(make, model, vehicle_number)
       `)
+      .eq('tenant_id', tenantUser?.tenant_id || '')
       .order('created_at', { ascending: false })
       .limit(limit);
 

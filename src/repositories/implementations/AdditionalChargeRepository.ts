@@ -7,10 +7,20 @@ export class AdditionalChargeRepository extends BaseRepository<AdditionalCharge>
   protected tableName = 'additional_charges' as const;
 
   async getChargesByContract(contractId: string): Promise<AdditionalCharge[]> {
+    // Get current user's tenant ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+
     const { data, error } = await supabase
       .from('additional_charges')
       .select('*')
       .eq('contract_id', contractId)
+      .eq('tenant_id', tenantUser?.tenant_id || '')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -18,6 +28,15 @@ export class AdditionalChargeRepository extends BaseRepository<AdditionalCharge>
   }
 
   async getPendingCharges(): Promise<AdditionalCharge[]> {
+    // Get current user's tenant ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+
     const { data, error } = await supabase
       .from('additional_charges')
       .select(`
@@ -26,6 +45,7 @@ export class AdditionalChargeRepository extends BaseRepository<AdditionalCharge>
         customers(name, phone)
       `)
       .eq('status', 'pending')
+      .eq('tenant_id', tenantUser?.tenant_id || '')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -81,18 +101,32 @@ export class AdditionalChargeRepository extends BaseRepository<AdditionalCharge>
   }
 
   async getChargeStats() {
+    // Get current user's tenant ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+
+    const tenantId = tenantUser?.tenant_id || '';
+
     const { data: totalCount, error: totalError } = await supabase
       .from('additional_charges')
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
+      .eq('tenant_id', tenantId);
 
     const { data: pendingCount, error: pendingError } = await supabase
       .from('additional_charges')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending');
+      .eq('status', 'pending')
+      .eq('tenant_id', tenantId);
 
     const { data: totalValue, error: valueError } = await supabase
       .from('additional_charges')
-      .select('amount');
+      .select('amount')
+      .eq('tenant_id', tenantId);
 
     if (totalError || pendingError || valueError) {
       throw totalError || pendingError || valueError;

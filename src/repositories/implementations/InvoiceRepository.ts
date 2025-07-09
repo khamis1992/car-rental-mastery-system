@@ -8,6 +8,15 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
   protected tableName = 'invoices' as const;
 
   async getInvoicesWithDetails(): Promise<InvoiceWithDetails[]> {
+    // Get current user's tenant ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+
     const { data, error } = await supabase
       .from('invoices')
       .select(`
@@ -18,6 +27,7 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
           vehicles(make, model, vehicle_number)
         )
       `)
+      .eq('tenant_id', tenantUser?.tenant_id || '')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -34,6 +44,15 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
   }
 
   async getInvoiceById(id: string): Promise<Invoice | null> {
+    // Get current user's tenant ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+
     const { data, error } = await supabase
       .from('invoices')
       .select(`
@@ -50,6 +69,7 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
         payments(*)
       `)
       .eq('id', id)
+      .eq('tenant_id', tenantUser?.tenant_id || '')
       .single();
 
     if (error) throw error;
@@ -215,23 +235,38 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
   }
 
   async getInvoiceStats() {
+    // Get current user's tenant ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+
+    const tenantId = tenantUser?.tenant_id || '';
+
     const { data: totalCount, error: totalError } = await supabase
       .from('invoices')
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
+      .eq('tenant_id', tenantId);
 
     const { data: paidCount, error: paidError } = await supabase
       .from('invoices')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'paid');
+      .eq('status', 'paid')
+      .eq('tenant_id', tenantId);
 
     const { data: overdueCount, error: overdueError } = await supabase
       .from('invoices')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'overdue');
+      .eq('status', 'overdue')
+      .eq('tenant_id', tenantId);
 
     const { data: totalValue, error: valueError } = await supabase
       .from('invoices')
-      .select('total_amount, outstanding_amount');
+      .select('total_amount, outstanding_amount')
+      .eq('tenant_id', tenantId);
 
     if (totalError || paidError || overdueError || valueError) {
       throw totalError || paidError || overdueError || valueError;
@@ -250,6 +285,15 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
   }
 
   async getOverdueInvoices() {
+    // Get current user's tenant ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+
     const { data, error } = await supabase
       .from('invoices')
       .select(`
@@ -258,6 +302,7 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
         contracts(contract_number)
       `)
       .eq('status', 'overdue')
+      .eq('tenant_id', tenantUser?.tenant_id || '')
       .order('due_date', { ascending: true });
 
     if (error) throw error;

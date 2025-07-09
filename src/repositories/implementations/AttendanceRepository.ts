@@ -48,6 +48,15 @@ export class AttendanceRepository extends BaseRepository<Attendance> implements 
   }
 
   async getByDateRange(startDate: string, endDate: string): Promise<Attendance[]> {
+    // Get current user's tenant ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+
     const { data, error } = await supabase
       .from('attendance')
       .select(`
@@ -64,6 +73,7 @@ export class AttendanceRepository extends BaseRepository<Attendance> implements 
           address
         )
       `)
+      .eq('tenant_id', tenantUser?.tenant_id || '')
       .gte('date', startDate)
       .lte('date', endDate)
       .order('date', { ascending: false });
