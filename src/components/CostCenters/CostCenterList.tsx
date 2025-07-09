@@ -188,12 +188,12 @@ const CostCenterList = ({ costCenters, onRefresh, isLoading }: CostCenterListPro
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div>
+                        <div className="text-right">
                           <div className="font-medium rtl-title">
                             {costCenter.cost_center_name}
                           </div>
                           {costCenter.description && (
-                            <div className="text-sm text-muted-foreground">
+                            <div className="text-sm text-muted-foreground text-right">
                               {costCenter.description}
                             </div>
                           )}
