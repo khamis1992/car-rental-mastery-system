@@ -208,9 +208,10 @@ const Notifications = () => {
                         </Button>
                       </div>
                       
-                      <div className="flex items-start gap-3">
-                        <div className="text-right">
-                          <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-start gap-3 ml-auto">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1 flex-row-reverse">
+                            {getNotificationIcon(notification.type)}
                             <Badge variant="outline">
                               {getCategoryLabel(notification.category)}
                             </Badge>
@@ -219,19 +220,18 @@ const Notifications = () => {
                                notification.priority === 'high' ? 'مهم' :
                                notification.priority === 'medium' ? 'متوسط' : 'عادي'}
                             </Badge>
-                            <h3 className={`font-medium ${!notification.read ? 'font-bold' : ''} rtl-title`}>
+                            <h3 className={`font-medium ${!notification.read ? 'font-bold' : ''} text-right`}>
                               {notification.title}
                             </h3>
                           </div>
                           <p className="text-sm text-muted-foreground mb-2 text-right">
                             {notification.message}
                           </p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground justify-end">
-                            {notification.time}
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground flex-row-reverse">
                             <Clock className="w-3 h-3" />
+                            <span>{notification.time}</span>
                           </div>
                         </div>
-                        {getNotificationIcon(notification.type)}
                       </div>
                     </div>
                   </div>
@@ -276,27 +276,27 @@ const Notifications = () => {
                           </Button>
                         </div>
                         
-                        <div className="flex items-start gap-3">
-                          <div className="text-right">
-                            <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-start gap-3 ml-auto">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1 flex-row-reverse">
+                              {getNotificationIcon(notification.type)}
                               <Badge className={getPriorityColor(notification.priority)}>
                                 {notification.priority === 'urgent' ? 'عاجل' : 
                                  notification.priority === 'high' ? 'مهم' :
                                  notification.priority === 'medium' ? 'متوسط' : 'عادي'}
                               </Badge>
-                              <h3 className={`font-medium ${!notification.read ? 'font-bold' : ''} rtl-title`}>
+                              <h3 className={`font-medium ${!notification.read ? 'font-bold' : ''} text-right`}>
                                 {notification.title}
                               </h3>
                             </div>
                             <p className="text-sm text-muted-foreground mb-2 text-right">
                               {notification.message}
                             </p>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground justify-end">
-                              {notification.time}
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground flex-row-reverse">
                               <Clock className="w-3 h-3" />
+                              <span>{notification.time}</span>
                             </div>
                           </div>
-                          {getNotificationIcon(notification.type)}
                         </div>
                       </div>
                     </div>
