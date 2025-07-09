@@ -1639,6 +1639,48 @@ export type Database = {
           },
         ]
       }
+      cost_center_settings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          requires_restart: boolean
+          setting_key: string
+          setting_type: string
+          setting_value: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          requires_restart?: boolean
+          setting_key: string
+          setting_type?: string
+          setting_value?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          requires_restart?: boolean
+          setting_key?: string
+          setting_type?: string
+          setting_value?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       cost_centers: {
         Row: {
           actual_spent: number | null
@@ -4660,6 +4702,10 @@ export type Database = {
         Args: { filters?: Json }
         Returns: Json
       }
+      get_cost_center_setting: {
+        Args: { setting_key_param: string }
+        Returns: Json
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -4738,6 +4784,14 @@ export type Database = {
       update_cost_center_actual_cost: {
         Args: { cost_center_id: string }
         Returns: undefined
+      }
+      update_cost_center_setting: {
+        Args: {
+          setting_key_param: string
+          new_value: Json
+          updated_by_param?: string
+        }
+        Returns: boolean
       }
       validate_accounting_balance: {
         Args: { journal_entry_id: string }

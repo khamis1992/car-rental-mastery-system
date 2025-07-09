@@ -23,6 +23,7 @@ import CostCenterForm from '@/components/CostCenters/CostCenterForm';
 import CostCenterList from '@/components/CostCenters/CostCenterList';
 import CostCenterReports from '@/components/CostCenters/CostCenterReports';
 import CostCenterAllocations from '@/components/CostCenters/CostCenterAllocations';
+import CostCenterSettings from '@/components/CostCenters/CostCenterSettings';
 
 const CostCenters = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -276,25 +277,7 @@ const CostCenters = () => {
         </TabsContent>
 
         <TabsContent value="settings">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 rtl-flex">
-                <Settings className="h-5 w-5" />
-                إعدادات مراكز التكلفة
-              </CardTitle>
-              <CardDescription>
-                إعدادات عامة لإدارة مراكز التكلفة
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <Settings className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">
-                  سيتم إضافة إعدادات إدارة مراكز التكلفة قريباً
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <CostCenterSettings />
         </TabsContent>
       </Tabs>
 
