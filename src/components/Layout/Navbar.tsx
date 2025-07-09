@@ -17,6 +17,7 @@ import { NotificationCenter } from "@/components/Navbar/NotificationCenter";
 import DailyTasksButton from "@/components/Navbar/DailyTasksButton";
 import { AttendanceClock } from "@/components/Navbar/AttendanceClock";
 import { useSearch } from "@/contexts/SearchContext";
+import TenantSelector from "@/components/Navbar/TenantSelector";
 
 const Navbar = () => {
   const { user, profile, signOut } = useAuth();
@@ -134,7 +135,7 @@ const Navbar = () => {
           </DropdownMenu>
         </div>
 
-        {/* شريط البحث وساعة الحضور */}
+        {/* شريط البحث وساعة الحضور ومحدد المؤسسة */}
         <div className="flex items-center gap-4 flex-1 max-w-2xl mx-8">
           <div className="flex-1 max-w-md">
             <Button
@@ -149,6 +150,9 @@ const Navbar = () => {
               </div>
             </Button>
           </div>
+          
+          {/* محدد المؤسسة */}
+          <TenantSelector />
           
           {/* ساعة الحضور */}
           <AttendanceClock />
