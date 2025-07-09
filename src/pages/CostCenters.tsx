@@ -137,11 +137,11 @@ const CostCenters = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-          <TabsTrigger value="centers">إدارة المراكز</TabsTrigger>
-          <TabsTrigger value="allocations">توزيع التكاليف</TabsTrigger>
-          <TabsTrigger value="reports">التقارير</TabsTrigger>
           <TabsTrigger value="settings">الإعدادات</TabsTrigger>
+          <TabsTrigger value="reports">التقارير</TabsTrigger>
+          <TabsTrigger value="allocations">توزيع التكاليف</TabsTrigger>
+          <TabsTrigger value="centers">إدارة المراكز</TabsTrigger>
+          <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
