@@ -110,14 +110,14 @@ const CostCenterList = ({ costCenters, onRefresh, isLoading }: CostCenterListPro
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="rtl-title">الكود</TableHead>
-                  <TableHead className="rtl-title">اسم مركز التكلفة</TableHead>
-                  <TableHead className="rtl-title">النوع</TableHead>
-                  <TableHead className="rtl-title">المستوى</TableHead>
-                  <TableHead className="rtl-title">الميزانية</TableHead>
-                  <TableHead className="rtl-title">المصروف</TableHead>
-                  <TableHead className="rtl-title">الاستخدام</TableHead>
-                  <TableHead className="rtl-title">الإجراءات</TableHead>
+                  <TableHead className="text-right font-semibold">الكود</TableHead>
+                  <TableHead className="text-right font-semibold">اسم مركز التكلفة</TableHead>
+                  <TableHead className="text-right font-semibold">النوع</TableHead>
+                  <TableHead className="text-right font-semibold">المستوى</TableHead>
+                  <TableHead className="text-right font-semibold">الميزانية</TableHead>
+                  <TableHead className="text-right font-semibold">المصروف</TableHead>
+                  <TableHead className="text-right font-semibold">الاستخدام</TableHead>
+                  <TableHead className="text-right font-semibold">الإجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
