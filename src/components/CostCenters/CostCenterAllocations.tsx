@@ -313,13 +313,8 @@ const CostCenterAllocations = () => {
                         <TableCell>
                           <div className="text-right">
                             <div className="font-medium">
-                              {(allocation as any).reference_details || allocation.reference_id}
+                              {(allocation as any).reference_details || 'غير محدد'}
                             </div>
-                            {(allocation as any).reference_details && (
-                              <div className="text-xs text-muted-foreground font-mono mt-1">
-                                {allocation.reference_id}
-                              </div>
-                            )}
                           </div>
                         </TableCell>
                         <TableCell>
