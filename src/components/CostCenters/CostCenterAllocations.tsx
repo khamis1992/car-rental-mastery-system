@@ -235,13 +235,13 @@ const CostCenterAllocations = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right">نوع المرجع</TableHead>
-                  <TableHead className="text-right">معرف المرجع</TableHead>
-                  <TableHead className="text-right">مركز التكلفة</TableHead>
-                  <TableHead className="text-right">النسبة</TableHead>
-                  <TableHead className="text-right">المبلغ</TableHead>
-                  <TableHead className="text-right">تاريخ التوزيع</TableHead>
                   <TableHead className="text-right">الإجراءات</TableHead>
+                  <TableHead className="text-right">تاريخ التوزيع</TableHead>
+                  <TableHead className="text-right">المبلغ</TableHead>
+                  <TableHead className="text-right">النسبة</TableHead>
+                  <TableHead className="text-right">مركز التكلفة</TableHead>
+                  <TableHead className="text-right">معرف المرجع</TableHead>
+                  <TableHead className="text-right">نوع المرجع</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -263,15 +263,40 @@ const CostCenterAllocations = () => {
                     return (
                       <TableRow key={allocation.id}>
                         <TableCell>
-                          <div className="flex items-center gap-2 rtl-flex">
-                            <Icon className="h-4 w-4" />
-                            <Badge variant="secondary">
-                              {getReferenceTypeLabel(allocation.reference_type)}
-                            </Badge>
+                          <div className="flex gap-2 rtl-flex">
+                            <Button variant="ghost" size="sm">
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteAllocation(allocation.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </TableCell>
-                        <TableCell className="font-mono">
-                          {allocation.reference_id}
+                        <TableCell>
+                          {allocation.allocation_date 
+                            ? new Date(allocation.allocation_date).toLocaleDateString('ar-SA', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })
+                            : 'غير محدد'
+                          }
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {allocation.allocation_amount?.toLocaleString('ar-KW', {
+                            minimumFractionDigits: 3,
+                            maximumFractionDigits: 3
+                          })} د.ك
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {allocation.allocation_percentage}%
+                          </Badge>
                         </TableCell>
                         <TableCell>
                           <div className="text-right">
@@ -285,40 +310,15 @@ const CostCenterAllocations = () => {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {allocation.allocation_percentage}%
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {allocation.allocation_amount?.toLocaleString('ar-KW', {
-                            minimumFractionDigits: 3,
-                            maximumFractionDigits: 3
-                          })} د.ك
+                        <TableCell className="font-mono">
+                          {allocation.reference_id}
                         </TableCell>
                         <TableCell>
-                          {allocation.allocation_date 
-                            ? new Date(allocation.allocation_date).toLocaleDateString('ar-SA', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })
-                            : 'غير محدد'
-                          }
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2 rtl-flex">
-                            <Button variant="ghost" size="sm">
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteAllocation(allocation.id)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                          <div className="flex items-center gap-2 rtl-flex">
+                            <Icon className="h-4 w-4" />
+                            <Badge variant="secondary">
+                              {getReferenceTypeLabel(allocation.reference_type)}
+                            </Badge>
                           </div>
                         </TableCell>
                       </TableRow>
