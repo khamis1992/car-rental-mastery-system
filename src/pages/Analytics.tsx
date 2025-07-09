@@ -20,6 +20,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAnalyticsData } from '@/hooks/useAnalyticsData';
+import { KPICard } from '@/components/Analytics/KPICard';
+import { RevenueChart } from '@/components/Analytics/RevenueChart';
+import { FleetUtilizationChart } from '@/components/Analytics/FleetUtilizationChart';
+import { CustomerSegmentChart } from '@/components/Analytics/CustomerSegmentChart';
+import { PerformanceTable } from '@/components/Analytics/PerformanceTable';
 import { formatCurrencyKWD } from '@/lib/currency';
 
 const Analytics = () => {
@@ -27,18 +34,48 @@ const Analytics = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('daily');
   const [showFlowchart, setShowFlowchart] = useState(false);
 
-  // Empty data arrays - to be replaced with real data
-  const kpiData: any[] = [];
-  const revenueData: any[] = [];
-  const fleetUtilization: any[] = [];
-  const customerSegments: any[] = [];
-  const topPerformingVehicles: any[] = [];
+  // Fetch analytics data
+  const {
+    kpiData,
+    revenueData,
+    fleetData,
+    customerData,
+    advancedKPIs,
+    isLoading,
+    error
+  } = useAnalyticsData(dateRange);
 
   const getUtilizationColor = (utilization: number) => {
     if (utilization >= 85) return 'text-green-500';
     if (utilization >= 70) return 'text-yellow-500';
     return 'text-red-500';
   };
+
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex gap-2">
+            <Skeleton className="w-40 h-10" />
+            <Skeleton className="w-20 h-10" />
+            <Skeleton className="w-32 h-10" />
+            <Skeleton className="w-24 h-10" />
+          </div>
+          <div>
+            <Skeleton className="w-64 h-8" />
+            <Skeleton className="w-48 h-4 mt-2" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-32" />
+          ))}
+        </div>
+        <Skeleton className="w-full h-96" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -87,21 +124,14 @@ const Analytics = () => {
       {/* مؤشرات الأداء الرئيسية */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpiData.map((kpi, index) => (
-          <Card key={index} className="card-elegant">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between rtl-flex">
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground rtl-title">{kpi.title}</p>
-                  <p className="text-2xl font-bold rtl-title">{kpi.value}</p>
-                  <div className="flex items-center gap-1 mt-1 rtl-flex">
-                    <TrendingUp className="w-4 h-4 text-green-500" />
-                    <span className="text-sm text-green-500">{kpi.change}</span>
-                  </div>
-                </div>
-                {kpi.icon}
-              </div>
-            </CardContent>
-          </Card>
+          <KPICard
+            key={index}
+            title={kpi.title}
+            value={kpi.value}
+            change={kpi.change}
+            icon={kpi.icon}
+            trend={kpi.trend}
+          />
         ))}
       </div>
 
@@ -116,97 +146,21 @@ const Analytics = () => {
 
         <TabsContent value="revenue" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="card-elegant">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 rtl-flex">
-                  <BarChart3 className="w-5 h-5" />
-                  الإيرادات الشهرية
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  لا توجد بيانات إيرادات متاحة
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-elegant">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 rtl-flex">
-                  <PieChart className="w-5 h-5" />
-                  توزيع الإيرادات حسب نوع السيارة
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  لا توجد بيانات أسطول متاحة
-                </div>
-              </CardContent>
-            </Card>
+            <RevenueChart data={revenueData} />
+            <FleetUtilizationChart data={fleetData} />
           </div>
         </TabsContent>
 
         <TabsContent value="fleet" className="space-y-4">
-          <Card className="card-elegant">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 rtl-flex">
-                <Car className="w-5 h-5" />
-                تحليل أداء الأسطول
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                لا توجد بيانات أداء أسطول متاحة
-              </div>
-            </CardContent>
-          </Card>
+          <FleetUtilizationChart data={fleetData} />
         </TabsContent>
 
         <TabsContent value="customers" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="card-elegant">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 rtl-flex">
-                  <Users className="w-5 h-5" />
-                  شرائح العملاء
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  لا توجد بيانات شرائح عملاء متاحة
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-elegant">
-              <CardHeader>
-                <CardTitle className="rtl-title">إحصائيات العملاء</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-center py-8 text-muted-foreground">
-                    لا توجد إحصائيات عملاء متاحة
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <CustomerSegmentChart data={customerData} />
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-4">
-          <Card className="card-elegant">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 rtl-flex">
-                <TrendingUp className="w-5 h-5" />
-                أفضل السيارات أداءً
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                لا توجد بيانات أداء سيارات متاحة
-              </div>
-            </CardContent>
-          </Card>
+          <PerformanceTable data={advancedKPIs} />
         </TabsContent>
 
         <TabsContent value="trends" className="space-y-4">
