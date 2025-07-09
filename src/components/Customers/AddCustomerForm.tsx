@@ -129,7 +129,10 @@ const AddCustomerForm: React.FC<AddCustomerFormProps> = ({ onCustomerAdded }) =>
 
       const { error } = await supabase
         .from('customers')
-        .insert([customerData]);
+        .insert([{
+          ...customerData,
+          tenant_id: null as any // Will be set by trigger
+        }]);
 
       if (error) {
         console.error('خطأ في إضافة العميل:', error);

@@ -149,7 +149,8 @@ const CustomerCSVImportDialog: React.FC<CustomerCSVImportDialogProps> = ({
           .insert([{
             ...customerData,
             customer_number: customerNumber,
-            created_by: user?.id
+            created_by: user?.id,
+            tenant_id: null as any // Will be set by trigger
           }]);
 
         if (error) {

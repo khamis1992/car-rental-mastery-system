@@ -209,7 +209,8 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSuccess, mode }
           .insert([{
             ...customerData,
             customer_number: customerNumber,
-            created_by: user?.id
+            created_by: user?.id,
+            tenant_id: null as any // Will be set by trigger
           }]);
 
         if (error) {

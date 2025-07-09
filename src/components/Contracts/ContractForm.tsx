@@ -220,7 +220,10 @@ export const ContractForm: React.FC<ContractFormProps> = ({
       console.log('Inserting contract data:', contractData);
       const { error, data: insertedData } = await supabase
         .from('contracts')
-        .insert(contractData)
+        .insert({
+          ...contractData,
+          tenant_id: null as any // Will be set by trigger
+        })
         .select();
 
       if (error) {

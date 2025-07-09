@@ -223,7 +223,10 @@ export const BilingualContractForm: React.FC<BilingualContractFormProps> = ({
 
       const { error } = await supabase
         .from('contracts')
-        .insert(contractData);
+        .insert({
+          ...contractData,
+          tenant_id: null as any // Will be set by trigger
+        });
 
       if (error) throw error;
 

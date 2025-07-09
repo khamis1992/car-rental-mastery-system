@@ -125,7 +125,10 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({
 
       const { error } = await supabase
         .from('quotations')
-        .insert([quotationData]);
+        .insert([{
+          ...quotationData,
+          tenant_id: null as any // Will be set by trigger
+        }]);
 
       if (error) throw error;
 
