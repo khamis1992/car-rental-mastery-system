@@ -235,13 +235,13 @@ const CostCenterAllocations = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="rtl-title">نوع المرجع</TableHead>
-                  <TableHead className="rtl-title">معرف المرجع</TableHead>
-                  <TableHead className="rtl-title">مركز التكلفة</TableHead>
-                  <TableHead className="rtl-title">النسبة</TableHead>
-                  <TableHead className="rtl-title">المبلغ</TableHead>
-                  <TableHead className="rtl-title">تاريخ التوزيع</TableHead>
-                  <TableHead className="rtl-title">الإجراءات</TableHead>
+                  <TableHead className="text-right">نوع المرجع</TableHead>
+                  <TableHead className="text-right">معرف المرجع</TableHead>
+                  <TableHead className="text-right">مركز التكلفة</TableHead>
+                  <TableHead className="text-right">النسبة</TableHead>
+                  <TableHead className="text-right">المبلغ</TableHead>
+                  <TableHead className="text-right">تاريخ التوزيع</TableHead>
+                  <TableHead className="text-right">الإجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
