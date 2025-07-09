@@ -310,8 +310,15 @@ const CostCenterAllocations = () => {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="font-mono">
-                          {allocation.reference_id}
+                        <TableCell>
+                          <div className="text-right">
+                            <div className="font-medium">
+                              {allocation.reference_details || allocation.reference_id}
+                            </div>
+                            <div className="text-xs text-muted-foreground font-mono">
+                              {allocation.reference_id}
+                            </div>
+                          </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2 rtl-flex">

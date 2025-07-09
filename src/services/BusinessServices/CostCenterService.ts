@@ -325,7 +325,67 @@ export class CostCenterService {
       throw new Error(`فشل في جلب توزيعات التكلفة: ${error.message}`);
     }
 
-    return data || [];
+    // إضافة المعلومات الوصفية للمرجع
+    const allocationsWithDetails = await Promise.all((data || []).map(async (allocation) => {
+      let referenceDetails = '';
+      
+      try {
+        switch (allocation.reference_type) {
+          case 'contract':
+            const { data: contract } = await supabase
+              .from('contracts')
+              .select('contract_number, customer:customers(name)')
+              .eq('id', allocation.reference_id)
+              .single();
+            
+            if (contract) {
+              referenceDetails = `عقد ${contract.contract_number} - ${contract.customer?.name || 'عميل غير معروف'}`;
+            }
+            break;
+            
+          case 'employee':
+            const { data: employee } = await supabase
+              .from('employees')
+              .select('first_name, last_name, employee_number')
+              .eq('id', allocation.reference_id)
+              .single();
+            
+            if (employee) {
+              referenceDetails = `${employee.first_name} ${employee.last_name} (${employee.employee_number})`;
+            }
+            break;
+            
+          case 'vehicle':
+            const { data: vehicle } = await supabase
+              .from('vehicles')
+              .select('make, model, license_plate, vehicle_number')
+              .eq('id', allocation.reference_id)
+              .single();
+            
+            if (vehicle) {
+              referenceDetails = `${vehicle.make} ${vehicle.model} - ${vehicle.license_plate} (${vehicle.vehicle_number})`;
+            }
+            break;
+            
+          case 'expense':
+            referenceDetails = `مصروف - ${allocation.reference_id}`;
+            break;
+            
+          default:
+            referenceDetails = allocation.reference_id;
+        }
+      } catch (err) {
+        console.warn(`Failed to fetch details for ${allocation.reference_type}:`, err);
+        referenceDetails = allocation.reference_id;
+      }
+      
+      return {
+        ...allocation,
+        reference_details: referenceDetails || allocation.reference_id
+      };
+    }));
+
+    return allocationsWithDetails;
   }
 
   async getAllocationsByCostCenter(costCenterId: string): Promise<CostCenterAllocation[]> {
