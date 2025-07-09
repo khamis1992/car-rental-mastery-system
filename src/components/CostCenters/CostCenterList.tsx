@@ -110,14 +110,14 @@ const CostCenterList = ({ costCenters, onRefresh, isLoading }: CostCenterListPro
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="rtl-title w-20">الكود</TableHead>
+                  <TableHead className="rtl-title">الكود</TableHead>
                   <TableHead className="rtl-title">اسم مركز التكلفة</TableHead>
-                  <TableHead className="rtl-title w-24">النوع</TableHead>
-                  <TableHead className="rtl-title w-20 text-center">المستوى</TableHead>
-                  <TableHead className="rtl-title w-32 text-right">الميزانية</TableHead>
-                  <TableHead className="rtl-title w-32 text-right">المصروف</TableHead>
-                  <TableHead className="rtl-title w-32 text-center">نسبة الاستخدام</TableHead>
-                  <TableHead className="rtl-title w-24 text-center">الإجراءات</TableHead>
+                  <TableHead className="rtl-title">النوع</TableHead>
+                  <TableHead className="rtl-title">المستوى</TableHead>
+                  <TableHead className="rtl-title">الميزانية</TableHead>
+                  <TableHead className="rtl-title">المصروف</TableHead>
+                  <TableHead className="rtl-title">الاستخدام</TableHead>
+                  <TableHead className="rtl-title">الإجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -135,76 +135,68 @@ const CostCenterList = ({ costCenters, onRefresh, isLoading }: CostCenterListPro
                   </TableRow>
                 ) : (
                   filteredCostCenters.map((costCenter) => (
-                    <TableRow key={costCenter.id} className="hover:bg-muted/50">
-                      <TableCell className="font-mono text-sm font-semibold">
+                    <TableRow key={costCenter.id}>
+                      <TableCell className="font-mono">
                         {costCenter.cost_center_code}
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium rtl-title text-base">
+                          <div className="font-medium rtl-title">
                             {costCenter.cost_center_name}
                           </div>
                           {costCenter.description && (
-                            <div className="text-sm text-muted-foreground mt-1">
+                            <div className="text-sm text-muted-foreground">
                               {costCenter.description}
                             </div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge 
-                          variant="secondary" 
-                          className={`bg-${getCostCenterTypeColor(costCenter.cost_center_type)}-100 text-${getCostCenterTypeColor(costCenter.cost_center_type)}-800`}
-                        >
+                        <Badge variant="secondary" className={`bg-${getCostCenterTypeColor(costCenter.cost_center_type)}-100`}>
                           {getCostCenterTypeLabel(costCenter.cost_center_type)}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-1">
+                      <TableCell>
+                        <div className="flex items-center gap-1">
                           {Array.from({ length: costCenter.level }, (_, i) => (
                             <div key={i} className="w-2 h-2 bg-primary rounded-full"></div>
                           ))}
-                          <span className="text-sm font-medium ml-2">
+                          <span className="text-sm text-muted-foreground ml-2">
                             {costCenter.level}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right font-medium">
-                        <span className="text-green-700">
-                          {costCenter.budget_amount.toLocaleString()} د.ك
-                        </span>
+                      <TableCell className="font-medium">
+                        {costCenter.budget_amount.toLocaleString()} د.ك
                       </TableCell>
-                      <TableCell className="text-right font-medium">
-                        <span className={costCenter.actual_spent > costCenter.budget_amount ? "text-red-600" : "text-blue-700"}>
-                          {costCenter.actual_spent.toLocaleString()} د.ك
-                        </span>
+                      <TableCell className="font-medium">
+                        {costCenter.actual_spent.toLocaleString()} د.ك
                       </TableCell>
                       <TableCell>
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                           <Progress 
                             value={calculateUtilization(costCenter.actual_spent, costCenter.budget_amount)}
-                            className="h-2 w-full"
+                            className="h-2"
                           />
-                          <div className="text-xs text-center font-medium">
+                          <div className="text-xs text-center text-muted-foreground">
                             {calculateUtilization(costCenter.actual_spent, costCenter.budget_amount).toFixed(1)}%
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex gap-1 justify-center">
+                        <div className="flex gap-2 rtl-flex">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => setEditingCostCenter(costCenter)}
-                            className="h-8 w-8 p-0 hover:bg-blue-50"
                           >
-                            <Edit2 className="h-4 w-4 text-blue-600" />
+                            <Edit2 className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDelete(costCenter)}
-                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
