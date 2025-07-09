@@ -7,20 +7,13 @@ export class AdditionalChargeRepository extends BaseRepository<AdditionalCharge>
   protected tableName = 'additional_charges' as const;
 
   async getChargesByContract(contractId: string): Promise<AdditionalCharge[]> {
-    // Get current user's tenant ID
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: tenantUser } = await supabase
-      .from('tenant_users')
-      .select('tenant_id')
-      .eq('user_id', user?.id)
-      .eq('status', 'active')
-      .single();
-
+    const tenantId = await this.getCurrentTenantId();
+    
     const { data, error } = await supabase
       .from('additional_charges')
       .select('*')
       .eq('contract_id', contractId)
-      .eq('tenant_id', tenantUser?.tenant_id || '')
+      .eq('tenant_id', tenantId || '')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -28,15 +21,8 @@ export class AdditionalChargeRepository extends BaseRepository<AdditionalCharge>
   }
 
   async getPendingCharges(): Promise<AdditionalCharge[]> {
-    // Get current user's tenant ID
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: tenantUser } = await supabase
-      .from('tenant_users')
-      .select('tenant_id')
-      .eq('user_id', user?.id)
-      .eq('status', 'active')
-      .single();
-
+    const tenantId = await this.getCurrentTenantId();
+    
     const { data, error } = await supabase
       .from('additional_charges')
       .select(`
@@ -45,7 +31,7 @@ export class AdditionalChargeRepository extends BaseRepository<AdditionalCharge>
         customers(name, phone)
       `)
       .eq('status', 'pending')
-      .eq('tenant_id', tenantUser?.tenant_id || '')
+      .eq('tenant_id', tenantId || '')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -53,28 +39,7 @@ export class AdditionalChargeRepository extends BaseRepository<AdditionalCharge>
   }
 
   async createCharge(chargeData: Omit<AdditionalCharge, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'tenant_id'>): Promise<AdditionalCharge> {
-    // Get current user for tenant info
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    // Get tenant_id from user's tenant_users relationship
-    const { data: tenantUser } = await supabase
-      .from('tenant_users')
-      .select('tenant_id')
-      .eq('user_id', user?.id)
-      .single();
-
-    const { data: charge, error } = await supabase
-      .from('additional_charges')
-      .insert({
-        ...chargeData,
-        created_by: user?.id,
-        tenant_id: tenantUser?.tenant_id || ''
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return charge as AdditionalCharge;
+    return this.create(chargeData as any);
   }
 
   async updateChargeStatus(id: string, status: AdditionalCharge['status'], invoiceId?: string): Promise<void> {
@@ -101,16 +66,7 @@ export class AdditionalChargeRepository extends BaseRepository<AdditionalCharge>
   }
 
   async getChargeStats() {
-    // Get current user's tenant ID
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: tenantUser } = await supabase
-      .from('tenant_users')
-      .select('tenant_id')
-      .eq('user_id', user?.id)
-      .eq('status', 'active')
-      .single();
-
-    const tenantId = tenantUser?.tenant_id || '';
+    const tenantId = await this.getCurrentTenantId() || '';
 
     const { data: totalCount, error: totalError } = await supabase
       .from('additional_charges')

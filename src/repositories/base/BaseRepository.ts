@@ -5,7 +5,7 @@ export abstract class BaseRepository<T, K = string> implements IRepository<T, K>
   protected abstract tableName: string;
 
   // Get current tenant ID from authenticated user
-  private async getCurrentTenantId(): Promise<string | null> {
+  protected async getCurrentTenantId(): Promise<string | null> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
@@ -41,7 +41,8 @@ export abstract class BaseRepository<T, K = string> implements IRepository<T, K>
   private async tableHasTenantId(): Promise<boolean> {
     const tablesWithTenantId = [
       'contracts', 'additional_charges', 'chart_of_accounts', 
-      'branches', 'cost_centers', 'attendance'
+      'branches', 'cost_centers', 'attendance', 'quotations',
+      'employees', 'vehicles', 'customers', 'invoices', 'payments'
     ];
     return tablesWithTenantId.includes(this.tableName);
   }

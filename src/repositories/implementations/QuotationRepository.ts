@@ -7,15 +7,8 @@ export class QuotationRepository extends BaseRepository<QuotationWithDetails> im
   protected tableName = 'quotations' as const;
 
   async getQuotationsWithDetails(): Promise<QuotationWithDetails[]> {
-    // Get current user's tenant ID
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: tenantUser } = await supabase
-      .from('tenant_users')
-      .select('tenant_id')
-      .eq('user_id', user?.id)
-      .eq('status', 'active')
-      .single();
-
+    const tenantId = await this.getCurrentTenantId();
+    
     const { data, error } = await supabase
       .from('quotations')
       .select(`
@@ -23,7 +16,7 @@ export class QuotationRepository extends BaseRepository<QuotationWithDetails> im
         customers!inner(name, phone),
         vehicles!inner(make, model, vehicle_number)
       `)
-      .eq('tenant_id', tenantUser?.tenant_id || '')
+      .eq('tenant_id', tenantId || '')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -53,15 +46,8 @@ export class QuotationRepository extends BaseRepository<QuotationWithDetails> im
   }
 
   async getQuotationById(id: string) {
-    // Get current user's tenant ID
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: tenantUser } = await supabase
-      .from('tenant_users')
-      .select('tenant_id')
-      .eq('user_id', user?.id)
-      .eq('status', 'active')
-      .single();
-
+    const tenantId = await this.getCurrentTenantId();
+    
     const { data, error } = await supabase
       .from('quotations')
       .select(`
@@ -70,7 +56,7 @@ export class QuotationRepository extends BaseRepository<QuotationWithDetails> im
         vehicles(make, model, year, license_plate, vehicle_number)
       `)
       .eq('id', id)
-      .eq('tenant_id', tenantUser?.tenant_id || '')
+      .eq('tenant_id', tenantId || '')
       .single();
 
     if (error) throw error;
@@ -97,15 +83,8 @@ export class QuotationRepository extends BaseRepository<QuotationWithDetails> im
   }
 
   async getActiveQuotations() {
-    // Get current user's tenant ID
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: tenantUser } = await supabase
-      .from('tenant_users')
-      .select('tenant_id')
-      .eq('user_id', user?.id)
-      .eq('status', 'active')
-      .single();
-
+    const tenantId = await this.getCurrentTenantId();
+    
     const { data, error } = await supabase
       .from('quotations')
       .select(`
@@ -115,7 +94,7 @@ export class QuotationRepository extends BaseRepository<QuotationWithDetails> im
       `)
       .in('status', ['draft', 'sent', 'accepted'])
       .gte('valid_until', new Date().toISOString().split('T')[0])
-      .eq('tenant_id', tenantUser?.tenant_id || '')
+      .eq('tenant_id', tenantId || '')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -132,16 +111,7 @@ export class QuotationRepository extends BaseRepository<QuotationWithDetails> im
   }
 
   async getQuotationStats() {
-    // Get current user's tenant ID
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: tenantUser } = await supabase
-      .from('tenant_users')
-      .select('tenant_id')
-      .eq('user_id', user?.id)
-      .eq('status', 'active')
-      .single();
-
-    const tenantId = tenantUser?.tenant_id || '';
+    const tenantId = await this.getCurrentTenantId() || '';
 
     const { data: totalCount, error: totalError } = await supabase
       .from('quotations')
