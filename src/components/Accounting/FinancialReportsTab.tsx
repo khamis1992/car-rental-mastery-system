@@ -226,8 +226,8 @@ export const FinancialReportsTab = () => {
                       <TableCell className={`text-right ${account.debit_balance > 0 ? 'font-medium text-green-600' : ''}`}>
                         {account.debit_balance > 0 ? formatAmount(account.debit_balance) : '-'}
                       </TableCell>
-                      <TableCell>{account.account_name}</TableCell>
-                      <TableCell className="font-medium">{account.account_code}</TableCell>
+                      <TableCell className="text-right">{account.account_name}</TableCell>
+                      <TableCell className="font-medium text-right">{account.account_code}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
