@@ -55,11 +55,14 @@ const PaymentMethodsTab: React.FC = () => {
   const getPaymentMethodIcon = (method: string) => {
     switch (method.toLowerCase()) {
       case 'credit_card':
+      case 'stripe':
         return <CreditCard className="w-4 h-4" />;
       case 'bank_transfer':
         return <Building className="w-4 h-4" />;
       case 'cash':
         return <Banknote className="w-4 h-4" />;
+      case 'sadad':
+        return <Banknote className="w-4 h-4 text-blue-600" />;
       default:
         return <CreditCard className="w-4 h-4" />;
     }
@@ -73,6 +76,9 @@ const PaymentMethodsTab: React.FC = () => {
       cash: 'نقد',
       check: 'شيك',
       online_payment: 'دفع إلكتروني',
+      stripe: 'Stripe',
+      sadad: 'SADAD',
+      manual: 'يدوي',
     };
     
     return methods[method as keyof typeof methods] || method;
@@ -214,9 +220,19 @@ const PaymentMethodsTab: React.FC = () => {
             تحديث
           </Button>
           
-          <Button>
+          <Button
+            onClick={() => {
+              // يمكن إضافة modal أو navigation للدفع
+              window.location.href = '/billing/payment-portal';
+            }}
+          >
             <Plus className="w-4 h-4" />
-            تسجيل دفعة جديدة
+            دفع فاتورة SADAD
+          </Button>
+          
+          <Button variant="outline">
+            <Plus className="w-4 h-4" />
+            تسجيل دفعة يدوية
           </Button>
         </div>
       </div>

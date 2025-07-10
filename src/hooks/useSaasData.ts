@@ -8,7 +8,8 @@ import {
   SaasSubscription,
   SaasInvoice,
   SaasPayment,
-  SaasBillingStats
+  SaasBillingStats,
+  SadadPaymentRequest
 } from '@/types/saas';
 
 // خطط الاشتراك
@@ -264,6 +265,9 @@ export const useCreatePayment = () => {
       amount: number;
       currency: string;
       payment_method?: string;
+      payment_gateway?: 'stripe' | 'sadad';
+      sadad_transaction_id?: string;
+      sadad_bill_id?: string;
     }) => saasService.createPayment(paymentData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['saas-payments'] });
@@ -278,6 +282,69 @@ export const useCreatePayment = () => {
       toast({
         title: 'خطأ في تسجيل الدفعة',
         description: 'حدث خطأ أثناء تسجيل الدفعة',
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
+// دفع SADAD
+export const useCreateSadadPayment = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (paymentData: SadadPaymentRequest) => 
+      saasService.createSadadPayment(paymentData),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['saas-payments'] });
+      queryClient.invalidateQueries({ queryKey: ['saas-invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['billing-stats'] });
+      
+      if (data.success) {
+        toast({
+          title: 'تم إنشاء فاتورة SADAD',
+          description: 'تم إنشاء فاتورة الدفع بنجاح',
+        });
+      }
+    },
+    onError: () => {
+      toast({
+        title: 'خطأ في إنشاء فاتورة SADAD',
+        description: 'حدث خطأ أثناء إنشاء فاتورة الدفع',
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
+export const useUpdatePaymentStatus = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: ({ 
+      paymentId, 
+      status, 
+      metadata 
+    }: { 
+      paymentId: string; 
+      status: SaasPayment['status']; 
+      metadata?: any 
+    }) => saasService.updatePaymentStatus(paymentId, status, metadata),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['saas-payments'] });
+      queryClient.invalidateQueries({ queryKey: ['saas-invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['billing-stats'] });
+      toast({
+        title: 'تم تحديث حالة الدفع',
+        description: 'تم تحديث حالة الدفع بنجاح',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'خطأ في تحديث حالة الدفع',
+        description: 'حدث خطأ أثناء تحديث حالة الدفع',
         variant: 'destructive',
       });
     },

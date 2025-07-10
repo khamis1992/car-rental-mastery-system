@@ -215,6 +215,9 @@ export class SaasService {
     amount: number;
     currency: string;
     payment_method?: string;
+    payment_gateway?: 'stripe' | 'sadad';
+    sadad_transaction_id?: string;
+    sadad_bill_id?: string;
   }): Promise<SaasPayment> {
     const { data, error } = await supabase
       .from('saas_payments')
@@ -232,6 +235,43 @@ export class SaasService {
 
     if (error) throw error;
     return data as unknown as SaasPayment;
+  }
+
+  // دفع SADAD
+  async createSadadPayment(paymentData: {
+    invoice_id: string;
+    subscription_id: string;
+    tenant_id: string;
+    amount: number;
+    currency: string;
+    customer_mobile?: string;
+    customer_email?: string;
+    bill_description: string;
+    due_date?: string;
+  }): Promise<any> {
+    const { data, error } = await supabase.functions.invoke('sadad-create-payment', {
+      body: paymentData
+    });
+
+    if (error) throw error;
+    return data;
+  }
+
+  async updatePaymentStatus(
+    paymentId: string, 
+    status: SaasPayment['status'],
+    metadata?: any
+  ): Promise<void> {
+    const { error } = await supabase
+      .from('saas_payments')
+      .update({ 
+        status,
+        ...(status === 'succeeded' && { paid_at: new Date().toISOString() }),
+        ...(metadata && { metadata })
+      })
+      .eq('id', paymentId);
+
+    if (error) throw error;
   }
 
   // الإحصائيات والتقارير

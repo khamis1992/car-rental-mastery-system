@@ -92,10 +92,13 @@ export interface SaasPayment {
   subscription_id: string;
   tenant_id: string;
   stripe_payment_intent_id?: string;
+  sadad_transaction_id?: string;
+  sadad_bill_id?: string;
   amount: number;
   currency: string;
   status: 'processing' | 'succeeded' | 'failed' | 'canceled' | 'requires_action';
-  payment_method?: string;
+  payment_method: 'stripe' | 'sadad' | 'manual' | 'bank_transfer';
+  payment_gateway?: 'stripe' | 'sadad';
   paid_at?: string;
   failure_reason?: string;
   created_at: string;
@@ -106,6 +109,28 @@ export interface SaasPayment {
   invoice?: SaasInvoice;
   subscription?: SaasSubscription;
   tenant?: any;
+}
+
+export interface SadadPaymentRequest {
+  invoice_id: string;
+  subscription_id: string;
+  tenant_id: string;
+  amount: number;
+  currency: string;
+  customer_mobile?: string;
+  customer_email?: string;
+  bill_description: string;
+  due_date?: string;
+}
+
+export interface SadadPaymentResponse {
+  success: boolean;
+  bill_id?: string;
+  transaction_id?: string;
+  payment_url?: string;
+  qr_code?: string;
+  error?: string;
+  message?: string;
 }
 
 export interface TenantUsage {
