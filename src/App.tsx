@@ -35,6 +35,7 @@ import CostCenters from "./pages/CostCenters";
 import Tenants from "./pages/Tenants";
 import NotFound from "./pages/NotFound";
 import PublicQuotation from "./pages/PublicQuotation";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import DraftStage from "./pages/ContractStages/DraftStage";
 import PendingStage from "./pages/ContractStages/PendingStage";
 import ActiveStage from "./pages/ContractStages/ActiveStage";
@@ -212,8 +213,15 @@ const App = () => (
                           </Layout>
                         </ProtectedRoute>
                       } />
-                    {/* Contract stage routes */}
-                    <Route path="/contracts/stage/draft/:contractId" element={
+                      <Route path="/super-admin" element={
+                        <ProtectedRoute requiredRole="super_admin">
+                          <Layout>
+                            <SuperAdminDashboard />
+                          </Layout>
+                        </ProtectedRoute>
+                      } />
+                     {/* Contract stage routes */}
+                     <Route path="/contracts/stage/draft/:contractId" element={
                       <ProtectedRoute>
                         <Layout>
                           <DraftStage />
