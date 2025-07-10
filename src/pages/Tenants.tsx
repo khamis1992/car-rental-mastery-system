@@ -1,18 +1,24 @@
-import React, { useState } from 'react';
-import { Plus, Building2, Users, Settings, Crown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useEffect } from 'react';
+import { Building2, Users, Settings, Crown, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useTenant } from '@/contexts/TenantContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { TenantOnboarding } from '@/components/Tenants/TenantOnboarding';
 import TenantLimitChecker from '@/components/Tenants/TenantLimitChecker';
+import { useNavigate } from 'react-router-dom';
 
 const Tenants: React.FC = () => {
-  const { currentTenant, currentUserRole, switchTenant, loading, error } = useTenant();
+  const { currentTenant, currentUserRole, loading, error } = useTenant();
   const { profile } = useAuth();
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const navigate = useNavigate();
+
+  // إعادة توجيه مديري النظام العام إلى صفحة Super Admin
+  useEffect(() => {
+    if (currentUserRole === 'super_admin') {
+      navigate('/super-admin');
+    }
+  }, [currentUserRole, navigate]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -63,8 +69,6 @@ const Tenants: React.FC = () => {
     }
   };
 
-  const isSuperAdmin = currentUserRole === 'super_admin';
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-soft p-6 flex items-center justify-center" dir="rtl">
@@ -103,31 +107,20 @@ const Tenants: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">المؤسسات</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">معلومات المؤسسة</h1>
             <p className="text-muted-foreground">
-              إدارة المؤسسات والمنظمات في النظام
+              عرض معلومات المؤسسة والحدود المسموحة
             </p>
           </div>
           
-          {isSuperAdmin && (
-            <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
-                  <Plus className="w-4 h-4" />
-                  إضافة مؤسسة جديدة
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>إضافة مؤسسة جديدة</DialogTitle>
-                  <DialogDescription>
-                    قم بإنشاء مؤسسة جديدة وإعداد الحساب الإداري
-                  </DialogDescription>
-                </DialogHeader>
-                <TenantOnboarding onComplete={() => setShowOnboarding(false)} />
-              </DialogContent>
-            </Dialog>
-          )}
+          <Button 
+            onClick={() => navigate(-1)}
+            variant="outline" 
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            العودة
+          </Button>
         </div>
 
         {currentTenant && (
@@ -219,15 +212,9 @@ const Tenants: React.FC = () => {
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Building2 className="w-16 h-16 text-muted-foreground/50 mb-4" />
               <h3 className="text-lg font-medium mb-2">لا توجد مؤسسة محددة</h3>
-              <p className="text-muted-foreground text-center mb-6">
-                يرجى اختيار مؤسسة للوصول إلى النظام أو إنشاء مؤسسة جديدة
+              <p className="text-muted-foreground text-center">
+                يرجى التواصل مع مدير النظام لإضافتك إلى مؤسسة
               </p>
-              {isSuperAdmin && (
-                <Button onClick={() => setShowOnboarding(true)} className="flex items-center gap-2">
-                  <Plus className="w-4 h-4" />
-                  إنشاء مؤسسة جديدة
-                </Button>
-              )}
             </CardContent>
           </Card>
         )}
