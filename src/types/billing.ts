@@ -1,5 +1,5 @@
 // ملف موحد لأنواع البيانات المتعلقة بمعالجة الفوترة
-// تم تحديثه لاستخدام التعريفات الموحدة من unified-billing.ts
+// تم تحديثه لاستخدام التعريفات الموحدة من unified-saas.ts
 
 // إعادة تصدير الأنواع الموحدة
 export type {
@@ -21,27 +21,22 @@ export type {
   // أنواع الفواتير
   SaasInvoice,
   SaasInvoiceItem,
-  BaseInvoice,
-  BaseInvoiceItem,
   CreateInvoiceFormData,
   
   // أنواع المدفوعات
   SaasPayment,
-  BasePayment,
   CreatePaymentFormData,
   
   // أنواع الإحصائيات
   SaasBillingStats,
+  BillingAnalytics,
   
   // أنواع الاستخدام
   TenantUsage,
   
   // أنواع معالجة الفوترة
   BillingProcessResult,
-  
-  // أنواع الطلبات الموحدة
-  UnifiedPaymentRequest,
-  UnifiedPaymentResponse,
+  AutoBillingSettings,
   
   // دوال التحقق
   isValidCurrency,
@@ -49,4 +44,4 @@ export type {
   isValidSubscriptionStatus,
   isValidInvoiceStatus,
   isValidPaymentStatus,
-} from '@/types/unified-billing';
+} from '@/types/unified-saas';

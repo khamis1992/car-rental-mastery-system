@@ -1,7 +1,7 @@
 // تكوين موحد لنظام الفوترة والاشتراكات
 // يحتوي على جميع الإعدادات والثوابت المشتركة
 
-import type { Currency, PaymentGateway } from '@/types/unified-billing';
+import type { Currency, PaymentGateway } from '@/types/unified-saas';
 
 // ===== الثوابت العامة =====
 

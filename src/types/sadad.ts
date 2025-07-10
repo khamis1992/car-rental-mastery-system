@@ -1,37 +1,28 @@
 // ملف موحد لأنواع البيانات المتعلقة بنظام SADAD
-// تم تحديثه لاستخدام التعريفات الموحدة من unified-billing.ts
+// تم تحديثه لاستخدام التعريفات الموحدة من unified-saas.ts
 
 // إعادة تصدير الأنواع الموحدة المتعلقة بـ SADAD
 export type {
   // الأنواع الأساسية لـ SADAD
-  SadadPaymentStatus,
+  PaymentStatus,
   Currency,
-  
-  // إعدادات SADAD
-  SadadSettings,
-  SadadSettingsFormData,
-  SadadConfig,
+  PaymentGateway,
+  PaymentMethod,
   
   // مدفوعات SADAD
-  SadadPayment,
-  CreateSadadPaymentFormData,
+  SaasPayment,
+  CreatePaymentFormData,
   
   // طلبات واستجابات API
-  SadadCreatePaymentRequest,
-  SadadCreatePaymentResponse,
-  SadadPaymentStatusResponse,
-  
-  // أحداث Webhook
-  SadadWebhookEvent,
-  SadadWebhookPayload,
-  
-  // سجل المعاملات
-  SadadTransactionLog,
-  
-  // إحصائيات SADAD
-  SadadStats,
+  SadadPaymentRequest,
+  SadadPaymentResponse,
   
   // دوال التحقق
-  isValidSadadPaymentStatus,
+  isValidPaymentStatus,
   isValidCurrency,
-} from '@/types/unified-billing';
+  isValidPaymentGateway,
+  
+  // دوال المساعدة
+  formatCurrency,
+  calculateTaxAmount,
+} from '@/types/unified-saas';

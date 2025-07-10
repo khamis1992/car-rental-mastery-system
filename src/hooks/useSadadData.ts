@@ -2,12 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { sadadService } from '@/services/sadadService';
 import { useToast } from '@/hooks/use-toast';
 import { 
-  SadadSettings,
-  SadadPayment,
-  CreateSadadPaymentFormData,
-  SadadStats,
-  SadadSettingsFormData
-} from '@/types/unified-billing';
+  SaasPayment,
+  CreatePaymentFormData,
+  SadadPaymentRequest,
+  SadadPaymentResponse,
+  PaymentStatus,
+  Currency
+} from '@/types/unified-saas';
 
 // إعدادات SADAD
 export const useSadadSettings = () => {
