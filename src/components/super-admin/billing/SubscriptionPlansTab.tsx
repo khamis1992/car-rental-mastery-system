@@ -1,91 +1,96 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Star, Users, HardDrive, FileText } from 'lucide-react';
+import { Plus, Edit, Trash2, Star, Users, HardDrive, FileText, Car } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import type { SubscriptionPlan } from '@/types/saas';
 import { PlanFormDialog } from './PlanFormDialog';
 
 export function SubscriptionPlansTab() {
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingPlan, setEditingPlan] = useState(null);
+  const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
   const { toast } = useToast();
 
-  // Mock data - replace with real data from API
-  const plans = [
-    {
-      id: '1',
-      plan_name: 'الخطة الأساسية',
-      plan_name_en: 'Basic Plan',
-      plan_code: 'basic',
-      description: 'خطة مناسبة للشركات الصغيرة',
-      price_monthly: 29.99,
-      price_yearly: 299.99,
-      features: ['إدارة العقود', 'إدارة المركبات', 'التقارير الأساسية', 'دعم بالبريد الإلكتروني'],
-      max_users_per_tenant: 5,
-      max_vehicles: 10,
-      max_contracts: 50,
-      storage_limit_gb: 1,
-      is_active: true,
-      is_popular: false,
-      sort_order: 1,
-      subscribers_count: 15
-    },
-    {
-      id: '2',
-      plan_name: 'الخطة المتقدمة',
-      plan_name_en: 'Professional Plan',
-      plan_code: 'professional',
-      description: 'خطة مناسبة للشركات المتوسطة',
-      price_monthly: 59.99,
-      price_yearly: 599.99,
-      features: ['جميع مميزات الخطة الأساسية', 'تقارير متقدمة', 'إدارة المخالفات', 'النسخ الاحتياطي التلقائي', 'دعم هاتفي'],
-      max_users_per_tenant: 25,
-      max_vehicles: 50,
-      max_contracts: 200,
-      storage_limit_gb: 5,
-      is_active: true,
-      is_popular: true,
-      sort_order: 2,
-      subscribers_count: 28
-    },
-    {
-      id: '3',
-      plan_name: 'خطة المؤسسات',
-      plan_name_en: 'Enterprise Plan',
-      plan_code: 'enterprise',
-      description: 'خطة مناسبة للشركات الكبيرة',
-      price_monthly: 149.99,
-      price_yearly: 1499.99,
-      features: ['جميع المميزات', 'مستأجرين متعددين', 'مستخدمين غير محدودين', 'API مخصص', 'دعم مخصص 24/7', 'تدريب مخصص'],
-      max_users_per_tenant: 999999,
-      max_vehicles: 999999,
-      max_contracts: 999999,
-      storage_limit_gb: 100,
-      is_active: true,
-      is_popular: false,
-      sort_order: 3,
-      subscribers_count: 12
-    }
-  ];
+  useEffect(() => {
+    fetchPlans();
+  }, []);
 
-  const handleEdit = (plan: any) => {
+  const fetchPlans = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('subscription_plans')
+        .select('*')
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      
+      // تحويل البيانات لتتطابق مع النوع المطلوب
+      const formattedPlans = (data || []).map(plan => ({
+        ...plan,
+        features: Array.isArray(plan.features) ? plan.features as string[] : []
+      })) as SubscriptionPlan[];
+      
+      setPlans(formattedPlans);
+    } catch (error: any) {
+      toast({
+        title: "خطأ في تحميل الخطط",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (plan: SubscriptionPlan) => {
     setEditingPlan(plan);
     setIsCreateDialogOpen(true);
   };
 
-  const handleDelete = (planId: string) => {
-    // Implement delete logic
-    toast({
-      title: 'تم حذف الخطة',
-      description: 'تم حذف خطة الاشتراك بنجاح',
-    });
+  const handleDelete = async (planId: string) => {
+    if (!confirm('هل أنت متأكد من حذف هذه الخطة؟')) return;
+
+    try {
+      const { error } = await supabase
+        .from('subscription_plans')
+        .delete()
+        .eq('id', planId);
+
+      if (error) throw error;
+
+      toast({
+        title: "تم حذف الخطة بنجاح",
+        variant: "default",
+      });
+      
+      fetchPlans();
+    } catch (error: any) {
+      toast({
+        title: "خطأ في حذف الخطة",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
-  const closeDialog = () => {
+  const handleFormSuccess = () => {
     setIsCreateDialogOpen(false);
     setEditingPlan(null);
+    fetchPlans();
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-muted-foreground">جاري التحميل...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -141,63 +146,73 @@ export function SubscriptionPlansTab() {
               {/* Pricing */}
               <div className="space-y-2">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-2xl font-bold">${plan.price_monthly}</span>
+                  <span className="text-2xl font-bold">{plan.price_monthly} د.ك</span>
                   <span className="text-muted-foreground">/شهر</span>
                 </div>
                 <div className="flex items-baseline justify-between">
-                  <span className="text-lg">${plan.price_yearly}</span>
+                  <span className="text-lg">{plan.price_yearly} د.ك</span>
                   <span className="text-muted-foreground">/سنة</span>
                 </div>
               </div>
 
               {/* Limits */}
               <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 ml-2 text-muted-foreground" />
-                    المستخدمين
+                {plan.max_users_per_tenant && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Users className="h-4 w-4 ml-2 text-muted-foreground" />
+                      المستخدمين
+                    </div>
+                    <span>{plan.max_users_per_tenant === 999999 ? 'غير محدود' : plan.max_users_per_tenant}</span>
                   </div>
-                  <span>{plan.max_users_per_tenant === 999999 ? 'غير محدود' : plan.max_users_per_tenant}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <FileText className="h-4 w-4 ml-2 text-muted-foreground" />
-                    المركبات
+                )}
+                {plan.max_vehicles && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Car className="h-4 w-4 ml-2 text-muted-foreground" />
+                      المركبات
+                    </div>
+                    <span>{plan.max_vehicles === 999999 ? 'غير محدود' : plan.max_vehicles}</span>
                   </div>
-                  <span>{plan.max_vehicles === 999999 ? 'غير محدود' : plan.max_vehicles}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <HardDrive className="h-4 w-4 ml-2 text-muted-foreground" />
-                    التخزين
+                )}
+                {plan.storage_limit_gb && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <HardDrive className="h-4 w-4 ml-2 text-muted-foreground" />
+                      التخزين
+                    </div>
+                    <span>{plan.storage_limit_gb}GB</span>
                   </div>
-                  <span>{plan.storage_limit_gb}GB</span>
-                </div>
+                )}
               </div>
 
               {/* Features */}
-              <div className="space-y-2">
-                <p className="font-medium text-sm">المميزات:</p>
-                <ul className="text-xs space-y-1">
-                  {plan.features.slice(0, 3).map((feature, index) => (
-                    <li key={index} className="flex items-center">
-                      <div className="w-1 h-1 bg-primary rounded-full ml-2" />
-                      {feature}
-                    </li>
-                  ))}
-                  {plan.features.length > 3 && (
-                    <li className="text-muted-foreground">
-                      +{plan.features.length - 3} مميزات أخرى
-                    </li>
-                  )}
-                </ul>
-              </div>
+              {plan.features && plan.features.length > 0 && (
+                <div className="space-y-2">
+                  <p className="font-medium text-sm">المميزات:</p>
+                  <ul className="text-xs space-y-1">
+                    {plan.features.slice(0, 3).map((feature, index) => (
+                      <li key={index} className="flex items-center">
+                        <div className="w-1 h-1 bg-primary rounded-full ml-2" />
+                        {feature}
+                      </li>
+                    ))}
+                    {plan.features.length > 3 && (
+                      <li className="text-muted-foreground">
+                        +{plan.features.length - 3} مميزات أخرى
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
 
-              {/* Stats */}
+              {/* Status */}
               <div className="pt-4 border-t">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">عدد المشتركين</span>
-                  <Badge variant="secondary">{plan.subscribers_count}</Badge>
+                  <Badge variant={plan.is_active ? "default" : "secondary"}>
+                    {plan.is_active ? "نشط" : "معطل"}
+                  </Badge>
+                  <span className="text-muted-foreground">كود: {plan.plan_code}</span>
                 </div>
               </div>
             </CardContent>
@@ -208,8 +223,9 @@ export function SubscriptionPlansTab() {
       {/* Plan Form Dialog */}
       <PlanFormDialog 
         open={isCreateDialogOpen}
-        onClose={closeDialog}
+        onOpenChange={setIsCreateDialogOpen}
         plan={editingPlan}
+        onSuccess={handleFormSuccess}
       />
     </div>
   );
