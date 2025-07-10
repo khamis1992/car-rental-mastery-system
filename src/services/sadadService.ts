@@ -436,6 +436,137 @@ export class SadadService {
       throw error;
     }
   }
+
+  // دالة تحسين استعلامات قاعدة البيانات
+  async batchGetPayments(paymentIds: string[]): Promise<SadadPayment[]> {
+    try {
+      if (paymentIds.length === 0) return [];
+
+      // تقسيم الطلبات إلى مجموعات للتحسين
+      const batchSize = 100;
+      const batches: SadadPayment[] = [];
+
+      for (let i = 0; i < paymentIds.length; i += batchSize) {
+        const batchIds = paymentIds.slice(i, i + batchSize);
+        
+        const { data, error } = await supabase
+          .from('sadad_payments')
+          .select('*')
+          .in('id', batchIds);
+
+        if (error) throw error;
+        if (data) batches.push(...(data as SadadPayment[]));
+      }
+
+      return batches;
+    } catch (error) {
+      console.error('Batch get payments error:', error);
+      throw error;
+    }
+  }
+
+  // دالة للإحصائيات المحسّنة مع الـ caching
+  private statsCache = new Map<string, { data: SadadStats; timestamp: number }>();
+  private readonly STATS_CACHE_TTL = 5 * 60 * 1000; // 5 دقائق
+
+  async getCachedSadadStats(filters?: {
+    tenant_id?: string;
+    from_date?: string;
+    to_date?: string;
+  }): Promise<SadadStats> {
+    // إنشاء مفتاح للذاكرة المؤقتة
+    const cacheKey = JSON.stringify(filters || {});
+    const cached = this.statsCache.get(cacheKey);
+    const now = Date.now();
+
+    // التحقق من الذاكرة المؤقتة
+    if (cached && (now - cached.timestamp) < this.STATS_CACHE_TTL) {
+      console.log('Using cached SADAD stats');
+      return cached.data;
+    }
+
+    console.log('Fetching fresh SADAD stats');
+    
+    try {
+      const stats = await this.getSadadStats(filters);
+      
+      // تخزين في الذاكرة المؤقتة
+      this.statsCache.set(cacheKey, {
+        data: stats,
+        timestamp: now
+      });
+
+      return stats;
+    } catch (error) {
+      // استخدام الإحصائيات المخزنة مؤقتاً كـ fallback
+      if (cached) {
+        console.warn('Using expired cached stats as fallback');
+        return cached.data;
+      }
+      throw error;
+    }
+  }
+
+  // دالة تنظيف الذاكرة المؤقتة
+  clearStatsCache(): void {
+    this.statsCache.clear();
+  }
+
+  // دالة معالجة الأخطاء مع إعادة المحاولة
+  async withRetry<T>(
+    operation: () => Promise<T>,
+    maxRetries: number = 3,
+    delay: number = 1000
+  ): Promise<T> {
+    let lastError: Error;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error as Error;
+        console.warn(`Operation attempt ${attempt} failed:`, error);
+        
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, delay * attempt));
+        }
+      }
+    }
+    
+    throw new Error(`Operation failed after ${maxRetries} attempts: ${lastError.message}`);
+  }
+
+  // دالة مراقبة الأداء
+  async getPerformanceMetrics(): Promise<{
+    average_response_time: number;
+    success_rate: number;
+    error_rate: number;
+    total_requests: number;
+  }> {
+    try {
+      const { data: logs, error } = await supabase
+        .from('sadad_transaction_log')
+        .select('status, created_at')
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // آخر 24 ساعة
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const totalRequests = logs?.length || 0;
+      const successfulRequests = logs?.filter(log => log.status === 'success').length || 0;
+      const failedRequests = totalRequests - successfulRequests;
+
+      return {
+        average_response_time: 0, // يحتاج إضافة تتبع وقت الاستجابة
+        success_rate: totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0,
+        error_rate: totalRequests > 0 ? (failedRequests / totalRequests) * 100 : 0,
+        total_requests: totalRequests
+      };
+    } catch (error) {
+      console.error('Performance metrics error:', error);
+      throw error;
+    }
+  }
 }
 
 export const sadadService = new SadadService();

@@ -21,6 +21,26 @@ const TIMING_CONFIG = {
   duplicateEventWindow: 5 * 60 * 1000, // 5 دقائق للأحداث المكررة
 };
 
+// إعدادات الأداء والـ caching
+const PERFORMANCE_CONFIG = {
+  settingsCacheTTL: 5 * 60 * 1000, // 5 دقائق
+  maxConcurrentRequests: 15,
+  queryTimeout: 10000, // 10 ثواني للـ webhooks
+  duplicateDetectionTTL: 10 * 60 * 1000, // 10 دقائق
+};
+
+// إعدادات Rate Limiting للـ webhooks
+const RATE_LIMIT_CONFIG = {
+  maxRequestsPerMinute: 100, // webhooks أكثر تكراراً
+  maxRequestsPerHour: 2000,
+  maxRequestsPerDay: 10000,
+};
+
+// ذاكرة تخزين مؤقت
+const settingsCache = new Map<string, { data: any; timestamp: number }>();
+const duplicateCache = new Map<string, number>(); // للكشف عن الأحداث المكررة
+const requestCounters = new Map<string, { count: number; resetTime: number }>();
+
 interface SadadWebhookPayload {
   event_type: 'payment.completed' | 'payment.failed' | 'payment.expired' | 'payment.cancelled';
   transaction_id: string;
@@ -51,6 +71,24 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    // التحقق من Rate Limiting
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'sadad-webhook';
+    const rateLimitResult = checkRateLimit(clientIP);
+    if (!rateLimitResult.allowed) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: `Rate limit exceeded. ${rateLimitResult.message}`,
+        retry_after: rateLimitResult.retryAfter
+      }), {
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "Retry-After": rateLimitResult.retryAfter?.toString() || "60"
+        },
+        status: 429,
+      });
+    }
+
     // التحقق من حجم الطلب
     const contentLength = req.headers.get('content-length');
     if (contentLength && parseInt(contentLength) > SECURITY_CONFIG.maxWebhookSize) {
@@ -62,19 +100,24 @@ serve(async (req) => {
     
     console.log('Received SADAD webhook:', JSON.stringify(webhookData, null, 2));
 
+    // التحقق من الأحداث المكررة
+    const duplicateCheck = checkForDuplicate(webhookData);
+    if (duplicateCheck.isDuplicate) {
+      console.log('Duplicate webhook event detected, returning success without processing');
+      return new Response(JSON.stringify({
+        success: true,
+        message: "Duplicate event, already processed"
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     // التحقق من عمر الحدث
     await validateEventTiming(webhookData);
 
-    // الحصول على إعدادات SADAD للتحقق من التوقيع
-    const { data: settings, error: settingsError } = await supabase
-      .from('sadad_settings')
-      .select('*')
-      .eq('is_active', true)
-      .single();
-
-    if (settingsError || !settings) {
-      throw new Error("SADAD settings not found");
-    }
+    // الحصول على إعدادات SADAD للتحقق من التوقيع مع الـ caching
+    const settings = await getCachedSadadSettings(supabase);
 
     // التحقق من التوقيع
     const isValidSignature = await verifySignature(webhookData, settings.merchant_key);
@@ -390,5 +433,162 @@ async function handlePaymentSuccess(supabase: any, payment: any, webhookData: Sa
   } catch (error) {
     console.error('Error handling payment success:', error);
     // لا نرمي الخطأ هنا لأن الدفعة نفسها نجحت
+  }
+}
+
+// دالة التحقق من Rate Limiting
+function checkRateLimit(clientIP: string): { allowed: boolean; message?: string; retryAfter?: number } {
+  const now = Date.now();
+  const minuteKey = `${clientIP}:minute:${Math.floor(now / (60 * 1000))}`;
+  const hourKey = `${clientIP}:hour:${Math.floor(now / (60 * 60 * 1000))}`;
+  const dayKey = `${clientIP}:day:${Math.floor(now / (24 * 60 * 60 * 1000))}`;
+
+  // تنظيف الطلبات المنتهية الصلاحية
+  cleanupExpiredCounters();
+
+  const minuteCount = getOrCreateCounter(minuteKey, 60 * 1000);
+  const hourCount = getOrCreateCounter(hourKey, 60 * 60 * 1000);
+  const dayCount = getOrCreateCounter(dayKey, 24 * 60 * 60 * 1000);
+
+  // التحقق من حدود الدقيقة
+  if (minuteCount.count >= RATE_LIMIT_CONFIG.maxRequestsPerMinute) {
+    return {
+      allowed: false,
+      message: `Too many requests per minute. Limit: ${RATE_LIMIT_CONFIG.maxRequestsPerMinute}`,
+      retryAfter: 60
+    };
+  }
+
+  // التحقق من حدود الساعة
+  if (hourCount.count >= RATE_LIMIT_CONFIG.maxRequestsPerHour) {
+    return {
+      allowed: false,
+      message: `Too many requests per hour. Limit: ${RATE_LIMIT_CONFIG.maxRequestsPerHour}`,
+      retryAfter: 3600
+    };
+  }
+
+  // التحقق من حدود اليوم
+  if (dayCount.count >= RATE_LIMIT_CONFIG.maxRequestsPerDay) {
+    return {
+      allowed: false,
+      message: `Too many requests per day. Limit: ${RATE_LIMIT_CONFIG.maxRequestsPerDay}`,
+      retryAfter: 24 * 3600
+    };
+  }
+
+  // زيادة العدادات
+  minuteCount.count++;
+  hourCount.count++;
+  dayCount.count++;
+
+  return { allowed: true };
+}
+
+// دالة إنشاء أو الحصول على عداد
+function getOrCreateCounter(key: string, ttl: number) {
+  const existing = requestCounters.get(key);
+  const now = Date.now();
+
+  if (existing && existing.resetTime > now) {
+    return existing;
+  }
+
+  const newCounter = { count: 0, resetTime: now + ttl };
+  requestCounters.set(key, newCounter);
+  return newCounter;
+}
+
+// دالة تنظيف العدادات المنتهية الصلاحية
+function cleanupExpiredCounters() {
+  const now = Date.now();
+  for (const [key, counter] of requestCounters.entries()) {
+    if (counter.resetTime <= now) {
+      requestCounters.delete(key);
+    }
+  }
+}
+
+// دالة التحقق من الأحداث المكررة
+function checkForDuplicate(webhookData: SadadWebhookPayload): { isDuplicate: boolean; message?: string } {
+  const now = Date.now();
+  const eventKey = `${webhookData.transaction_id}:${webhookData.event_type}:${webhookData.timestamp}`;
+  
+  // تنظيف الأحداث المنتهية الصلاحية
+  cleanupExpiredDuplicates();
+  
+  // التحقق من وجود حدث مكرر
+  const existingEventTime = duplicateCache.get(eventKey);
+  if (existingEventTime) {
+    return {
+      isDuplicate: true,
+      message: `Duplicate event detected. Original event time: ${new Date(existingEventTime).toISOString()}`
+    };
+  }
+  
+  // إضافة الحدث للذاكرة المؤقتة
+  duplicateCache.set(eventKey, now);
+  
+  return { isDuplicate: false };
+}
+
+// دالة تنظيف الأحداث المكررة المنتهية الصلاحية
+function cleanupExpiredDuplicates() {
+  const now = Date.now();
+  const expiredThreshold = now - PERFORMANCE_CONFIG.duplicateDetectionTTL;
+  
+  for (const [key, timestamp] of duplicateCache.entries()) {
+    if (timestamp < expiredThreshold) {
+      duplicateCache.delete(key);
+    }
+  }
+}
+
+// دالة الحصول على إعدادات SADAD مع الـ caching
+async function getCachedSadadSettings(supabase: any): Promise<any> {
+  const cacheKey = 'sadad_settings';
+  const cached = settingsCache.get(cacheKey);
+  const now = Date.now();
+
+  // التحقق من وجود الإعدادات في الذاكرة المؤقتة وأنها لم تنته صلاحيتها
+  if (cached && (now - cached.timestamp) < PERFORMANCE_CONFIG.settingsCacheTTL) {
+    console.log('Using cached SADAD settings');
+    return cached.data;
+  }
+
+  console.log('Fetching fresh SADAD settings');
+  
+  try {
+    const { data: settings, error: settingsError } = await supabase
+      .from('sadad_settings')
+      .select('*')
+      .eq('is_active', true)
+      .single();
+
+    if (settingsError || !settings) {
+      // إذا كان هناك إعدادات مخزنة مؤقتاً، استخدمها كـ fallback
+      if (cached) {
+        console.warn('Using expired cached settings as fallback');
+        return cached.data;
+      }
+      throw new Error("SADAD settings not found");
+    }
+
+    // تخزين الإعدادات في الذاكرة المؤقتة
+    settingsCache.set(cacheKey, {
+      data: settings,
+      timestamp: now
+    });
+
+    return settings;
+  } catch (error) {
+    // التحقق من إمكانية استخدام إعدادات مخزنة مؤقتاً كـ fallback
+    if (cached) {
+      console.warn('Database error, using cached settings as fallback:', error);
+      return cached.data;
+    }
+    
+    console.error('Failed to fetch SADAD settings:', error);
+    throw error;
   }
 }

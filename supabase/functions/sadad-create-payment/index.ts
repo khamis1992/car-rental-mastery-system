@@ -21,6 +21,25 @@ const VALIDATION_CONFIG = {
   maxExpiryMinutes: 10080, // أسبوع واحد
 };
 
+// إعدادات الأداء والـ caching
+const PERFORMANCE_CONFIG = {
+  settingsCacheTTL: 5 * 60 * 1000, // 5 دقائق
+  maxConcurrentRequests: 10,
+  connectionPoolSize: 20,
+  queryTimeout: 15000, // 15 ثانية
+};
+
+// إعدادات Rate Limiting
+const RATE_LIMIT_CONFIG = {
+  maxRequestsPerMinute: 30,
+  maxRequestsPerHour: 500,
+  maxRequestsPerDay: 2000,
+};
+
+// ذاكرة تخزين مؤقت للإعدادات
+const settingsCache = new Map<string, { data: any; timestamp: number }>();
+const requestCounters = new Map<string, { count: number; resetTime: number }>();
+
 interface SadadCreatePaymentRequest {
   payment_id: string;
   amount: number;
@@ -46,6 +65,24 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    // التحقق من Rate Limiting
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const rateLimitResult = checkRateLimit(clientIP);
+    if (!rateLimitResult.allowed) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: `Rate limit exceeded. ${rateLimitResult.message}`,
+        retry_after: rateLimitResult.retryAfter
+      }), {
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "Retry-After": rateLimitResult.retryAfter?.toString() || "60"
+        },
+        status: 429,
+      });
+    }
+
     // التحقق من المصادقة
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
@@ -64,16 +101,8 @@ serve(async (req) => {
     // تنظيف وتطهير البيانات
     const sanitizedData = sanitizeRequestData(requestData);
 
-    // الحصول على إعدادات SADAD
-    const { data: settings, error: settingsError } = await supabase
-      .from('sadad_settings')
-      .select('*')
-      .eq('is_active', true)
-      .single();
-
-    if (settingsError || !settings) {
-      throw new Error("SADAD settings not found or not configured");
-    }
+    // الحصول على إعدادات SADAD مع الـ caching
+    const settings = await getCachedSadadSettings(supabase);
 
     // الحصول على معلومات الدفعة من قاعدة البيانات
     const { data: payment, error: paymentError } = await supabase
@@ -347,4 +376,160 @@ async function callSadadAPI(url: string, payload: any): Promise<{ response: Resp
 
   const data = await response.json();
   return { response, data };
+}
+
+// دالة التحقق من Rate Limiting
+function checkRateLimit(clientIP: string): { allowed: boolean; message?: string; retryAfter?: number } {
+  const now = Date.now();
+  const minuteKey = `${clientIP}:minute:${Math.floor(now / (60 * 1000))}`;
+  const hourKey = `${clientIP}:hour:${Math.floor(now / (60 * 60 * 1000))}`;
+  const dayKey = `${clientIP}:day:${Math.floor(now / (24 * 60 * 60 * 1000))}`;
+
+  // تنظيف الطلبات المنتهية الصلاحية
+  cleanupExpiredCounters();
+
+  const minuteCount = getOrCreateCounter(minuteKey, 60 * 1000);
+  const hourCount = getOrCreateCounter(hourKey, 60 * 60 * 1000);
+  const dayCount = getOrCreateCounter(dayKey, 24 * 60 * 60 * 1000);
+
+  // التحقق من حدود الدقيقة
+  if (minuteCount.count >= RATE_LIMIT_CONFIG.maxRequestsPerMinute) {
+    return {
+      allowed: false,
+      message: `Too many requests per minute. Limit: ${RATE_LIMIT_CONFIG.maxRequestsPerMinute}`,
+      retryAfter: 60
+    };
+  }
+
+  // التحقق من حدود الساعة
+  if (hourCount.count >= RATE_LIMIT_CONFIG.maxRequestsPerHour) {
+    return {
+      allowed: false,
+      message: `Too many requests per hour. Limit: ${RATE_LIMIT_CONFIG.maxRequestsPerHour}`,
+      retryAfter: 3600
+    };
+  }
+
+  // التحقق من حدود اليوم
+  if (dayCount.count >= RATE_LIMIT_CONFIG.maxRequestsPerDay) {
+    return {
+      allowed: false,
+      message: `Too many requests per day. Limit: ${RATE_LIMIT_CONFIG.maxRequestsPerDay}`,
+      retryAfter: 24 * 3600
+    };
+  }
+
+  // زيادة العدادات
+  minuteCount.count++;
+  hourCount.count++;
+  dayCount.count++;
+
+  return { allowed: true };
+}
+
+// دالة إنشاء أو الحصول على عداد
+function getOrCreateCounter(key: string, ttl: number) {
+  const existing = requestCounters.get(key);
+  const now = Date.now();
+
+  if (existing && existing.resetTime > now) {
+    return existing;
+  }
+
+  const newCounter = { count: 0, resetTime: now + ttl };
+  requestCounters.set(key, newCounter);
+  return newCounter;
+}
+
+// دالة تنظيف العدادات المنتهية الصلاحية
+function cleanupExpiredCounters() {
+  const now = Date.now();
+  for (const [key, counter] of requestCounters.entries()) {
+    if (counter.resetTime <= now) {
+      requestCounters.delete(key);
+    }
+  }
+}
+
+// دالة الحصول على إعدادات SADAD مع الـ caching
+async function getCachedSadadSettings(supabase: any): Promise<any> {
+  const cacheKey = 'sadad_settings';
+  const cached = settingsCache.get(cacheKey);
+  const now = Date.now();
+
+  // التحقق من وجود الإعدادات في الذاكرة المؤقتة وأنها لم تنته صلاحيتها
+  if (cached && (now - cached.timestamp) < PERFORMANCE_CONFIG.settingsCacheTTL) {
+    console.log('Using cached SADAD settings');
+    return cached.data;
+  }
+
+  console.log('Fetching fresh SADAD settings');
+  
+  // تحديد مهلة زمنية للاستعلام
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Database query timeout')), PERFORMANCE_CONFIG.queryTimeout);
+  });
+
+  try {
+    const queryPromise = supabase
+      .from('sadad_settings')
+      .select('*')
+      .eq('is_active', true)
+      .single();
+
+    const { data: settings, error: settingsError } = await Promise.race([queryPromise, timeoutPromise]);
+
+    if (settingsError || !settings) {
+      // إذا كان هناك إعدادات مخزنة مؤقتاً، استخدمها كـ fallback
+      if (cached) {
+        console.warn('Using expired cached settings as fallback');
+        return cached.data;
+      }
+      throw new Error("SADAD settings not found or not configured");
+    }
+
+    // تخزين الإعدادات في الذاكرة المؤقتة
+    settingsCache.set(cacheKey, {
+      data: settings,
+      timestamp: now
+    });
+
+    return settings;
+  } catch (error) {
+    // التحقق من إمكانية استخدام إعدادات مخزنة مؤقتاً كـ fallback
+    if (cached) {
+      console.warn('Database error, using cached settings as fallback:', error);
+      return cached.data;
+    }
+    
+    console.error('Failed to fetch SADAD settings:', error);
+    throw error;
+  }
+}
+
+// دالة تحسين الاستعلامات المتوازية
+async function batchDatabaseOperations(operations: Promise<any>[]): Promise<any[]> {
+  try {
+    // تنفيذ العمليات بالتوازي مع حد أقصى للعمليات المتزامنة
+    const results = [];
+    for (let i = 0; i < operations.length; i += PERFORMANCE_CONFIG.maxConcurrentRequests) {
+      const batch = operations.slice(i, i + PERFORMANCE_CONFIG.maxConcurrentRequests);
+      const batchResults = await Promise.allSettled(batch);
+      
+      // معالجة النتائج
+      batchResults.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          results[i + index] = result.value;
+        } else {
+          console.error(`Operation ${i + index} failed:`, result.reason);
+          results[i + index] = { error: result.reason };
+        }
+      });
+    }
+    
+    return results;
+  } catch (error) {
+    console.error('Batch operation failed:', error);
+    throw error;
+  }
 }
