@@ -4150,13 +4150,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "saas_subscriptions_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "subscription_plans"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "saas_subscriptions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -4217,10 +4210,10 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
-          features: Json | null
+          features: string[] | null
           id: string
-          is_active: boolean | null
-          is_popular: boolean | null
+          is_active: boolean
+          is_popular: boolean
           max_contracts: number | null
           max_tenants: number | null
           max_users_per_tenant: number | null
@@ -4230,7 +4223,7 @@ export type Database = {
           plan_name_en: string | null
           price_monthly: number
           price_yearly: number
-          sort_order: number | null
+          sort_order: number
           storage_limit_gb: number | null
           updated_at: string
         }
@@ -4238,10 +4231,10 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
-          features?: Json | null
+          features?: string[] | null
           id?: string
-          is_active?: boolean | null
-          is_popular?: boolean | null
+          is_active?: boolean
+          is_popular?: boolean
           max_contracts?: number | null
           max_tenants?: number | null
           max_users_per_tenant?: number | null
@@ -4251,7 +4244,7 @@ export type Database = {
           plan_name_en?: string | null
           price_monthly?: number
           price_yearly?: number
-          sort_order?: number | null
+          sort_order?: number
           storage_limit_gb?: number | null
           updated_at?: string
         }
@@ -4259,10 +4252,10 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
-          features?: Json | null
+          features?: string[] | null
           id?: string
-          is_active?: boolean | null
-          is_popular?: boolean | null
+          is_active?: boolean
+          is_popular?: boolean
           max_contracts?: number | null
           max_tenants?: number | null
           max_users_per_tenant?: number | null
@@ -4272,7 +4265,7 @@ export type Database = {
           plan_name_en?: string | null
           price_monthly?: number
           price_yearly?: number
-          sort_order?: number | null
+          sort_order?: number
           storage_limit_gb?: number | null
           updated_at?: string
         }
