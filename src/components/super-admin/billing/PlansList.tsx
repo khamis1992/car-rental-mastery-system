@@ -232,11 +232,17 @@ const PlansList: React.FC = () => {
       {/* Plan Form Dialog */}
       <PlanFormDialog
         open={isDialogOpen}
-        onClose={() => {
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) {
+            setSelectedPlan(null);
+          }
+        }}
+        plan={selectedPlan}
+        onSuccess={() => {
           setIsDialogOpen(false);
           setSelectedPlan(null);
         }}
-        plan={selectedPlan}
       />
     </div>
   );
