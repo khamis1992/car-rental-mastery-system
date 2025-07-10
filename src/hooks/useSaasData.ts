@@ -189,7 +189,10 @@ export const useCreateInvoice = () => {
     mutationFn: (invoiceData: {
       subscription_id: string;
       tenant_id: string;
-      amount_due: number;
+      subtotal: number;
+      tax_amount?: number;
+      discount_amount?: number;
+      total_amount: number;
       currency: string;
       billing_period_start: string;
       billing_period_end: string;

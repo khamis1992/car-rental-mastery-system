@@ -86,9 +86,9 @@ const InvoiceGenerator: React.FC = () => {
       // Invoice items
       doc.text('تفاصيل الفاتورة:', 20, 120);
       doc.text(`الاشتراك: ${invoice.subscription?.plan?.plan_name || 'خطة غير محددة'}`, 20, 130);
-      doc.text(`المبلغ المستحق: ${invoice.amount_due} ${invoice.currency}`, 20, 140);
-      doc.text(`المبلغ المدفوع: ${invoice.amount_paid} ${invoice.currency}`, 20, 150);
-      doc.text(`المبلغ المتبقي: ${invoice.amount_remaining} ${invoice.currency}`, 20, 160);
+       doc.text(`المبلغ الإجمالي: ${invoice.total_amount} ${invoice.currency}`, 20, 140);
+       doc.text(`المبلغ الفرعي: ${invoice.subtotal} ${invoice.currency}`, 20, 150);
+       doc.text(`الضريبة: ${invoice.tax_amount} ${invoice.currency}`, 20, 160);
       
       // Footer
       doc.setFontSize(10);
@@ -162,7 +162,7 @@ const InvoiceGenerator: React.FC = () => {
                         <DollarSign className="w-4 h-4" />
                         <span>المبلغ</span>
                       </div>
-                      <p className="font-semibold">{invoice.amount_due} {invoice.currency}</p>
+                      <p className="font-semibold">{invoice.total_amount} {invoice.currency}</p>
                     </div>
                     
                     <div className="text-center">
@@ -255,18 +255,18 @@ const InvoiceGenerator: React.FC = () => {
                       <span>الخطة:</span>
                       <span>{selectedInvoice.subscription?.plan?.plan_name || 'غير محدد'}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>المبلغ المستحق:</span>
-                      <span>{selectedInvoice.amount_due} {selectedInvoice.currency}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>المبلغ المدفوع:</span>
-                      <span>{selectedInvoice.amount_paid} {selectedInvoice.currency}</span>
-                    </div>
-                    <div className="flex justify-between font-semibold">
-                      <span>المبلغ المتبقي:</span>
-                      <span>{selectedInvoice.amount_remaining} {selectedInvoice.currency}</span>
-                    </div>
+                     <div className="flex justify-between">
+                       <span>المبلغ الفرعي:</span>
+                       <span>{selectedInvoice.subtotal} {selectedInvoice.currency}</span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span>الضريبة:</span>
+                       <span>{selectedInvoice.tax_amount} {selectedInvoice.currency}</span>
+                     </div>
+                     <div className="flex justify-between font-semibold">
+                       <span>المبلغ الإجمالي:</span>
+                       <span>{selectedInvoice.total_amount} {selectedInvoice.currency}</span>
+                     </div>
                   </div>
                 </div>
                 

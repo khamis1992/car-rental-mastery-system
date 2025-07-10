@@ -36,7 +36,7 @@ export interface SaasInvoice {
   tenant_id: string;
   stripe_invoice_id?: string;
   invoice_number: string;
-  status: 'draft' | 'open' | 'paid' | 'uncollectible' | 'void';
+  status: 'draft' | 'open' | 'paid' | 'uncollectible' | 'void' | 'sent' | 'overdue';
   subtotal: number;
   tax_amount: number;
   discount_amount: number;

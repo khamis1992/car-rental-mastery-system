@@ -71,7 +71,7 @@ export class SaasService {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return (data || []) as SaasSubscription[];
+    return (data || []) as unknown as SaasSubscription[];
   }
 
   async createSubscription(subscriptionData: SubscriptionFormData): Promise<SaasSubscription> {
@@ -89,7 +89,7 @@ export class SaasService {
       .single();
 
     if (error) throw error;
-    return data as SaasSubscription;
+    return data as unknown as SaasSubscription;
   }
 
   async updateSubscription(subscriptionId: string, updates: Partial<SaasSubscription>): Promise<SaasSubscription> {
@@ -105,7 +105,7 @@ export class SaasService {
       .single();
 
     if (error) throw error;
-    return data as SaasSubscription;
+    return data as unknown as SaasSubscription;
   }
 
   async cancelSubscription(subscriptionId: string): Promise<void> {
@@ -134,13 +134,16 @@ export class SaasService {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return (data || []) as SaasInvoice[];
+    return (data || []) as unknown as SaasInvoice[];
   }
 
   async createInvoice(invoiceData: {
     subscription_id: string;
     tenant_id: string;
-    amount_due: number;
+    subtotal: number;
+    tax_amount?: number;
+    discount_amount?: number;
+    total_amount: number;
     currency: string;
     billing_period_start: string;
     billing_period_end: string;
@@ -153,11 +156,19 @@ export class SaasService {
     const { data, error } = await supabase
       .from('saas_invoices')
       .insert({
-        ...invoiceData,
+        subscription_id: invoiceData.subscription_id,
+        tenant_id: invoiceData.tenant_id,
         invoice_number: invoiceNumber,
         status: 'draft',
-        amount_paid: 0,
-        amount_remaining: invoiceData.amount_due
+        subtotal: invoiceData.subtotal,
+        tax_amount: invoiceData.tax_amount || 0,
+        discount_amount: invoiceData.discount_amount || 0,
+        total_amount: invoiceData.total_amount,
+        currency: invoiceData.currency,
+        billing_period_start: invoiceData.billing_period_start,
+        billing_period_end: invoiceData.billing_period_end,
+        due_date: invoiceData.due_date,
+        description: invoiceData.description
       })
       .select(`
         *,
@@ -169,7 +180,7 @@ export class SaasService {
       .single();
 
     if (error) throw error;
-    return data as SaasInvoice;
+    return data as unknown as SaasInvoice;
   }
 
   async updateInvoiceStatus(invoiceId: string, status: SaasInvoice['status']): Promise<void> {
@@ -194,7 +205,7 @@ export class SaasService {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return (data || []) as SaasPayment[];
+    return (data || []) as unknown as SaasPayment[];
   }
 
   async createPayment(paymentData: {
@@ -220,7 +231,7 @@ export class SaasService {
       .single();
 
     if (error) throw error;
-    return data as SaasPayment;
+    return data as unknown as SaasPayment;
   }
 
   // الإحصائيات والتقارير

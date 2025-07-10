@@ -151,7 +151,7 @@ export function AutomaticBillingTab() {
             <div className="text-2xl font-bold">
               {invoices
                 .filter(inv => inv.status === 'paid')
-                .reduce((sum, inv) => sum + inv.amount_due, 0)
+                .reduce((sum, inv) => sum + inv.total_amount, 0)
                 .toFixed(3)} د.ك
             </div>
             <p className="text-xs text-muted-foreground">
@@ -237,7 +237,7 @@ export function AutomaticBillingTab() {
                       </p>
                     </div>
                     <div className="text-left">
-                      <p className="font-bold">{invoice.amount_due.toFixed(3)} د.ك</p>
+                      <p className="font-bold">{invoice.total_amount.toFixed(3)} د.ك</p>
                       <Badge 
                         variant={
                           invoice.status === 'paid' ? 'default' : 
@@ -290,9 +290,9 @@ export function AutomaticBillingTab() {
                     <div className="text-left">
                       <p className="font-bold">{subscription.amount.toFixed(3)} د.ك</p>
                       <Badge variant={subscription.status === 'active' ? 'default' : 'secondary'}>
-                        {subscription.status === 'active' ? 'نشط' : 
-                         subscription.status === 'paused' ? 'متوقف' :
-                         subscription.status === 'cancelled' ? 'ملغي' : 'منتهي'}
+                         {subscription.status === 'active' ? 'نشط' : 
+                          subscription.status === 'paused' ? 'متوقف' :
+                          subscription.status === 'canceled' ? 'ملغي' : 'منتهي'}
                       </Badge>
                     </div>
                   </div>
