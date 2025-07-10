@@ -7,6 +7,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { TenantOnboarding } from '@/components/Tenants/TenantOnboarding';
+import TenantLimitChecker from '@/components/Tenants/TenantLimitChecker';
 
 const Tenants: React.FC = () => {
   const { currentTenant, currentUserRole, switchTenant } = useTenant();
@@ -167,6 +168,17 @@ const Tenants: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {currentTenant && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div className="lg:col-span-2">
+              {/* Additional tenant management features can go here */}
+            </div>
+            <div>
+              <TenantLimitChecker />
+            </div>
+          </div>
         )}
 
         {!currentTenant && (

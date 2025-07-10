@@ -17,7 +17,7 @@ import { NotificationCenter } from "@/components/Navbar/NotificationCenter";
 import DailyTasksButton from "@/components/Navbar/DailyTasksButton";
 import { AttendanceClock } from "@/components/Navbar/AttendanceClock";
 import { useSearch } from "@/contexts/SearchContext";
-import TenantSelector from "@/components/Navbar/TenantSelector";
+import TenantSwitcher from "./TenantSwitcher";
 
 const Navbar = () => {
   const { user, profile, signOut } = useAuth();
@@ -152,7 +152,7 @@ const Navbar = () => {
           </div>
           
           {/* محدد المؤسسة */}
-          <TenantSelector />
+          <TenantSwitcher />
           
           {/* ساعة الحضور */}
           <AttendanceClock />

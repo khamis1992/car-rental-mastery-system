@@ -206,12 +206,12 @@ const App = () => (
                        </ProtectedRoute>
                      } />
                      <Route path="/tenants" element={
-                       <ProtectedRoute>
-                         <Layout>
-                           <Tenants />
-                         </Layout>
-                       </ProtectedRoute>
-                     } />
+                        <ProtectedRoute requiredRole="super_admin">
+                          <Layout>
+                            <Tenants />
+                          </Layout>
+                        </ProtectedRoute>
+                      } />
                     {/* Contract stage routes */}
                     <Route path="/contracts/stage/draft/:contractId" element={
                       <ProtectedRoute>

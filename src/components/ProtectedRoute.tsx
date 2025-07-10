@@ -6,7 +6,7 @@ import TenantGuard from './TenantGuard';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'admin' | 'manager' | 'accountant' | 'technician' | 'receptionist';
+  requiredRole?: 'super_admin' | 'tenant_admin' | 'manager' | 'accountant' | 'receptionist' | 'user';
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
@@ -35,7 +35,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     return <Navigate to="/auth" replace />;
   }
 
-  if (requiredRole && profile && profile.role !== requiredRole && profile.role !== 'admin') {
+  // For super_admin role, check the old profile system for backward compatibility
+  if (requiredRole === 'super_admin' && profile && profile.role !== 'admin') {
     return (
       <div className="min-h-screen bg-gradient-soft flex items-center justify-center">
         <div className="text-center">
@@ -43,7 +44,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
             غير مصرح لك بالوصول
           </h1>
           <p className="text-muted-foreground">
-            تحتاج إلى صلاحية {requiredRole} للوصول إلى هذه الصفحة
+            تحتاج إلى صلاحية مدير النظام للوصول إلى هذه الصفحة
           </p>
         </div>
       </div>
