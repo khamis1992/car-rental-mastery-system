@@ -58,7 +58,7 @@ export const useSystemMonitoring = () => {
     try {
       setLoading(true);
       
-      // جلب بيانات Postgres logs
+      // جلب بيانات Postgres logs باستخدام Edge Function الجديد
       const postgresQuery = `
         select identifier, postgres_logs.timestamp, id, event_message, parsed.error_severity 
         from postgres_logs
@@ -69,9 +69,13 @@ export const useSystemMonitoring = () => {
         limit 100
       `;
 
-      const { data: postgresLogs } = await supabase.functions.invoke('supabase-analytics', {
+      const { data: postgresLogs, error: postgresError } = await supabase.functions.invoke('supabase-analytics', {
         body: { query: postgresQuery }
       });
+
+      if (postgresError) {
+        console.error('خطأ في جلب بيانات Postgres:', postgresError);
+      }
 
       // جلب بيانات Auth logs
       const authQuery = `
@@ -82,9 +86,30 @@ export const useSystemMonitoring = () => {
         limit 50
       `;
 
-      const { data: authLogs } = await supabase.functions.invoke('supabase-analytics', {
+      const { data: authLogs, error: authError } = await supabase.functions.invoke('supabase-analytics', {
         body: { query: authQuery }
       });
+
+      if (authError) {
+        console.error('خطأ في جلب بيانات المصادقة:', authError);
+      }
+
+      // جلب إحصائيات النظام من قاعدة البيانات
+      const systemStatsQuery = `
+        select 
+          (select count(*) from contracts where status = 'active') as active_contracts,
+          (select count(*) from vehicles where status = 'available') as available_vehicles,
+          (select count(*) from customers where status = 'active') as active_customers,
+          (select count(*) from employees where is_active = true) as active_employees
+      `;
+
+      const { data: systemStats, error: statsError } = await supabase.functions.invoke('supabase-analytics', {
+        body: { query: systemStatsQuery }
+      });
+
+      if (statsError) {
+        console.error('خطأ في جلب إحصائيات النظام:', statsError);
+      }
 
       // تجهيز بيانات الخوادم
       const servers: ServerMetrics[] = [
