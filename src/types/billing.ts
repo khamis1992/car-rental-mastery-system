@@ -4,7 +4,7 @@ export interface SaasSubscription {
   plan_id: string;
   stripe_subscription_id?: string;
   stripe_customer_id?: string;
-  status: 'active' | 'paused' | 'cancelled' | 'expired';
+  status: 'active' | 'paused' | 'canceled' | 'expired' | 'trialing' | 'past_due' | 'unpaid';
   billing_cycle: 'monthly' | 'yearly';
   current_period_start: string;
   current_period_end: string;
@@ -36,10 +36,11 @@ export interface SaasInvoice {
   tenant_id: string;
   stripe_invoice_id?: string;
   invoice_number: string;
-  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
-  amount_due: number;
-  amount_paid: number;
-  amount_remaining: number;
+  status: 'draft' | 'open' | 'paid' | 'uncollectible' | 'void';
+  subtotal: number;
+  tax_amount: number;
+  discount_amount: number;
+  total_amount: number;
   currency: string;
   billing_period_start: string;
   billing_period_end: string;
@@ -80,10 +81,11 @@ export interface SaasPayment {
   payment_method: string;
   payment_reference?: string;
   payment_date: string;
-  status: 'completed' | 'failed' | 'pending' | 'refunded';
+  status: 'processing' | 'succeeded' | 'failed' | 'canceled' | 'requires_action';
   gateway_response?: Record<string, any>;
   created_at: string;
   created_by?: string;
+  paid_at?: string;
   
   // Relations
   invoice?: SaasInvoice;
