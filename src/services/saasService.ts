@@ -7,21 +7,81 @@ import {
   TenantUsage,
   PlanFormData,
   SubscriptionFormData,
-  SaasBillingStats
-} from '@/types/saas';
+  SubscriptionUpdateData,
+  CreateInvoiceFormData,
+  CreatePaymentFormData,
+  SadadPaymentRequest,
+  SadadPaymentResponse,
+  SaasBillingStats,
+  BillingProcessResult,
+  UsageUpdateData,
+  SAAS_CONSTANTS,
+  calculateInvoiceTotal,
+  calculateTaxAmount,
+  calculateDiscountAmount,
+  calculateNextBillingDate,
+  formatCurrency
+} from '@/types/unified-saas';
 
-export class SaasService {
-  // إدارة خطط الاشتراك مع الـ caching
-  private plansCache = new Map<string, { data: SubscriptionPlan[]; timestamp: number }>();
-  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 دقائق
+// =======================================================
+// خدمة SaaS المحسنة والموحدة
+// =======================================================
+
+export class EnhancedSaasService {
+  // إدارة الذاكرة المؤقتة مع TTL محسن
+  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+  private readonly DEFAULT_CACHE_TTL = 5 * 60 * 1000; // 5 دقائق
+  private readonly PLANS_CACHE_TTL = 10 * 60 * 1000; // 10 دقائق للخطط
+  private readonly STATS_CACHE_TTL = 2 * 60 * 1000; // دقيقتان للإحصائيات
+
+  // =======================================================
+  // دوال مساعدة للذاكرة المؤقتة
+  // =======================================================
+
+  private getCacheKey(prefix: string, ...params: string[]): string {
+    return `${prefix}:${params.join(':')}`;
+  }
+
+  private setCache<T>(key: string, data: T, ttl: number = this.DEFAULT_CACHE_TTL): void {
+    this.cache.set(key, { data, timestamp: Date.now(), ttl });
+  }
+
+  private getCache<T>(key: string): T | null {
+    const cached = this.cache.get(key);
+    if (!cached) return null;
+
+    const now = Date.now();
+    if (now - cached.timestamp > cached.ttl) {
+      this.cache.delete(key);
+      return null;
+    }
+
+    return cached.data as T;
+  }
+
+  private clearCache(pattern?: string): void {
+    if (!pattern) {
+      this.cache.clear();
+      return;
+    }
+
+    for (const [key] of this.cache) {
+      if (key.includes(pattern)) {
+        this.cache.delete(key);
+      }
+    }
+  }
+
+  // =======================================================
+  // إدارة خطط الاشتراك المحسنة
+  // =======================================================
 
   async getSubscriptionPlans(useCache: boolean = true): Promise<SubscriptionPlan[]> {
-    const cacheKey = 'active_plans';
-    const cached = this.plansCache.get(cacheKey);
-    const now = Date.now();
-
-    if (useCache && cached && (now - cached.timestamp) < this.CACHE_TTL) {
-      return cached.data;
+    const cacheKey = this.getCacheKey('plans', 'active');
+    
+    if (useCache) {
+      const cached = this.getCache<SubscriptionPlan[]>(cacheKey);
+      if (cached) return cached;
     }
 
     const { data, error } = await supabase
@@ -30,36 +90,75 @@ export class SaasService {
       .eq('is_active', true)
       .order('sort_order', { ascending: true });
 
-    if (error) throw error;
+    if (error) throw new Error(`فشل في جلب خطط الاشتراك: ${error.message}`);
     
     const plans = (data || []) as SubscriptionPlan[];
-    this.plansCache.set(cacheKey, { data: plans, timestamp: now });
+    this.setCache(cacheKey, plans, this.PLANS_CACHE_TTL);
     
     return plans;
   }
 
   async getAllSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+    const cacheKey = this.getCacheKey('plans', 'all');
+    const cached = this.getCache<SubscriptionPlan[]>(cacheKey);
+    if (cached) return cached;
+
     const { data, error } = await supabase
       .from('subscription_plans')
       .select('*')
       .order('sort_order', { ascending: true });
 
-    if (error) throw error;
-    return (data || []) as SubscriptionPlan[];
+    if (error) throw new Error(`فشل في جلب جميع خطط الاشتراك: ${error.message}`);
+    
+    const plans = (data || []) as SubscriptionPlan[];
+    this.setCache(cacheKey, plans, this.PLANS_CACHE_TTL);
+    
+    return plans;
+  }
+
+  async getSubscriptionPlanById(planId: string): Promise<SubscriptionPlan> {
+    const cacheKey = this.getCacheKey('plan', planId);
+    const cached = this.getCache<SubscriptionPlan>(cacheKey);
+    if (cached) return cached;
+
+    const { data, error } = await supabase
+      .from('subscription_plans')
+      .select('*')
+      .eq('id', planId)
+      .single();
+
+    if (error) throw new Error(`فشل في جلب خطة الاشتراك: ${error.message}`);
+    
+    const plan = data as SubscriptionPlan;
+    this.setCache(cacheKey, plan, this.PLANS_CACHE_TTL);
+    
+    return plan;
   }
 
   async createSubscriptionPlan(planData: PlanFormData): Promise<SubscriptionPlan> {
+    // التحقق من عدم وجود خطة بنفس الكود
+    const existingPlan = await this.checkPlanCodeExists(planData.plan_code);
+    if (existingPlan) {
+      throw new Error('كود الخطة موجود مسبقاً');
+    }
+
+    const { data: user } = await supabase.auth.getUser();
+    
     const { data, error } = await supabase
       .from('subscription_plans')
       .insert({
         ...planData,
         is_active: true,
-        created_by: (await supabase.auth.getUser()).data.user?.id
+        created_by: user.user?.id
       })
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(`فشل في إنشاء خطة الاشتراك: ${error.message}`);
+    
+    // تنظيف الذاكرة المؤقتة
+    this.clearCache('plans');
+    
     return data as SubscriptionPlan;
   }
 
@@ -71,113 +170,251 @@ export class SaasService {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(`فشل في تحديث خطة الاشتراك: ${error.message}`);
+    
+    // تنظيف الذاكرة المؤقتة
+    this.clearCache('plans');
+    this.clearCache('plan');
+    
     return data as SubscriptionPlan;
   }
 
   async deleteSubscriptionPlan(planId: string): Promise<void> {
+    // التحقق من عدم وجود اشتراكات نشطة لهذه الخطة
+    const activeSubscriptions = await this.getActiveSubscriptionsByPlan(planId);
+    if (activeSubscriptions.length > 0) {
+      throw new Error('لا يمكن حذف خطة تحتوي على اشتراكات نشطة');
+    }
+
     const { error } = await supabase
       .from('subscription_plans')
       .update({ is_active: false })
       .eq('id', planId);
 
-    if (error) throw error;
+    if (error) throw new Error(`فشل في حذف خطة الاشتراك: ${error.message}`);
+    
+    // تنظيف الذاكرة المؤقتة
+    this.clearCache('plans');
   }
 
-  // إدارة الاشتراكات
-  async getTenantSubscriptions(): Promise<SaasSubscription[]> {
+  private async checkPlanCodeExists(planCode: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('subscription_plans')
+      .select('id')
+      .eq('plan_code', planCode)
+      .limit(1);
+
+    if (error) throw new Error(`فشل في التحقق من كود الخطة: ${error.message}`);
+    
+    return (data || []).length > 0;
+  }
+
+  private async getActiveSubscriptionsByPlan(planId: string): Promise<SaasSubscription[]> {
+    const { data, error } = await supabase
+      .from('saas_subscriptions')
+      .select('*')
+      .eq('plan_id', planId)
+      .in('status', ['active', 'trialing']);
+
+    if (error) throw new Error(`فشل في جلب الاشتراكات النشطة: ${error.message}`);
+    
+    return (data || []) as SaasSubscription[];
+  }
+
+  // =======================================================
+  // إدارة الاشتراكات المحسنة
+  // =======================================================
+
+  async getTenantSubscriptions(tenantId?: string): Promise<SaasSubscription[]> {
+    const cacheKey = this.getCacheKey('subscriptions', tenantId || 'all');
+    const cached = this.getCache<SaasSubscription[]>(cacheKey);
+    if (cached) return cached;
+
+    let query = supabase
+      .from('saas_subscriptions')
+      .select(`
+        *,
+        tenant:tenants(id, name, email),
+        plan:subscription_plans(*)
+      `);
+
+    if (tenantId) {
+      query = query.eq('tenant_id', tenantId);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
+
+    if (error) throw new Error(`فشل في جلب الاشتراكات: ${error.message}`);
+    
+    const subscriptions = (data || []) as unknown as SaasSubscription[];
+    this.setCache(cacheKey, subscriptions);
+    
+    return subscriptions;
+  }
+
+  async getSubscriptionById(subscriptionId: string): Promise<SaasSubscription> {
+    const cacheKey = this.getCacheKey('subscription', subscriptionId);
+    const cached = this.getCache<SaasSubscription>(cacheKey);
+    if (cached) return cached;
+
     const { data, error } = await supabase
       .from('saas_subscriptions')
       .select(`
         *,
-        tenant:tenants(*),
+        tenant:tenants(id, name, email),
         plan:subscription_plans(*)
       `)
-      .order('created_at', { ascending: false });
+      .eq('id', subscriptionId)
+      .single();
 
-    if (error) throw error;
-    return (data || []) as unknown as SaasSubscription[];
+    if (error) throw new Error(`فشل في جلب الاشتراك: ${error.message}`);
+    
+    const subscription = data as unknown as SaasSubscription;
+    this.setCache(cacheKey, subscription);
+    
+    return subscription;
   }
 
   async createSubscription(subscriptionData: SubscriptionFormData): Promise<SaasSubscription> {
+    // جلب معلومات الخطة
+    const plan = await this.getSubscriptionPlanById(subscriptionData.plan_id);
+    
+    // حساب التواريخ
+    const now = new Date();
+    const periodStart = now;
+    const trialEnd = subscriptionData.trial_days ? 
+      new Date(now.getTime() + subscriptionData.trial_days * 24 * 60 * 60 * 1000) : 
+      undefined;
+
+    const periodEnd = calculateNextBillingDate(periodStart, subscriptionData.billing_cycle);
+    const nextBillingDate = calculateNextBillingDate(periodEnd, subscriptionData.billing_cycle);
+
+    // حساب المبلغ
+    const amount = subscriptionData.billing_cycle === 'monthly' ? 
+      plan.price_monthly : 
+      plan.price_yearly;
+
+    const finalAmount = calculateDiscountAmount(amount, subscriptionData.discount_percentage || 0);
+
     const { data, error } = await supabase
       .from('saas_subscriptions')
       .insert({
-        ...subscriptionData,
-        status: 'trialing'
+        tenant_id: subscriptionData.tenant_id,
+        plan_id: subscriptionData.plan_id,
+        status: trialEnd ? 'trialing' : 'active',
+        billing_cycle: subscriptionData.billing_cycle,
+        current_period_start: periodStart.toISOString().split('T')[0],
+        current_period_end: periodEnd.toISOString().split('T')[0],
+        next_billing_date: nextBillingDate.toISOString().split('T')[0],
+        trial_ends_at: trialEnd?.toISOString().split('T')[0],
+        amount: finalAmount,
+        currency: SAAS_CONSTANTS.DEFAULT_CURRENCY,
+        discount_percentage: subscriptionData.discount_percentage || 0,
+        auto_renew: subscriptionData.auto_renew ?? true
       })
       .select(`
         *,
-        tenant:tenants(*),
+        tenant:tenants(id, name, email),
         plan:subscription_plans(*)
       `)
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(`فشل في إنشاء الاشتراك: ${error.message}`);
+    
+    // تنظيف الذاكرة المؤقتة
+    this.clearCache('subscriptions');
+    
     return data as unknown as SaasSubscription;
   }
 
-  async updateSubscription(subscriptionId: string, updates: Partial<SaasSubscription>): Promise<SaasSubscription> {
+  async updateSubscription(subscriptionId: string, updates: SubscriptionUpdateData): Promise<SaasSubscription> {
     const { data, error } = await supabase
       .from('saas_subscriptions')
       .update(updates)
       .eq('id', subscriptionId)
       .select(`
         *,
-        tenant:tenants(*),
+        tenant:tenants(id, name, email),
         plan:subscription_plans(*)
       `)
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(`فشل في تحديث الاشتراك: ${error.message}`);
+    
+    // تنظيف الذاكرة المؤقتة
+    this.clearCache('subscriptions');
+    this.clearCache('subscription');
+    
     return data as unknown as SaasSubscription;
   }
 
-  async cancelSubscription(subscriptionId: string): Promise<void> {
-    const { error } = await supabase
-      .from('saas_subscriptions')
-      .update({ 
-        status: 'canceled',
-        canceled_at: new Date().toISOString()
-      })
-      .eq('id', subscriptionId);
+  async cancelSubscription(subscriptionId: string, reason?: string): Promise<void> {
+    const updates: SubscriptionUpdateData = {
+      status: 'canceled',
+      cancellation_reason: reason
+    };
 
-    if (error) throw error;
+    await this.updateSubscription(subscriptionId, updates);
   }
 
-  // إدارة الفواتير
-  async getSaasInvoices(): Promise<SaasInvoice[]> {
-    const { data, error } = await supabase
+  async pauseSubscription(subscriptionId: string): Promise<void> {
+    await this.updateSubscription(subscriptionId, { status: 'paused' });
+  }
+
+  async resumeSubscription(subscriptionId: string): Promise<void> {
+    await this.updateSubscription(subscriptionId, { status: 'active' });
+  }
+
+  // =======================================================
+  // إدارة الفواتير المحسنة
+  // =======================================================
+
+  async getSaasInvoices(tenantId?: string, limit?: number): Promise<SaasInvoice[]> {
+    const cacheKey = this.getCacheKey('invoices', tenantId || 'all', limit?.toString() || 'all');
+    const cached = this.getCache<SaasInvoice[]>(cacheKey);
+    if (cached) return cached;
+
+    let query = supabase
       .from('saas_invoices')
       .select(`
         *,
         subscription:saas_subscriptions(*),
-        tenant:tenants(*),
+        tenant:tenants(id, name, email),
         items:saas_invoice_items(*),
         payments:saas_payments(*)
-      `)
-      .order('created_at', { ascending: false });
+      `);
 
-    if (error) throw error;
-    return (data || []) as unknown as SaasInvoice[];
+    if (tenantId) {
+      query = query.eq('tenant_id', tenantId);
+    }
+
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
+
+    if (error) throw new Error(`فشل في جلب الفواتير: ${error.message}`);
+    
+    const invoices = (data || []) as unknown as SaasInvoice[];
+    this.setCache(cacheKey, invoices);
+    
+    return invoices;
   }
 
-  async createInvoice(invoiceData: {
-    subscription_id: string;
-    tenant_id: string;
-    subtotal: number;
-    tax_amount?: number;
-    discount_amount?: number;
-    total_amount: number;
-    currency: string;
-    billing_period_start: string;
-    billing_period_end: string;
-    due_date?: string;
-    description?: string;
-  }): Promise<SaasInvoice> {
+  async createInvoice(invoiceData: CreateInvoiceFormData): Promise<SaasInvoice> {
     // توليد رقم الفاتورة
     const { data: invoiceNumber } = await supabase.rpc('generate_saas_invoice_number');
     
+    const { data: user } = await supabase.auth.getUser();
+
+    // حساب المبلغ الإجمالي إذا لم يكن محدداً
+    const totalAmount = invoiceData.total_amount || calculateInvoiceTotal(
+      invoiceData.subtotal,
+      invoiceData.tax_amount || 0,
+      invoiceData.discount_amount || 0
+    );
+
     const { data, error } = await supabase
       .from('saas_invoices')
       .insert({
@@ -188,98 +425,138 @@ export class SaasService {
         subtotal: invoiceData.subtotal,
         tax_amount: invoiceData.tax_amount || 0,
         discount_amount: invoiceData.discount_amount || 0,
-        total_amount: invoiceData.total_amount,
+        total_amount: totalAmount,
         currency: invoiceData.currency,
         billing_period_start: invoiceData.billing_period_start,
         billing_period_end: invoiceData.billing_period_end,
         due_date: invoiceData.due_date,
-        description: invoiceData.description
+        description: invoiceData.description,
+        created_by: user.user?.id
       })
       .select(`
         *,
         subscription:saas_subscriptions(*),
-        tenant:tenants(*),
+        tenant:tenants(id, name, email),
         items:saas_invoice_items(*),
         payments:saas_payments(*)
       `)
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(`فشل في إنشاء الفاتورة: ${error.message}`);
+
+    // إضافة عناصر الفاتورة إذا كانت موجودة
+    if (invoiceData.items && invoiceData.items.length > 0) {
+      await this.addInvoiceItems(data.id, invoiceData.items);
+    }
+    
+    // تنظيف الذاكرة المؤقتة
+    this.clearCache('invoices');
+    
     return data as unknown as SaasInvoice;
   }
 
-  async updateInvoiceStatus(invoiceId: string, status: SaasInvoice['status']): Promise<void> {
+  private async addInvoiceItems(invoiceId: string, items: any[]): Promise<void> {
     const { error } = await supabase
-      .from('saas_invoices')
-      .update({ status })
-      .eq('id', invoiceId);
+      .from('saas_invoice_items')
+      .insert(
+        items.map(item => ({
+          invoice_id: invoiceId,
+          ...item
+        }))
+      );
 
-    if (error) throw error;
+    if (error) throw new Error(`فشل في إضافة عناصر الفاتورة: ${error.message}`);
   }
 
-  // إدارة المدفوعات
-  async getSaasPayments(): Promise<SaasPayment[]> {
-    const { data, error } = await supabase
+  async updateInvoiceStatus(invoiceId: string, status: SaasInvoice['status']): Promise<void> {
+    const updates: any = { status };
+    
+    if (status === 'paid') {
+      updates.paid_at = new Date().toISOString();
+    }
+
+    const { error } = await supabase
+      .from('saas_invoices')
+      .update(updates)
+      .eq('id', invoiceId);
+
+    if (error) throw new Error(`فشل في تحديث حالة الفاتورة: ${error.message}`);
+    
+    // تنظيف الذاكرة المؤقتة
+    this.clearCache('invoices');
+  }
+
+  // =======================================================
+  // إدارة المدفوعات المحسنة
+  // =======================================================
+
+  async getSaasPayments(tenantId?: string): Promise<SaasPayment[]> {
+    const cacheKey = this.getCacheKey('payments', tenantId || 'all');
+    const cached = this.getCache<SaasPayment[]>(cacheKey);
+    if (cached) return cached;
+
+    let query = supabase
       .from('saas_payments')
       .select(`
         *,
         invoice:saas_invoices(*),
         subscription:saas_subscriptions(*),
-        tenant:tenants(*)
-      `)
-      .order('created_at', { ascending: false });
+        tenant:tenants(id, name, email)
+      `);
 
-    if (error) throw error;
-    return (data || []) as unknown as SaasPayment[];
+    if (tenantId) {
+      query = query.eq('tenant_id', tenantId);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
+
+    if (error) throw new Error(`فشل في جلب المدفوعات: ${error.message}`);
+    
+    const payments = (data || []) as unknown as SaasPayment[];
+    this.setCache(cacheKey, payments);
+    
+    return payments;
   }
 
-  async createPayment(paymentData: {
-    invoice_id: string;
-    subscription_id: string;
-    tenant_id: string;
-    amount: number;
-    currency: string;
-    payment_method?: string;
-    payment_gateway?: 'stripe' | 'sadad';
-    sadad_transaction_id?: string;
-    sadad_bill_id?: string;
-  }): Promise<SaasPayment> {
+  async createPayment(paymentData: CreatePaymentFormData): Promise<SaasPayment> {
+    const { data: user } = await supabase.auth.getUser();
+
     const { data, error } = await supabase
       .from('saas_payments')
       .insert({
         ...paymentData,
-        status: 'processing'
+        status: 'pending',
+        created_by: user.user?.id
       })
       .select(`
         *,
         invoice:saas_invoices(*),
         subscription:saas_subscriptions(*),
-        tenant:tenants(*)
+        tenant:tenants(id, name, email)
       `)
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(`فشل في إنشاء المدفوعة: ${error.message}`);
+    
+    // تنظيف الذاكرة المؤقتة
+    this.clearCache('payments');
+    
     return data as unknown as SaasPayment;
   }
 
-  // دفع SADAD
-  async createSadadPayment(paymentData: {
-    invoice_id: string;
-    subscription_id: string;
-    tenant_id: string;
-    amount: number;
-    currency: string;
-    customer_mobile?: string;
-    customer_email?: string;
-    bill_description: string;
-    due_date?: string;
-  }): Promise<any> {
-    const { data, error } = await supabase.functions.invoke('sadad-create-payment', {
-      body: paymentData
-    });
+  // دفع SADAD المحسن
+  async createSadadPayment(paymentData: SadadPaymentRequest): Promise<SadadPaymentResponse> {
+    try {
+      const { data, error } = await supabase.functions.invoke('sadad-create-payment', {
+        body: paymentData
+      });
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      
+      return data as SadadPaymentResponse;
+    } catch (error) {
+      throw new Error(`فشل في إنشاء دفعة SADAD: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`);
+    }
   }
 
   async updatePaymentStatus(
@@ -287,98 +564,60 @@ export class SaasService {
     status: SaasPayment['status'],
     metadata?: any
   ): Promise<void> {
+    const updates: any = { status };
+    
+    if (status === 'succeeded') {
+      updates.paid_at = new Date().toISOString();
+    }
+    
+    if (metadata) {
+      updates.metadata = metadata;
+    }
+
     const { error } = await supabase
       .from('saas_payments')
-      .update({ 
-        status,
-        ...(status === 'succeeded' && { paid_at: new Date().toISOString() }),
-        ...(metadata && { metadata })
-      })
+      .update(updates)
       .eq('id', paymentId);
 
-    if (error) throw error;
-  }
-
-  // الإحصائيات والتقارير
-  async getBillingStats(): Promise<SaasBillingStats> {
-    // إجمالي الإيرادات
-    const { data: paymentsData } = await supabase
-      .from('saas_payments')
-      .select('amount')
-      .eq('status', 'succeeded');
-
-    const totalRevenue = paymentsData?.reduce((sum, payment) => sum + payment.amount, 0) || 0;
-
-    // الإيرادات الشهرية
-    const currentMonth = new Date();
-    const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+    if (error) throw new Error(`فشل في تحديث حالة المدفوعة: ${error.message}`);
     
-    const { data: monthlyPayments } = await supabase
-      .from('saas_payments')
-      .select('amount')
-      .eq('status', 'succeeded')
-      .gte('paid_at', startOfMonth.toISOString());
-
-    const monthlyRevenue = monthlyPayments?.reduce((sum, payment) => sum + payment.amount, 0) || 0;
-
-    // عدد الاشتراكات النشطة
-    const { count: activeSubscriptions } = await supabase
-      .from('saas_subscriptions')
-      .select('*', { count: 'exact' })
-      .eq('status', 'active');
-
-    // عدد الاشتراكات التجريبية
-    const { count: trialSubscriptions } = await supabase
-      .from('saas_subscriptions')
-      .select('*', { count: 'exact' })
-      .eq('status', 'trialing');
-
-    // عدد الاشتراكات الملغاة
-    const { count: canceledSubscriptions } = await supabase
-      .from('saas_subscriptions')
-      .select('*', { count: 'exact' })
-      .eq('status', 'canceled');
-
-    // الفواتير المتأخرة
-    const { count: overdueInvoices } = await supabase
-      .from('saas_invoices')
-      .select('*', { count: 'exact' })
-      .eq('status', 'open')
-      .lt('due_date', new Date().toISOString());
-
-    // إجمالي المؤسسات
-    const { count: totalTenants } = await supabase
-      .from('tenants')
-      .select('*', { count: 'exact' })
-      .eq('status', 'active');
-
-    return {
-      total_revenue: totalRevenue,
-      monthly_revenue: monthlyRevenue,
-      active_subscriptions: activeSubscriptions || 0,
-      trial_subscriptions: trialSubscriptions || 0,
-      canceled_subscriptions: canceledSubscriptions || 0,
-      overdue_invoices: overdueInvoices || 0,
-      total_tenants: totalTenants || 0,
-      growth_rate: 0 // سيتم حسابها بناءً على البيانات التاريخية
-    };
+    // تنظيف الذاكرة المؤقتة
+    this.clearCache('payments');
   }
 
-  // إدارة استخدام المؤسسات
-  async getTenantUsage(): Promise<TenantUsage[]> {
-    const { data, error } = await supabase
+  // =======================================================
+  // إدارة استخدام المؤسسات المحسنة
+  // =======================================================
+
+  async getTenantUsage(tenantId?: string, limit: number = 30): Promise<TenantUsage[]> {
+    const cacheKey = this.getCacheKey('usage', tenantId || 'all', limit.toString());
+    const cached = this.getCache<TenantUsage[]>(cacheKey);
+    if (cached) return cached;
+
+    let query = supabase
       .from('tenant_usage')
       .select(`
         *,
-        tenant:tenants(*)
-      `)
-      .order('usage_date', { ascending: false });
+        tenant:tenants(id, name)
+      `);
 
-    if (error) throw error;
-    return (data || []) as TenantUsage[];
+    if (tenantId) {
+      query = query.eq('tenant_id', tenantId);
+    }
+
+    const { data, error } = await query
+      .order('usage_date', { ascending: false })
+      .limit(limit);
+
+    if (error) throw new Error(`فشل في جلب بيانات الاستخدام: ${error.message}`);
+    
+    const usage = (data || []) as TenantUsage[];
+    this.setCache(cacheKey, usage);
+    
+    return usage;
   }
 
-  async updateTenantUsage(tenantId: string, usageData: Partial<TenantUsage>): Promise<TenantUsage> {
+  async updateTenantUsage(tenantId: string, usageData: UsageUpdateData): Promise<TenantUsage> {
     const today = new Date().toISOString().split('T')[0];
     
     const { data, error } = await supabase
@@ -390,13 +629,204 @@ export class SaasService {
       })
       .select(`
         *,
-        tenant:tenants(*)
+        tenant:tenants(id, name)
       `)
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(`فشل في تحديث بيانات الاستخدام: ${error.message}`);
+    
+    // تنظيف الذاكرة المؤقتة
+    this.clearCache('usage');
+    
     return data as TenantUsage;
+  }
+
+  async calculateCurrentUsage(tenantId: string): Promise<UsageUpdateData> {
+    // حساب الاستخدام الحالي من الجداول الفعلية
+    const { data: usageData } = await supabase.rpc('calculate_tenant_usage', {
+      tenant_id_param: tenantId
+    });
+
+    return usageData as UsageUpdateData;
+  }
+
+  async syncTenantUsage(tenantId: string): Promise<void> {
+    await supabase.rpc('update_tenant_usage_stats', {
+      tenant_id_param: tenantId
+    });
+    
+    // تنظيف الذاكرة المؤقتة
+    this.clearCache('usage');
+  }
+
+  // =======================================================
+  // الإحصائيات والتقارير المحسنة
+  // =======================================================
+
+  async getBillingStats(): Promise<SaasBillingStats> {
+    const cacheKey = this.getCacheKey('stats', 'billing');
+    const cached = this.getCache<SaasBillingStats>(cacheKey);
+    if (cached) return cached;
+
+    // تنفيذ جميع الاستعلامات بشكل متوازي لتحسين الأداء
+    const [
+      totalRevenueResult,
+      monthlyRevenueResult,
+      activeSubscriptionsResult,
+      trialSubscriptionsResult,
+      canceledSubscriptionsResult,
+      overdueInvoicesResult,
+      totalTenantsResult
+    ] = await Promise.all([
+      // إجمالي الإيرادات
+      supabase
+        .from('saas_payments')
+        .select('amount')
+        .eq('status', 'succeeded'),
+      
+      // الإيرادات الشهرية
+      supabase
+        .from('saas_payments')
+        .select('amount')
+        .eq('status', 'succeeded')
+        .gte('paid_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
+      
+      // الاشتراكات النشطة
+      supabase
+        .from('saas_subscriptions')
+        .select('*', { count: 'exact' })
+        .eq('status', 'active'),
+      
+      // الاشتراكات التجريبية
+      supabase
+        .from('saas_subscriptions')
+        .select('*', { count: 'exact' })
+        .eq('status', 'trialing'),
+      
+      // الاشتراكات الملغاة
+      supabase
+        .from('saas_subscriptions')
+        .select('*', { count: 'exact' })
+        .eq('status', 'canceled'),
+      
+      // الفواتير المتأخرة
+      supabase
+        .from('saas_invoices')
+        .select('*', { count: 'exact' })
+        .eq('status', 'sent')
+        .lt('due_date', new Date().toISOString()),
+      
+      // إجمالي المؤسسات
+      supabase
+        .from('tenants')
+        .select('*', { count: 'exact' })
+        .eq('status', 'active')
+    ]);
+
+    const stats: SaasBillingStats = {
+      total_revenue: totalRevenueResult.data?.reduce((sum, payment) => sum + payment.amount, 0) || 0,
+      monthly_revenue: monthlyRevenueResult.data?.reduce((sum, payment) => sum + payment.amount, 0) || 0,
+      yearly_revenue: 0, // سيحسب لاحقاً
+      active_subscriptions: activeSubscriptionsResult.count || 0,
+      trial_subscriptions: trialSubscriptionsResult.count || 0,
+      canceled_subscriptions: canceledSubscriptionsResult.count || 0,
+      total_subscriptions: (activeSubscriptionsResult.count || 0) + (trialSubscriptionsResult.count || 0) + (canceledSubscriptionsResult.count || 0),
+      pending_invoices: 0,
+      overdue_invoices: overdueInvoicesResult.count || 0,
+      paid_invoices: 0,
+      total_invoices: 0,
+      total_tenants: totalTenantsResult.count || 0,
+      active_tenants: totalTenantsResult.count || 0,
+      growth_rate: 0, // سيحسب بناءً على البيانات التاريخية
+      churn_rate: 0,
+      average_revenue_per_user: 0,
+      average_subscription_value: 0
+    };
+
+    // حساب المتوسطات
+    if (stats.total_tenants > 0) {
+      stats.average_revenue_per_user = stats.total_revenue / stats.total_tenants;
+    }
+
+    if (stats.total_subscriptions > 0) {
+      stats.average_subscription_value = stats.total_revenue / stats.total_subscriptions;
+    }
+
+    this.setCache(cacheKey, stats, this.STATS_CACHE_TTL);
+    
+    return stats;
+  }
+
+  // =======================================================
+  // معالجة الفوترة التلقائية
+  // =======================================================
+
+  async processAutomaticBilling(): Promise<BillingProcessResult> {
+    try {
+      const { data, error } = await supabase.functions.invoke('automatic-billing');
+      
+      if (error) throw error;
+      
+      // تنظيف الذاكرة المؤقتة بعد المعالجة
+      this.clearCache();
+      
+      return data as BillingProcessResult;
+    } catch (error) {
+      throw new Error(`فشل في معالجة الفوترة التلقائية: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`);
+    }
+  }
+
+  // =======================================================
+  // دوال مساعدة إضافية
+  // =======================================================
+
+  async getUpcomingRenewals(days: number = 7): Promise<SaasSubscription[]> {
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + days);
+
+    const { data, error } = await supabase
+      .from('saas_subscriptions')
+      .select(`
+        *,
+        tenant:tenants(id, name, email),
+        plan:subscription_plans(*)
+      `)
+      .eq('status', 'active')
+      .eq('auto_renew', true)
+      .lte('next_billing_date', endDate.toISOString().split('T')[0]);
+
+    if (error) throw new Error(`فشل في جلب التجديدات القادمة: ${error.message}`);
+    
+    return (data || []) as unknown as SaasSubscription[];
+  }
+
+  async getOverdueInvoices(): Promise<SaasInvoice[]> {
+    const { data, error } = await supabase
+      .from('saas_invoices')
+      .select(`
+        *,
+        subscription:saas_subscriptions(*),
+        tenant:tenants(id, name, email)
+      `)
+      .eq('status', 'sent')
+      .lt('due_date', new Date().toISOString());
+
+    if (error) throw new Error(`فشل في جلب الفواتير المتأخرة: ${error.message}`);
+    
+    return (data || []) as unknown as SaasInvoice[];
+  }
+
+  // =======================================================
+  // تنظيف الموارد
+  // =======================================================
+
+  dispose(): void {
+    this.cache.clear();
   }
 }
 
-export const saasService = new SaasService();
+// إنشاء instance وحيد للخدمة
+export const enhancedSaasService = new EnhancedSaasService();
+
+// إعادة تصدير للتوافق مع الكود الموجود
+export const saasService = enhancedSaasService;
