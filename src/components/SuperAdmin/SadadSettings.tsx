@@ -39,9 +39,9 @@ const SadadSettings: React.FC = () => {
     defaultValues: {
       merchant_id: '',
       merchant_key: '',
-      api_url: 'https://api.sadad.qa/v1',
-      is_sandbox: true,
-      is_active: false
+      api_url: 'https://api.sadad.kw/v1',
+      is_sandbox: false,
+      is_active: true
     }
   });
 
@@ -51,9 +51,9 @@ const SadadSettings: React.FC = () => {
     if (settings) {
       setValue('merchant_id', settings.merchant_id || '');
       setValue('merchant_key', settings.merchant_key || '');
-      setValue('api_url', settings.api_url || 'https://api.sadad.qa/v1');
-      setValue('is_sandbox', settings.is_sandbox ?? true);
-      setValue('is_active', settings.is_active ?? false);
+      setValue('api_url', settings.api_url || 'https://api.sadad.kw/v1');
+      setValue('is_sandbox', settings.is_sandbox ?? false);
+      setValue('is_active', settings.is_active ?? true);
     }
   }, [settings, setValue]);
 
@@ -148,7 +148,7 @@ const SadadSettings: React.FC = () => {
               <Input
                 id="api_url"
                 type="url"
-                placeholder="https://api.sadad.qa/v1"
+                placeholder="https://api.sadad.kw/v1"
                 {...register('api_url')}
               />
               {errors.api_url && (
