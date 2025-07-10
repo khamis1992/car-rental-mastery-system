@@ -100,7 +100,7 @@ export function SubscriptionPlansTab() {
           <h2 className="text-2xl font-bold">خطط الاشتراك</h2>
           <p className="text-muted-foreground">إدارة خطط الاشتراك المتاحة للعملاء</p>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
+        <Button onClick={() => setIsCreateDialogOpen(true)} className="flex items-center gap-2 flex-row-reverse">
           <Plus className="h-4 w-4" />
           إضافة خطة جديدة
         </Button>
