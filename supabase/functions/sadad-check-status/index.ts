@@ -6,6 +6,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// إعدادات إعادة المحاولة
+const RETRY_CONFIG = {
+  maxRetries: 3,
+  retryDelay: 1000,
+  timeoutMs: 30000,
+};
+
+// إعدادات التحقق من الأمان
+const SECURITY_CONFIG = {
+  maxTransactionIdLength: 100,
+  allowedStatuses: ['pending', 'processing', 'paid', 'failed', 'expired', 'cancelled'],
+};
+
 interface SadadStatusRequest {
   transaction_id: string;
 }
@@ -34,12 +47,8 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    // قراءة بيانات الطلب
-    const requestData: SadadStatusRequest = await req.json();
-    
-    if (!requestData.transaction_id) {
-      throw new Error("Transaction ID is required");
-    }
+    // التحقق من صحة البيانات وتحليل الطلب
+    const requestData = await validateStatusRequest(req);
 
     // الحصول على إعدادات SADAD
     const { data: settings, error: settingsError } = await supabase
@@ -86,18 +95,11 @@ serve(async (req) => {
         status: 'pending'
       });
 
-    // إرسال الطلب إلى SADAD
-    const sadadResponse = await fetch(`${settings.api_url}/api/v1/payments/${requestData.transaction_id}/status`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Supabase-Edge-Function/1.0'
-      },
-      body: JSON.stringify(finalPayload)
-    });
-
-    const responseData = await sadadResponse.json();
+    // إرسال الطلب إلى SADAD مع إعادة المحاولة
+    const { response: sadadResponse, data: responseData } = await retryApiCall(
+      () => callSadadStatusAPI(`${settings.api_url}/api/v1/payments/${requestData.transaction_id}/status`, finalPayload),
+      RETRY_CONFIG
+    );
 
     // تسجيل الاستجابة
     await supabase
@@ -160,20 +162,112 @@ serve(async (req) => {
   }
 });
 
-// دالة توليد التوقيع لفحص الحالة
+// دالة توليد التوقيع لفحص الحالة المحسّنة
 async function generateSignature(payload: any, merchantKey: string): Promise<string> {
-  const signatureString = [
-    payload.merchant_id,
-    payload.transaction_id,
-    merchantKey
-  ].join('|');
+  try {
+    // التحقق من وجود البيانات المطلوبة
+    if (!payload.merchant_id || !payload.transaction_id || !merchantKey) {
+      throw new Error("Missing required data for signature generation");
+    }
 
-  const encoder = new TextEncoder();
-  const data = encoder.encode(signatureString);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const signatureString = [
+      payload.merchant_id,
+      payload.transaction_id,
+      merchantKey
+    ].join('|');
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(signatureString);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    return hashHex;
+  } catch (error) {
+    console.error('Signature generation error:', error);
+    throw new Error('Failed to generate secure signature');
+  }
+}
+
+// دالة التحقق من صحة طلب فحص الحالة
+async function validateStatusRequest(req: Request): Promise<SadadStatusRequest> {
+  try {
+    const requestData = await req.json();
+    
+    // التحقق من وجود معرف المعاملة
+    if (!requestData.transaction_id || typeof requestData.transaction_id !== 'string') {
+      throw new Error("transaction_id is required and must be a string");
+    }
+
+    // التحقق من طول معرف المعاملة
+    if (requestData.transaction_id.length > SECURITY_CONFIG.maxTransactionIdLength) {
+      throw new Error(`transaction_id cannot exceed ${SECURITY_CONFIG.maxTransactionIdLength} characters`);
+    }
+
+    // التحقق من تنسيق معرف المعاملة (أرقام وأحرف فقط)
+    const validTransactionIdFormat = /^[a-zA-Z0-9\-_]+$/;
+    if (!validTransactionIdFormat.test(requestData.transaction_id)) {
+      throw new Error("Invalid transaction_id format. Only alphanumeric characters, hyphens, and underscores are allowed");
+    }
+
+    return {
+      transaction_id: requestData.transaction_id.trim()
+    };
+  } catch (error) {
+    console.error('Status request validation error:', error);
+    throw new Error(`Invalid request data: ${error.message}`);
+  }
+}
+
+// دالة استدعاء API مع إعادة المحاولة
+async function retryApiCall<T>(
+  apiCall: () => Promise<T>,
+  config: typeof RETRY_CONFIG
+): Promise<T> {
+  let lastError: Error;
   
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
+    try {
+      return await Promise.race([
+        apiCall(),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), config.timeoutMs)
+        )
+      ]);
+    } catch (error) {
+      lastError = error as Error;
+      console.warn(`API call attempt ${attempt} failed:`, error);
+      
+      if (attempt < config.maxRetries) {
+        // زيادة زمن الانتظار تدريجياً
+        await new Promise(resolve => setTimeout(resolve, config.retryDelay * attempt));
+      }
+    }
+  }
   
-  return hashHex;
+  throw new Error(`API call failed after ${config.maxRetries} attempts: ${lastError.message}`);
+}
+
+// دالة استدعاء SADAD API لفحص الحالة
+async function callSadadStatusAPI(url: string, payload: any): Promise<{ response: Response, data: any }> {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'User-Agent': 'Supabase-Edge-Function/2.0',
+      'X-Request-ID': crypto.randomUUID(),
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json();
+  
+  // التحقق من صحة الاستجابة
+  if (data.status && !SECURITY_CONFIG.allowedStatuses.includes(data.status)) {
+    console.warn(`Unexpected status received: ${data.status}`);
+  }
+
+  return { response, data };
 }

@@ -309,6 +309,133 @@ export class SadadService {
 
     return data as SadadPayment | null;
   }
+
+  // دالة للتحقق من صحة البيانات المدخلة
+  validatePaymentData(paymentData: CreateSadadPaymentFormData): void {
+    const errors: string[] = [];
+
+    // التحقق من المبلغ
+    if (paymentData.amount <= 0 || paymentData.amount > 999999.999) {
+      errors.push('المبلغ يجب أن يكون بين 0.001 و 999999.999');
+    }
+
+    // التحقق من العملة
+    const validCurrencies = ['KWD', 'USD', 'EUR'];
+    if (paymentData.currency && !validCurrencies.includes(paymentData.currency)) {
+      errors.push(`العملة يجب أن تكون واحدة من: ${validCurrencies.join(', ')}`);
+    }
+
+    // التحقق من الوصف
+    if (paymentData.description && paymentData.description.length > 500) {
+      errors.push('الوصف لا يمكن أن يتجاوز 500 حرف');
+    }
+
+    // التحقق من البريد الإلكتروني
+    if (paymentData.customer_email && !this.isValidEmail(paymentData.customer_email)) {
+      errors.push('تنسيق البريد الإلكتروني غير صحيح');
+    }
+
+    // التحقق من رقم الهاتف
+    if (paymentData.customer_phone && !this.isValidPhone(paymentData.customer_phone)) {
+      errors.push('تنسيق رقم الهاتف غير صحيح');
+    }
+
+    // التحقق من مدة انتهاء الصلاحية
+    if (paymentData.expires_in_minutes && (paymentData.expires_in_minutes < 1 || paymentData.expires_in_minutes > 10080)) {
+      errors.push('مدة انتهاء الصلاحية يجب أن تكون بين 1 دقيقة و 10080 دقيقة (أسبوع)');
+    }
+
+    if (errors.length > 0) {
+      throw new Error(`بيانات غير صحيحة: ${errors.join(', ')}`);
+    }
+  }
+
+  // التحقق من صحة البريد الإلكتروني
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  // التحقق من صحة رقم الهاتف
+  private isValidPhone(phone: string): boolean {
+    // نمط للرقم الكويتي أو الدولي
+    const phoneRegex = /^(\+965|965)?[569][0-9]{7}$/;
+    return phoneRegex.test(phone.replace(/\s|-/g, ''));
+  }
+
+  // دالة للتحقق من صحة التوقيع
+  async verifySignature(data: any, signature: string, merchantKey: string): Promise<boolean> {
+    try {
+      const signatureString = [
+        data.merchant_id,
+        data.amount?.toString() || '',
+        data.currency || '',
+        data.reference || '',
+        merchantKey
+      ].join('|');
+
+      const encoder = new TextEncoder();
+      const encodedData = encoder.encode(signatureString);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', encodedData);
+      
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const computedSignature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      return computedSignature.toLowerCase() === signature.toLowerCase();
+    } catch (error) {
+      console.error('Signature verification error:', error);
+      return false;
+    }
+  }
+
+  // دالة إعادة المحاولة للطلبات الفاشلة
+  async retryFailedPayments(filters?: {
+    tenant_id?: string;
+    older_than_minutes?: number;
+    max_retries?: number;
+  }): Promise<{ retried: number; failed: number }> {
+    try {
+      let query = supabase
+        .from('sadad_payments')
+        .select('*')
+        .eq('sadad_status', 'failed');
+
+      if (filters?.tenant_id) {
+        query = query.eq('tenant_id', filters.tenant_id);
+      }
+
+      if (filters?.older_than_minutes) {
+        const cutoffTime = new Date(Date.now() - filters.older_than_minutes * 60 * 1000).toISOString();
+        query = query.lt('updated_at', cutoffTime);
+      }
+
+      const { data: failedPayments, error } = await query;
+      
+      if (error) throw error;
+      if (!failedPayments || failedPayments.length === 0) {
+        return { retried: 0, failed: 0 };
+      }
+
+      let retriedCount = 0;
+      let stillFailedCount = 0;
+
+      for (const payment of failedPayments) {
+        try {
+          // محاولة إعادة معالجة الدفعة
+          await this.updateSadadPaymentStatus(payment.id, 'pending');
+          retriedCount++;
+        } catch (retryError) {
+          console.error(`Failed to retry payment ${payment.id}:`, retryError);
+          stillFailedCount++;
+        }
+      }
+
+      return { retried: retriedCount, failed: stillFailedCount };
+    } catch (error) {
+      console.error('Retry failed payments error:', error);
+      throw error;
+    }
+  }
 }
 
 export const sadadService = new SadadService();

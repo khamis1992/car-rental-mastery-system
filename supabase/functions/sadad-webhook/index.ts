@@ -6,6 +6,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// إعدادات الأمان والموثوقية
+const SECURITY_CONFIG = {
+  maxWebhookSize: 1024 * 1024, // 1MB
+  allowedEventTypes: ['payment.completed', 'payment.failed', 'payment.expired', 'payment.cancelled'],
+  maxTransactionIdLength: 100,
+  maxAmountValue: 999999.999,
+  signatureHashLength: 64,
+};
+
+// إعدادات الوقت والتوقيت
+const TIMING_CONFIG = {
+  maxEventAge: 30 * 60 * 1000, // 30 دقيقة بالميلي ثانية
+  duplicateEventWindow: 5 * 60 * 1000, // 5 دقائق للأحداث المكررة
+};
+
 interface SadadWebhookPayload {
   event_type: 'payment.completed' | 'payment.failed' | 'payment.expired' | 'payment.cancelled';
   transaction_id: string;
@@ -36,15 +51,19 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    // قراءة بيانات webhook
-    const webhookData: SadadWebhookPayload = await req.json();
+    // التحقق من حجم الطلب
+    const contentLength = req.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > SECURITY_CONFIG.maxWebhookSize) {
+      throw new Error("Webhook payload too large");
+    }
+
+    // قراءة وتحليل بيانات webhook مع التحقق من صحتها
+    const webhookData = await validateWebhookData(req);
     
     console.log('Received SADAD webhook:', JSON.stringify(webhookData, null, 2));
 
-    // التحقق من البيانات المطلوبة
-    if (!webhookData.transaction_id || !webhookData.event_type) {
-      throw new Error("Missing required webhook data");
-    }
+    // التحقق من عمر الحدث
+    await validateEventTiming(webhookData);
 
     // الحصول على إعدادات SADAD للتحقق من التوقيع
     const { data: settings, error: settingsError } = await supabase
@@ -183,9 +202,102 @@ serve(async (req) => {
   }
 });
 
-// دالة التحقق من التوقيع
+// دالة التحقق من صحة بيانات الـ webhook
+async function validateWebhookData(req: Request): Promise<SadadWebhookPayload> {
+  try {
+    const webhookData = await req.json();
+
+    // التحقق من نوع الحدث
+    if (!webhookData.event_type || !SECURITY_CONFIG.allowedEventTypes.includes(webhookData.event_type)) {
+      throw new Error(`Invalid or missing event_type. Allowed types: ${SECURITY_CONFIG.allowedEventTypes.join(', ')}`);
+    }
+
+    // التحقق من معرف المعاملة
+    if (!webhookData.transaction_id || typeof webhookData.transaction_id !== 'string') {
+      throw new Error("Missing or invalid transaction_id");
+    }
+
+    if (webhookData.transaction_id.length > SECURITY_CONFIG.maxTransactionIdLength) {
+      throw new Error(`transaction_id too long. Max length: ${SECURITY_CONFIG.maxTransactionIdLength}`);
+    }
+
+    // التحقق من التوقيع
+    if (!webhookData.signature || typeof webhookData.signature !== 'string') {
+      throw new Error("Missing or invalid signature");
+    }
+
+    if (webhookData.signature.length !== SECURITY_CONFIG.signatureHashLength) {
+      throw new Error(`Invalid signature format. Expected length: ${SECURITY_CONFIG.signatureHashLength}`);
+    }
+
+    // التحقق من التوقيت
+    if (!webhookData.timestamp || typeof webhookData.timestamp !== 'string') {
+      throw new Error("Missing or invalid timestamp");
+    }
+
+    // التحقق من المبلغ إذا كان موجوداً
+    if (webhookData.amount !== undefined) {
+      if (typeof webhookData.amount !== 'number' || webhookData.amount < 0 || webhookData.amount > SECURITY_CONFIG.maxAmountValue) {
+        throw new Error(`Invalid amount. Must be between 0 and ${SECURITY_CONFIG.maxAmountValue}`);
+      }
+    }
+
+    // التحقق من الحالة
+    if (!webhookData.status || typeof webhookData.status !== 'string') {
+      throw new Error("Missing or invalid status");
+    }
+
+    // تنظيف البيانات
+    return {
+      event_type: webhookData.event_type,
+      transaction_id: webhookData.transaction_id.trim(),
+      reference_number: webhookData.reference_number?.trim(),
+      reference: webhookData.reference?.trim(),
+      status: webhookData.status.trim(),
+      amount: webhookData.amount,
+      currency: webhookData.currency?.trim().toUpperCase(),
+      paid_at: webhookData.paid_at?.trim(),
+      customer_info: webhookData.customer_info,
+      signature: webhookData.signature.trim().toLowerCase(),
+      timestamp: webhookData.timestamp.trim()
+    };
+  } catch (error) {
+    console.error('Webhook data validation error:', error);
+    throw new Error(`Invalid webhook data: ${error.message}`);
+  }
+}
+
+// دالة التحقق من عمر الحدث
+async function validateEventTiming(webhookData: SadadWebhookPayload): Promise<void> {
+  try {
+    const eventTime = new Date(webhookData.timestamp).getTime();
+    const currentTime = Date.now();
+    const eventAge = currentTime - eventTime;
+
+    // التحقق من أن الحدث ليس قديماً جداً
+    if (eventAge > TIMING_CONFIG.maxEventAge) {
+      throw new Error(`Event too old. Age: ${Math.floor(eventAge / 1000)} seconds, Max allowed: ${Math.floor(TIMING_CONFIG.maxEventAge / 1000)} seconds`);
+    }
+
+    // التحقق من أن الحدث ليس في المستقبل
+    if (eventAge < -60000) { // تسامح لدقيقة واحدة للفروق في التوقيت
+      throw new Error("Event timestamp is in the future");
+    }
+  } catch (error) {
+    console.error('Event timing validation error:', error);
+    throw new Error(`Invalid event timing: ${error.message}`);
+  }
+}
+
+// دالة التحقق من التوقيع المحسّنة
 async function verifySignature(payload: SadadWebhookPayload, merchantKey: string): Promise<boolean> {
   try {
+    // التحقق من وجود البيانات المطلوبة
+    if (!payload.transaction_id || !payload.status || !payload.timestamp || !merchantKey) {
+      console.error('Missing required data for signature verification');
+      return false;
+    }
+
     // إنشاء string للتحقق من التوقيع
     const signatureString = [
       payload.transaction_id,
@@ -204,7 +316,21 @@ async function verifySignature(payload: SadadWebhookPayload, merchantKey: string
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const computedSignature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     
-    return computedSignature === payload.signature;
+    // مقارنة آمنة للتوقيعات
+    const providedSignature = payload.signature.toLowerCase();
+    const computedSignatureLower = computedSignature.toLowerCase();
+    
+    if (providedSignature.length !== computedSignatureLower.length) {
+      return false;
+    }
+
+    // مقارنة constant-time لمنع timing attacks
+    let result = 0;
+    for (let i = 0; i < providedSignature.length; i++) {
+      result |= providedSignature.charCodeAt(i) ^ computedSignatureLower.charCodeAt(i);
+    }
+    
+    return result === 0;
   } catch (error) {
     console.error('Signature verification error:', error);
     return false;
