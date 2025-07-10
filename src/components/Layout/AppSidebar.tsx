@@ -146,6 +146,11 @@ const superAdminItems = [
     url: "/super-admin", 
     icon: Crown 
   },
+  { 
+    title: "الفوترة والاشتراكات", 
+    url: "/billing", 
+    icon: DollarSign 
+  },
 ];
 
 export function AppSidebar() {

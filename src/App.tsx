@@ -36,6 +36,7 @@ import Tenants from "./pages/Tenants";
 import NotFound from "./pages/NotFound";
 import PublicQuotation from "./pages/PublicQuotation";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
+import BillingManagement from "./pages/BillingManagement";
 import DraftStage from "./pages/ContractStages/DraftStage";
 import PendingStage from "./pages/ContractStages/PendingStage";
 import ActiveStage from "./pages/ContractStages/ActiveStage";
@@ -217,6 +218,13 @@ const App = () => (
                         <ProtectedRoute requiredRole="super_admin">
                           <Layout>
                             <SuperAdminDashboard />
+                          </Layout>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/billing" element={
+                        <ProtectedRoute requiredRole="super_admin">
+                          <Layout>
+                            <BillingManagement />
                           </Layout>
                         </ProtectedRoute>
                       } />
