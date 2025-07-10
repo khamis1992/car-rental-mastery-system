@@ -8,34 +8,45 @@ import {
   Users,
   CreditCard
 } from "lucide-react";
+import { useBillingStats } from '@/hooks/useSaasData';
 
 const BillingOverview: React.FC = () => {
+  const { data: billingStats, isLoading } = useBillingStats();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   const stats = [
     {
       title: "إجمالي الإيرادات الشهرية",
-      value: "15,750 د.ك",
+      value: `${billingStats?.monthly_revenue || 0} د.ك`,
       change: "+12.5%",
       isPositive: true,
       icon: DollarSign
     },
     {
       title: "عدد المؤسسات النشطة",
-      value: "24",
-      change: "+3 هذا الشهر",
+      value: `${billingStats?.total_tenants || 0}`,
+      change: `+${billingStats?.active_subscriptions || 0} نشط`,
       isPositive: true,
       icon: Building2
     },
     {
-      title: "متوسط القيمة لكل مؤسسة",
-      value: "656 د.ك",
-      change: "+8.2%",
+      title: "الاشتراكات النشطة",
+      value: `${billingStats?.active_subscriptions || 0}`,
+      change: `${billingStats?.trial_subscriptions || 0} تجريبي`,
       isPositive: true,
       icon: Users
     },
     {
-      title: "المدفوعات المعلقة",
-      value: "2,350 د.ك",
-      change: "-15.3%",
+      title: "الفواتير المتأخرة",
+      value: `${billingStats?.overdue_invoices || 0}`,
+      change: "تحتاج متابعة",
       isPositive: false,
       icon: CreditCard
     }

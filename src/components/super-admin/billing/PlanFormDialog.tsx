@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,43 +6,103 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { useCreateSubscriptionPlan, useUpdateSubscriptionPlan } from '@/hooks/useSaasData';
+import { SubscriptionPlan } from '@/types/saas';
 
 interface PlanFormDialogProps {
   open: boolean;
   onClose: () => void;
-  plan?: any;
+  plan?: SubscriptionPlan | null;
 }
 
 export function PlanFormDialog({ open, onClose, plan }: PlanFormDialogProps) {
   const [formData, setFormData] = useState({
-    plan_name: plan?.plan_name || '',
-    plan_name_en: plan?.plan_name_en || '',
-    plan_code: plan?.plan_code || '',
-    description: plan?.description || '',
-    price_monthly: plan?.price_monthly || 0,
-    price_yearly: plan?.price_yearly || 0,
-    max_users_per_tenant: plan?.max_users_per_tenant || 5,
-    max_vehicles: plan?.max_vehicles || 10,
-    max_contracts: plan?.max_contracts || 50,
-    storage_limit_gb: plan?.storage_limit_gb || 1,
-    is_popular: plan?.is_popular || false,
-    sort_order: plan?.sort_order || 1,
-    features: plan?.features?.join('\n') || ''
+    plan_name: '',
+    plan_name_en: '',
+    plan_code: '',
+    description: '',
+    price_monthly: 0,
+    price_yearly: 0,
+    max_users_per_tenant: 5,
+    max_vehicles: 10,
+    max_contracts: 50,
+    storage_limit_gb: 1,
+    is_popular: false,
+    sort_order: 1,
+    features: ''
   });
 
   const { toast } = useToast();
+  const createPlanMutation = useCreateSubscriptionPlan();
+  const updatePlanMutation = useUpdateSubscriptionPlan();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Reset form when dialog opens/closes or plan changes
+  useEffect(() => {
+    if (open) {
+      if (plan) {
+        setFormData({
+          plan_name: plan.plan_name || '',
+          plan_name_en: plan.plan_name_en || '',
+          plan_code: plan.plan_code || '',
+          description: plan.description || '',
+          price_monthly: plan.price_monthly || 0,
+          price_yearly: plan.price_yearly || 0,
+          max_users_per_tenant: plan.max_users_per_tenant || 5,
+          max_vehicles: plan.max_vehicles || 10,
+          max_contracts: plan.max_contracts || 50,
+          storage_limit_gb: plan.storage_limit_gb || 1,
+          is_popular: plan.is_popular || false,
+          sort_order: plan.sort_order || 1,
+          features: plan.features?.join('\n') || ''
+        });
+      } else {
+        setFormData({
+          plan_name: '',
+          plan_name_en: '',
+          plan_code: '',
+          description: '',
+          price_monthly: 0,
+          price_yearly: 0,
+          max_users_per_tenant: 5,
+          max_vehicles: 10,
+          max_contracts: 50,
+          storage_limit_gb: 1,
+          is_popular: false,
+          sort_order: 1,
+          features: ''
+        });
+      }
+    }
+  }, [open, plan]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Implement save logic here
-    toast({
-      title: plan ? 'تم تحديث الخطة' : 'تم إنشاء الخطة',
-      description: plan ? 'تم تحديث خطة الاشتراك بنجاح' : 'تم إنشاء خطة اشتراك جديدة',
-    });
-    
-    onClose();
+    try {
+      const planPayload = {
+        ...formData,
+        features: formData.features
+          .split('\n')
+          .filter(feature => feature.trim())
+          .map(feature => feature.trim())
+      };
+
+      if (plan) {
+        await updatePlanMutation.mutateAsync({
+          planId: plan.id,
+          planData: planPayload
+        });
+      } else {
+        await createPlanMutation.mutateAsync(planPayload);
+      }
+      
+      onClose();
+    } catch (error) {
+      // Error is handled by the mutation hooks
+    }
   };
+
+  const isLoading = createPlanMutation.isPending || updatePlanMutation.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -196,11 +256,11 @@ export function PlanFormDialog({ open, onClose, plan }: PlanFormDialogProps) {
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
               إلغاء
             </Button>
-            <Button type="submit">
-              {plan ? 'تحديث' : 'إنشاء'}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'جاري الحفظ...' : (plan ? 'تحديث' : 'إنشاء')}
             </Button>
           </div>
         </form>
