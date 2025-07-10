@@ -10,7 +10,7 @@ import { TenantOnboarding } from '@/components/Tenants/TenantOnboarding';
 import TenantLimitChecker from '@/components/Tenants/TenantLimitChecker';
 
 const Tenants: React.FC = () => {
-  const { currentTenant, currentUserRole, switchTenant } = useTenant();
+  const { currentTenant, currentUserRole, switchTenant, loading, error } = useTenant();
   const { profile } = useAuth();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -64,6 +64,39 @@ const Tenants: React.FC = () => {
   };
 
   const isSuperAdmin = currentUserRole === 'super_admin';
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-soft p-6 flex items-center justify-center" dir="rtl">
+        <div className="text-center">
+          <Building2 className="w-16 h-16 text-primary mx-auto mb-4 animate-pulse" />
+          <h3 className="text-lg font-medium mb-2">جاري تحميل بيانات المؤسسات...</h3>
+          <p className="text-muted-foreground">يرجى الانتظار قليلاً</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-soft p-6 flex items-center justify-center" dir="rtl">
+        <Card className="w-full max-w-md border-destructive/20">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Building2 className="w-16 h-16 text-destructive mb-4" />
+            <h3 className="text-lg font-medium mb-2 text-destructive">خطأ في تحميل البيانات</h3>
+            <p className="text-muted-foreground text-center mb-6">{error}</p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              إعادة المحاولة
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-soft p-6" dir="rtl">
