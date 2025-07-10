@@ -7,7 +7,7 @@ import {
   CreateSadadPaymentFormData,
   SadadStats,
   SadadSettingsFormData
-} from '@/types/sadad';
+} from '@/types/unified-billing';
 
 // إعدادات SADAD
 export const useSadadSettings = () => {

@@ -1,194 +1,52 @@
-// أنواع البيانات لنظام SaaS
+// ملف موحد لأنواع البيانات المتعلقة بنظام SaaS
+// تم تحديثه لاستخدام التعريفات الموحدة من unified-billing.ts
 
-export interface SubscriptionPlan {
-  id: string;
-  plan_name: string;
-  plan_name_en?: string;
-  plan_code: string;
-  description?: string;
-  price_monthly: number;
-  price_yearly: number;
-  features: string[];
-  max_tenants?: number;
-  max_users_per_tenant?: number;
-  max_vehicles?: number;
-  max_contracts?: number;
-  storage_limit_gb?: number;
-  is_active: boolean;
-  is_popular: boolean;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-  created_by?: string;
-}
-
-export interface SaasSubscription {
-  id: string;
-  tenant_id: string;
-  plan_id: string;
-  stripe_subscription_id?: string;
-  stripe_customer_id?: string;
-  status: 'active' | 'canceled' | 'past_due' | 'unpaid' | 'trialing' | 'paused' | 'expired';
-  billing_cycle: 'monthly' | 'yearly';
-  current_period_start: string;
-  current_period_end: string;
-  trial_end?: string;
-  amount: number;
-  currency: string;
-  created_at: string;
-  updated_at: string;
-  canceled_at?: string;
-  pause_collection?: any;
+// إعادة تصدير الأنواع الموحدة
+export type {
+  // الأنواع الأساسية
+  Currency,
+  PaymentGateway,
+  PaymentMethod,
+  SubscriptionStatus,
+  InvoiceStatus,
+  PaymentStatus,
+  BillingCycle,
   
-  // Relations
-  tenant?: any;
-  plan?: SubscriptionPlan;
-}
-
-export interface SaasInvoice {
-  id: string;
-  subscription_id: string;
-  tenant_id: string;
-  stripe_invoice_id?: string;
-  invoice_number: string;
-  status: 'draft' | 'open' | 'paid' | 'uncollectible' | 'void' | 'sent' | 'overdue';
-  subtotal: number;
-  tax_amount: number;
-  discount_amount: number;
-  total_amount: number;
-  currency: string;
-  billing_period_start: string;
-  billing_period_end: string;
-  due_date?: string;
-  paid_at?: string;
-  created_at: string;
-  updated_at: string;
-  invoice_pdf_url?: string;
-  description?: string;
-  metadata?: any;
+  // أنواع خطط الاشتراك
+  SubscriptionPlan,
+  PlanFormData,
   
-  // Relations
-  subscription?: SaasSubscription;
-  tenant?: any;
-  items?: SaasInvoiceItem[];
-  payments?: SaasPayment[];
-}
-
-export interface SaasInvoiceItem {
-  id: string;
-  invoice_id: string;
-  description: string;
-  amount: number;
-  quantity: number;
-  unit_price: number;
-  period_start?: string;
-  period_end?: string;
-  created_at: string;
-}
-
-export interface SaasPayment {
-  id: string;
-  invoice_id: string;
-  subscription_id: string;
-  tenant_id: string;
-  stripe_payment_intent_id?: string;
-  sadad_transaction_id?: string;
-  sadad_bill_id?: string;
-  amount: number;
-  currency: string;
-  status: 'processing' | 'succeeded' | 'failed' | 'canceled' | 'requires_action';
-  payment_method: 'stripe' | 'sadad' | 'manual' | 'bank_transfer';
-  payment_gateway?: 'stripe' | 'sadad';
-  paid_at?: string;
-  failure_reason?: string;
-  created_at: string;
-  updated_at: string;
-  metadata?: any;
+  // أنواع الاشتراكات
+  SaasSubscription,
+  BaseSubscription,
+  SubscriptionFormData,
   
-  // Relations
-  invoice?: SaasInvoice;
-  subscription?: SaasSubscription;
-  tenant?: any;
-}
-
-// واجهات للتكامل مع SADAD - مُحسَّنة وموحدة
-export interface SadadPaymentRequest {
-  invoice_id: string;
-  subscription_id: string;
-  tenant_id: string;
-  amount: number;
-  currency: string;
-  customer_mobile?: string;
-  customer_email?: string;
-  bill_description: string;
-  due_date?: string;
-  expires_in_minutes?: number;
-}
-
-export interface SadadPaymentResponse {
-  success: boolean;
-  payment_id?: string;
-  bill_id?: string;
-  transaction_id?: string;
-  reference_number?: string;
-  payment_url?: string;
-  qr_code?: string;
-  expires_at?: string;
-  error?: string;
-  error_code?: string;
-  message?: string;
-}
-
-export interface TenantUsage {
-  id: string;
-  tenant_id: string;
-  usage_date: string;
-  users_count: number;
-  vehicles_count: number;
-  contracts_count: number;
-  storage_used_gb: number;
-  created_at: string;
-  updated_at: string;
+  // أنواع الفواتير
+  SaasInvoice,
+  SaasInvoiceItem,
+  BaseInvoice,
+  BaseInvoiceItem,
+  CreateInvoiceFormData,
   
-  // Relations
-  tenant?: any;
-}
-
-export interface PlanFormData {
-  plan_name: string;
-  plan_name_en?: string;
-  plan_code: string;
-  description?: string;
-  price_monthly: number;
-  price_yearly: number;
-  features: string[];
-  max_tenants?: number;
-  max_users_per_tenant?: number;
-  max_vehicles?: number;
-  max_contracts?: number;
-  storage_limit_gb?: number;
-  is_popular: boolean;
-  sort_order: number;
-}
-
-export interface SubscriptionFormData {
-  tenant_id: string;
-  plan_id: string;
-  billing_cycle: 'monthly' | 'yearly';
-  current_period_start: string;
-  current_period_end: string;
-  trial_end?: string;
-  amount: number;
-  currency: string;
-}
-
-export interface SaasBillingStats {
-  total_revenue: number;
-  monthly_revenue: number;
-  active_subscriptions: number;
-  trial_subscriptions: number;
-  canceled_subscriptions: number;
-  overdue_invoices: number;
-  total_tenants: number;
-  growth_rate: number;
-}
+  // أنواع المدفوعات
+  SaasPayment,
+  BasePayment,
+  CreatePaymentFormData,
+  
+  // أنواع SADAD المدمجة
+  SadadPaymentRequest,
+  UnifiedPaymentResponse as SadadPaymentResponse,
+  
+  // أنواع الاستخدام
+  TenantUsage,
+  
+  // أنواع الإحصائيات
+  SaasBillingStats,
+  
+  // دوال التحقق
+  isValidCurrency,
+  isValidPaymentGateway,
+  isValidSubscriptionStatus,
+  isValidInvoiceStatus,
+  isValidPaymentStatus,
+} from '@/types/unified-billing';
