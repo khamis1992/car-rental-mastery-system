@@ -4158,6 +4158,209 @@ export type Database = {
           },
         ]
       }
+      sadad_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          paid_at: string | null
+          payment_url: string | null
+          saas_invoice_id: string | null
+          sadad_reference_number: string | null
+          sadad_response: Json | null
+          sadad_status: string
+          sadad_transaction_id: string | null
+          subscription_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_url?: string | null
+          saas_invoice_id?: string | null
+          sadad_reference_number?: string | null
+          sadad_response?: Json | null
+          sadad_status?: string
+          sadad_transaction_id?: string | null
+          subscription_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_url?: string | null
+          saas_invoice_id?: string | null
+          sadad_reference_number?: string | null
+          sadad_response?: Json | null
+          sadad_status?: string
+          sadad_transaction_id?: string | null
+          subscription_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sadad_payments_saas_invoice_id_fkey"
+            columns: ["saas_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "saas_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sadad_payments_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "saas_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sadad_payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sadad_settings: {
+        Row: {
+          api_url: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          is_sandbox: boolean
+          merchant_id: string
+          merchant_key: string
+          updated_at: string
+        }
+        Insert: {
+          api_url?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          is_sandbox?: boolean
+          merchant_id: string
+          merchant_key: string
+          updated_at?: string
+        }
+        Update: {
+          api_url?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          is_sandbox?: boolean
+          merchant_id?: string
+          merchant_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sadad_transaction_log: {
+        Row: {
+          action: string
+          created_at: string
+          error_message: string | null
+          id: string
+          payment_id: string
+          request_data: Json | null
+          response_data: Json | null
+          status: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payment_id: string
+          request_data?: Json | null
+          response_data?: Json | null
+          status: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payment_id?: string
+          request_data?: Json | null
+          response_data?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sadad_transaction_log_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "sadad_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sadad_webhook_events: {
+        Row: {
+          created_at: string
+          event_data: Json
+          event_type: string
+          id: string
+          payment_id: string | null
+          processed: boolean
+          sadad_transaction_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_data: Json
+          event_type: string
+          id?: string
+          payment_id?: string | null
+          processed?: boolean
+          sadad_transaction_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json
+          event_type?: string
+          id?: string
+          payment_id?: string | null
+          processed?: boolean
+          sadad_transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sadad_webhook_events_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "sadad_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_history: {
         Row: {
           amount: number | null
