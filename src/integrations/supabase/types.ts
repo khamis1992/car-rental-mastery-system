@@ -3662,6 +3662,48 @@ export type Database = {
           },
         ]
       }
+      system_settings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          requires_restart: boolean
+          setting_key: string
+          setting_type: string
+          setting_value: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          requires_restart?: boolean
+          setting_key: string
+          setting_type?: string
+          setting_value?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          requires_restart?: boolean
+          setting_key?: string
+          setting_type?: string
+          setting_value?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       task_assignments: {
         Row: {
           completed_at: string | null
@@ -5054,6 +5096,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_grouped_system_settings: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_system_setting: {
+        Args: { setting_key_param: string }
+        Returns: Json
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -5142,6 +5192,14 @@ export type Database = {
         Returns: undefined
       }
       update_cost_center_setting: {
+        Args: {
+          setting_key_param: string
+          new_value: Json
+          updated_by_param?: string
+        }
+        Returns: boolean
+      }
+      update_system_setting: {
         Args: {
           setting_key_param: string
           new_value: Json
