@@ -146,11 +146,6 @@ const superAdminItems = [
     url: "/super-admin", 
     icon: Crown 
   },
-  { 
-    title: "إدارة المؤسسات", 
-    url: "/tenants", 
-    icon: Building2 
-  },
 ];
 
 export function AppSidebar() {
