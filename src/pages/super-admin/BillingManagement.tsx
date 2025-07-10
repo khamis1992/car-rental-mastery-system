@@ -19,6 +19,7 @@ import { SubscriptionsTab } from '@/components/super-admin/billing/Subscriptions
 import { InvoicesTab } from '@/components/super-admin/billing/InvoicesTab';
 import { PaymentsTab } from '@/components/super-admin/billing/PaymentsTab';
 import { UsageTab } from '@/components/super-admin/billing/UsageTab';
+import { AutomaticBillingTab } from '@/components/super-admin/billing/AutomaticBillingTab';
 
 export default function BillingManagement() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -101,13 +102,14 @@ export default function BillingManagement() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
           <TabsTrigger value="plans">خطط الاشتراك</TabsTrigger>
           <TabsTrigger value="subscriptions">الاشتراكات</TabsTrigger>
           <TabsTrigger value="invoices">الفواتير</TabsTrigger>
           <TabsTrigger value="payments">المدفوعات</TabsTrigger>
           <TabsTrigger value="usage">الاستخدام</TabsTrigger>
+          <TabsTrigger value="auto-billing">الفوترة التلقائية</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -182,6 +184,10 @@ export default function BillingManagement() {
 
         <TabsContent value="usage">
           <UsageTab />
+        </TabsContent>
+
+        <TabsContent value="auto-billing">
+          <AutomaticBillingTab />
         </TabsContent>
       </Tabs>
     </div>

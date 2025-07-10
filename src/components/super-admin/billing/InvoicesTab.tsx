@@ -1,145 +1,191 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useToast } from '@/hooks/use-toast';
-import { Search, Eye, Download, Send, AlertTriangle } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { 
+  Search, 
+  Download, 
+  Send,
+  CheckCircle,
+  XCircle,
+  Clock,
+  AlertCircle,
+  FileText,
+  DollarSign,
+  Calendar,
+  TrendingUp
+} from 'lucide-react';
+import { useSaasInvoices, useUpdateInvoiceStatus } from '@/hooks/useBillingData';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import { SaasInvoice } from '@/types/billing';
 
 export function InvoicesTab() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  
+  const { data: invoices = [], isLoading } = useSaasInvoices();
+  const updateInvoiceStatusMutation = useUpdateInvoiceStatus();
 
-  // Mock data - replace with real data from API
-  const invoices = [
-    {
-      id: '1',
-      invoice_number: 'SAAS-000123',
-      tenant_name: 'شركة التميز للتجارة',
-      subscription_id: '1',
-      status: 'paid',
-      amount_due: 59.99,
-      amount_paid: 59.99,
-      amount_remaining: 0,
-      currency: 'USD',
-      billing_period_start: '2024-01-01',
-      billing_period_end: '2024-02-01',
-      due_date: '2024-01-15',
-      paid_at: '2024-01-14',
-      created_at: '2024-01-01'
-    },
-    {
-      id: '2',
-      invoice_number: 'SAAS-000124',
-      tenant_name: 'مؤسسة الخليج للاستثمار',
-      subscription_id: '2',
-      status: 'open',
-      amount_due: 1499.99,
-      amount_paid: 0,
-      amount_remaining: 1499.99,
-      currency: 'USD',
-      billing_period_start: '2024-01-15',
-      billing_period_end: '2025-01-15',
-      due_date: '2024-02-15',
-      paid_at: null,
-      created_at: '2024-01-15'
-    },
-    {
-      id: '3',
-      invoice_number: 'SAAS-000125',
-      tenant_name: 'شركة النور للتطوير',
-      subscription_id: '3',
-      status: 'overdue',
-      amount_due: 29.99,
-      amount_paid: 0,
-      amount_remaining: 29.99,
-      currency: 'USD',
-      billing_period_start: '2024-01-01',
-      billing_period_end: '2024-02-01',
-      due_date: '2024-01-15',
-      paid_at: null,
-      created_at: '2024-01-01'
+  const filteredInvoices = invoices.filter(invoice => {
+    const matchesSearch = !searchQuery || 
+      invoice.tenant?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      invoice.invoice_number?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesStatus = selectedStatus === 'all' || invoice.status === selectedStatus;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleStatusChange = async (invoiceId: string, newStatus: SaasInvoice['status']) => {
+    try {
+      await updateInvoiceStatusMutation.mutateAsync({
+        id: invoiceId,
+        status: newStatus,
+        payment_method: newStatus === 'paid' ? 'manual' : undefined,
+        payment_reference: newStatus === 'paid' ? `REF-${Date.now()}` : undefined
+      });
+    } catch (error) {
+      console.error('Error updating invoice status:', error);
     }
-  ];
+  };
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      draft: { label: 'مسودة', variant: 'secondary' as const },
-      open: { label: 'مفتوحة', variant: 'default' as const },
-      paid: { label: 'مدفوعة', variant: 'default' as const },
-      overdue: { label: 'متأخرة', variant: 'destructive' as const },
-      uncollectible: { label: 'غير قابلة للتحصيل', variant: 'destructive' as const },
-      void: { label: 'ملغاة', variant: 'outline' as const }
+      draft: { label: 'مسودة', variant: 'secondary' as const, icon: FileText },
+      sent: { label: 'مرسلة', variant: 'default' as const, icon: Send },
+      paid: { label: 'مدفوعة', variant: 'default' as const, icon: CheckCircle },
+      overdue: { label: 'متأخرة', variant: 'destructive' as const, icon: AlertCircle },
+      void: { label: 'ملغاة', variant: 'destructive' as const, icon: XCircle },
+      uncollectible: { label: 'غير قابلة للتحصيل', variant: 'destructive' as const, icon: XCircle },
     };
+
+    const config = statusConfig[status as keyof typeof statusConfig] || { 
+      label: status, 
+      variant: 'secondary' as const, 
+      icon: Clock 
+    };
+
+    const Icon = config.icon;
     
-    const config = statusConfig[status as keyof typeof statusConfig] || { label: status, variant: 'outline' as const };
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+    return (
+      <Badge variant={config.variant} className="gap-1">
+        <Icon className="h-3 w-3" />
+        {config.label}
+      </Badge>
+    );
   };
 
-  const handleAction = (action: string, invoiceId: string) => {
-    toast({
-      title: `تم ${action} الفاتورة`,
-      description: `تم تنفيذ العملية بنجاح`,
-    });
+  // Calculate statistics
+  const stats = {
+    total: invoices.length,
+    paid: invoices.filter(i => i.status === 'paid').length,
+    pending: invoices.filter(i => ['sent', 'draft'].includes(i.status)).length,
+    overdue: invoices.filter(i => i.status === 'overdue').length,
+    totalAmount: invoices.reduce((sum, i) => sum + i.total_amount, 0),
+    paidAmount: invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.total_amount, 0),
   };
 
-  const getDaysOverdue = (dueDate: string, status: string) => {
-    if (status !== 'overdue') return null;
-    const due = new Date(dueDate);
-    const today = new Date();
-    const diffTime = today.getTime() - due.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
-  const filteredInvoices = invoices.filter(invoice =>
-    invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    invoice.tenant_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  if (isLoading) {
+    return <div className="flex justify-center p-8">جاري التحميل...</div>;
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Header & Filters */}
+      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">إدارة الفواتير</h2>
-          <p className="text-muted-foreground">عرض وإدارة جميع فواتير الاشتراكات</p>
+          <h2 className="text-2xl font-bold">فواتير النظام</h2>
+          <p className="text-muted-foreground">إدارة جميع فواتير الاشتراكات</p>
+        </div>
+        
+        <div className="flex gap-2">
+          <div className="relative">
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="البحث في الفواتير..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pr-9 w-64"
+            />
+          </div>
+          
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="px-3 py-2 border rounded-md bg-background"
+          >
+            <option value="all">جميع الحالات</option>
+            <option value="draft">مسودة</option>
+            <option value="sent">مرسلة</option>
+            <option value="paid">مدفوعة</option>
+            <option value="overdue">متأخرة</option>
+            <option value="void">ملغاة</option>
+          </select>
         </div>
       </div>
 
-      {/* Search and Stats */}
-      <div className="flex items-center justify-between">
-        <div className="relative max-w-md">
-          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="البحث في الفواتير..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pr-10"
-          />
-        </div>
-        
-        <div className="flex space-x-4">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-green-600">
-              {invoices.filter(inv => inv.status === 'paid').length}
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              إجمالي الفواتير
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              مدفوعة
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{stats.paid}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.paidAmount.toFixed(3)} د.ك
             </p>
-            <p className="text-sm text-muted-foreground">مدفوعة</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-orange-600">
-              {invoices.filter(inv => inv.status === 'open').length}
-            </p>
-            <p className="text-sm text-muted-foreground">مفتوحة</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-red-600">
-              {invoices.filter(inv => inv.status === 'overdue').length}
-            </p>
-            <p className="text-sm text-muted-foreground">متأخرة</p>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Clock className="h-4 w-4 text-orange-600" />
+              معلقة
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">{stats.pending}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              متأخرة
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{stats.overdue}</div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Invoices Table */}
@@ -152,12 +198,11 @@ export function InvoicesTab() {
             <TableHeader>
               <TableRow>
                 <TableHead>رقم الفاتورة</TableHead>
-                <TableHead>المستأجر</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead>المبلغ المستحق</TableHead>
-                <TableHead>المبلغ المدفوع</TableHead>
-                <TableHead>تاريخ الاستحقاق</TableHead>
+                <TableHead>المؤسسة</TableHead>
                 <TableHead>فترة الفوترة</TableHead>
+                <TableHead>المبلغ</TableHead>
+                <TableHead>تاريخ الاستحقاق</TableHead>
+                <TableHead>الحالة</TableHead>
                 <TableHead>الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
@@ -165,79 +210,75 @@ export function InvoicesTab() {
               {filteredInvoices.map((invoice) => (
                 <TableRow key={invoice.id}>
                   <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium">{invoice.invoice_number}</span>
-                      {invoice.status === 'overdue' && (
-                        <AlertTriangle className="h-4 w-4 text-red-500" />
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>{invoice.tenant_name}</TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      {getStatusBadge(invoice.status)}
-                      {invoice.status === 'overdue' && (
-                        <p className="text-xs text-red-600">
-                          متأخرة {getDaysOverdue(invoice.due_date, invoice.status)} يوم
-                        </p>
-                      )}
+                    <div className="font-medium">{invoice.invoice_number}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {format(new Date(invoice.created_at), 'dd/MM/yyyy', { locale: ar })}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium">${invoice.amount_due}</p>
-                      <p className="text-sm text-muted-foreground">{invoice.currency}</p>
+                      <div className="font-medium">{invoice.tenant?.name}</div>
+                      <div className="text-sm text-muted-foreground">{invoice.tenant?.email}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      <div>{format(new Date(invoice.billing_period_start), 'dd/MM/yyyy', { locale: ar })}</div>
+                      <div className="text-muted-foreground">إلى</div>
+                      <div>{format(new Date(invoice.billing_period_end), 'dd/MM/yyyy', { locale: ar })}</div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium">${invoice.amount_paid}</p>
-                      {invoice.amount_remaining > 0 && (
-                        <p className="text-sm text-red-600">
-                          المتبقي: ${invoice.amount_remaining}
-                        </p>
+                      <div className="font-medium">{invoice.total_amount.toFixed(3)} {invoice.currency}</div>
+                      {invoice.discount_amount > 0 && (
+                        <div className="text-sm text-green-600">
+                          خصم: {invoice.discount_amount.toFixed(3)} {invoice.currency}
+                        </div>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="text-sm">
-                      <p>{new Date(invoice.due_date).toLocaleDateString('ar-SA')}</p>
-                      {invoice.paid_at && (
-                        <p className="text-green-600">
-                          دُفعت: {new Date(invoice.paid_at).toLocaleDateString('ar-SA')}
-                        </p>
-                      )}
-                    </div>
+                    {invoice.due_date ? (
+                      <div className={`text-sm ${
+                        new Date(invoice.due_date) < new Date() && invoice.status !== 'paid' 
+                          ? 'text-red-600 font-medium' 
+                          : ''
+                      }`}>
+                        {format(new Date(invoice.due_date), 'dd/MM/yyyy', { locale: ar })}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">غير محدد</span>
+                    )}
                   </TableCell>
                   <TableCell>
-                    <div className="text-sm">
-                      <p>من: {new Date(invoice.billing_period_start).toLocaleDateString('ar-SA')}</p>
-                      <p>إلى: {new Date(invoice.billing_period_end).toLocaleDateString('ar-SA')}</p>
-                    </div>
+                    {getStatusBadge(invoice.status)}
                   </TableCell>
                   <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleAction('عرض', invoice.id)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleAction('تحميل', invoice.id)}
-                      >
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" title="تحميل PDF">
                         <Download className="h-4 w-4" />
                       </Button>
-                      {(invoice.status === 'open' || invoice.status === 'overdue') && (
-                        <Button
+                      
+                      {invoice.status === 'draft' && (
+                        <Button 
+                          variant="ghost" 
                           size="sm"
-                          variant="default"
-                          onClick={() => handleAction('إرسال تذكير', invoice.id)}
+                          onClick={() => handleStatusChange(invoice.id, 'sent')}
+                          title="إرسال الفاتورة"
                         >
                           <Send className="h-4 w-4" />
+                        </Button>
+                      )}
+                      
+                      {['sent', 'overdue'].includes(invoice.status) && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleStatusChange(invoice.id, 'paid')}
+                          title="تعليم كمدفوعة"
+                        >
+                          <CheckCircle className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
@@ -246,6 +287,12 @@ export function InvoicesTab() {
               ))}
             </TableBody>
           </Table>
+
+          {filteredInvoices.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">لا توجد فواتير تطابق معايير البحث</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
