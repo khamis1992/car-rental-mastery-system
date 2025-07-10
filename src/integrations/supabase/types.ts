@@ -2041,6 +2041,63 @@ export type Database = {
         }
         Relationships: []
       }
+      data_access_rules: {
+        Row: {
+          access_conditions: Json
+          created_at: string
+          created_by: string | null
+          department_id: string | null
+          id: string
+          is_active: boolean
+          role_name: string | null
+          rule_name: string
+          table_name: string
+          tenant_id: string
+          user_id: string | null
+        }
+        Insert: {
+          access_conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          id?: string
+          is_active?: boolean
+          role_name?: string | null
+          rule_name: string
+          table_name: string
+          tenant_id: string
+          user_id?: string | null
+        }
+        Update: {
+          access_conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          id?: string
+          is_active?: boolean
+          role_name?: string | null
+          rule_name?: string
+          table_name?: string
+          tenant_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_access_rules_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_access_rules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       department_integrations: {
         Row: {
           assigned_employee_id: string | null
@@ -3470,6 +3527,178 @@ export type Database = {
           },
         ]
       }
+      permission_audit_log: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          new_value: Json | null
+          old_value: Json | null
+          permission_key: string
+          reason: string | null
+          target_role: string | null
+          target_user_id: string | null
+          tenant_id: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          new_value?: Json | null
+          old_value?: Json | null
+          permission_key: string
+          reason?: string | null
+          target_role?: string | null
+          target_user_id?: string | null
+          tenant_id: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          new_value?: Json | null
+          old_value?: Json | null
+          permission_key?: string
+          reason?: string | null
+          target_role?: string | null
+          target_user_id?: string | null
+          tenant_id?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permission_audit_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permission_group_permissions: {
+        Row: {
+          granted: boolean
+          group_id: string
+          id: string
+          permission_id: string
+        }
+        Insert: {
+          granted?: boolean
+          group_id: string
+          id?: string
+          permission_id: string
+        }
+        Update: {
+          granted?: boolean
+          group_id?: string
+          id?: string
+          permission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permission_group_permissions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "permission_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permission_group_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permission_groups: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          group_description: string | null
+          group_name: string
+          id: string
+          is_active: boolean
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          group_description?: string | null
+          group_name: string
+          id?: string
+          is_active?: boolean
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          group_description?: string | null
+          group_name?: string
+          id?: string
+          is_active?: boolean
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permission_groups_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permissions: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          is_active: boolean
+          is_system_permission: boolean
+          module_name: string
+          permission_description: string | null
+          permission_key: string
+          permission_name: string
+          resource_level: string
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_system_permission?: boolean
+          module_name: string
+          permission_description?: string | null
+          permission_key: string
+          permission_name: string
+          resource_level?: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_system_permission?: boolean
+          module_name?: string
+          permission_description?: string | null
+          permission_key?: string
+          permission_name?: string
+          resource_level?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           branch_id: string | null
@@ -3611,6 +3840,57 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_permissions: {
+        Row: {
+          conditions: Json | null
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          granted: boolean
+          id: string
+          permission_id: string
+          role_name: string
+          tenant_id: string
+        }
+        Insert: {
+          conditions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          granted?: boolean
+          id?: string
+          permission_id: string
+          role_name: string
+          tenant_id: string
+        }
+        Update: {
+          conditions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          granted?: boolean
+          id?: string
+          permission_id?: string
+          role_name?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -4162,6 +4442,60 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_permissions: {
+        Row: {
+          conditions: Json | null
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          granted: boolean
+          id: string
+          permission_id: string
+          reason: string | null
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          conditions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          granted?: boolean
+          id?: string
+          permission_id: string
+          reason?: string | null
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          conditions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          granted?: boolean
+          id?: string
+          permission_id?: string
+          reason?: string | null
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_permissions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -5104,12 +5438,27 @@ export type Database = {
         Args: { setting_key_param: string }
         Returns: Json
       }
+      get_user_permissions: {
+        Args: { _user_id: string; _tenant_id: string }
+        Returns: {
+          permission_key: string
+          permission_name: string
+          module_name: string
+          action_type: string
+          granted: boolean
+          source: string
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
       has_any_tenant_role: {
         Args: { _roles: string[] }
+        Returns: boolean
+      }
+      has_permission: {
+        Args: { _user_id: string; _tenant_id: string; _permission_key: string }
         Returns: boolean
       }
       has_role: {
@@ -5178,6 +5527,10 @@ export type Database = {
       safe_delete_contract: {
         Args: { contract_id_param: string; delete_related?: boolean }
         Returns: Json
+      }
+      setup_default_role_permissions: {
+        Args: { _tenant_id: string }
+        Returns: undefined
       }
       update_account_balances: {
         Args: Record<PropertyKey, never>
