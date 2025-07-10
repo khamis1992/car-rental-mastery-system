@@ -6172,6 +6172,7 @@ export type Database = {
         | "accountant"
         | "technician"
         | "receptionist"
+        | "super_admin"
       vehicle_status: "available" | "rented" | "maintenance" | "out_of_service"
       vehicle_type:
         | "sedan"
@@ -6318,6 +6319,7 @@ export const Constants = {
         "accountant",
         "technician",
         "receptionist",
+        "super_admin",
       ],
       vehicle_status: ["available", "rented", "maintenance", "out_of_service"],
       vehicle_type: [
