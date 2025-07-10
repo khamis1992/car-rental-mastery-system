@@ -14,7 +14,10 @@ import {
   Globe
 } from "lucide-react";
 import SuperAdminStats from "@/components/SuperAdmin/SuperAdminStats";
-import TenantManagement from "@/components/SuperAdmin/TenantManagement";
+import AdvancedTenantManagement from "@/components/SuperAdmin/AdvancedTenantManagement";
+import AdvancedPermissions from "@/components/SuperAdmin/AdvancedPermissions";
+import MaintenanceTools from "@/components/SuperAdmin/MaintenanceTools";
+import SupportTools from "@/components/SuperAdmin/SupportTools";
 import SystemMonitoring from "@/components/SuperAdmin/SystemMonitoring";
 import GlobalSettings from "@/components/SuperAdmin/GlobalSettings";
 import { useTenant } from '@/contexts/TenantContext';
@@ -70,22 +73,30 @@ const SuperAdminDashboard: React.FC = () => {
 
         {/* Main Dashboard Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:grid-cols-6">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               نظرة عامة
             </TabsTrigger>
             <TabsTrigger value="tenants" className="flex items-center gap-2">
               <Building2 className="w-4 h-4" />
-              إدارة المؤسسات
+              المؤسسات
+            </TabsTrigger>
+            <TabsTrigger value="permissions" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              الصلاحيات
+            </TabsTrigger>
+            <TabsTrigger value="maintenance" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              الصيانة
+            </TabsTrigger>
+            <TabsTrigger value="support" className="flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              الدعم
             </TabsTrigger>
             <TabsTrigger value="monitoring" className="flex items-center gap-2">
-              <Activity className="w-4 h-4" />
-              مراقبة النظام
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
-              الإعدادات العامة
+              <Database className="w-4 h-4" />
+              المراقبة
             </TabsTrigger>
           </TabsList>
 
@@ -144,15 +155,23 @@ const SuperAdminDashboard: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="tenants">
-            <TenantManagement />
+            <AdvancedTenantManagement />
+          </TabsContent>
+
+          <TabsContent value="permissions">
+            <AdvancedPermissions />
+          </TabsContent>
+
+          <TabsContent value="maintenance">
+            <MaintenanceTools />
+          </TabsContent>
+
+          <TabsContent value="support">
+            <SupportTools />
           </TabsContent>
 
           <TabsContent value="monitoring">
             <SystemMonitoring />
-          </TabsContent>
-
-          <TabsContent value="settings">
-            <GlobalSettings />
           </TabsContent>
         </Tabs>
       </div>
