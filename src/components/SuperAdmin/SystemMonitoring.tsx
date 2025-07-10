@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { 
   Activity, 
   Server, 
@@ -12,69 +13,13 @@ import {
   Clock,
   Cpu,
   HardDrive,
-  MemoryStick
+  MemoryStick,
+  RefreshCw
 } from "lucide-react";
+import { useSystemMonitoring } from '@/hooks/useSystemMonitoring';
 
 const SystemMonitoring: React.FC = () => {
-  // في التطبيق الحقيقي، سيتم جلب هذه البيانات من APIs مراقبة الخوادم
-  const systemMetrics = {
-    servers: [
-      {
-        name: 'خادم التطبيق الرئيسي',
-        status: 'online',
-        cpu: 45,
-        memory: 67,
-        disk: 34,
-        uptime: '99.9%'
-      },
-      {
-        name: 'خادم قاعدة البيانات',
-        status: 'online',
-        cpu: 32,
-        memory: 78,
-        disk: 56,
-        uptime: '99.8%'
-      },
-      {
-        name: 'خادم النسخ الاحتياطي',
-        status: 'maintenance',
-        cpu: 12,
-        memory: 23,
-        disk: 89,
-        uptime: '98.5%'
-      }
-    ],
-    databases: [
-      {
-        name: 'قاعدة البيانات الرئيسية',
-        status: 'healthy',
-        connections: 24,
-        size: '2.3 GB',
-        lastBackup: '2024-01-10 03:00:00'
-      },
-      {
-        name: 'قاعدة بيانات التحليلات',
-        status: 'healthy',
-        connections: 8,
-        size: '890 MB',
-        lastBackup: '2024-01-10 03:30:00'
-      }
-    ],
-    alerts: [
-      {
-        id: 1,
-        type: 'warning',
-        message: 'استخدام الذاكرة مرتفع في خادم قاعدة البيانات',
-        timestamp: '2024-01-10 14:30:00'
-      },
-      {
-        id: 2,
-        type: 'info',
-        message: 'تم إكمال النسخة الاحتياطية بنجاح',
-        timestamp: '2024-01-10 03:00:00'
-      }
-    ]
-  };
+  const { metrics, loading, error, refetch } = useSystemMonitoring();
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -112,15 +57,56 @@ const SystemMonitoring: React.FC = () => {
     return 'bg-red-500';
   };
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold">مراقبة النظام</h2>
+          <p className="text-muted-foreground">جاري تحميل بيانات المراقبة...</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardContent className="flex items-center p-6">
+                <div className="w-8 h-8 bg-gray-200 rounded mr-3 animate-pulse" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-6 bg-gray-200 rounded animate-pulse" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold">مراقبة النظام</h2>
-        <p className="text-muted-foreground">
-          مراقبة أداء الخوادم وقواعد البيانات والتنبيهات
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">مراقبة النظام</h2>
+          <p className="text-muted-foreground">
+            مراقبة أداء الخوادم وقواعد البيانات والتنبيهات
+          </p>
+        </div>
+        <Button onClick={refetch} variant="outline" size="sm" className="gap-2">
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          تحديث
+        </Button>
       </div>
+
+      {error && (
+        <Card className="border-destructive">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-4 h-4" />
+              <span>{error}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* System Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -130,8 +116,7 @@ const SystemMonitoring: React.FC = () => {
             <div>
               <p className="text-sm text-muted-foreground">الخوادم النشطة</p>
               <p className="text-2xl font-bold">
-                {systemMetrics.servers.filter(s => s.status === 'online').length}/
-                {systemMetrics.servers.length}
+                {metrics.serverStats.activeServers}/{metrics.serverStats.totalServers}
               </p>
             </div>
           </CardContent>
@@ -141,7 +126,7 @@ const SystemMonitoring: React.FC = () => {
             <Database className="w-8 h-8 text-green-600 mr-3" />
             <div>
               <p className="text-sm text-muted-foreground">قواعد البيانات</p>
-              <p className="text-2xl font-bold">{systemMetrics.databases.length}</p>
+              <p className="text-2xl font-bold">{metrics.serverStats.databaseCount}</p>
             </div>
           </CardContent>
         </Card>
@@ -150,7 +135,7 @@ const SystemMonitoring: React.FC = () => {
             <Wifi className="w-8 h-8 text-purple-600 mr-3" />
             <div>
               <p className="text-sm text-muted-foreground">زمن الاستجابة</p>
-              <p className="text-2xl font-bold">127ms</p>
+              <p className="text-2xl font-bold">{metrics.serverStats.responseTime}</p>
             </div>
           </CardContent>
         </Card>
@@ -159,7 +144,7 @@ const SystemMonitoring: React.FC = () => {
             <Activity className="w-8 h-8 text-orange-600 mr-3" />
             <div>
               <p className="text-sm text-muted-foreground">معدل التوفر</p>
-              <p className="text-2xl font-bold">99.8%</p>
+              <p className="text-2xl font-bold">{metrics.serverStats.uptime}</p>
             </div>
           </CardContent>
         </Card>
@@ -175,7 +160,7 @@ const SystemMonitoring: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {systemMetrics.servers.map((server, index) => (
+            {metrics.servers.map((server, index) => (
               <div key={index} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
@@ -243,7 +228,7 @@ const SystemMonitoring: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {systemMetrics.databases.map((db, index) => (
+              {metrics.databases.map((db, index) => (
                 <div key={index} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-medium">{db.name}</h4>
@@ -279,11 +264,13 @@ const SystemMonitoring: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {systemMetrics.alerts.map((alert) => (
+              {metrics.alerts.map((alert) => (
                 <div key={alert.id} className="border rounded-lg p-3">
                   <div className="flex items-start gap-2">
                     {alert.type === 'warning' ? (
                       <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5" />
+                    ) : alert.type === 'error' ? (
+                      <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5" />
                     ) : (
                       <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5" />
                     )}
