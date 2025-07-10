@@ -4945,6 +4945,10 @@ export type Database = {
         }
         Returns: string
       }
+      execute_analytics_query: {
+        Args: { query_text: string }
+        Returns: Json
+      }
       extract_transaction_features: {
         Args: { description: string; amount: number; transaction_date?: string }
         Returns: Json
