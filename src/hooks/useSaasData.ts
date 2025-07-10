@@ -289,3 +289,38 @@ export const useBillingStats = () => {
     refetchInterval: 5 * 60 * 1000, // تحديث كل 5 دقائق
   });
 };
+
+// استخدام المؤسسات
+export const useTenantUsage = () => {
+  return useQuery({
+    queryKey: ['tenant-usage'],
+    queryFn: () => saasService.getTenantUsage(),
+    refetchInterval: 10 * 60 * 1000, // تحديث كل 10 دقائق
+  });
+};
+
+export const useUpdateTenantUsage = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: ({ tenantId, usageData }: { 
+      tenantId: string; 
+      usageData: Partial<any>; 
+    }) => saasService.updateTenantUsage(tenantId, usageData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tenant-usage'] });
+      toast({
+        title: 'تم تحديث الاستخدام',
+        description: 'تم تحديث بيانات استخدام المؤسسة بنجاح',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'خطأ في تحديث الاستخدام',
+        description: 'حدث خطأ أثناء تحديث بيانات الاستخدام',
+        variant: 'destructive',
+      });
+    },
+  });
+};
