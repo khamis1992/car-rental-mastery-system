@@ -3895,6 +3895,276 @@ export type Database = {
           },
         ]
       }
+      saas_invoice_items: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          id: string
+          invoice_id: string
+          period_end: string | null
+          period_start: string | null
+          quantity: number
+          unit_price: number
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description: string
+          id?: string
+          invoice_id: string
+          period_end?: string | null
+          period_start?: string | null
+          quantity?: number
+          unit_price: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_id?: string
+          period_end?: string | null
+          period_start?: string | null
+          quantity?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saas_invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "saas_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saas_invoices: {
+        Row: {
+          amount_due: number
+          amount_paid: number
+          amount_remaining: number
+          billing_period_end: string
+          billing_period_start: string
+          created_at: string
+          currency: string
+          description: string | null
+          due_date: string | null
+          id: string
+          invoice_number: string
+          invoice_pdf_url: string | null
+          metadata: Json | null
+          paid_at: string | null
+          status: string
+          stripe_invoice_id: string | null
+          subscription_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_due?: number
+          amount_paid?: number
+          amount_remaining?: number
+          billing_period_end: string
+          billing_period_start: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_number: string
+          invoice_pdf_url?: string | null
+          metadata?: Json | null
+          paid_at?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+          subscription_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_due?: number
+          amount_paid?: number
+          amount_remaining?: number
+          billing_period_end?: string
+          billing_period_start?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          invoice_pdf_url?: string | null
+          metadata?: Json | null
+          paid_at?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+          subscription_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saas_invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "saas_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saas_invoices_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saas_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          failure_reason: string | null
+          id: string
+          invoice_id: string
+          metadata: Json | null
+          paid_at: string | null
+          payment_method: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          subscription_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          failure_reason?: string | null
+          id?: string
+          invoice_id: string
+          metadata?: Json | null
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          subscription_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          failure_reason?: string | null
+          id?: string
+          invoice_id?: string
+          metadata?: Json | null
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          subscription_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saas_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "saas_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saas_payments_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "saas_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saas_payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saas_subscriptions: {
+        Row: {
+          amount: number
+          billing_cycle: string
+          canceled_at: string | null
+          created_at: string
+          currency: string
+          current_period_end: string
+          current_period_start: string
+          id: string
+          pause_collection: Json | null
+          plan_id: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          tenant_id: string
+          trial_end: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          billing_cycle?: string
+          canceled_at?: string | null
+          created_at?: string
+          currency?: string
+          current_period_end: string
+          current_period_start: string
+          id?: string
+          pause_collection?: Json | null
+          plan_id: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tenant_id: string
+          trial_end?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          billing_cycle?: string
+          canceled_at?: string | null
+          created_at?: string
+          currency?: string
+          current_period_end?: string
+          current_period_start?: string
+          id?: string
+          pause_collection?: Json | null
+          plan_id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tenant_id?: string
+          trial_end?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saas_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saas_subscriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_history: {
         Row: {
           amount: number | null
@@ -3941,6 +4211,72 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          features: Json | null
+          id: string
+          is_active: boolean | null
+          is_popular: boolean | null
+          max_contracts: number | null
+          max_tenants: number | null
+          max_users_per_tenant: number | null
+          max_vehicles: number | null
+          plan_code: string
+          plan_name: string
+          plan_name_en: string | null
+          price_monthly: number
+          price_yearly: number
+          sort_order: number | null
+          storage_limit_gb: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          max_contracts?: number | null
+          max_tenants?: number | null
+          max_users_per_tenant?: number | null
+          max_vehicles?: number | null
+          plan_code: string
+          plan_name: string
+          plan_name_en?: string | null
+          price_monthly?: number
+          price_yearly?: number
+          sort_order?: number | null
+          storage_limit_gb?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          max_contracts?: number | null
+          max_tenants?: number | null
+          max_users_per_tenant?: number | null
+          max_vehicles?: number | null
+          plan_code?: string
+          plan_name?: string
+          plan_name_en?: string | null
+          price_monthly?: number
+          price_yearly?: number
+          sort_order?: number | null
+          storage_limit_gb?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       system_settings: {
         Row: {
@@ -4032,6 +4368,50 @@ export type Database = {
           },
         ]
       }
+      tenant_usage: {
+        Row: {
+          contracts_count: number | null
+          created_at: string
+          id: string
+          storage_used_gb: number | null
+          tenant_id: string
+          updated_at: string
+          usage_date: string
+          users_count: number | null
+          vehicles_count: number | null
+        }
+        Insert: {
+          contracts_count?: number | null
+          created_at?: string
+          id?: string
+          storage_used_gb?: number | null
+          tenant_id: string
+          updated_at?: string
+          usage_date?: string
+          users_count?: number | null
+          vehicles_count?: number | null
+        }
+        Update: {
+          contracts_count?: number | null
+          created_at?: string
+          id?: string
+          storage_used_gb?: number | null
+          tenant_id?: string
+          updated_at?: string
+          usage_date?: string
+          users_count?: number | null
+          vehicles_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_usage_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_users: {
         Row: {
           created_at: string | null
@@ -4103,6 +4483,7 @@ export type Database = {
           subscription_plan: string | null
           subscription_starts_at: string | null
           subscription_status: string | null
+          tenant_type: string | null
           timezone: string | null
           trial_ends_at: string | null
           updated_at: string | null
@@ -4130,6 +4511,7 @@ export type Database = {
           subscription_plan?: string | null
           subscription_starts_at?: string | null
           subscription_status?: string | null
+          tenant_type?: string | null
           timezone?: string | null
           trial_ends_at?: string | null
           updated_at?: string | null
@@ -4157,6 +4539,7 @@ export type Database = {
           subscription_plan?: string | null
           subscription_starts_at?: string | null
           subscription_status?: string | null
+          tenant_type?: string | null
           timezone?: string | null
           trial_ends_at?: string | null
           updated_at?: string | null
@@ -5403,6 +5786,10 @@ export type Database = {
         Returns: string
       }
       generate_quotation_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_saas_invoice_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
