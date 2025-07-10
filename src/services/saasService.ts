@@ -11,8 +11,19 @@ import {
 } from '@/types/saas';
 
 export class SaasService {
-  // إدارة خطط الاشتراك
-  async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+  // إدارة خطط الاشتراك مع الـ caching
+  private plansCache = new Map<string, { data: SubscriptionPlan[]; timestamp: number }>();
+  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 دقائق
+
+  async getSubscriptionPlans(useCache: boolean = true): Promise<SubscriptionPlan[]> {
+    const cacheKey = 'active_plans';
+    const cached = this.plansCache.get(cacheKey);
+    const now = Date.now();
+
+    if (useCache && cached && (now - cached.timestamp) < this.CACHE_TTL) {
+      return cached.data;
+    }
+
     const { data, error } = await supabase
       .from('subscription_plans')
       .select('*')
@@ -20,7 +31,11 @@ export class SaasService {
       .order('sort_order', { ascending: true });
 
     if (error) throw error;
-    return (data || []) as SubscriptionPlan[];
+    
+    const plans = (data || []) as SubscriptionPlan[];
+    this.plansCache.set(cacheKey, { data: plans, timestamp: now });
+    
+    return plans;
   }
 
   async getAllSubscriptionPlans(): Promise<SubscriptionPlan[]> {

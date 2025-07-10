@@ -111,6 +111,7 @@ export interface SaasPayment {
   tenant?: any;
 }
 
+// واجهات للتكامل مع SADAD - مُحسَّنة وموحدة
 export interface SadadPaymentRequest {
   invoice_id: string;
   subscription_id: string;
@@ -121,15 +122,20 @@ export interface SadadPaymentRequest {
   customer_email?: string;
   bill_description: string;
   due_date?: string;
+  expires_in_minutes?: number;
 }
 
 export interface SadadPaymentResponse {
   success: boolean;
+  payment_id?: string;
   bill_id?: string;
   transaction_id?: string;
+  reference_number?: string;
   payment_url?: string;
   qr_code?: string;
+  expires_at?: string;
   error?: string;
+  error_code?: string;
   message?: string;
 }
 
