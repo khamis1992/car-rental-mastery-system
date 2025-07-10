@@ -18,6 +18,8 @@ import PaymentMethods from "@/components/Billing/PaymentMethods";
 import BillingInvoices from "@/components/Billing/BillingInvoices";
 import BillingReports from "@/components/Billing/BillingReports";
 import BillingSettings from "@/components/Billing/BillingSettings";
+import SubscriptionPlansManagement from "@/components/Billing/SubscriptionPlansManagement";
+import AutomatedBilling from "@/components/Billing/AutomatedBilling";
 
 const BillingManagement: React.FC = () => {
   const { currentUserRole } = useTenant();
@@ -66,14 +68,22 @@ const BillingManagement: React.FC = () => {
 
         {/* Main Billing Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:grid-cols-6">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-8">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               نظرة عامة
             </TabsTrigger>
+            <TabsTrigger value="plans" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              خطط الاشتراك
+            </TabsTrigger>
             <TabsTrigger value="subscriptions" className="flex items-center gap-2">
               <Building2 className="w-4 h-4" />
               الاشتراكات
+            </TabsTrigger>
+            <TabsTrigger value="automated" className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              الفوترة التلقائية
             </TabsTrigger>
             <TabsTrigger value="payments" className="flex items-center gap-2">
               <CreditCard className="w-4 h-4" />
@@ -97,8 +107,16 @@ const BillingManagement: React.FC = () => {
             <BillingOverview />
           </TabsContent>
 
+          <TabsContent value="plans">
+            <SubscriptionPlansManagement />
+          </TabsContent>
+
           <TabsContent value="subscriptions">
             <TenantSubscriptions />
+          </TabsContent>
+
+          <TabsContent value="automated">
+            <AutomatedBilling />
           </TabsContent>
 
           <TabsContent value="payments">

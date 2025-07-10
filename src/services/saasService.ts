@@ -23,6 +23,16 @@ export class SaasService {
     return (data || []) as SubscriptionPlan[];
   }
 
+  async getAllSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+    const { data, error } = await supabase
+      .from('subscription_plans')
+      .select('*')
+      .order('sort_order', { ascending: true });
+
+    if (error) throw error;
+    return (data || []) as SubscriptionPlan[];
+  }
+
   async createSubscriptionPlan(planData: PlanFormData): Promise<SubscriptionPlan> {
     const { data, error } = await supabase
       .from('subscription_plans')

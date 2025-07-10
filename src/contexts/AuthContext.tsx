@@ -8,7 +8,7 @@ interface Profile {
   user_id: string;
   full_name: string;
   phone?: string;
-  role: 'admin' | 'manager' | 'accountant' | 'technician' | 'receptionist';
+  role: 'admin' | 'manager' | 'accountant' | 'technician' | 'receptionist' | 'super_admin';
   is_active: boolean;
   branch_id?: string;
   created_at: string;
