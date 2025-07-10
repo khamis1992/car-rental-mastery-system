@@ -12,7 +12,8 @@ import {
   Settings,
   TrendingUp,
   Globe,
-  DollarSign
+  DollarSign,
+  CreditCard
 } from "lucide-react";
 import SuperAdminStats from "@/components/SuperAdmin/SuperAdminStats";
 import AdvancedTenantManagement from "@/components/SuperAdmin/AdvancedTenantManagement";
@@ -22,6 +23,7 @@ import SupportTools from "@/components/SuperAdmin/SupportTools";
 import SystemMonitoring from "@/components/SuperAdmin/SystemMonitoring";
 import GlobalSettings from "@/components/SuperAdmin/GlobalSettings";
 import BillingAndSubscriptions from "@/components/SuperAdmin/BillingAndSubscriptions";
+import SadadManagement from "@/components/SuperAdmin/SadadManagement";
 import { useTenant } from '@/contexts/TenantContext';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -75,7 +77,7 @@ const SuperAdminDashboard: React.FC = () => {
 
         {/* Main Dashboard Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:grid-cols-8">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               نظرة عامة
@@ -91,6 +93,10 @@ const SuperAdminDashboard: React.FC = () => {
             <TabsTrigger value="billing" className="flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
               الفوترة والاشتراكات
+            </TabsTrigger>
+            <TabsTrigger value="sadad" className="flex items-center gap-2">
+              <CreditCard className="w-4 h-4" />
+              SADAD
             </TabsTrigger>
             <TabsTrigger value="maintenance" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
@@ -170,6 +176,10 @@ const SuperAdminDashboard: React.FC = () => {
 
           <TabsContent value="billing">
             <BillingAndSubscriptions />
+          </TabsContent>
+
+          <TabsContent value="sadad">
+            <SadadManagement />
           </TabsContent>
 
           <TabsContent value="maintenance">
