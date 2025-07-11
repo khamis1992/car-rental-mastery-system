@@ -177,8 +177,8 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         position: formData.position,
         department: selectedDepartment?.department_name || null,
         department_id: formData.department_id || null,
-        primary_cost_center_id: formData.primary_cost_center_id || null,
-        secondary_cost_center_id: formData.secondary_cost_center_id || null,
+        primary_cost_center_id: formData.primary_cost_center_id === 'none' ? null : formData.primary_cost_center_id || null,
+        secondary_cost_center_id: formData.secondary_cost_center_id === 'none' ? null : formData.secondary_cost_center_id || null,
         salary: parseFloat(formData.salary),
         hire_date: hireDate!.toISOString().split('T')[0],
         status: 'active' as const,
@@ -518,7 +518,7 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                       <SelectValue placeholder="اختر مركز التكلفة الأساسي" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">بدون مركز تكلفة</SelectItem>
+                      <SelectItem value="none">بدون مركز تكلفة</SelectItem>
                       {costCenters.map((cc) => (
                         <SelectItem key={cc.id} value={cc.id}>
                           {cc.cost_center_name} ({cc.cost_center_code})
@@ -537,7 +537,7 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                       <SelectValue placeholder="اختر مركز التكلفة الثانوي" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">بدون مركز تكلفة</SelectItem>
+                      <SelectItem value="none">بدون مركز تكلفة</SelectItem>
                       {costCenters.map((cc) => (
                         <SelectItem key={cc.id} value={cc.id}>
                           {cc.cost_center_name} ({cc.cost_center_code})

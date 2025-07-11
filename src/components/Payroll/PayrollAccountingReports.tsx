@@ -173,7 +173,7 @@ export const PayrollAccountingReports: React.FC = () => {
                   <SelectValue placeholder="جميع الأقسام" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">جميع الأقسام</SelectItem>
+                  <SelectItem value="all">جميع الأقسام</SelectItem>
                   <SelectItem value="الإدارة">الإدارة</SelectItem>
                   <SelectItem value="المحاسبة">المحاسبة</SelectItem>
                   <SelectItem value="الموارد البشرية">الموارد البشرية</SelectItem>

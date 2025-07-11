@@ -237,7 +237,7 @@ export const ContractAccountingReports: React.FC<ContractAccountingReportsProps>
                   <SelectValue placeholder="اختر الحالة" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">جميع الحالات</SelectItem>
+                  <SelectItem value="all">جميع الحالات</SelectItem>
                   <SelectItem value="active">نشط</SelectItem>
                   <SelectItem value="completed">مكتمل</SelectItem>
                   <SelectItem value="pending">في الانتظار</SelectItem>

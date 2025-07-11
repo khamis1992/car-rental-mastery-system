@@ -133,7 +133,7 @@ export const DepartmentForm: React.FC<DepartmentFormProps> = ({
         department_name: formData.department_name,
         department_name_en: formData.department_name_en || null,
         description: formData.description || null,
-        manager_id: formData.manager_id || null,
+        manager_id: formData.manager_id === 'none' ? null : formData.manager_id || null,
         is_active: formData.is_active
       };
 
@@ -246,7 +246,7 @@ export const DepartmentForm: React.FC<DepartmentFormProps> = ({
                 <SelectValue placeholder="اختر مدير القسم" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">بدون مدير</SelectItem>
+                <SelectItem value="none">بدون مدير</SelectItem>
                 {employees.map((employee) => (
                   <SelectItem key={employee.id} value={employee.id}>
                     {employee.first_name} {employee.last_name} - {employee.employee_number}
