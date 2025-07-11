@@ -48,13 +48,14 @@ const Invoicing = () => {
   // دوال خدمة متوافقة مع API القديم
   const invoiceService = {
     createInvoice: (data: any) => createInvoiceMutation.mutateAsync(data),
-    updateInvoiceStatus: (invoiceId: string, status: string) => 
+    updateInvoiceStatus: (invoiceId: string, status: 'paid' | 'sent' | 'overdue' | 'canceled') => 
       updateInvoiceStatusMutation.mutateAsync({ invoiceId, status }),
     getInvoiceStats: async () => ({
       total: invoices.length,
       paid: invoices.filter(i => i.status === 'paid').length,
-      pending: invoices.filter(i => i.status === 'sent').length,
       overdue: invoices.filter(i => i.status === 'overdue').length,
+      totalRevenue: invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.total_amount, 0),
+      outstandingRevenue: invoices.filter(i => i.status !== 'paid').reduce((sum, i) => sum + i.total_amount, 0),
     }),
     getInvoiceById: async (id: string) => invoices.find(i => i.id === id),
   };
@@ -187,8 +188,33 @@ const Invoicing = () => {
         description: "يرجى الانتظار أثناء إنشاء ملف PDF",
       });
 
+      // Convert SaasInvoice to Invoice format for PDF generation
+      const invoiceForPDF = {
+        ...invoice,
+        contract_id: invoice.subscription_id || '',
+        customer_id: invoice.tenant_id,
+        invoice_date: invoice.created_at,
+        issue_date: invoice.created_at,
+        payment_terms: '',
+        payment_method: '',
+        notes: invoice.description || '',
+        terms_and_conditions: '',
+        sent_at: invoice.created_at,
+        paid_at: invoice.paid_at,
+        created_by: invoice.created_by,
+        paid_amount: 0,
+        outstanding_amount: invoice.total_amount,
+        due_date: invoice.due_date,
+        invoice_type: 'rental' as const,
+        status: invoice.status === 'open' ? 'sent' : invoice.status === 'canceled' ? 'cancelled' : invoice.status as 'paid' | 'overdue' | 'draft' | 'sent' | 'partially_paid' | 'cancelled',
+        contract: null,
+        customer: null,
+        items: [],
+        payments: []
+      };
+
       await downloadInvoicePDF(
-        invoice,
+        invoiceForPDF,
         `invoice_${invoice.invoice_number}.pdf`,
         { includeTerms: true, includeNotes: true },
         (step, progress) => {
@@ -361,7 +387,32 @@ const Invoicing = () => {
 
         <TabsContent value="invoices">
           <InvoicesList
-            invoices={invoices}
+            invoices={invoices.map(invoice => ({
+              ...invoice,
+              customer_name: invoice.tenant?.name || 'عميل',
+              customer_phone: invoice.tenant?.email || '',
+              contract_number: invoice.subscription_id || '',
+              vehicle_info: '',
+              contract_id: invoice.subscription_id || '',
+              customer_id: invoice.tenant_id,
+              invoice_date: invoice.created_at,
+              issue_date: invoice.created_at,
+              payment_terms: '',
+              payment_method: '',
+              terms_and_conditions: '',
+              sent_at: invoice.created_at,
+              paid_at: invoice.paid_at,
+              created_by: invoice.created_by,
+              paid_amount: 0,
+              outstanding_amount: invoice.total_amount,
+              due_date: invoice.due_date,
+              invoice_type: 'rental' as const,
+              status: invoice.status === 'open' ? 'sent' : invoice.status === 'canceled' ? 'cancelled' : invoice.status as 'paid' | 'overdue' | 'draft' | 'sent' | 'partially_paid' | 'cancelled',
+              contract: null,
+              customer: null,
+              items: [],
+              payments: []
+            }))}
             loading={loading}
             onRefresh={loadData}
             onView={handleViewInvoice}
@@ -375,7 +426,14 @@ const Invoicing = () => {
 
         <TabsContent value="payments">
           <PaymentsList
-            payments={paymentsData}
+            payments={paymentsData.map(payment => ({
+              ...payment,
+              payment_number: payment.payment_reference || `PAY-${payment.id.slice(0, 8)}`,
+              contract_id: payment.subscription_id || '',
+              customer_id: payment.tenant_id,
+              payment_method: payment.payment_method === 'credit_card' ? 'card' : payment.payment_method as 'bank_transfer' | 'cash' | 'check' | 'card' | 'online',
+              status: payment.status === 'canceled' ? 'cancelled' : payment.status as 'pending' | 'failed' | 'completed' | 'cancelled'
+            }))}
             loading={loading}
             onRefresh={loadData}
             onView={handleViewPayment}
