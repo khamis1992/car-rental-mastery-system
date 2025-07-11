@@ -10,14 +10,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Building2, Users, MoreHorizontal, Shield, AlertTriangle, CheckCircle, Clock, TrendingUp, Settings, Eye, Edit, Trash2, UserPlus, Crown, Database, Activity } from "lucide-react";
+import { supabase } from '@/integrations/supabase/client';
 import { TenantService } from '@/services/tenantService';
 import { Tenant } from '@/types/tenant';
 import { useToast } from "@/hooks/use-toast";
 
+// نوع محدث للمؤسسة مع الإحصائيات الحقيقية
+interface TenantWithStats extends Tenant {
+  actual_users?: number;
+  actual_vehicles?: number;
+  actual_contracts?: number;
+}
+
 const AdvancedTenantManagement: React.FC = () => {
-  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [tenants, setTenants] = useState<TenantWithStats[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
+  const [selectedTenant, setSelectedTenant] = useState<TenantWithStats | null>(null);
   const [showTenantDetails, setShowTenantDetails] = useState(false);
   const [showAddTenantDialog, setShowAddTenantDialog] = useState(false);
 
@@ -77,10 +85,49 @@ const AdvancedTenantManagement: React.FC = () => {
   useEffect(() => {
     loadTenants();
   }, []);
-  const loadTenants = async () => {
+  // دالة جلب البيانات الحقيقية مع الإحصائيات
+  const loadTenantsWithStats = async () => {
     try {
-      const data = await tenantService.getAllTenants();
-      setTenants(data);
+      // استعلام مبسط لجلب المؤسسات مع الإحصائيات
+      const { data: tenantsData, error: tenantsError } = await supabase
+        .from('tenants')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (tenantsError) throw tenantsError;
+      
+      // جلب الإحصائيات لكل مؤسسة
+      const tenantsWithStats = await Promise.all(
+        (tenantsData || []).map(async (tenant) => {
+          // جلب عدد المستخدمين الفعلي
+          const { count: usersCount } = await supabase
+            .from('tenant_users')
+            .select('*', { count: 'exact', head: true })
+            .eq('tenant_id', tenant.id)
+            .eq('status', 'active');
+            
+          // جلب عدد المركبات الفعلي
+          const { count: vehiclesCount } = await supabase
+            .from('vehicles')
+            .select('*', { count: 'exact', head: true })
+            .eq('tenant_id', tenant.id);
+            
+          // جلب عدد العقود الفعلي
+          const { count: contractsCount } = await supabase
+            .from('contracts')
+            .select('*', { count: 'exact', head: true })
+            .eq('tenant_id', tenant.id);
+            
+          return {
+            ...tenant,
+            actual_users: usersCount || 0,
+            actual_vehicles: vehiclesCount || 0,
+            actual_contracts: contractsCount || 0
+          } as TenantWithStats;
+        })
+      );
+      
+      setTenants(tenantsWithStats);
     } catch (error: any) {
       toast({
         title: "خطأ",
@@ -91,6 +138,8 @@ const AdvancedTenantManagement: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const loadTenants = loadTenantsWithStats;
   const getStatusBadge = (status: string) => {
     const variants = {
       active: {
@@ -359,7 +408,7 @@ const AdvancedTenantManagement: React.FC = () => {
   const TenantDetailsDialog = ({
     tenant
   }: {
-    tenant: Tenant;
+    tenant: TenantWithStats;
   }) => <Dialog open={showTenantDetails} onOpenChange={setShowTenantDetails}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" dir="rtl">
         <DialogHeader>
@@ -411,15 +460,15 @@ const AdvancedTenantManagement: React.FC = () => {
                 <CardContent className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">المستخدمون:</span>
-                    <span>{Math.floor(Math.random() * 50)} / {tenant.max_users}</span>
+                    <span>{tenant.actual_users || 0} / {tenant.max_users}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">المركبات:</span>
-                    <span>{Math.floor(Math.random() * 100)} / {tenant.max_vehicles}</span>
+                    <span>{tenant.actual_vehicles || 0} / {tenant.max_vehicles}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">العقود:</span>
-                    <span>{Math.floor(Math.random() * 200)} / {tenant.max_contracts}</span>
+                    <span>{tenant.actual_contracts || 0} / {tenant.max_contracts}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -561,7 +610,7 @@ const AdvancedTenantManagement: React.FC = () => {
                   <TableCell className="text-right">
                     <div className="flex items-center gap-1">
                       <Users className="w-4 h-4 text-muted-foreground" />
-                      <span>{Math.floor(Math.random() * 50)}</span>
+                      <span>{tenant.actual_users || 0}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
