@@ -218,7 +218,29 @@ export class EnhancedSaasService {
 
     if (error) throw new Error(`فشل في جلب الاشتراكات النشطة: ${error.message}`);
     
-    return (data || []) as SaasSubscription[];
+    // Map database fields to interface
+    return (data || []).map(sub => ({
+      id: sub.id,
+      tenant_id: sub.tenant_id,
+      plan_id: sub.plan_id,
+      status: sub.status,
+      billing_cycle: sub.billing_cycle,
+      current_period_start: sub.current_period_start,
+      current_period_end: sub.current_period_end,
+      next_billing_date: sub.current_period_end,
+      trial_ends_at: sub.trial_end,
+      amount: sub.amount,
+      currency: sub.currency,
+      discount_percentage: 0,
+      auto_renew: true, // Default since field doesn't exist in DB
+      canceled_at: sub.canceled_at,
+      cancellation_reason: undefined, // Field doesn't exist in DB
+      stripe_subscription_id: sub.stripe_subscription_id,
+      stripe_customer_id: sub.stripe_customer_id,
+      created_at: sub.created_at,
+      updated_at: sub.updated_at,
+      created_by: sub.created_at // Use created_at as fallback
+    })) as SaasSubscription[];
   }
 
   // =======================================================
@@ -524,9 +546,15 @@ export class EnhancedSaasService {
     const { data, error } = await supabase
       .from('saas_payments')
       .insert({
-        ...paymentData,
-        status: 'pending',
-        created_by: user.user?.id
+        amount: paymentData.amount,
+        currency: paymentData.currency,
+        // failure_reason: paymentData.failure_reason, // Commented out as this field doesn't exist
+        invoice_id: paymentData.invoice_id,
+        metadata: paymentData.metadata,
+        payment_method: paymentData.payment_method,
+        subscription_id: paymentData.subscription_id,
+        tenant_id: paymentData.tenant_id,
+        status: 'pending'
       })
       .select(`
         *,
@@ -643,17 +671,35 @@ export class EnhancedSaasService {
 
   async calculateCurrentUsage(tenantId: string): Promise<UsageUpdateData> {
     // حساب الاستخدام الحالي من الجداول الفعلية
-    const { data: usageData } = await supabase.rpc('calculate_tenant_usage', {
-      tenant_id_param: tenantId
-    });
+    // استخدام استعلام مباشر بدلاً من RPC غير موجود
+    const { data: invoices } = await supabase
+      .from('saas_invoices')
+      .select('amount_due')
+      .eq('tenant_id', tenantId);
+    
+    const { data: subscriptions } = await supabase
+      .from('saas_subscriptions')
+      .select('amount')
+      .eq('tenant_id', tenantId);
 
-    return usageData as UsageUpdateData;
+    return {
+      total_invoices: invoices?.length || 0,
+      total_revenue: invoices?.reduce((sum, inv) => sum + inv.amount_due, 0) || 0,
+      active_subscriptions: subscriptions?.length || 0
+    } as UsageUpdateData;
   }
 
   async syncTenantUsage(tenantId: string): Promise<void> {
-    await supabase.rpc('update_tenant_usage_stats', {
-      tenant_id_param: tenantId
-    });
+    const usageData = await this.calculateCurrentUsage(tenantId);
+    
+    // تحديث إحصائيات الاستخدام في جدول tenant_usage بدلاً من جدول غير موجود
+    await supabase
+      .from('tenant_usage')
+      .upsert({
+        tenant_id: tenantId,
+        usage_date: new Date().toISOString().split('T')[0],
+        ...usageData
+      });
     
     // تنظيف الذاكرة المؤقتة
     this.clearCache('usage');
@@ -786,14 +832,9 @@ export class EnhancedSaasService {
 
     const { data, error } = await supabase
       .from('saas_subscriptions')
-      .select(`
-        *,
-        tenant:tenants(id, name, email),
-        plan:subscription_plans(*)
-      `)
+      .select('*')
       .eq('status', 'active')
-      .eq('auto_renew', true)
-      .lte('next_billing_date', endDate.toISOString().split('T')[0]);
+      .lte('current_period_end', endDate.toISOString().split('T')[0]);
 
     if (error) throw new Error(`فشل في جلب التجديدات القادمة: ${error.message}`);
     

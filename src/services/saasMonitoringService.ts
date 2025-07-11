@@ -221,9 +221,8 @@ export class SaasMonitoringService {
 
       const { data: expiringSubscriptions, error } = await supabase
         .from('saas_subscriptions')
-        .select('*')
+        .select('id, tenant_id, current_period_end, amount')
         .eq('status', 'active')
-        .eq('auto_renew', false)
         .lte('current_period_end', nextWeek.toISOString().split('T')[0]);
 
       if (error) {

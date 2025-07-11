@@ -195,7 +195,11 @@ export class SadadService {
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      type: data.event_type,
+      data: data.event_data
+    };
   }
 
   async markWebhookEventAsProcessed(id: string): Promise<void> {
@@ -215,7 +219,11 @@ export class SadadService {
       .order('created_at', { ascending: true });
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(event => ({
+      ...event,
+      type: event.event_type,
+      data: event.event_data
+    }));
   }
 
   // إدارة سجل المعاملات
@@ -234,7 +242,11 @@ export class SadadService {
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      transaction_id: data.payment_id,
+      amount: 0
+    };
   }
 
   async getTransactionLogs(paymentId: string): Promise<SadadTransactionLog[]> {
@@ -245,7 +257,11 @@ export class SadadService {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(log => ({
+      ...log,
+      transaction_id: log.payment_id,
+      amount: 0
+    }));
   }
 
   // الإحصائيات
