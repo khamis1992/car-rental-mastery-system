@@ -298,7 +298,7 @@ const AdvancedTenantManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">إدارة المؤسسات المتقدمة</h2>
+        <h2 className="text-2xl font-bold text-right">إدارة المؤسسات المتقدمة</h2>
         <Button className="flex items-center gap-2">
           <Building2 className="w-4 h-4" />
           إضافة مؤسسة جديدة
@@ -307,7 +307,7 @@ const AdvancedTenantManagement: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-right">
             <Database className="w-5 h-5" />
             قائمة المؤسسات
           </CardTitle>
@@ -327,21 +327,21 @@ const AdvancedTenantManagement: React.FC = () => {
             <TableBody>
               {tenants.map((tenant) => (
                 <TableRow key={tenant.id}>
-                  <TableCell>
+                  <TableCell className="text-right">
                     <div>
                       <div className="font-medium">{tenant.name}</div>
                       <div className="text-sm text-muted-foreground">{tenant.slug}</div>
                     </div>
                   </TableCell>
                   <TableCell>{getStatusBadge(tenant.status)}</TableCell>
-                  <TableCell>{getSubscriptionBadge(tenant.subscription_plan)}</TableCell>
-                  <TableCell>
+                  <TableCell className="text-right">{getSubscriptionBadge(tenant.subscription_plan)}</TableCell>
+                  <TableCell className="text-right">
                     <div className="flex items-center gap-1">
                       <Users className="w-4 h-4 text-muted-foreground" />
                       <span>{Math.floor(Math.random() * 50)}</span>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-right">
                     {new Date(tenant.created_at).toLocaleDateString('ar-SA')}
                   </TableCell>
                   <TableCell>

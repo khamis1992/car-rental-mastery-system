@@ -304,7 +304,7 @@ const AdvancedPermissions: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">نظام الصلاحيات المتقدم</h2>
+        <h2 className="text-2xl font-bold text-right">نظام الصلاحيات المتقدم</h2>
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -331,7 +331,7 @@ const AdvancedPermissions: React.FC = () => {
         <TabsContent value="roles">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-right">
                 <Users className="w-5 h-5" />
                 إدارة الأدوار
               </CardTitle>

@@ -419,7 +419,7 @@ const SupportTools: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">أدوات الدعم الفني</h2>
+        <h2 className="text-2xl font-bold text-right">أدوات الدعم الفني</h2>
         <div className="flex gap-2">
           <Button
             variant="outline"

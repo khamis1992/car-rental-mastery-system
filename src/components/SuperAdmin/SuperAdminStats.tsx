@@ -77,12 +77,12 @@ const SuperAdminStats: React.FC = () => {
       {stats.map((stat, index) => (
         <Card key={index} className="border-primary/10 hover:border-primary/30 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-muted-foreground text-right">
               {stat.title}
             </CardTitle>
             <stat.icon className={`h-4 w-4 ${stat.color}`} />
           </CardHeader>
-          <CardContent>
+          <CardContent className="text-right">
             <div className="text-2xl font-bold">{stat.value}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {stat.change}

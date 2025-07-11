@@ -221,7 +221,7 @@ const MaintenanceTools: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">أدوات الصيانة</h2>
+        <h2 className="text-2xl font-bold text-right">أدوات الصيانة</h2>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Label htmlFor="maintenance-mode">وضع الصيانة</Label>
@@ -258,13 +258,13 @@ const MaintenanceTools: React.FC = () => {
             {/* Database Health */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-right">
                   <Database className="w-5 h-5" />
                   قاعدة البيانات
                   {getStatusIcon(systemHealth.database.status)}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 text-right">
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>الاتصالات النشطة</span>
