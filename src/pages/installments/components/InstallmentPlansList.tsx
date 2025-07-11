@@ -19,6 +19,10 @@ interface InstallmentPlan {
   first_installment_date: string;
   last_installment_date: string;
   created_at: string;
+  contract_year?: string;
+  vehicle_count?: number;
+  price_per_vehicle?: number;
+  progress_amount?: number;
 }
 
 interface Props {
@@ -99,63 +103,80 @@ export function InstallmentPlansList({ refreshKey, onRefresh }: Props) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right">رقم الخطة</TableHead>
-                  <TableHead className="text-right">اسم الخطة</TableHead>
-                  <TableHead className="text-right">المورد</TableHead>
-                  <TableHead className="text-right">المبلغ الإجمالي</TableHead>
-                  <TableHead className="text-right">المبلغ المتبقي</TableHead>
-                  <TableHead className="text-right">عدد الأقساط</TableHead>
-                  <TableHead className="text-right">الحالة</TableHead>
+                  <TableHead className="text-right">اسم العقد</TableHead>
+                  <TableHead className="text-right">السنة</TableHead>
+                  <TableHead className="text-right">السيارات</TableHead>
+                  <TableHead className="text-right">سعر/سيارة</TableHead>
+                  <TableHead className="text-right">القيمة الإجمالية</TableHead>
+                  <TableHead className="text-right">التقدم</TableHead>
+                  <TableHead className="text-right">معلق</TableHead>
+                  <TableHead className="text-right">الأقساط</TableHead>
                   <TableHead className="text-right">الإجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {plans.map((plan) => (
-                  <TableRow key={plan.id}>
-                    <TableCell className="font-medium">{plan.plan_number}</TableCell>
-                    <TableCell>{plan.plan_name}</TableCell>
-                    <TableCell>{plan.supplier_name}</TableCell>
-                    <TableCell>
-                      <div className="rtl-flex">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        {plan.total_amount?.toFixed(3)} د.ك
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="rtl-flex">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        {plan.remaining_amount?.toFixed(3)} د.ك
-                      </div>
-                    </TableCell>
-                    <TableCell>{plan.number_of_installments}</TableCell>
-                    <TableCell>{getStatusBadge(plan.status)}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {plans.map((plan) => {
+                  const progressAmount = plan.progress_amount || (plan.total_amount - plan.remaining_amount);
+                  const contractYear = plan.contract_year || new Date(plan.created_at).getFullYear().toString();
+                  
+                  return (
+                    <TableRow key={plan.id}>
+                      <TableCell className="font-medium">{plan.plan_name || plan.plan_number}</TableCell>
+                      <TableCell>{contractYear}</TableCell>
+                      <TableCell>{plan.vehicle_count || 1}</TableCell>
+                      <TableCell>
+                        <div className="rtl-flex">
+                          <DollarSign className="h-4 w-4 text-muted-foreground" />
+                          {plan.price_per_vehicle?.toFixed(3) || (plan.total_amount / (plan.vehicle_count || 1)).toFixed(3)} د.ك
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="rtl-flex">
+                          <DollarSign className="h-4 w-4 text-muted-foreground" />
+                          {plan.total_amount?.toFixed(3)} د.ك
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="rtl-flex">
+                          <DollarSign className="h-4 w-4 text-muted-foreground" />
+                          {progressAmount?.toFixed(3)} د.ك
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="rtl-flex">
+                          <DollarSign className="h-4 w-4 text-muted-foreground" />
+                          {plan.remaining_amount?.toFixed(3)} د.ك
+                        </div>
+                      </TableCell>
+                      <TableCell>{plan.number_of_installments} قسط</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
