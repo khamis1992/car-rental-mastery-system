@@ -204,7 +204,7 @@ export function InstallmentDashboard() {
 
       {/* التبويبات الرئيسية */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-5" dir="rtl">
           <TabsTrigger value="overview" className="rtl-flex">
             <FileText className="h-4 w-4" />
             نظرة عامة
