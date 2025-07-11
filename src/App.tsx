@@ -32,6 +32,7 @@ import Attendance from "./pages/Attendance";
 import Leaves from "./pages/Leaves";
 import Payroll from "./pages/Payroll";
 import CostCenters from "./pages/CostCenters";
+import { InstallmentDashboard } from "./pages/installments/InstallmentDashboard";
 import Tenants from "./pages/Tenants";
 import NotFound from "./pages/NotFound";
 import PublicQuotation from "./pages/PublicQuotation";
@@ -143,6 +144,13 @@ const App = () => (
                       <ProtectedRoute>
                         <Layout>
                           <Accounting />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/installments" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <InstallmentDashboard />
                         </Layout>
                       </ProtectedRoute>
                     } />
