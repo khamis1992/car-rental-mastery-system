@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { TenantService } from '@/services/tenantService';
 import { Tenant } from '@/types/tenant';
 import { useToast } from "@/hooks/use-toast";
+import { EnhancedTenantOnboarding } from './TenantOnboarding/EnhancedTenantOnboarding';
 
 // نوع محدث للمؤسسة مع الإحصائيات الحقيقية
 interface TenantWithStats extends Tenant {
@@ -299,140 +300,7 @@ const AdvancedTenantManagement: React.FC = () => {
       setLoading(false);
     }
   };
-  const AddTenantDialog = () => <Dialog open={showAddTenantDialog} onOpenChange={setShowAddTenantDialog}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" dir="rtl">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="flex items-center gap-2">
-            <Building2 className="w-5 h-5" />
-            إضافة مؤسسة جديدة
-          </DialogTitle>
-          <DialogDescription>
-            املأ البيانات التالية لإضافة مؤسسة جديدة إلى النظام
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleAddTenant} className="flex flex-col flex-1 overflow-hidden">
-          <div className="grid gap-4 py-4 overflow-y-auto flex-1 px-1">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">اسم المؤسسة</Label>
-                <Input id="name" value={newTenantData.name} onChange={e => setNewTenantData(prev => ({
-                ...prev,
-                name: e.target.value
-              }))} placeholder="اسم المؤسسة" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="slug">المعرف الفريد</Label>
-                <Input id="slug" value={newTenantData.slug} onChange={e => setNewTenantData(prev => ({
-                ...prev,
-                slug: e.target.value
-              }))} placeholder="معرف-المؤسسة" className="rounded-sm" />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="contact_email">البريد الإلكتروني</Label>
-                <Input id="contact_email" type="email" value={newTenantData.contact_email} onChange={e => setNewTenantData(prev => ({
-                ...prev,
-                contact_email: e.target.value
-              }))} placeholder="email@example.com" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="contact_phone">رقم الهاتف</Label>
-                <Input id="contact_phone" value={newTenantData.contact_phone} onChange={e => setNewTenantData(prev => ({
-                ...prev,
-                contact_phone: e.target.value
-              }))} placeholder="+965 xxxx xxxx" />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="subscription_plan">باقة الاشتراك</Label>
-                <Select value={newTenantData.subscription_plan} onValueChange={handlePlanChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر الباقة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(subscriptionPlans).map(([key, plan]) => (
-                      <SelectItem key={key} value={key}>
-                        <div className="flex items-center justify-between w-full">
-                          <span>{plan.name}</span>
-                          <div className="text-xs text-muted-foreground mr-2">
-                            {plan.max_users} مستخدم • {plan.max_vehicles} مركبة • {plan.max_contracts} عقد
-                          </div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{newTenantData.max_users}</div>
-                  <div className="text-sm text-muted-foreground">عدد المستخدمين</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{newTenantData.max_vehicles}</div>
-                  <div className="text-sm text-muted-foreground">عدد المركبات</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{newTenantData.max_contracts}</div>
-                  <div className="text-sm text-muted-foreground">عدد العقود</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">بيانات المدير</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="admin_name">اسم المدير</Label>
-                  <Input id="admin_name" value={newTenantData.admin_user.full_name} onChange={e => setNewTenantData(prev => ({
-                  ...prev,
-                  admin_user: {
-                    ...prev.admin_user,
-                    full_name: e.target.value
-                  }
-                }))} placeholder="اسم المدير الكامل" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="admin_email">بريد المدير الإلكتروني</Label>
-                  <Input id="admin_email" type="email" value={newTenantData.admin_user.email} onChange={e => setNewTenantData(prev => ({
-                  ...prev,
-                  admin_user: {
-                    ...prev.admin_user,
-                    email: e.target.value
-                  }
-                }))} placeholder="admin@example.com" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="admin_password">كلمة مرور المدير</Label>
-                <Input id="admin_password" type="password" value={newTenantData.admin_user.password} onChange={e => setNewTenantData(prev => ({
-                ...prev,
-                admin_user: {
-                  ...prev.admin_user,
-                  password: e.target.value
-                }
-              }))} placeholder="كلمة مرور آمنة" />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2 flex-shrink-0 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={() => setShowAddTenantDialog(false)}>
-              إلغاء
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "جاري الإضافة..." : "إضافة المؤسسة"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>;
+  // No longer needed - replaced with EnhancedTenantOnboarding component
   const TenantDetailsDialog = ({
     tenant
   }: {
@@ -693,7 +561,12 @@ const AdvancedTenantManagement: React.FC = () => {
       </Card>
 
       {selectedTenant && <TenantDetailsDialog tenant={selectedTenant} />}
-      <AddTenantDialog />
+      
+      <EnhancedTenantOnboarding
+        open={showAddTenantDialog}
+        onOpenChange={setShowAddTenantDialog}
+        onSuccess={loadTenants}
+      />
     </div>;
 };
 export default AdvancedTenantManagement;
