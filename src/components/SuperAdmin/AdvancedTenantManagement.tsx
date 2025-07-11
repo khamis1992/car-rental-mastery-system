@@ -505,7 +505,7 @@ const AdvancedTenantManagement: React.FC = () => {
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
-                    {new Date(tenant.created_at).toLocaleDateString('ar-SA')}
+                    {new Date(tenant.created_at).toLocaleDateString('ar-SA', { calendar: 'gregory' })}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
