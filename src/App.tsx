@@ -46,6 +46,7 @@ import SystemMonitoringPage from "./pages/super-admin/SystemMonitoring";
 import MaintenanceToolsPage from "./pages/super-admin/MaintenanceTools";
 import TechnicalSupport from "./pages/super-admin/TechnicalSupport";
 import GlobalSettingsPage from "./pages/super-admin/GlobalSettings";
+import SuperAdminLayout from "./layouts/SuperAdminLayout";
 import DraftStage from "./pages/ContractStages/DraftStage";
 import PendingStage from "./pages/ContractStages/PendingStage";
 import ActiveStage from "./pages/ContractStages/ActiveStage";
@@ -230,69 +231,24 @@ const App = () => (
                           </Layout>
                         </ProtectedRoute>
                       } />
-                                             <Route path="/super-admin/main-dashboard" element={
-                         <ProtectedRoute requiredRole="super_admin">
-                           <Layout>
-                             <MainDashboard />
-                           </Layout>
-                         </ProtectedRoute>
-                       } />
-                       <Route path="/super-admin/tenant-management" element={
-                         <ProtectedRoute requiredRole="super_admin">
-                           <Layout>
-                             <TenantManagement />
-                           </Layout>
-                         </ProtectedRoute>
-                       } />
-                       <Route path="/super-admin/users-permissions" element={
-                         <ProtectedRoute requiredRole="super_admin">
-                           <Layout>
-                             <UsersAndPermissions />
-                           </Layout>
-                         </ProtectedRoute>
-                       } />
-                       <Route path="/super-admin/billing-subscriptions" element={
-                         <ProtectedRoute requiredRole="super_admin">
-                           <Layout>
-                             <BillingAndSubscriptionsPage />
-                           </Layout>
-                         </ProtectedRoute>
-                       } />
-                       <Route path="/super-admin/sadad-payments" element={
-                         <ProtectedRoute requiredRole="super_admin">
-                           <Layout>
-                             <SadadPayments />
-                           </Layout>
-                         </ProtectedRoute>
-                       } />
-                       <Route path="/super-admin/system-monitoring" element={
-                         <ProtectedRoute requiredRole="super_admin">
-                           <Layout>
-                             <SystemMonitoringPage />
-                           </Layout>
-                         </ProtectedRoute>
-                       } />
-                       <Route path="/super-admin/maintenance-tools" element={
-                         <ProtectedRoute requiredRole="super_admin">
-                           <Layout>
-                             <MaintenanceToolsPage />
-                           </Layout>
-                         </ProtectedRoute>
-                       } />
-                       <Route path="/super-admin/technical-support" element={
-                         <ProtectedRoute requiredRole="super_admin">
-                           <Layout>
-                             <TechnicalSupport />
-                           </Layout>
-                         </ProtectedRoute>
-                       } />
-                       <Route path="/super-admin/global-settings" element={
-                         <ProtectedRoute requiredRole="super_admin">
-                           <Layout>
-                             <GlobalSettingsPage />
-                           </Layout>
-                         </ProtectedRoute>
-                       } />
+                        {/* Super Admin Routes with Sidebar Layout */}
+                        <Route path="/super-admin/*" element={
+                          <ProtectedRoute requiredRole="super_admin">
+                            <SuperAdminLayout />
+                          </ProtectedRoute>
+                        }>
+                          <Route path="main-dashboard" element={<MainDashboard />} />
+                          <Route path="tenants" element={<TenantManagement />} />
+                          <Route path="users" element={<UsersAndPermissions />} />
+                          <Route path="billing" element={<BillingAndSubscriptionsPage />} />
+                          <Route path="analytics" element={<SystemMonitoringPage />} />
+                          <Route path="monitoring" element={<SystemMonitoringPage />} />
+                          <Route path="database" element={<MaintenanceToolsPage />} />
+                          <Route path="security" element={<TechnicalSupport />} />
+                          <Route path="financial" element={<BillingAndSubscriptionsPage />} />
+                          <Route path="alerts" element={<SystemMonitoringPage />} />
+                          <Route path="settings" element={<GlobalSettingsPage />} />
+                        </Route>
                       <Route path="/billing" element={
                         <ProtectedRoute requiredRole="super_admin">
                           <Layout>
