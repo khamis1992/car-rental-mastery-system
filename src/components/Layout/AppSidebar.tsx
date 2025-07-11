@@ -18,7 +18,9 @@ import {
   UserCheck,
   ChevronDown,
   ChevronRight,
-  Crown
+  Crown,
+  CreditCard,
+  Activity
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -142,14 +144,49 @@ const systemItems = [
 // إدارة النظام العام (لمديري النظام العام فقط)
 const superAdminItems = [
   { 
-    title: "لوحة تحكم مدير النظام", 
-    url: "/super-admin", 
-    icon: Crown 
+    title: "لوحة التحكم الرئيسية", 
+    url: "/super-admin/main-dashboard", 
+    icon: BarChart3 
   },
   { 
-    title: "الفوترة والاشتراكات", 
-    url: "/billing", 
+    title: "إدارة المؤسسات", 
+    url: "/super-admin/tenant-management", 
+    icon: Building2 
+  },
+  { 
+    title: "إدارة المستخدمين والصلاحيات", 
+    url: "/super-admin/users-permissions", 
+    icon: Users 
+  },
+  { 
+    title: "إدارة الفوترة والاشتراكات", 
+    url: "/super-admin/billing-subscriptions", 
     icon: DollarSign 
+  },
+  { 
+    title: "إدارة مدفوعات SADAD", 
+    url: "/super-admin/sadad-payments", 
+    icon: CreditCard 
+  },
+  { 
+    title: "مراقبة النظام والأداء", 
+    url: "/super-admin/system-monitoring", 
+    icon: Activity 
+  },
+  { 
+    title: "أدوات الصيانة", 
+    url: "/super-admin/maintenance-tools", 
+    icon: Settings 
+  },
+  { 
+    title: "إدارة الدعم الفني", 
+    url: "/super-admin/technical-support", 
+    icon: MessageCircle 
+  },
+  { 
+    title: "الإعدادات العامة", 
+    url: "/super-admin/global-settings", 
+    icon: Settings 
   },
 ];
 

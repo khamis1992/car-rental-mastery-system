@@ -37,6 +37,15 @@ import NotFound from "./pages/NotFound";
 import PublicQuotation from "./pages/PublicQuotation";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import BillingManagement from "./pages/BillingManagement";
+import MainDashboard from "./pages/super-admin/MainDashboard";
+import TenantManagement from "./pages/super-admin/TenantManagement";
+import UsersAndPermissions from "./pages/super-admin/UsersAndPermissions";
+import BillingAndSubscriptionsPage from "./pages/super-admin/BillingAndSubscriptions";
+import SadadPayments from "./pages/super-admin/SadadPayments";
+import SystemMonitoringPage from "./pages/super-admin/SystemMonitoring";
+import MaintenanceToolsPage from "./pages/super-admin/MaintenanceTools";
+import TechnicalSupport from "./pages/super-admin/TechnicalSupport";
+import GlobalSettingsPage from "./pages/super-admin/GlobalSettings";
 import DraftStage from "./pages/ContractStages/DraftStage";
 import PendingStage from "./pages/ContractStages/PendingStage";
 import ActiveStage from "./pages/ContractStages/ActiveStage";
@@ -221,6 +230,69 @@ const App = () => (
                           </Layout>
                         </ProtectedRoute>
                       } />
+                                             <Route path="/super-admin/main-dashboard" element={
+                         <ProtectedRoute requiredRole="super_admin">
+                           <Layout>
+                             <MainDashboard />
+                           </Layout>
+                         </ProtectedRoute>
+                       } />
+                       <Route path="/super-admin/tenant-management" element={
+                         <ProtectedRoute requiredRole="super_admin">
+                           <Layout>
+                             <TenantManagement />
+                           </Layout>
+                         </ProtectedRoute>
+                       } />
+                       <Route path="/super-admin/users-permissions" element={
+                         <ProtectedRoute requiredRole="super_admin">
+                           <Layout>
+                             <UsersAndPermissions />
+                           </Layout>
+                         </ProtectedRoute>
+                       } />
+                       <Route path="/super-admin/billing-subscriptions" element={
+                         <ProtectedRoute requiredRole="super_admin">
+                           <Layout>
+                             <BillingAndSubscriptionsPage />
+                           </Layout>
+                         </ProtectedRoute>
+                       } />
+                       <Route path="/super-admin/sadad-payments" element={
+                         <ProtectedRoute requiredRole="super_admin">
+                           <Layout>
+                             <SadadPayments />
+                           </Layout>
+                         </ProtectedRoute>
+                       } />
+                       <Route path="/super-admin/system-monitoring" element={
+                         <ProtectedRoute requiredRole="super_admin">
+                           <Layout>
+                             <SystemMonitoringPage />
+                           </Layout>
+                         </ProtectedRoute>
+                       } />
+                       <Route path="/super-admin/maintenance-tools" element={
+                         <ProtectedRoute requiredRole="super_admin">
+                           <Layout>
+                             <MaintenanceToolsPage />
+                           </Layout>
+                         </ProtectedRoute>
+                       } />
+                       <Route path="/super-admin/technical-support" element={
+                         <ProtectedRoute requiredRole="super_admin">
+                           <Layout>
+                             <TechnicalSupport />
+                           </Layout>
+                         </ProtectedRoute>
+                       } />
+                       <Route path="/super-admin/global-settings" element={
+                         <ProtectedRoute requiredRole="super_admin">
+                           <Layout>
+                             <GlobalSettingsPage />
+                           </Layout>
+                         </ProtectedRoute>
+                       } />
                       <Route path="/billing" element={
                         <ProtectedRoute requiredRole="super_admin">
                           <Layout>
