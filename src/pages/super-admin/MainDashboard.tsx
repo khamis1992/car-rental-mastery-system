@@ -5,15 +5,18 @@ import {
   Database,
   TrendingUp,
   Globe,
-  Crown
+  Crown,
+  RefreshCw
 } from "lucide-react";
 import SuperAdminStats from "@/components/SuperAdmin/SuperAdminStats";
+import { useSubscriptionRevenue } from "@/hooks/useSubscriptionRevenue";
 import { useTenant } from '@/contexts/TenantContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 const MainDashboard: React.FC = () => {
   const { currentUserRole } = useTenant();
   const { user } = useAuth();
+  const { data: revenueData, isLoading: revenueLoading } = useSubscriptionRevenue();
 
   // التحقق من صلاحيات الوصول
   if (currentUserRole !== 'super_admin') {
@@ -147,20 +150,36 @@ const MainDashboard: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-right">
                 <TrendingUp className="w-5 h-5 text-primary" />
-                الإيرادات الشهرية
+                إيرادات الاشتراكات الشهرية
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 text-right">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">هذا الشهر</span>
-                  <span className="font-medium text-success">15,240 ر.س</span>
+              {revenueLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="h-6 w-6 animate-spin text-primary" />
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">الشهر السابق</span>
-                  <span className="font-medium">12,850 ر.س</span>
+              ) : (
+                <div className="space-y-3 text-right">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">هذا الشهر</span>
+                    <span className="font-medium text-success">
+                      {revenueData?.currentMonth?.toFixed(3) || "0.000"} د.ك
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">الشهر السابق</span>
+                    <span className="font-medium">
+                      {revenueData?.previousMonth?.toFixed(3) || "0.000"} د.ك
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">معدل النمو</span>
+                    <span className={`font-medium ${revenueData?.growthPercentage && revenueData.growthPercentage > 0 ? 'text-success' : revenueData?.growthPercentage && revenueData.growthPercentage < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                      {revenueData?.growth || "لا توجد بيانات"}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 

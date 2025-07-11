@@ -36,19 +36,54 @@ export const useSuperAdminStats = () => {
         .select('*', { count: 'exact', head: true })
         .eq('status', 'active');
 
-      // Fetch total revenue from payments
-      const { data: revenueData } = await supabase
-        .from('payments')
-        .select('amount')
-        .eq('status', 'completed');
+      // Fetch subscription revenue from saas_payments
+      const { data: saasPayments } = await supabase
+        .from('saas_payments')
+        .select('amount, currency, status, paid_at')
+        .eq('status', 'succeeded');
 
-      const totalRevenue = revenueData?.reduce((sum, payment) => sum + (payment.amount || 0), 0) || 0;
+      const totalSubscriptionRevenue = saasPayments?.reduce((sum, payment) => sum + (payment.amount || 0), 0) || 0;
+
+      // Calculate monthly subscription revenue (current month)
+      const currentMonth = new Date();
+      const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+      const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+
+      const { data: monthlyPayments } = await supabase
+        .from('saas_payments')
+        .select('amount')
+        .eq('status', 'succeeded')
+        .gte('paid_at', startOfMonth.toISOString())
+        .lte('paid_at', endOfMonth.toISOString());
+
+      const monthlySubscriptionRevenue = monthlyPayments?.reduce((sum, payment) => sum + (payment.amount || 0), 0) || 0;
+
+      // Calculate previous month for growth comparison
+      const previousMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+      const endOfPreviousMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 0);
+
+      const { data: previousMonthPayments } = await supabase
+        .from('saas_payments')
+        .select('amount')
+        .eq('status', 'succeeded')
+        .gte('paid_at', previousMonth.toISOString())
+        .lte('paid_at', endOfPreviousMonth.toISOString());
+
+      const previousMonthRevenue = previousMonthPayments?.reduce((sum, payment) => sum + (payment.amount || 0), 0) || 0;
+
+      // Calculate growth percentage
+      const revenueGrowthPercentage = previousMonthRevenue > 0 
+        ? ((monthlySubscriptionRevenue - previousMonthRevenue) / previousMonthRevenue * 100).toFixed(1)
+        : '0';
+      
+      const revenueGrowth = previousMonthRevenue > 0 
+        ? `${parseFloat(revenueGrowthPercentage) > 0 ? '+' : ''}${revenueGrowthPercentage}% هذا الشهر`
+        : "أول شهر";
 
       // Calculate growth rates (mock for now - would need historical data)
       const tenantGrowth = "+2 هذا الشهر";
       const userGrowth = "+18% نمو";
       const transactionGrowth = "+5.2% اليوم";
-      const revenueGrowth = "+12% هذا الشهر";
 
       // Calculate data size (mock - would need actual DB size query)
       const dataSize = "2.3 TB";
@@ -72,7 +107,7 @@ export const useSuperAdminStats = () => {
         totalTenants: tenantsCount || 0,
         totalUsers: usersCount || 0,
         activeTransactions: activeTransactions || 0,
-        totalRevenue,
+        totalRevenue: totalSubscriptionRevenue,
         systemPerformance,
         dataSize,
         securityStatus,

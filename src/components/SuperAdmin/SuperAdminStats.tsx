@@ -65,7 +65,7 @@ const SuperAdminStats: React.FC = () => {
       color: "text-orange-600"
     },
     {
-      title: "إجمالي الإيرادات",
+      title: "إيرادات الاشتراكات",
       value: `${statsData?.totalRevenue?.toFixed(3) || "0.000"} د.ك`,
       icon: DollarSign,
       change: statsData?.revenueGrowth || "+0% هذا الشهر",
