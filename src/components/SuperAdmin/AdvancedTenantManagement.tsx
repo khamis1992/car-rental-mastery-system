@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -12,12 +13,46 @@ import { Building2, Users, MoreHorizontal, Shield, AlertTriangle, CheckCircle, C
 import { TenantService } from '@/services/tenantService';
 import { Tenant } from '@/types/tenant';
 import { useToast } from "@/hooks/use-toast";
+
 const AdvancedTenantManagement: React.FC = () => {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
   const [showTenantDetails, setShowTenantDetails] = useState(false);
   const [showAddTenantDialog, setShowAddTenantDialog] = useState(false);
+
+  // تعريف الباقات المختلفة
+  const subscriptionPlans = {
+    basic: {
+      name: 'أساسي',
+      max_users: 10,
+      max_vehicles: 50,
+      max_contracts: 100,
+      color: 'bg-gray-100 text-gray-800'
+    },
+    standard: {
+      name: 'معياري',
+      max_users: 25,
+      max_vehicles: 100,
+      max_contracts: 250,
+      color: 'bg-blue-100 text-blue-800'
+    },
+    premium: {
+      name: 'مميز',
+      max_users: 50,
+      max_vehicles: 200,
+      max_contracts: 500,
+      color: 'bg-purple-100 text-purple-800'
+    },
+    enterprise: {
+      name: 'مؤسسي',
+      max_users: 100,
+      max_vehicles: 500,
+      max_contracts: 1000,
+      color: 'bg-gold-100 text-gold-800'
+    }
+  };
+
   const [newTenantData, setNewTenantData] = useState({
     name: '',
     slug: '',
@@ -26,20 +61,19 @@ const AdvancedTenantManagement: React.FC = () => {
     country: 'Kuwait',
     timezone: 'Asia/Kuwait',
     currency: 'KWD',
-    subscription_plan: 'basic' as const,
-    max_users: 10,
-    max_vehicles: 50,
-    max_contracts: 100,
+    subscription_plan: 'basic' as keyof typeof subscriptionPlans,
+    max_users: subscriptionPlans.basic.max_users,
+    max_vehicles: subscriptionPlans.basic.max_vehicles,
+    max_contracts: subscriptionPlans.basic.max_contracts,
     admin_user: {
       email: '',
       password: '',
       full_name: ''
     }
   });
+
   const tenantService = new TenantService();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   useEffect(() => {
     loadTenants();
   }, []);
@@ -143,6 +177,18 @@ const AdvancedTenantManagement: React.FC = () => {
       });
     }
   };
+  // معالج تغيير الباقة
+  const handlePlanChange = (selectedPlan: keyof typeof subscriptionPlans) => {
+    const plan = subscriptionPlans[selectedPlan];
+    setNewTenantData(prev => ({
+      ...prev,
+      subscription_plan: selectedPlan,
+      max_users: plan.max_users,
+      max_vehicles: plan.max_vehicles,
+      max_contracts: plan.max_contracts
+    }));
+  };
+
   const handleAddTenant = async () => {
     try {
       await tenantService.createTenant(newTenantData);
@@ -159,10 +205,10 @@ const AdvancedTenantManagement: React.FC = () => {
         country: 'Kuwait',
         timezone: 'Asia/Kuwait',
         currency: 'KWD',
-        subscription_plan: 'basic' as const,
-        max_users: 10,
-        max_vehicles: 50,
-        max_contracts: 100,
+        subscription_plan: 'basic',
+        max_users: subscriptionPlans.basic.max_users,
+        max_vehicles: subscriptionPlans.basic.max_vehicles,
+        max_contracts: subscriptionPlans.basic.max_contracts,
         admin_user: {
           email: '',
           password: '',
@@ -225,27 +271,41 @@ const AdvancedTenantManagement: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="max_users">عدد المستخدمين</Label>
-              <Input id="max_users" type="number" value={newTenantData.max_users} onChange={e => setNewTenantData(prev => ({
-              ...prev,
-              max_users: parseInt(e.target.value)
-            }))} />
+              <Label htmlFor="subscription_plan">باقة الاشتراك</Label>
+              <Select value={newTenantData.subscription_plan} onValueChange={handlePlanChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر الباقة" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(subscriptionPlans).map(([key, plan]) => (
+                    <SelectItem key={key} value={key}>
+                      <div className="flex items-center justify-between w-full">
+                        <span>{plan.name}</span>
+                        <div className="text-xs text-muted-foreground mr-2">
+                          {plan.max_users} مستخدم • {plan.max_vehicles} مركبة • {plan.max_contracts} عقد
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="max_vehicles">عدد المركبات</Label>
-              <Input id="max_vehicles" type="number" value={newTenantData.max_vehicles} onChange={e => setNewTenantData(prev => ({
-              ...prev,
-              max_vehicles: parseInt(e.target.value)
-            }))} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="max_contracts">عدد العقود</Label>
-              <Input id="max_contracts" type="number" value={newTenantData.max_contracts} onChange={e => setNewTenantData(prev => ({
-              ...prev,
-              max_contracts: parseInt(e.target.value)
-            }))} />
+
+            <div className="grid grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">{newTenantData.max_users}</div>
+                <div className="text-sm text-muted-foreground">عدد المستخدمين</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">{newTenantData.max_vehicles}</div>
+                <div className="text-sm text-muted-foreground">عدد المركبات</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">{newTenantData.max_contracts}</div>
+                <div className="text-sm text-muted-foreground">عدد العقود</div>
+              </div>
             </div>
           </div>
 
