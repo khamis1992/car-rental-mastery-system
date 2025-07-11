@@ -111,9 +111,9 @@ export function InstallmentDashboard() {
     <div className="container mx-auto p-6 space-y-6">
       {/* العنوان وأزرار التحكم */}
       <div className="flex items-center justify-between">
-        <div className="rtl-title">
-          <h1 className="text-3xl font-bold">متابعة الأقساط</h1>
-          <p className="text-muted-foreground">إدارة ومتابعة أقساط العقود والموردين</p>
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold text-foreground">متابعة الأقساط</h1>
+          <p className="text-base text-muted-foreground">إدارة ومتابعة أقساط العقود والموردين</p>
         </div>
         
         <div className="flex gap-2">
