@@ -141,7 +141,7 @@ const SuperAdminDashboard: React.FC = () => {
 
               <Card className="border-primary/20">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-right">
+                  <CardTitle className="flex items-center gap-2 text-right flex-row-reverse justify-end">
                     <Database className="w-5 h-5 text-primary" />
                     إحصائيات قاعدة البيانات
                   </CardTitle>
