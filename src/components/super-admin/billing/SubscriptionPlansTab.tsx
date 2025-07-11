@@ -14,7 +14,7 @@ import {
   FileText
 } from 'lucide-react';
 import { useSubscriptionPlans, useDeleteSubscriptionPlan } from '@/hooks/useSaasData';
-import { SubscriptionPlan } from '@/types/saas';
+import { SubscriptionPlan } from '@/types/unified-saas';
 
 export function SubscriptionPlansTab() {
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);

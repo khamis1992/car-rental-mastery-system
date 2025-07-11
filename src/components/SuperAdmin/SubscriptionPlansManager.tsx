@@ -15,7 +15,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useSubscriptionPlans, useDeleteSubscriptionPlan } from '@/hooks/useSaasData';
-import { SubscriptionPlan } from '@/types/saas';
+import { SubscriptionPlan } from '@/types/unified-saas';
 // دالة تنسيق العملة
 const formatCurrency = (amount: number) => `${amount.toFixed(3)} د.ك`;
 import { useToast } from '@/hooks/use-toast';

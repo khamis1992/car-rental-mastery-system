@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { X, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import type { SubscriptionPlan, PlanFormData } from '@/types/saas';
+import type { SubscriptionPlan, PlanFormData } from '@/types/unified-saas';
 
 interface PlanFormDialogProps {
   open: boolean;

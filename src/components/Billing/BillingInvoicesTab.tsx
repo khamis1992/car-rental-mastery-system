@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useSaasInvoices, useUpdateInvoiceStatus } from "@/hooks/useSaasData";
 import { useToast } from "@/hooks/use-toast";
-import { SaasInvoice } from "@/types/saas";
+import { SaasInvoice } from "@/types/unified-saas";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 

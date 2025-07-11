@@ -16,7 +16,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useBillingStats } from '@/hooks/useSaasData';
 import SubscriptionPlansManager from './SubscriptionPlansManager';
-import { SubscriptionPlan } from '@/types/saas';
+import { SubscriptionPlan } from '@/types/unified-saas';
 
 const BillingAndSubscriptions: React.FC = () => {
   const navigate = useNavigate();

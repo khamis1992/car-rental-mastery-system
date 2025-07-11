@@ -11,7 +11,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import { useSaasInvoices } from "@/hooks/useSaasData";
-import { SaasInvoice } from "@/types/saas";
+import { SaasInvoice } from "@/types/unified-saas";
 import SaasPaymentForm from "./SaasPaymentForm";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";

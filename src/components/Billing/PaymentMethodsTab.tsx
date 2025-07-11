@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useSaasPayments, useCreatePayment } from "@/hooks/useSaasData";
 import { useToast } from "@/hooks/use-toast";
-import { SaasPayment } from "@/types/saas";
+import { SaasPayment } from "@/types/unified-saas";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 

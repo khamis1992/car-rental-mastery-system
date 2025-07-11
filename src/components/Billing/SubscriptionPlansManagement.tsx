@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Edit2, Trash2, Crown } from "lucide-react";
 import { saasService } from '@/services/saasService';
-import { SubscriptionPlan, PlanFormData } from '@/types/saas';
+import { SubscriptionPlan, PlanFormData } from '@/types/unified-saas';
 
 const SubscriptionPlansManagement: React.FC = () => {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);

@@ -22,7 +22,7 @@ import {
   useSubscriptionPlans, 
   useDeleteSubscriptionPlan 
 } from '@/hooks/useSaasData';
-import { SubscriptionPlan } from '@/types/saas';
+import { SubscriptionPlan } from '@/types/unified-saas';
 
 const PlansList: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);

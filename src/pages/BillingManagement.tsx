@@ -15,11 +15,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import BillingOverview from "@/components/Billing/BillingOverview";
 import TenantSubscriptions from "@/components/Billing/TenantSubscriptions";
 import PaymentMethods from "@/components/Billing/PaymentMethods";
-import BillingInvoices from "@/components/Billing/BillingInvoices";
+import BillingInvoicesTab from "@/components/Billing/BillingInvoicesTab";
 import BillingReports from "@/components/Billing/BillingReports";
 import BillingSettings from "@/components/Billing/BillingSettings";
 import SubscriptionPlansManagement from "@/components/Billing/SubscriptionPlansManagement";
-import AutomatedBilling from "@/components/Billing/AutomatedBilling";
+import AutoBillingManager from "@/components/Billing/AutoBillingManager";
 
 const BillingManagement: React.FC = () => {
   const { currentUserRole } = useTenant();
@@ -116,7 +116,7 @@ const BillingManagement: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="automated">
-            <AutomatedBilling />
+            <AutoBillingManager />
           </TabsContent>
 
           <TabsContent value="payments">
@@ -124,7 +124,7 @@ const BillingManagement: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="invoices">
-            <BillingInvoices />
+            <BillingInvoicesTab />
           </TabsContent>
 
           <TabsContent value="reports">

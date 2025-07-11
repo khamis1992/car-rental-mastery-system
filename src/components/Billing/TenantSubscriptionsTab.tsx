@@ -8,7 +8,7 @@ import { Plus, Search, Edit, Trash2, Pause, Play, RefreshCw } from "lucide-react
 import { useTenantSubscriptions, useCancelSubscription, useUpdateSubscription } from "@/hooks/useSaasData";
 import CreateSubscriptionDialog from "./CreateSubscriptionDialog";
 import { useToast } from "@/hooks/use-toast";
-import { SaasSubscription } from "@/types/saas";
+import { SaasSubscription } from "@/types/unified-saas";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 
