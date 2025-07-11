@@ -44,10 +44,7 @@ export function AutomaticBillingTab() {
   const handleRunBilling = async () => {
     setIsProcessing(true);
     try {
-      const result = await runBillingMutation.mutateAsync({
-        billingDate: new Date().toISOString(),
-        dryRun: false
-      });
+      const result = await runBillingMutation.mutateAsync();
       setBillingResults(result);
     } catch (error) {
       console.error('Billing process failed:', error);

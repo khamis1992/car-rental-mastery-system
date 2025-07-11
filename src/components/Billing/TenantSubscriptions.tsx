@@ -80,7 +80,7 @@ const TenantSubscriptions: React.FC = () => {
     try {
       await updateSubscriptionMutation.mutateAsync({
         subscriptionId: subscription.id,
-        updates: { status: 'paused', pause_collection: { behavior: 'void' } }
+        updates: { status: 'paused' }
       });
       toast({
         title: 'تم إيقاف الاشتراك مؤقتاً',

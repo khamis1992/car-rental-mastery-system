@@ -9,6 +9,11 @@ import {
   PaymentStatus,
   Currency
 } from '@/types/unified-saas';
+import {
+  SadadPayment,
+  SadadSettingsFormData,
+  CreateSadadPaymentFormData
+} from '@/types/sadad';
 
 // إعدادات SADAD
 export const useSadadSettings = () => {
@@ -100,7 +105,7 @@ export const useUpdateSadadPaymentStatus = () => {
       additionalData 
     }: { 
       id: string; 
-      status: SadadPayment['sadad_status'];
+      status: SaasPayment['status'];
       additionalData?: Partial<SadadPayment>;
     }) => sadadService.updateSadadPaymentStatus(id, status, additionalData),
     onSuccess: (_, variables) => {

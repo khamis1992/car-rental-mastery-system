@@ -26,3 +26,16 @@ export type {
   formatCurrency,
   calculateTaxAmount,
 } from '@/types/unified-saas';
+
+// إضافة الأنواع المفقودة للتوافق مع المكونات الموجودة
+export type SadadPayment = SaasPayment;
+export type CreateSadadPaymentFormData = CreatePaymentFormData;
+
+// نوع إعدادات SADAD
+export interface SadadSettingsFormData {
+  merchant_id: string;
+  merchant_key: string;
+  api_url: string;
+  is_sandbox: boolean;
+  is_active: boolean;
+}

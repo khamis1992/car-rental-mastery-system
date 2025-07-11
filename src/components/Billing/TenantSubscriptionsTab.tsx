@@ -29,7 +29,7 @@ const TenantSubscriptionsTab: React.FC = () => {
   const handleCancelSubscription = async (subscriptionId: string) => {
     if (confirm("هل أنت متأكد من إلغاء هذا الاشتراك؟")) {
       try {
-        await cancelSubscriptionMutation.mutateAsync(subscriptionId);
+        await cancelSubscriptionMutation.mutateAsync({ subscriptionId });
       } catch (error) {
         toast({
           title: "خطأ في إلغاء الاشتراك",

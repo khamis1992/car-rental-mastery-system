@@ -364,7 +364,7 @@ export class UnifiedPaymentService {
     // حساب إحصائيات SaaS
     const saasSucceeded = saasPayments.filter(p => p.status === 'succeeded');
     const saasFailed = saasPayments.filter(p => p.status === 'failed');
-    const saasPending = saasPayments.filter(p => p.status === 'processing' || p.status === 'requires_action');
+    const saasPending = saasPayments.filter(p => p.status === 'pending');
 
     // حساب إحصائيات SADAD
     const sadadSucceeded = sadadPayments.filter(p => p.sadad_status === 'paid');
@@ -434,7 +434,7 @@ export class UnifiedPaymentService {
         const saasPayment = payment as SaasPayment & { payment_type: 'saas' };
         return amountMatch || currencyMatch ||
           saasPayment.payment_reference?.toLowerCase().includes(searchLower) ||
-          saasPayment.description?.toLowerCase().includes(searchLower);
+          false; // SaasPayment doesn't have description field
       } else {
         const sadadPayment = payment as SadadPayment & { payment_type: 'sadad' };
         return amountMatch || currencyMatch ||

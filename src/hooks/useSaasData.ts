@@ -27,7 +27,7 @@ export function useSubscriptionPlans() {
     queryKey: ['subscription-plans'],
     queryFn: () => enhancedSaasService.getSubscriptionPlans(),
     staleTime: 10 * 60 * 1000, // 10 دقائق
-    cacheTime: 15 * 60 * 1000, // 15 دقيقة
+    gcTime: 15 * 60 * 1000, // 15 دقيقة
   });
 }
 
@@ -36,7 +36,7 @@ export function useAllSubscriptionPlans() {
     queryKey: ['subscription-plans', 'all'],
     queryFn: () => enhancedSaasService.getAllSubscriptionPlans(),
     staleTime: 10 * 60 * 1000,
-    cacheTime: 15 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
 }
 
@@ -46,7 +46,7 @@ export function useSubscriptionPlan(planId: string) {
     queryFn: () => enhancedSaasService.getSubscriptionPlanById(planId),
     enabled: !!planId,
     staleTime: 10 * 60 * 1000,
-    cacheTime: 15 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
 }
 
@@ -130,7 +130,7 @@ export function useTenantSubscriptions(tenantId?: string) {
     queryKey: ['tenant-subscriptions', tenantId],
     queryFn: () => enhancedSaasService.getTenantSubscriptions(tenantId),
     staleTime: 5 * 60 * 1000, // 5 دقائق
-    cacheTime: 10 * 60 * 1000, // 10 دقائق
+    gcTime: 10 * 60 * 1000, // 10 دقائق
   });
 }
 
@@ -140,7 +140,7 @@ export function useSubscription(subscriptionId: string) {
     queryFn: () => enhancedSaasService.getSubscriptionById(subscriptionId),
     enabled: !!subscriptionId,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }
 
@@ -273,7 +273,7 @@ export function useSaasInvoices(tenantId?: string, limit?: number) {
     queryKey: ['saas-invoices', tenantId, limit],
     queryFn: () => enhancedSaasService.getSaasInvoices(tenantId, limit),
     staleTime: 3 * 60 * 1000, // 3 دقائق
-    cacheTime: 5 * 60 * 1000, // 5 دقائق
+    gcTime: 5 * 60 * 1000, // 5 دقائق
   });
 }
 
@@ -335,7 +335,7 @@ export function useSaasPayments(tenantId?: string) {
     queryKey: ['saas-payments', tenantId],
     queryFn: () => enhancedSaasService.getSaasPayments(tenantId),
     staleTime: 2 * 60 * 1000, // دقيقتان
-    cacheTime: 5 * 60 * 1000, // 5 دقائق
+    gcTime: 5 * 60 * 1000, // 5 دقائق
   });
 }
 
@@ -438,7 +438,7 @@ export function useTenantUsage(tenantId?: string, limit: number = 30) {
     queryKey: ['tenant-usage', tenantId, limit],
     queryFn: () => enhancedSaasService.getTenantUsage(tenantId, limit),
     staleTime: 5 * 60 * 1000, // 5 دقائق
-    cacheTime: 10 * 60 * 1000, // 10 دقائق
+    gcTime: 10 * 60 * 1000, // 10 دقائق
   });
 }
 
@@ -473,7 +473,7 @@ export function useCalculateCurrentUsage(tenantId: string) {
     queryFn: () => enhancedSaasService.calculateCurrentUsage(tenantId),
     enabled: !!tenantId,
     staleTime: 1 * 60 * 1000, // دقيقة واحدة
-    cacheTime: 3 * 60 * 1000, // 3 دقائق
+    gcTime: 3 * 60 * 1000, // 3 دقائق
   });
 }
 
@@ -510,7 +510,7 @@ export function useBillingStats() {
     queryKey: ['billing-stats'],
     queryFn: () => enhancedSaasService.getBillingStats(),
     staleTime: 2 * 60 * 1000, // دقيقتان
-    cacheTime: 5 * 60 * 1000, // 5 دقائق
+    gcTime: 5 * 60 * 1000, // 5 دقائق
     refetchInterval: 5 * 60 * 1000, // تحديث كل 5 دقائق
   });
 }
@@ -520,7 +520,7 @@ export function useUpcomingRenewals(days: number = 7) {
     queryKey: ['upcoming-renewals', days],
     queryFn: () => enhancedSaasService.getUpcomingRenewals(days),
     staleTime: 10 * 60 * 1000, // 10 دقائق
-    cacheTime: 15 * 60 * 1000, // 15 دقيقة
+    gcTime: 15 * 60 * 1000, // 15 دقيقة
   });
 }
 
@@ -529,7 +529,7 @@ export function useOverdueInvoices() {
     queryKey: ['overdue-invoices'],
     queryFn: () => enhancedSaasService.getOverdueInvoices(),
     staleTime: 5 * 60 * 1000, // 5 دقائق
-    cacheTime: 10 * 60 * 1000, // 10 دقائق
+    gcTime: 10 * 60 * 1000, // 10 دقائق
     refetchInterval: 10 * 60 * 1000, // تحديث كل 10 دقائق
   });
 }

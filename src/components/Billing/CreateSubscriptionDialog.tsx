@@ -86,8 +86,7 @@ const CreateSubscriptionDialog: React.FC<CreateSubscriptionDialogProps> = ({
         current_period_start: periodStart,
         current_period_end: periodEnd,
         trial_end: trialEnd,
-        amount,
-        currency: 'KWD'
+        amount
       });
 
       onSuccess();
