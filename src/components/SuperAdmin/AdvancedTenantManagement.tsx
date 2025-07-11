@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -20,29 +15,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { TenantService } from '@/services/tenantService';
 import { Tenant } from '@/types/tenant';
 import { useToast } from "@/hooks/use-toast";
-
-// تعريف مخطط التحقق من صحة البيانات
-const tenantFormSchema = z.object({
-  name: z.string().min(2, 'اسم المؤسسة مطلوب (على الأقل حرفان)'),
-  slug: z.string()
-    .min(2, 'المعرف الفريد مطلوب (على الأقل حرفان)')
-    .regex(/^[a-z0-9-]+$/, 'المعرف يجب أن يحتوي على أحرف إنجليزية صغيرة وأرقام وشرطات فقط'),
-  contact_email: z.string().email('البريد الإلكتروني غير صحيح'),
-  contact_phone: z.string().optional(),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  country: z.string().min(1, 'البلد مطلوب'),
-  timezone: z.string().min(1, 'المنطقة الزمنية مطلوبة'),
-  currency: z.string().min(1, 'العملة مطلوبة'),
-  subscription_plan: z.enum(['basic', 'standard', 'premium', 'enterprise']),
-  admin_user: z.object({
-    email: z.string().email('البريد الإلكتروني للمدير غير صحيح'),
-    password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
-    full_name: z.string().min(2, 'اسم المدير مطلوب (على الأقل حرفان)'),
-  }),
-});
-
-type TenantFormData = z.infer<typeof tenantFormSchema>;
 
 // نوع محدث للمؤسسة مع الإحصائيات الحقيقية
 interface TenantWithStats extends Tenant {
@@ -90,30 +62,27 @@ const AdvancedTenantManagement: React.FC = () => {
     }
   };
 
+  const [newTenantData, setNewTenantData] = useState({
+    name: '',
+    slug: '',
+    contact_email: '',
+    contact_phone: '',
+    country: 'Kuwait',
+    timezone: 'Asia/Kuwait',
+    currency: 'KWD',
+    subscription_plan: 'basic' as keyof typeof subscriptionPlans,
+    max_users: subscriptionPlans.basic.max_users,
+    max_vehicles: subscriptionPlans.basic.max_vehicles,
+    max_contracts: subscriptionPlans.basic.max_contracts,
+    admin_user: {
+      email: '',
+      password: '',
+      full_name: ''
+    }
+  });
+
   const tenantService = new TenantService();
   const { toast } = useToast();
-
-  // إعداد نموذج react-hook-form
-  const form = useForm<TenantFormData>({
-    resolver: zodResolver(tenantFormSchema),
-    defaultValues: {
-      name: '',
-      slug: '',
-      contact_email: '',
-      contact_phone: '',
-      address: '',
-      city: '',
-      country: 'الكويت',
-      timezone: 'Asia/Kuwait',
-      currency: 'KWD',
-      subscription_plan: 'basic',
-      admin_user: {
-        email: '',
-        password: '',
-        full_name: '',
-      },
-    },
-  });
   useEffect(() => {
     loadTenants();
   }, []);
@@ -258,53 +227,67 @@ const AdvancedTenantManagement: React.FC = () => {
       });
     }
   };
-  // دالة توليد slug من الاسم
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
+  // معالج تغيير الباقة
+  const handlePlanChange = (selectedPlan: keyof typeof subscriptionPlans) => {
+    const plan = subscriptionPlans[selectedPlan];
+    setNewTenantData(prev => ({
+      ...prev,
+      subscription_plan: selectedPlan,
+      max_users: plan.max_users,
+      max_vehicles: plan.max_vehicles,
+      max_contracts: plan.max_contracts
+    }));
   };
 
-  // معالج تشغيل النموذج
-  const onSubmit = async (data: TenantFormData) => {
+  const handleAddTenant = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+
+    if (!newTenantData.name.trim()) {
+      toast({
+        title: "خطأ",
+        description: "اسم المؤسسة مطلوب",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!newTenantData.slug.trim()) {
+      toast({
+        title: "خطأ",
+        description: "المعرف الفريد مطلوب",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       setLoading(true);
-      
-      // إعداد بيانات المؤسسة
-      const plan = subscriptionPlans[data.subscription_plan];
-      const tenantData = {
-        name: data.name,
-        slug: data.slug,
-        contact_email: data.contact_email,
-        contact_phone: data.contact_phone,
-        address: data.address,
-        city: data.city,
-        country: data.country,
-        timezone: data.timezone,
-        currency: data.currency,
-        subscription_plan: data.subscription_plan,
-        max_users: plan.max_users,
-        max_vehicles: plan.max_vehicles,
-        max_contracts: plan.max_contracts,
-        admin_user: {
-          email: data.admin_user.email,
-          password: data.admin_user.password,
-          full_name: data.admin_user.full_name,
-        },
-      };
-      
-      await tenantService.createTenant(tenantData);
-      
+      await tenantService.createTenant(newTenantData);
       toast({
         title: "تم بنجاح",
         description: "تم إضافة المؤسسة الجديدة"
       });
-      
-      form.reset();
       setShowAddTenantDialog(false);
+      setNewTenantData({
+        name: '',
+        slug: '',
+        contact_email: '',
+        contact_phone: '',
+        country: 'Kuwait',
+        timezone: 'Asia/Kuwait',
+        currency: 'KWD',
+        subscription_plan: 'basic',
+        max_users: subscriptionPlans.basic.max_users,
+        max_vehicles: subscriptionPlans.basic.max_vehicles,
+        max_contracts: subscriptionPlans.basic.max_contracts,
+        admin_user: {
+          email: '',
+          password: '',
+          full_name: ''
+        }
+      });
       loadTenants();
     } catch (error: any) {
       toast({
@@ -316,346 +299,140 @@ const AdvancedTenantManagement: React.FC = () => {
       setLoading(false);
     }
   };
-  const AddTenantDialog = () => (
-    <Dialog open={showAddTenantDialog} onOpenChange={setShowAddTenantDialog}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-background to-muted/20" dir="rtl">
-        <DialogHeader className="text-center border-b border-border/50 pb-4">
-          <DialogTitle className="text-2xl font-bold text-primary flex items-center justify-center gap-2">
-            <Building2 className="w-6 h-6" />
+  const AddTenantDialog = () => <Dialog open={showAddTenantDialog} onOpenChange={setShowAddTenantDialog}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" dir="rtl">
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="flex items-center gap-2">
+            <Building2 className="w-5 h-5" />
             إضافة مؤسسة جديدة
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground text-center">
-            قم بملء النموذج أدناه لإضافة مؤسسة جديدة إلى النظام
+          <DialogDescription>
+            املأ البيانات التالية لإضافة مؤسسة جديدة إلى النظام
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {/* معلومات المؤسسة الأساسية */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-right">
-                  <Building2 className="w-5 h-5" />
-                  معلومات المؤسسة الأساسية
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>اسم المؤسسة</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            placeholder="شركة البشائر الخليجية"
-                            onChange={(e) => {
-                              field.onChange(e);
-                              // توليد slug تلقائياً
-                              const currentSlug = form.getValues('slug');
-                              if (!currentSlug || currentSlug === generateSlug(form.getValues('name') || '')) {
-                                form.setValue('slug', generateSlug(e.target.value));
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="slug"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>المعرف الفريد</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="bashayir-gulf" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="contact_email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>البريد الإلكتروني</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="email" placeholder="info@company.com" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="contact_phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>رقم الهاتف</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="+965 XXXX XXXX" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>العنوان</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} placeholder="العنوان التفصيلي للمؤسسة" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>المدينة</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="الكويت" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>البلد</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="اختر البلد" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="الكويت">الكويت</SelectItem>
-                            <SelectItem value="السعودية">السعودية</SelectItem>
-                            <SelectItem value="الإمارات">الإمارات</SelectItem>
-                            <SelectItem value="قطر">قطر</SelectItem>
-                            <SelectItem value="البحرين">البحرين</SelectItem>
-                            <SelectItem value="عمان">عمان</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="currency"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>العملة</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="اختر العملة" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="KWD">دينار كويتي (KWD)</SelectItem>
-                            <SelectItem value="SAR">ريال سعودي (SAR)</SelectItem>
-                            <SelectItem value="AED">درهم إماراتي (AED)</SelectItem>
-                            <SelectItem value="QAR">ريال قطري (QAR)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="timezone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>المنطقة الزمنية</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="اختر المنطقة الزمنية" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Asia/Kuwait">الكويت (GMT+3)</SelectItem>
-                          <SelectItem value="Asia/Riyadh">الرياض (GMT+3)</SelectItem>
-                          <SelectItem value="Asia/Dubai">دبي (GMT+4)</SelectItem>
-                          <SelectItem value="Asia/Qatar">قطر (GMT+3)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            {/* خطة الاشتراك */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-right">
-                  <Crown className="w-5 h-5" />
-                  خطة الاشتراك والحدود
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="subscription_plan"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>باقة الاشتراك</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="اختر خطة الاشتراك" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {Object.entries(subscriptionPlans).map(([key, plan]) => (
-                            <SelectItem key={key} value={key}>
-                              <div className="flex items-center justify-between w-full">
-                                <span>{plan.name}</span>
-                                <div className="text-xs text-muted-foreground mr-2">
-                                  {plan.max_users} مستخدم • {plan.max_vehicles} مركبة • {plan.max_contracts} عقد
-                                </div>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* عرض حدود الخطة المختارة */}
-                <div className="grid grid-cols-3 gap-4 p-4 border rounded-lg bg-muted/50">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">
-                      {subscriptionPlans[form.watch('subscription_plan')]?.max_users || 0}
-                    </div>
-                    <div className="text-sm text-muted-foreground">عدد المستخدمين</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">
-                      {subscriptionPlans[form.watch('subscription_plan')]?.max_vehicles || 0}
-                    </div>
-                    <div className="text-sm text-muted-foreground">عدد المركبات</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">
-                      {subscriptionPlans[form.watch('subscription_plan')]?.max_contracts || 0}
-                    </div>
-                    <div className="text-sm text-muted-foreground">عدد العقود</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* معلومات المدير */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-right">
-                  <Users className="w-5 h-5" />
-                  بيانات المدير الأساسي
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="admin_user.full_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>الاسم الكامل للمدير</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="أحمد محمد علي" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="admin_user.email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>البريد الإلكتروني للمدير</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="email" placeholder="admin@company.com" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="admin_user.password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>كلمة المرور</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="password" placeholder="كلمة مرور قوية" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* أزرار النموذج */}
-            <div className="flex justify-end gap-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => {
-                  form.reset();
-                  setShowAddTenantDialog(false);
-                }}
-              >
-                إلغاء
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "جاري الإنشاء..." : "إنشاء المؤسسة"}
-              </Button>
+        <form onSubmit={handleAddTenant} className="flex flex-col flex-1 overflow-hidden">
+          <div className="grid gap-4 py-4 overflow-y-auto flex-1 px-1">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">اسم المؤسسة</Label>
+                <Input id="name" value={newTenantData.name} onChange={e => setNewTenantData(prev => ({
+                ...prev,
+                name: e.target.value
+              }))} placeholder="اسم المؤسسة" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="slug">المعرف الفريد</Label>
+                <Input id="slug" value={newTenantData.slug} onChange={e => setNewTenantData(prev => ({
+                ...prev,
+                slug: e.target.value
+              }))} placeholder="معرف-المؤسسة" className="rounded-sm" />
+              </div>
             </div>
-          </form>
-        </Form>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="contact_email">البريد الإلكتروني</Label>
+                <Input id="contact_email" type="email" value={newTenantData.contact_email} onChange={e => setNewTenantData(prev => ({
+                ...prev,
+                contact_email: e.target.value
+              }))} placeholder="email@example.com" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contact_phone">رقم الهاتف</Label>
+                <Input id="contact_phone" value={newTenantData.contact_phone} onChange={e => setNewTenantData(prev => ({
+                ...prev,
+                contact_phone: e.target.value
+              }))} placeholder="+965 xxxx xxxx" />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="subscription_plan">باقة الاشتراك</Label>
+                <Select value={newTenantData.subscription_plan} onValueChange={handlePlanChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر الباقة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(subscriptionPlans).map(([key, plan]) => (
+                      <SelectItem key={key} value={key}>
+                        <div className="flex items-center justify-between w-full">
+                          <span>{plan.name}</span>
+                          <div className="text-xs text-muted-foreground mr-2">
+                            {plan.max_users} مستخدم • {plan.max_vehicles} مركبة • {plan.max_contracts} عقد
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">{newTenantData.max_users}</div>
+                  <div className="text-sm text-muted-foreground">عدد المستخدمين</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">{newTenantData.max_vehicles}</div>
+                  <div className="text-sm text-muted-foreground">عدد المركبات</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">{newTenantData.max_contracts}</div>
+                  <div className="text-sm text-muted-foreground">عدد العقود</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">بيانات المدير</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="admin_name">اسم المدير</Label>
+                  <Input id="admin_name" value={newTenantData.admin_user.full_name} onChange={e => setNewTenantData(prev => ({
+                  ...prev,
+                  admin_user: {
+                    ...prev.admin_user,
+                    full_name: e.target.value
+                  }
+                }))} placeholder="اسم المدير الكامل" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="admin_email">بريد المدير الإلكتروني</Label>
+                  <Input id="admin_email" type="email" value={newTenantData.admin_user.email} onChange={e => setNewTenantData(prev => ({
+                  ...prev,
+                  admin_user: {
+                    ...prev.admin_user,
+                    email: e.target.value
+                  }
+                }))} placeholder="admin@example.com" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="admin_password">كلمة مرور المدير</Label>
+                <Input id="admin_password" type="password" value={newTenantData.admin_user.password} onChange={e => setNewTenantData(prev => ({
+                ...prev,
+                admin_user: {
+                  ...prev.admin_user,
+                  password: e.target.value
+                }
+              }))} placeholder="كلمة مرور آمنة" />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 flex-shrink-0 pt-4 border-t">
+            <Button type="button" variant="outline" onClick={() => setShowAddTenantDialog(false)}>
+              إلغاء
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "جاري الإضافة..." : "إضافة المؤسسة"}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
   const TenantDetailsDialog = ({
     tenant
   }: {

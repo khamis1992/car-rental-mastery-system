@@ -78,11 +78,6 @@ const financialItems = [
     icon: Calculator 
   },
   { 
-    title: "الأقساط", 
-    url: "/installments", 
-    icon: CreditCard 
-  },
-  { 
     title: "مراكز التكلفة", 
     url: "/cost-centers", 
     icon: Building2 

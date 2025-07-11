@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Settings, 
   Save, 
@@ -23,7 +22,6 @@ const GlobalSettings: React.FC = () => {
     // System Settings
     systemName: 'نظام إدارة تأجير السيارات',
     systemVersion: '2.1.0',
-    defaultCurrency: 'KWD',
     maintenanceMode: false,
     allowRegistration: true,
     maxTenantsPerUser: 5,
@@ -126,24 +124,6 @@ const GlobalSettings: React.FC = () => {
                     onChange={(e) => handleSettingChange('systemVersion', e.target.value)}
                     disabled
                   />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="defaultCurrency">العملة الافتراضية</Label>
-                  <Select
-                    value={settings.defaultCurrency}
-                    onValueChange={(value) => handleSettingChange('defaultCurrency', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر العملة" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="KWD">دينار كويتي (KWD)</SelectItem>
-                      <SelectItem value="QAR">ريال قطري (QAR)</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
               </div>
 

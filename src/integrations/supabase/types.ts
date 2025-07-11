@@ -2778,286 +2778,6 @@ export type Database = {
           },
         ]
       }
-      installment_alerts: {
-        Row: {
-          alert_type: string
-          created_by: string | null
-          id: string
-          installment_id: string
-          is_read: boolean | null
-          message: string
-          read_at: string | null
-          sent_at: string | null
-          severity: string
-          tenant_id: string
-        }
-        Insert: {
-          alert_type: string
-          created_by?: string | null
-          id?: string
-          installment_id: string
-          is_read?: boolean | null
-          message: string
-          read_at?: string | null
-          sent_at?: string | null
-          severity?: string
-          tenant_id: string
-        }
-        Update: {
-          alert_type?: string
-          created_by?: string | null
-          id?: string
-          installment_id?: string
-          is_read?: boolean | null
-          message?: string
-          read_at?: string | null
-          sent_at?: string | null
-          severity?: string
-          tenant_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "installment_alerts_installment_id_fkey"
-            columns: ["installment_id"]
-            isOneToOne: false
-            referencedRelation: "installments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "installment_alerts_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      installment_payments: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          id: string
-          installment_id: string
-          journal_entry_id: string | null
-          notes: string | null
-          payment_amount: number
-          payment_date: string
-          payment_method: string
-          payment_reference: string | null
-          tenant_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          id?: string
-          installment_id: string
-          journal_entry_id?: string | null
-          notes?: string | null
-          payment_amount: number
-          payment_date?: string
-          payment_method: string
-          payment_reference?: string | null
-          tenant_id: string
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          id?: string
-          installment_id?: string
-          journal_entry_id?: string | null
-          notes?: string | null
-          payment_amount?: number
-          payment_date?: string
-          payment_method?: string
-          payment_reference?: string | null
-          tenant_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "installment_payments_installment_id_fkey"
-            columns: ["installment_id"]
-            isOneToOne: false
-            referencedRelation: "installments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "installment_payments_journal_entry_id_fkey"
-            columns: ["journal_entry_id"]
-            isOneToOne: false
-            referencedRelation: "journal_entries"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "installment_payments_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      installment_plans: {
-        Row: {
-          contract_id: string | null
-          created_at: string | null
-          created_by: string | null
-          down_payment: number | null
-          first_installment_date: string
-          id: string
-          installment_frequency: string
-          interest_rate: number | null
-          last_installment_date: string
-          notes: string | null
-          number_of_installments: number
-          penalty_rate: number | null
-          plan_name: string
-          plan_number: string
-          remaining_amount: number
-          status: string
-          supplier_name: string
-          tenant_id: string
-          total_amount: number
-          updated_at: string | null
-        }
-        Insert: {
-          contract_id?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          down_payment?: number | null
-          first_installment_date: string
-          id?: string
-          installment_frequency?: string
-          interest_rate?: number | null
-          last_installment_date: string
-          notes?: string | null
-          number_of_installments: number
-          penalty_rate?: number | null
-          plan_name: string
-          plan_number: string
-          remaining_amount: number
-          status?: string
-          supplier_name: string
-          tenant_id: string
-          total_amount: number
-          updated_at?: string | null
-        }
-        Update: {
-          contract_id?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          down_payment?: number | null
-          first_installment_date?: string
-          id?: string
-          installment_frequency?: string
-          interest_rate?: number | null
-          last_installment_date?: string
-          notes?: string | null
-          number_of_installments?: number
-          penalty_rate?: number | null
-          plan_name?: string
-          plan_number?: string
-          remaining_amount?: number
-          status?: string
-          supplier_name?: string
-          tenant_id?: string
-          total_amount?: number
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "installment_plans_contract_id_fkey"
-            columns: ["contract_id"]
-            isOneToOne: false
-            referencedRelation: "contracts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "installment_plans_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      installments: {
-        Row: {
-          created_at: string | null
-          days_overdue: number | null
-          due_date: string
-          id: string
-          installment_number: number
-          installment_plan_id: string
-          notes: string | null
-          original_amount: number
-          paid_amount: number | null
-          payment_date: string | null
-          payment_method: string | null
-          payment_reference: string | null
-          penalty_amount: number | null
-          remaining_amount: number | null
-          status: string
-          tenant_id: string
-          total_amount: number
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          days_overdue?: number | null
-          due_date: string
-          id?: string
-          installment_number: number
-          installment_plan_id: string
-          notes?: string | null
-          original_amount: number
-          paid_amount?: number | null
-          payment_date?: string | null
-          payment_method?: string | null
-          payment_reference?: string | null
-          penalty_amount?: number | null
-          remaining_amount?: number | null
-          status?: string
-          tenant_id: string
-          total_amount: number
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          days_overdue?: number | null
-          due_date?: string
-          id?: string
-          installment_number?: number
-          installment_plan_id?: string
-          notes?: string | null
-          original_amount?: number
-          paid_amount?: number | null
-          payment_date?: string | null
-          payment_method?: string | null
-          payment_reference?: string | null
-          penalty_amount?: number | null
-          remaining_amount?: number | null
-          status?: string
-          tenant_id?: string
-          total_amount?: number
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "installments_installment_plan_id_fkey"
-            columns: ["installment_plan_id"]
-            isOneToOne: false
-            referencedRelation: "installment_plans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "installments_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       invoice_items: {
         Row: {
           created_at: string
@@ -6172,10 +5892,6 @@ export type Database = {
           forecast_count: number
         }[]
       }
-      calculate_installment_summary: {
-        Args: { tenant_id_param: string }
-        Returns: Json
-      }
       calculate_monthly_depreciation: {
         Args: {
           asset_cost: number
@@ -6246,10 +5962,6 @@ export type Database = {
       create_depreciation_entries: {
         Args: Record<PropertyKey, never>
         Returns: number
-      }
-      create_installment_alerts: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
       }
       create_invoice_accounting_entry: {
         Args: { invoice_id: string; invoice_data: Json }
@@ -6366,10 +6078,6 @@ export type Database = {
       }
       generate_hierarchical_asset_code: {
         Args: { vehicle_type: string; make: string; model: string }
-        Returns: string
-      }
-      generate_installment_plan_number: {
-        Args: Record<PropertyKey, never>
         Returns: string
       }
       generate_invoice_number: {
@@ -6553,10 +6261,6 @@ export type Database = {
           updated_by_param?: string
         }
         Returns: boolean
-      }
-      update_overdue_installments: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
       }
       update_system_setting: {
         Args: {
