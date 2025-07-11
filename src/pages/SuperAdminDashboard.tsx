@@ -57,7 +57,7 @@ const SuperAdminDashboard: React.FC = () => {
             <div className="bg-gradient-primary p-3 rounded-xl shadow-glow">
               <Crown className="w-8 h-8 text-primary-foreground" />
             </div>
-            <div>
+            <div className="text-right">
               <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                 لوحة تحكم مدير النظام العام
               </h1>
@@ -66,7 +66,7 @@ const SuperAdminDashboard: React.FC = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground text-right">
             <Globe className="w-4 h-4" />
             <span>النظام العام</span>
           </div>
@@ -116,13 +116,13 @@ const SuperAdminDashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="border-primary/20">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-right">
                     <TrendingUp className="w-5 h-5 text-primary" />
                     أداء النظام العام
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                  <div className="space-y-4 text-right">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">معدل الاستخدام</span>
                       <span className="font-medium">92%</span>
@@ -141,13 +141,13 @@ const SuperAdminDashboard: React.FC = () => {
 
               <Card className="border-primary/20">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-right">
                     <Database className="w-5 h-5 text-primary" />
                     إحصائيات قاعدة البيانات
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                  <div className="space-y-4 text-right">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">حجم البيانات</span>
                       <span className="font-medium">2.3 GB</span>
