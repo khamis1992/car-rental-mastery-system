@@ -34,7 +34,9 @@ export type InvoiceStatus =
   | 'paid' 
   | 'overdue' 
   | 'canceled' 
-  | 'void';
+  | 'void'
+  | 'open'
+  | 'uncollectible';
 
 export type PaymentStatus = 
   | 'pending' 
@@ -96,6 +98,7 @@ export interface PlanFormData {
   description?: string;
   price_monthly: number;
   price_yearly: number;
+  max_tenants?: number;
   max_users_per_tenant: number;
   max_vehicles: number;
   max_contracts: number;
@@ -161,6 +164,10 @@ export interface SubscriptionFormData {
   trial_days?: number;
   discount_percentage?: number;
   auto_renew?: boolean;
+  current_period_start?: string;
+  current_period_end?: string;
+  trial_end?: string;
+  amount?: number;
 }
 
 export interface SubscriptionUpdateData {
@@ -170,6 +177,7 @@ export interface SubscriptionUpdateData {
   discount_percentage?: number;
   auto_renew?: boolean;
   cancellation_reason?: string;
+  pause_collection?: boolean;
 }
 
 // =======================================================
@@ -286,6 +294,7 @@ export interface SaasPayment {
   payment_reference?: string;
   
   // تواريخ مهمة
+  payment_date: string;
   paid_at?: string;
   
   // معلومات إضافية
@@ -312,15 +321,21 @@ export interface SaasPayment {
 }
 
 export interface CreatePaymentFormData {
-  invoice_id: string;
-  subscription_id: string;
-  tenant_id: string;
+  invoice_id?: string;
+  subscription_id?: string;
+  tenant_id?: string;
   amount: number;
   currency: Currency;
-  payment_method: PaymentMethod;
+  payment_method?: PaymentMethod;
   payment_gateway?: PaymentGateway;
   external_payment_id?: string;
   payment_reference?: string;
+  payment_date?: string;
+  description?: string;
+  customer_name?: string;
+  customer_email?: string;
+  customer_phone?: string;
+  expires_in_minutes?: number;
   metadata?: Record<string, any>;
 }
 
@@ -383,6 +398,7 @@ export interface SadadPaymentResponse {
   transaction_id?: string;
   payment_url?: string;
   qr_code?: string;
+  error?: string;
   error_message?: string;
   metadata?: Record<string, any>;
 }
@@ -642,6 +658,89 @@ export const SAAS_CONSTANTS = {
 // ملاحظات نهائية
 // =======================================================
 
+// =======================================================
+// مرشحات وإحصائيات المدفوعات
+// =======================================================
+
+export interface PaymentFilters {
+  tenant_id?: string;
+  status?: PaymentStatus;
+  payment_method?: PaymentMethod;
+  from_date?: string;
+  to_date?: string;
+  min_amount?: number;
+  max_amount?: number;
+  limit?: number;
+}
+
+export interface PaymentStats {
+  total_payments: number;
+  successful_payments: number;
+  failed_payments: number;
+  pending_payments: number;
+  total_amount: number;
+  success_rate: number;
+  average_payment_amount: number;
+  saas_stats?: {
+    total: number;
+    succeeded: number;
+    failed: number;
+    pending: number;
+    amount: number;
+  };
+  sadad_stats?: {
+    total: number;
+    succeeded: number;
+    failed: number;
+    pending: number;
+    amount: number;
+  };
+}
+
+// =======================================================
+// أنواع SADAD المدمجة
+// =======================================================
+
+export interface SadadPayment {
+  id: string;
+  tenant_id: string;
+  saas_invoice_id?: string;
+  subscription_id?: string;
+  
+  // معلومات العميل
+  customer_name?: string;
+  customer_email?: string;
+  customer_phone?: string;
+  
+  // معلومات الدفع
+  amount: number;
+  currency: Currency;
+  description?: string;
+  
+  // حالة SADAD
+  sadad_status: 'pending' | 'processing' | 'paid' | 'failed' | 'expired' | 'cancelled';
+  
+  // معلومات المعاملة
+  sadad_transaction_id?: string;
+  sadad_reference_number?: string;
+  sadad_bill_id?: string;
+  
+  // التوقيتات
+  expires_at?: string;
+  paid_at?: string;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
+export interface SadadSettingsFormData {
+  merchant_id: string;
+  merchant_key: string;
+  api_url: string;
+  is_sandbox: boolean;
+  is_active: boolean;
+}
+
 /*
 هذا الملف يحتوي على جميع أنواع البيانات الموحدة لنظام SaaS
 تم تصميمه ليكون:
@@ -653,4 +752,4 @@ export const SAAS_CONSTANTS = {
 
 يجب استخدام هذا الملف كمرجع وحيد لجميع أنواع البيانات
 المتعلقة بنظام SaaS في التطبيق.
-*/ 
+*/
