@@ -78,37 +78,37 @@ const SuperAdminDashboard: React.FC = () => {
         {/* Main Dashboard Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:grid-cols-8">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              نظرة عامة
-            </TabsTrigger>
-            <TabsTrigger value="tenants" className="flex items-center gap-2">
-              <Building2 className="w-4 h-4" />
-              المؤسسات
-            </TabsTrigger>
-            <TabsTrigger value="permissions" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              الصلاحيات
-            </TabsTrigger>
-            <TabsTrigger value="billing" className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4" />
-              الفوترة والاشتراكات
-            </TabsTrigger>
-            <TabsTrigger value="sadad" className="flex items-center gap-2">
-              <CreditCard className="w-4 h-4" />
-              SADAD
-            </TabsTrigger>
-            <TabsTrigger value="maintenance" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
-              الصيانة
+            <TabsTrigger value="monitoring" className="flex items-center gap-2">
+              <Database className="w-4 h-4" />
+              المراقبة
             </TabsTrigger>
             <TabsTrigger value="support" className="flex items-center gap-2">
               <Activity className="w-4 h-4" />
               الدعم
             </TabsTrigger>
-            <TabsTrigger value="monitoring" className="flex items-center gap-2">
-              <Database className="w-4 h-4" />
-              المراقبة
+            <TabsTrigger value="maintenance" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              الصيانة
+            </TabsTrigger>
+            <TabsTrigger value="sadad" className="flex items-center gap-2">
+              <CreditCard className="w-4 h-4" />
+              SADAD
+            </TabsTrigger>
+            <TabsTrigger value="billing" className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              الفوترة والاشتراكات
+            </TabsTrigger>
+            <TabsTrigger value="permissions" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              الصلاحيات
+            </TabsTrigger>
+            <TabsTrigger value="tenants" className="flex items-center gap-2">
+              <Building2 className="w-4 h-4" />
+              المؤسسات
+            </TabsTrigger>
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              نظرة عامة
             </TabsTrigger>
           </TabsList>
 
