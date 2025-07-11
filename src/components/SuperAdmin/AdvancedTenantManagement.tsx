@@ -275,8 +275,8 @@ const AdvancedTenantManagement: React.FC = () => {
     }
   };
   const AddTenantDialog = () => <Dialog open={showAddTenantDialog} onOpenChange={setShowAddTenantDialog}>
-      <DialogContent className="max-w-2xl" dir="rtl">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" dir="rtl">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Building2 className="w-5 h-5" />
             إضافة مؤسسة جديدة
@@ -286,7 +286,7 @@ const AdvancedTenantManagement: React.FC = () => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
+        <div className="grid gap-4 py-4 overflow-y-auto flex-1 px-1">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">اسم المؤسسة</Label>
@@ -396,7 +396,7 @@ const AdvancedTenantManagement: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 flex-shrink-0 pt-4 border-t">
           <Button variant="outline" onClick={() => setShowAddTenantDialog(false)}>
             إلغاء
           </Button>
