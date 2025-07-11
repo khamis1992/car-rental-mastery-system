@@ -1,14 +1,11 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, 
   Globe,
-  Crown,
-  Shield
+  Crown
 } from "lucide-react";
 import AdvancedPermissions from "@/components/SuperAdmin/AdvancedPermissions";
-import RealUserManagement from "@/components/SuperAdmin/RealUserManagement";
 import { useTenant } from '@/contexts/TenantContext';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -57,27 +54,8 @@ const UsersAndPermissions: React.FC = () => {
           </div>
         </div>
 
-        {/* إدارة المستخدمين والصلاحيات */}
-        <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              إدارة المستخدمين
-            </TabsTrigger>
-            <TabsTrigger value="permissions" className="flex items-center gap-2">
-              <Shield className="w-4 h-4" />
-              إدارة الصلاحيات
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="users">
-            <RealUserManagement />
-          </TabsContent>
-
-          <TabsContent value="permissions">
-            <AdvancedPermissions />
-          </TabsContent>
-        </Tabs>
+        {/* Permissions Management Component */}
+        <AdvancedPermissions />
       </div>
     </div>
   );
