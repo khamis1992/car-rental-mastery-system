@@ -54,6 +54,25 @@ const AdvancedTenantManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
   const [showTenantDetails, setShowTenantDetails] = useState(false);
+  const [showAddTenantDialog, setShowAddTenantDialog] = useState(false);
+  const [newTenantData, setNewTenantData] = useState({
+    name: '',
+    slug: '',
+    contact_email: '',
+    contact_phone: '',
+    country: 'Kuwait',
+    timezone: 'Asia/Kuwait',
+    currency: 'KWD',
+    subscription_plan: 'basic' as const,
+    max_users: 10,
+    max_vehicles: 50,
+    max_contracts: 100,
+    admin_user: {
+      email: '',
+      password: '',
+      full_name: ''
+    }
+  });
   const tenantService = new TenantService();
   const { toast } = useToast();
 
@@ -132,6 +151,186 @@ const AdvancedTenantManagement: React.FC = () => {
       });
     }
   };
+
+  const handleAddTenant = async () => {
+    try {
+      await tenantService.createTenant(newTenantData);
+      toast({
+        title: "تم بنجاح",
+        description: "تم إضافة المؤسسة الجديدة",
+      });
+      setShowAddTenantDialog(false);
+      setNewTenantData({
+        name: '',
+        slug: '',
+        contact_email: '',
+        contact_phone: '',
+        country: 'Kuwait',
+        timezone: 'Asia/Kuwait',
+        currency: 'KWD',
+        subscription_plan: 'basic' as const,
+        max_users: 10,
+        max_vehicles: 50,
+        max_contracts: 100,
+        admin_user: {
+          email: '',
+          password: '',
+          full_name: ''
+        }
+      });
+      loadTenants();
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message || "فشل في إضافة المؤسسة",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const AddTenantDialog = () => (
+    <Dialog open={showAddTenantDialog} onOpenChange={setShowAddTenantDialog}>
+      <DialogContent className="max-w-2xl" dir="rtl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Building2 className="w-5 h-5" />
+            إضافة مؤسسة جديدة
+          </DialogTitle>
+          <DialogDescription>
+            املأ البيانات التالية لإضافة مؤسسة جديدة إلى النظام
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">اسم المؤسسة</Label>
+              <Input
+                id="name"
+                value={newTenantData.name}
+                onChange={(e) => setNewTenantData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="اسم المؤسسة"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="slug">المعرف الفريد</Label>
+              <Input
+                id="slug"
+                value={newTenantData.slug}
+                onChange={(e) => setNewTenantData(prev => ({ ...prev, slug: e.target.value }))}
+                placeholder="معرف-المؤسسة"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="contact_email">البريد الإلكتروني</Label>
+              <Input
+                id="contact_email"
+                type="email"
+                value={newTenantData.contact_email}
+                onChange={(e) => setNewTenantData(prev => ({ ...prev, contact_email: e.target.value }))}
+                placeholder="email@example.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact_phone">رقم الهاتف</Label>
+              <Input
+                id="contact_phone"
+                value={newTenantData.contact_phone}
+                onChange={(e) => setNewTenantData(prev => ({ ...prev, contact_phone: e.target.value }))}
+                placeholder="+965 xxxx xxxx"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="max_users">عدد المستخدمين</Label>
+              <Input
+                id="max_users"
+                type="number"
+                value={newTenantData.max_users}
+                onChange={(e) => setNewTenantData(prev => ({ ...prev, max_users: parseInt(e.target.value) }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="max_vehicles">عدد المركبات</Label>
+              <Input
+                id="max_vehicles"
+                type="number"
+                value={newTenantData.max_vehicles}
+                onChange={(e) => setNewTenantData(prev => ({ ...prev, max_vehicles: parseInt(e.target.value) }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="max_contracts">عدد العقود</Label>
+              <Input
+                id="max_contracts"
+                type="number"
+                value={newTenantData.max_contracts}
+                onChange={(e) => setNewTenantData(prev => ({ ...prev, max_contracts: parseInt(e.target.value) }))}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">بيانات المدير</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="admin_name">اسم المدير</Label>
+                <Input
+                  id="admin_name"
+                  value={newTenantData.admin_user.full_name}
+                  onChange={(e) => setNewTenantData(prev => ({ 
+                    ...prev, 
+                    admin_user: { ...prev.admin_user, full_name: e.target.value }
+                  }))}
+                  placeholder="اسم المدير الكامل"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="admin_email">بريد المدير الإلكتروني</Label>
+                <Input
+                  id="admin_email"
+                  type="email"
+                  value={newTenantData.admin_user.email}
+                  onChange={(e) => setNewTenantData(prev => ({ 
+                    ...prev, 
+                    admin_user: { ...prev.admin_user, email: e.target.value }
+                  }))}
+                  placeholder="admin@example.com"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="admin_password">كلمة مرور المدير</Label>
+              <Input
+                id="admin_password"
+                type="password"
+                value={newTenantData.admin_user.password}
+                onChange={(e) => setNewTenantData(prev => ({ 
+                  ...prev, 
+                  admin_user: { ...prev.admin_user, password: e.target.value }
+                }))}
+                placeholder="كلمة مرور آمنة"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setShowAddTenantDialog(false)}>
+            إلغاء
+          </Button>
+          <Button onClick={handleAddTenant}>
+            إضافة المؤسسة
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 
   const TenantDetailsDialog = ({ tenant }: { tenant: Tenant }) => (
     <Dialog open={showTenantDetails} onOpenChange={setShowTenantDetails}>
@@ -299,7 +498,7 @@ const AdvancedTenantManagement: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-right">إدارة المؤسسات المتقدمة</h2>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={() => setShowAddTenantDialog(true)}>
           <Building2 className="w-4 h-4" />
           إضافة مؤسسة جديدة
         </Button>
@@ -391,6 +590,7 @@ const AdvancedTenantManagement: React.FC = () => {
       </Card>
 
       {selectedTenant && <TenantDetailsDialog tenant={selectedTenant} />}
+      <AddTenantDialog />
     </div>
   );
 };
