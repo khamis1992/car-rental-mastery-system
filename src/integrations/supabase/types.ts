@@ -2224,6 +2224,62 @@ export type Database = {
           },
         ]
       }
+      domain_verifications: {
+        Row: {
+          created_at: string
+          dns_records: Json | null
+          domain: string
+          error_message: string | null
+          expires_at: string
+          id: string
+          last_checked_at: string | null
+          tenant_id: string
+          updated_at: string
+          verification_type: string
+          verification_value: string
+          verified: boolean
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          dns_records?: Json | null
+          domain: string
+          error_message?: string | null
+          expires_at?: string
+          id?: string
+          last_checked_at?: string | null
+          tenant_id: string
+          updated_at?: string
+          verification_type?: string
+          verification_value: string
+          verified?: boolean
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          dns_records?: Json | null
+          domain?: string
+          error_message?: string | null
+          expires_at?: string
+          id?: string
+          last_checked_at?: string | null
+          tenant_id?: string
+          updated_at?: string
+          verification_type?: string
+          verification_value?: string
+          verified?: boolean
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_verifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees: {
         Row: {
           address: string | null
@@ -4361,6 +4417,65 @@ export type Database = {
           },
         ]
       }
+      ssl_certificates: {
+        Row: {
+          auto_renew: boolean
+          certificate_data: string | null
+          chain_data: string | null
+          created_at: string
+          domain: string
+          expires_at: string | null
+          id: string
+          issued_at: string | null
+          last_renewed_at: string | null
+          private_key_data: string | null
+          provider: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          auto_renew?: boolean
+          certificate_data?: string | null
+          chain_data?: string | null
+          created_at?: string
+          domain: string
+          expires_at?: string | null
+          id?: string
+          issued_at?: string | null
+          last_renewed_at?: string | null
+          private_key_data?: string | null
+          provider?: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          auto_renew?: boolean
+          certificate_data?: string | null
+          chain_data?: string | null
+          created_at?: string
+          domain?: string
+          expires_at?: string | null
+          id?: string
+          issued_at?: string | null
+          last_renewed_at?: string | null
+          private_key_data?: string | null
+          provider?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ssl_certificates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_history: {
         Row: {
           amount: number | null
@@ -5953,6 +6068,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_domain_verification_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_employee_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -6055,6 +6174,14 @@ export type Database = {
         Args: { _role: string }
         Returns: boolean
       }
+      initiate_domain_verification: {
+        Args: {
+          p_tenant_id: string
+          p_domain: string
+          p_verification_type?: string
+        }
+        Returns: Json
+      }
       log_transaction: {
         Args:
           | {
@@ -6154,6 +6281,10 @@ export type Database = {
       validate_chart_of_accounts: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      verify_domain: {
+        Args: { p_verification_id: string }
+        Returns: boolean
       }
     }
     Enums: {

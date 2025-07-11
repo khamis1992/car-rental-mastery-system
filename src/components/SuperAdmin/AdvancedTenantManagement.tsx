@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Building2, Users, MoreHorizontal, Shield, AlertTriangle, CheckCircle, Clock, TrendingUp, Settings, Eye, Edit, Trash2, UserPlus, Crown, Database, Activity } from "lucide-react";
+import { Building2, Users, MoreHorizontal, Shield, AlertTriangle, CheckCircle, Clock, TrendingUp, Settings, Eye, Edit, Trash2, UserPlus, Crown, Database, Activity, Globe } from "lucide-react";
+import DomainManagement from "./DomainManagement";
 import { supabase } from '@/integrations/supabase/client';
 import { TenantService } from '@/services/tenantService';
 import { Tenant } from '@/types/tenant';
@@ -419,9 +420,10 @@ const AdvancedTenantManagement: React.FC = () => {
         </DialogHeader>
 
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
             <TabsTrigger value="users">المستخدمون</TabsTrigger>
+            <TabsTrigger value="domains">الدومين</TabsTrigger>
             <TabsTrigger value="usage">الاستخدام</TabsTrigger>
             <TabsTrigger value="billing">الفوترة</TabsTrigger>
             <TabsTrigger value="settings">الإعدادات</TabsTrigger>
@@ -492,6 +494,14 @@ const AdvancedTenantManagement: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="domains">
+            <DomainManagement 
+              tenantId={tenant.id}
+              tenantName={tenant.name}
+              currentDomain={tenant.domain}
+            />
           </TabsContent>
 
           <TabsContent value="usage">
