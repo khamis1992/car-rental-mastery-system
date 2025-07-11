@@ -8,64 +8,93 @@ import {
   TrendingUp,
   Database,
   Shield,
-  Globe
+  Globe,
+  RefreshCw
 } from "lucide-react";
+import { useSuperAdminStats } from '@/hooks/useSuperAdminStats';
 
 const SuperAdminStats: React.FC = () => {
-  // في التطبيق الحقيقي، سيتم جلب هذه البيانات من API
+  const { data: statsData, isLoading, error } = useSuperAdminStats();
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[...Array(8)].map((_, i) => (
+          <Card key={i} className="border-primary/10">
+            <CardContent className="flex items-center justify-center py-12">
+              <RefreshCw className="h-6 w-6 animate-spin text-primary" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="col-span-full border-destructive/20">
+          <CardContent className="flex items-center justify-center py-12 text-destructive">
+            حدث خطأ في تحميل البيانات
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const stats = [
     {
       title: "إجمالي المؤسسات",
-      value: "12",
+      value: statsData?.totalTenants?.toLocaleString() || "0",
       icon: Building2,
-      change: "+2 هذا الشهر",
+      change: statsData?.tenantGrowth || "+0 هذا الشهر",
       color: "text-blue-600"
     },
     {
       title: "إجمالي المستخدمين",
-      value: "1,247",
+      value: statsData?.totalUsers?.toLocaleString() || "0",
       icon: Users,
-      change: "+18% نمو",
+      change: statsData?.userGrowth || "+0% نمو",
       color: "text-green-600"
     },
     {
       title: "المعاملات النشطة",
-      value: "8,432",
+      value: statsData?.activeTransactions?.toLocaleString() || "0",
       icon: Activity,
-      change: "+5.2% اليوم",
+      change: statsData?.transactionGrowth || "+0% اليوم",
       color: "text-orange-600"
     },
     {
       title: "إجمالي الإيرادات",
-      value: "45,320 د.ك",
+      value: `${statsData?.totalRevenue?.toFixed(3) || "0.000"} د.ك`,
       icon: DollarSign,
-      change: "+12% هذا الشهر",
+      change: statsData?.revenueGrowth || "+0% هذا الشهر",
       color: "text-purple-600"
     },
     {
       title: "معدل الأداء",
-      value: "99.8%",
+      value: `${statsData?.systemPerformance || 0}%`,
       icon: TrendingUp,
       change: "مستقر",
       color: "text-green-600"
     },
     {
       title: "حجم البيانات",
-      value: "2.3 TB",
+      value: statsData?.dataSize || "0 TB",
       icon: Database,
       change: "+150 GB",
       color: "text-indigo-600"
     },
     {
       title: "حالة الأمان",
-      value: "آمن",
+      value: statsData?.securityStatus || "آمن",
       icon: Shield,
       change: "لا توجد تهديدات",
       color: "text-green-600"
     },
     {
       title: "المناطق النشطة",
-      value: "3",
+      value: statsData?.activeRegions?.toString() || "0",
       icon: Globe,
       change: "الكويت، السعودية، الإمارات",
       color: "text-blue-600"
