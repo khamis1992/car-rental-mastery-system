@@ -47,7 +47,7 @@ export function InstallmentDashboard() {
     try {
       setLoading(true);
       const data = await installmentService.getInstallmentSummary();
-      setSummary(data as SummaryData);
+      setSummary(data as unknown as SummaryData);
     } catch (error) {
       console.error("Error loading summary:", error);
       toast({

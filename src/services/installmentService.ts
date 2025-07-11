@@ -31,7 +31,7 @@ export const installmentService = {
     return data;
   },
 
-  async createInstallmentPlan(plan: InstallmentPlanInsert) {
+  async createInstallmentPlan(plan: Omit<InstallmentPlanInsert, 'plan_number'>) {
     // توليد رقم الخطة
     const { data: planNumber } = await supabase.rpc("generate_installment_plan_number");
     

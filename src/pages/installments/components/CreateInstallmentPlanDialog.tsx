@@ -33,12 +33,27 @@ export function CreateInstallmentPlanDialog({ open, onOpenChange, onSuccess }: P
     setLoading(true);
 
     try {
+      // Calculate last installment date
+      const firstDate = new Date(formData.first_installment_date);
+      const lastDate = new Date(firstDate);
+      
+      const installments = parseInt(formData.number_of_installments);
+      if (formData.installment_frequency === 'monthly') {
+        lastDate.setMonth(lastDate.getMonth() + installments - 1);
+      } else if (formData.installment_frequency === 'quarterly') {
+        lastDate.setMonth(lastDate.getMonth() + (installments * 3) - 3);
+      } else if (formData.installment_frequency === 'annually') {
+        lastDate.setFullYear(lastDate.getFullYear() + installments - 1);
+      }
+
       const planData = {
         ...formData,
         total_amount: parseFloat(formData.total_amount),
         down_payment: parseFloat(formData.down_payment || "0"),
         remaining_amount: parseFloat(formData.total_amount) - parseFloat(formData.down_payment || "0"),
         number_of_installments: parseInt(formData.number_of_installments),
+        last_installment_date: lastDate.toISOString().split('T')[0],
+        tenant_id: "00000000-0000-0000-0000-000000000000", // This should be dynamic
       };
 
       await installmentService.createInstallmentPlan(planData);
