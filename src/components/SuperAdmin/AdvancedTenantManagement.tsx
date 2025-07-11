@@ -5,50 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { 
-  Building2, 
-  Users, 
-  MoreHorizontal,
-  Shield,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  TrendingUp,
-  Settings,
-  Eye,
-  Edit,
-  Trash2,
-  UserPlus,
-  Crown,
-  Database,
-  Activity
-} from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Building2, Users, MoreHorizontal, Shield, AlertTriangle, CheckCircle, Clock, TrendingUp, Settings, Eye, Edit, Trash2, UserPlus, Crown, Database, Activity } from "lucide-react";
 import { TenantService } from '@/services/tenantService';
 import { Tenant } from '@/types/tenant';
 import { useToast } from "@/hooks/use-toast";
-
 const AdvancedTenantManagement: React.FC = () => {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,12 +37,12 @@ const AdvancedTenantManagement: React.FC = () => {
     }
   });
   const tenantService = new TenantService();
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     loadTenants();
   }, []);
-
   const loadTenants = async () => {
     try {
       const data = await tenantService.getAllTenants();
@@ -88,55 +51,84 @@ const AdvancedTenantManagement: React.FC = () => {
       toast({
         title: "خطأ",
         description: "فشل في تحميل المؤسسات",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   const getStatusBadge = (status: string) => {
     const variants = {
-      active: { variant: 'default' as const, text: 'نشط', color: 'bg-green-100 text-green-800' },
-      trial: { variant: 'secondary' as const, text: 'تجريبي', color: 'bg-blue-100 text-blue-800' },
-      suspended: { variant: 'destructive' as const, text: 'معلق', color: 'bg-red-100 text-red-800' },
-      cancelled: { variant: 'outline' as const, text: 'ملغي', color: 'bg-gray-100 text-gray-800' }
+      active: {
+        variant: 'default' as const,
+        text: 'نشط',
+        color: 'bg-green-100 text-green-800'
+      },
+      trial: {
+        variant: 'secondary' as const,
+        text: 'تجريبي',
+        color: 'bg-blue-100 text-blue-800'
+      },
+      suspended: {
+        variant: 'destructive' as const,
+        text: 'معلق',
+        color: 'bg-red-100 text-red-800'
+      },
+      cancelled: {
+        variant: 'outline' as const,
+        text: 'ملغي',
+        color: 'bg-gray-100 text-gray-800'
+      }
     };
-    
     const statusInfo = variants[status as keyof typeof variants] || variants.active;
-    return (
-      <Badge className={statusInfo.color}>
+    return <Badge className={statusInfo.color}>
         {statusInfo.text}
-      </Badge>
-    );
+      </Badge>;
   };
-
   const getSubscriptionBadge = (plan: string) => {
     const plans = {
-      basic: { text: 'أساسي', color: 'bg-gray-100 text-gray-800' },
-      standard: { text: 'معياري', color: 'bg-blue-100 text-blue-800' },
-      premium: { text: 'مميز', color: 'bg-purple-100 text-purple-800' },
-      enterprise: { text: 'مؤسسي', color: 'bg-gold-100 text-gold-800' }
+      basic: {
+        text: 'أساسي',
+        color: 'bg-gray-100 text-gray-800'
+      },
+      standard: {
+        text: 'معياري',
+        color: 'bg-blue-100 text-blue-800'
+      },
+      premium: {
+        text: 'مميز',
+        color: 'bg-purple-100 text-purple-800'
+      },
+      enterprise: {
+        text: 'مؤسسي',
+        color: 'bg-gold-100 text-gold-800'
+      }
     };
-    
     const planInfo = plans[plan as keyof typeof plans] || plans.basic;
-    return (
-      <Badge className={planInfo.color}>
+    return <Badge className={planInfo.color}>
         {planInfo.text}
-      </Badge>
-    );
+      </Badge>;
   };
-
   const handleTenantAction = async (tenantId: string, action: string) => {
     try {
       switch (action) {
         case 'suspend':
-          await tenantService.updateTenant(tenantId, { status: 'suspended' });
-          toast({ title: "تم بنجاح", description: "تم تعليق المؤسسة" });
+          await tenantService.updateTenant(tenantId, {
+            status: 'suspended'
+          });
+          toast({
+            title: "تم بنجاح",
+            description: "تم تعليق المؤسسة"
+          });
           break;
         case 'activate':
-          await tenantService.updateTenant(tenantId, { status: 'active' });
-          toast({ title: "تم بنجاح", description: "تم تفعيل المؤسسة" });
+          await tenantService.updateTenant(tenantId, {
+            status: 'active'
+          });
+          toast({
+            title: "تم بنجاح",
+            description: "تم تفعيل المؤسسة"
+          });
           break;
         case 'delete':
           // TODO: Add confirmation dialog
@@ -147,17 +139,16 @@ const AdvancedTenantManagement: React.FC = () => {
       toast({
         title: "خطأ",
         description: error.message || "فشل في تنفيذ العملية",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleAddTenant = async () => {
     try {
       await tenantService.createTenant(newTenantData);
       toast({
         title: "تم بنجاح",
-        description: "تم إضافة المؤسسة الجديدة",
+        description: "تم إضافة المؤسسة الجديدة"
       });
       setShowAddTenantDialog(false);
       setNewTenantData({
@@ -183,13 +174,11 @@ const AdvancedTenantManagement: React.FC = () => {
       toast({
         title: "خطأ",
         description: error.message || "فشل في إضافة المؤسسة",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
-  const AddTenantDialog = () => (
-    <Dialog open={showAddTenantDialog} onOpenChange={setShowAddTenantDialog}>
+  const AddTenantDialog = () => <Dialog open={showAddTenantDialog} onOpenChange={setShowAddTenantDialog}>
       <DialogContent className="max-w-2xl" dir="rtl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -205,73 +194,58 @@ const AdvancedTenantManagement: React.FC = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">اسم المؤسسة</Label>
-              <Input
-                id="name"
-                value={newTenantData.name}
-                onChange={(e) => setNewTenantData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="اسم المؤسسة"
-              />
+              <Input id="name" value={newTenantData.name} onChange={e => setNewTenantData(prev => ({
+              ...prev,
+              name: e.target.value
+            }))} placeholder="اسم المؤسسة" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="slug">المعرف الفريد</Label>
-              <Input
-                id="slug"
-                value={newTenantData.slug}
-                onChange={(e) => setNewTenantData(prev => ({ ...prev, slug: e.target.value }))}
-                placeholder="معرف-المؤسسة"
-              />
+              <Input id="slug" value={newTenantData.slug} onChange={e => setNewTenantData(prev => ({
+              ...prev,
+              slug: e.target.value
+            }))} placeholder="معرف-المؤسسة" className="rounded-sm" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="contact_email">البريد الإلكتروني</Label>
-              <Input
-                id="contact_email"
-                type="email"
-                value={newTenantData.contact_email}
-                onChange={(e) => setNewTenantData(prev => ({ ...prev, contact_email: e.target.value }))}
-                placeholder="email@example.com"
-              />
+              <Input id="contact_email" type="email" value={newTenantData.contact_email} onChange={e => setNewTenantData(prev => ({
+              ...prev,
+              contact_email: e.target.value
+            }))} placeholder="email@example.com" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="contact_phone">رقم الهاتف</Label>
-              <Input
-                id="contact_phone"
-                value={newTenantData.contact_phone}
-                onChange={(e) => setNewTenantData(prev => ({ ...prev, contact_phone: e.target.value }))}
-                placeholder="+965 xxxx xxxx"
-              />
+              <Input id="contact_phone" value={newTenantData.contact_phone} onChange={e => setNewTenantData(prev => ({
+              ...prev,
+              contact_phone: e.target.value
+            }))} placeholder="+965 xxxx xxxx" />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="max_users">عدد المستخدمين</Label>
-              <Input
-                id="max_users"
-                type="number"
-                value={newTenantData.max_users}
-                onChange={(e) => setNewTenantData(prev => ({ ...prev, max_users: parseInt(e.target.value) }))}
-              />
+              <Input id="max_users" type="number" value={newTenantData.max_users} onChange={e => setNewTenantData(prev => ({
+              ...prev,
+              max_users: parseInt(e.target.value)
+            }))} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="max_vehicles">عدد المركبات</Label>
-              <Input
-                id="max_vehicles"
-                type="number"
-                value={newTenantData.max_vehicles}
-                onChange={(e) => setNewTenantData(prev => ({ ...prev, max_vehicles: parseInt(e.target.value) }))}
-              />
+              <Input id="max_vehicles" type="number" value={newTenantData.max_vehicles} onChange={e => setNewTenantData(prev => ({
+              ...prev,
+              max_vehicles: parseInt(e.target.value)
+            }))} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="max_contracts">عدد العقود</Label>
-              <Input
-                id="max_contracts"
-                type="number"
-                value={newTenantData.max_contracts}
-                onChange={(e) => setNewTenantData(prev => ({ ...prev, max_contracts: parseInt(e.target.value) }))}
-              />
+              <Input id="max_contracts" type="number" value={newTenantData.max_contracts} onChange={e => setNewTenantData(prev => ({
+              ...prev,
+              max_contracts: parseInt(e.target.value)
+            }))} />
             </div>
           </div>
 
@@ -280,42 +254,34 @@ const AdvancedTenantManagement: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="admin_name">اسم المدير</Label>
-                <Input
-                  id="admin_name"
-                  value={newTenantData.admin_user.full_name}
-                  onChange={(e) => setNewTenantData(prev => ({ 
-                    ...prev, 
-                    admin_user: { ...prev.admin_user, full_name: e.target.value }
-                  }))}
-                  placeholder="اسم المدير الكامل"
-                />
+                <Input id="admin_name" value={newTenantData.admin_user.full_name} onChange={e => setNewTenantData(prev => ({
+                ...prev,
+                admin_user: {
+                  ...prev.admin_user,
+                  full_name: e.target.value
+                }
+              }))} placeholder="اسم المدير الكامل" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="admin_email">بريد المدير الإلكتروني</Label>
-                <Input
-                  id="admin_email"
-                  type="email"
-                  value={newTenantData.admin_user.email}
-                  onChange={(e) => setNewTenantData(prev => ({ 
-                    ...prev, 
-                    admin_user: { ...prev.admin_user, email: e.target.value }
-                  }))}
-                  placeholder="admin@example.com"
-                />
+                <Input id="admin_email" type="email" value={newTenantData.admin_user.email} onChange={e => setNewTenantData(prev => ({
+                ...prev,
+                admin_user: {
+                  ...prev.admin_user,
+                  email: e.target.value
+                }
+              }))} placeholder="admin@example.com" />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="admin_password">كلمة مرور المدير</Label>
-              <Input
-                id="admin_password"
-                type="password"
-                value={newTenantData.admin_user.password}
-                onChange={(e) => setNewTenantData(prev => ({ 
-                  ...prev, 
-                  admin_user: { ...prev.admin_user, password: e.target.value }
-                }))}
-                placeholder="كلمة مرور آمنة"
-              />
+              <Input id="admin_password" type="password" value={newTenantData.admin_user.password} onChange={e => setNewTenantData(prev => ({
+              ...prev,
+              admin_user: {
+                ...prev.admin_user,
+                password: e.target.value
+              }
+            }))} placeholder="كلمة مرور آمنة" />
             </div>
           </div>
         </div>
@@ -329,11 +295,12 @@ const AdvancedTenantManagement: React.FC = () => {
           </Button>
         </div>
       </DialogContent>
-    </Dialog>
-  );
-
-  const TenantDetailsDialog = ({ tenant }: { tenant: Tenant }) => (
-    <Dialog open={showTenantDetails} onOpenChange={setShowTenantDetails}>
+    </Dialog>;
+  const TenantDetailsDialog = ({
+    tenant
+  }: {
+    tenant: Tenant;
+  }) => <Dialog open={showTenantDetails} onOpenChange={setShowTenantDetails}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" dir="rtl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -431,7 +398,9 @@ const AdvancedTenantManagement: React.FC = () => {
                       <span>2.1 GB / 10 GB</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: '21%' }}></div>
+                      <div className="bg-blue-600 h-2 rounded-full" style={{
+                      width: '21%'
+                    }}></div>
                     </div>
                   </div>
                 </CardContent>
@@ -448,7 +417,9 @@ const AdvancedTenantManagement: React.FC = () => {
                       <span>15,234 / 50,000</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-green-600 h-2 rounded-full" style={{ width: '30%' }}></div>
+                      <div className="bg-green-600 h-2 rounded-full" style={{
+                      width: '30%'
+                    }}></div>
                     </div>
                   </div>
                 </CardContent>
@@ -483,19 +454,13 @@ const AdvancedTenantManagement: React.FC = () => {
           </TabsContent>
         </Tabs>
       </DialogContent>
-    </Dialog>
-  );
-
+    </Dialog>;
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
+    return <div className="flex items-center justify-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-right">إدارة المؤسسات المتقدمة</h2>
         <Button className="flex items-center gap-2" onClick={() => setShowAddTenantDialog(true)}>
@@ -524,8 +489,7 @@ const AdvancedTenantManagement: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tenants.map((tenant) => (
-                <TableRow key={tenant.id}>
+              {tenants.map(tenant => <TableRow key={tenant.id}>
                   <TableCell className="text-right">
                     <div>
                       <div className="font-medium">{tenant.name}</div>
@@ -551,12 +515,10 @@ const AdvancedTenantManagement: React.FC = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedTenant(tenant);
-                            setShowTenantDetails(true);
-                          }}
-                        >
+                        <DropdownMenuItem onClick={() => {
+                      setSelectedTenant(tenant);
+                      setShowTenantDetails(true);
+                    }}>
                           <Eye className="w-4 h-4 ml-2" />
                           عرض التفاصيل
                         </DropdownMenuItem>
@@ -564,17 +526,13 @@ const AdvancedTenantManagement: React.FC = () => {
                           <Edit className="w-4 h-4 ml-2" />
                           تحرير
                         </DropdownMenuItem>
-                        {tenant.status === 'active' ? (
-                          <DropdownMenuItem onClick={() => handleTenantAction(tenant.id, 'suspend')}>
+                        {tenant.status === 'active' ? <DropdownMenuItem onClick={() => handleTenantAction(tenant.id, 'suspend')}>
                             <Shield className="w-4 h-4 ml-2" />
                             تعليق
-                          </DropdownMenuItem>
-                        ) : (
-                          <DropdownMenuItem onClick={() => handleTenantAction(tenant.id, 'activate')}>
+                          </DropdownMenuItem> : <DropdownMenuItem onClick={() => handleTenantAction(tenant.id, 'activate')}>
                             <CheckCircle className="w-4 h-4 ml-2" />
                             تفعيل
-                          </DropdownMenuItem>
-                        )}
+                          </DropdownMenuItem>}
                         <DropdownMenuItem className="text-red-600">
                           <Trash2 className="w-4 h-4 ml-2" />
                           حذف
@@ -582,8 +540,7 @@ const AdvancedTenantManagement: React.FC = () => {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
-                </TableRow>
-              ))}
+                </TableRow>)}
             </TableBody>
           </Table>
         </CardContent>
@@ -591,8 +548,6 @@ const AdvancedTenantManagement: React.FC = () => {
 
       {selectedTenant && <TenantDetailsDialog tenant={selectedTenant} />}
       <AddTenantDialog />
-    </div>
-  );
+    </div>;
 };
-
 export default AdvancedTenantManagement;
