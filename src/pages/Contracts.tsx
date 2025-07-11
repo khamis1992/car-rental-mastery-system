@@ -9,7 +9,8 @@ import { ContractsList } from '@/components/Contracts/ContractsList';
 import { ContractMonitoring } from '@/components/Contracts/ContractMonitoring';
 import { ContractStats } from '@/components/Contracts/ContractStats';
 import { ContractDetailsDialog } from '@/components/Contracts/ContractDetailsDialog';
-import { useContractsEnhanced } from '@/hooks/useContractsEnhanced';
+import { useContractsOptimized } from '@/hooks/useContractsOptimized';
+import { ContractsRealtimeProvider } from '@/contexts/ContractsRealtimeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AbortErrorBoundary, useAbortErrorHandler } from '@/components/ErrorBoundary/AbortErrorBoundary';
@@ -40,7 +41,7 @@ const Contracts = () => {
     completeContract,
     updateStatus,
     syncAllContracts,
-  } = useContractsEnhanced();
+  } = useContractsOptimized();
 
   // التحقق من وجود quotation parameter في URL
   useEffect(() => {

@@ -1,11 +1,13 @@
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useContractsOptimized } from "@/hooks/useContractsOptimized";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useContractsDataRefactored } from "@/hooks/useContractsDataRefactored";
+import { Car, Users, DollarSign, TrendingUp } from "lucide-react";
 import { useMemo } from "react";
 
 const FleetOverview = () => {
-  const { vehicles, loading } = useContractsDataRefactored();
+  const { vehicles, loading } = useContractsOptimized();
   
   const fleetData = useMemo(() => {
     if (!vehicles.length) {

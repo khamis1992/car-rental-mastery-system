@@ -24,10 +24,10 @@ import {
   Calendar,
   TrendingUp
 } from 'lucide-react';
-import { useSaasInvoices, useUpdateInvoiceStatus } from '@/hooks/useBillingData';
+import { useSaasInvoices, useUpdateInvoiceStatus } from '@/hooks/useSaasData';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { SaasInvoice } from '@/types/billing';
+import { SaasInvoice } from '@/types/unified-saas';
 
 export function InvoicesTab() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,10 +49,8 @@ export function InvoicesTab() {
   const handleStatusChange = async (invoiceId: string, newStatus: SaasInvoice['status']) => {
     try {
       await updateInvoiceStatusMutation.mutateAsync({
-        id: invoiceId,
-        status: newStatus,
-        payment_method: newStatus === 'paid' ? 'manual' : undefined,
-        payment_reference: newStatus === 'paid' ? `REF-${Date.now()}` : undefined
+        invoiceId: invoiceId,
+        status: newStatus
       });
     } catch (error) {
       console.error('Error updating invoice status:', error);

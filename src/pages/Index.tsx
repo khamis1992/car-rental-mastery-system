@@ -13,12 +13,17 @@ import {
   DollarSign
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useContractsDataRefactored } from "@/hooks/useContractsDataRefactored";
+import { useContractsOptimized } from "@/hooks/useContractsOptimized";
+import { useMaintenanceData } from "@/hooks/useMaintenanceData";
+import TenantGuard from "@/components/TenantGuard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { formatCurrencyKWD } from "@/lib/currency";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { contractStats, customers, loading } = useContractsDataRefactored();
+  const { contractStats, customers, loading } = useContractsOptimized();
+  const { maintenanceRecords } = useMaintenanceData();
 
   return (
     <div className="container mx-auto px-6 py-8">

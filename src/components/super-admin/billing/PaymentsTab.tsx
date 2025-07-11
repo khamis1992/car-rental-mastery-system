@@ -22,7 +22,7 @@ import {
   AlertCircle,
   Download
 } from 'lucide-react';
-import { useSaasPayments } from '@/hooks/useBillingData';
+import { useSaasPayments } from '@/hooks/useSaasData';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 

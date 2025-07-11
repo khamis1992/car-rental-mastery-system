@@ -15,7 +15,7 @@ import {
   RefreshCw,
   Settings
 } from 'lucide-react';
-import { useSaasInvoices, useSaasSubscriptions, useRunAutomaticBilling } from '@/hooks/useBillingData';
+import { useSaasInvoices, useTenantSubscriptions, useProcessAutomaticBilling } from '@/hooks/useSaasData';
 import { formatDistanceToNow, format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
@@ -23,9 +23,9 @@ export function AutomaticBillingTab() {
   const [billingResults, setBillingResults] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { data: subscriptions = [], isLoading: subsLoading } = useSaasSubscriptions();
+  const { data: subscriptions = [], isLoading: subsLoading } = useTenantSubscriptions();
   const { data: invoices = [], isLoading: invoicesLoading } = useSaasInvoices();
-  const runBillingMutation = useRunAutomaticBilling();
+  const runBillingMutation = useProcessAutomaticBilling();
 
   const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
   const recentInvoices = invoices.slice(0, 5);
@@ -44,7 +44,10 @@ export function AutomaticBillingTab() {
   const handleRunBilling = async () => {
     setIsProcessing(true);
     try {
-      const result = await runBillingMutation.mutateAsync();
+      const result = await runBillingMutation.mutateAsync({
+        billingDate: new Date().toISOString(),
+        dryRun: false
+      });
       setBillingResults(result);
     } catch (error) {
       console.error('Billing process failed:', error);

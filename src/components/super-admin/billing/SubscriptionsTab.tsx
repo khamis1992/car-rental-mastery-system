@@ -22,17 +22,17 @@ import {
   DollarSign,
   AlertTriangle
 } from 'lucide-react';
-import { useSaasSubscriptions, useUpdateSaasSubscription } from '@/hooks/useBillingData';
+import { useTenantSubscriptions, useUpdateSubscription } from '@/hooks/useSaasData';
 import { format, isAfter, isBefore, addDays } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { SaasSubscription } from '@/types/billing';
+import { SaasSubscription } from '@/types/unified-saas';
 
 export function SubscriptionsTab() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   
-  const { data: subscriptions = [], isLoading } = useSaasSubscriptions();
-  const updateSubscriptionMutation = useUpdateSaasSubscription();
+  const { data: subscriptions = [], isLoading } = useTenantSubscriptions();
+  const updateSubscriptionMutation = useUpdateSubscription();
 
   const filteredSubscriptions = subscriptions.filter(sub => {
     const matchesSearch = !searchQuery || 
@@ -47,7 +47,7 @@ export function SubscriptionsTab() {
   const handleStatusChange = async (subscriptionId: string, newStatus: SaasSubscription['status']) => {
     try {
       await updateSubscriptionMutation.mutateAsync({
-        id: subscriptionId,
+        subscriptionId: subscriptionId,
         updates: { status: newStatus }
       });
     } catch (error) {

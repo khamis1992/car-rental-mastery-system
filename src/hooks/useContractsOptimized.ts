@@ -382,5 +382,84 @@ export const useContractsOptimized = () => {
     
     // دوال قديمة للتوافق
     loadData,
+    
+    // دوال للتوافق مع useContractsEnhanced
+    isConnected: true, // dummy للتوافق
+    lastSync: new Date().toISOString(), // dummy للتوافق
+    
+    // عمليات محسنة للعقود
+    activateContract: async (contractId: string, actualStartDate: string) => {
+      try {
+        await contractService.updateContract(contractId, {
+          status: 'active',
+          actual_start_date: actualStartDate,
+        });
+        updateSingleContract(contractId, {
+          status: 'active',
+          actual_start_date: actualStartDate,
+        });
+        toast({
+          title: "تم تفعيل العقد",
+          description: "تم تفعيل العقد بنجاح",
+        });
+      } catch (error) {
+        console.error('Error activating contract:', error);
+        toast({
+          title: "خطأ في تفعيل العقد",
+          description: "فشل في تفعيل العقد",
+          variant: "destructive",
+        });
+      }
+    },
+    
+    completeContract: async (contractId: string, actualEndDate: string) => {
+      try {
+        await contractService.updateContract(contractId, {
+          status: 'completed',
+          actual_end_date: actualEndDate,
+        });
+        updateSingleContract(contractId, {
+          status: 'completed',
+          actual_end_date: actualEndDate,
+        });
+        toast({
+          title: "تم إكمال العقد",
+          description: "تم إكمال العقد بنجاح",
+        });
+      } catch (error) {
+        console.error('Error completing contract:', error);
+        toast({
+          title: "خطأ في إكمال العقد",
+          description: "فشل في إكمال العقد",
+          variant: "destructive",
+        });
+      }
+    },
+    
+    updateStatus: async (contractId: string, status: string) => {
+      try {
+        await contractService.updateContract(contractId, { status });
+        updateSingleContract(contractId, { status });
+      } catch (error) {
+        console.error('Error updating contract status:', error);
+        toast({
+          title: "خطأ في تحديث الحالة",
+          description: "فشل في تحديث حالة العقد",
+          variant: "destructive",
+        });
+      }
+    },
+    
+    syncAllContracts: async () => {
+      toast({
+        title: "جاري المزامنة",
+        description: "جاري مزامنة جميع العقود...",
+      });
+      await loadData();
+      toast({
+        title: "تمت المزامنة",
+        description: "تم تحديث جميع العقود بنجاح",
+      });
+    },
   };
 };
