@@ -6,13 +6,19 @@ type CompanyBrandingInsert = Database['public']['Tables']['company_branding']['I
 type CompanyBrandingUpdate = Database['public']['Tables']['company_branding']['Update'];
 
 export const companyBrandingService = {
-  // الحصول على بيانات العلامة التجارية الحالية
-  async getCompanyBranding(): Promise<CompanyBranding | null> {
-    const { data, error } = await supabase
+  // الحصول على بيانات العلامة التجارية الحالية للتينانت
+  async getCompanyBranding(tenantId?: string): Promise<CompanyBranding | null> {
+    let query = supabase
       .from('company_branding')
       .select('*')
-      .eq('is_active', true)
-      .single();
+      .eq('is_active', true);
+
+    // إذا لم يتم تحديد tenant_id، استخدم التينانت الحالي
+    if (tenantId) {
+      query = query.eq('tenant_id', tenantId);
+    }
+
+    const { data, error } = await query.single();
 
     if (error && error.code !== 'PGRST116') {
       console.error('Error fetching company branding:', error);
@@ -59,67 +65,41 @@ export const companyBrandingService = {
     }
   },
 
-  // رفع صورة الرأس
-  async uploadHeaderImage(file: File): Promise<string> {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `header-${Date.now()}.${fileExt}`;
-    const filePath = `headers/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('company-branding')
-      .upload(filePath, file);
-
-    if (uploadError) {
-      console.error('Error uploading header image:', uploadError);
-      throw uploadError;
-    }
-
-    const { data } = supabase.storage
-      .from('company-branding')
-      .getPublicUrl(filePath);
-
-    return data.publicUrl;
+  // رفع صورة الرأس (استخدام الخدمة الجديدة)
+  async uploadHeaderImage(file: File, tenantId?: string): Promise<string> {
+    return this.uploadAsset(file, 'header_image', 'default', tenantId);
   },
 
-  // رفع صورة التذييل
-  async uploadFooterImage(file: File): Promise<string> {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `footer-${Date.now()}.${fileExt}`;
-    const filePath = `footers/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('company-branding')
-      .upload(filePath, file);
-
-    if (uploadError) {
-      console.error('Error uploading footer image:', uploadError);
-      throw uploadError;
-    }
-
-    const { data } = supabase.storage
-      .from('company-branding')
-      .getPublicUrl(filePath);
-
-    return data.publicUrl;
+  // رفع صورة التذييل (استخدام الخدمة الجديدة)
+  async uploadFooterImage(file: File, tenantId?: string): Promise<string> {
+    return this.uploadAsset(file, 'footer_image', 'default', tenantId);
   },
 
-  // رفع الشعار
-  async uploadLogo(file: File): Promise<string> {
+  // رفع الشعار (استخدام الخدمة الجديدة)
+  async uploadLogo(file: File, tenantId?: string): Promise<string> {
+    return this.uploadAsset(file, 'logo', 'default', tenantId);
+  },
+
+  // دالة مساعدة لرفع الأصول
+  async uploadAsset(file: File, assetType: 'logo' | 'header_image' | 'footer_image', assetName: string = 'default', tenantId?: string): Promise<string> {
+    // الحصول على معرف التينانت من السياق إذا لم يتم تمريره
+    const currentTenantId = tenantId; // يمكن الحصول عليه من السياق
+
     const fileExt = file.name.split('.').pop();
-    const fileName = `logo-${Date.now()}.${fileExt}`;
-    const filePath = `logos/${fileName}`;
+    const fileName = `${assetType}-${assetName}-${Date.now()}.${fileExt}`;
+    const filePath = `${currentTenantId || 'default'}/${assetType}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
-      .from('company-branding')
+      .from('tenant-assets')
       .upload(filePath, file);
 
     if (uploadError) {
-      console.error('Error uploading logo:', uploadError);
+      console.error(`Error uploading ${assetType}:`, uploadError);
       throw uploadError;
     }
 
     const { data } = supabase.storage
-      .from('company-branding')
+      .from('tenant-assets')
       .getPublicUrl(filePath);
 
     return data.publicUrl;
@@ -132,13 +112,22 @@ export const companyBrandingService = {
     try {
       // استخراج المسار من الـ URL
       const urlParts = url.split('/');
-      const bucketIndex = urlParts.findIndex(part => part === 'company-branding');
+      
+      // دعم كل من النظام القديم والجديد
+      let bucketIndex = urlParts.findIndex(part => part === 'tenant-assets');
+      let bucketName = 'tenant-assets';
+      
+      if (bucketIndex === -1) {
+        bucketIndex = urlParts.findIndex(part => part === 'company-branding');
+        bucketName = 'company-branding';
+      }
+      
       if (bucketIndex === -1) return;
       
       const filePath = urlParts.slice(bucketIndex + 1).join('/');
 
       const { error } = await supabase.storage
-        .from('company-branding')
+        .from(bucketName)
         .remove([filePath]);
 
       if (error) {

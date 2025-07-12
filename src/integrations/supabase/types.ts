@@ -1225,6 +1225,7 @@ export type Database = {
           show_footer: boolean | null
           show_header: boolean | null
           tax_number: string | null
+          tenant_id: string | null
           updated_at: string
           website: string | null
         }
@@ -1248,6 +1249,7 @@ export type Database = {
           show_footer?: boolean | null
           show_header?: boolean | null
           tax_number?: string | null
+          tenant_id?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -1271,10 +1273,19 @@ export type Database = {
           show_footer?: boolean | null
           show_header?: boolean | null
           tax_number?: string | null
+          tenant_id?: string | null
           updated_at?: string
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "company_branding_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contract_accounting_entries: {
         Row: {
@@ -5131,6 +5142,164 @@ export type Database = {
           },
         ]
       }
+      tenant_assets: {
+        Row: {
+          alt_text: string | null
+          asset_name: string
+          asset_type: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          file_path: string
+          file_size: number | null
+          file_url: string
+          id: string
+          is_active: boolean | null
+          is_current: boolean | null
+          mime_type: string | null
+          parent_asset_id: string | null
+          tenant_id: string
+          updated_at: string | null
+          usage_context: Json | null
+          version: number | null
+        }
+        Insert: {
+          alt_text?: string | null
+          asset_name: string
+          asset_type: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          file_path: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          is_active?: boolean | null
+          is_current?: boolean | null
+          mime_type?: string | null
+          parent_asset_id?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          usage_context?: Json | null
+          version?: number | null
+        }
+        Update: {
+          alt_text?: string | null
+          asset_name?: string
+          asset_type?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          file_path?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          is_active?: boolean | null
+          is_current?: boolean | null
+          mime_type?: string | null
+          parent_asset_id?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          usage_context?: Json | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_assets_parent_asset_id_fkey"
+            columns: ["parent_asset_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_assets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_customizations: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          custom_body_scripts: string | null
+          custom_css: string | null
+          custom_head_scripts: string | null
+          custom_pages: Json | null
+          dashboard_layout: string | null
+          dashboard_widgets: Json | null
+          default_language: string | null
+          disabled_features: Json | null
+          email_templates: Json | null
+          enabled_features: Json | null
+          id: string
+          is_active: boolean | null
+          navigation_collapsed: boolean | null
+          navigation_items: Json | null
+          navigation_style: string | null
+          rtl_enabled: boolean | null
+          supported_languages: Json | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          custom_body_scripts?: string | null
+          custom_css?: string | null
+          custom_head_scripts?: string | null
+          custom_pages?: Json | null
+          dashboard_layout?: string | null
+          dashboard_widgets?: Json | null
+          default_language?: string | null
+          disabled_features?: Json | null
+          email_templates?: Json | null
+          enabled_features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          navigation_collapsed?: boolean | null
+          navigation_items?: Json | null
+          navigation_style?: string | null
+          rtl_enabled?: boolean | null
+          supported_languages?: Json | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          custom_body_scripts?: string | null
+          custom_css?: string | null
+          custom_head_scripts?: string | null
+          custom_pages?: Json | null
+          dashboard_layout?: string | null
+          dashboard_widgets?: Json | null
+          default_language?: string | null
+          disabled_features?: Json | null
+          email_templates?: Json | null
+          enabled_features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          navigation_collapsed?: boolean | null
+          navigation_items?: Json | null
+          navigation_style?: string | null
+          rtl_enabled?: boolean | null
+          supported_languages?: Json | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_customizations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_deletion_log: {
         Row: {
           created_at: string
@@ -5163,6 +5332,166 @@ export type Database = {
           tenant_name?: string
         }
         Relationships: []
+      }
+      tenant_domains: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          domain: string
+          id: string
+          is_active: boolean | null
+          is_primary: boolean | null
+          redirect_to_primary: boolean | null
+          ssl_certificate_id: string | null
+          ssl_expires_at: string | null
+          ssl_status: string | null
+          subdomain: string | null
+          tenant_id: string
+          updated_at: string | null
+          verification_method: string | null
+          verification_status: string | null
+          verification_token: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          domain: string
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          redirect_to_primary?: boolean | null
+          ssl_certificate_id?: string | null
+          ssl_expires_at?: string | null
+          ssl_status?: string | null
+          subdomain?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          verification_method?: string | null
+          verification_status?: string | null
+          verification_token?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          domain?: string
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          redirect_to_primary?: boolean | null
+          ssl_certificate_id?: string | null
+          ssl_expires_at?: string | null
+          ssl_status?: string | null
+          subdomain?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          verification_method?: string | null
+          verification_status?: string | null
+          verification_token?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_domains_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_themes: {
+        Row: {
+          accent_color: string | null
+          background_color: string | null
+          border_radius: string | null
+          created_at: string | null
+          created_by: string | null
+          custom_css: Json | null
+          error_color: string | null
+          font_family: string | null
+          font_size_base: string | null
+          font_weight_base: string | null
+          id: string
+          info_color: string | null
+          is_active: boolean | null
+          is_default: boolean | null
+          primary_color: string | null
+          secondary_color: string | null
+          spacing_unit: string | null
+          success_color: string | null
+          surface_color: string | null
+          tenant_id: string
+          text_primary: string | null
+          text_secondary: string | null
+          theme_name: string
+          updated_at: string | null
+          warning_color: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          background_color?: string | null
+          border_radius?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          custom_css?: Json | null
+          error_color?: string | null
+          font_family?: string | null
+          font_size_base?: string | null
+          font_weight_base?: string | null
+          id?: string
+          info_color?: string | null
+          is_active?: boolean | null
+          is_default?: boolean | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          spacing_unit?: string | null
+          success_color?: string | null
+          surface_color?: string | null
+          tenant_id: string
+          text_primary?: string | null
+          text_secondary?: string | null
+          theme_name?: string
+          updated_at?: string | null
+          warning_color?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          background_color?: string | null
+          border_radius?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          custom_css?: Json | null
+          error_color?: string | null
+          font_family?: string | null
+          font_size_base?: string | null
+          font_weight_base?: string | null
+          id?: string
+          info_color?: string | null
+          is_active?: boolean | null
+          is_default?: boolean | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          spacing_unit?: string | null
+          success_color?: string | null
+          surface_color?: string | null
+          tenant_id?: string
+          text_primary?: string | null
+          text_secondary?: string | null
+          theme_name?: string
+          updated_at?: string | null
+          warning_color?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_themes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tenant_usage: {
         Row: {
@@ -6666,6 +6995,10 @@ export type Database = {
       }
       get_system_setting: {
         Args: { setting_key_param: string }
+        Returns: Json
+      }
+      get_tenant_theme: {
+        Args: { p_tenant_id?: string }
         Returns: Json
       }
       get_user_permissions: {
