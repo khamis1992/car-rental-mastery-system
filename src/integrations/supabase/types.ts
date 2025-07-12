@@ -6482,6 +6482,10 @@ export type Database = {
         }
         Returns: Json
       }
+      is_saas_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       log_transaction: {
         Args:
           | {
