@@ -6796,6 +6796,26 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      copy_default_branches: {
+        Args: { target_tenant_id: string }
+        Returns: number
+      }
+      copy_default_chart_of_accounts: {
+        Args: { target_tenant_id: string }
+        Returns: number
+      }
+      copy_default_company_branding: {
+        Args: { target_tenant_id: string }
+        Returns: number
+      }
+      copy_default_cost_centers: {
+        Args: { target_tenant_id: string }
+        Returns: number
+      }
+      copy_default_financial_periods: {
+        Args: { target_tenant_id: string }
+        Returns: number
+      }
       correct_account_balance: {
         Args: { account_code_param: string }
         Returns: Json
@@ -7181,6 +7201,10 @@ export type Database = {
         Args: { _tenant_id: string }
         Returns: undefined
       }
+      setup_tenant_default_accounting_data: {
+        Args: { target_tenant_id: string }
+        Returns: Json
+      }
       test_accounting_data_isolation: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -7244,6 +7268,10 @@ export type Database = {
       verify_domain: {
         Args: { p_verification_id: string }
         Returns: boolean
+      }
+      verify_tenant_accounting_data: {
+        Args: { target_tenant_id: string }
+        Returns: Json
       }
     }
     Enums: {
