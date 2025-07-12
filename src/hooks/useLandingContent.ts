@@ -59,12 +59,20 @@ export const useLandingContent = (sectionName?: string) => {
 
       if (error) throw error;
 
+      // Update local state immediately
+      setContent(prevContent => 
+        prevContent.map(item => 
+          item.id === id ? { ...item, ...updates } : item
+        )
+      );
+
       toast({
         title: "تم التحديث بنجاح",
         description: "تم تحديث المحتوى بنجاح",
       });
 
-      fetchContent(); // Refresh data
+      // Also refresh from server to ensure consistency
+      await fetchContent();
     } catch (error) {
       console.error('Error updating content:', error);
       toast({
