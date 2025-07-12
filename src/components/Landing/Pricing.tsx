@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Check, Zap, Crown, Building } from "lucide-react";
+import { useState } from "react";
+import { SubscriptionModal } from "./SubscriptionModal";
 
 const plans = [
   {
@@ -16,7 +18,7 @@ const plans = [
       "تطبيق الموبايل"
     ],
     popular: false,
-    buttonText: "ابدأ الآن"
+    buttonText: "اشترك"
   },
   {
     name: "الباقة المتقدمة",
@@ -35,7 +37,7 @@ const plans = [
       "تكامل مع البنوك"
     ],
     popular: true,
-    buttonText: "الأكثر شعبية"
+    buttonText: "اشترك"
   },
   {
     name: "الباقة المؤسسية",
@@ -59,8 +61,22 @@ const plans = [
 ];
 
 export function Pricing() {
+  const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSubscribe = (plan: typeof plans[0]) => {
+    if (plan.price === "مخصص") {
+      // للباقة المؤسسية، نحتاج لتوجيه المستخدم للتواصل
+      window.location.href = "mailto:sales@saptcogulf.com?subject=استفسار عن الباقة المؤسسية";
+      return;
+    }
+    
+    setSelectedPlan(plan);
+    setIsModalOpen(true);
+  };
+
   return (
-    <section className="py-20 bg-background">
+    <section id="pricing" className="py-20 bg-background">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-foreground">
@@ -139,6 +155,7 @@ export function Pricing() {
                     : 'variant-outline'
                 }`}
                 size="lg"
+                onClick={() => handleSubscribe(plan)}
               >
                 {plan.buttonText}
               </Button>
@@ -171,6 +188,12 @@ export function Pricing() {
           </div>
         </div>
       </div>
+
+      <SubscriptionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        selectedPlan={selectedPlan}
+      />
     </section>
   );
 }

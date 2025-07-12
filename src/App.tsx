@@ -16,6 +16,9 @@ import { setupGlobalErrorHandling } from "@/utils/errorHandling";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import LandingPage from "./pages/LandingPage";
+import SadadSimulation from "./pages/SadadSimulation";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCancel from "./pages/PaymentCancel";
 import Customers from "./pages/Customers";
 import Fleet from "./pages/Fleet";
 import Quotations from "./pages/Quotations";
@@ -100,6 +103,9 @@ const App = () => (
                   <Routes>
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/auth" element={<Auth />} />
+                    <Route path="/sadad-simulation" element={<SadadSimulation />} />
+                    <Route path="/payment-success" element={<PaymentSuccess />} />
+                    <Route path="/payment-cancel" element={<PaymentCancel />} />
                     <Route path="/dashboard" element={
                       <ProtectedRoute>
                         <Layout>
