@@ -6846,7 +6846,7 @@ export type Database = {
         Args: { contract_id: string; contract_data: Json }
         Returns: string
       }
-      create_default_chart_of_accounts: {
+      create_correct_chart_of_accounts: {
         Args: { tenant_id_param: string }
         Returns: number
       }
@@ -7201,7 +7201,7 @@ export type Database = {
         Args: { tenant_id_param: string; deletion_reason?: string }
         Returns: Json
       }
-      setup_default_accounts_for_tenant: {
+      setup_correct_accounts_for_tenant: {
         Args: { tenant_id_param: string }
         Returns: boolean
       }
