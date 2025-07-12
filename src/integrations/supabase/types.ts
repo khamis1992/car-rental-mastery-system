@@ -600,6 +600,7 @@ export type Database = {
           method_used: string
           notes: string | null
           period_months: number
+          tenant_id: string
         }
         Insert: {
           accumulated_depreciation: number
@@ -614,6 +615,7 @@ export type Database = {
           method_used: string
           notes?: string | null
           period_months?: number
+          tenant_id: string
         }
         Update: {
           accumulated_depreciation?: number
@@ -628,6 +630,7 @@ export type Database = {
           method_used?: string
           notes?: string | null
           period_months?: number
+          tenant_id?: string
         }
         Relationships: [
           {
@@ -642,6 +645,13 @@ export type Database = {
             columns: ["journal_entry_id"]
             isOneToOne: false
             referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_depreciation_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -797,6 +807,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           opening_balance: number | null
+          tenant_id: string
           updated_at: string
         }
         Insert: {
@@ -812,6 +823,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           opening_balance?: number | null
+          tenant_id: string
           updated_at?: string
         }
         Update: {
@@ -827,6 +839,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           opening_balance?: number | null
+          tenant_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -835,6 +848,13 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -852,6 +872,7 @@ export type Database = {
           journal_entry_id: string | null
           reference_number: string | null
           status: string
+          tenant_id: string
           transaction_date: string
           transaction_type: string
           updated_at: string
@@ -868,6 +889,7 @@ export type Database = {
           journal_entry_id?: string | null
           reference_number?: string | null
           status?: string
+          tenant_id: string
           transaction_date: string
           transaction_type: string
           updated_at?: string
@@ -884,6 +906,7 @@ export type Database = {
           journal_entry_id?: string | null
           reference_number?: string | null
           status?: string
+          tenant_id?: string
           transaction_date?: string
           transaction_type?: string
           updated_at?: string
@@ -901,6 +924,13 @@ export type Database = {
             columns: ["journal_entry_id"]
             isOneToOne: false
             referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -969,6 +999,7 @@ export type Database = {
           q2_amount: number | null
           q3_amount: number | null
           q4_amount: number | null
+          tenant_id: string
           updated_at: string
           variance_amount: number | null
           variance_percentage: number | null
@@ -986,6 +1017,7 @@ export type Database = {
           q2_amount?: number | null
           q3_amount?: number | null
           q4_amount?: number | null
+          tenant_id: string
           updated_at?: string
           variance_amount?: number | null
           variance_percentage?: number | null
@@ -1003,6 +1035,7 @@ export type Database = {
           q2_amount?: number | null
           q3_amount?: number | null
           q4_amount?: number | null
+          tenant_id?: string
           updated_at?: string
           variance_amount?: number | null
           variance_percentage?: number | null
@@ -1022,6 +1055,13 @@ export type Database = {
             referencedRelation: "budgets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "budget_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       budgets: {
@@ -1038,6 +1078,7 @@ export type Database = {
           notes: string | null
           start_date: string
           status: string
+          tenant_id: string
           total_expense_budget: number | null
           total_revenue_budget: number | null
           updated_at: string
@@ -1055,6 +1096,7 @@ export type Database = {
           notes?: string | null
           start_date: string
           status?: string
+          tenant_id: string
           total_expense_budget?: number | null
           total_revenue_budget?: number | null
           updated_at?: string
@@ -1072,11 +1114,20 @@ export type Database = {
           notes?: string | null
           start_date?: string
           status?: string
+          tenant_id?: string
           total_expense_budget?: number | null
           total_revenue_budget?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "budgets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chart_of_accounts: {
         Row: {
@@ -2692,6 +2743,7 @@ export type Database = {
           serial_number: string | null
           status: string
           supplier_name: string | null
+          tenant_id: string
           updated_at: string
           useful_life_years: number
           warranty_expiry: string | null
@@ -2721,6 +2773,7 @@ export type Database = {
           serial_number?: string | null
           status?: string
           supplier_name?: string | null
+          tenant_id: string
           updated_at?: string
           useful_life_years: number
           warranty_expiry?: string | null
@@ -2750,6 +2803,7 @@ export type Database = {
           serial_number?: string | null
           status?: string
           supplier_name?: string | null
+          tenant_id?: string
           updated_at?: string
           useful_life_years?: number
           warranty_expiry?: string | null
@@ -2774,6 +2828,13 @@ export type Database = {
             columns: ["depreciation_expense_account_id"]
             isOneToOne: false
             referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixed_assets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
