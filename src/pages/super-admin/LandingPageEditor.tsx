@@ -139,7 +139,7 @@ const LandingPageEditor: React.FC = () => {
             </Button>
             <Button 
               variant="outline"
-              onClick={() => window.open('/landing', '_blank')}
+              onClick={() => window.open('/', '_blank')}
               className="gap-2"
             >
               <Eye className="w-4 h-4" />

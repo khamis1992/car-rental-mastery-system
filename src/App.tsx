@@ -98,9 +98,9 @@ const App = () => (
                 <Sonner />
                 <BrowserRouter>
                   <Routes>
-                    <Route path="/landing" element={<LandingPage />} />
+                    <Route path="/" element={<LandingPage />} />
                     <Route path="/auth" element={<Auth />} />
-                    <Route path="/" element={
+                    <Route path="/dashboard" element={
                       <ProtectedRoute>
                         <Layout>
                           <Index />

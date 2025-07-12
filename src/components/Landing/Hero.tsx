@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Car, Shield, Zap } from "lucide-react";
 import { useLandingContent } from "@/hooks/useLandingContent";
+import { Link } from "react-router-dom";
 
 export function Hero() {
   const { getContentValue } = useLandingContent('hero');
@@ -42,10 +43,12 @@ export function Hero() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button size="lg" variant="secondary" className="text-lg px-8 py-4 bg-white text-primary hover:bg-white/90">
-                {getContentValue('hero', 'cta_text') || 'احجز عرضاً تجريبياً'}
-                <ArrowLeft className="w-5 h-5 mr-2" />
-              </Button>
+              <Link to="/auth">
+                <Button size="lg" variant="secondary" className="text-lg px-8 py-4 bg-white text-primary hover:bg-white/90">
+                  {getContentValue('hero', 'cta_text') || 'ابدأ الآن'}
+                  <ArrowLeft className="w-5 h-5 mr-2" />
+                </Button>
+              </Link>
             </div>
           </div>
 
