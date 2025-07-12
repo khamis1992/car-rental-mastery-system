@@ -6858,6 +6858,10 @@ export type Database = {
         Args: { contract_id: string; contract_data: Json }
         Returns: string
       }
+      create_correct_chart_of_accounts: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
       create_depreciation_entries: {
         Args: Record<PropertyKey, never>
         Returns: number
