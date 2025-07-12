@@ -46,26 +46,28 @@ export function Features() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <div 
               key={index}
-              className="group relative p-8 bg-card rounded-2xl border border-border hover:shadow-elegant transition-all duration-300 hover:-translate-y-2"
+              className="group relative p-8 bg-white rounded-3xl border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center"
             >
-              <div className={`w-16 h-16 rounded-2xl ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                <feature.icon className="w-8 h-8" />
+              {/* Icon container */}
+              <div className="flex justify-center mb-6">
+                <div className={`w-20 h-20 rounded-2xl ${feature.color} flex items-center justify-center group-hover:scale-105 transition-transform duration-300`}>
+                  <feature.icon className="w-10 h-10" />
+                </div>
               </div>
               
-              <h3 className="text-xl font-bold mb-4 text-card-foreground">
+              {/* Title */}
+              <h3 className="text-xl font-bold mb-4 text-gray-800">
                 {feature.title}
               </h3>
               
-              <p className="text-muted-foreground leading-relaxed">
+              {/* Description */}
+              <p className="text-gray-600 leading-relaxed text-sm">
                 {feature.description}
               </p>
-
-              {/* Decorative element */}
-              <div className="absolute top-4 left-4 w-20 h-20 bg-gradient-to-br from-primary/5 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
           ))}
         </div>
