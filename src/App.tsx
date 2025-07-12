@@ -51,6 +51,7 @@ import SystemMonitoringPage from "./pages/super-admin/SystemMonitoring";
 import MaintenanceToolsPage from "./pages/super-admin/MaintenanceTools";
 import TechnicalSupport from "./pages/super-admin/TechnicalSupport";
 import GlobalSettingsPage from "./pages/super-admin/GlobalSettings";
+import TenantIsolationDashboard from "./pages/TenantIsolationDashboard";
 import DraftStage from "./pages/ContractStages/DraftStage";
 import PendingStage from "./pages/ContractStages/PendingStage";
 import ActiveStage from "./pages/ContractStages/ActiveStage";
@@ -309,12 +310,19 @@ const App = () => (
                            </Layout>
                          </ProtectedRoute>
                        } />
-                       <Route path="/super-admin/landing-editor" element={
-                         <ProtectedRoute requiredRole="super_admin">
-                           <LandingPageEditor />
-                         </ProtectedRoute>
-                       } />
-                     {/* Contract stage routes */}
+                        <Route path="/super-admin/landing-editor" element={
+                          <ProtectedRoute requiredRole="super_admin">
+                            <LandingPageEditor />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/tenant-isolation" element={
+                          <ProtectedRoute>
+                            <Layout>
+                              <TenantIsolationDashboard />
+                            </Layout>
+                          </ProtectedRoute>
+                        } />
+                      {/* Contract stage routes */}
                      <Route path="/contracts/stage/draft/:contractId" element={
                       <ProtectedRoute>
                         <Layout>

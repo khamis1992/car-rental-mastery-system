@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Tenant, TenantUser } from '@/types/tenant';
 import { TenantService } from '@/services/tenantService';
+import { tenantIsolationService } from '@/services/BusinessServices/TenantIsolationService';
 import { useAuth } from './AuthContext';
 
 interface TenantContextType {
@@ -97,6 +98,16 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
         .eq('tenant_id', tenantId)
         .eq('status', 'active')
         .single();
+
+      const success = !error && !!tenantUser && !!tenantUser.tenant;
+
+      // تسجيل محاولة تبديل المؤسسة للمراقبة
+      await tenantIsolationService.logAccess(
+        tenantId,
+        'tenant_switch',
+        'switch_tenant',
+        success
+      );
 
       if (error) throw error;
 

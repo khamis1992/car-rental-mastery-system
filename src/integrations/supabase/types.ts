@@ -3387,6 +3387,7 @@ export type Database = {
           id: string
           journal_entry_id: string
           line_number: number
+          tenant_id: string | null
         }
         Insert: {
           account_id: string
@@ -3398,6 +3399,7 @@ export type Database = {
           id?: string
           journal_entry_id: string
           line_number: number
+          tenant_id?: string | null
         }
         Update: {
           account_id?: string
@@ -3409,6 +3411,7 @@ export type Database = {
           id?: string
           journal_entry_id?: string
           line_number?: number
+          tenant_id?: string | null
         }
         Relationships: [
           {
@@ -3437,6 +3440,13 @@ export type Database = {
             columns: ["journal_entry_id"]
             isOneToOne: false
             referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_lines_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -3493,6 +3503,7 @@ export type Database = {
           rejection_reason: string | null
           start_date: string
           status: string
+          tenant_id: string | null
           total_days: number
           updated_at: string
         }
@@ -3508,6 +3519,7 @@ export type Database = {
           rejection_reason?: string | null
           start_date: string
           status?: string
+          tenant_id?: string | null
           total_days: number
           updated_at?: string
         }
@@ -3523,6 +3535,7 @@ export type Database = {
           rejection_reason?: string | null
           start_date?: string
           status?: string
+          tenant_id?: string | null
           total_days?: number
           updated_at?: string
         }
@@ -3539,6 +3552,13 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -3638,6 +3658,7 @@ export type Database = {
           longitude: number
           name: string
           radius: number
+          tenant_id: string | null
           updated_at: string
         }
         Insert: {
@@ -3650,6 +3671,7 @@ export type Database = {
           longitude: number
           name: string
           radius?: number
+          tenant_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -3662,9 +3684,18 @@ export type Database = {
           longitude?: number
           name?: string
           radius?: number
+          tenant_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "office_locations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payments: {
         Row: {
@@ -5059,6 +5090,47 @@ export type Database = {
           },
         ]
       }
+      tenant_access_log: {
+        Row: {
+          action: string | null
+          attempted_tenant_id: string | null
+          created_at: string | null
+          id: string
+          success: boolean | null
+          table_name: string | null
+          tenant_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action?: string | null
+          attempted_tenant_id?: string | null
+          created_at?: string | null
+          id?: string
+          success?: boolean | null
+          table_name?: string | null
+          tenant_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string | null
+          attempted_tenant_id?: string | null
+          created_at?: string | null
+          id?: string
+          success?: boolean | null
+          table_name?: string | null
+          tenant_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_access_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_deletion_log: {
         Row: {
           created_at: string
@@ -5479,6 +5551,7 @@ export type Database = {
           status: string
           target_id: string | null
           target_table: string | null
+          tenant_id: string | null
           transaction_type: string
           vehicle_id: string | null
         }
@@ -5499,6 +5572,7 @@ export type Database = {
           status?: string
           target_id?: string | null
           target_table?: string | null
+          tenant_id?: string | null
           transaction_type: string
           vehicle_id?: string | null
         }
@@ -5519,6 +5593,7 @@ export type Database = {
           status?: string
           target_id?: string | null
           target_table?: string | null
+          tenant_id?: string | null
           transaction_type?: string
           vehicle_id?: string | null
         }
@@ -5542,6 +5617,13 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
           {
@@ -6636,6 +6718,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      log_tenant_access: {
+        Args: {
+          p_tenant_id: string
+          p_attempted_tenant_id: string
+          p_table_name: string
+          p_action: string
+          p_success: boolean
+        }
+        Returns: undefined
+      }
       log_transaction: {
         Args:
           | {
@@ -6759,6 +6851,10 @@ export type Database = {
       validate_chart_of_accounts: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      validate_tenant_access: {
+        Args: { table_tenant_id: string }
+        Returns: boolean
       }
       verify_domain: {
         Args: { p_verification_id: string }

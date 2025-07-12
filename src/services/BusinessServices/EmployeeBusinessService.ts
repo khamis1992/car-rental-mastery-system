@@ -1,10 +1,12 @@
 import { IEmployeeRepository } from '@/repositories/interfaces/IEmployeeRepository';
 import { Employee } from '@/types/hr';
+import { useTenant } from '@/contexts/TenantContext';
 
 export class EmployeeBusinessService {
   constructor(private employeeRepository: IEmployeeRepository) {}
 
   async getAllEmployees(): Promise<Employee[]> {
+    // جميع الاستعلامات تتم تلقائياً بفلترة tenant_id من خلال RLS
     return this.employeeRepository.getAll();
   }
 
