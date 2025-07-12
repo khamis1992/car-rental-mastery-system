@@ -6502,6 +6502,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_data_isolation_report: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       generate_department_code: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -6668,6 +6672,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      monitor_tenant_data_access: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       periodic_accounting_maintenance: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -6699,6 +6707,10 @@ export type Database = {
       setup_default_role_permissions: {
         Args: { _tenant_id: string }
         Returns: undefined
+      }
+      test_accounting_data_isolation: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       update_account_balances: {
         Args: Record<PropertyKey, never>
