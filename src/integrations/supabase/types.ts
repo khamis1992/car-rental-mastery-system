@@ -6800,6 +6800,10 @@ export type Database = {
         Args: { tenant_id_param: string }
         Returns: number
       }
+      complete_chart_of_accounts_part3: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
       copy_default_branches: {
         Args: { target_tenant_id: string }
         Returns: number
