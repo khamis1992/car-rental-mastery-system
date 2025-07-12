@@ -6846,6 +6846,10 @@ export type Database = {
         Args: { contract_id: string; contract_data: Json }
         Returns: string
       }
+      create_default_chart_of_accounts: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
       create_depreciation_entries: {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -7196,6 +7200,10 @@ export type Database = {
       safe_delete_tenant: {
         Args: { tenant_id_param: string; deletion_reason?: string }
         Returns: Json
+      }
+      setup_default_accounts_for_tenant: {
+        Args: { tenant_id_param: string }
+        Returns: boolean
       }
       setup_default_role_permissions: {
         Args: { _tenant_id: string }
