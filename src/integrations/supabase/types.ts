@@ -6351,6 +6351,15 @@ export type Database = {
         Args: { tenant_data: Json; admin_user_id?: string }
         Returns: Json
       }
+      create_tenant_with_admin_user: {
+        Args: {
+          tenant_data: Json
+          admin_email: string
+          admin_password: string
+          admin_full_name: string
+        }
+        Returns: Json
+      }
       create_vehicle_asset: {
         Args: { vehicle_id: string; vehicle_data: Json }
         Returns: string

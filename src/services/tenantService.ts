@@ -39,97 +39,112 @@ export class TenantService {
     try {
       console.log('Creating tenant with data:', tenantData);
       
-      // استخدام الدالة المحسنة لإنشاء المؤسسة
-      const { data: result, error } = await supabase.rpc('create_tenant_with_admin', {
-        tenant_data: {
-          name: tenantData.name,
-          slug: tenantData.slug,
-          contact_email: tenantData.contact_email,
-          contact_phone: tenantData.contact_phone,
-          address: tenantData.address,
-          city: tenantData.city,
-          country: tenantData.country,
-          timezone: tenantData.timezone,
-          currency: tenantData.currency,
-          subscription_plan: tenantData.subscription_plan,
-          status: 'trial'
-        }
-      });
-
-      if (error) {
-        console.error('Error calling create_tenant_with_admin:', error);
-        throw new Error(`خطأ في إنشاء المؤسسة: ${error.message}`);
-      }
-
-      const typedResult = result as { success: boolean; tenant_id?: string; error?: string; debug_info?: any };
-      
-      if (!typedResult?.success) {
-        console.error('Tenant creation failed:', result);
-        throw new Error(`فشل في إنشاء المؤسسة: ${typedResult?.error || 'خطأ غير معروف'}`);
-      }
-
-      console.log('Tenant created successfully via function:', result);
-
-      // الحصول على بيانات المؤسسة المنشأة
-      const { data: tenant, error: fetchError } = await supabase
-        .from('tenants')
-        .select('*')
-        .eq('id', typedResult.tenant_id!)
-        .single();
-
-      if (fetchError || !tenant) {
-        console.error('Error fetching created tenant:', fetchError);
-        throw new Error('تم إنشاء المؤسسة ولكن لم يتم العثور عليها');
-      }
-
-      // Create admin user account if provided
       if (tenantData.admin_user) {
-        // أولاً ننشئ المستخدم
-        const { data: authUser, error: authError } = await supabase.auth.signUp({
-          email: tenantData.admin_user.email,
-          password: tenantData.admin_user.password,
-          options: {
-            data: {
-              full_name: tenantData.admin_user.full_name
-            }
+        // استخدام الدالة المحسنة التي تنشئ المؤسسة والمدير معاً
+        const { data: result, error } = await supabase.rpc('create_tenant_with_admin_user', {
+          tenant_data: {
+            name: tenantData.name,
+            slug: tenantData.slug,
+            contact_email: tenantData.contact_email,
+            contact_phone: tenantData.contact_phone,
+            address: tenantData.address,
+            city: tenantData.city,
+            country: tenantData.country,
+            timezone: tenantData.timezone,
+            currency: tenantData.currency,
+            subscription_plan: tenantData.subscription_plan,
+            status: 'trial'
+          },
+          admin_email: tenantData.admin_user.email,
+          admin_password: tenantData.admin_user.password,
+          admin_full_name: tenantData.admin_user.full_name
+        });
+
+        if (error) {
+          console.error('Error calling create_tenant_with_admin_user:', error);
+          throw new Error(`خطأ في إنشاء المؤسسة: ${error.message}`);
+        }
+
+        const typedResult = result as { success: boolean; tenant_id?: string; user_id?: string; error?: string };
+        
+        if (!typedResult?.success) {
+          console.error('Tenant creation failed:', result);
+          throw new Error(`فشل في إنشاء المؤسسة: ${typedResult?.error || 'خطأ غير معروف'}`);
+        }
+
+        console.log('Tenant and admin created successfully:', result);
+
+        // الحصول على بيانات المؤسسة المنشأة
+        const { data: tenant, error: fetchError } = await supabase
+          .from('tenants')
+          .select('*')
+          .eq('id', typedResult.tenant_id!)
+          .single();
+
+        if (fetchError || !tenant) {
+          console.error('Error fetching created tenant:', fetchError);
+          throw new Error('تم إنشاء المؤسسة ولكن لم يتم العثور عليها');
+        }
+
+        return {
+          ...tenant,
+          status: tenant.status as Tenant['status'],
+          subscription_plan: tenant.subscription_plan as Tenant['subscription_plan'],
+          subscription_status: tenant.subscription_status as Tenant['subscription_status'],
+          settings: (tenant.settings as Record<string, any>) || {}
+        };
+      } else {
+        // في حالة عدم وجود بيانات مدير، استخدم الدالة القديمة
+        const { data: result, error } = await supabase.rpc('create_tenant_with_admin', {
+          tenant_data: {
+            name: tenantData.name,
+            slug: tenantData.slug,
+            contact_email: tenantData.contact_email,
+            contact_phone: tenantData.contact_phone,
+            address: tenantData.address,
+            city: tenantData.city,
+            country: tenantData.country,
+            timezone: tenantData.timezone,
+            currency: tenantData.currency,
+            subscription_plan: tenantData.subscription_plan,
+            status: 'trial'
           }
         });
 
-        if (authError) {
-          console.warn('Failed to create admin user:', authError);
-          // Don't throw here as tenant was created successfully
-        } else if (authUser.user) {
-          // إنشاء ربط المستخدم بالمؤسسة كمدير أولاً
-          const { error: linkError } = await supabase
-            .from('tenant_users')
-            .insert({
-              tenant_id: tenant.id,
-              user_id: authUser.user.id,
-              role: 'tenant_admin',
-              status: 'active'
-            });
-
-          if (linkError) {
-            console.error('Failed to link user to tenant:', linkError);
-            // في حالة فشل الربط، نحتاج لحذف المستخدم المنشأ
-            try {
-              await supabase.auth.admin.deleteUser(authUser.user.id);
-            } catch (deleteError) {
-              console.error('Failed to cleanup user after link failure:', deleteError);
-            }
-          } else {
-            console.log('Successfully linked user to tenant as tenant_admin');
-          }
+        if (error) {
+          console.error('Error calling create_tenant_with_admin:', error);
+          throw new Error(`خطأ في إنشاء المؤسسة: ${error.message}`);
         }
+
+        const typedResult = result as { success: boolean; tenant_id?: string; error?: string };
+        
+        if (!typedResult?.success) {
+          console.error('Tenant creation failed:', result);
+          throw new Error(`فشل في إنشاء المؤسسة: ${typedResult?.error || 'خطأ غير معروف'}`);
+        }
+
+        console.log('Tenant created successfully via function:', result);
+
+        const { data: tenant, error: fetchError } = await supabase
+          .from('tenants')
+          .select('*')
+          .eq('id', typedResult.tenant_id!)
+          .single();
+
+        if (fetchError || !tenant) {
+          console.error('Error fetching created tenant:', fetchError);
+          throw new Error('تم إنشاء المؤسسة ولكن لم يتم العثور عليها');
+        }
+
+        return {
+          ...tenant,
+          status: tenant.status as Tenant['status'],
+          subscription_plan: tenant.subscription_plan as Tenant['subscription_plan'],
+          subscription_status: tenant.subscription_status as Tenant['subscription_status'],
+          settings: (tenant.settings as Record<string, any>) || {}
+        };
       }
 
-      return {
-        ...tenant,
-        status: tenant.status as Tenant['status'],
-        subscription_plan: tenant.subscription_plan as Tenant['subscription_plan'],
-        subscription_status: tenant.subscription_status as Tenant['subscription_status'],
-        settings: (tenant.settings as Record<string, any>) || {}
-      };
     } catch (error) {
       console.error('Error in createTenant:', error);
       
