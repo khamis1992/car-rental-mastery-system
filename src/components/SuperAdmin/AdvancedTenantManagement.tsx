@@ -343,18 +343,20 @@ const AdvancedTenantManagement: React.FC = () => {
     
     try {
       setLoading(true);
-      // TODO: إضافة استدعاء API لحذف المؤسسة
-      // await tenantService.deleteTenant(tenantToDelete.id);
+      
+      // استدعاء API لحذف المؤسسة
+      await tenantService.deleteTenant(tenantToDelete.id, "حذف من لوحة الإدارة العامة");
       
       toast({
         title: "تم بنجاح",
-        description: `تم حذف المؤسسة ${tenantToDelete.name}`
+        description: `تم إلغاء تفعيل المؤسسة ${tenantToDelete.name} بنجاح`
       });
       
       setShowDeleteDialog(false);
       setTenantToDelete(null);
-      loadTenants();
+      await loadTenants(); // تحديث القائمة بعد الحذف
     } catch (error: any) {
+      console.error('Error deleting tenant:', error);
       toast({
         title: "خطأ",
         description: error.message || "فشل في حذف المؤسسة",

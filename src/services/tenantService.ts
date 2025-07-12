@@ -312,4 +312,24 @@ export class TenantService {
 
     return !data && !error;
   }
+
+  // Delete tenant (soft delete)
+  async deleteTenant(tenantId: string, reason?: string): Promise<void> {
+    const { data, error } = await supabase.rpc('safe_delete_tenant', {
+      tenant_id_param: tenantId,
+      deletion_reason: reason || 'Deleted by super admin'
+    });
+
+    if (error) {
+      console.error('Error deleting tenant:', error);
+      throw new Error(`فشل في حذف المؤسسة: ${error.message}`);
+    }
+
+    const result = data as { success?: boolean; tenant_name?: string } | null;
+    if (!result?.success) {
+      throw new Error('فشل في حذف المؤسسة');
+    }
+
+    console.log('Tenant deleted successfully:', result.tenant_name);
+  }
 }

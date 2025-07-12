@@ -4959,6 +4959,39 @@ export type Database = {
           },
         ]
       }
+      tenant_deletion_log: {
+        Row: {
+          created_at: string
+          deleted_at: string
+          deleted_by: string | null
+          deletion_reason: string | null
+          deletion_type: string
+          id: string
+          tenant_id: string
+          tenant_name: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string
+          deleted_by?: string | null
+          deletion_reason?: string | null
+          deletion_type?: string
+          id?: string
+          tenant_id: string
+          tenant_name: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string
+          deleted_by?: string | null
+          deletion_reason?: string | null
+          deletion_type?: string
+          id?: string
+          tenant_id?: string
+          tenant_name?: string
+        }
+        Relationships: []
+      }
       tenant_usage: {
         Row: {
           contracts_count: number | null
@@ -6540,6 +6573,10 @@ export type Database = {
       }
       safe_delete_contract: {
         Args: { contract_id_param: string; delete_related?: boolean }
+        Returns: Json
+      }
+      safe_delete_tenant: {
+        Args: { tenant_id_param: string; deletion_reason?: string }
         Returns: Json
       }
       setup_default_role_permissions: {
