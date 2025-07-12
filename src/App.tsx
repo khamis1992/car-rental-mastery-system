@@ -15,6 +15,7 @@ import { GlobalErrorBoundary } from "@/components/ErrorBoundary/GlobalErrorBound
 import { setupGlobalErrorHandling } from "@/utils/errorHandling";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import LandingPage from "./pages/LandingPage";
 import Customers from "./pages/Customers";
 import Fleet from "./pages/Fleet";
 import Quotations from "./pages/Quotations";
@@ -96,6 +97,7 @@ const App = () => (
                 <Sonner />
                 <BrowserRouter>
                   <Routes>
+                    <Route path="/landing" element={<LandingPage />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/" element={
                       <ProtectedRoute>
