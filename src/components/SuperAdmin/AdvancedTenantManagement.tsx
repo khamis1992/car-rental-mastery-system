@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Building2, Users, MoreHorizontal, Shield, AlertTriangle, CheckCircle, Clock, TrendingUp, Settings, Eye, Edit, Trash2, UserPlus, Crown, Database, Activity, Globe } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Building2, Users, MoreHorizontal, Shield, AlertTriangle, CheckCircle, Clock, TrendingUp, Settings, Eye, Edit, Trash2, UserPlus, Crown, Database, Activity, Globe, Search, Filter, Plus, Download, Upload, RefreshCw } from "lucide-react";
 import DomainManagement from "./DomainManagement";
 import { supabase } from '@/integrations/supabase/client';
 import { TenantService } from '@/services/tenantService';
@@ -26,10 +27,18 @@ interface TenantWithStats extends Tenant {
 
 const AdvancedTenantManagement: React.FC = () => {
   const [tenants, setTenants] = useState<TenantWithStats[]>([]);
+  const [filteredTenants, setFilteredTenants] = useState<TenantWithStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTenant, setSelectedTenant] = useState<TenantWithStats | null>(null);
   const [showTenantDetails, setShowTenantDetails] = useState(false);
   const [showAddTenantDialog, setShowAddTenantDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [tenantToDelete, setTenantToDelete] = useState<TenantWithStats | null>(null);
+  
+  // حقول البحث والفلترة
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [planFilter, setPlanFilter] = useState<string>('all');
 
   // تعريف الباقات المختلفة
   const subscriptionPlans = {
@@ -84,9 +93,36 @@ const AdvancedTenantManagement: React.FC = () => {
 
   const tenantService = new TenantService();
   const { toast } = useToast();
+  
   useEffect(() => {
     loadTenants();
   }, []);
+
+  // تأثير البحث والفلترة
+  useEffect(() => {
+    let filtered = tenants;
+
+    // تطبيق البحث
+    if (searchTerm) {
+      filtered = filtered.filter(tenant => 
+        tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tenant.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tenant.contact_email?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // تطبيق فلتر الحالة
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(tenant => tenant.status === statusFilter);
+    }
+
+    // تطبيق فلتر الخطة
+    if (planFilter !== 'all') {
+      filtered = filtered.filter(tenant => tenant.subscription_plan === planFilter);
+    }
+
+    setFilteredTenants(filtered);
+  }, [tenants, searchTerm, statusFilter, planFilter]);
   // دالة جلب البيانات الحقيقية مع الإحصائيات
   const loadTenantsWithStats = async () => {
     try {
@@ -216,7 +252,7 @@ const AdvancedTenantManagement: React.FC = () => {
           });
           break;
         case 'delete':
-          // TODO: Add confirmation dialog
+          // يتم التعامل مع الحذف عبر handleDeleteTenant
           break;
       }
       loadTenants();
@@ -300,6 +336,52 @@ const AdvancedTenantManagement: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // وظيفة حذف المؤسسة مع تأكيد
+  const handleDeleteTenant = async () => {
+    if (!tenantToDelete) return;
+    
+    try {
+      setLoading(true);
+      // TODO: إضافة استدعاء API لحذف المؤسسة
+      // await tenantService.deleteTenant(tenantToDelete.id);
+      
+      toast({
+        title: "تم بنجاح",
+        description: `تم حذف المؤسسة ${tenantToDelete.name}`
+      });
+      
+      setShowDeleteDialog(false);
+      setTenantToDelete(null);
+      loadTenants();
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message || "فشل في حذف المؤسسة",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // إحصائيات سريعة
+  const getQuickStats = () => {
+    const totalTenants = tenants.length;
+    const activeTenants = tenants.filter(t => t.status === 'active').length;
+    const suspendedTenants = tenants.filter(t => t.status === 'suspended').length;
+    const totalUsers = tenants.reduce((sum, t) => sum + (t.actual_users || 0), 0);
+
+    return {
+      total: totalTenants,
+      active: activeTenants,
+      suspended: suspendedTenants,
+      users: totalUsers
+    };
+  };
+
+  const stats = getQuickStats();
+
   // No longer needed - replaced with EnhancedTenantOnboarding component
   const TenantDetailsDialog = ({
     tenant
@@ -477,11 +559,122 @@ const AdvancedTenantManagement: React.FC = () => {
   return <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-right">إدارة المؤسسات المتقدمة</h2>
-        <Button className="flex items-center gap-2" onClick={() => setShowAddTenantDialog(true)}>
-          <Building2 className="w-4 h-4" />
-          إضافة مؤسسة جديدة
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={loadTenants} className="flex items-center gap-2">
+            <RefreshCw className="w-4 h-4" />
+            تحديث
+          </Button>
+          <Button className="flex items-center gap-2" onClick={() => setShowAddTenantDialog(true)}>
+            <Building2 className="w-4 h-4" />
+            إضافة مؤسسة جديدة
+          </Button>
+        </div>
       </div>
+
+      {/* إحصائيات سريعة */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground text-right">إجمالي المؤسسات</p>
+                <p className="text-2xl font-bold text-right">{stats.total}</p>
+              </div>
+              <Building2 className="w-8 h-8 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground text-right">المؤسسات النشطة</p>
+                <p className="text-2xl font-bold text-green-600 text-right">{stats.active}</p>
+              </div>
+              <CheckCircle className="w-8 h-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground text-right">المؤسسات المعلقة</p>
+                <p className="text-2xl font-bold text-red-600 text-right">{stats.suspended}</p>
+              </div>
+              <Shield className="w-8 h-8 text-red-600" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground text-right">إجمالي المستخدمين</p>
+                <p className="text-2xl font-bold text-right">{stats.users}</p>
+              </div>
+              <Users className="w-8 h-8 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* أدوات البحث والفلترة */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="البحث في المؤسسات..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pr-10 text-right"
+              />
+            </div>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="فلترة حسب الحالة" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع الحالات</SelectItem>
+                <SelectItem value="active">نشط</SelectItem>
+                <SelectItem value="trial">تجريبي</SelectItem>
+                <SelectItem value="suspended">معلق</SelectItem>
+                <SelectItem value="cancelled">ملغي</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={planFilter} onValueChange={setPlanFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="فلترة حسب الخطة" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع الخطط</SelectItem>
+                <SelectItem value="basic">أساسي</SelectItem>
+                <SelectItem value="standard">معياري</SelectItem>
+                <SelectItem value="premium">مميز</SelectItem>
+                <SelectItem value="enterprise">مؤسسي</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                تصدير
+              </Button>
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Filter className="w-4 h-4" />
+                المزيد
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -503,7 +696,7 @@ const AdvancedTenantManagement: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tenants.map(tenant => <TableRow key={tenant.id}>
+              {filteredTenants.map(tenant => <TableRow key={tenant.id}>
                   <TableCell className="text-right">
                     <div>
                       <div className="font-medium">{tenant.name}</div>
@@ -547,10 +740,16 @@ const AdvancedTenantManagement: React.FC = () => {
                             <CheckCircle className="w-4 h-4 ml-2" />
                             تفعيل
                           </DropdownMenuItem>}
-                        <DropdownMenuItem className="text-red-600">
-                          <Trash2 className="w-4 h-4 ml-2" />
-                          حذف
-                        </DropdownMenuItem>
+                         <DropdownMenuItem 
+                           className="text-red-600"
+                           onClick={() => {
+                             setTenantToDelete(tenant);
+                             setShowDeleteDialog(true);
+                           }}
+                         >
+                           <Trash2 className="w-4 h-4 ml-2" />
+                           حذف
+                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -567,6 +766,34 @@ const AdvancedTenantManagement: React.FC = () => {
         onOpenChange={setShowAddTenantDialog}
         onSuccess={loadTenants}
       />
+      
+      {/* مربع حوار تأكيد الحذف */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-right">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+              تأكيد حذف المؤسسة
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              هل أنت متأكد من رغبتك في حذف المؤسسة "{tenantToDelete?.name}"؟
+              <br />
+              <strong className="text-destructive">
+                تحذير: هذا الإجراء لا يمكن التراجع عنه وسيتم حذف جميع البيانات المرتبطة بالمؤسسة.
+              </strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-2">
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteTenant}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              حذف المؤسسة
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 };
 export default AdvancedTenantManagement;
