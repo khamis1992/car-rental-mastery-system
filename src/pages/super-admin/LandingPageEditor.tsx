@@ -14,8 +14,10 @@ import {
   Plus,
   Globe,
   RefreshCw,
-  Settings
+  Settings,
+  ArrowRight
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useLandingContent, LandingContent } from '@/hooks/useLandingContent';
 import { useToast } from '@/hooks/use-toast';
 
@@ -109,13 +111,21 @@ const LandingPageEditor: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              محرر الصفحة الرئيسية
-            </h1>
-            <p className="text-muted-foreground">
-              إدارة وتحرير محتوى الصفحة الرئيسية بشكل ديناميكي
-            </p>
+          <div className="flex items-center gap-4">
+            <Link to="/super-admin">
+              <Button variant="outline" size="sm" className="gap-2">
+                <ArrowRight className="w-4 h-4" />
+                العودة للوحة التحكم
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                محرر الصفحة الرئيسية
+              </h1>
+              <p className="text-muted-foreground">
+                إدارة وتحرير محتوى الصفحة الرئيسية بشكل ديناميكي
+              </p>
+            </div>
           </div>
           
           <div className="flex gap-3">
