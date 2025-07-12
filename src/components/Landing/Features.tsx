@@ -1,4 +1,4 @@
-import { Car, Users, BarChart3, Shield, Clock, Smartphone } from "lucide-react";
+import { Car, Users, BarChart3, Shield, Clock } from "lucide-react";
 
 const features = [
   {
@@ -30,12 +30,6 @@ const features = [
     title: "أتمتة العمليات",
     description: "أتمتة العقود والفواتير والتذكيرات لتوفير الوقت والجهد",
     color: "text-orange-600 bg-orange-100"
-  },
-  {
-    icon: Smartphone,
-    title: "تطبيق موبايل متطور",
-    description: "تطبيق سهل الاستخدام للعملاء والموظفين مع إشعارات فورية",
-    color: "text-indigo-600 bg-indigo-100"
   }
 ];
 
