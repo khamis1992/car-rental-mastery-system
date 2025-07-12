@@ -78,6 +78,11 @@ const financialItems = [
     icon: Calculator 
   },
   { 
+    title: "التقارير المحاسبية", 
+    url: "/accounting-reports", 
+    icon: BarChart3 
+  },
+  { 
     title: "مراكز التكلفة", 
     url: "/cost-centers", 
     icon: Building2 
