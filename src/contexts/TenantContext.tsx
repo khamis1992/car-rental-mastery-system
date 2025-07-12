@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Tenant, TenantUser } from '@/types/tenant';
 import { TenantService } from '@/services/tenantService';
 import { tenantIsolationService } from '@/services/BusinessServices/TenantIsolationService';
+import { tenantIsolationMiddleware } from '@/middleware/TenantIsolationMiddleware';
 import { useAuth } from './AuthContext';
 
 interface TenantContextType {
@@ -67,12 +68,17 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
       }
 
       if (tenantUser && tenantUser.tenant) {
-        setCurrentTenant(tenantUser.tenant as Tenant);
+        const tenant = tenantUser.tenant as Tenant;
+        setCurrentTenant(tenant);
         setCurrentUserRole(tenantUser.role as TenantUser['role']);
+        
+        // تفعيل middleware العزل للمؤسسة
+        await tenantIsolationMiddleware.setCurrentTenant(tenant.id);
       } else {
         // User is not associated with any tenant
         setCurrentTenant(null);
         setCurrentUserRole(null);
+        tenantIsolationMiddleware.reset();
       }
     } catch (err: any) {
       console.error('Error loading tenant:', err);
@@ -112,8 +118,12 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
       if (error) throw error;
 
       if (tenantUser && tenantUser.tenant) {
-        setCurrentTenant(tenantUser.tenant as Tenant);
+        const tenant = tenantUser.tenant as Tenant;
+        setCurrentTenant(tenant);
         setCurrentUserRole(tenantUser.role as TenantUser['role']);
+        
+        // تفعيل middleware العزل للمؤسسة الجديدة
+        await tenantIsolationMiddleware.setCurrentTenant(tenant.id);
         
         // Store selected tenant in localStorage for persistence
         localStorage.setItem('selectedTenantId', tenantId);

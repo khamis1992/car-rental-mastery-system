@@ -5142,6 +5142,45 @@ export type Database = {
           },
         ]
       }
+      tenant_access_logs: {
+        Row: {
+          action: string
+          actual_tenant_id: string | null
+          attempted_tenant_id: string | null
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          success: boolean
+          table_name: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          actual_tenant_id?: string | null
+          attempted_tenant_id?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          success: boolean
+          table_name: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          actual_tenant_id?: string | null
+          attempted_tenant_id?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+          table_name?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       tenant_assets: {
         Row: {
           alt_text: string | null
@@ -7061,6 +7100,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      log_tenant_access_attempt: {
+        Args: {
+          attempted_tenant_id: string
+          table_name: string
+          action: string
+          success: boolean
+        }
+        Returns: undefined
+      }
       log_transaction: {
         Args:
           | {
@@ -7188,6 +7236,10 @@ export type Database = {
       validate_tenant_access: {
         Args: { table_tenant_id: string }
         Returns: boolean
+      }
+      validate_tenant_isolation_integrity: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       verify_domain: {
         Args: { p_verification_id: string }
