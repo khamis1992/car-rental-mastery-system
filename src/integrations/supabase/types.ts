@@ -6804,6 +6804,10 @@ export type Database = {
         Args: { tenant_id_param: string }
         Returns: number
       }
+      complete_chart_of_accounts_part4: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
       copy_default_branches: {
         Args: { target_tenant_id: string }
         Returns: number
@@ -7208,6 +7212,10 @@ export type Database = {
       safe_delete_tenant: {
         Args: { tenant_id_param: string; deletion_reason?: string }
         Returns: Json
+      }
+      setup_complete_chart_of_accounts: {
+        Args: { tenant_id_param: string }
+        Returns: boolean
       }
       setup_default_role_permissions: {
         Args: { _tenant_id: string }
