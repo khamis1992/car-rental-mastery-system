@@ -6854,6 +6854,10 @@ export type Database = {
         Args: { attendance_data: Json }
         Returns: string
       }
+      create_comprehensive_chart_of_accounts: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
       create_contract_accounting_entry: {
         Args: { contract_id: string; contract_data: Json }
         Returns: string
