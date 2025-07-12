@@ -1,9 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Car, Shield, Zap } from "lucide-react";
-
 export function Hero() {
-  return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary-glow to-accent min-h-screen flex items-center">
+  return <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary-glow to-accent min-h-screen flex items-center">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 right-10 w-32 h-32 border-2 border-white/30 rounded-full"></div>
@@ -16,9 +14,9 @@ export function Hero() {
           {/* Content */}
           <div className="text-center lg:text-right text-white">
             <h1 className="text-5xl lg:text-7xl font-bold mb-6 leading-tight">
-              <span className="text-white">البشائر</span>
+              
               <br />
-              <span className="text-accent-foreground">الخليجية</span>
+              <span className="text-accent-foreground">fleetify</span>
             </h1>
             
             <p className="text-xl lg:text-2xl mb-8 text-white/90 max-w-2xl">
@@ -90,6 +88,5 @@ export function Hero() {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 }
