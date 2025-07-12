@@ -45,7 +45,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 const coreBusinessItems = [
   { 
     title: "الرئيسية", 
-    url: "/", 
+    url: "/dashboard", 
     icon: Home 
   },
   { 
