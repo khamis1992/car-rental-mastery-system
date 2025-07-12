@@ -1,18 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react";
-
 export function Footer() {
-  return (
-    <footer className="bg-primary text-primary-foreground">
+  return <footer className="bg-primary text-primary-foreground">
       {/* Main Footer */}
       <div className="container mx-auto px-6 py-16">
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="lg:col-span-1">
-            <h3 className="text-2xl font-bold mb-4">
-              البشائر الخليجية
-            </h3>
+            <h3 className="text-2xl font-bold mb-4">fleetify</h3>
             <p className="text-primary-foreground/80 mb-6 leading-relaxed">
               نظام إدارة تأجير السيارات المتكامل المصمم خصيصاً لدولة الكويت. 
               نقدم حلولاً ذكية ومتطورة لإدارة أعمالك بكفاءة عالية.
@@ -104,10 +100,7 @@ export function Footer() {
               احصل على آخر التحديثات والمميزات الجديدة
             </p>
             <div className="flex gap-2">
-              <Input 
-                placeholder="بريدك الإلكتروني"
-                className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/60"
-              />
+              <Input placeholder="بريدك الإلكتروني" className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/60" />
               <Button variant="secondary" size="sm">
                 اشترك
               </Button>
@@ -153,6 +146,5 @@ export function Footer() {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 }
