@@ -136,12 +136,6 @@ const Auth = () => {
           </Button>
         </form>
 
-        {/* Test Credentials */}
-        <div className="mt-8 text-center text-xs text-muted-foreground">
-          <p>للاختبار، يمكنك استخدام:</p>
-          <p className="font-mono mt-1">admin@admin.com</p>
-          <p className="mt-2">تواصل مع المدير لإنشاء حساب جديد</p>
-        </div>
       </div>
     </div>
   );
