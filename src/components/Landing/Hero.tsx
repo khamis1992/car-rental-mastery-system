@@ -1,6 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Car, Shield, Zap } from "lucide-react";
+import { useLandingContent } from "@/hooks/useLandingContent";
+
 export function Hero() {
+  const { getContentValue } = useLandingContent('hero');
   return <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary-glow to-accent min-h-screen flex items-center">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
@@ -14,15 +17,13 @@ export function Hero() {
           {/* Content */}
           <div className="text-center lg:text-right text-white">
             <h1 className="text-5xl lg:text-7xl font-bold mb-6 leading-tight">
-              
+              {getContentValue('hero', 'title') || 'نظام إدارة تأجير السيارات الأكثر تطوراً'}
               <br />
               <span className="text-accent-foreground">fleetify</span>
             </h1>
             
             <p className="text-xl lg:text-2xl mb-8 text-white/90 max-w-2xl">
-              نظام إدارة تأجير السيارات المتكامل المصمم خصيصاً لدولة الكويت
-              <br />
-              إدارة ذكية، حلول عملية، نتائج مضمونة
+              {getContentValue('hero', 'subtitle') || 'حلول متكاملة لإدارة أسطول السيارات مع تقنيات حديثة ونظام محاسبي متقدم'}
             </p>
 
             <div className="flex flex-wrap gap-4 justify-center lg:justify-start mb-8">
@@ -42,7 +43,7 @@ export function Hero() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button size="lg" variant="secondary" className="text-lg px-8 py-4 bg-white text-primary hover:bg-white/90">
-                ابدأ تجربتك المجانية
+                {getContentValue('hero', 'cta_text') || 'احجز عرضاً تجريبياً'}
                 <ArrowLeft className="w-5 h-5 mr-2" />
               </Button>
             </div>

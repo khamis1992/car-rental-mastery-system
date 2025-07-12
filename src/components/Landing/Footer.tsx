@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react";
+import { useLandingContent } from "@/hooks/useLandingContent";
+
 export function Footer() {
+  const { getContentValue } = useLandingContent('footer');
   return <footer className="bg-primary text-primary-foreground">
       {/* Main Footer */}
       <div className="container mx-auto px-6 py-16">
@@ -10,8 +13,7 @@ export function Footer() {
           <div className="lg:col-span-1">
             <h3 className="text-2xl font-bold mb-4">fleetify</h3>
             <p className="text-primary-foreground/80 mb-6 leading-relaxed">
-              نظام إدارة تأجير السيارات المتكامل المصمم خصيصاً لدولة الكويت. 
-              نقدم حلولاً ذكية ومتطورة لإدارة أعمالك بكفاءة عالية.
+              {getContentValue('footer', 'company_description') || 'شركة ساپتكو الخليج الرائدة في مجال تأجير السيارات وحلول إدارة الأساطيل'}
             </p>
             <div className="flex gap-4">
               <div className="w-10 h-10 bg-primary-foreground/10 rounded-lg flex items-center justify-center hover:bg-primary-foreground/20 transition-colors cursor-pointer">
@@ -130,7 +132,7 @@ export function Footer() {
         <div className="container mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-primary-foreground/80">
-              © 2024 البشائر الخليجية. جميع الحقوق محفوظة.
+              © 2024 {getContentValue('footer', 'copyright') || 'جميع الحقوق محفوظة - شركة ساپتكو الخليج'}
             </p>
             <div className="flex gap-6 text-sm">
               <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground">

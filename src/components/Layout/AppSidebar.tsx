@@ -184,6 +184,11 @@ const superAdminItems = [
     icon: MessageCircle 
   },
   { 
+    title: "محرر الصفحة الرئيسية", 
+    url: "/super-admin/landing-editor", 
+    icon: FileText 
+  },
+  { 
     title: "الإعدادات العامة", 
     url: "/super-admin/global-settings", 
     icon: Settings 

@@ -2,17 +2,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import { useLandingContent } from "@/hooks/useLandingContent";
 
 export function Contact() {
+  const { getContentValue } = useLandingContent('contact');
   return (
     <section className="py-20 bg-muted/30">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-foreground">
-            تواصل معنا
+            {getContentValue('contact', 'title') || 'تواصل معنا'}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            فريقنا جاهز لمساعدتك في البدء. تواصل معنا للحصول على استشارة مجانية
+            {getContentValue('contact', 'subtitle') || 'نحن هنا لمساعدتك في تطوير عملك'}
           </p>
         </div>
 
@@ -99,10 +101,10 @@ export function Contact() {
                     هاتف
                   </h4>
                   <p className="text-muted-foreground">
-                    +965 2XXX XXXX
+                    {getContentValue('contact', 'phone_primary') || '+965 2220 0000'}
                   </p>
                   <p className="text-muted-foreground">
-                    +965 9XXX XXXX
+                    {getContentValue('contact', 'phone_secondary') || '+965 9999 0000'}
                   </p>
                 </div>
               </div>
@@ -116,10 +118,10 @@ export function Contact() {
                     البريد الإلكتروني
                   </h4>
                   <p className="text-muted-foreground">
-                    info@bashair-gulf.com
+                    {getContentValue('contact', 'email_sales') || 'sales@saptcogulf.com'}
                   </p>
                   <p className="text-muted-foreground">
-                    support@bashair-gulf.com
+                    {getContentValue('contact', 'email_support') || 'support@saptcogulf.com'}
                   </p>
                 </div>
               </div>
@@ -133,9 +135,7 @@ export function Contact() {
                     العنوان
                   </h4>
                   <p className="text-muted-foreground">
-                    الكويت العاصمة، شارع الخليج العربي
-                    <br />
-                    برج التجارة، الطابق الخامس
+                    {getContentValue('contact', 'address') || 'الكويت، منطقة الشرق، شارع الخليج العربي'}
                   </p>
                 </div>
               </div>
@@ -149,9 +149,7 @@ export function Contact() {
                     ساعات العمل
                   </h4>
                   <p className="text-muted-foreground">
-                    الأحد - الخميس: ٨:٠٠ ص - ٦:٠٠ م
-                    <br />
-                    الجمعة - السبت: مغلق
+                    {getContentValue('contact', 'working_hours') || 'الأحد - الخميس: 8:00 ص - 6:00 م'}
                   </p>
                 </div>
               </div>

@@ -3380,6 +3380,45 @@ export type Database = {
           },
         ]
       }
+      landing_page_content: {
+        Row: {
+          content_key: string
+          content_type: string
+          content_value: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          section_name: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content_key: string
+          content_type?: string
+          content_value?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          section_name: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content_key?: string
+          content_type?: string
+          content_value?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          section_name?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       leave_requests: {
         Row: {
           approved_at: string | null
