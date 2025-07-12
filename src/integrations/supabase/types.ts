@@ -6796,6 +6796,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      complete_chart_of_accounts_part2: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
       copy_default_branches: {
         Args: { target_tenant_id: string }
         Returns: number
