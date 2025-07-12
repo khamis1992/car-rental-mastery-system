@@ -6732,6 +6732,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      validate_accounting_access: {
+        Args: { target_tenant_id: string }
+        Returns: boolean
+      }
       validate_accounting_balance: {
         Args: { journal_entry_id: string }
         Returns: Json

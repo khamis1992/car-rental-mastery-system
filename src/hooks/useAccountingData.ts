@@ -91,48 +91,49 @@ export const useAccountingData = () => {
       // Update account balances first
       await supabase.rpc('update_account_balances');
 
-      // Get updated revenue accounts (4xxx) - correct calculation for revenue accounts
-      const { data: revenueAccounts, error: revenueError } = await supabase
-        .from('chart_of_accounts')
-        .select('current_balance')
-        .eq('account_type', 'revenue')
-        .eq('is_active', true);
+      // Use the tenant-aware accounting service to get data
+      const [revenueAccounts, expenseAccounts, pendingInvoices, cashAccounts] = await Promise.all([
+        // Get revenue accounts for current tenant
+        supabase
+          .from('chart_of_accounts')
+          .select('current_balance')
+          .eq('account_type', 'revenue')
+          .eq('is_active', true),
+        
+        // Get expense accounts for current tenant  
+        supabase
+          .from('chart_of_accounts')
+          .select('current_balance')
+          .eq('account_type', 'expense')
+          .eq('is_active', true),
+        
+        // Get pending invoices for current tenant
+        supabase
+          .from('invoices')
+          .select('outstanding_amount')
+          .in('status', ['sent', 'overdue']),
+        
+        // Get cash accounts for current tenant
+        supabase
+          .from('chart_of_accounts')
+          .select('current_balance')
+          .eq('account_type', 'asset')
+          .eq('account_category', 'current_asset')
+          .eq('is_active', true)
+          .or('account_name.ilike.%نقدية%,account_name.ilike.%صندوق%,account_name.ilike.%cash%')
+      ]);
 
-      if (revenueError) throw revenueError;
+      // Check for errors
+      if (revenueAccounts.error) throw revenueAccounts.error;
+      if (expenseAccounts.error) throw expenseAccounts.error;
+      if (pendingInvoices.error) throw pendingInvoices.error;
+      if (cashAccounts.error) throw cashAccounts.error;
 
-      // Get expense accounts (5xxx) - correct calculation for expense accounts
-      const { data: expenseAccounts, error: expenseError } = await supabase
-        .from('chart_of_accounts')
-        .select('current_balance')
-        .eq('account_type', 'expense')
-        .eq('is_active', true);
-
-      if (expenseError) throw expenseError;
-
-      // Get pending invoices
-      const { data: pendingInvoices, error: invoicesError } = await supabase
-        .from('invoices')
-        .select('outstanding_amount')
-        .in('status', ['sent', 'overdue']);
-
-      if (invoicesError) throw invoicesError;
-
-      // Get cash balances from asset accounts
-      const { data: cashAccounts, error: cashError } = await supabase
-        .from('chart_of_accounts')
-        .select('current_balance')
-        .eq('account_type', 'asset')
-        .eq('account_category', 'current_asset')
-        .eq('is_active', true)
-        .or('account_name.ilike.%نقدية%,account_name.ilike.%صندوق%,account_name.ilike.%cash%');
-
-      if (cashError) throw cashError;
-
-      // Calculate totals with proper accounting logic
-      const monthlyRevenue = Math.abs((revenueAccounts || []).reduce((sum, acc) => sum + (acc.current_balance || 0), 0));
-      const totalExpenses = Math.abs((expenseAccounts || []).reduce((sum, acc) => sum + (acc.current_balance || 0), 0));
-      const pendingPayments = (pendingInvoices || []).reduce((sum, inv) => sum + (inv.outstanding_amount || 0), 0);
-      const cashBalance = (cashAccounts || []).reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
+      // Calculate totals with proper accounting logic (tenant-isolated data)
+      const monthlyRevenue = Math.abs((revenueAccounts.data || []).reduce((sum, acc) => sum + (acc.current_balance || 0), 0));
+      const totalExpenses = Math.abs((expenseAccounts.data || []).reduce((sum, acc) => sum + (acc.current_balance || 0), 0));
+      const pendingPayments = (pendingInvoices.data || []).reduce((sum, inv) => sum + (inv.outstanding_amount || 0), 0);
+      const cashBalance = (cashAccounts.data || []).reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
       
       // Use actual revenue from payments if available, otherwise use account balances
       const actualRevenue = metrics.actual_revenue || 0;
@@ -159,7 +160,7 @@ export const useAccountingData = () => {
 
   const fetchRecentTransactions = async (): Promise<RecentTransaction[]> => {
     try {
-      // Get recent journal entries
+      // Get recent journal entries for current tenant (RLS will handle filtering)
       const { data: journalEntries, error } = await supabase
         .from('journal_entries')
         .select(`

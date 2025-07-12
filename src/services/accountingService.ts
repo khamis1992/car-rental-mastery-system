@@ -2,11 +2,29 @@ import { supabase } from "@/integrations/supabase/client";
 import { ChartOfAccount, JournalEntry, JournalEntryLine, CostCenter, Branch, FinancialPeriod, TrialBalance, IncomeStatement, BalanceSheet } from "@/types/accounting";
 
 export const accountingService = {
+  // Helper method to get current tenant ID
+  async getCurrentTenantId(): Promise<string> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const { data, error } = await supabase
+      .from('tenant_users')
+      .select('tenant_id')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .single();
+
+    if (error || !data) throw new Error('No active tenant found for user');
+    return data.tenant_id;
+  },
+
   // Chart of Accounts
   async getChartOfAccounts(): Promise<ChartOfAccount[]> {
+    const tenantId = await this.getCurrentTenantId();
     const { data, error } = await supabase
       .from('chart_of_accounts')
       .select('*')
+      .eq('tenant_id', tenantId)
       .order('account_code');
     
     if (error) throw error;
@@ -47,6 +65,7 @@ export const accountingService = {
 
   // Journal Entries
   async getJournalEntries(): Promise<JournalEntry[]> {
+    const tenantId = await this.getCurrentTenantId();
     const { data, error } = await supabase
       .from('journal_entries')
       .select(`
@@ -57,6 +76,7 @@ export const accountingService = {
           cost_center:cost_centers(*)
         )
       `)
+      .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false });
     
     if (error) throw error;
@@ -160,9 +180,11 @@ export const accountingService = {
 
   // Cost Centers
   async getCostCenters(): Promise<CostCenter[]> {
+    const tenantId = await this.getCurrentTenantId();
     const { data, error } = await supabase
       .from('cost_centers')
       .select('*')
+      .eq('tenant_id', tenantId)
       .order('cost_center_code');
     
     if (error) throw error;
@@ -187,9 +209,11 @@ export const accountingService = {
 
   // Branches
   async getBranches(): Promise<Branch[]> {
+    const tenantId = await this.getCurrentTenantId();
     const { data, error } = await supabase
       .from('branches')
       .select('*')
+      .eq('tenant_id', tenantId)
       .order('branch_code');
     
     if (error) throw error;
@@ -225,9 +249,11 @@ export const accountingService = {
 
   // Reports
   async getTrialBalance(periodId?: string): Promise<TrialBalance[]> {
+    const tenantId = await this.getCurrentTenantId();
     let query = supabase
       .from('chart_of_accounts')
       .select('account_code, account_name, current_balance, account_type')
+      .eq('tenant_id', tenantId)
       .eq('allow_posting', true)
       .neq('current_balance', 0);
 
@@ -246,9 +272,11 @@ export const accountingService = {
   },
 
   async getIncomeStatement(startDate: string, endDate: string): Promise<IncomeStatement> {
+    const tenantId = await this.getCurrentTenantId();
     const { data, error } = await supabase
       .from('chart_of_accounts')
       .select('account_type, account_category, current_balance')
+      .eq('tenant_id', tenantId)
       .in('account_type', ['revenue', 'expense']);
     
     if (error) throw error;
@@ -290,9 +318,11 @@ export const accountingService = {
   },
 
   async getBalanceSheet(): Promise<BalanceSheet> {
+    const tenantId = await this.getCurrentTenantId();
     const { data, error } = await supabase
       .from('chart_of_accounts')
       .select('account_type, account_category, current_balance')
+      .eq('tenant_id', tenantId)
       .in('account_type', ['asset', 'liability', 'equity']);
     
     if (error) throw error;
