@@ -15,6 +15,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useContractsOptimized } from "@/hooks/useContractsOptimized";
 import { useMaintenanceData } from "@/hooks/useMaintenanceData";
+import { useTenant } from "@/contexts/TenantContext";
 import TenantGuard from "@/components/TenantGuard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -24,13 +25,14 @@ const Index = () => {
   const navigate = useNavigate();
   const { contractStats, customers, loading } = useContractsOptimized();
   const { maintenanceRecords } = useMaintenanceData();
+  const { currentTenant } = useTenant();
 
   return (
     <div className="container mx-auto px-6 py-8">
         {/* شاشة الترحيب */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-foreground mb-2">
-            مرحباً بك في البشائر الخليجية
+            مرحباً بك في {currentTenant?.name || 'النظام'}
           </h2>
           <p className="text-muted-foreground">
             نظرة شاملة على أعمالك وإدارة متكاملة لجميع عمليات التأجير

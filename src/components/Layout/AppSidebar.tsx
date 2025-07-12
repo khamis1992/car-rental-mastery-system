@@ -199,7 +199,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const { profile, isSaasAdmin } = useAuth();
-  const { currentUserRole } = useTenant();
+  const { currentUserRole, currentTenant } = useTenant();
   const currentPath = location.pathname;
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({
     core: false,
@@ -345,7 +345,7 @@ export function AppSidebar() {
           </div>
           {state === "expanded" && (
             <div className="flex-1">
-              <h2 className="text-lg font-bold text-foreground">البشائر الخليجية</h2>
+              <h2 className="text-lg font-bold text-foreground">{currentTenant?.name || 'النظام'}</h2>
               {profile && (
                 <Badge className={`text-white text-xs ${getRoleColor(profile.role)}`}>
                   {getRoleLabel(profile.role)}
