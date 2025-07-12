@@ -193,7 +193,7 @@ const superAdminItems = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
-  const { profile } = useAuth();
+  const { profile, isSaasAdmin } = useAuth();
   const { currentUserRole } = useTenant();
   const currentPath = location.pathname;
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({
@@ -352,12 +352,20 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {renderMenuGroup(coreBusinessItems, "core", "الأعمال الأساسية", Building2)}
-        {renderMenuGroup(financialItems, "financial", "المالية", Calculator)}
-        {renderMenuGroup(fleetManagementItems, "fleet", "إدارة الأسطول", Car)}
-        {renderMenuGroup(filteredHrItems, "hr", "الموارد البشرية", UserCheck)}
-        {renderMenuGroup(systemItems, "system", "النظام", Settings)}
-        {currentUserRole === 'super_admin' && renderMenuGroup(superAdminItems, "superadmin", "إدارة النظام العام", Crown)}
+        {isSaasAdmin ? (
+          // عرض قسم إدارة النظام العام فقط لـ admin@admin.com
+          renderMenuGroup(superAdminItems, "superadmin", "إدارة النظام العام", Crown)
+        ) : (
+          // عرض جميع الأقسام للمستخدمين العاديين
+          <>
+            {renderMenuGroup(coreBusinessItems, "core", "الأعمال الأساسية", Building2)}
+            {renderMenuGroup(financialItems, "financial", "المالية", Calculator)}
+            {renderMenuGroup(fleetManagementItems, "fleet", "إدارة الأسطول", Car)}
+            {renderMenuGroup(filteredHrItems, "hr", "الموارد البشرية", UserCheck)}
+            {renderMenuGroup(systemItems, "system", "النظام", Settings)}
+            {currentUserRole === 'super_admin' && renderMenuGroup(superAdminItems, "superadmin", "إدارة النظام العام", Crown)}
+          </>
+        )}
       </SidebarContent>
     </Sidebar>
   );

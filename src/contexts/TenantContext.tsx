@@ -36,6 +36,15 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
       return;
     }
 
+    // منع admin@admin.com من تحميل بيانات المؤسسات
+    if (user.email === 'admin@admin.com') {
+      setCurrentTenant(null);
+      setCurrentUserRole('super_admin');
+      setLoading(false);
+      console.log('🔧 SaaS Admin detected - tenant data loading skipped');
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);

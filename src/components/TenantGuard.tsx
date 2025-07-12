@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useTenant } from '@/contexts/TenantContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface TenantGuardProps {
@@ -10,6 +11,12 @@ interface TenantGuardProps {
 
 const TenantGuard: React.FC<TenantGuardProps> = ({ children, requiredRole }) => {
   const { currentTenant, currentUserRole, loading } = useTenant();
+  const { isSaasAdmin } = useAuth();
+
+  // تخطي فحص المؤسسة لمدير النظام العام
+  if (isSaasAdmin) {
+    return <>{children}</>;
+  }
 
   if (loading) {
     return (

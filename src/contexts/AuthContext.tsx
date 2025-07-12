@@ -20,10 +20,12 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
+  isSaasAdmin: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   hasRole: (role: string) => boolean;
+  checkSaasAdmin: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,6 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSaasAdmin, setIsSaasAdmin] = useState(false);
   
 
   const fetchProfile = useCallback(async (userId: string, retryCount = 0): Promise<Profile | null> => {
@@ -205,15 +208,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return profile?.role === role;
   };
 
+  const checkSaasAdmin = useCallback((): boolean => {
+    return user?.email === 'admin@admin.com';
+  }, [user]);
+
+  // تحديث حالة SaaS admin عند تغيير المستخدم
+  useEffect(() => {
+    const saasAdminStatus = checkSaasAdmin();
+    setIsSaasAdmin(saasAdminStatus);
+  }, [checkSaasAdmin]);
+
   const value = {
     user,
     session,
     profile,
     loading,
+    isSaasAdmin,
     signIn,
     signUp,
     signOut,
     hasRole,
+    checkSaasAdmin,
   };
 
   return (
