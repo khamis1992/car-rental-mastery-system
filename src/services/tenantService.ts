@@ -36,69 +36,132 @@ export class TenantService {
 
   // Create new tenant (onboarding)
   async createTenant(tenantData: TenantOnboardingData): Promise<Tenant> {
-    // First, create the tenant
-    const { data: tenant, error: tenantError } = await supabase
-      .from('tenants')
-      .insert({
-        name: tenantData.name,
-        slug: tenantData.slug,
-        contact_email: tenantData.contact_email,
-        contact_phone: tenantData.contact_phone,
-        address: tenantData.address,
-        city: tenantData.city,
-        country: tenantData.country,
-        timezone: tenantData.timezone,
-        currency: tenantData.currency,
-        subscription_plan: tenantData.subscription_plan,
-        status: 'trial'
-      })
-      .select()
-      .single();
-
-    if (tenantError) throw tenantError;
-
-    // Create admin user account
-    const { data: authUser, error: authError } = await supabase.auth.signUp({
-      email: tenantData.admin_user.email,
-      password: tenantData.admin_user.password,
-      options: {
-        data: {
-          full_name: tenantData.admin_user.full_name
+    try {
+      console.log('Creating tenant with data:', tenantData);
+      
+      // استخدام الدالة المحسنة لإنشاء المؤسسة
+      const { data: result, error } = await supabase.rpc('create_tenant_with_admin', {
+        tenant_data: {
+          name: tenantData.name,
+          slug: tenantData.slug,
+          contact_email: tenantData.contact_email,
+          contact_phone: tenantData.contact_phone,
+          address: tenantData.address,
+          city: tenantData.city,
+          country: tenantData.country,
+          timezone: tenantData.timezone,
+          currency: tenantData.currency,
+          subscription_plan: tenantData.subscription_plan,
+          status: 'trial'
         }
+      });
+
+      if (error) {
+        console.error('Error calling create_tenant_with_admin:', error);
+        throw new Error(`خطأ في إنشاء المؤسسة: ${error.message}`);
       }
-    });
 
-    if (authError) {
-      // Cleanup: delete the tenant if user creation failed
-      await supabase.from('tenants').delete().eq('id', tenant.id);
-      throw authError;
-    }
+      const typedResult = result as { success: boolean; tenant_id?: string; error?: string; debug_info?: any };
+      
+      if (!typedResult?.success) {
+        console.error('Tenant creation failed:', result);
+        throw new Error(`فشل في إنشاء المؤسسة: ${typedResult?.error || 'خطأ غير معروف'}`);
+      }
 
-    // Link user to tenant as admin
-    if (authUser.user) {
-      const { error: linkError } = await supabase
-        .from('tenant_users')
-        .insert({
-          tenant_id: tenant.id,
-          user_id: authUser.user.id,
-          role: 'tenant_admin',
-          status: 'active'
+      console.log('Tenant created successfully via function:', result);
+
+      // الحصول على بيانات المؤسسة المنشأة
+      const { data: tenant, error: fetchError } = await supabase
+        .from('tenants')
+        .select('*')
+        .eq('id', typedResult.tenant_id!)
+        .single();
+
+      if (fetchError || !tenant) {
+        console.error('Error fetching created tenant:', fetchError);
+        throw new Error('تم إنشاء المؤسسة ولكن لم يتم العثور عليها');
+      }
+
+      // Create admin user account if provided
+      if (tenantData.admin_user) {
+        const { data: authUser, error: authError } = await supabase.auth.signUp({
+          email: tenantData.admin_user.email,
+          password: tenantData.admin_user.password,
+          options: {
+            data: {
+              full_name: tenantData.admin_user.full_name
+            }
+          }
         });
 
-      if (linkError) {
-        // Cleanup on failure
-        await supabase.from('tenants').delete().eq('id', tenant.id);
-        throw linkError;
+        if (authError) {
+          console.warn('Failed to create admin user:', authError);
+          // Don't throw here as tenant was created successfully
+        } else if (authUser.user) {
+          // Link new user to tenant as admin
+          await supabase
+            .from('tenant_users')
+            .insert({
+              tenant_id: tenant.id,
+              user_id: authUser.user.id,
+              role: 'tenant_admin',
+              status: 'active'
+            });
+        }
+      }
+
+      return {
+        ...tenant,
+        status: tenant.status as Tenant['status'],
+        subscription_plan: tenant.subscription_plan as Tenant['subscription_plan'],
+        subscription_status: tenant.subscription_status as Tenant['subscription_status'],
+        settings: (tenant.settings as Record<string, any>) || {}
+      };
+    } catch (error) {
+      console.error('Error in createTenant:', error);
+      
+      // محاولة بديلة إذا فشلت الدالة المحسنة
+      console.log('Attempting fallback tenant creation...');
+      try {
+        const { data: debugInfo } = await supabase.rpc('debug_user_context');
+        console.log('Debug info:', debugInfo);
+        
+        const { data: tenant, error: fallbackError } = await supabase
+          .from('tenants')
+          .insert({
+            name: tenantData.name,
+            slug: tenantData.slug,
+            contact_email: tenantData.contact_email,
+            contact_phone: tenantData.contact_phone,
+            address: tenantData.address,
+            city: tenantData.city,
+            country: tenantData.country,
+            timezone: tenantData.timezone,
+            currency: tenantData.currency,
+            subscription_plan: tenantData.subscription_plan,
+            status: 'trial'
+          })
+          .select()
+          .single();
+
+        if (fallbackError) {
+          console.error('Fallback creation also failed:', fallbackError);
+          throw new Error(`خطأ في إنشاء المؤسسة (محاولة بديلة): ${fallbackError.message}. معلومات التشخيص: ${JSON.stringify(debugInfo)}`);
+        }
+
+        console.log('Fallback tenant creation successful:', tenant);
+        return {
+          ...tenant,
+          status: tenant.status as Tenant['status'],
+          subscription_plan: tenant.subscription_plan as Tenant['subscription_plan'],
+          subscription_status: tenant.subscription_status as Tenant['subscription_status'],
+          settings: (tenant.settings as Record<string, any>) || {}
+        };
+      } catch (fallbackError) {
+        console.error('Both creation methods failed:', fallbackError);
+        throw error; // رمي الخطأ الأصلي
       }
     }
-
-    return {
-      ...tenant,
-      status: tenant.status as Tenant['status'],
-      subscription_plan: tenant.subscription_plan as Tenant['subscription_plan'],
-      subscription_status: tenant.subscription_status as Tenant['subscription_status'],
-      settings: (tenant.settings as Record<string, any>) || {}
-    };
   }
 
   // Update tenant settings

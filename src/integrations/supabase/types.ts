@@ -6275,6 +6275,10 @@ export type Database = {
         Args: { payroll_id: string; payroll_data: Json }
         Returns: string
       }
+      create_tenant_with_admin: {
+        Args: { tenant_data: Json; admin_user_id?: string }
+        Returns: Json
+      }
       create_vehicle_asset: {
         Args: { vehicle_id: string; vehicle_data: Json }
         Returns: string
@@ -6302,6 +6306,10 @@ export type Database = {
           customer_name: string
         }
         Returns: string
+      }
+      debug_user_context: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       execute_analytics_query: {
         Args: { query_text: string }
