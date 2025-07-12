@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { Building2, Users, MoreHorizontal, Shield, AlertTriangle, CheckCircle, Clock, TrendingUp, Settings, Eye, Edit, Trash2, UserPlus, Crown, Database, Activity, Globe, Search, Filter, Plus, Download, Upload, RefreshCw } from "lucide-react";
 import DomainManagement from "./DomainManagement";
 import { supabase } from '@/integrations/supabase/client';
@@ -33,7 +34,10 @@ const AdvancedTenantManagement: React.FC = () => {
   const [showTenantDetails, setShowTenantDetails] = useState(false);
   const [showAddTenantDialog, setShowAddTenantDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showHardDeleteDialog, setShowHardDeleteDialog] = useState(false);
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [tenantToDelete, setTenantToDelete] = useState<TenantWithStats | null>(null);
+  const [deleteReason, setDeleteReason] = useState('');
   
   // حقول البحث والفلترة
   const [searchTerm, setSearchTerm] = useState('');
@@ -337,29 +341,92 @@ const AdvancedTenantManagement: React.FC = () => {
     }
   };
 
-  // وظيفة حذف المؤسسة مع تأكيد
+  // وظيفة إلغاء المؤسسة (soft delete)
   const handleDeleteTenant = async () => {
     if (!tenantToDelete) return;
     
     try {
       setLoading(true);
       
-      // استدعاء API لحذف المؤسسة
-      await tenantService.deleteTenant(tenantToDelete.id, "حذف من لوحة الإدارة العامة");
+      // استدعاء API لإلغاء المؤسسة
+      const result = await tenantService.deleteTenant(tenantToDelete.id, deleteReason || "إلغاء من لوحة الإدارة العامة", false);
       
       toast({
         title: "تم بنجاح",
-        description: `تم إلغاء تفعيل المؤسسة ${tenantToDelete.name} بنجاح`
+        description: result.message || `تم إلغاء المؤسسة ${tenantToDelete.name} بنجاح`
       });
       
       setShowDeleteDialog(false);
       setTenantToDelete(null);
-      await loadTenants(); // تحديث القائمة بعد الحذف
+      setDeleteReason('');
+      await loadTenants();
     } catch (error: any) {
-      console.error('Error deleting tenant:', error);
+      console.error('Error cancelling tenant:', error);
       toast({
         title: "خطأ",
-        description: error.message || "فشل في حذف المؤسسة",
+        description: error.message || "فشل في إلغاء المؤسسة",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // وظيفة الحذف النهائي للمؤسسة (hard delete)
+  const handleHardDeleteTenant = async () => {
+    if (!tenantToDelete) return;
+    
+    try {
+      setLoading(true);
+      
+      // استدعاء API للحذف النهائي
+      const result = await tenantService.deleteTenant(tenantToDelete.id, deleteReason || "حذف نهائي من لوحة الإدارة العامة", true);
+      
+      toast({
+        title: "تم بنجاح",
+        description: result.message || `تم حذف المؤسسة ${tenantToDelete.name} نهائياً`
+      });
+      
+      setShowHardDeleteDialog(false);
+      setTenantToDelete(null);
+      setDeleteReason('');
+      await loadTenants();
+    } catch (error: any) {
+      console.error('Error hard deleting tenant:', error);
+      toast({
+        title: "خطأ",
+        description: error.message || "فشل في الحذف النهائي للمؤسسة",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // وظيفة استعادة المؤسسة الملغاة
+  const handleRestoreTenant = async () => {
+    if (!tenantToDelete) return;
+    
+    try {
+      setLoading(true);
+      
+      // استدعاء API لاستعادة المؤسسة
+      const result = await tenantService.restoreTenant(tenantToDelete.id, deleteReason || "استعادة من لوحة الإدارة العامة");
+      
+      toast({
+        title: "تم بنجاح",
+        description: result.message || `تم استعادة المؤسسة ${tenantToDelete.name} بنجاح`
+      });
+      
+      setShowRestoreDialog(false);
+      setTenantToDelete(null);
+      setDeleteReason('');
+      await loadTenants();
+    } catch (error: any) {
+      console.error('Error restoring tenant:', error);
+      toast({
+        title: "خطأ",
+        description: error.message || "فشل في استعادة المؤسسة",
         variant: "destructive"
       });
     } finally {
@@ -735,23 +802,48 @@ const AdvancedTenantManagement: React.FC = () => {
                           <Edit className="w-4 h-4 ml-2" />
                           تحرير
                         </DropdownMenuItem>
-                        {tenant.status === 'active' ? <DropdownMenuItem onClick={() => handleTenantAction(tenant.id, 'suspend')}>
+                         {tenant.status === 'active' ? <DropdownMenuItem onClick={() => handleTenantAction(tenant.id, 'suspend')}>
                             <Shield className="w-4 h-4 ml-2" />
                             تعليق
+                          </DropdownMenuItem> : tenant.status === 'cancelled' ? <DropdownMenuItem 
+                            className="text-green-600"
+                            onClick={() => {
+                              setTenantToDelete(tenant);
+                              setShowRestoreDialog(true);
+                            }}
+                          >
+                            <CheckCircle className="w-4 h-4 ml-2" />
+                            استعادة
                           </DropdownMenuItem> : <DropdownMenuItem onClick={() => handleTenantAction(tenant.id, 'activate')}>
                             <CheckCircle className="w-4 h-4 ml-2" />
                             تفعيل
                           </DropdownMenuItem>}
-                         <DropdownMenuItem 
-                           className="text-red-600"
-                           onClick={() => {
-                             setTenantToDelete(tenant);
-                             setShowDeleteDialog(true);
-                           }}
-                         >
-                           <Trash2 className="w-4 h-4 ml-2" />
-                           حذف
-                         </DropdownMenuItem>
+                          
+                         {tenant.status !== 'active' && (
+                           <DropdownMenuItem 
+                             className="text-orange-600"
+                             onClick={() => {
+                               setTenantToDelete(tenant);
+                               setShowDeleteDialog(true);
+                             }}
+                           >
+                             <Trash2 className="w-4 h-4 ml-2" />
+                             إلغاء
+                           </DropdownMenuItem>
+                         )}
+                         
+                         {tenant.status === 'cancelled' && (
+                           <DropdownMenuItem 
+                             className="text-red-600"
+                             onClick={() => {
+                               setTenantToDelete(tenant);
+                               setShowHardDeleteDialog(true);
+                             }}
+                           >
+                             <Trash2 className="w-4 h-4 ml-2" />
+                             حذف نهائي
+                           </DropdownMenuItem>
+                         )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -769,29 +861,126 @@ const AdvancedTenantManagement: React.FC = () => {
         onSuccess={loadTenants}
       />
       
-      {/* مربع حوار تأكيد الحذف */}
+      {/* مربع حوار تأكيد الإلغاء */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent dir="rtl">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-right">
-              <AlertTriangle className="w-5 h-5 text-destructive" />
-              تأكيد حذف المؤسسة
+              <AlertTriangle className="w-5 h-5 text-orange-600" />
+              تأكيد إلغاء المؤسسة
             </AlertDialogTitle>
             <AlertDialogDescription className="text-right">
-              هل أنت متأكد من رغبتك في حذف المؤسسة "{tenantToDelete?.name}"؟
+              هل أنت متأكد من رغبتك في إلغاء المؤسسة "{tenantToDelete?.name}"؟
               <br />
-              <strong className="text-destructive">
-                تحذير: هذا الإجراء لا يمكن التراجع عنه وسيتم حذف جميع البيانات المرتبطة بالمؤسسة.
-              </strong>
+              سيتم إلغاء تفعيل المؤسسة ويمكن استعادتها لاحقاً.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="deleteReason" className="text-right">سبب الإلغاء (اختياري)</Label>
+              <Textarea
+                id="deleteReason"
+                placeholder="اذكر سبب إلغاء المؤسسة..."
+                value={deleteReason}
+                onChange={(e) => setDeleteReason(e.target.value)}
+                className="mt-2 text-right"
+                rows={3}
+              />
+            </div>
+          </div>
           <AlertDialogFooter className="flex gap-2">
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setDeleteReason('')}>إلغاء</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteTenant}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-orange-600 hover:bg-orange-700"
             >
-              حذف المؤسسة
+              إلغاء المؤسسة
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* مربع حوار تأكيد الحذف النهائي */}
+      <AlertDialog open={showHardDeleteDialog} onOpenChange={setShowHardDeleteDialog}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-right">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+              تأكيد الحذف النهائي
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              <strong className="text-destructive">
+                تحذير خطير: هذا الإجراء لا يمكن التراجع عنه!
+              </strong>
+              <br />
+              سيتم حذف المؤسسة "{tenantToDelete?.name}" وجميع البيانات المرتبطة بها نهائياً من النظام.
+              <br />
+              <span className="text-sm text-muted-foreground">
+                يشمل ذلك: المستخدمين، العقود، المركبات، الفواتير، وجميع البيانات الأخرى.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="hardDeleteReason" className="text-right">سبب الحذف النهائي (مطلوب)</Label>
+              <Textarea
+                id="hardDeleteReason"
+                placeholder="اذكر سبب الحذف النهائي للمؤسسة..."
+                value={deleteReason}
+                onChange={(e) => setDeleteReason(e.target.value)}
+                className="mt-2 text-right"
+                rows={3}
+                required
+              />
+            </div>
+          </div>
+          <AlertDialogFooter className="flex gap-2">
+            <AlertDialogCancel onClick={() => setDeleteReason('')}>إلغاء</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleHardDeleteTenant}
+              className="bg-destructive hover:bg-destructive/90"
+              disabled={!deleteReason.trim()}
+            >
+              حذف نهائي
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* مربع حوار تأكيد الاستعادة */}
+      <AlertDialog open={showRestoreDialog} onOpenChange={setShowRestoreDialog}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-right">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              تأكيد استعادة المؤسسة
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              هل أنت متأكد من رغبتك في استعادة المؤسسة "{tenantToDelete?.name}"؟
+              <br />
+              سيتم إعادة تفعيل المؤسسة وجميع المستخدمين المرتبطين بها.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="restoreReason" className="text-right">سبب الاستعادة (اختياري)</Label>
+              <Textarea
+                id="restoreReason"
+                placeholder="اذكر سبب استعادة المؤسسة..."
+                value={deleteReason}
+                onChange={(e) => setDeleteReason(e.target.value)}
+                className="mt-2 text-right"
+                rows={3}
+              />
+            </div>
+          </div>
+          <AlertDialogFooter className="flex gap-2">
+            <AlertDialogCancel onClick={() => setDeleteReason('')}>إلغاء</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleRestoreTenant}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              استعادة المؤسسة
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

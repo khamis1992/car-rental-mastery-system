@@ -313,23 +313,46 @@ export class TenantService {
     return !data && !error;
   }
 
-  // Delete tenant (soft delete)
-  async deleteTenant(tenantId: string, reason?: string): Promise<void> {
-    const { data, error } = await supabase.rpc('safe_delete_tenant', {
+  // Delete tenant (soft delete or hard delete)
+  async deleteTenant(tenantId: string, reason?: string, hardDelete: boolean = false): Promise<any> {
+    const functionName = hardDelete ? 'hard_delete_tenant' : 'safe_delete_tenant';
+    const { data, error } = await supabase.rpc(functionName, {
       tenant_id_param: tenantId,
-      deletion_reason: reason || 'Deleted by super admin'
+      deletion_reason: reason || (hardDelete ? 'حذف نهائي من قبل مدير النظام' : 'إلغاء من قبل مدير النظام')
     });
 
     if (error) {
       console.error('Error deleting tenant:', error);
-      throw new Error(`فشل في حذف المؤسسة: ${error.message}`);
+      throw new Error(`فشل في ${hardDelete ? 'الحذف النهائي للمؤسسة' : 'إلغاء المؤسسة'}: ${error.message}`);
     }
 
-    const result = data as { success?: boolean; tenant_name?: string } | null;
+    const result = data as { success?: boolean; tenant_name?: string; message?: string } | null;
     if (!result?.success) {
-      throw new Error('فشل في حذف المؤسسة');
+      throw new Error(`فشل في ${hardDelete ? 'الحذف النهائي للمؤسسة' : 'إلغاء المؤسسة'}`);
     }
 
-    console.log('Tenant deleted successfully:', result.tenant_name);
+    console.log('Tenant action completed successfully:', result.tenant_name, result.message);
+    return result;
+  }
+
+  // Restore cancelled tenant
+  async restoreTenant(tenantId: string, reason?: string): Promise<any> {
+    const { data, error } = await supabase.rpc('restore_cancelled_tenant', {
+      tenant_id_param: tenantId,
+      restore_reason: reason || 'استعادة من قبل مدير النظام'
+    });
+
+    if (error) {
+      console.error('Error restoring tenant:', error);
+      throw new Error(`فشل في استعادة المؤسسة: ${error.message}`);
+    }
+
+    const result = data as { success?: boolean; tenant_name?: string; message?: string } | null;
+    if (!result?.success) {
+      throw new Error('فشل في استعادة المؤسسة');
+    }
+
+    console.log('Tenant restored successfully:', result.tenant_name, result.message);
+    return result;
   }
 }

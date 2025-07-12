@@ -6488,6 +6488,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      hard_delete_tenant: {
+        Args: { tenant_id_param: string; deletion_reason?: string }
+        Returns: Json
+      }
       has_any_tenant_role: {
         Args: { _roles: string[] }
         Returns: boolean
@@ -6569,6 +6573,10 @@ export type Database = {
       }
       reprocess_missing_payment_entries: {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      restore_cancelled_tenant: {
+        Args: { tenant_id_param: string; restore_reason?: string }
         Returns: Json
       }
       safe_delete_contract: {
