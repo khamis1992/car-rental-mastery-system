@@ -84,6 +84,7 @@ export class TenantService {
 
       // Create admin user account if provided
       if (tenantData.admin_user) {
+        // أولاً ننشئ المستخدم
         const { data: authUser, error: authError } = await supabase.auth.signUp({
           email: tenantData.admin_user.email,
           password: tenantData.admin_user.password,
@@ -98,8 +99,8 @@ export class TenantService {
           console.warn('Failed to create admin user:', authError);
           // Don't throw here as tenant was created successfully
         } else if (authUser.user) {
-          // Link new user to tenant as admin
-          await supabase
+          // إنشاء ربط المستخدم بالمؤسسة كمدير أولاً
+          const { error: linkError } = await supabase
             .from('tenant_users')
             .insert({
               tenant_id: tenant.id,
@@ -107,6 +108,18 @@ export class TenantService {
               role: 'tenant_admin',
               status: 'active'
             });
+
+          if (linkError) {
+            console.error('Failed to link user to tenant:', linkError);
+            // في حالة فشل الربط، نحتاج لحذف المستخدم المنشأ
+            try {
+              await supabase.auth.admin.deleteUser(authUser.user.id);
+            } catch (deleteError) {
+              console.error('Failed to cleanup user after link failure:', deleteError);
+            }
+          } else {
+            console.log('Successfully linked user to tenant as tenant_admin');
+          }
         }
       }
 
