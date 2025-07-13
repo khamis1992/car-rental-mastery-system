@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { 
   Home, 
   Users, 
@@ -337,7 +337,7 @@ export function AppSidebar() {
           <CollapsibleTrigger asChild>
             <SidebarGroupLabel className="group/label text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer">
               <div className="flex items-center gap-2 flex-1">
-                <groupIcon className="w-4 h-4" />
+                {React.createElement(groupIcon, { className: "w-4 h-4" })}
                 {state === "expanded" && (
                   <>
                     <span>{groupLabel}</span>

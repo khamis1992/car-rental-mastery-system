@@ -14,7 +14,7 @@ import {
   TrendingUp, TrendingDown, AlertTriangle, CheckCircle, 
   DollarSign, Users, Car, Calculator, Activity, Shield,
   Brain, Target, BarChart3, PieChart as PieChartIcon,
-  ArrowUp, ArrowDown, Clock, Zap, Star, Warning
+  ArrowUp, ArrowDown, Clock, Zap, Star
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';

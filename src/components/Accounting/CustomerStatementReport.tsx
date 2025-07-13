@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { DatePickerRange } from '@/components/ui/date-picker-range';
 import { 
-  Search, Filter, Download, Print, FileText, 
+  Search, Filter, Download, Printer, FileText, 
   DollarSign, TrendingUp, TrendingDown, User 
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -176,7 +176,7 @@ const CustomerStatementReport = () => {
             تصدير
           </Button>
           <Button onClick={handlePrint} variant="outline" className="flex items-center gap-2">
-            <Print className="w-4 h-4" />
+            <Printer className="w-4 h-4" />
             طباعة
           </Button>
         </div>
