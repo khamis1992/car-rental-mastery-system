@@ -398,7 +398,7 @@ class AutomatedJournalService {
     if (!this.tenant_id || !this.user_id) throw new Error('User not initialized');
 
     const { data, error } = await supabase
-      .from('automated_journal_entries')
+      .from('journal_entries')
       .insert([{
         entry_date: format(new Date(), 'yyyy-MM-dd'),
         reference: entryData.reference,
@@ -439,7 +439,7 @@ class AutomatedJournalService {
     if (!this.tenant_id) await this.initializeUser();
 
     let query = supabase
-      .from('automated_journal_entries')
+      .from('journal_entries')
       .select('*')
       .eq('tenant_id', this.tenant_id)
       .order('entry_date', { ascending: false });
@@ -476,7 +476,7 @@ class AutomatedJournalService {
   // 8. Post Journal Entry
   async postJournalEntry(entryId: string): Promise<void> {
     const { error } = await supabase
-      .from('automated_journal_entries')
+      .from('journal_entries')
       .update({ 
         status: 'posted',
         updated_at: new Date().toISOString()
@@ -492,7 +492,7 @@ class AutomatedJournalService {
   // 9. Reverse Journal Entry
   async reverseJournalEntry(entryId: string, reason: string): Promise<void> {
     const { error } = await supabase
-      .from('automated_journal_entries')
+      .from('journal_entries')
       .update({ 
         status: 'reversed',
         notes: reason,
@@ -509,7 +509,7 @@ class AutomatedJournalService {
   // 10. Get Journal Entry by ID
   async getJournalEntryById(entryId: string): Promise<AutomatedJournalEntry | null> {
     const { data, error } = await supabase
-      .from('automated_journal_entries')
+      .from('journal_entries')
       .select('*')
       .eq('id', entryId)
       .single();
@@ -556,7 +556,7 @@ class AutomatedJournalService {
     if (!this.tenant_id) await this.initializeUser();
 
     let query = supabase
-      .from('automated_journal_entries')
+      .from('journal_entries')
       .select('debit_amount, credit_amount, debit_account, credit_account')
       .eq('tenant_id', this.tenant_id)
       .eq('status', 'posted');
