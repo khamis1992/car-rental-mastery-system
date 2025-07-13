@@ -51,7 +51,6 @@ import CancelledStage from '@/pages/ContractStages/CancelledStage';
 
 // Super Admin Pages
 import SuperAdminBillingManagement from '@/pages/super-admin/BillingManagement';
-import TenantManagement from '@/pages/super-admin/TenantManagement';
 
 // Financial Components - New System
 import NewFinancialDashboard from '@/components/Financial/NewFinancialDashboard';
@@ -108,7 +107,10 @@ function App() {
                           <Route path="integration" element={<IntegrationCenter />} />
                           <Route path="communications" element={<Communications />} />
                           <Route path="invoicing" element={<Invoicing />} />
-                          <Route path="tenants" element={<TenantManagement />} />
+                          <Route path="tenants" element={<div className="p-6 text-center">
+                            <h2 className="text-2xl font-bold mb-4">إدارة المؤسسات</h2>
+                            <p className="text-muted-foreground">قريباً</p>
+                          </div>} />
                           
                           {/* Contract Stages */}
                           <Route path="contracts/draft" element={<DraftStage />} />
