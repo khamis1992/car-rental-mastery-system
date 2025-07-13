@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, DollarSign, FileText, Calendar, CreditCard, Receipt, RefreshCw } from 'lucide-react';
+import { TrendingUp, DollarSign, FileText, Calendar, CreditCard, Receipt, RefreshCw, Calculator, Download, AlertTriangle, Bell, Info, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
 import { JournalEntriesTab } from '@/components/Accounting/JournalEntriesTab';
 import { FinancialReportsTab } from '@/components/Accounting/FinancialReportsTab';
@@ -14,9 +14,96 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrencyKWD } from '@/lib/currency';
 import { useAccountingData } from '@/hooks/useAccountingData';
+import { cn } from '@/lib/utils';
 
 const Accounting = () => {
   const { financialStats, recentTransactions, loading, error, refetch } = useAccountingData();
+
+  // Smart Alerts Component
+  const SmartAlerts = () => {
+    const alerts = [
+      {
+        id: 1,
+        type: 'warning',
+        title: 'تحذير من التدفق النقدي',
+        message: 'المدفوعات المعلقة تتجاوز 50% من الإيرادات الشهرية',
+        priority: 'high',
+        timestamp: '2024-01-15T10:30:00Z',
+        category: 'cash_flow',
+        isRead: false
+      },
+      {
+        id: 2,
+        type: 'info',
+        title: 'تم تصنيف معاملة جديدة تلقائياً',
+        message: 'تم تصنيف إيداع بقيمة 500 د.ك كإيراد تأجير',
+        priority: 'medium',
+        timestamp: '2024-01-15T09:15:00Z',
+        category: 'ai_classification',
+        isRead: true
+      }
+    ];
+
+    const getAlertIcon = (type: string) => {
+      switch (type) {
+        case 'warning': return AlertTriangle;
+        case 'error': return AlertCircle;
+        case 'success': return CheckCircle2;
+        default: return Info;
+      }
+    };
+
+    const getAlertStyles = (type: string) => {
+      switch (type) {
+        case 'warning': return 'border-yellow-200 bg-yellow-50 text-yellow-800';
+        case 'error': return 'border-red-200 bg-red-50 text-red-800';
+        case 'success': return 'border-green-200 bg-green-50 text-green-800';
+        default: return 'border-blue-200 bg-blue-50 text-blue-800';
+      }
+    };
+
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="h-5 w-5" />
+            التنبيهات الذكية
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {alerts.map((alert) => {
+            const Icon = getAlertIcon(alert.type);
+            return (
+              <div 
+                key={alert.id} 
+                className={cn(
+                  "p-4 rounded-lg border",
+                  getAlertStyles(alert.type),
+                  !alert.isRead && "ring-2 ring-primary/20"
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <Icon className="h-5 w-5 mt-0.5" />
+                  <div className="flex-1">
+                    <h4 className="font-medium mb-1">{alert.title}</h4>
+                    <p className="text-sm opacity-80">{alert.message}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant={alert.priority === 'high' ? 'destructive' : 'secondary'} className="text-xs">
+                        {alert.priority === 'high' ? 'عالي' : 'متوسط'}
+                      </Badge>
+                      <span className="text-xs opacity-60">
+                        {new Date(alert.timestamp).toLocaleString('ar-SA')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
+    );
+  };
 
   const displayStats = [
     {
@@ -120,6 +207,9 @@ const Accounting = () => {
           </Card>
         ))}
       </div>
+
+      {/* Smart Alerts */}
+      <SmartAlerts />
 
       <Tabs defaultValue="dashboard" className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
