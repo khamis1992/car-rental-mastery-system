@@ -1,9 +1,11 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { vehicleStatusEventHandler } from './services/VehicleStatusEventHandler'
+import { serviceInitializer } from './services/ServiceInitializer'
 
-// تهيئة نظام إدارة حالات المركبات
-vehicleStatusEventHandler.initialize();
+// تهيئة نظام إدارة الخدمات بطريقة آمنة
+serviceInitializer.initialize().catch(error => {
+  console.error('❌ خطأ في تهيئة الخدمات:', error);
+});
 
 createRoot(document.getElementById("root")!).render(<App />);

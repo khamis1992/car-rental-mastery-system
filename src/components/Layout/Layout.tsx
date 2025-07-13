@@ -6,7 +6,7 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-export function Layout({ children }: LayoutProps) {
+function Layout({ children }: LayoutProps) {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full" dir="rtl">
@@ -21,3 +21,6 @@ export function Layout({ children }: LayoutProps) {
     </SidebarProvider>
   );
 }
+
+export default Layout;
+export { Layout };

@@ -111,7 +111,7 @@ export const contractAccountingService = {
 
       // الحصول على معرفات الحسابات
       const accounts = await accountingService.getChartOfAccounts();
-      const contractReceivableAccount = accounts.find(acc => acc.account_code === '1130')?.id;
+      const contractReceivableAccount = accounts.find(acc => acc.account_code === '110201')?.id;
       
       let cashAccount;
       if (paymentData.payment_method === 'bank_transfer' && paymentData.bank_account_id) {
@@ -197,13 +197,13 @@ export const contractAccountingService = {
       });
 
       const accounts = await accountingService.getChartOfAccounts();
-      const depositAccount = accounts.find(acc => acc.account_code === '2130')?.id;
+      const depositAccount = accounts.find(acc => acc.account_code === '210301')?.id;
       const cashAccount = accounts.find(acc => 
         acc.account_type === 'asset' && 
         acc.account_category === 'current_asset' &&
         (acc.account_name.includes('نقدية') || acc.account_name.includes('صندوق'))
       )?.id;
-      const revenueAccount = accounts.find(acc => acc.account_code === '4112')?.id;
+      const revenueAccount = accounts.find(acc => acc.account_code === '410101')?.id;
 
       if (!depositAccount || !cashAccount || !revenueAccount) {
         throw new Error('لا يمكن العثور على الحسابات المطلوبة لإرجاع العربون');

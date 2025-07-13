@@ -115,7 +115,7 @@ export const payrollAccountingService = {
 
       // الحصول على معرفات الحسابات
       const accounts = await accountingService.getChartOfAccounts();
-      const salaryPayableAccount = accounts.find(acc => acc.account_code === '2110')?.id;
+      const salaryPayableAccount = accounts.find(acc => acc.account_code === '210201')?.id;
       
       let cashAccount;
       if (paymentData.payment_method === 'bank_transfer' && paymentData.bank_account_id) {
