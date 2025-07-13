@@ -7185,6 +7185,10 @@ export type Database = {
         Args: { contract_id_param: string; reason?: string }
         Returns: Json
       }
+      migrate_account_balances: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       migrate_to_deferred_revenue_system: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -7228,6 +7232,10 @@ export type Database = {
       setup_default_role_permissions: {
         Args: { _tenant_id: string }
         Returns: undefined
+      }
+      setup_enhanced_chart_of_accounts: {
+        Args: { tenant_id_param: string }
+        Returns: number
       }
       setup_tenant_default_accounting_data: {
         Args: { target_tenant_id: string }
@@ -7290,6 +7298,10 @@ export type Database = {
         Returns: boolean
       }
       validate_tenant_isolation_integrity: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      validate_trial_balance: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
