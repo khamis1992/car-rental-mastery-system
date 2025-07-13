@@ -7408,6 +7408,23 @@ export type Database = {
         Args: { cost_center_id_param: string }
         Returns: number
       }
+      calculate_cost_center_performance: {
+        Args: {
+          p_tenant_id: string
+          p_cost_center_id?: string
+          p_year?: number
+        }
+        Returns: {
+          cost_center_id: string
+          cost_center_name: string
+          annual_budget: number
+          annual_actual: number
+          variance: number
+          variance_percentage: number
+          utilization_rate: number
+          performance_status: string
+        }[]
+      }
       calculate_financial_kpis: {
         Args: { for_date?: string }
         Returns: number
@@ -7481,6 +7498,16 @@ export type Database = {
         Args: { tenant_id_param: string }
         Returns: number
       }
+      convert_currency: {
+        Args: {
+          p_amount: number
+          p_from_currency: string
+          p_to_currency: string
+          p_tenant_id: string
+          p_date?: string
+        }
+        Returns: number
+      }
       copy_default_branches: {
         Args: { target_tenant_id: string }
         Returns: number
@@ -7525,6 +7552,16 @@ export type Database = {
       }
       create_attendance_accounting_entry: {
         Args: { attendance_data: Json }
+        Returns: string
+      }
+      create_automatic_journal_entry: {
+        Args: {
+          p_tenant_id: string
+          p_reference_type: string
+          p_reference_id: string
+          p_description: string
+          p_entry_lines: Json
+        }
         Returns: string
       }
       create_comprehensive_chart_of_accounts: {
@@ -7652,6 +7689,15 @@ export type Database = {
       generate_asset_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      generate_basic_financial_report: {
+        Args: {
+          p_tenant_id: string
+          p_report_type: string
+          p_start_date?: string
+          p_end_date?: string
+        }
+        Returns: Json
       }
       generate_branch_code: {
         Args: Record<PropertyKey, never>
