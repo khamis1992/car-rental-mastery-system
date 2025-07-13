@@ -4,11 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 export interface CustomerAnalytics {
   id: string;
   customer_id?: string;
+  customer_name?: string;
   name: string;
   total_contracts: number;
   contracts_count?: number;
   total_revenue: number;
   total_payments?: number;
+  total_invoices?: number;
   current_balance?: number;
   outstanding_balance?: number;
   average_contract_value: number;
@@ -53,11 +55,13 @@ export interface CustomerOverview {
   contracts_count?: number;
   total_amount: number;
   total_invoices?: number;
+  total_payments?: number;
   current_balance?: number;
   outstanding_balance: number;
   collection_rate?: number;
   penalties_count?: number;
   days_overdue?: number;
+  last_payment_date?: string;
   payment_status: 'good' | 'warning' | 'overdue';
 }
 
@@ -70,6 +74,7 @@ export interface FixedAsset {
   vehicle_type?: string;
   plate_number?: string;
   status?: string;
+  year?: number; // Changed to number since we're using numbers
   purchase_date: string;
   purchase_cost: number;
   purchase_value?: number;
@@ -83,11 +88,11 @@ export interface FixedAsset {
 
 class AccountingReportsService {
   /**
-   * Get customer analytics data
+   * Get customer analytics data with support for single customer filter
    */
-  async getCustomerAnalytics(): Promise<CustomerAnalytics[]> {
+  async getCustomerAnalytics(customerId?: string): Promise<CustomerAnalytics[]> {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('customers')
         .select(`
           id,
@@ -96,17 +101,38 @@ class AccountingReportsService {
           contracts!inner(total_amount)
         `);
 
+      if (customerId) {
+        query = query.eq('id', customerId);
+      }
+
+      const { data, error } = await query;
+
       if (error) throw error;
 
       // Process the data to calculate analytics
       return (data || []).map(customer => ({
         id: customer.id,
+        customer_id: customer.id,
+        customer_name: customer.name,
         name: customer.name,
         total_contracts: customer.contracts?.length || 0,
+        contracts_count: customer.contracts?.length || 0,
         total_revenue: customer.contracts?.reduce((sum: number, contract: any) => sum + (contract.total_amount || 0), 0) || 0,
+        total_invoices: 0, // Mock data
+        total_payments: 0, // Mock data
+        current_balance: 0, // Mock data
+        outstanding_balance: 0, // Mock data
         average_contract_value: 0, // Calculate based on contracts
+        average_rental_days: 30, // Mock data
         payment_score: 85, // Mock score
-        last_contract_date: new Date().toISOString()
+        collection_rate: 95, // Mock rate
+        total_penalties: 0, // Mock data
+        paid_penalties: 0, // Mock data
+        last_contract_date: new Date().toISOString(),
+        first_contract_date: new Date().toISOString(),
+        last_activity_date: new Date().toISOString(),
+        most_rented_vehicle: 'N/A', // Mock data
+        most_used_branch: 'N/A' // Mock data
       }));
     } catch (error) {
       console.error('Error fetching customer analytics:', error);
@@ -161,11 +187,21 @@ class AccountingReportsService {
       return (data || []).map(customer => ({
         id: customer.id,
         name: customer.name,
+        customer_name: customer.name,
         phone: customer.phone || '',
         email: customer.email || '',
+        status: 'active',
         total_contracts: customer.contracts?.length || 0,
+        contracts_count: customer.contracts?.length || 0,
         total_amount: customer.contracts?.reduce((sum: number, contract: any) => sum + (contract.total_amount || 0), 0) || 0,
+        total_invoices: 0, // Mock data
+        total_payments: 0, // Mock data
+        current_balance: 0, // Mock data
         outstanding_balance: 0, // Calculate based on payments
+        collection_rate: 95, // Mock rate
+        penalties_count: 0, // Mock data
+        days_overdue: 0, // Mock data
+        last_payment_date: new Date().toISOString(),
         payment_status: 'good' as const
       }));
     } catch (error) {
@@ -189,13 +225,20 @@ class AccountingReportsService {
       return (data || []).map(asset => ({
         id: asset.id,
         name: asset.asset_name,
-        category: asset.category,
+        asset_code: asset.asset_code,
+        category: asset.asset_category,
+        model: 'Unknown', // Default since field doesn't exist
+        status: 'active', // Default status
+        year: 2020, // Default year as number
         purchase_date: asset.purchase_date,
         purchase_cost: asset.purchase_cost,
+        purchase_value: asset.purchase_cost,
         accumulated_depreciation: asset.accumulated_depreciation || 0,
-        book_value: asset.current_value || 0,
+        book_value: asset.book_value || 0,
         depreciation_method: asset.depreciation_method,
-        useful_life: asset.useful_life_years
+        depreciation_rate: 10, // Mock rate
+        useful_life: asset.useful_life_years,
+        monthly_depreciation: asset.purchase_cost / (asset.useful_life_years * 12) || 0
       }));
     } catch (error) {
       console.error('Error fetching fixed assets:', error);
