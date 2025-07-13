@@ -8522,10 +8522,6 @@ export type Database = {
         Args: { setting_key_param: string }
         Returns: Json
       }
-      get_current_tenant_id: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
       get_grouped_system_settings: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -8552,6 +8548,10 @@ export type Database = {
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
+      }
+      get_user_tenant_direct: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       hard_delete_tenant: {
         Args: { tenant_id_param: string; deletion_reason?: string }
