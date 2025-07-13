@@ -111,7 +111,7 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }: PlanForm
         // إنشاء خطة جديدة
         const { error } = await supabase
           .from('subscription_plans')
-          .insert(submitData);
+          .insert([submitData]);
 
         if (error) throw error;
 

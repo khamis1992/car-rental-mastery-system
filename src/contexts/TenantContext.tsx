@@ -4,7 +4,6 @@ import { TenantService } from '@/services/tenantService';
 import { tenantIsolationService } from '@/services/BusinessServices/TenantIsolationService';
 import { tenantIsolationMiddleware } from '@/middleware/TenantIsolationMiddleware';
 import { useAuth } from './AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 
 interface TenantContextType {
   currentTenant: Tenant | null;
@@ -52,54 +51,37 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      console.log('🔄 Loading tenant data for user:', user.id);
-
-      // البحث مباشرة في جدول tenant_users بدون join  
-      const { data: tenantUsers, error: usersError } = await supabase
+      // Get current tenant and user role
+      const { data: tenantUser, error: tenantUserError } = await supabase
         .from('tenant_users')
-        .select('*')
+        .select(`
+          role,
+          status,
+          tenant:tenants(*)
+        `)
         .eq('user_id', user.id)
         .eq('status', 'active')
-        .limit(1);
+        .single();
 
-      console.log('🔍 Tenant users result:', { tenantUsers, usersError });
-
-      if (usersError) {
-        console.error('❌ Error fetching tenant users:', usersError);
-        throw usersError;
+      if (tenantUserError && tenantUserError.code !== 'PGRST116') {
+        throw tenantUserError;
       }
 
-      if (tenantUsers && tenantUsers.length > 0) {
-        const tenantUser = tenantUsers[0];
+      if (tenantUser && tenantUser.tenant) {
+        const tenant = tenantUser.tenant as Tenant;
+        setCurrentTenant(tenant);
+        setCurrentUserRole(tenantUser.role as TenantUser['role']);
         
-        // البحث في جدول tenants منفصلاً
-        const { data: tenant, error: tenantError } = await supabase
-          .from('tenants')
-          .select('*')
-          .eq('id', tenantUser.tenant_id)
-          .single();
-
-        if (tenantError) {
-          console.error('❌ Error fetching tenant:', tenantError);
-          throw tenantError;
-        }
-
-        if (tenant) {
-          console.log('✅ Tenant loaded:', tenant);
-          setCurrentTenant(tenant as any);
-          setCurrentUserRole(tenantUser.role as TenantUser['role']);
-          
-          // تفعيل middleware العزل للمؤسسة
-          await tenantIsolationMiddleware.setCurrentTenant(tenant.id);
-        }
+        // تفعيل middleware العزل للمؤسسة
+        await tenantIsolationMiddleware.setCurrentTenant(tenant.id);
       } else {
-        console.log('⚠️ User is not associated with any tenant');
+        // User is not associated with any tenant
         setCurrentTenant(null);
         setCurrentUserRole(null);
         tenantIsolationMiddleware.reset();
       }
     } catch (err: any) {
-      console.error('❌ Error loading tenant:', err);
+      console.error('Error loading tenant:', err);
       setError(err.message || 'فشل في تحميل بيانات المؤسسة');
     } finally {
       setLoading(false);
@@ -135,7 +117,7 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
 
       if (error) throw error;
 
-      if (tenantUser && tenantUser.tenant && typeof tenantUser.tenant === 'object' && !Array.isArray(tenantUser.tenant)) {
+      if (tenantUser && tenantUser.tenant) {
         const tenant = tenantUser.tenant as Tenant;
         setCurrentTenant(tenant);
         setCurrentUserRole(tenantUser.role as TenantUser['role']);
@@ -191,3 +173,6 @@ export const useTenant = (): TenantContextType => {
   }
   return context;
 };
+
+// Import supabase here to avoid circular dependency
+import { supabase } from '@/integrations/supabase/client';

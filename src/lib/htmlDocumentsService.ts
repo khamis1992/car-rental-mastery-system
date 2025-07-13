@@ -451,127 +451,89 @@ export class HTMLDocumentsService {
             <h2>دليل الحسابات</h2>
             
             <div class="accounts-section">
-              <h3>1. الأصول (Assets) - 1XXXXX</h3>
+              <h3>1. الأصول (Assets) - 1XXX</h3>
               
-              <h4>الأصول المتداولة (11XXXX):</h4>
-              
-              <h5>النقدية والبنوك (1101XX):</h5>
+              <h4>الأصول الجارية (11XX):</h4>
               <ul>
-                <li><strong>110101:</strong> النقدية في الصندوق</li>
-                <li><strong>110102:</strong> البنك التجاري الكويتي</li>
-                <li><strong>110103:</strong> بنك الكويت الوطني</li>
-                <li><strong>110104:</strong> بيت التمويل الكويتي</li>
-                <li><strong>110105:</strong> بنك الخليج</li>
+                <li><strong>1110:</strong> صندوق النقدية</li>
+                <li><strong>1120:</strong> البنوك</li>
+                <li><strong>1130:</strong> المدينون (العملاء)</li>
+                <li><strong>1140:</strong> المخالفات المرورية المدينة</li>
+                <li><strong>1150:</strong> المخزون</li>
+                <li><strong>1160:</strong> المصروفات المدفوعة مقدماً</li>
               </ul>
 
-              <h5>الحسابات المدينة (1102XX):</h5>
+              <h4>الأصول الثابتة (13XX):</h4>
               <ul>
-                <li><strong>110201:</strong> عملاء - أفراد</li>
-                <li><strong>110202:</strong> عملاء - شركات</li>
-                <li><strong>110203:</strong> عملاء - جهات حكومية</li>
-                <li><strong>110204:</strong> أوراق القبض</li>
-                <li><strong>110205:</strong> مخصص الديون المشكوك فيها</li>
-              </ul>
-
-              <h5>المخزون (1103XX):</h5>
-              <ul>
-                <li><strong>110301:</strong> قطع الغيار</li>
-                <li><strong>110302:</strong> المحروقات</li>
-                <li><strong>110303:</strong> اللوازم المكتبية</li>
-                <li><strong>110304:</strong> مواد التنظيف</li>
-              </ul>
-
-              <h4>الأصول الثابتة (12XXXX):</h4>
-              <ul>
-                <li><strong>120301:</strong> سيارات الأجرة</li>
-                <li><strong>120302:</strong> الحافلات</li>
-                <li><strong>120303:</strong> الشاحنات</li>
-                <li><strong>120304:</strong> مجمع إهلاك المركبات</li>
+                <li><strong>1310:</strong> المركبات (بالتكلفة)</li>
+                <li><strong>1320:</strong> مجمع استهلاك المركبات</li>
+                <li><strong>1330:</strong> المباني والإنشاءات</li>
+                <li><strong>1340:</strong> الأثاث والمعدات</li>
+                <li><strong>1350:</strong> الأجهزة والحاسوب</li>
               </ul>
             </div>
 
             <div class="accounts-section">
-              <h3>2. الخصوم (Liabilities) - 2XXXXX</h3>
+              <h3>2. الخصوم (Liabilities) - 2XXX</h3>
               
-              <h4>الخصوم المتداولة (21XXXX):</h4>
+              <h4>الخصوم الجارية (21XX):</h4>
               <ul>
-                <li><strong>210201:</strong> مستحقات الرواتب</li>
-                <li><strong>210203:</strong> مستحقات ضريبية</li>
-                <li><strong>210101:</strong> موردون</li>
-                <li><strong>210102:</strong> أوراق الدفع</li>
-                <li><strong>210301:</strong> ودائع العملاء</li>
+                <li><strong>2110:</strong> الرواتب والأجور المستحقة</li>
+                <li><strong>2120:</strong> الضرائب المستحقة</li>
+                <li><strong>2121:</strong> التأمينات المستحقة</li>
+                <li><strong>2150:</strong> الدائنون (الموردون)</li>
+                <li><strong>2160:</strong> فواتير في انتظار السداد</li>
               </ul>
 
-              <h4>القروض طويلة الأجل (22XXXX):</h4>
+              <h4>الخصوم طويلة الأجل (22XX):</h4>
               <ul>
-                <li><strong>2201:</strong> قروض بنكية طويلة الأجل</li>
-                <li><strong>2202:</strong> قروض أخرى طويلة الأجل</li>
+                <li><strong>2210:</strong> قروض طويلة الأجل</li>
+                <li><strong>2220:</strong> مخصص تعويض نهاية الخدمة</li>
               </ul>
             </div>
 
             <div class="accounts-section">
-              <h3>3. حقوق الملكية (Equity) - 3XXXXX</h3>
+              <h3>3. حقوق الملكية (Equity) - 3XXX</h3>
               <ul>
-                <li><strong>3101:</strong> رأس المال المدفوع</li>
-                <li><strong>3201:</strong> الاحتياطي القانوني</li>
-                <li><strong>3301:</strong> أرباح مرحلة من سنوات سابقة</li>
-                <li><strong>3302:</strong> أرباح السنة الحالية</li>
+                <li><strong>3110:</strong> رأس المال</li>
+                <li><strong>3120:</strong> الاحتياطيات</li>
+                <li><strong>3130:</strong> الأرباح المدورة</li>
+                <li><strong>3140:</strong> أرباح السنة الجارية</li>
               </ul>
             </div>
 
             <div class="accounts-section">
-              <h3>4. الإيرادات (Revenue) - 4XXXXX</h3>
-              
-              <h4>إيرادات التأجير (41XXXX):</h4>
+              <h3>4. الإيرادات (Revenue) - 4XXX</h3>
               <ul>
-                <li><strong>410101:</strong> إيراد تأجير سيارات يومي</li>
-                <li><strong>410102:</strong> إيراد تأجير سيارات أسبوعي</li>
-                <li><strong>410103:</strong> إيراد تأجير سيارات شهري</li>
-                <li><strong>410201:</strong> إيراد تأجير حافلات يومي</li>
-              </ul>
-
-              <h4>إيرادات الخدمات الإضافية (42XXXX):</h4>
-              <ul>
-                <li><strong>4201:</strong> إيرادات التوصيل والاستلام</li>
-                <li><strong>4202:</strong> إيرادات الصيانة</li>
-                <li><strong>4203:</strong> إيرادات التأمين الإضافي</li>
+                <li><strong>4110:</strong> إيرادات تأجير المركبات</li>
+                <li><strong>4120:</strong> إيرادات الخدمات الإضافية</li>
+                <li><strong>4130:</strong> إيرادات التأمين</li>
+                <li><strong>4140:</strong> إيرادات الضمانات المصادرة</li>
+                <li><strong>4150:</strong> إيرادات المخالفات المرورية</li>
               </ul>
             </div>
 
             <div class="accounts-section">
-              <h3>5. المصروفات (Expenses) - 5XXXXX</h3>
+              <h3>5. المصروفات (Expenses) - 5XXX</h3>
               
-              <h4>مصروفات التشغيل (51XXXX):</h4>
-              
-              <h5>الرواتب والأجور (5101XX):</h5>
+              <h4>مصروفات التشغيل (51XX):</h4>
               <ul>
-                <li><strong>510101:</strong> رواتب الإدارة</li>
-                <li><strong>510102:</strong> رواتب الموظفين</li>
-                <li><strong>510103:</strong> البدلات</li>
-                <li><strong>510104:</strong> العمولات</li>
+                <li><strong>5110:</strong> رواتب وأجور</li>
+                <li><strong>5111:</strong> علاوات ومكافآت</li>
+                <li><strong>5112:</strong> ساعات إضافية</li>
+                <li><strong>5120:</strong> استهلاك المركبات</li>
+                <li><strong>5101:</strong> صيانة وإصلاح المركبات</li>
+                <li><strong>5140:</strong> تأمين المركبات</li>
+                <li><strong>5150:</strong> وقود المركبات</li>
               </ul>
 
-              <h5>مصروفات المركبات (5102XX):</h5>
+              <h4>المصروفات الإدارية (52XX):</h4>
               <ul>
-                <li><strong>510201:</strong> الوقود</li>
-                <li><strong>510202:</strong> الصيانة والإصلاح</li>
-                <li><strong>510203:</strong> قطع الغيار</li>
-                <li><strong>510204:</strong> التأمين</li>
-              </ul>
-
-              <h5>المصروفات الإدارية (5103XX):</h5>
-              <ul>
-                <li><strong>510301:</strong> الإيجارات</li>
-                <li><strong>510302:</strong> الكهرباء والماء</li>
-                <li><strong>510303:</strong> الهاتف والإنترنت</li>
-                <li><strong>510304:</strong> القرطاسية واللوازم المكتبية</li>
-              </ul>
-
-              <h5>الإهلاك (5104XX):</h5>
-              <ul>
-                <li><strong>510402:</strong> إهلاك المركبات</li>
-                <li><strong>510403:</strong> إهلاك المعدات</li>
-                <li><strong>510404:</strong> إهلاك الأثاث</li>
+                <li><strong>5210:</strong> إيجار المكاتب</li>
+                <li><strong>5220:</strong> كهرباء وماء وهاتف</li>
+                <li><strong>5230:</strong> مواد مكتبية</li>
+                <li><strong>5240:</strong> صيانة المعدات</li>
+                <li><strong>5250:</strong> رسوم ومتنوعة</li>
               </ul>
             </div>
           </section>
@@ -582,27 +544,19 @@ export class HTMLDocumentsService {
             <div class="entries-section">
               <h3>1. قيود العقود</h3>
               
-              <h4>عند إنشاء العقد (للأفراد):</h4>
+              <h4>عند إنشاء العقد:</h4>
               <div class="entry-example">
                 <pre>
-من حـ/ عملاء - أفراد (110201)          XXX
-    إلى حـ/ إيراد تأجير سيارات يومي (410101)  XXX
+من حـ/ المدينون (العملاء)          XXX
+    إلى حـ/ إيرادات التأجير              XXX
                 </pre>
               </div>
 
-              <h4>عند الدفع نقداً:</h4>
+              <h4>عند الدفع:</h4>
               <div class="entry-example">
                 <pre>
-من حـ/ النقدية في الصندوق (110101)    XXX
-    إلى حـ/ عملاء - أفراد (110201)       XXX
-                </pre>
-              </div>
-
-              <h4>عند الدفع بالتحويل البنكي:</h4>
-              <div class="entry-example">
-                <pre>
-من حـ/ بنك الكويت الوطني (110103)    XXX
-    إلى حـ/ عملاء - أفراد (110201)       XXX
+من حـ/ صندوق النقدية             XXX
+    إلى حـ/ المدينون (العملاء)         XXX
                 </pre>
               </div>
             </div>
@@ -613,58 +567,43 @@ export class HTMLDocumentsService {
               <h4>راتب شهري:</h4>
               <div class="entry-example">
                 <pre>
-من حـ/ رواتب الموظفين (510102)       XXX
-من حـ/ رواتب الإدارة (510101)        XXX
-    إلى حـ/ مستحقات الرواتب (210201)     XXX
-    إلى حـ/ مستحقات ضريبية (210203)     XXX
-                </pre>
-              </div>
-
-              <h4>عند دفع الرواتب:</h4>
-              <div class="entry-example">
-                <pre>
-من حـ/ مستحقات الرواتب (210201)     XXX
-    إلى حـ/ النقدية في الصندوق (110101)   XXX
+من حـ/ رواتب وأجور              XXX
+من حـ/ التأمينات (حصة الشركة)    XXX
+    إلى حـ/ الرواتب المستحقة           XXX
+    إلى حـ/ الضرائب المستحقة          XXX  
+    إلى حـ/ التأمينات المستحقة         XXX
                 </pre>
               </div>
             </div>
 
             <div class="entries-section">
-              <h3>3. قيود المصروفات</h3>
+              <h3>3. قيود المخالفات المرورية</h3>
               
-              <h4>عند دفع مصروفات الوقود:</h4>
+              <h4>عند تسجيل المخالفة:</h4>
               <div class="entry-example">
                 <pre>
-من حـ/ الوقود (510201)              XXX
-    إلى حـ/ النقدية في الصندوق (110101)   XXX
+من حـ/ المخالفات المرورية المدينة   XXX
+    إلى حـ/ إيرادات المخالفات المرورية  XXX
                 </pre>
               </div>
 
-              <h4>عند دفع مصروفات الصيانة:</h4>
+              <h4>عند دفع المخالفة:</h4>
               <div class="entry-example">
                 <pre>
-من حـ/ الصيانة والإصلاح (510202)     XXX
-    إلى حـ/ النقدية في الصندوق (110101)   XXX
+من حـ/ صندوق النقدية             XXX
+    إلى حـ/ المخالفات المرورية المدينة  XXX
                 </pre>
               </div>
             </div>
 
             <div class="entries-section">
-              <h3>4. قيود الإهلاك</h3>
+              <h3>4. قيود الاستهلاك</h3>
               
-              <h4>إهلاك شهري للمركبات:</h4>
+              <h4>استهلاك شهري للمركبات:</h4>
               <div class="entry-example">
                 <pre>
-من حـ/ إهلاك المركبات (510402)      XXX
-    إلى حـ/ مجمع إهلاك المركبات (120304)  XXX
-                </pre>
-              </div>
-
-              <h4>إهلاك المعدات:</h4>
-              <div class="entry-example">
-                <pre>
-من حـ/ إهلاك المعدات (510403)       XXX
-    إلى حـ/ مجمع إهلاك المعدات (120203)   XXX
+من حـ/ استهلاك المركبات          XXX
+    إلى حـ/ مجمع استهلاك المركبات     XXX
                 </pre>
               </div>
             </div>
