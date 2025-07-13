@@ -121,17 +121,13 @@ const Accounting = () => {
       </div>
 
       <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="reports">التقارير المالية</TabsTrigger>
           <TabsTrigger value="journal">القيود المحاسبية</TabsTrigger>
           <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
-          <TabsTrigger value="setup">إعداد النظام</TabsTrigger>
           <TabsTrigger value="transactions">المعاملات المالية</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="setup" className="space-y-4">
-          <ChartOfAccountsSetup />
-        </TabsContent>
 
         <TabsContent value="accounts" className="space-y-4">
           <ChartOfAccountsTab />
