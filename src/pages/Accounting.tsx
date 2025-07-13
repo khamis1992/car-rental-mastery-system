@@ -8,6 +8,9 @@ import { AccountingDataRefresh } from '@/components/Accounting/AccountingDataRef
 import { AccountingMaintenanceTools } from '@/components/Accounting/AccountingMaintenanceTools';
 import { ChartOfAccountsSetup } from '@/components/Accounting/ChartOfAccountsSetup';
 import { EnhancedAccountingDashboard } from '@/components/Accounting/EnhancedAccountingDashboard';
+import { AutomatedJournalEntries } from '@/components/Accounting/AutomatedJournalEntries';
+import { AccountingValidation } from '@/components/Accounting/AccountingValidation';
+import { EnhancedBudgetManagement } from '@/components/Accounting/EnhancedBudgetManagement';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -212,12 +215,14 @@ const Accounting = () => {
       <SmartAlerts />
 
       <Tabs defaultValue="dashboard" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="dashboard">لوحة التحكم المتقدمة</TabsTrigger>
-          <TabsTrigger value="reports">التقارير المالية</TabsTrigger>
-          <TabsTrigger value="journal">القيود المحاسبية</TabsTrigger>
-          <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
-          <TabsTrigger value="transactions">المعاملات المالية</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="validation">التحقق والمراجعة</TabsTrigger>
+          <TabsTrigger value="budget">إدارة الميزانية</TabsTrigger>
+          <TabsTrigger value="automation">الأتمتة</TabsTrigger>
+          <TabsTrigger value="dashboard">لوحة التحكم</TabsTrigger>
+          <TabsTrigger value="reports">التقارير</TabsTrigger>
+          <TabsTrigger value="journal">القيود</TabsTrigger>
+          <TabsTrigger value="accounts">الحسابات</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-4">
@@ -272,6 +277,18 @@ const Accounting = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="automation" className="space-y-4">
+          <AutomatedJournalEntries />
+        </TabsContent>
+
+        <TabsContent value="budget" className="space-y-4">
+          <EnhancedBudgetManagement />
+        </TabsContent>
+
+        <TabsContent value="validation" className="space-y-4">
+          <AccountingValidation />
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-4">
