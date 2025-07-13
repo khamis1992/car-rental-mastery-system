@@ -12,7 +12,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import Layout from '@/components/Layout/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import TenantGuard from '@/components/TenantGuard';
-import { GlobalErrorBoundary } from '@/components/ErrorBoundary/GlobalErrorBoundary';
+import GlobalErrorBoundary from '@/components/ErrorBoundary/GlobalErrorBoundary';
 import AbortErrorBoundary from '@/components/ErrorBoundary/AbortErrorBoundary';
 
 // Pages
