@@ -6864,46 +6864,70 @@ export type Database = {
       }
       tenants: {
         Row: {
+          address: string | null
           cancelled_at: string | null
+          country: string | null
           created_at: string | null
+          currency: string | null
           domain: string | null
+          email: string | null
           id: string
           name: string
           owner_id: string | null
+          phone: string | null
           settings: Json | null
+          slug: string | null
           status: string | null
           subscription_plan: string | null
           suspended_at: string | null
+          timezone: string | null
           trial_ends_at: string | null
           updated_at: string | null
+          website: string | null
         }
         Insert: {
+          address?: string | null
           cancelled_at?: string | null
+          country?: string | null
           created_at?: string | null
+          currency?: string | null
           domain?: string | null
+          email?: string | null
           id?: string
           name: string
           owner_id?: string | null
+          phone?: string | null
           settings?: Json | null
+          slug?: string | null
           status?: string | null
           subscription_plan?: string | null
           suspended_at?: string | null
+          timezone?: string | null
           trial_ends_at?: string | null
           updated_at?: string | null
+          website?: string | null
         }
         Update: {
+          address?: string | null
           cancelled_at?: string | null
+          country?: string | null
           created_at?: string | null
+          currency?: string | null
           domain?: string | null
+          email?: string | null
           id?: string
           name?: string
           owner_id?: string | null
+          phone?: string | null
           settings?: Json | null
+          slug?: string | null
           status?: string | null
           subscription_plan?: string | null
           suspended_at?: string | null
+          timezone?: string | null
           trial_ends_at?: string | null
           updated_at?: string | null
+          website?: string | null
         }
         Relationships: []
       }

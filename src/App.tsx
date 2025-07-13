@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -51,6 +51,7 @@ import CancelledStage from '@/pages/ContractStages/CancelledStage';
 
 // Super Admin Pages
 import SuperAdminBillingManagement from '@/pages/super-admin/BillingManagement';
+import TenantManagement from '@/pages/super-admin/TenantManagement';
 
 // Financial Components - New System
 import NewFinancialDashboard from '@/components/Financial/NewFinancialDashboard';
@@ -62,15 +63,16 @@ import './App.css';
 function App() {
   return (
     <GlobalErrorBoundary>
-      <AuthProvider>
-        <TenantProvider>
-          <SettingsProvider>
-            <SearchProvider>
-              <NotificationProvider>
-                <ContractsRealtimeProvider>
-                  <SidebarProvider>
-                    <AbortErrorBoundary>
-                      <Routes>
+      <BrowserRouter>
+        <AuthProvider>
+          <TenantProvider>
+            <SettingsProvider>
+              <SearchProvider>
+                <NotificationProvider>
+                  <ContractsRealtimeProvider>
+                    <SidebarProvider>
+                      <AbortErrorBoundary>
+                        <Routes>
                         {/* Public Routes */}
                         <Route path="/auth" element={<Auth />} />
                         <Route path="/public-quotation/:id" element={<PublicQuotation />} />
@@ -106,7 +108,7 @@ function App() {
                           <Route path="integration" element={<IntegrationCenter />} />
                           <Route path="communications" element={<Communications />} />
                           <Route path="invoicing" element={<Invoicing />} />
-                          <Route path="tenants" element={<Tenants />} />
+                          <Route path="tenants" element={<TenantManagement />} />
                           
                           {/* Contract Stages */}
                           <Route path="contracts/draft" element={<DraftStage />} />
@@ -182,15 +184,16 @@ function App() {
                         
                         {/* 404 */}
                         <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </AbortErrorBoundary>
-                  </SidebarProvider>
-                </ContractsRealtimeProvider>
-              </NotificationProvider>
-            </SearchProvider>
-          </SettingsProvider>
-        </TenantProvider>
-      </AuthProvider>
+                        </Routes>
+                      </AbortErrorBoundary>
+                    </SidebarProvider>
+                  </ContractsRealtimeProvider>
+                </NotificationProvider>
+              </SearchProvider>
+            </SettingsProvider>
+          </TenantProvider>
+        </AuthProvider>
+      </BrowserRouter>
       <Toaster />
       <SonnerToaster />
     </GlobalErrorBoundary>
