@@ -27,8 +27,7 @@ export class VehicleStatusEventHandler {
       return;
     }
 
-    try {
-      console.log('🎯 تهيئة معالج أحداث حالات المركبات');
+    console.log('🎯 تهيئة معالج أحداث حالات المركبات');
 
     const eventBus = orchestrationContainer.getEventBus();
 
@@ -132,16 +131,11 @@ export class VehicleStatusEventHandler {
       }
     });
 
-      // بدء المهام المجدولة
-      scheduledJobsService.startAllJobs();
+    // بدء المهام المجدولة
+    scheduledJobsService.startAllJobs();
 
-      this.isInitialized = true;
-      console.log('✅ تم تهيئة معالج أحداث حالات المركبات');
-      
-    } catch (error) {
-      console.error('❌ خطأ في تهيئة معالج أحداث المركبات:', error);
-      throw error;
-    }
+    this.isInitialized = true;
+    console.log('✅ تم تهيئة معالج أحداث حالات المركبات');
   }
 
   /**
@@ -153,18 +147,13 @@ export class VehicleStatusEventHandler {
       return;
     }
 
-    try {
-      console.log('🛑 إيقاف معالج أحداث حالات المركبات');
+    console.log('🛑 إيقاف معالج أحداث حالات المركبات');
 
-      // إيقاف المهام المجدولة
-      scheduledJobsService.stopAllJobs();
+    // إيقاف المهام المجدولة
+    scheduledJobsService.stopAllJobs();
 
-      this.isInitialized = false;
-      console.log('✅ تم إيقاف معالج أحداث حالات المركبات');
-      
-    } catch (error) {
-      console.error('❌ خطأ في إيقاف معالج أحداث المركبات:', error);
-    }
+    this.isInitialized = false;
+    console.log('✅ تم إيقاف معالج أحداث حالات المركبات');
   }
 
   /**

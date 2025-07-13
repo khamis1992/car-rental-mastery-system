@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export class ScheduledJobsService {
   private static instance: ScheduledJobsService;
-  private jobIntervals: Map<string, number> = new Map();
+  private jobIntervals: Map<string, NodeJS.Timeout> = new Map();
 
   private constructor() {}
 
@@ -88,7 +88,7 @@ export class ScheduledJobsService {
       } catch (error) {
         console.error(`❌ خطأ في المهمة المجدولة ${jobName}:`, error);
       }
-    }, intervalMs) as unknown as number;
+    }, intervalMs);
 
     this.jobIntervals.set(jobName, interval);
     console.log(`⏰ تم جدولة المهمة: ${jobName} (كل ${intervalMs / 1000} ثانية)`);
