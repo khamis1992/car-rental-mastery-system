@@ -12,7 +12,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import Layout from '@/components/Layout/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import TenantGuard from '@/components/TenantGuard';
-import GlobalErrorBoundary from '@/components/ErrorBoundary/GlobalErrorBoundary';
+import { GlobalErrorBoundary } from '@/components/ErrorBoundary/GlobalErrorBoundary';
 import AbortErrorBoundary from '@/components/ErrorBoundary/AbortErrorBoundary';
 
 // Pages
@@ -80,7 +80,9 @@ function App() {
                         <Route path="/" element={
                           <ProtectedRoute>
                             <TenantGuard>
-                              <Layout />
+                              <Layout>
+                                <div />
+                              </Layout>
                             </TenantGuard>
                           </ProtectedRoute>
                         }>
@@ -111,7 +113,7 @@ function App() {
                           <Route path="contracts/pending" element={<PendingStage />} />
                           <Route path="contracts/active" element={<ActiveStage />} />
                           <Route path="contracts/completed" element={<CompletedStage />} />
-                          <Route path="contracts/cancelled" element={<CancelledStage />} />
+                          <Route path="contracts/cancelled" element={<CancelledStage contract={{}} />} />
                           
                           {/* New Financial System Routes */}
                           <Route path="financial/new-dashboard" element={<NewFinancialDashboard />} />
