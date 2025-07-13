@@ -7289,6 +7289,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      validate_chart_consistency: {
+        Args: { tenant_id_param: string }
+        Returns: Json
+      }
       validate_chart_of_accounts: {
         Args: Record<PropertyKey, never>
         Returns: Json
