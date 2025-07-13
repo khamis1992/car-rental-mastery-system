@@ -1886,6 +1886,110 @@ export type Database = {
           },
         ]
       }
+      cost_center_budgets: {
+        Row: {
+          account_id: string | null
+          annual_actual: number | null
+          annual_budget: number | null
+          approved_at: string | null
+          approved_by: string | null
+          budget_version: number | null
+          budget_year: number
+          cost_center_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          q1_actual: number | null
+          q1_budget: number | null
+          q2_actual: number | null
+          q2_budget: number | null
+          q3_actual: number | null
+          q3_budget: number | null
+          q4_actual: number | null
+          q4_budget: number | null
+          status: string | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          annual_actual?: number | null
+          annual_budget?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          budget_version?: number | null
+          budget_year: number
+          cost_center_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          q1_actual?: number | null
+          q1_budget?: number | null
+          q2_actual?: number | null
+          q2_budget?: number | null
+          q3_actual?: number | null
+          q3_budget?: number | null
+          q4_actual?: number | null
+          q4_budget?: number | null
+          status?: string | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          annual_actual?: number | null
+          annual_budget?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          budget_version?: number | null
+          budget_year?: number
+          cost_center_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          q1_actual?: number | null
+          q1_budget?: number | null
+          q2_actual?: number | null
+          q2_budget?: number | null
+          q3_actual?: number | null
+          q3_budget?: number | null
+          q4_actual?: number | null
+          q4_budget?: number | null
+          status?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_center_budgets_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_center_budgets_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_center_budgets_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_center_budgets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cost_center_settings: {
         Row: {
           created_at: string
@@ -1931,9 +2035,14 @@ export type Database = {
       cost_centers: {
         Row: {
           actual_spent: number | null
+          approval_workflow: Json | null
+          auto_alerts: boolean | null
           budget_amount: number | null
+          budget_version: number | null
+          business_unit: string | null
           cost_center_code: string
           cost_center_name: string
+          cost_center_name_en: string | null
           cost_center_type: string | null
           created_at: string
           created_by: string | null
@@ -1944,15 +2053,25 @@ export type Database = {
           is_active: boolean | null
           level: number | null
           manager_id: string | null
+          ministry_classification: string | null
           parent_id: string | null
+          profit_center_code: string | null
+          reporting_manager_id: string | null
+          requires_pre_approval: boolean | null
           tenant_id: string
           updated_at: string
+          variance_threshold: number | null
         }
         Insert: {
           actual_spent?: number | null
+          approval_workflow?: Json | null
+          auto_alerts?: boolean | null
           budget_amount?: number | null
+          budget_version?: number | null
+          business_unit?: string | null
           cost_center_code: string
           cost_center_name: string
+          cost_center_name_en?: string | null
           cost_center_type?: string | null
           created_at?: string
           created_by?: string | null
@@ -1963,15 +2082,25 @@ export type Database = {
           is_active?: boolean | null
           level?: number | null
           manager_id?: string | null
+          ministry_classification?: string | null
           parent_id?: string | null
+          profit_center_code?: string | null
+          reporting_manager_id?: string | null
+          requires_pre_approval?: boolean | null
           tenant_id: string
           updated_at?: string
+          variance_threshold?: number | null
         }
         Update: {
           actual_spent?: number | null
+          approval_workflow?: Json | null
+          auto_alerts?: boolean | null
           budget_amount?: number | null
+          budget_version?: number | null
+          business_unit?: string | null
           cost_center_code?: string
           cost_center_name?: string
+          cost_center_name_en?: string | null
           cost_center_type?: string | null
           created_at?: string
           created_by?: string | null
@@ -1982,9 +2111,14 @@ export type Database = {
           is_active?: boolean | null
           level?: number | null
           manager_id?: string | null
+          ministry_classification?: string | null
           parent_id?: string | null
+          profit_center_code?: string | null
+          reporting_manager_id?: string | null
+          requires_pre_approval?: boolean | null
           tenant_id?: string
           updated_at?: string
+          variance_threshold?: number | null
         }
         Relationships: [
           {
@@ -2013,6 +2147,13 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_centers_reporting_manager_id_fkey"
+            columns: ["reporting_manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
           {
@@ -2475,6 +2616,72 @@ export type Database = {
           },
           {
             foreignKeyName: "departments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_sequences: {
+        Row: {
+          branch_id: string | null
+          created_at: string | null
+          current_number: number | null
+          document_type: string
+          id: string
+          is_active: boolean | null
+          last_reset: string | null
+          padding_length: number | null
+          prefix: string | null
+          reset_annually: boolean | null
+          reset_monthly: boolean | null
+          suffix: string | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string | null
+          current_number?: number | null
+          document_type: string
+          id?: string
+          is_active?: boolean | null
+          last_reset?: string | null
+          padding_length?: number | null
+          prefix?: string | null
+          reset_annually?: boolean | null
+          reset_monthly?: boolean | null
+          suffix?: string | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string | null
+          current_number?: number | null
+          document_type?: string
+          id?: string
+          is_active?: boolean | null
+          last_reset?: string | null
+          padding_length?: number | null
+          prefix?: string | null
+          reset_annually?: boolean | null
+          reset_monthly?: boolean | null
+          suffix?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_sequences_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "enhanced_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_sequences_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -3084,6 +3291,65 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      financial_report_templates: {
+        Row: {
+          auto_generate: boolean | null
+          created_at: string | null
+          created_by: string | null
+          generation_frequency: string | null
+          id: string
+          is_active: boolean | null
+          last_generated: string | null
+          legal_requirement: boolean | null
+          ministry_format: boolean | null
+          report_name: string
+          report_structure: Json
+          report_type: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          auto_generate?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          generation_frequency?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_generated?: string | null
+          legal_requirement?: boolean | null
+          ministry_format?: boolean | null
+          report_name: string
+          report_structure: Json
+          report_type: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          auto_generate?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          generation_frequency?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_generated?: string | null
+          legal_requirement?: boolean | null
+          ministry_format?: boolean | null
+          report_name?: string
+          report_structure?: Json
+          report_type?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_report_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fixed_assets: {
         Row: {
