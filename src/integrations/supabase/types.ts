@@ -98,6 +98,56 @@ export type Database = {
         }
         Relationships: []
       }
+      accounting_templates: {
+        Row: {
+          auto_apply_rules: Json | null
+          created_at: string | null
+          created_by: string | null
+          default_accounts: Json | null
+          id: string
+          is_active: boolean | null
+          template_name: string
+          template_structure: Json
+          template_type: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          auto_apply_rules?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          default_accounts?: Json | null
+          id?: string
+          is_active?: boolean | null
+          template_name: string
+          template_structure: Json
+          template_type: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          auto_apply_rules?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          default_accounts?: Json | null
+          id?: string
+          is_active?: boolean | null
+          template_name?: string
+          template_structure?: Json
+          template_type?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accounting_webhooks: {
         Row: {
           created_at: string
@@ -213,6 +263,50 @@ export type Database = {
           },
           {
             foreignKeyName: "additional_charges_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      advanced_accounting_settings: {
+        Row: {
+          id: string
+          last_updated: string | null
+          ministry_required: boolean | null
+          setting_category: string
+          setting_description: string | null
+          setting_key: string
+          setting_value: Json
+          tenant_id: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          last_updated?: string | null
+          ministry_required?: boolean | null
+          setting_category: string
+          setting_description?: string | null
+          setting_key: string
+          setting_value: Json
+          tenant_id: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          last_updated?: string | null
+          ministry_required?: boolean | null
+          setting_category?: string
+          setting_description?: string | null
+          setting_key?: string
+          setting_value?: Json
+          tenant_id?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advanced_accounting_settings_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -2591,6 +2685,123 @@ export type Database = {
           },
         ]
       }
+      enhanced_branches: {
+        Row: {
+          address_ar: string | null
+          address_en: string | null
+          branch_code: string
+          branch_name_ar: string
+          branch_name_en: string | null
+          branch_type: string | null
+          city: string | null
+          commercial_registration: string | null
+          country: string | null
+          created_at: string | null
+          created_by: string | null
+          email: string | null
+          established_date: string | null
+          fax: string | null
+          financial_year_start: number | null
+          governorate: string | null
+          id: string
+          is_active: boolean | null
+          manager_email: string | null
+          manager_name: string | null
+          manager_phone: string | null
+          parent_branch_id: string | null
+          phone: string | null
+          po_box: string | null
+          postal_code: string | null
+          reporting_currency: string | null
+          tax_registration: string | null
+          tenant_id: string
+          updated_at: string | null
+          website: string | null
+          zakat_number: string | null
+        }
+        Insert: {
+          address_ar?: string | null
+          address_en?: string | null
+          branch_code: string
+          branch_name_ar: string
+          branch_name_en?: string | null
+          branch_type?: string | null
+          city?: string | null
+          commercial_registration?: string | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          established_date?: string | null
+          fax?: string | null
+          financial_year_start?: number | null
+          governorate?: string | null
+          id?: string
+          is_active?: boolean | null
+          manager_email?: string | null
+          manager_name?: string | null
+          manager_phone?: string | null
+          parent_branch_id?: string | null
+          phone?: string | null
+          po_box?: string | null
+          postal_code?: string | null
+          reporting_currency?: string | null
+          tax_registration?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          website?: string | null
+          zakat_number?: string | null
+        }
+        Update: {
+          address_ar?: string | null
+          address_en?: string | null
+          branch_code?: string
+          branch_name_ar?: string
+          branch_name_en?: string | null
+          branch_type?: string | null
+          city?: string | null
+          commercial_registration?: string | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          established_date?: string | null
+          fax?: string | null
+          financial_year_start?: number | null
+          governorate?: string | null
+          id?: string
+          is_active?: boolean | null
+          manager_email?: string | null
+          manager_name?: string | null
+          manager_phone?: string | null
+          parent_branch_id?: string | null
+          phone?: string | null
+          po_box?: string | null
+          postal_code?: string | null
+          reporting_currency?: string | null
+          tax_registration?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          website?: string | null
+          zakat_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enhanced_branches_parent_branch_id_fkey"
+            columns: ["parent_branch_id"]
+            isOneToOne: false
+            referencedRelation: "enhanced_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enhanced_branches_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exchange_rates_history: {
         Row: {
           created_at: string | null
@@ -3444,18 +3655,26 @@ export type Database = {
       }
       journal_entries: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
+          attachment_urls: string[] | null
+          audit_trail: Json | null
+          base_currency: string | null
           branch_id: string | null
           created_at: string
           created_by: string | null
           description: string
           entry_date: string
           entry_number: string
+          exchange_rate: number | null
           financial_period_id: string | null
           id: string
+          ministry_compliance_check: boolean | null
           posted_at: string | null
           posted_by: string | null
           reference_id: string | null
           reference_type: string | null
+          requires_approval: boolean | null
           reversal_reason: string | null
           reversed_at: string | null
           reversed_by: string | null
@@ -3464,20 +3683,29 @@ export type Database = {
           total_credit: number
           total_debit: number
           updated_at: string
+          zakat_calculated: boolean | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          attachment_urls?: string[] | null
+          audit_trail?: Json | null
+          base_currency?: string | null
           branch_id?: string | null
           created_at?: string
           created_by?: string | null
           description: string
           entry_date: string
           entry_number: string
+          exchange_rate?: number | null
           financial_period_id?: string | null
           id?: string
+          ministry_compliance_check?: boolean | null
           posted_at?: string | null
           posted_by?: string | null
           reference_id?: string | null
           reference_type?: string | null
+          requires_approval?: boolean | null
           reversal_reason?: string | null
           reversed_at?: string | null
           reversed_by?: string | null
@@ -3486,20 +3714,29 @@ export type Database = {
           total_credit?: number
           total_debit?: number
           updated_at?: string
+          zakat_calculated?: boolean | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          attachment_urls?: string[] | null
+          audit_trail?: Json | null
+          base_currency?: string | null
           branch_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string
           entry_date?: string
           entry_number?: string
+          exchange_rate?: number | null
           financial_period_id?: string | null
           id?: string
+          ministry_compliance_check?: boolean | null
           posted_at?: string | null
           posted_by?: string | null
           reference_id?: string | null
           reference_type?: string | null
+          requires_approval?: boolean | null
           reversal_reason?: string | null
           reversed_at?: string | null
           reversed_by?: string | null
@@ -3508,6 +3745,7 @@ export type Database = {
           total_credit?: number
           total_debit?: number
           updated_at?: string
+          zakat_calculated?: boolean | null
         }
         Relationships: [
           {
@@ -3541,10 +3779,15 @@ export type Database = {
           credit_amount: number | null
           debit_amount: number | null
           description: string | null
+          exchange_rate: number | null
           id: string
           journal_entry_id: string
           line_number: number
+          original_amount: number | null
+          original_currency: string | null
           tenant_id: string | null
+          vat_amount: number | null
+          vat_rate: number | null
         }
         Insert: {
           account_id: string
@@ -3553,10 +3796,15 @@ export type Database = {
           credit_amount?: number | null
           debit_amount?: number | null
           description?: string | null
+          exchange_rate?: number | null
           id?: string
           journal_entry_id: string
           line_number: number
+          original_amount?: number | null
+          original_currency?: string | null
           tenant_id?: string | null
+          vat_amount?: number | null
+          vat_rate?: number | null
         }
         Update: {
           account_id?: string
@@ -3565,10 +3813,15 @@ export type Database = {
           credit_amount?: number | null
           debit_amount?: number | null
           description?: string | null
+          exchange_rate?: number | null
           id?: string
           journal_entry_id?: string
           line_number?: number
+          original_amount?: number | null
+          original_currency?: string | null
           tenant_id?: string | null
+          vat_amount?: number | null
+          vat_rate?: number | null
         }
         Relationships: [
           {
