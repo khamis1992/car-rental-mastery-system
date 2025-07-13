@@ -1978,77 +1978,113 @@ export type Database = {
       customers: {
         Row: {
           address: string | null
+          assigned_to: string | null
           city: string | null
           company_contact_person: string | null
+          company_name: string | null
           company_registration_number: string | null
           country: string | null
           created_at: string
           created_by: string | null
+          customer_code: string
           customer_number: string
           customer_type: Database["public"]["Enums"]["customer_type"]
           email: string | null
+          financial_info: Json | null
           id: string
+          identification: Json | null
           last_contract_date: string | null
+          lifecycle_stage: string
           name: string
           national_id: string | null
           notes: string | null
           phone: string
+          preferences: Json | null
           rating: number | null
+          secondary_phone: string | null
+          segments: string[] | null
+          source: string | null
           status: Database["public"]["Enums"]["customer_status"]
+          tags: string[] | null
           tax_number: string | null
           tenant_id: string
           total_contracts: number | null
           total_revenue: number | null
+          type: string
           updated_at: string
         }
         Insert: {
           address?: string | null
+          assigned_to?: string | null
           city?: string | null
           company_contact_person?: string | null
+          company_name?: string | null
           company_registration_number?: string | null
           country?: string | null
           created_at?: string
           created_by?: string | null
+          customer_code: string
           customer_number: string
           customer_type?: Database["public"]["Enums"]["customer_type"]
           email?: string | null
+          financial_info?: Json | null
           id?: string
+          identification?: Json | null
           last_contract_date?: string | null
+          lifecycle_stage?: string
           name: string
           national_id?: string | null
           notes?: string | null
           phone: string
+          preferences?: Json | null
           rating?: number | null
+          secondary_phone?: string | null
+          segments?: string[] | null
+          source?: string | null
           status?: Database["public"]["Enums"]["customer_status"]
+          tags?: string[] | null
           tax_number?: string | null
           tenant_id: string
           total_contracts?: number | null
           total_revenue?: number | null
+          type?: string
           updated_at?: string
         }
         Update: {
           address?: string | null
+          assigned_to?: string | null
           city?: string | null
           company_contact_person?: string | null
+          company_name?: string | null
           company_registration_number?: string | null
           country?: string | null
           created_at?: string
           created_by?: string | null
+          customer_code?: string
           customer_number?: string
           customer_type?: Database["public"]["Enums"]["customer_type"]
           email?: string | null
+          financial_info?: Json | null
           id?: string
+          identification?: Json | null
           last_contract_date?: string | null
+          lifecycle_stage?: string
           name?: string
           national_id?: string | null
           notes?: string | null
           phone?: string
+          preferences?: Json | null
           rating?: number | null
+          secondary_phone?: string | null
+          segments?: string[] | null
+          source?: string | null
           status?: Database["public"]["Enums"]["customer_status"]
+          tags?: string[] | null
           tax_number?: string | null
           tenant_id?: string
           total_contracts?: number | null
           total_revenue?: number | null
+          type?: string
           updated_at?: string
         }
         Relationships: [
@@ -2057,6 +2093,199 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_events: {
+        Row: {
+          id: string
+          event_type: string
+          source_service: string
+          source_id: string | null
+          aggregate_id: string | null
+          aggregate_type: string | null
+          event_data: Json
+          metadata: Json
+          priority: string
+          retry_count: number
+          max_retries: number
+          scheduled_at: string
+          processed: boolean
+          processed_at: string | null
+          processing_time_ms: number | null
+          error: string | null
+          failed_at: string | null
+          tenant_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          event_type: string
+          source_service: string
+          source_id?: string | null
+          aggregate_id?: string | null
+          aggregate_type?: string | null
+          event_data: Json
+          metadata?: Json
+          priority?: string
+          retry_count?: number
+          max_retries?: number
+          scheduled_at?: string
+          processed?: boolean
+          processed_at?: string | null
+          processing_time_ms?: number | null
+          error?: string | null
+          failed_at?: string | null
+          tenant_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          event_type?: string
+          source_service?: string
+          source_id?: string | null
+          aggregate_id?: string | null
+          aggregate_type?: string | null
+          event_data?: Json
+          metadata?: Json
+          priority?: string
+          retry_count?: number
+          max_retries?: number
+          scheduled_at?: string
+          processed?: boolean
+          processed_at?: string | null
+          processing_time_ms?: number | null
+          error?: string | null
+          failed_at?: string | null
+          tenant_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      customer_activities: {
+        Row: {
+          id: string
+          customer_id: string
+          activity_type: string
+          title: string
+          description: string | null
+          date: string
+          performed_by: string | null
+          related_entity_type: string | null
+          related_entity_id: string | null
+          metadata: Json
+          tenant_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          customer_id: string
+          activity_type: string
+          title: string
+          description?: string | null
+          date?: string
+          performed_by?: string | null
+          related_entity_type?: string | null
+          related_entity_id?: string | null
+          metadata?: Json
+          tenant_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          customer_id?: string
+          activity_type?: string
+          title?: string
+          description?: string | null
+          date?: string
+          performed_by?: string | null
+          related_entity_type?: string | null
+          related_entity_id?: string | null
+          metadata?: Json
+          tenant_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_activities_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_opportunities: {
+        Row: {
+          id: string
+          customer_id: string
+          opportunity_name: string
+          description: string | null
+          stage: string
+          probability: number
+          value: number
+          currency: string
+          expected_close_date: string | null
+          actual_close_date: string | null
+          source: string | null
+          assigned_to: string | null
+          products_services: Json
+          competitors: string[]
+          notes: string | null
+          tenant_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          customer_id: string
+          opportunity_name: string
+          description?: string | null
+          stage?: string
+          probability?: number
+          value?: number
+          currency?: string
+          expected_close_date?: string | null
+          actual_close_date?: string | null
+          source?: string | null
+          assigned_to?: string | null
+          products_services?: Json
+          competitors?: string[]
+          notes?: string | null
+          tenant_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          customer_id?: string
+          opportunity_name?: string
+          description?: string | null
+          stage?: string
+          probability?: number
+          value?: number
+          currency?: string
+          expected_close_date?: string | null
+          actual_close_date?: string | null
+          source?: string | null
+          assigned_to?: string | null
+          products_services?: Json
+          competitors?: string[]
+          notes?: string | null
+          tenant_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_opportunities_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
             referencedColumns: ["id"]
           },
         ]

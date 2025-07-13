@@ -1,5 +1,5 @@
-import { supabase } from '@/integrations/supabase/client';
-import { eventBusService, BusinessEventTypes } from '@/services/EventBus/EventBusService';
+import { supabase } from '../../integrations/supabase/client';
+import { eventBusService, BusinessEventTypes } from '../EventBus/EventBusService';
 
 // معلومات العميل المتقدمة
 export interface CustomerProfile {
@@ -385,16 +385,16 @@ class CRMService {
         .from('customers')
         .insert({
           customer_code: customerCode,
-          type: customerData.type || 'individual',
-          full_name: customerData.full_name,
+          customer_type: customerData.type || 'individual',
+          name: customerData.full_name,
           company_name: customerData.company_name,
           email: customerData.email,
           phone: customerData.phone,
           secondary_phone: customerData.secondary_phone,
-          address: customerData.address,
-          identification: customerData.identification,
-          financial_info: customerData.financial_info || this.getDefaultFinancialInfo(),
-          preferences: customerData.preferences || this.getDefaultPreferences(),
+          address: JSON.stringify(customerData.address || {}),
+          identification: JSON.stringify(customerData.identification || {}),
+          financial_info: JSON.stringify(customerData.financial_info || this.getDefaultFinancialInfo()),
+          preferences: JSON.stringify(customerData.preferences || this.getDefaultPreferences()),
           lifecycle_stage: customerData.lifecycle_stage || CustomerLifecycleStage.PROSPECT,
           segments: customerData.segments || [],
           tags: customerData.tags || [],
