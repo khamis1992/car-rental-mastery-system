@@ -55,12 +55,12 @@ const TenantSwitcher: React.FC = () => {
       if (error) throw error;
 
       const tenants = data
-        ?.filter(item => item.tenant)
+        ?.filter(item => item && typeof item === 'object' && 'tenant' in item && item.tenant)
         .map(item => ({
-          id: item.tenant.id,
-          name: item.tenant.name,
-          role: item.role,
-          status: item.tenant.status
+          id: (item as any).tenant.id,
+          name: (item as any).tenant.name,
+          role: (item as any).role,
+          status: (item as any).tenant.status
         })) || [];
 
       setAvailableTenants(tenants);

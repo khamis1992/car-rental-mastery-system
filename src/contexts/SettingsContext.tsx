@@ -14,6 +14,7 @@ interface SystemSettings {
 interface SettingsContextType {
   systemSettings: SystemSettings;
   updateSystemSettings: (field: string, value: any) => void;
+  settings: SystemSettings; // Add this for compatibility
 }
 
 const defaultSettings: SystemSettings = {
@@ -48,7 +49,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
 
   return (
-    <SettingsContext.Provider value={{ systemSettings, updateSystemSettings }}>
+    <SettingsContext.Provider value={{
+      systemSettings,
+      updateSystemSettings,
+      settings: systemSettings // Add this for compatibility
+    }}>
       {children}
     </SettingsContext.Provider>
   );
