@@ -6735,6 +6735,10 @@ export type Database = {
         Args: { budget_id: string }
         Returns: undefined
       }
+      calculate_cash_flow: {
+        Args: { start_date: string; end_date: string }
+        Returns: Json
+      }
       calculate_cost_center_actual_costs: {
         Args: { cost_center_id_param: string }
         Returns: number
@@ -6757,6 +6761,10 @@ export type Database = {
       }
       calculate_installment_summary: {
         Args: { tenant_id_param: string }
+        Returns: Json
+      }
+      calculate_liquidity_ratios: {
+        Args: Record<PropertyKey, never>
         Returns: Json
       }
       calculate_monthly_depreciation: {
@@ -7011,6 +7019,10 @@ export type Database = {
       generate_employee_number: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      generate_financial_summary: {
+        Args: { as_of_date?: string }
+        Returns: Json
       }
       generate_hierarchical_asset_code: {
         Args: { vehicle_type: string; make: string; model: string }

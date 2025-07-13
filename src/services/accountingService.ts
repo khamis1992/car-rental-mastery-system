@@ -1,5 +1,27 @@
 import { supabase } from "@/integrations/supabase/client";
-import { ChartOfAccount, JournalEntry, JournalEntryLine, CostCenter, Branch, FinancialPeriod, TrialBalance, IncomeStatement, BalanceSheet } from "@/types/accounting";
+import { 
+  ChartOfAccount, 
+  JournalEntry, 
+  JournalEntryLine, 
+  CostCenter, 
+  Branch, 
+  FinancialPeriod, 
+  TrialBalance, 
+  IncomeStatement, 
+  BalanceSheet,
+  FixedAsset,
+  AssetDepreciation,
+  AssetCategory,
+  BankTransaction,
+  Budget,
+  BudgetItem,
+  CostCenterAllocation,
+  AdvancedKPI,
+  AIInsight,
+  CashFlowStatement,
+  LiquidityRatios,
+  FinancialSummary
+} from "@/types/accounting";
 
 export const accountingService = {
   // Helper method to get current tenant ID
@@ -366,5 +388,356 @@ export const accountingService = {
         total_equity: capital
       }
     };
+  },
+
+  // ================== الميزات المتقدمة الجديدة ==================
+
+  // إدارة الأصول الثابتة
+  async getFixedAssets(): Promise<FixedAsset[]> {
+    const tenantId = await this.getCurrentTenantId();
+    const { data, error } = await supabase
+      .from('fixed_assets')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .order('asset_code');
+    
+    if (error) throw error;
+    return (data || []) as FixedAsset[];
+  },
+
+  async createFixedAsset(asset: Omit<FixedAsset, 'id' | 'created_at' | 'updated_at' | 'tenant_id'>): Promise<FixedAsset> {
+    const tenantId = await this.getCurrentTenantId();
+    const { data, error } = await supabase
+      .from('fixed_assets')
+      .insert({
+        ...asset,
+        tenant_id: tenantId
+      } as any)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data as FixedAsset;
+  },
+
+  async updateFixedAsset(id: string, asset: Partial<FixedAsset>): Promise<FixedAsset> {
+    const { data, error } = await supabase
+      .from('fixed_assets')
+      .update(asset as any)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data as FixedAsset;
+  },
+
+  async deleteFixedAsset(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('fixed_assets')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+  },
+
+  // إدارة إهلاك الأصول
+  async getAssetDepreciation(assetId?: string): Promise<AssetDepreciation[]> {
+    const tenantId = await this.getCurrentTenantId();
+    let query = supabase
+      .from('asset_depreciation')
+      .select(`
+        *,
+        asset:fixed_assets(*)
+      `)
+      .eq('tenant_id', tenantId)
+      .order('depreciation_date', { ascending: false });
+
+    if (assetId) {
+      query = query.eq('asset_id', assetId);
+    }
+
+    const { data, error } = await query;
+    
+    if (error) throw error;
+    return (data || []) as AssetDepreciation[];
+  },
+
+  async createAssetDepreciation(depreciation: Omit<AssetDepreciation, 'id' | 'created_at' | 'tenant_id'>): Promise<AssetDepreciation> {
+    const tenantId = await this.getCurrentTenantId();
+    const { data, error } = await supabase
+      .from('asset_depreciation')
+      .insert({
+        ...depreciation,
+        tenant_id: tenantId
+      } as any)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data as AssetDepreciation;
+  },
+
+  // إدارة فئات الأصول
+  async getAssetCategories(): Promise<AssetCategory[]> {
+    const { data, error } = await supabase
+      .from('asset_categories')
+      .select('*')
+      .eq('is_active', true)
+      .order('category_name');
+    
+    if (error) throw error;
+    return (data || []) as AssetCategory[];
+  },
+
+  // إدارة المعاملات البنكية
+  async getBankTransactions(bankAccountId?: string): Promise<BankTransaction[]> {
+    const tenantId = await this.getCurrentTenantId();
+    let query = supabase
+      .from('bank_transactions')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .order('transaction_date', { ascending: false });
+
+    if (bankAccountId) {
+      query = query.eq('bank_account_id', bankAccountId);
+    }
+
+    const { data, error } = await query;
+    
+    if (error) throw error;
+    return (data || []) as BankTransaction[];
+  },
+
+  async createBankTransaction(transaction: Omit<BankTransaction, 'id' | 'created_at' | 'updated_at' | 'tenant_id'>): Promise<BankTransaction> {
+    const tenantId = await this.getCurrentTenantId();
+    const { data, error } = await supabase
+      .from('bank_transactions')
+      .insert({
+        ...transaction,
+        tenant_id: tenantId
+      } as any)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data as BankTransaction;
+  },
+
+  // إدارة الميزانيات
+  async getBudgets(): Promise<Budget[]> {
+    const tenantId = await this.getCurrentTenantId();
+    const { data, error } = await supabase
+      .from('budgets')
+      .select(`
+        *,
+        items:budget_items(
+          *,
+          account:chart_of_accounts(*)
+        )
+      `)
+      .eq('tenant_id', tenantId)
+      .order('budget_year', { ascending: false });
+    
+    if (error) throw error;
+    return (data || []) as Budget[];
+  },
+
+  async createBudget(budget: Omit<Budget, 'id' | 'created_at' | 'updated_at' | 'tenant_id'>): Promise<Budget> {
+    const tenantId = await this.getCurrentTenantId();
+    const { data, error } = await supabase
+      .from('budgets')
+      .insert({
+        ...budget,
+        tenant_id: tenantId
+      } as any)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data as Budget;
+  },
+
+  async updateBudget(id: string, budget: Partial<Budget>): Promise<Budget> {
+    const { data, error } = await supabase
+      .from('budgets')
+      .update(budget as any)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data as Budget;
+  },
+
+  // إدارة بنود الميزانية
+  async getBudgetItems(budgetId: string): Promise<BudgetItem[]> {
+    const { data, error } = await supabase
+      .from('budget_items')
+      .select(`
+        *,
+        account:chart_of_accounts(*)
+      `)
+      .eq('budget_id', budgetId);
+    
+    if (error) throw error;
+    return (data || []) as BudgetItem[];
+  },
+
+  async createBudgetItem(item: Omit<BudgetItem, 'id' | 'created_at' | 'updated_at' | 'tenant_id'>): Promise<BudgetItem> {
+    const tenantId = await this.getCurrentTenantId();
+    const { data, error } = await supabase
+      .from('budget_items')
+      .insert({
+        ...item,
+        tenant_id: tenantId
+      } as any)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data as BudgetItem;
+  },
+
+  // حساب انحرافات الميزانية
+  async calculateBudgetVariance(budgetId: string): Promise<void> {
+    const { error } = await supabase.rpc('calculate_budget_variance', {
+      budget_id: budgetId
+    });
+    
+    if (error) throw error;
+  },
+
+  // المؤشرات المتقدمة
+  async getAdvancedKPIs(): Promise<AdvancedKPI[]> {
+    const { data, error } = await supabase
+      .from('advanced_kpis')
+      .select('*')
+      .order('category', { ascending: true });
+    
+    if (error) throw error;
+    return (data || []) as AdvancedKPI[];
+  },
+
+  async calculateAllKPIs(): Promise<any> {
+    const { data, error } = await supabase.rpc('calculate_all_kpis');
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async calculateSpecificKPI(kpiCode: string): Promise<number> {
+    const { data, error } = await supabase.rpc('calculate_advanced_kpi', {
+      kpi_code_param: kpiCode
+    });
+    
+    if (error) throw error;
+    return data || 0;
+  },
+
+  // رؤى الذكاء الاصطناعي
+  async getAIInsights(): Promise<AIInsight[]> {
+    const { data, error } = await supabase
+      .from('ai_insights')
+      .select('*')
+      .eq('is_dismissed', false)
+      .order('priority_level', { ascending: false })
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return (data || []) as AIInsight[];
+  },
+
+  async dismissAIInsight(id: string): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from('ai_insights')
+      .update({
+        is_dismissed: true,
+        dismissed_by: user?.id,
+        dismissed_at: new Date().toISOString()
+      })
+      .eq('id', id);
+    
+    if (error) throw error;
+  },
+
+  // التقارير المتقدمة
+  async getCashFlowStatement(startDate: string, endDate: string): Promise<CashFlowStatement> {
+    const { data, error } = await supabase.rpc('calculate_cash_flow', {
+      start_date: startDate,
+      end_date: endDate
+    });
+    
+    if (error) throw error;
+    return (data as unknown) as CashFlowStatement;
+  },
+
+  async getLiquidityRatios(): Promise<LiquidityRatios> {
+    const { data, error } = await supabase.rpc('calculate_liquidity_ratios');
+    
+    if (error) throw error;
+    return (data as unknown) as LiquidityRatios;
+  },
+
+  async getFinancialSummary(asOfDate?: string): Promise<FinancialSummary> {
+    const { data, error } = await supabase.rpc('generate_financial_summary', {
+      as_of_date: asOfDate || new Date().toISOString().split('T')[0]
+    });
+    
+    if (error) throw error;
+    return (data as unknown) as FinancialSummary;
+  },
+
+  async validateTrialBalance(): Promise<any> {
+    const { data, error } = await supabase.rpc('validate_trial_balance');
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async auditOrphanedEntries(): Promise<any> {
+    const { data, error } = await supabase.rpc('audit_orphaned_entries');
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async performPeriodicMaintenance(): Promise<any> {
+    const { data, error } = await supabase.rpc('periodic_accounting_maintenance');
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // مراكز التكلفة المحسنة  
+  async getCostCenterAllocations(costCenterId?: string): Promise<CostCenterAllocation[]> {
+    let query = supabase
+      .from('cost_center_allocations')
+      .select(`
+        *,
+        cost_center:cost_centers(*)
+      `)
+      .order('allocation_date', { ascending: false });
+
+    if (costCenterId) {
+      query = query.eq('cost_center_id', costCenterId);
+    }
+
+    const { data, error } = await query;
+    
+    if (error) throw error;
+    return (data || []) as CostCenterAllocation[];
+  },
+
+  async createCostCenterAllocation(allocation: Omit<CostCenterAllocation, 'id' | 'created_at' | 'updated_at'>): Promise<CostCenterAllocation> {
+    const { data, error } = await supabase
+      .from('cost_center_allocations')
+      .insert(allocation as any)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data as CostCenterAllocation;
   }
 };
