@@ -8397,6 +8397,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      ensure_user_tenant_association: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       execute_analytics_query: {
         Args: { query_text: string }
         Returns: Json
