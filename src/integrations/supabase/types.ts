@@ -1134,60 +1134,100 @@ export type Database = {
           account_category: string
           account_code: string
           account_name: string
+          account_name_arabic: string | null
           account_name_en: string | null
+          account_name_english: string | null
           account_type: string
           allow_posting: boolean | null
+          auto_reconcile: boolean | null
+          consolidation_account_id: string | null
           created_at: string
           created_by: string | null
           current_balance: number | null
           id: string
           is_active: boolean | null
+          ksaap_compliant: boolean | null
+          legal_reference: string | null
           level: number
+          ministry_commerce_code: string | null
           notes: string | null
           opening_balance: number | null
           parent_account_id: string | null
+          regulatory_code: string | null
+          report_position: number | null
+          required_documentation: string[] | null
           tenant_id: string
           updated_at: string
+          zakat_applicable: boolean | null
         }
         Insert: {
           account_category: string
           account_code: string
           account_name: string
+          account_name_arabic?: string | null
           account_name_en?: string | null
+          account_name_english?: string | null
           account_type: string
           allow_posting?: boolean | null
+          auto_reconcile?: boolean | null
+          consolidation_account_id?: string | null
           created_at?: string
           created_by?: string | null
           current_balance?: number | null
           id?: string
           is_active?: boolean | null
+          ksaap_compliant?: boolean | null
+          legal_reference?: string | null
           level?: number
+          ministry_commerce_code?: string | null
           notes?: string | null
           opening_balance?: number | null
           parent_account_id?: string | null
+          regulatory_code?: string | null
+          report_position?: number | null
+          required_documentation?: string[] | null
           tenant_id: string
           updated_at?: string
+          zakat_applicable?: boolean | null
         }
         Update: {
           account_category?: string
           account_code?: string
           account_name?: string
+          account_name_arabic?: string | null
           account_name_en?: string | null
+          account_name_english?: string | null
           account_type?: string
           allow_posting?: boolean | null
+          auto_reconcile?: boolean | null
+          consolidation_account_id?: string | null
           created_at?: string
           created_by?: string | null
           current_balance?: number | null
           id?: string
           is_active?: boolean | null
+          ksaap_compliant?: boolean | null
+          legal_reference?: string | null
           level?: number
+          ministry_commerce_code?: string | null
           notes?: string | null
           opening_balance?: number | null
           parent_account_id?: string | null
+          regulatory_code?: string | null
+          report_position?: number | null
+          required_documentation?: string[] | null
           tenant_id?: string
           updated_at?: string
+          zakat_applicable?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_consolidation_account_id_fkey"
+            columns: ["consolidation_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "chart_of_accounts_parent_account_id_fkey"
             columns: ["parent_account_id"]
@@ -1890,6 +1930,68 @@ export type Database = {
           },
         ]
       }
+      currencies: {
+        Row: {
+          base_currency: boolean | null
+          central_bank_rate: number | null
+          created_at: string | null
+          created_by: string | null
+          currency_code: string
+          currency_name_ar: string
+          currency_name_en: string | null
+          decimal_places: number | null
+          exchange_rate: number | null
+          id: string
+          is_active: boolean | null
+          last_updated: string | null
+          symbol: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          base_currency?: boolean | null
+          central_bank_rate?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          currency_code: string
+          currency_name_ar: string
+          currency_name_en?: string | null
+          decimal_places?: number | null
+          exchange_rate?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_updated?: string | null
+          symbol: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          base_currency?: boolean | null
+          central_bank_rate?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          currency_code?: string
+          currency_name_ar?: string
+          currency_name_en?: string | null
+          decimal_places?: number | null
+          exchange_rate?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_updated?: string | null
+          symbol?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "currencies_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_evaluations: {
         Row: {
           comments: string | null
@@ -2485,6 +2587,50 @@ export type Database = {
             columns: ["work_location_id"]
             isOneToOne: false
             referencedRelation: "work_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exchange_rates_history: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          effective_date: string
+          from_currency: string
+          id: string
+          rate: number
+          source: string | null
+          tenant_id: string
+          to_currency: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          effective_date: string
+          from_currency: string
+          id?: string
+          rate: number
+          source?: string | null
+          tenant_id: string
+          to_currency: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          effective_date?: string
+          from_currency?: string
+          id?: string
+          rate?: number
+          source?: string | null
+          tenant_id?: string
+          to_currency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exchange_rates_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
