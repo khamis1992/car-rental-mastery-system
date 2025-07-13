@@ -7753,6 +7753,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_next_document_number: {
+        Args: {
+          p_tenant_id: string
+          p_document_type: string
+          p_branch_id?: string
+        }
+        Returns: string
+      }
       get_system_setting: {
         Args: { setting_key_param: string }
         Returns: Json
