@@ -50,83 +50,73 @@ const FixedAssetsReport = () => {
       const mockAssets: FixedAsset[] = [
         {
           id: '1',
+          name: 'تويوتا كامري 2022',
           asset_code: 'VEH-001',
-          vehicle_type: 'sedan',
-          plate_number: 'ABC-123',
-          model: 'كامري 2022',
-          year: 2022,
-          purchase_date: '2022-01-15',
-          purchase_value: 25000,
-          depreciation_rate: 15,
-          monthly_depreciation: 312.5,
+          category: 'مركبات',
+          acquisition_date: '2022-01-15',
+          acquisition_cost: 25000,
           accumulated_depreciation: 7500,
           book_value: 17500,
-          status: 'active',
-          last_depreciation_date: '2024-01-01'
+          depreciation_rate: 15,
+          useful_life: 5,
+          status: 'نشط',
+          location: 'الفرع الرئيسي'
         },
         {
           id: '2',
+          name: 'نيسان باثفايندر 2021',
           asset_code: 'VEH-002',
-          vehicle_type: 'suv',
-          plate_number: 'XYZ-456',
-          model: 'باثفايندر 2021',
-          year: 2021,
-          purchase_date: '2021-06-10',
-          purchase_value: 35000,
-          depreciation_rate: 12,
-          monthly_depreciation: 350,
+          category: 'مركبات',
+          acquisition_date: '2021-06-10',
+          acquisition_cost: 35000,
           accumulated_depreciation: 11200,
           book_value: 23800,
-          status: 'active',
-          last_depreciation_date: '2024-01-01'
+          depreciation_rate: 12,
+          useful_life: 5,
+          status: 'نشط',
+          location: 'الفرع الرئيسي'
         },
         {
           id: '3',
+          name: 'تويوتا كوستر 2020',
           asset_code: 'VEH-003',
-          vehicle_type: 'bus',
-          plate_number: 'BUS-789',
-          model: 'كوستر 2020',
-          year: 2020,
-          purchase_date: '2020-03-20',
-          purchase_value: 45000,
-          depreciation_rate: 10,
-          monthly_depreciation: 375,
+          category: 'مركبات',
+          acquisition_date: '2020-03-20',
+          acquisition_cost: 45000,
           accumulated_depreciation: 18000,
           book_value: 27000,
-          status: 'active',
-          last_depreciation_date: '2024-01-01'
+          depreciation_rate: 10,
+          useful_life: 10,
+          status: 'نشط',
+          location: 'الفرع الرئيسي'
         },
         {
           id: '4',
+          name: 'ايسوزو شاحنة 2019',
           asset_code: 'VEH-004',
-          vehicle_type: 'truck',
-          plate_number: 'TRK-101',
-          model: 'ايسوزو 2019',
-          year: 2019,
-          purchase_date: '2019-08-05',
-          purchase_value: 28000,
-          depreciation_rate: 18,
-          monthly_depreciation: 420,
-          book_value: 5600,
+          category: 'مركبات',
+          acquisition_date: '2019-08-05',
+          acquisition_cost: 28000,
           accumulated_depreciation: 22400,
-          status: 'maintenance',
-          last_depreciation_date: '2024-01-01'
+          book_value: 5600,
+          depreciation_rate: 18,
+          useful_life: 8,
+          status: 'صيانة',
+          location: 'الفرع الرئيسي'
         },
         {
           id: '5',
+          name: 'هوندا أكورد 2023',
           asset_code: 'VEH-005',
-          vehicle_type: 'sedan',
-          plate_number: 'DEF-987',
-          model: 'اكورد 2023',
-          year: 2023,
-          purchase_date: '2023-05-12',
-          purchase_value: 32000,
+          category: 'مركبات',
+          acquisition_date: '2023-05-12',
+          acquisition_cost: 32000,
+          accumulated_depreciation: 2986,
+          book_value: 29014,
           depreciation_rate: 14,
-          monthly_depreciation: 373.33,
-          accumulated_depreciation: 2986.64,
-          book_value: 29013.36,
-          status: 'active',
-          last_depreciation_date: '2024-01-01'
+          useful_life: 5,
+          status: 'نشط',
+          location: 'الفرع الرئيسي'
         }
       ];
       setAssets(mockAssets);
@@ -138,18 +128,13 @@ const FixedAssetsReport = () => {
   const filterAssets = () => {
     let filtered = assets;
 
-    if (vehicleTypeFilter !== 'all') {
-      filtered = filtered.filter(asset => asset.vehicle_type === vehicleTypeFilter);
-    }
-
     if (statusFilter !== 'all') {
       filtered = filtered.filter(asset => asset.status === statusFilter);
     }
 
     if (searchTerm) {
       filtered = filtered.filter(asset =>
-        asset.plate_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        asset.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         asset.asset_code.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -174,43 +159,13 @@ const FixedAssetsReport = () => {
     }
   };
 
-  const getVehicleIcon = (type: string) => {
-    switch (type) {
-      case 'sedan':
-        return <Car className="w-5 h-5" />;
-      case 'suv':
-        return <Car className="w-5 h-5" />;
-      case 'bus':
-        return <Bus className="w-5 h-5" />;
-      case 'truck':
-        return <Truck className="w-5 h-5" />;
-      default:
-        return <Car className="w-5 h-5" />;
-    }
-  };
-
-  const getVehicleTypeName = (type: string) => {
-    switch (type) {
-      case 'sedan':
-        return 'سيارة صالون';
-      case 'suv':
-        return 'دفع رباعي';
-      case 'bus':
-        return 'باص';
-      case 'truck':
-        return 'شاحنة';
-      default:
-        return type;
-    }
-  };
-
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'active':
+      case 'نشط':
         return <Badge className="bg-green-100 text-green-800">نشط</Badge>;
-      case 'maintenance':
+      case 'صيانة':
         return <Badge className="bg-yellow-100 text-yellow-800">صيانة</Badge>;
-      case 'disposed':
+      case 'مُستبعد':
         return <Badge className="bg-red-100 text-red-800">مُستبعد</Badge>;
       default:
         return <Badge>{status}</Badge>;
@@ -218,58 +173,21 @@ const FixedAssetsReport = () => {
   };
 
   const calculateSummary = () => {
-    const totalValue = filteredAssets.reduce((sum, asset) => sum + asset.purchase_value, 0);
+    const totalValue = filteredAssets.reduce((sum, asset) => sum + asset.acquisition_cost, 0);
     const totalBookValue = filteredAssets.reduce((sum, asset) => sum + asset.book_value, 0);
     const totalDepreciation = filteredAssets.reduce((sum, asset) => sum + asset.accumulated_depreciation, 0);
-    const monthlyDepreciation = filteredAssets.reduce((sum, asset) => sum + asset.monthly_depreciation, 0);
-    const depreciationRate = totalValue > 0 ? (totalDepreciation / totalValue) * 100 : 0;
+    const monthlyDepreciation = filteredAssets.reduce((sum, asset) => sum + (asset.acquisition_cost * asset.depreciation_rate / 100 / 12), 0);
 
     return { 
       totalAssets: filteredAssets.length,
       totalValue, 
       totalBookValue, 
       totalDepreciation, 
-      monthlyDepreciation,
-      depreciationRate 
+      monthlyDepreciation
     };
   };
 
   const summary = calculateSummary();
-
-  // Chart data
-  const assetDistributionData = assets.reduce((acc: any[], asset) => {
-    const typeName = getVehicleTypeName(asset.vehicle_type);
-    const existing = acc.find(item => item.name === typeName);
-    if (existing) {
-      existing.value += 1;
-      existing.totalValue += asset.purchase_value;
-    } else {
-      acc.push({ 
-        name: typeName, 
-        value: 1, 
-        totalValue: asset.purchase_value,
-        color: asset.vehicle_type === 'sedan' ? '#3b82f6' : 
-               asset.vehicle_type === 'suv' ? '#8b5cf6' :
-               asset.vehicle_type === 'bus' ? '#10b981' : '#f59e0b'
-      });
-    }
-    return acc;
-  }, []);
-
-  const depreciationTrendData = [
-    { month: 'يناير', depreciation: 4200, book_value: 185000 },
-    { month: 'فبراير', depreciation: 4200, book_value: 180800 },
-    { month: 'مارس', depreciation: 4200, book_value: 176600 },
-    { month: 'أبريل', depreciation: 4200, book_value: 172400 },
-    { month: 'مايو', depreciation: 4200, book_value: 168200 },
-    { month: 'يونيو', depreciation: 4200, book_value: 164000 }
-  ];
-
-  const ageAnalysisData = assets.map(asset => ({
-    name: asset.plate_number,
-    age: differenceInMonths(new Date(), new Date(asset.purchase_date)),
-    depreciation_rate: asset.depreciation_rate
-  }));
 
   return (
     <div className="space-y-6">
@@ -370,126 +288,6 @@ const FixedAssetsReport = () => {
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5" />
-            الفلاتر والبحث
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">البحث</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                <Input
-                  placeholder="رقم اللوحة، الموديل، أو كود الأصل"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">نوع المركبة</label>
-              <Select value={vehicleTypeFilter} onValueChange={setVehicleTypeFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">جميع الأنواع</SelectItem>
-                  <SelectItem value="sedan">سيارة صالون</SelectItem>
-                  <SelectItem value="suv">دفع رباعي</SelectItem>
-                  <SelectItem value="bus">باص</SelectItem>
-                  <SelectItem value="truck">شاحنة</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">الحالة</label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">جميع الحالات</SelectItem>
-                  <SelectItem value="active">نشط</SelectItem>
-                  <SelectItem value="maintenance">صيانة</SelectItem>
-                  <SelectItem value="disposed">مُستبعد</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Asset Distribution */}
-        <Card>
-          <CardHeader>
-            <CardTitle>توزيع الأصول حسب النوع</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={assetDistributionData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={120}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {assetDistributionData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Depreciation Trend */}
-        <Card>
-          <CardHeader>
-            <CardTitle>اتجاه الإهلاك والقيمة الدفترية</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={depreciationTrendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip formatter={(value) => `${value.toLocaleString()} د.ك`} />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="depreciation" 
-                  stroke="#ef4444" 
-                  name="الإهلاك الشهري"
-                  strokeWidth={2}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="book_value" 
-                  stroke="#3b82f6" 
-                  name="القيمة الدفترية"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Assets Table */}
       <Card>
         <CardHeader>
@@ -514,59 +312,40 @@ const FixedAssetsReport = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
+                    <th className="text-right py-3 px-2">اسم الأصل</th>
                     <th className="text-right py-3 px-2">كود الأصل</th>
-                    <th className="text-right py-3 px-2">النوع</th>
-                    <th className="text-right py-3 px-2">رقم اللوحة</th>
-                    <th className="text-right py-3 px-2">الموديل</th>
+                    <th className="text-right py-3 px-2">الفئة</th>
                     <th className="text-right py-3 px-2">تاريخ الشراء</th>
                     <th className="text-right py-3 px-2">القيمة الأصلية</th>
-                    <th className="text-right py-3 px-2">معدل الإهلاك</th>
-                    <th className="text-right py-3 px-2">الإهلاك الشهري</th>
                     <th className="text-right py-3 px-2">الإهلاك المجمع</th>
                     <th className="text-right py-3 px-2">القيمة الدفترية</th>
+                    <th className="text-right py-3 px-2">معدل الإهلاك</th>
                     <th className="text-right py-3 px-2">الحالة</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredAssets.map((asset) => {
-                    const depreciationPercentage = (asset.accumulated_depreciation / asset.purchase_value) * 100;
+                    const depreciationPercentage = (asset.accumulated_depreciation / asset.acquisition_cost) * 100;
                     
                     return (
                       <tr key={asset.id} className="border-b hover:bg-gray-50">
-                        <td className="py-3 px-2 font-medium">{asset.asset_code}</td>
-                        <td className="py-3 px-2">
-                          <div className="flex items-center gap-2">
-                            {getVehicleIcon(asset.vehicle_type)}
-                            {getVehicleTypeName(asset.vehicle_type)}
-                          </div>
-                        </td>
-                        <td className="py-3 px-2 font-medium">{asset.plate_number}</td>
-                        <td className="py-3 px-2">{asset.model}</td>
+                        <td className="py-3 px-2 font-medium">{asset.name}</td>
+                        <td className="py-3 px-2">{asset.asset_code}</td>
+                        <td className="py-3 px-2">{asset.category}</td>
                         <td className="py-3 px-2 text-sm">
-                          {format(new Date(asset.purchase_date), 'yyyy/MM/dd', { locale: ar })}
+                          {format(new Date(asset.acquisition_date), 'yyyy/MM/dd', { locale: ar })}
                         </td>
                         <td className="py-3 px-2 text-blue-600 font-medium">
-                          {asset.purchase_value.toLocaleString()} د.ك
+                          {asset.acquisition_cost.toLocaleString()} د.ك
                         </td>
-                        <td className="py-3 px-2 text-center">
-                          <Badge variant="outline">{asset.depreciation_rate}%</Badge>
-                        </td>
-                        <td className="py-3 px-2 text-orange-600 font-medium">
-                          {asset.monthly_depreciation.toLocaleString()} د.ك
-                        </td>
-                        <td className="py-3 px-2">
-                          <div>
-                            <p className="text-red-600 font-medium">
-                              {asset.accumulated_depreciation.toLocaleString()} د.ك
-                            </p>
-                            <Progress value={depreciationPercentage} className="h-1 mt-1" />
-                            <p className="text-xs text-gray-500 mt-1">
-                              {depreciationPercentage.toFixed(1)}%
-                            </p>
-                          </div>
+                        <td className="py-3 px-2 text-red-600 font-medium">
+                          {asset.accumulated_depreciation.toLocaleString()} د.ك
                         </td>
                         <td className="py-3 px-2 text-green-600 font-medium">
                           {asset.book_value.toLocaleString()} د.ك
+                        </td>
+                        <td className="py-3 px-2 text-center">
+                          <Badge variant="outline">{asset.depreciation_rate}%</Badge>
                         </td>
                         <td className="py-3 px-2">
                           {getStatusBadge(asset.status)}
@@ -580,47 +359,8 @@ const FixedAssetsReport = () => {
           )}
         </CardContent>
       </Card>
-
-      {/* Depreciation Information */}
-      <Card className="border-l-4 border-l-blue-500">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                <Calculator className="w-5 h-5" />
-                طريقة حساب الإهلاك
-              </h3>
-              <div className="space-y-2 text-sm text-blue-700">
-                <p>• الإهلاك الشهري = (القيمة الأصلية × معدل الإهلاك السنوي) ÷ 12</p>
-                <p>• الإهلاك المجمع = الإهلاك الشهري × عدد الأشهر منذ الشراء</p>
-                <p>• القيمة الدفترية = القيمة الأصلية - الإهلاك المجمع</p>
-                <p>• الحد الأقصى للإهلاك: 80% من القيمة الأصلية</p>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                القيود المحاسبية التلقائية
-              </h3>
-              <div className="space-y-2 text-sm text-blue-700">
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-blue-100 text-blue-800">5130101</Badge>
-                  <span>مدين: مصروف إهلاك السيارات والباصات</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-green-100 text-green-800">1210101</Badge>
-                  <span>دائن: مخصص إهلاك السيارات والباصات</span>
-                </div>
-                <p className="text-xs text-gray-600 mt-2">
-                  يتم تطبيق القيود تلقائياً شهرياً عند الضغط على زر "تطبيق الإهلاك الشهري"
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
 
-export default FixedAssetsReport; 
+export default FixedAssetsReport;

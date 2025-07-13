@@ -8549,17 +8549,13 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
-      get_user_tenant_direct: {
+      get_user_tenant_id: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
       hard_delete_tenant: {
         Args: { tenant_id_param: string; deletion_reason?: string }
         Returns: Json
-      }
-      has_any_tenant_role: {
-        Args: { _roles: string[] }
-        Returns: boolean
       }
       has_permission: {
         Args: { _user_id: string; _tenant_id: string; _permission_key: string }
@@ -8572,7 +8568,11 @@ export type Database = {
         }
         Returns: boolean
       }
-      has_tenant_role: {
+      has_user_any_role: {
+        Args: { _roles: string[] }
+        Returns: boolean
+      }
+      has_user_role: {
         Args: { _role: string }
         Returns: boolean
       }

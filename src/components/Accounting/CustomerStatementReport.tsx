@@ -63,12 +63,10 @@ const CustomerStatementReport = () => {
         transaction_type: transactionType !== 'all' ? transactionType : undefined
       };
 
-      const data = await accountingReportsService.getCustomerStatement(
-        selectedCustomer,
-        dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : undefined,
-        dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined,
-        filters
-      );
+      const data = await accountingReportsService.getCustomerStatement(selectedCustomer, {
+        startDate: dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : '',
+        endDate: dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : ''
+      });
 
       setTransactions(data);
     } catch (error) {

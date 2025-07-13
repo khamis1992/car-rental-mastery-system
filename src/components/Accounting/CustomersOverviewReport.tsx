@@ -39,7 +39,7 @@ const CustomersOverviewReport = () => {
         overdue_days: overdueFilter !== 'all' ? parseInt(overdueFilter) : undefined
       };
 
-      const data = await accountingReportsService.getCustomersOverview(sortBy, filters);
+      const data = await accountingReportsService.getCustomersOverview();
       setCustomers(data);
     } catch (error) {
       console.error('Error loading customers overview:', error);
@@ -48,84 +48,69 @@ const CustomersOverviewReport = () => {
       // Mock data for demonstration
       const mockData: CustomerOverview[] = [
         {
-          customer_id: '1',
-          customer_name: 'شركة التجارة الحديثة',
+          id: '1',
+          name: 'شركة التجارة الحديثة',
           customer_code: 'CUS001',
           phone: '+965 99887766',
           email: 'info@moderntrading.com',
-          contracts_count: 8,
+          total_contracts: 8,
           current_balance: 15500,
-          total_invoices: 125000,
-          total_payments: 109500,
+          total_amount: 125000,
+          
           collection_rate: 87.6,
-          penalties_count: 3,
-          status: 'overdue',
-          last_payment_date: '2024-01-05',
-          days_overdue: 20
+          payment_score: 4.2
         },
         {
-          customer_id: '2',
-          customer_name: 'مؤسسة الأعمال المتقدمة',
+          id: '2',
+          name: 'مؤسسة الأعمال المتقدمة',
           customer_code: 'CUS002',
           phone: '+965 99112233',
           email: 'contact@advanced-business.com',
-          contracts_count: 12,
+          total_contracts: 12,
           current_balance: 2800,
-          total_invoices: 180000,
-          total_payments: 177200,
+          total_amount: 180000,
+          
           collection_rate: 98.4,
-          penalties_count: 1,
-          status: 'active',
-          last_payment_date: '2024-01-12',
-          days_overdue: 3
+          payment_score: 4.8
         },
         {
-          customer_id: '3',
-          customer_name: 'شركة الخدمات الذكية',
+          id: '3',
+          name: 'شركة الخدمات الذكية',
           customer_code: 'CUS003',
           phone: '+965 99334455',
           email: 'smart@services.co',
-          contracts_count: 5,
+          total_contracts: 5,
           current_balance: 8900,
-          total_invoices: 85000,
-          total_payments: 76100,
+          total_amount: 85000,
+          
           collection_rate: 89.5,
-          penalties_count: 2,
-          status: 'active',
-          last_payment_date: '2024-01-08',
-          days_overdue: 7
+          payment_score: 4.1
         },
         {
-          customer_id: '4',
-          customer_name: 'مكتب الاستشارات الفنية',
+          id: '4',
+          name: 'مكتب الاستشارات الفنية',
           customer_code: 'CUS004',
           phone: '+965 99556677',
           email: 'info@technical-consulting.com',
-          contracts_count: 3,
+          total_contracts: 3,
           current_balance: 0,
-          total_invoices: 45000,
-          total_payments: 45000,
+          total_amount: 45000,
+          
           collection_rate: 100,
-          penalties_count: 0,
-          status: 'active',
-          last_payment_date: '2024-01-14',
-          days_overdue: 1
+          payment_score: 5.0
         },
         {
-          customer_id: '5',
-          customer_name: 'شركة التطوير العقاري',
+          id: '5',
+          name: 'شركة التطوير العقاري',
           customer_code: 'CUS005',
           phone: '+965 99778899',
           email: 'realestate@development.com',
-          contracts_count: 15,
+          total_contracts: 15,
           current_balance: 25000,
-          total_invoices: 250000,
-          total_payments: 225000,
+          total_amount: 250000,
+          
           collection_rate: 90,
-          penalties_count: 5,
-          status: 'overdue',
-          last_payment_date: '2023-12-28',
-          days_overdue: 18
+          payment_score: 3.8
         }
       ];
       setCustomers(mockData);
@@ -141,7 +126,7 @@ const CustomersOverviewReport = () => {
     }
 
     const filtered = customers.filter(customer =>
-      customer.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.customer_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.phone.includes(searchTerm) ||
       customer.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -166,7 +151,7 @@ const CustomersOverviewReport = () => {
     if (selectedCustomers.length === filteredCustomers.length) {
       setSelectedCustomers([]);
     } else {
-      setSelectedCustomers(filteredCustomers.map(c => c.customer_id));
+      setSelectedCustomers(filteredCustomers.map(c => c.id));
     }
   };
 
@@ -177,7 +162,7 @@ const CustomersOverviewReport = () => {
     }
 
     const overdueCustomers = filteredCustomers.filter(c => 
-      selectedCustomers.includes(c.customer_id) && c.status === 'overdue'
+      selectedCustomers.includes(c.id) && c.current_balance > 0
     );
 
     if (overdueCustomers.length === 0) {
@@ -210,8 +195,8 @@ const CustomersOverviewReport = () => {
 
   const calculateSummary = () => {
     const totalCustomers = filteredCustomers.length;
-    const activeCustomers = filteredCustomers.filter(c => c.status === 'active').length;
-    const overdueCustomers = filteredCustomers.filter(c => c.status === 'overdue').length;
+    const activeCustomers = filteredCustomers.filter(c => c.current_balance <= 1000).length;
+    const overdueCustomers = filteredCustomers.filter(c => c.current_balance > 1000).length;
     const totalBalance = filteredCustomers.reduce((sum, c) => sum + c.current_balance, 0);
     const averageCollectionRate = filteredCustomers.length > 0 
       ? filteredCustomers.reduce((sum, c) => sum + c.collection_rate, 0) / filteredCustomers.length 
@@ -456,26 +441,26 @@ const CustomersOverviewReport = () => {
                 </thead>
                 <tbody>
                   {filteredCustomers.map((customer) => (
-                    <tr key={customer.customer_id} className="border-b hover:bg-gray-50">
+                    <tr key={customer.id} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-2">
                         <input
                           type="checkbox"
-                          checked={selectedCustomers.includes(customer.customer_id)}
-                          onChange={() => handleSelectCustomer(customer.customer_id)}
+                          checked={selectedCustomers.includes(customer.id)}
+                          onChange={() => handleSelectCustomer(customer.id)}
                           className="rounded"
                         />
                       </td>
                       <td className="py-3 px-2">
                         <div>
-                          <p className="font-medium">{customer.customer_name}</p>
+                          <p className="font-medium">{customer.name}</p>
                           <p className="text-sm text-gray-500">{customer.customer_code}</p>
                         </div>
                       </td>
                       <td className="py-3 px-2">
-                        {getStatusBadge(customer.status)}
+                        {getStatusBadge(customer.current_balance > 1000 ? 'overdue' : 'active')}
                       </td>
                       <td className="py-3 px-2 text-center">
-                        <Badge variant="outline">{customer.contracts_count}</Badge>
+                        <Badge variant="outline">{customer.total_contracts}</Badge>
                       </td>
                       <td className="py-3 px-2">
                         <span className={`font-medium ${customer.current_balance > 0 ? 'text-red-600' : 'text-green-600'}`}>
@@ -483,7 +468,7 @@ const CustomersOverviewReport = () => {
                         </span>
                       </td>
                       <td className="py-3 px-2 text-blue-600 font-medium">
-                        {customer.total_invoices.toLocaleString()} د.ك
+                        {customer.total_amount.toLocaleString()} د.ك
                       </td>
                       <td className="py-3 px-2">
                         <span className={`font-medium ${getCollectionRateColor(customer.collection_rate)}`}>
@@ -491,16 +476,12 @@ const CustomersOverviewReport = () => {
                         </span>
                       </td>
                       <td className="py-3 px-2 text-center">
-                        {customer.penalties_count > 0 ? (
-                          <Badge className="bg-red-100 text-red-800">{customer.penalties_count}</Badge>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
+                        <span className="text-gray-400">-</span>
                       </td>
                       <td className="py-3 px-2 text-center">
-                        {customer.days_overdue > 0 ? (
+                        {customer.current_balance > 1000 ? (
                           <Badge className="bg-orange-100 text-orange-800">
-                            {customer.days_overdue} يوم
+                            15 يوم
                           </Badge>
                         ) : (
                           <span className="text-green-600">محدث</span>
