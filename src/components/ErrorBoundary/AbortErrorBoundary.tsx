@@ -110,11 +110,9 @@ export class AbortErrorBoundary extends Component<Props, State> {
       );
     }
 
-  return this.props.children;
+    return this.props.children;
   }
 }
-
-export default AbortErrorBoundary;
 
 // Hook version for functional components
 export const useAbortErrorHandler = () => {

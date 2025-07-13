@@ -48,19 +48,29 @@ export const useAccountingData = () => {
 
   const fetchFinancialStats = async (): Promise<FinancialStats> => {
     try {
+      // Update account balances first using the enhanced migration function
+      await supabase.rpc('migrate_account_balances');
+
       // Get current month start and end dates
       const now = new Date();
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
       
-      // Use the new calculate_financial_metrics function
-      const { data: metricsData, error: metricsError } = await supabase
-        .rpc('calculate_financial_metrics', {
-          start_date: monthStart.toISOString().split('T')[0],
-          end_date: monthEnd.toISOString().split('T')[0]
-        });
-
-      if (metricsError) throw metricsError;
+      // Try to use the calculate_financial_metrics function if available
+      let metricsData = null;
+      try {
+        const { data, error } = await supabase
+          .rpc('calculate_financial_metrics', {
+            start_date: monthStart.toISOString().split('T')[0],
+            end_date: monthEnd.toISOString().split('T')[0]
+          });
+        
+        if (!error) {
+          metricsData = data;
+        }
+      } catch (error) {
+        console.log('calculate_financial_metrics not available, using direct queries');
+      }
 
       // Handle the metrics data properly
       let metrics: FinancialMetrics;

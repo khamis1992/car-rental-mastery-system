@@ -6,6 +6,7 @@ import { FinancialReportsTab } from '@/components/Accounting/FinancialReportsTab
 import { AccountingBackfillTab } from '@/components/Accounting/AccountingBackfillTab';
 import { AccountingDataRefresh } from '@/components/Accounting/AccountingDataRefresh';
 import { AccountingMaintenanceTools } from '@/components/Accounting/AccountingMaintenanceTools';
+import { ChartOfAccountsSetup } from '@/components/Accounting/ChartOfAccountsSetup';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -120,12 +121,17 @@ const Accounting = () => {
       </div>
 
       <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="reports">التقارير المالية</TabsTrigger>
           <TabsTrigger value="journal">القيود المحاسبية</TabsTrigger>
           <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
+          <TabsTrigger value="setup">إعداد النظام</TabsTrigger>
           <TabsTrigger value="transactions">المعاملات المالية</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="setup" className="space-y-4">
+          <ChartOfAccountsSetup />
+        </TabsContent>
 
         <TabsContent value="accounts" className="space-y-4">
           <ChartOfAccountsTab />
