@@ -56,7 +56,24 @@ export class TenantIsolationMiddleware {
   }
 
   /**
-   * الحصول على المؤسسة الحالية
+   * الحصول على المؤسسة الحالية من قاعدة البيانات مباشرة
+   */
+  async getCurrentTenantFromDB(): Promise<string | null> {
+    try {
+      const { data, error } = await supabase.rpc('get_user_tenant_direct');
+      if (error) {
+        console.error('خطأ في جلب المؤسسة من قاعدة البيانات:', error);
+        return null;
+      }
+      return data;
+    } catch (error) {
+      console.error('خطأ في استدعاء get_user_tenant_direct:', error);
+      return null;
+    }
+  }
+
+  /**
+   * الحصول على المؤسسة الحالية (محفوظة مؤقتاً)
    */
   getCurrentTenant(): string | null {
     return this.currentTenantId;

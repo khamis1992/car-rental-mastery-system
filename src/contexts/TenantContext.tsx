@@ -54,29 +54,20 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
 
       console.log('🔄 Loading tenant data for user:', user.id);
 
-      // البحث مباشرة في جدول tenant_users بدون join  
-      const { data: tenantUsers, error: usersError } = await supabase
-        .from('tenant_users')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .limit(1);
-
-      console.log('🔍 Tenant users result:', { tenantUsers, usersError });
-
-      if (usersError) {
-        console.error('❌ Error fetching tenant users:', usersError);
-        throw usersError;
+      // استخدام الدالة الجديدة للحصول على المؤسسة مباشرة
+      const { data: tenantId, error: tenantIdError } = await supabase.rpc('get_user_tenant_direct');
+      
+      if (tenantIdError) {
+        console.error('❌ Error getting user tenant:', tenantIdError);
+        throw tenantIdError;
       }
 
-      if (tenantUsers && tenantUsers.length > 0) {
-        const tenantUser = tenantUsers[0];
-        
-        // البحث في جدول tenants منفصلاً
+      if (tenantId) {
+        // جلب بيانات المؤسسة
         const { data: tenant, error: tenantError } = await supabase
           .from('tenants')
           .select('*')
-          .eq('id', tenantUser.tenant_id)
+          .eq('id', tenantId)
           .single();
 
         if (tenantError) {
@@ -84,10 +75,24 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
           throw tenantError;
         }
 
+        // جلب دور المستخدم
+        const { data: tenantUsers, error: usersError } = await supabase
+          .from('tenant_users')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('tenant_id', tenantId)
+          .eq('status', 'active')
+          .single();
+
+        if (usersError) {
+          console.error('❌ Error fetching user role:', usersError);
+          throw usersError;
+        }
+
         if (tenant) {
           console.log('✅ Tenant loaded:', tenant);
           setCurrentTenant(tenant as any);
-          setCurrentUserRole(tenantUser.role as TenantUser['role']);
+          setCurrentUserRole(tenantUsers?.role as TenantUser['role'] || 'user');
           
           // تفعيل middleware العزل للمؤسسة
           await tenantIsolationMiddleware.setCurrentTenant(tenant.id);
