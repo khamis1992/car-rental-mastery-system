@@ -9127,6 +9127,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_tenant_valid: {
+        Args: { tenant_id_param: string }
+        Returns: boolean
+      }
       log_tenant_access: {
         Args: {
           p_tenant_id: string

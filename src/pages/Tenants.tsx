@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useTenant } from '@/contexts/TenantContext';
 import { useAuth } from '@/contexts/AuthContext';
 import TenantLimitChecker from '@/components/Tenants/TenantLimitChecker';
+import TrialStatusAlert from '@/components/Tenants/TrialStatusAlert';
 import { useNavigate } from 'react-router-dom';
 
 const Tenants: React.FC = () => {
@@ -122,6 +123,8 @@ const Tenants: React.FC = () => {
             العودة
           </Button>
         </div>
+
+        {currentTenant && <TrialStatusAlert tenant={currentTenant} />}
 
         {currentTenant && (
           <Card className="mb-8 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
