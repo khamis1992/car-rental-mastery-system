@@ -2227,6 +2227,69 @@ export type Database = {
           },
         ]
       }
+      customer_aging_analysis: {
+        Row: {
+          analysis_date: string
+          created_at: string | null
+          created_by: string | null
+          current_amount: number | null
+          customer_id: string
+          days_30_60: number | null
+          days_61_90: number | null
+          days_91_120: number | null
+          id: string
+          oldest_invoice_date: string | null
+          over_120_days: number | null
+          tenant_id: string
+          total_outstanding: number | null
+        }
+        Insert: {
+          analysis_date: string
+          created_at?: string | null
+          created_by?: string | null
+          current_amount?: number | null
+          customer_id: string
+          days_30_60?: number | null
+          days_61_90?: number | null
+          days_91_120?: number | null
+          id?: string
+          oldest_invoice_date?: string | null
+          over_120_days?: number | null
+          tenant_id: string
+          total_outstanding?: number | null
+        }
+        Update: {
+          analysis_date?: string
+          created_at?: string | null
+          created_by?: string | null
+          current_amount?: number | null
+          customer_id?: string
+          days_30_60?: number | null
+          days_61_90?: number | null
+          days_91_120?: number | null
+          id?: string
+          oldest_invoice_date?: string | null
+          over_120_days?: number | null
+          tenant_id?: string
+          total_outstanding?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_customer_aging_customer"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_customer_aging_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_evaluations: {
         Row: {
           comments: string | null
@@ -2308,6 +2371,271 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_statements: {
+        Row: {
+          closing_balance: number | null
+          customer_id: string
+          from_date: string
+          generated_at: string | null
+          generated_by: string | null
+          id: string
+          opening_balance: number | null
+          statement_data: Json
+          statement_date: string
+          status: string | null
+          tenant_id: string
+          to_date: string
+          total_credits: number | null
+          total_debits: number | null
+        }
+        Insert: {
+          closing_balance?: number | null
+          customer_id: string
+          from_date: string
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          opening_balance?: number | null
+          statement_data?: Json
+          statement_date: string
+          status?: string | null
+          tenant_id: string
+          to_date: string
+          total_credits?: number | null
+          total_debits?: number | null
+        }
+        Update: {
+          closing_balance?: number | null
+          customer_id?: string
+          from_date?: string
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          opening_balance?: number | null
+          statement_data?: Json
+          statement_date?: string
+          status?: string | null
+          tenant_id?: string
+          to_date?: string
+          total_credits?: number | null
+          total_debits?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_customer_statements_customer"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_customer_statements_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_subsidiary_ledger: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          credit_amount: number | null
+          customer_id: string
+          debit_amount: number | null
+          description: string
+          id: string
+          journal_entry_id: string
+          reference_id: string | null
+          reference_type: string
+          running_balance: number | null
+          tenant_id: string
+          transaction_date: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          credit_amount?: number | null
+          customer_id: string
+          debit_amount?: number | null
+          description: string
+          id?: string
+          journal_entry_id: string
+          reference_id?: string | null
+          reference_type: string
+          running_balance?: number | null
+          tenant_id: string
+          transaction_date: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          credit_amount?: number | null
+          customer_id?: string
+          debit_amount?: number | null
+          description?: string
+          id?: string
+          journal_entry_id?: string
+          reference_id?: string | null
+          reference_type?: string
+          running_balance?: number | null
+          tenant_id?: string
+          transaction_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_customer_subsidiary_customer"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_customer_subsidiary_journal"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_customer_subsidiary_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_tracking_settings: {
+        Row: {
+          aging_analysis_frequency: string | null
+          aging_thresholds: Json | null
+          auto_generate_statements: boolean | null
+          auto_send_statements: boolean | null
+          created_at: string | null
+          created_by: string | null
+          credit_limit_alerts: boolean | null
+          id: string
+          overdue_payment_alerts: boolean | null
+          statement_email_template: string | null
+          statement_frequency: string | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          aging_analysis_frequency?: string | null
+          aging_thresholds?: Json | null
+          auto_generate_statements?: boolean | null
+          auto_send_statements?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          credit_limit_alerts?: boolean | null
+          id?: string
+          overdue_payment_alerts?: boolean | null
+          statement_email_template?: string | null
+          statement_frequency?: string | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          aging_analysis_frequency?: string | null
+          aging_thresholds?: Json | null
+          auto_generate_statements?: boolean | null
+          auto_send_statements?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          credit_limit_alerts?: boolean | null
+          id?: string
+          overdue_payment_alerts?: boolean | null
+          statement_email_template?: string | null
+          statement_frequency?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_customer_tracking_settings_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_transaction_log: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          balance_before: number | null
+          created_by: string | null
+          customer_id: string
+          description: string
+          id: string
+          journal_entry_id: string | null
+          metadata: Json | null
+          reference_id: string | null
+          reference_type: string | null
+          tenant_id: string
+          transaction_date: string | null
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          balance_after?: number | null
+          balance_before?: number | null
+          created_by?: string | null
+          customer_id: string
+          description: string
+          id?: string
+          journal_entry_id?: string | null
+          metadata?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          tenant_id: string
+          transaction_date?: string | null
+          transaction_type: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          balance_before?: number | null
+          created_by?: string | null
+          customer_id?: string
+          description?: string
+          id?: string
+          journal_entry_id?: string | null
+          metadata?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          tenant_id?: string
+          transaction_date?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_customer_transaction_customer"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_customer_transaction_journal"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_customer_transaction_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -7614,6 +7942,10 @@ export type Database = {
           utilization_rate: number
           performance_status: string
         }[]
+      }
+      calculate_customer_aging: {
+        Args: { customer_id_param: string; analysis_date_param?: string }
+        Returns: Json
       }
       calculate_financial_kpis: {
         Args: { for_date?: string }
