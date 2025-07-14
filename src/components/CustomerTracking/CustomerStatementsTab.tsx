@@ -13,6 +13,7 @@ import { CustomerStatement, CustomerStatementFormData } from '@/types/customerTr
 import { customerTrackingService } from '@/services/customerTrackingService';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { CustomerStatementViewer } from './CustomerStatementViewer';
 
 export const CustomerStatementsTab = () => {
   const [statements, setStatements] = useState<CustomerStatement[]>([]);

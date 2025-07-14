@@ -65,7 +65,7 @@ export class BankReconciliationService {
 
       if (updateError) throw updateError;
 
-      return updatedImport;
+      return updatedImport as BankReconciliationImport;
     } catch (error) {
       // في حالة الخطأ، تحديث حالة الاستيراد
       await supabase
@@ -120,7 +120,7 @@ export class BankReconciliationService {
 
     // حساب المطابقات بناءً على المبلغ والتاريخ والوصف
     const suggestions: MatchSuggestion[] = [{
-      imported_transaction: transaction,
+      imported_transaction: transaction as ImportedBankTransaction,
       suggested_matches: (journalEntries || []).map(entry => {
         let confidence = 0;
         const reasons: string[] = [];
