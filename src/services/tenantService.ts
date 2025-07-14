@@ -14,7 +14,33 @@ export class TenantService {
       .single();
 
     if (error || !data?.tenant) return null;
-    return data.tenant as Tenant;
+    
+    const tenant = data.tenant as Tenant;
+    
+    // التحقق من صلاحية المؤسسة
+    if (!this.isOrganizationValid(tenant)) {
+      return null;
+    }
+    
+    return tenant;
+  }
+
+  // دالة مساعدة للتحقق من صلاحية المؤسسة
+  private isOrganizationValid(tenant: Tenant): boolean {
+    if (tenant.status === 'active') {
+      return true;
+    }
+    
+    if (tenant.status === 'trial') {
+      if (tenant.trial_ends_at) {
+        const trialEndDate = new Date(tenant.trial_ends_at);
+        const now = new Date();
+        return now <= trialEndDate;
+      }
+      return true; // فترة تجريبية بدون تاريخ انتهاء
+    }
+    
+    return false; // suspended أو cancelled
   }
 
   // Get all tenants for super admin

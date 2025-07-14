@@ -135,6 +135,11 @@ const Tenants: React.FC = () => {
                       <Badge className={`text-white ${getStatusColor(currentTenant.status)}`}>
                         {getStatusLabel(currentTenant.status)}
                       </Badge>
+                      {currentTenant.status === 'trial' && currentTenant.trial_ends_at && (
+                        <Badge variant="outline" className="text-orange-600 border-orange-200 bg-orange-50">
+                          ينتهي في {new Date(currentTenant.trial_ends_at).toLocaleDateString('ar-SA')}
+                        </Badge>
+                      )}
                       {currentUserRole && (
                         <Badge variant="outline" className="flex items-center gap-1">
                           {currentUserRole === 'super_admin' && <Crown className="w-3 h-3" />}

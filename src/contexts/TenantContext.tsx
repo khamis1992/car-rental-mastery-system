@@ -31,6 +31,48 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
   const { user, session } = useAuth();
   const tenantService = new TenantService();
 
+  // دالة للتحقق من صلاحية المؤسسة
+  const isOrganizationValid = (tenant: Tenant): { valid: boolean; reason?: string } => {
+    if (tenant.status === 'active') {
+      return { valid: true };
+    }
+    
+    if (tenant.status === 'trial') {
+      // التحقق من انتهاء الفترة التجريبية
+      if (tenant.trial_ends_at) {
+        const trialEndDate = new Date(tenant.trial_ends_at);
+        const now = new Date();
+        
+        if (now > trialEndDate) {
+          return { 
+            valid: false, 
+            reason: 'انتهت الفترة التجريبية لهذه المؤسسة. يرجى تجديد الاشتراك.' 
+          };
+        }
+      }
+      return { valid: true };
+    }
+    
+    if (tenant.status === 'suspended') {
+      return { 
+        valid: false, 
+        reason: 'تم تعليق هذه المؤسسة. يرجى التواصل مع الدعم الفني.' 
+      };
+    }
+    
+    if (tenant.status === 'cancelled') {
+      return { 
+        valid: false, 
+        reason: 'تم إلغاء هذه المؤسسة. يرجى التواصل مع مدير النظام.' 
+      };
+    }
+    
+    return { 
+      valid: false, 
+      reason: `حالة المؤسسة غير صحيحة: ${tenant.status}` 
+    };
+  };
+
   const loadTenant = async () => {
     if (!user || !session) {
       setCurrentTenant(null);
@@ -84,6 +126,17 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
       if (tenantUser && tenantUser.tenant) {
         const tenant = tenantUser.tenant as Tenant;
         console.log('✅ تم العثور على المؤسسة:', tenant.name);
+        
+        // التحقق من صلاحية المؤسسة (نشطة أو تجريبية صالحة)
+        const isValidTenant = isOrganizationValid(tenant);
+        if (!isValidTenant.valid) {
+          console.warn('⚠️ المؤسسة غير صالحة:', isValidTenant.reason);
+          setError(isValidTenant.reason);
+          setCurrentTenant(null);
+          setCurrentUserRole(null);
+          tenantIsolationMiddleware.reset();
+          return;
+        }
         
         setCurrentTenant(tenant);
         setCurrentUserRole(tenantUser.role as TenantUser['role']);
