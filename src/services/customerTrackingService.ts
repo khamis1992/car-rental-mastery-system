@@ -45,7 +45,10 @@ export class CustomerTrackingService {
     const { data, error } = await query;
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(item => ({
+      ...item,
+      reference_type: item.reference_type as 'invoice' | 'payment' | 'adjustment' | 'refund'
+    }));
   }
 
   async createCustomerLedgerEntry(entry: Omit<CustomerSubsidiaryLedger, 'id' | 'created_at' | 'running_balance'>): Promise<CustomerSubsidiaryLedger> {
@@ -56,7 +59,10 @@ export class CustomerTrackingService {
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      reference_type: data.reference_type as 'invoice' | 'payment' | 'adjustment' | 'refund'
+    };
   }
 
   // ==== إدارة كشوف حسابات العملاء ====
@@ -85,13 +91,14 @@ export class CustomerTrackingService {
     if (openingError) throw openingError;
 
     const opening_balance = openingBalanceData?.[0]?.running_balance || 0;
-    const total_debits = transactions?.reduce((sum, t) => sum + t.debit_amount, 0) || 0;
-    const total_credits = transactions?.reduce((sum, t) => sum + t.credit_amount, 0) || 0;
+    const total_debits = transactions?.reduce((sum, t) => sum + (t.debit_amount || 0), 0) || 0;
+    const total_credits = transactions?.reduce((sum, t) => sum + (t.credit_amount || 0), 0) || 0;
     const closing_balance = opening_balance + total_debits - total_credits;
 
     // إنشاء كشف الحساب
     const statementData = {
       customer_id: formData.customer_id,
+      tenant_id: 'default-tenant', // temporary - should be from context
       statement_date: new Date().toISOString().split('T')[0],
       from_date: formData.from_date,
       to_date: formData.to_date,
@@ -99,10 +106,10 @@ export class CustomerTrackingService {
       closing_balance,
       total_debits,
       total_credits,
-      statement_data: {
+      statement_data: JSON.stringify({
         transactions: transactions || [],
         generation_options: formData
-      },
+      }),
       status: 'generated' as const
     };
 
@@ -113,7 +120,10 @@ export class CustomerTrackingService {
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      status: data.status as 'generated' | 'sent' | 'viewed'
+    };
   }
 
   async getCustomerStatements(customer_id?: string): Promise<CustomerStatement[]> {
@@ -134,7 +144,10 @@ export class CustomerTrackingService {
 
     const { data, error } = await query;
     if (error) throw error;
-    return data || [];
+    return (data || []).map(item => ({
+      ...item,
+      status: item.status as 'generated' | 'sent' | 'viewed'
+    }));
   }
 
   // ==== تحليل أعمار الديون ====
@@ -162,21 +175,25 @@ export class CustomerTrackingService {
         continue;
       }
 
+      // التعامل مع نوع Json
+      const agingResult = agingData as any;
+
       // تخطي العملاء بدون أرصدة إذا لم يتم تضمينهم
-      if (!formData.include_zero_balances && agingData.total_outstanding === 0) {
+      if (!formData.include_zero_balances && (agingResult?.total_outstanding || 0) === 0) {
         continue;
       }
 
       const analysisEntry = {
         customer_id: customerId,
+        tenant_id: 'default-tenant', // temporary - should be from context
         analysis_date: formData.analysis_date,
-        current_amount: agingData.current_amount || 0,
-        days_30_60: agingData.days_30_60 || 0,
-        days_61_90: agingData.days_61_90 || 0,
-        days_91_120: agingData.days_91_120 || 0,
-        over_120_days: agingData.over_120_days || 0,
-        total_outstanding: agingData.total_outstanding || 0,
-        oldest_invoice_date: agingData.oldest_invoice_date
+        current_amount: agingResult?.current_amount || 0,
+        days_30_60: agingResult?.days_30_60 || 0,
+        days_61_90: agingResult?.days_61_90 || 0,
+        days_91_120: agingResult?.days_91_120 || 0,
+        over_120_days: agingResult?.over_120_days || 0,
+        total_outstanding: agingResult?.total_outstanding || 0,
+        oldest_invoice_date: agingResult?.oldest_invoice_date
       };
 
       const { data: savedAnalysis, error: saveError } = await supabase
@@ -249,7 +266,11 @@ export class CustomerTrackingService {
       .limit(limit);
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(item => ({
+      ...item,
+      transaction_type: item.transaction_type as 'adjustment' | 'invoice_created' | 'payment_received' | 'credit_applied' | 'debit_entry' | 'credit_entry',
+      reference_type: item.reference_type as 'invoice' | 'payment' | 'adjustment' | 'credit_note'
+    }));
   }
 
   // ==== إحصائيات تتبع العملاء ====
@@ -268,7 +289,7 @@ export class CustomerTrackingService {
       if (!acc[transaction.customer_id]) {
         acc[transaction.customer_id] = 0;
       }
-      acc[transaction.customer_id] += transaction.debit_amount - transaction.credit_amount;
+      acc[transaction.customer_id] += (transaction.debit_amount || 0) - (transaction.credit_amount || 0);
       return acc;
     }, {} as Record<string, number>) || {};
 
@@ -284,20 +305,20 @@ export class CustomerTrackingService {
 
     if (agingError) throw agingError;
 
-    const currentPeriodAmount = agingData?.reduce((sum, analysis) => sum + analysis.current_amount, 0) || 0;
+    const currentPeriodAmount = agingData?.reduce((sum, analysis) => sum + (analysis.current_amount || 0), 0) || 0;
     const overdueAmount = agingData?.reduce((sum, analysis) => 
-      sum + analysis.days_30_60 + analysis.days_61_90 + analysis.days_91_120 + analysis.over_120_days, 0) || 0;
+      sum + (analysis.days_30_60 || 0) + (analysis.days_61_90 || 0) + (analysis.days_91_120 || 0) + (analysis.over_120_days || 0), 0) || 0;
     
-    const criticalCustomers = agingData?.filter(analysis => analysis.over_120_days > 0).length || 0;
+    const criticalCustomers = agingData?.filter(analysis => (analysis.over_120_days || 0) > 0).length || 0;
 
     // العميل الأكثر تأخيراً
     let mostOverdueCustomer = null;
     if (agingData && agingData.length > 0) {
       const mostOverdue = agingData.reduce((max, current) => 
-        current.over_120_days > max.over_120_days ? current : max
+        (current.over_120_days || 0) > (max.over_120_days || 0) ? current : max
       );
 
-      if (mostOverdue.over_120_days > 0) {
+      if ((mostOverdue.over_120_days || 0) > 0) {
         const { data: customerData } = await supabase
           .from('customers')
           .select('name')
@@ -307,7 +328,7 @@ export class CustomerTrackingService {
         mostOverdueCustomer = {
           customer_id: mostOverdue.customer_id,
           customer_name: customerData?.name || 'غير معروف',
-          amount: mostOverdue.over_120_days,
+          amount: mostOverdue.over_120_days || 0,
           days_overdue: mostOverdue.oldest_invoice_date ? 
             Math.floor((new Date().getTime() - new Date(mostOverdue.oldest_invoice_date).getTime()) / (1000 * 60 * 60 * 24)) : 0
         };
@@ -354,7 +375,7 @@ export class CustomerTrackingService {
     for (const customer of customers || []) {
       const transactions = customer.customer_subsidiary_ledger || [];
       const currentBalance = transactions.reduce((sum: number, t: any) => 
-        sum + t.debit_amount - t.credit_amount, 0);
+        sum + (t.debit_amount || 0) - (t.credit_amount || 0), 0);
 
       // تطبيق فلاتر الرصيد
       if (filters?.balance_status) {
@@ -401,7 +422,12 @@ export class CustomerTrackingService {
       .maybeSingle();
 
     if (error) throw error;
-    return data;
+    return data ? {
+      ...data,
+      statement_frequency: data.statement_frequency as 'weekly' | 'monthly' | 'quarterly',
+      aging_analysis_frequency: data.aging_analysis_frequency as 'weekly' | 'monthly',
+      aging_thresholds: data.aging_thresholds as any || { current: 30, warning: 60, overdue: 90, critical: 120 }
+    } : null;
   }
 
   async updateCustomerTrackingSettings(settings: Partial<CustomerTrackingSettings>): Promise<CustomerTrackingSettings> {
@@ -416,25 +442,38 @@ export class CustomerTrackingService {
         .single();
 
       if (error) throw error;
-      return data;
+      return {
+        ...data,
+        statement_frequency: data.statement_frequency as 'weekly' | 'monthly' | 'quarterly',
+        aging_analysis_frequency: data.aging_analysis_frequency as 'weekly' | 'monthly',
+        aging_thresholds: data.aging_thresholds as any || { current: 30, warning: 60, overdue: 90, critical: 120 }
+      };
     } else {
+      const newSettings = {
+        tenant_id: 'default-tenant', // temporary - should be from context
+        auto_generate_statements: true,
+        statement_frequency: 'monthly',
+        aging_analysis_frequency: 'weekly',
+        credit_limit_alerts: true,
+        overdue_payment_alerts: true,
+        aging_thresholds: { current: 30, warning: 60, overdue: 90, critical: 120 },
+        auto_send_statements: false,
+        ...settings
+      };
+
       const { data, error } = await supabase
         .from('customer_tracking_settings')
-        .insert({
-          auto_generate_statements: true,
-          statement_frequency: 'monthly',
-          aging_analysis_frequency: 'weekly',
-          credit_limit_alerts: true,
-          overdue_payment_alerts: true,
-          aging_thresholds: { current: 30, warning: 60, overdue: 90, critical: 120 },
-          auto_send_statements: false,
-          ...settings
-        })
+        .insert(newSettings)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return {
+        ...data,
+        statement_frequency: data.statement_frequency as 'weekly' | 'monthly' | 'quarterly',
+        aging_analysis_frequency: data.aging_analysis_frequency as 'weekly' | 'monthly',
+        aging_thresholds: data.aging_thresholds as any || { current: 30, warning: 60, overdue: 90, critical: 120 }
+      };
     }
   }
 }
