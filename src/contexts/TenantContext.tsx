@@ -4,6 +4,7 @@ import { TenantService } from '@/services/tenantService';
 import { tenantIsolationService } from '@/services/BusinessServices/TenantIsolationService';
 import { tenantIsolationMiddleware } from '@/middleware/TenantIsolationMiddleware';
 import { useAuth } from './AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TenantContextType {
   currentTenant: Tenant | null;
@@ -51,10 +52,13 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
 
+      console.log('🔄 بدء تحميل بيانات المؤسسة للمستخدم:', user.email);
+
       // Get current tenant and user role
       const { data: tenantUser, error: tenantUserError } = await supabase
         .from('tenant_users')
         .select(`
+          tenant_id,
           role,
           status,
           tenant:tenants(*)
@@ -63,21 +67,36 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
         .eq('status', 'active')
         .single();
 
-      if (tenantUserError && tenantUserError.code !== 'PGRST116') {
-        throw tenantUserError;
+      if (tenantUserError) {
+        if (tenantUserError.code === 'PGRST116') {
+          console.warn('⚠️ لم يتم العثور على مؤسسة للمستخدم');
+          setError('لم يتم العثور على مؤسسة مرتبطة بهذا المستخدم');
+          setCurrentTenant(null);
+          setCurrentUserRole(null);
+          tenantIsolationMiddleware.reset();
+          return;
+        } else {
+          console.error('❌ خطأ في البحث عن المؤسسة:', tenantUserError);
+          throw tenantUserError;
+        }
       }
 
       if (tenantUser && tenantUser.tenant) {
         const tenant = tenantUser.tenant as Tenant;
+        console.log('✅ تم العثور على المؤسسة:', tenant.name);
+        
         setCurrentTenant(tenant);
         setCurrentUserRole(tenantUser.role as TenantUser['role']);
         
         // تفعيل middleware العزل للمؤسسة
         await tenantIsolationMiddleware.setCurrentTenant(tenant.id);
+        console.log('✅ تم تحميل بيانات المؤسسة بنجاح');
       } else {
         // User is not associated with any tenant
+        console.warn('⚠️ المستخدم غير مرتبط بأي مؤسسة');
         setCurrentTenant(null);
         setCurrentUserRole(null);
+        setError('المستخدم غير مرتبط بأي مؤسسة نشطة');
         tenantIsolationMiddleware.reset();
       }
     } catch (err: any) {
@@ -173,6 +192,3 @@ export const useTenant = (): TenantContextType => {
   }
   return context;
 };
-
-// Import supabase here to avoid circular dependency
-import { supabase } from '@/integrations/supabase/client';

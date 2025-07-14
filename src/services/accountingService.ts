@@ -24,20 +24,78 @@ import {
 } from "@/types/accounting";
 
 export const accountingService = {
-  // Helper method to get current tenant ID
+  // Helper method to get current tenant ID with enhanced error handling
   async getCurrentTenantId(): Promise<string> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        console.error('❌ خطأ في المصادقة:', authError);
+        throw new Error('فشل في التحقق من هوية المستخدم');
+      }
+      
+      if (!user) {
+        throw new Error('المستخدم غير مصادق عليه - يرجى تسجيل الدخول');
+      }
 
-    const { data, error } = await supabase
-      .from('tenant_users')
-      .select('tenant_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+      const { data, error } = await supabase
+        .from('tenant_users')
+        .select('tenant_id, status, role')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
 
-    if (error || !data) throw new Error('No active tenant found for user');
-    return data.tenant_id;
+      if (error) {
+        console.error('❌ خطأ في البحث عن المؤسسة:', error);
+        if (error.code === 'PGRST116') {
+          throw new Error('لم يتم العثور على مؤسسة نشطة لهذا المستخدم');
+        }
+        throw new Error('خطأ في الوصول إلى بيانات المؤسسة');
+      }
+      
+      if (!data) {
+        throw new Error('لم يتم العثور على مؤسسة نشطة لهذا المستخدم');
+      }
+
+      console.log('✅ تم العثور على المؤسسة:', data.tenant_id);
+      return data.tenant_id;
+    } catch (error) {
+      console.error('❌ خطأ في getCurrentTenantId:', error);
+      throw error;
+    }
+  },
+
+  // Enhanced method to check tenant status
+  async getTenantInfo(): Promise<{ tenantId: string; userRole: string; isActive: boolean }> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('المستخدم غير مصادق عليه');
+
+      const { data, error } = await supabase
+        .from('tenant_users')
+        .select(`
+          tenant_id,
+          role,
+          status,
+          tenant:tenants(id, name, status)
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (error || !data) {
+        throw new Error('لم يتم العثور على معلومات المؤسسة');
+      }
+
+      return {
+        tenantId: data.tenant_id,
+        userRole: data.role,
+        isActive: data.tenant.status === 'active'
+      };
+    } catch (error) {
+      console.error('❌ خطأ في getTenantInfo:', error);
+      throw error;
+    }
   },
 
   // Chart of Accounts
@@ -85,24 +143,113 @@ export const accountingService = {
     if (error) throw error;
   },
 
-  // Journal Entries
+  // Journal Entries with enhanced error handling and diagnostics
   async getJournalEntries(): Promise<JournalEntry[]> {
-    const tenantId = await this.getCurrentTenantId();
-    const { data, error } = await supabase
-      .from('journal_entries')
-      .select(`
-        *,
-        lines:journal_entry_lines(
+    try {
+      console.log('🔍 بدء تحميل القيود المحاسبية...');
+      
+      // التحقق من المصادقة أولاً
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('المستخدم غير مصادق عليه - يرجى تسجيل الدخول أولاً');
+      }
+      
+      console.log('✅ المستخدم مصادق عليه:', user.email);
+      
+      // الحصول على معرف المؤسسة
+      const tenantId = await this.getCurrentTenantId();
+      console.log('✅ معرف المؤسسة:', tenantId);
+      
+      // جلب القيود المحاسبية
+      const { data, error } = await supabase
+        .from('journal_entries')
+        .select(`
           *,
-          account:chart_of_accounts(*),
-          cost_center:cost_centers(*)
-        )
-      `)
-      .eq('tenant_id', tenantId)
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return (data || []) as JournalEntry[];
+          lines:journal_entry_lines(
+            *,
+            account:chart_of_accounts(*),
+            cost_center:cost_centers(*)
+          )
+        `)
+        .eq('tenant_id', tenantId)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('❌ خطأ في جلب القيود المحاسبية:', error);
+        throw new Error(`خطأ في جلب القيود المحاسبية: ${error.message}`);
+      }
+      
+      console.log(`✅ تم جلب ${data?.length || 0} قيد محاسبي`);
+      return (data || []) as JournalEntry[];
+      
+    } catch (error) {
+      console.error('❌ خطأ في getJournalEntries:', error);
+      throw error;
+    }
+  },
+
+  // Diagnostic method to check database connection and permissions
+  async runDiagnostics(): Promise<{
+    authStatus: boolean;
+    tenantStatus: boolean;
+    permissionsStatus: boolean;
+    journalEntriesCount: number;
+    errors: string[];
+  }> {
+    const diagnostics = {
+      authStatus: false,
+      tenantStatus: false,
+      permissionsStatus: false,
+      journalEntriesCount: 0,
+      errors: [] as string[]
+    };
+
+    try {
+      // فحص المصادقة
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        diagnostics.errors.push('فشل في المصادقة');
+        return diagnostics;
+      }
+      diagnostics.authStatus = true;
+
+      // فحص المؤسسة
+      try {
+        const tenantId = await this.getCurrentTenantId();
+        diagnostics.tenantStatus = true;
+
+        // فحص الصلاحيات
+        const { data: entriesData, error: entriesError } = await supabase
+          .from('journal_entries')
+          .select('id')
+          .eq('tenant_id', tenantId)
+          .limit(1);
+
+        if (entriesError) {
+          diagnostics.errors.push(`خطأ في الصلاحيات: ${entriesError.message}`);
+        } else {
+          diagnostics.permissionsStatus = true;
+        }
+
+        // عد القيود المحاسبية
+        const { count, error: countError } = await supabase
+          .from('journal_entries')
+          .select('*', { count: 'exact', head: true })
+          .eq('tenant_id', tenantId);
+
+        if (!countError) {
+          diagnostics.journalEntriesCount = count || 0;
+        }
+
+      } catch (tenantError) {
+        diagnostics.errors.push(`خطأ في المؤسسة: ${tenantError}`);
+      }
+
+    } catch (error) {
+      diagnostics.errors.push(`خطأ عام: ${error}`);
+    }
+
+    return diagnostics;
   },
 
   async createJournalEntry(entry: Omit<JournalEntry, 'id' | 'entry_number' | 'created_at' | 'updated_at' | 'lines'>): Promise<JournalEntry> {

@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { JournalEntry, JournalEntryLine, ChartOfAccount } from '@/types/accounting';
 import { accountingService } from '@/services/accountingService';
 import { useToast } from '@/hooks/use-toast';
+import { DiagnosticsPanel } from './DiagnosticsPanel';
 
 export const JournalEntriesTab = () => {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
@@ -22,6 +23,7 @@ export const JournalEntriesTab = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -48,20 +50,70 @@ export const JournalEntriesTab = () => {
 
   const loadData = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('🔄 بدء تحميل بيانات القيود المحاسبية...');
+      
       const [entriesData, accountsData] = await Promise.all([
         accountingService.getJournalEntries(),
         accountingService.getChartOfAccounts()
       ]);
+      
+      console.log('✅ تم تحميل البيانات بنجاح:', {
+        entriesCount: entriesData.length,
+        accountsCount: accountsData.length
+      });
+      
       setEntries(entriesData);
       setAccounts(accountsData.filter(acc => acc.allow_posting));
-    } catch (error) {
+      
+      if (entriesData.length === 0) {
+        toast({
+          title: 'تنبيه',
+          description: 'لا توجد قيود محاسبية حتى الآن',
+        });
+      }
+      
+    } catch (error: any) {
+      console.error('❌ خطأ في تحميل البيانات:', error);
+      const errorMessage = error?.message || 'خطأ غير معروف في تحميل البيانات';
+      setError(errorMessage);
       toast({
         title: 'خطأ',
-        description: 'فشل في تحميل البيانات',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // تشخيص المشاكل
+  const runDiagnostics = async () => {
+    try {
+      const diagnostics = await accountingService.runDiagnostics();
+      console.log('🔍 نتائج التشخيص:', diagnostics);
+      
+      if (diagnostics.errors.length > 0) {
+        toast({
+          title: 'مشاكل تم اكتشافها',
+          description: diagnostics.errors.join(', '),
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'نجح التشخيص',
+          description: 'جميع الفحوصات نجحت',
+        });
+      }
+    } catch (error) {
+      console.error('خطأ في التشخيص:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل في تشغيل التشخيص',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -251,13 +303,56 @@ export const JournalEntriesTab = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-64">جاري التحميل...</div>;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p>جاري تحميل القيود المحاسبية...</p>
+          <p className="text-sm text-muted-foreground">
+            إذا استغرق التحميل وقتاً طويلاً، يرجى التحقق من الاتصال
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <DiagnosticsPanel />
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center space-y-4 max-w-md">
+            <div className="text-destructive mb-4">
+              <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-destructive">خطأ في تحميل البيانات</h3>
+            <p className="text-sm text-muted-foreground">{error}</p>
+            <div className="flex gap-2 justify-center">
+              <Button onClick={loadData} variant="outline">
+                إعادة المحاولة
+              </Button>
+              <Button onClick={runDiagnostics} variant="secondary">
+                تشخيص المشكلة
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <Card className="card-elegant">
-      <CardHeader>
-        <div className="flex justify-between items-center">
+    <div className="space-y-6">
+      {/* لوحة التشخيص - تظهر فقط في حالة وجود مشاكل */}
+      {entries.length === 0 && !loading && !error && (
+        <DiagnosticsPanel />
+      )}
+      
+      <Card className="card-elegant">
+        <CardHeader>
+          <div className="flex justify-between items-center rtl-flex">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => { resetForm(); setEditingEntry(null); }}>
@@ -417,7 +512,7 @@ export const JournalEntriesTab = () => {
               </form>
             </DialogContent>
           </Dialog>
-          <CardTitle>القيود المحاسبية</CardTitle>
+          <CardTitle className="rtl-title">القيود المحاسبية</CardTitle>
         </div>
       </CardHeader>
       <CardContent>
@@ -481,12 +576,27 @@ export const JournalEntriesTab = () => {
           </TableBody>
         </Table>
 
-        {filteredEntries.length === 0 && (
+        {filteredEntries.length === 0 && entries.length > 0 && (
           <div className="text-center py-8 text-muted-foreground">
             لا توجد قيود محاسبية مطابقة لبحثك
           </div>
         )}
+        
+        {entries.length === 0 && !loading && !error && (
+          <div className="text-center py-12">
+            <div className="text-muted-foreground mb-4">
+              <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-medium mb-2">لا توجد قيود محاسبية</h3>
+              <p className="text-sm">ابدأ بإضافة أول قيد محاسبي لك</p>
+            </div>
+            <Button onClick={() => { resetForm(); setEditingEntry(null); setIsDialogOpen(true); }}>
+              <Plus className="w-4 h-4 mr-2" />
+              إضافة قيد محاسبي
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
+    </div>
   );
 };
