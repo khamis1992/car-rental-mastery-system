@@ -8218,6 +8218,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      apply_comprehensive_default_chart: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       audit_orphaned_entries: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -8341,6 +8345,10 @@ export type Database = {
         Returns: number
       }
       complete_chart_of_accounts_part4: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
+      complete_liabilities_equity_revenue_expenses: {
         Args: { tenant_id_param: string }
         Returns: number
       }
@@ -8809,6 +8817,10 @@ export type Database = {
       setup_complete_chart_of_accounts: {
         Args: { tenant_id_param: string }
         Returns: boolean
+      }
+      setup_comprehensive_chart_of_accounts: {
+        Args: { tenant_id_param: string }
+        Returns: number
       }
       setup_default_role_permissions: {
         Args: { _tenant_id: string }

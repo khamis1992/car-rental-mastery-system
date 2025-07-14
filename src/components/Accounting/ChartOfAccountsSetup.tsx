@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { RefreshCw, Database, CheckCircle, AlertTriangle } from 'lucide-react';
+import { RefreshCw, Database, CheckCircle, AlertTriangle, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -17,6 +17,9 @@ interface SetupStatus {
 export const ChartOfAccountsSetup = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const queryClient = useQueryClient();
+  
+  // For now, hide super admin features - can be enabled based on user role checking
+  const isSuperAdmin = false;
 
   // Query to check current setup status
   const { data: setupStatus, isLoading } = useQuery({
@@ -37,33 +40,58 @@ export const ChartOfAccountsSetup = () => {
     }
   });
 
-  // Mutation to setup enhanced chart of accounts
+  // Mutation to setup comprehensive chart of accounts
   const setupMutation = useMutation({
     mutationFn: async () => {
       setIsProcessing(true);
       
-      // Get current tenant ID
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      // Get current tenant ID from function
+      const { data: currentTenant, error: tenantError } = await supabase.rpc('get_current_tenant_id');
+      if (tenantError || !currentTenant) throw new Error('Cannot determine current tenant');
 
-      // Call the enhanced setup function
-      const { data, error } = await supabase.rpc('setup_enhanced_chart_of_accounts', {
-        tenant_id_param: user.id // This would be replaced with actual tenant ID logic
+      // Call the comprehensive setup function
+      const { data: assetsData, error: assetsError } = await supabase.rpc('setup_comprehensive_chart_of_accounts', {
+        tenant_id_param: currentTenant
       });
 
-      if (error) throw error;
-      return data;
+      if (assetsError) throw assetsError;
+
+      // Add remaining accounts
+      const { data: otherData, error: otherError } = await supabase.rpc('complete_liabilities_equity_revenue_expenses', {
+        tenant_id_param: currentTenant
+      });
+
+      if (otherError) throw otherError;
+      
+      return assetsData + otherData;
     },
-    onSuccess: (accountsCreated) => {
-      toast.success(`تم إنشاء ${accountsCreated} حساب بنجاح`);
+    onSuccess: (totalAccounts) => {
+      toast.success(`تم إنشاء دليل الحسابات الشامل بنجاح (${totalAccounts} حساب)`);
       queryClient.invalidateQueries({ queryKey: ['chart-setup-status'] });
       queryClient.invalidateQueries({ queryKey: ['chart-of-accounts'] });
     },
     onError: (error: any) => {
-      toast.error(`خطأ في إعداد دليل الحسابات: ${error.message}`);
+      toast.error(`خطأ في إعداد دليل الحسابات الشامل: ${error.message}`);
     },
     onSettled: () => {
       setIsProcessing(false);
+    }
+  });
+
+  // Mutation to apply comprehensive chart to all tenants (super admin only)
+  const applyAllTenantsMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc('apply_comprehensive_default_chart');
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (result: any) => {
+      toast.success(`تم تطبيق دليل الحسابات على جميع المؤسسات (${result.total_accounts_created} حساب)`);
+      queryClient.invalidateQueries({ queryKey: ['chart-setup-status'] });
+      queryClient.invalidateQueries({ queryKey: ['chart-of-accounts'] });
+    },
+    onError: (error: any) => {
+      toast.error(`خطأ في تطبيق دليل الحسابات على جميع المؤسسات: ${error.message}`);
     }
   });
 
@@ -119,7 +147,7 @@ export const ChartOfAccountsSetup = () => {
         <CardHeader>
           <CardTitle className="text-right flex items-center gap-2 flex-row-reverse">
             <Database className="w-5 h-5" />
-            إعداد دليل الحسابات المحسن
+            إعداد دليل الحسابات الشامل
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -239,6 +267,63 @@ export const ChartOfAccountsSetup = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Super Admin Section */}
+      {isSuperAdmin && (
+        <Card className="card-elegant border-destructive">
+          <CardHeader>
+            <CardTitle className="text-right flex items-center gap-2 flex-row-reverse text-destructive">
+              <Users className="w-5 h-5" />
+              إعدادات المدير العام - تطبيق على جميع المؤسسات
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert className="border-destructive">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              <AlertDescription className="text-destructive">
+                <strong>تحذير:</strong> هذه العملية ستطبق دليل الحسابات الشامل على جميع المؤسسات في النظام.
+                سيتم حذف جميع الحسابات الموجودة واستبدالها بالهيكل الجديد.
+              </AlertDescription>
+            </Alert>
+
+            <div className="flex justify-center">
+              <Button
+                onClick={() => applyAllTenantsMutation.mutate()}
+                disabled={applyAllTenantsMutation.isPending}
+                variant="destructive"
+                size="lg"
+              >
+                {applyAllTenantsMutation.isPending && (
+                  <RefreshCw className="w-4 h-4 animate-spin ml-2" />
+                )}
+                تطبيق دليل الحسابات على جميع المؤسسات
+              </Button>
+            </div>
+
+            <div className="bg-muted p-4 rounded-lg">
+              <h4 className="font-semibold mb-3 text-right">ما ستقوم به هذه العملية:</h4>
+              <ul className="space-y-2 text-sm text-right">
+                <li className="flex items-center gap-2 flex-row-reverse">
+                  <CheckCircle className="w-4 h-4 text-primary" />
+                  تطبيق دليل الحسابات الشامل على جميع المؤسسات النشطة
+                </li>
+                <li className="flex items-center gap-2 flex-row-reverse">
+                  <CheckCircle className="w-4 h-4 text-primary" />
+                  إنشاء أكثر من 80 حساب لكل مؤسسة
+                </li>
+                <li className="flex items-center gap-2 flex-row-reverse">
+                  <CheckCircle className="w-4 h-4 text-primary" />
+                  ضمان التوافق مع المعايير المحاسبية الكويتية
+                </li>
+                <li className="flex items-center gap-2 flex-row-reverse">
+                  <CheckCircle className="w-4 h-4 text-primary" />
+                  إعداد الحسابات تلقائياً للمؤسسات الجديدة
+                </li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
