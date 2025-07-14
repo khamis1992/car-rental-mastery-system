@@ -110,7 +110,8 @@ export class DataSecurityService {
       const { data: { user } } = await supabase.auth.getUser();
       const tenantId = await this.getCurrentTenantId();
 
-      await supabase
+      // استخدام النوع any لتجنب مشاكل TypeScript مع الجداول الجديدة
+      await (supabase as any)
         .from('data_operation_logs')
         .insert({
           user_id: user?.id,
@@ -134,7 +135,8 @@ export class DataSecurityService {
       const { data: { user } } = await supabase.auth.getUser();
       const tenantId = await this.getCurrentTenantId();
 
-      await supabase
+      // استخدام النوع any لتجنب مشاكل TypeScript مع الجداول الجديدة
+      await (supabase as any)
         .from('security_events')
         .insert({
           user_id: user?.id,
@@ -229,7 +231,7 @@ export class DataSecurityService {
       const tenantId = await this.getCurrentTenantId();
       
       // جلب الأحداث الأمنية
-      const { data: securityEvents } = await supabase
+      const { data: securityEvents } = await (supabase as any)
         .from('security_events')
         .select('*')
         .eq('tenant_id', tenantId)
@@ -238,7 +240,7 @@ export class DataSecurityService {
         .order('timestamp', { ascending: false });
 
       // جلب سجلات العمليات
-      const { data: operationLogs } = await supabase
+      const { data: operationLogs } = await (supabase as any)
         .from('data_operation_logs')
         .select('*')
         .eq('tenant_id', tenantId)
@@ -247,10 +249,10 @@ export class DataSecurityService {
 
       // تحليل البيانات
       const totalEvents = securityEvents?.length || 0;
-      const criticalEvents = securityEvents?.filter(e => e.severity === 'critical').length || 0;
-      const highEvents = securityEvents?.filter(e => e.severity === 'high').length || 0;
+      const criticalEvents = securityEvents?.filter((e: any) => e.severity === 'critical').length || 0;
+      const highEvents = securityEvents?.filter((e: any) => e.severity === 'high').length || 0;
       const totalOperations = operationLogs?.length || 0;
-      const failedOperations = securityEvents?.filter(e => e.event_type.includes('failed')).length || 0;
+      const failedOperations = securityEvents?.filter((e: any) => e.event_type.includes('failed')).length || 0;
 
       return {
         summary: {
