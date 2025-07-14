@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, Check, X, FileText } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Check, X, FileText, Settings } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { JournalEntry, JournalEntryLine, ChartOfAccount } from '@/types/accounting';
 import { accountingService } from '@/services/accountingService';
 import { useToast } from '@/hooks/use-toast';
@@ -353,14 +354,14 @@ export const JournalEntriesTab = () => {
       <Card className="card-elegant">
         <CardHeader>
           <div className="flex justify-between items-center rtl-flex">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { resetForm(); setEditingEntry(null); }}>
-                <Plus className="w-4 h-4 ml-2" />
-                إضافة قيد محاسبي
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={() => { resetForm(); setEditingEntry(null); }}>
+                  <Plus className="w-4 h-4 ml-2" />
+                  قيد محاسبي
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingEntry ? 'تعديل القيد المحاسبي' : 'إضافة قيد محاسبي جديد'}
@@ -511,7 +512,12 @@ export const JournalEntriesTab = () => {
                 </div>
               </form>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+            <Button variant="outline" onClick={() => toast({ title: "قريباً", description: "ستتوفر القيود المتقدمة قريباً" })}>
+              <Settings className="w-4 h-4 ml-2" />
+              قيد متقدم
+            </Button>
+          </div>
           <CardTitle className="rtl-title">القيود المحاسبية</CardTitle>
         </div>
       </CardHeader>

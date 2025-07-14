@@ -3921,30 +3921,43 @@ export type Database = {
       }
       journal_entries: {
         Row: {
+          approval_notes: string | null
+          approval_status: string | null
           approved_at: string | null
           approved_by: string | null
           attachment_urls: string[] | null
           audit_trail: Json | null
+          auto_reverse_date: string | null
           base_currency: string | null
           branch_id: string | null
           created_at: string
           created_by: string | null
+          department_id: string | null
           description: string
           entry_date: string
           entry_number: string
+          entry_source: string | null
+          entry_subtype: string | null
           exchange_rate: number | null
           financial_period_id: string | null
+          fiscal_period_id: string | null
           id: string
           ministry_compliance_check: boolean | null
           posted_at: string | null
           posted_by: string | null
+          project_id: string | null
+          recurring_schedule: Json | null
           reference_id: string | null
           reference_type: string | null
+          rejection_reason: string | null
           requires_approval: boolean | null
+          reversal_entry_id: string | null
           reversal_reason: string | null
           reversed_at: string | null
           reversed_by: string | null
+          reversed_by_entry_id: string | null
           status: string
+          supporting_documents: Json | null
           tenant_id: string
           total_credit: number
           total_debit: number
@@ -3952,30 +3965,43 @@ export type Database = {
           zakat_calculated: boolean | null
         }
         Insert: {
+          approval_notes?: string | null
+          approval_status?: string | null
           approved_at?: string | null
           approved_by?: string | null
           attachment_urls?: string[] | null
           audit_trail?: Json | null
+          auto_reverse_date?: string | null
           base_currency?: string | null
           branch_id?: string | null
           created_at?: string
           created_by?: string | null
+          department_id?: string | null
           description: string
           entry_date: string
           entry_number: string
+          entry_source?: string | null
+          entry_subtype?: string | null
           exchange_rate?: number | null
           financial_period_id?: string | null
+          fiscal_period_id?: string | null
           id?: string
           ministry_compliance_check?: boolean | null
           posted_at?: string | null
           posted_by?: string | null
+          project_id?: string | null
+          recurring_schedule?: Json | null
           reference_id?: string | null
           reference_type?: string | null
+          rejection_reason?: string | null
           requires_approval?: boolean | null
+          reversal_entry_id?: string | null
           reversal_reason?: string | null
           reversed_at?: string | null
           reversed_by?: string | null
+          reversed_by_entry_id?: string | null
           status?: string
+          supporting_documents?: Json | null
           tenant_id: string
           total_credit?: number
           total_debit?: number
@@ -3983,30 +4009,43 @@ export type Database = {
           zakat_calculated?: boolean | null
         }
         Update: {
+          approval_notes?: string | null
+          approval_status?: string | null
           approved_at?: string | null
           approved_by?: string | null
           attachment_urls?: string[] | null
           audit_trail?: Json | null
+          auto_reverse_date?: string | null
           base_currency?: string | null
           branch_id?: string | null
           created_at?: string
           created_by?: string | null
+          department_id?: string | null
           description?: string
           entry_date?: string
           entry_number?: string
+          entry_source?: string | null
+          entry_subtype?: string | null
           exchange_rate?: number | null
           financial_period_id?: string | null
+          fiscal_period_id?: string | null
           id?: string
           ministry_compliance_check?: boolean | null
           posted_at?: string | null
           posted_by?: string | null
+          project_id?: string | null
+          recurring_schedule?: Json | null
           reference_id?: string | null
           reference_type?: string | null
+          rejection_reason?: string | null
           requires_approval?: boolean | null
+          reversal_entry_id?: string | null
           reversal_reason?: string | null
           reversed_at?: string | null
           reversed_by?: string | null
+          reversed_by_entry_id?: string | null
           status?: string
+          supporting_documents?: Json | null
           tenant_id?: string
           total_credit?: number
           total_debit?: number
@@ -4037,9 +4076,54 @@ export type Database = {
           },
         ]
       }
+      journal_entry_approvals: {
+        Row: {
+          approval_level: number
+          approved_at: string | null
+          approver_id: string
+          comments: string | null
+          created_at: string | null
+          id: string
+          journal_entry_id: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          approval_level?: number
+          approved_at?: string | null
+          approver_id: string
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          journal_entry_id: string
+          status: string
+          tenant_id: string
+        }
+        Update: {
+          approval_level?: number
+          approved_at?: string | null
+          approver_id?: string
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          journal_entry_id?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entry_approvals_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journal_entry_lines: {
         Row: {
           account_id: string
+          allocation_percentage: number | null
           cost_center_id: string | null
           created_at: string
           credit_amount: number | null
@@ -4047,16 +4131,21 @@ export type Database = {
           description: string | null
           exchange_rate: number | null
           id: string
+          is_reversible: boolean | null
           journal_entry_id: string
+          line_notes: string | null
           line_number: number
+          line_type: string | null
           original_amount: number | null
           original_currency: string | null
+          supporting_reference: string | null
           tenant_id: string | null
           vat_amount: number | null
           vat_rate: number | null
         }
         Insert: {
           account_id: string
+          allocation_percentage?: number | null
           cost_center_id?: string | null
           created_at?: string
           credit_amount?: number | null
@@ -4064,16 +4153,21 @@ export type Database = {
           description?: string | null
           exchange_rate?: number | null
           id?: string
+          is_reversible?: boolean | null
           journal_entry_id: string
+          line_notes?: string | null
           line_number: number
+          line_type?: string | null
           original_amount?: number | null
           original_currency?: string | null
+          supporting_reference?: string | null
           tenant_id?: string | null
           vat_amount?: number | null
           vat_rate?: number | null
         }
         Update: {
           account_id?: string
+          allocation_percentage?: number | null
           cost_center_id?: string | null
           created_at?: string
           credit_amount?: number | null
@@ -4081,10 +4175,14 @@ export type Database = {
           description?: string | null
           exchange_rate?: number | null
           id?: string
+          is_reversible?: boolean | null
           journal_entry_id?: string
+          line_notes?: string | null
           line_number?: number
+          line_type?: string | null
           original_amount?: number | null
           original_currency?: string | null
+          supporting_reference?: string | null
           tenant_id?: string | null
           vat_amount?: number | null
           vat_rate?: number | null
@@ -4123,6 +4221,98 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entry_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          default_accounts: Json | null
+          description: string | null
+          entry_subtype: string | null
+          entry_type: string
+          id: string
+          is_active: boolean | null
+          requires_approval: boolean | null
+          template_lines: Json
+          template_name: string
+          template_name_en: string | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          default_accounts?: Json | null
+          description?: string | null
+          entry_subtype?: string | null
+          entry_type: string
+          id?: string
+          is_active?: boolean | null
+          requires_approval?: boolean | null
+          template_lines: Json
+          template_name: string
+          template_name_en?: string | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          default_accounts?: Json | null
+          description?: string | null
+          entry_subtype?: string | null
+          entry_type?: string
+          id?: string
+          is_active?: boolean | null
+          requires_approval?: boolean | null
+          template_lines?: Json
+          template_name?: string
+          template_name_en?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      journal_entry_validations: {
+        Row: {
+          id: string
+          journal_entry_id: string
+          tenant_id: string
+          validated_at: string | null
+          validation_details: Json | null
+          validation_message: string | null
+          validation_status: string
+          validation_type: string
+        }
+        Insert: {
+          id?: string
+          journal_entry_id: string
+          tenant_id: string
+          validated_at?: string | null
+          validation_details?: Json | null
+          validation_message?: string | null
+          validation_status: string
+          validation_type: string
+        }
+        Update: {
+          id?: string
+          journal_entry_id?: string
+          tenant_id?: string
+          validated_at?: string | null
+          validation_details?: Json | null
+          validation_message?: string | null
+          validation_status?: string
+          validation_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entry_validations_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
             referencedColumns: ["id"]
           },
         ]
@@ -7948,6 +8138,10 @@ export type Database = {
         Args: { tenant_id_param: string; restore_reason?: string }
         Returns: Json
       }
+      run_journal_entry_validations: {
+        Args: { entry_id: string }
+        Returns: undefined
+      }
       safe_delete_contract: {
         Args: { contract_id_param: string; delete_related?: boolean }
         Returns: Json
@@ -8027,6 +8221,14 @@ export type Database = {
       validate_chart_of_accounts: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      validate_journal_entry_accounts: {
+        Args: { entry_id: string }
+        Returns: boolean
+      }
+      validate_journal_entry_balance: {
+        Args: { entry_id: string }
+        Returns: boolean
       }
       validate_tenant_access: {
         Args: { table_tenant_id: string }
