@@ -603,6 +603,5 @@ export const JournalEntriesTab = () => {
         )}
       </CardContent>
     </Card>
-    </div>
   );
 };
