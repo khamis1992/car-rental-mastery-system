@@ -352,43 +352,336 @@ export const JournalEntriesTab = () => {
       )}
       
       <Card className="card-elegant">
-        <CardHeader>
-          <div className="flex justify-between items-center rtl-flex">
+        <CardHeader className="rtl-card-header">
+          <CardTitle className="rtl-title text-xl font-bold">القيود المحاسبية</CardTitle>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => toast({ title: "قريباً", description: "ستتوفر القيود المتقدمة قريباً" })}>
+              <Settings className="w-4 h-4" />
+              قيد متقدم
+            </Button>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button onClick={() => { resetForm(); setEditingEntry(null); }}>
-                  <Plus className="w-4 h-4 ml-2" />
-                  قيد محاسبي
+                <Button className="btn-primary" onClick={() => { resetForm(); setEditingEntry(null); }}>
+                  <Plus className="w-4 h-4" />
+                  قيد محاسبي جديد
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>
+              <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden">
+                <DialogHeader className="border-b pb-4">
+                  <DialogTitle className="text-xl font-bold rtl-title">
                     {editingEntry ? 'تعديل القيد المحاسبي' : 'إضافة قيد محاسبي جديد'}
                   </DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* ... keep existing form content */}
-                  <div className="flex justify-end gap-2">
+                
+                <div className="overflow-y-auto max-h-[75vh]">
+                  <form onSubmit={handleSubmit} className="space-y-8 p-1">
+                    {/* معلومات القيد الأساسية */}
+                    <div className="bg-muted/30 rounded-lg p-6 space-y-4">
+                      <h3 className="font-semibold text-lg rtl-title mb-4">معلومات القيد الأساسية</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="entry_date" className="rtl-label">تاريخ القيد</Label>
+                          <Input
+                            id="entry_date"
+                            type="date"
+                            value={formData.entry_date}
+                            onChange={(e) => setFormData({ ...formData, entry_date: e.target.value })}
+                            required
+                            className="text-right"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="reference_type" className="rtl-label">نوع المرجع</Label>
+                          <Select value={formData.reference_type} onValueChange={(value) => setFormData({ ...formData, reference_type: value as any })}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="اختر نوع المرجع" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="manual">يدوي</SelectItem>
+                              <SelectItem value="invoice">فاتورة</SelectItem>
+                              <SelectItem value="payment">دفع</SelectItem>
+                              <SelectItem value="contract">عقد</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="reference_id" className="rtl-label">رقم المرجع</Label>
+                          <Input
+                            id="reference_id"
+                            value={formData.reference_id}
+                            onChange={(e) => setFormData({ ...formData, reference_id: e.target.value })}
+                            placeholder="رقم المرجع (اختياري)"
+                            className="text-right"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="description" className="rtl-label">وصف القيد</Label>
+                        <Textarea
+                          id="description"
+                          value={formData.description}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                          placeholder="وصف مفصل للقيد المحاسبي"
+                          required
+                          className="text-right min-h-[80px]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* سطور القيد المحاسبي */}
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-semibold text-lg rtl-title">سطور القيد المحاسبي</h3>
+                        <Button type="button" onClick={addLine} variant="outline" size="sm">
+                          <Plus className="w-4 h-4" />
+                          إضافة سطر
+                        </Button>
+                      </div>
+
+                      {formData.lines.length === 0 && (
+                        <div className="text-center py-8 text-muted-foreground border-2 border-dashed border-border rounded-lg">
+                          <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                          <p>لم يتم إضافة أي سطور بعد</p>
+                          <p className="text-sm">انقر على "إضافة سطر" للبدء</p>
+                        </div>
+                      )}
+
+                      {formData.lines.map((line, index) => (
+                        <div key={index} className="border border-border rounded-lg p-4 bg-card space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">السطر رقم {line.line_number}</span>
+                            <Button
+                              type="button"
+                              onClick={() => removeLine(index)}
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <div className="space-y-2">
+                              <Label className="rtl-label">الحساب</Label>
+                              <Select 
+                                value={line.account_id} 
+                                onValueChange={(value) => updateLine(index, 'account_id', value)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="اختر الحساب" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {accounts.map((account) => (
+                                    <SelectItem key={account.id} value={account.id}>
+                                      {account.account_code} - {account.account_name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label className="rtl-label">المبلغ المدين</Label>
+                              <Input
+                                type="number"
+                                step="0.001"
+                                min="0"
+                                value={line.debit_amount}
+                                onChange={(e) => updateLine(index, 'debit_amount', parseFloat(e.target.value) || 0)}
+                                placeholder="0.000"
+                                className="text-center"
+                              />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label className="rtl-label">المبلغ الدائن</Label>
+                              <Input
+                                type="number"
+                                step="0.001"
+                                min="0"
+                                value={line.credit_amount}
+                                onChange={(e) => updateLine(index, 'credit_amount', parseFloat(e.target.value) || 0)}
+                                placeholder="0.000"
+                                className="text-center"
+                              />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label className="rtl-label">وصف السطر</Label>
+                              <Input
+                                value={line.description}
+                                onChange={(e) => updateLine(index, 'description', e.target.value)}
+                                placeholder="وصف مختصر"
+                                className="text-right"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* ملخص الأرصدة */}
+                      {formData.lines.length > 0 && (
+                        <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                            <div className="space-y-1">
+                              <p className="text-sm text-muted-foreground">إجمالي المدين</p>
+                              <p className="text-lg font-bold text-primary">{formatAmount(getTotalDebit())}</p>
+                            </div>
+                            
+                            <div className="space-y-1">
+                              <p className="text-sm text-muted-foreground">إجمالي الدائن</p>
+                              <p className="text-lg font-bold text-primary">{formatAmount(getTotalCredit())}</p>
+                            </div>
+                            
+                            <div className="space-y-1">
+                              <p className="text-sm text-muted-foreground">الحالة</p>
+                              <div className="flex items-center justify-center">
+                                {isBalanced() ? (
+                                  <Badge variant="secondary" className="bg-success text-success-foreground">
+                                    <Check className="w-3 h-3 mr-1" />
+                                    متوازن
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="destructive">
+                                    <X className="w-3 h-3 mr-1" />
+                                    غير متوازن
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </form>
+                </div>
+
+                {/* أزرار الحفظ */}
+                <div className="border-t pt-4 flex justify-between items-center">
+                  <div className="text-sm text-muted-foreground">
+                    {formData.lines.length > 0 && !isBalanced() && (
+                      <span className="text-destructive">⚠️ القيد غير متوازن - تأكد من تساوي المدين والدائن</span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
                     <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                       إلغاء
                     </Button>
-                    <Button type="submit" disabled={!isBalanced() || formData.lines.length < 2}>
-                      {editingEntry ? 'تحديث' : 'حفظ'}
+                    <Button 
+                      onClick={handleSubmit}
+                      disabled={!isBalanced() || formData.lines.length < 2}
+                      className="btn-primary"
+                    >
+                      {editingEntry ? 'تحديث القيد' : 'حفظ القيد'}
                     </Button>
                   </div>
-                </form>
+                </div>
               </DialogContent>
             </Dialog>
-            <Button variant="outline" onClick={() => toast({ title: "قريباً", description: "ستتوفر القيود المتقدمة قريباً" })}>
-              <Settings className="w-4 h-4 ml-2" />
-              قيد متقدم
-            </Button>
           </div>
-          <CardTitle className="rtl-title">القيود المحاسبية</CardTitle>
         </CardHeader>
-        <CardContent>
-          {/* ... keep existing content */}
+        
+        <CardContent className="space-y-6">
+          {/* شريط البحث والفلترة */}
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <div className="flex-1 w-full">
+              <div className="relative">
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="البحث في القيود..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pr-10 text-right"
+                />
+              </div>
+            </div>
+            
+            <div className="w-full sm:w-48">
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="فلترة حسب الحالة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">جميع الحالات</SelectItem>
+                  <SelectItem value="draft">مسودة</SelectItem>
+                  <SelectItem value="posted">مرحل</SelectItem>
+                  <SelectItem value="reversed">معكوس</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* جدول القيود */}
+          {filteredEntries.length === 0 ? (
+            <div className="text-center py-12">
+              <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
+              <h3 className="text-lg font-semibold mb-2">لا توجد قيود محاسبية</h3>
+              <p className="text-muted-foreground mb-4">ابدأ بإنشاء أول قيد محاسبي لك</p>
+              <Button onClick={() => { resetForm(); setEditingEntry(null); setIsDialogOpen(true); }} className="btn-primary">
+                <Plus className="w-4 h-4" />
+                إنشاء قيد جديد
+              </Button>
+            </div>
+          ) : (
+            <div className="border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="text-right font-semibold">رقم القيد</TableHead>
+                    <TableHead className="text-right font-semibold">التاريخ</TableHead>
+                    <TableHead className="text-right font-semibold">الوصف</TableHead>
+                    <TableHead className="text-center font-semibold">المدين</TableHead>
+                    <TableHead className="text-center font-semibold">الدائن</TableHead>
+                    <TableHead className="text-center font-semibold">الحالة</TableHead>
+                    <TableHead className="text-center font-semibold">الإجراءات</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredEntries.map((entry) => (
+                    <TableRow key={entry.id} className="hover:bg-muted/30">
+                      <TableCell className="font-medium text-right">{entry.entry_number}</TableCell>
+                      <TableCell className="text-right">{new Date(entry.entry_date).toLocaleDateString('ar-KW')}</TableCell>
+                      <TableCell className="text-right max-w-xs truncate" title={entry.description}>
+                        {entry.description}
+                      </TableCell>
+                      <TableCell className="text-center font-mono">{formatAmount(entry.total_debit)}</TableCell>
+                      <TableCell className="text-center font-mono">{formatAmount(entry.total_credit)}</TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant={getStatusVariant(entry.status)}>
+                          {getStatusLabel(entry.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => { setEditingEntry(entry); setIsDialogOpen(true); }}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          {entry.status === 'draft' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handlePost(entry.id)}
+                              className="text-success hover:text-success hover:bg-success/10"
+                            >
+                              <Check className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
