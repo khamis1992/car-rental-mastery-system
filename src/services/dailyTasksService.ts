@@ -103,7 +103,9 @@ export const dailyTasksService = {
           priority: taskData.priority,
           due_time: taskData.due_time,
           due_date: taskData.due_date,
-          assigned_to_all: taskData.assigned_to_all
+          assigned_to_all: taskData.assigned_to_all,
+          category: 'general',
+          status: 'pending'
         }])
         .select()
         .single();
@@ -114,7 +116,8 @@ export const dailyTasksService = {
       if (!taskData.assigned_to_all && taskData.employee_ids && taskData.employee_ids.length > 0) {
         const assignments = taskData.employee_ids.map(employeeId => ({
           task_id: task.id,
-          employee_id: employeeId
+          employee_id: employeeId,
+          status: 'pending'
         }));
 
         const { error: assignmentError } = await supabase
@@ -162,6 +165,8 @@ export const dailyTasksService = {
 
       if (status === 'completed') {
         updateData.completed_at = new Date().toISOString();
+      } else if (status === 'in_progress') {
+        updateData.started_at = new Date().toISOString();
       }
 
       if (notes) {
@@ -196,6 +201,47 @@ export const dailyTasksService = {
     } catch (error) {
       console.error('خطأ في حذف المهمة:', error);
       return { success: false, error: error as Error };
+    }
+  },
+
+  // جلب المهام مع التخصيصات للموظف الحالي
+  async getCurrentUserTaskAssignments(date?: string) {
+    try {
+      const targetDate = date || new Date().toISOString().split('T')[0];
+      
+      // جلب معرف الموظف للمستخدم الحالي
+      const { data: employee, error: empError } = await supabase
+        .from('employees')
+        .select('id')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      if (empError) throw empError;
+
+      const { data, error } = await supabase
+        .from('task_assignments')
+        .select(`
+          *,
+          daily_tasks (
+            id,
+            title,
+            description,
+            priority,
+            due_time,
+            due_date,
+            category,
+            estimated_duration
+          )
+        `)
+        .eq('employee_id', employee.id)
+        .eq('daily_tasks.due_date', targetDate)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('خطأ في جلب مهام الموظف:', error);
+      return { data: null, error: error as Error };
     }
   }
 };

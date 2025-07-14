@@ -127,7 +127,7 @@ const DailyTasksChecklist = () => {
                 <div className="flex items-start gap-3">
                   <Checkbox
                     checked={task.status === 'completed'}
-                    onCheckedChange={() => toggleTask(task.id)}
+                    onCheckedChange={() => toggleTask((task as any).assignment_id || task.id)}
                     className="mt-0.5"
                   />
                   <div className="flex-1 min-w-0">
