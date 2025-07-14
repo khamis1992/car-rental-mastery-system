@@ -32,7 +32,6 @@ import FixedAssets from "./pages/FixedAssets";
 import BudgetManagement from "./pages/BudgetManagement";
 import AccountingAutomation from "./pages/AccountingAutomation";
 import AccountingValidation from "./pages/AccountingValidation";
-import QuickBooksAccounting from "./pages/QuickBooksAccounting";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 
@@ -197,11 +196,6 @@ const App = () => (
                         <Layout>
                           <AccountingValidation />
                         </Layout>
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/quickbooks-accounting" element={
-                      <ProtectedRoute>
-                        <QuickBooksAccounting />
                       </ProtectedRoute>
                     } />
                     <Route path="/settings" element={
