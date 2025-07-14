@@ -27,6 +27,8 @@ export const CustomerStatementsTab = () => {
     include_adjustments: true,
     email_to_customer: false
   });
+  const [selectedStatement, setSelectedStatement] = useState<CustomerStatement | null>(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -130,12 +132,8 @@ export const CustomerStatementsTab = () => {
   };
 
   const viewStatement = (statement: CustomerStatement) => {
-    // فتح كشف الحساب في نافذة جديدة أو في modal
-    console.log('عرض كشف الحساب:', statement);
-    toast({
-      title: 'قريباً',
-      description: 'ستتوفر ميزة عرض كشف الحساب قريباً',
-    });
+    setSelectedStatement(statement);
+    setViewerOpen(true);
   };
 
   const downloadStatement = (statement: CustomerStatement) => {
@@ -334,6 +332,13 @@ export const CustomerStatementsTab = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* عارض كشف الحساب */}
+      <CustomerStatementViewer
+        statement={selectedStatement}
+        open={viewerOpen}
+        onOpenChange={setViewerOpen}
+      />
     </div>
   );
 };

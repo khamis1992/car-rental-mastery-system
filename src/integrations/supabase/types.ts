@@ -953,6 +953,232 @@ export type Database = {
           },
         ]
       }
+      bank_reconciliation_imports: {
+        Row: {
+          bank_account_id: string
+          created_at: string
+          file_name: string | null
+          file_size: number | null
+          id: string
+          import_date: string
+          import_status: string
+          imported_by: string | null
+          matched_transactions: number | null
+          notes: string | null
+          tenant_id: string
+          total_transactions: number | null
+          unmatched_transactions: number | null
+          updated_at: string
+        }
+        Insert: {
+          bank_account_id: string
+          created_at?: string
+          file_name?: string | null
+          file_size?: number | null
+          id?: string
+          import_date?: string
+          import_status?: string
+          imported_by?: string | null
+          matched_transactions?: number | null
+          notes?: string | null
+          tenant_id: string
+          total_transactions?: number | null
+          unmatched_transactions?: number | null
+          updated_at?: string
+        }
+        Update: {
+          bank_account_id?: string
+          created_at?: string
+          file_name?: string | null
+          file_size?: number | null
+          id?: string
+          import_date?: string
+          import_status?: string
+          imported_by?: string | null
+          matched_transactions?: number | null
+          notes?: string | null
+          tenant_id?: string
+          total_transactions?: number | null
+          unmatched_transactions?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_reconciliation_imports_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_reconciliation_imports_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_reconciliation_matches: {
+        Row: {
+          created_at: string
+          id: string
+          imported_transaction_id: string
+          is_confirmed: boolean | null
+          journal_entry_id: string
+          match_amount: number
+          match_confidence: number | null
+          match_reason: string | null
+          match_type: string
+          matched_at: string
+          matched_by: string
+          notes: string | null
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          imported_transaction_id: string
+          is_confirmed?: boolean | null
+          journal_entry_id: string
+          match_amount: number
+          match_confidence?: number | null
+          match_reason?: string | null
+          match_type?: string
+          matched_at?: string
+          matched_by: string
+          notes?: string | null
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          imported_transaction_id?: string
+          is_confirmed?: boolean | null
+          journal_entry_id?: string
+          match_amount?: number
+          match_confidence?: number | null
+          match_reason?: string | null
+          match_type?: string
+          matched_at?: string
+          matched_by?: string
+          notes?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_reconciliation_matches_imported_transaction_id_fkey"
+            columns: ["imported_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "imported_bank_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_reconciliation_matches_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_reconciliation_matches_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_reconciliation_reports: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          bank_account_id: string
+          bank_charges: number
+          book_balance: number
+          closing_balance: number
+          created_at: string
+          id: string
+          interest_earned: number
+          notes: string | null
+          opening_balance: number
+          outstanding_deposits: number
+          outstanding_withdrawals: number
+          prepared_by: string
+          reconciled_balance: number
+          reconciliation_date: string
+          reconciliation_status: string
+          tenant_id: string
+          total_deposits: number
+          total_withdrawals: number
+          updated_at: string
+          variance_amount: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_account_id: string
+          bank_charges?: number
+          book_balance?: number
+          closing_balance?: number
+          created_at?: string
+          id?: string
+          interest_earned?: number
+          notes?: string | null
+          opening_balance?: number
+          outstanding_deposits?: number
+          outstanding_withdrawals?: number
+          prepared_by: string
+          reconciled_balance?: number
+          reconciliation_date: string
+          reconciliation_status?: string
+          tenant_id: string
+          total_deposits?: number
+          total_withdrawals?: number
+          updated_at?: string
+          variance_amount?: number
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_account_id?: string
+          bank_charges?: number
+          book_balance?: number
+          closing_balance?: number
+          created_at?: string
+          id?: string
+          interest_earned?: number
+          notes?: string | null
+          opening_balance?: number
+          outstanding_deposits?: number
+          outstanding_withdrawals?: number
+          prepared_by?: string
+          reconciled_balance?: number
+          reconciliation_date?: string
+          reconciliation_status?: string
+          tenant_id?: string
+          total_deposits?: number
+          total_withdrawals?: number
+          updated_at?: string
+          variance_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_reconciliation_reports_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_reconciliation_reports_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_transactions: {
         Row: {
           balance_after: number | null
@@ -3794,6 +4020,104 @@ export type Database = {
           },
           {
             foreignKeyName: "fixed_assets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      imported_bank_transactions: {
+        Row: {
+          balance_after: number | null
+          bank_account_id: string
+          bank_reference: string | null
+          check_number: string | null
+          created_at: string
+          credit_amount: number | null
+          debit_amount: number | null
+          description: string
+          id: string
+          import_id: string
+          is_matched: boolean | null
+          match_confidence: number | null
+          match_notes: string | null
+          match_type: string | null
+          matched_at: string | null
+          matched_by: string | null
+          matched_journal_entry_id: string | null
+          reference_number: string | null
+          tenant_id: string
+          transaction_date: string
+        }
+        Insert: {
+          balance_after?: number | null
+          bank_account_id: string
+          bank_reference?: string | null
+          check_number?: string | null
+          created_at?: string
+          credit_amount?: number | null
+          debit_amount?: number | null
+          description: string
+          id?: string
+          import_id: string
+          is_matched?: boolean | null
+          match_confidence?: number | null
+          match_notes?: string | null
+          match_type?: string | null
+          matched_at?: string | null
+          matched_by?: string | null
+          matched_journal_entry_id?: string | null
+          reference_number?: string | null
+          tenant_id: string
+          transaction_date: string
+        }
+        Update: {
+          balance_after?: number | null
+          bank_account_id?: string
+          bank_reference?: string | null
+          check_number?: string | null
+          created_at?: string
+          credit_amount?: number | null
+          debit_amount?: number | null
+          description?: string
+          id?: string
+          import_id?: string
+          is_matched?: boolean | null
+          match_confidence?: number | null
+          match_notes?: string | null
+          match_type?: string | null
+          matched_at?: string | null
+          matched_by?: string | null
+          matched_journal_entry_id?: string | null
+          reference_number?: string | null
+          tenant_id?: string
+          transaction_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imported_bank_transactions_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imported_bank_transactions_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "bank_reconciliation_imports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imported_bank_transactions_matched_journal_entry_id_fkey"
+            columns: ["matched_journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imported_bank_transactions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"

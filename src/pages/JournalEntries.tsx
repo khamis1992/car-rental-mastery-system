@@ -1,8 +1,9 @@
 import React from 'react';
 import { JournalEntriesTab } from '@/components/Accounting/JournalEntriesTab';
 import { AutomatedJournalEntries } from '@/components/Accounting/AutomatedJournalEntries';
+import BankReconciliation from '@/components/BankReconciliation/BankReconciliation';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Plus, Calendar, Filter } from 'lucide-react';
+import { RefreshCw, Plus, Calendar, Filter, CreditCard } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const JournalEntries = () => {
@@ -35,9 +36,10 @@ const JournalEntries = () => {
       </div>
 
       <Tabs defaultValue="entries" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="entries">القيود المحاسبية</TabsTrigger>
           <TabsTrigger value="automated">القيود التلقائية</TabsTrigger>
+          <TabsTrigger value="reconciliation">المطابقة البنكية</TabsTrigger>
         </TabsList>
 
         <TabsContent value="entries" className="space-y-4">
@@ -46,6 +48,10 @@ const JournalEntries = () => {
 
         <TabsContent value="automated" className="space-y-4">
           <AutomatedJournalEntries />
+        </TabsContent>
+
+        <TabsContent value="reconciliation" className="space-y-4">
+          <BankReconciliation />
         </TabsContent>
       </Tabs>
     </div>
