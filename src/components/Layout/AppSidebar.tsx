@@ -75,11 +75,6 @@ const coreBusinessItems = [
 // المالية
 const financialItems = [
   { 
-    title: "لوحة المحاسبة", 
-    url: "/accounting", 
-    icon: BarChart3 
-  },
-  { 
     title: "دليل الحسابات", 
     url: "/chart-of-accounts", 
     icon: Calculator 

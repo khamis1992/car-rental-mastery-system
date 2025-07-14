@@ -24,7 +24,7 @@ import Fleet from "./pages/Fleet";
 import Quotations from "./pages/Quotations";
 import Contracts from "./pages/Contracts";
 import Invoicing from "./pages/Invoicing";
-import Accounting from "./pages/Accounting";
+
 import ChartOfAccounts from "./pages/ChartOfAccounts";
 import JournalEntries from "./pages/JournalEntries";
 import FinancialReports from "./pages/FinancialReports";
@@ -152,13 +152,6 @@ const App = () => (
                       <ProtectedRoute>
                         <Layout>
                           <Invoicing />
-                        </Layout>
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/accounting" element={
-                      <ProtectedRoute>
-                        <Layout>
-                          <Accounting />
                         </Layout>
                       </ProtectedRoute>
                     } />
