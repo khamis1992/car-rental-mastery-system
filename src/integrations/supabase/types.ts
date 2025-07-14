@@ -2216,6 +2216,54 @@ export type Database = {
           },
         ]
       }
+      cost_center_history: {
+        Row: {
+          action_type: string
+          change_date: string | null
+          changed_by: string | null
+          cost_center_id: string
+          id: string
+          new_values: Json | null
+          notes: string | null
+          previous_values: Json | null
+        }
+        Insert: {
+          action_type: string
+          change_date?: string | null
+          changed_by?: string | null
+          cost_center_id: string
+          id?: string
+          new_values?: Json | null
+          notes?: string | null
+          previous_values?: Json | null
+        }
+        Update: {
+          action_type?: string
+          change_date?: string | null
+          changed_by?: string | null
+          cost_center_id?: string
+          id?: string
+          new_values?: Json | null
+          notes?: string | null
+          previous_values?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_center_history_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_center_history_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cost_center_settings: {
         Row: {
           created_at: string
@@ -2266,6 +2314,7 @@ export type Database = {
           budget_amount: number | null
           budget_version: number | null
           business_unit: string | null
+          cost_center_category: string | null
           cost_center_code: string
           cost_center_name: string
           cost_center_name_en: string | null
@@ -2295,6 +2344,7 @@ export type Database = {
           budget_amount?: number | null
           budget_version?: number | null
           business_unit?: string | null
+          cost_center_category?: string | null
           cost_center_code: string
           cost_center_name: string
           cost_center_name_en?: string | null
@@ -2324,6 +2374,7 @@ export type Database = {
           budget_amount?: number | null
           budget_version?: number | null
           business_unit?: string | null
+          cost_center_category?: string | null
           cost_center_code?: string
           cost_center_name?: string
           cost_center_name_en?: string | null
@@ -8578,6 +8629,10 @@ export type Database = {
       audit_orphaned_entries: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      auto_distribute_costs: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       calculate_advanced_kpi: {
         Args: { kpi_code_param: string }

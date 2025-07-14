@@ -7,6 +7,7 @@ export interface CostCenter {
   cost_center_name: string;
   description?: string;
   cost_center_type: string;
+  cost_center_category?: string;
   manager_id?: string;
   budget_amount: number;
   actual_spent: number;
@@ -58,6 +59,7 @@ export interface CreateCostCenterData {
   cost_center_name: string;
   description?: string;
   cost_center_type: 'operational' | 'administrative' | 'revenue' | 'support';
+  cost_center_category?: string;
   manager_id?: string;
   budget_amount?: number;
   department_id?: string;

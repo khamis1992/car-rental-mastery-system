@@ -65,6 +65,38 @@ const CostCenterList = ({ costCenters, onRefresh, isLoading }: CostCenterListPro
     return colors[type] || 'gray';
   };
 
+  const getCategoryLabel = (category: string) => {
+    const categories: Record<string, string> = {
+      management: 'إدارة عامة',
+      operations: 'عمليات',
+      sales: 'مبيعات',
+      hr: 'موارد بشرية',
+      fleet: 'أسطول',
+      maintenance: 'صيانة',
+      insurance: 'تأمين',
+      fuel: 'وقود',
+      customer_service: 'خدمة عملاء',
+      marketing: 'تسويق',
+      contracts: 'عقود',
+      accounting: 'محاسبة',
+      audit: 'مراجعة',
+      treasury: 'خزينة',
+      reporting: 'تقارير',
+      it: 'تقنية معلومات',
+      it_support: 'دعم فني',
+      development: 'تطوير',
+      security: 'أمن',
+      daily_ops: 'عمليات يومية',
+      warehouse: 'مخازن',
+      delivery: 'توصيل',
+      quality: 'جودة',
+      general: 'خدمات عامة',
+      facilities: 'مرافق',
+      legal: 'قانونية'
+    };
+    return categories[category] || category;
+  };
+
   const calculateUtilization = (actual: number, budget: number) => {
     if (budget === 0) return 0;
     return Math.min((actual / budget) * 100, 100);
@@ -183,9 +215,16 @@ const CostCenterList = ({ costCenters, onRefresh, isLoading }: CostCenterListPro
                         </div>
                       </TableCell>
                       <TableCell>
+                      <div className="space-y-1">
                         <Badge variant="secondary" className={`bg-${getCostCenterTypeColor(costCenter.cost_center_type)}-100`}>
                           {getCostCenterTypeLabel(costCenter.cost_center_type)}
                         </Badge>
+                        {costCenter.cost_center_category && (
+                          <div className="text-xs text-muted-foreground">
+                            {getCategoryLabel(costCenter.cost_center_category)}
+                          </div>
+                        )}
+                      </div>
                       </TableCell>
                       <TableCell>
                         <div className="text-right">

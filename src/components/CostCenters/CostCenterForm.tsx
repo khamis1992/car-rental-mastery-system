@@ -22,6 +22,7 @@ const CostCenterForm = ({ costCenter, onClose, onSuccess }: CostCenterFormProps)
     cost_center_name: '',
     description: '',
     cost_center_type: 'operational',
+    cost_center_category: '',
     manager_id: '',
     budget_amount: 0,
     department_id: '',
@@ -74,6 +75,7 @@ const CostCenterForm = ({ costCenter, onClose, onSuccess }: CostCenterFormProps)
         cost_center_name: costCenter.cost_center_name,
         description: costCenter.description || '',
         cost_center_type: costCenter.cost_center_type as 'operational' | 'administrative' | 'revenue' | 'support',
+        cost_center_category: costCenter.cost_center_category || '',
         manager_id: costCenter.manager_id || '',
         budget_amount: costCenter.budget_amount,
         department_id: costCenter.department_id || '',
@@ -146,24 +148,64 @@ const CostCenterForm = ({ costCenter, onClose, onSuccess }: CostCenterFormProps)
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label className="rtl-label">نوع مركز التكلفة</Label>
-              <Select 
-                value={formData.cost_center_type} 
-                onValueChange={(value) => handleInputChange('cost_center_type', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر النوع" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="operational">تشغيلي</SelectItem>
-                  <SelectItem value="administrative">إداري</SelectItem>
-                  <SelectItem value="revenue">إيرادات</SelectItem>
-                  <SelectItem value="support">دعم</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select 
+              value={formData.cost_center_type} 
+              onValueChange={(value) => handleInputChange('cost_center_type', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="اختر النوع" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="operational">تشغيلي</SelectItem>
+                <SelectItem value="administrative">إداري</SelectItem>
+                <SelectItem value="revenue">إيرادات</SelectItem>
+                <SelectItem value="support">دعم</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="rtl-label">فئة مركز التكلفة</Label>
+            <Select 
+              value={formData.cost_center_category || ''} 
+              onValueChange={(value) => handleInputChange('cost_center_category', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="اختر الفئة" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="management">إدارة عامة</SelectItem>
+                <SelectItem value="operations">عمليات</SelectItem>
+                <SelectItem value="sales">مبيعات</SelectItem>
+                <SelectItem value="hr">موارد بشرية</SelectItem>
+                <SelectItem value="fleet">أسطول</SelectItem>
+                <SelectItem value="maintenance">صيانة</SelectItem>
+                <SelectItem value="insurance">تأمين</SelectItem>
+                <SelectItem value="fuel">وقود</SelectItem>
+                <SelectItem value="customer_service">خدمة عملاء</SelectItem>
+                <SelectItem value="marketing">تسويق</SelectItem>
+                <SelectItem value="contracts">عقود</SelectItem>
+                <SelectItem value="accounting">محاسبة</SelectItem>
+                <SelectItem value="audit">مراجعة</SelectItem>
+                <SelectItem value="treasury">خزينة</SelectItem>
+                <SelectItem value="reporting">تقارير</SelectItem>
+                <SelectItem value="it">تقنية معلومات</SelectItem>
+                <SelectItem value="it_support">دعم فني</SelectItem>
+                <SelectItem value="development">تطوير</SelectItem>
+                <SelectItem value="security">أمن</SelectItem>
+                <SelectItem value="daily_ops">عمليات يومية</SelectItem>
+                <SelectItem value="warehouse">مخازن</SelectItem>
+                <SelectItem value="delivery">توصيل</SelectItem>
+                <SelectItem value="quality">جودة</SelectItem>
+                <SelectItem value="general">خدمات عامة</SelectItem>
+                <SelectItem value="facilities">مرافق</SelectItem>
+                <SelectItem value="legal">قانونية</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
             <div className="space-y-2">
               <Label className="rtl-label">الميزانية المخصصة</Label>
