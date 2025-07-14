@@ -25,6 +25,12 @@ import Quotations from "./pages/Quotations";
 import Contracts from "./pages/Contracts";
 import Invoicing from "./pages/Invoicing";
 import Accounting from "./pages/Accounting";
+import ChartOfAccounts from "./pages/ChartOfAccounts";
+import JournalEntries from "./pages/JournalEntries";
+import FinancialReports from "./pages/FinancialReports";
+import BudgetManagement from "./pages/BudgetManagement";
+import AccountingAutomation from "./pages/AccountingAutomation";
+import AccountingValidation from "./pages/AccountingValidation";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 
@@ -153,6 +159,48 @@ const App = () => (
                       <ProtectedRoute>
                         <Layout>
                           <Accounting />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/chart-of-accounts" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <ChartOfAccounts />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/journal-entries" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <JournalEntries />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/financial-reports" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <FinancialReports />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/budget-management" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <BudgetManagement />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/accounting-automation" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <AccountingAutomation />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/accounting-validation" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <AccountingValidation />
                         </Layout>
                       </ProtectedRoute>
                     } />

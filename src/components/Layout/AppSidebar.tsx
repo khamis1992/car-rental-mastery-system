@@ -20,7 +20,9 @@ import {
   ChevronRight,
   Crown,
   CreditCard,
-  Activity
+  Activity,
+  Zap,
+  Shield
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -73,9 +75,39 @@ const coreBusinessItems = [
 // المالية
 const financialItems = [
   { 
-    title: "المحاسبة", 
+    title: "لوحة المحاسبة", 
     url: "/accounting", 
+    icon: BarChart3 
+  },
+  { 
+    title: "دليل الحسابات", 
+    url: "/chart-of-accounts", 
     icon: Calculator 
+  },
+  { 
+    title: "القيود المحاسبية", 
+    url: "/journal-entries", 
+    icon: FileText 
+  },
+  { 
+    title: "التقارير المالية", 
+    url: "/financial-reports", 
+    icon: BarChart3 
+  },
+  { 
+    title: "إدارة الميزانية", 
+    url: "/budget-management", 
+    icon: DollarSign 
+  },
+  { 
+    title: "أتمتة المحاسبة", 
+    url: "/accounting-automation", 
+    icon: Zap 
+  },
+  { 
+    title: "التحقق والمراجعة", 
+    url: "/accounting-validation", 
+    icon: Shield 
   },
   { 
     title: "مراكز التكلفة", 

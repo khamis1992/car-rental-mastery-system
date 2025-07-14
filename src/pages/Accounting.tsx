@@ -1,23 +1,13 @@
 import React from 'react';
-import { TrendingUp, DollarSign, FileText, Calendar, CreditCard, Receipt, RefreshCw, Calculator, Download, AlertTriangle, Bell, Info, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
-import { JournalEntriesTab } from '@/components/Accounting/JournalEntriesTab';
-import { FinancialReportsTab } from '@/components/Accounting/FinancialReportsTab';
-import { AccountingBackfillTab } from '@/components/Accounting/AccountingBackfillTab';
-import { AccountingDataRefresh } from '@/components/Accounting/AccountingDataRefresh';
-import { AccountingMaintenanceTools } from '@/components/Accounting/AccountingMaintenanceTools';
-import { ChartOfAccountsSetup } from '@/components/Accounting/ChartOfAccountsSetup';
+import { TrendingUp, DollarSign, FileText, Calendar, CreditCard, Receipt, RefreshCw, Calculator, Download, AlertTriangle, Bell, Info, AlertCircle, CheckCircle2, BarChart3, Zap, Shield, Building2 } from 'lucide-react';
 import { EnhancedAccountingDashboard } from '@/components/Accounting/EnhancedAccountingDashboard';
-import { AutomatedJournalEntries } from '@/components/Accounting/AutomatedJournalEntries';
-import { AccountingValidation } from '@/components/Accounting/AccountingValidation';
-import { EnhancedBudgetManagement } from '@/components/Accounting/EnhancedBudgetManagement';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrencyKWD } from '@/lib/currency';
 import { useAccountingData } from '@/hooks/useAccountingData';
 import { cn } from '@/lib/utils';
+import { NavLink } from 'react-router-dom';
 
 const Accounting = () => {
   const { financialStats, recentTransactions, loading, error, refetch } = useAccountingData();
@@ -164,12 +154,57 @@ const Accounting = () => {
     );
   }
 
+  const quickAccessItems = [
+    {
+      title: "دليل الحسابات",
+      description: "إدارة وتنظيم الحسابات المحاسبية",
+      icon: <Calculator className="w-6 h-6 text-blue-500" />,
+      url: "/chart-of-accounts",
+      color: "bg-blue-50 border-blue-200"
+    },
+    {
+      title: "القيود المحاسبية", 
+      description: "تسجيل ومراجعة القيود اليومية",
+      icon: <FileText className="w-6 h-6 text-green-500" />,
+      url: "/journal-entries",
+      color: "bg-green-50 border-green-200"
+    },
+    {
+      title: "التقارير المالية",
+      description: "عرض التقارير والبيانات المالية",
+      icon: <BarChart3 className="w-6 h-6 text-purple-500" />,
+      url: "/financial-reports",
+      color: "bg-purple-50 border-purple-200"
+    },
+    {
+      title: "إدارة الميزانية",
+      description: "تخطيط ومراقبة الميزانيات",
+      icon: <DollarSign className="w-6 h-6 text-orange-500" />,
+      url: "/budget-management",
+      color: "bg-orange-50 border-orange-200"
+    },
+    {
+      title: "أتمتة المحاسبة",
+      description: "أدوات الأتمتة والصيانة",
+      icon: <Zap className="w-6 h-6 text-yellow-500" />,
+      url: "/accounting-automation",
+      color: "bg-yellow-50 border-yellow-200"
+    },
+    {
+      title: "التحقق والمراجعة",
+      description: "مراجعة وتدقيق القيود المحاسبية",
+      icon: <Shield className="w-6 h-6 text-red-500" />,
+      url: "/accounting-validation",
+      color: "bg-red-50 border-red-200"
+    }
+  ];
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">المحاسبة والتقارير</h1>
-          <p className="text-muted-foreground">إدارة الشؤون المالية والتقارير المحاسبية</p>
+          <h1 className="text-3xl font-bold text-foreground">لوحة تحكم المحاسبة</h1>
+          <p className="text-muted-foreground">نظرة شاملة على النشاط المحاسبي والمالي</p>
         </div>
         
         <div className="flex items-center gap-2">
@@ -214,88 +249,81 @@ const Accounting = () => {
       {/* Smart Alerts */}
       <SmartAlerts />
 
-      <Tabs defaultValue="dashboard" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="validation">التحقق والمراجعة</TabsTrigger>
-          <TabsTrigger value="budget">إدارة الميزانية</TabsTrigger>
-          <TabsTrigger value="automation">الأتمتة</TabsTrigger>
-          <TabsTrigger value="dashboard">لوحة التحكم</TabsTrigger>
-          <TabsTrigger value="reports">التقارير</TabsTrigger>
-          <TabsTrigger value="journal">القيود</TabsTrigger>
-          <TabsTrigger value="accounts">الحسابات</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="dashboard" className="space-y-4">
-          <EnhancedAccountingDashboard />
-        </TabsContent>
-
-
-        <TabsContent value="accounts" className="space-y-4">
-          <ChartOfAccountsTab />
-        </TabsContent>
-
-        <TabsContent value="journal" className="space-y-4">
-          <JournalEntriesTab />
-        </TabsContent>
-
-        <TabsContent value="transactions" className="space-y-4">
-          <Card className="card-elegant">
-            <CardHeader>
-              <CardTitle className="text-right">المعاملات الأخيرة</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentTransactions.length > 0 ? (
-                  recentTransactions.map((transaction) => (
-                    <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="text-left">
-                         <p className={`font-bold text-lg ${
-                           transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
-                         }`}>
-                           {transaction.amount > 0 ? '+' : ''}{formatCurrencyKWD(Math.abs(transaction.amount))}
-                         </p>
-                        <Badge variant={transaction.status === 'مكتمل' ? 'default' : 'secondary'}>
-                          {transaction.status}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-3 text-right">
-                        <div>
-                          <p className="font-medium">{transaction.description}</p>
-                          <p className="text-sm text-muted-foreground">{transaction.id} • {transaction.date}</p>
-                        </div>
-                        <div className={`w-3 h-3 rounded-full ${
-                          transaction.type === 'إيراد' ? 'bg-red-500' : 'bg-red-500'
-                        }`} />
+      {/* Quick Access to Accounting Modules */}
+      <Card className="card-elegant">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="w-5 h-5" />
+            الوصول السريع للأقسام المحاسبية
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {quickAccessItems.map((item, index) => (
+              <NavLink 
+                key={index} 
+                to={item.url}
+                className="block transition-transform hover:scale-105"
+              >
+                <Card className={`${item.color} hover:shadow-md transition-shadow cursor-pointer`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      {item.icon}
+                      <div>
+                        <h3 className="font-semibold text-lg mb-1">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground">{item.description}</p>
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    لا توجد معاملات مالية
+                  </CardContent>
+                </Card>
+              </NavLink>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Enhanced Dashboard */}
+      <EnhancedAccountingDashboard />
+
+      {/* Recent Transactions */}
+      <Card className="card-elegant">
+        <CardHeader>
+          <CardTitle className="text-right">المعاملات الأخيرة</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {recentTransactions.length > 0 ? (
+              recentTransactions.map((transaction) => (
+                <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="text-left">
+                     <p className={`font-bold text-lg ${
+                       transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                     }`}>
+                       {transaction.amount > 0 ? '+' : ''}{formatCurrencyKWD(Math.abs(transaction.amount))}
+                     </p>
+                    <Badge variant={transaction.status === 'مكتمل' ? 'default' : 'secondary'}>
+                      {transaction.status}
+                    </Badge>
                   </div>
-                )}
+                  <div className="flex items-center gap-3 text-right">
+                    <div>
+                      <p className="font-medium">{transaction.description}</p>
+                      <p className="text-sm text-muted-foreground">{transaction.id} • {transaction.date}</p>
+                    </div>
+                    <div className={`w-3 h-3 rounded-full ${
+                      transaction.type === 'إيراد' ? 'bg-green-500' : 'bg-red-500'
+                    }`} />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                لا توجد معاملات مالية
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="automation" className="space-y-4">
-          <AutomatedJournalEntries />
-        </TabsContent>
-
-        <TabsContent value="budget" className="space-y-4">
-          <EnhancedBudgetManagement />
-        </TabsContent>
-
-        <TabsContent value="validation" className="space-y-4">
-          <AccountingValidation />
-        </TabsContent>
-
-        <TabsContent value="reports" className="space-y-4">
-          <FinancialReportsTab />
-        </TabsContent>
-
-      </Tabs>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
