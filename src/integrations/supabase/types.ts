@@ -2866,6 +2866,69 @@ export type Database = {
           },
         ]
       }
+      customer_violations: {
+        Row: {
+          amount: number | null
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          description: string | null
+          id: string
+          notes: string | null
+          severity: string
+          status: string
+          tenant_id: string
+          updated_at: string
+          violation_date: string
+          violation_type: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          description?: string | null
+          id?: string
+          notes?: string | null
+          severity?: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          violation_date: string
+          violation_type: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          description?: string | null
+          id?: string
+          notes?: string | null
+          severity?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          violation_date?: string
+          violation_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_violations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_violations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           address: string | null
@@ -3295,6 +3358,72 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_training_progress: {
+        Row: {
+          attempts_count: number
+          completed_at: string | null
+          created_at: string
+          employee_id: string
+          id: string
+          last_accessed_at: string | null
+          material_id: string
+          notes: string | null
+          progress_percentage: number
+          score: number | null
+          started_at: string | null
+          status: string
+          time_spent_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          attempts_count?: number
+          completed_at?: string | null
+          created_at?: string
+          employee_id: string
+          id?: string
+          last_accessed_at?: string | null
+          material_id: string
+          notes?: string | null
+          progress_percentage?: number
+          score?: number | null
+          started_at?: string | null
+          status?: string
+          time_spent_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          attempts_count?: number
+          completed_at?: string | null
+          created_at?: string
+          employee_id?: string
+          id?: string
+          last_accessed_at?: string | null
+          material_id?: string
+          notes?: string | null
+          progress_percentage?: number
+          score?: number | null
+          started_at?: string | null
+          status?: string
+          time_spent_minutes?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_training_progress_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_training_progress_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "training_materials"
             referencedColumns: ["id"]
           },
         ]
@@ -5684,6 +5813,68 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_templates: {
+        Row: {
+          base_price: number
+          created_at: string
+          created_by: string | null
+          daily_rate: number
+          discount_rules: Json
+          id: string
+          is_active: boolean
+          monthly_rate: number | null
+          seasonal_multiplier: number
+          surge_pricing_rules: Json
+          template_name: string
+          tenant_id: string
+          updated_at: string
+          vehicle_category: string
+          weekly_rate: number | null
+        }
+        Insert: {
+          base_price: number
+          created_at?: string
+          created_by?: string | null
+          daily_rate: number
+          discount_rules?: Json
+          id?: string
+          is_active?: boolean
+          monthly_rate?: number | null
+          seasonal_multiplier?: number
+          surge_pricing_rules?: Json
+          template_name: string
+          tenant_id: string
+          updated_at?: string
+          vehicle_category: string
+          weekly_rate?: number | null
+        }
+        Update: {
+          base_price?: number
+          created_at?: string
+          created_by?: string | null
+          daily_rate?: number
+          discount_rules?: Json
+          id?: string
+          is_active?: boolean
+          monthly_rate?: number | null
+          seasonal_multiplier?: number
+          surge_pricing_rules?: Json
+          template_name?: string
+          tenant_id?: string
+          updated_at?: string
+          vehicle_category?: string
+          weekly_rate?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           branch_id: string | null
@@ -7404,6 +7595,77 @@ export type Database = {
             columns: ["model_id"]
             isOneToOne: false
             referencedRelation: "ml_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_materials: {
+        Row: {
+          category: string
+          content_data: Json | null
+          content_type: string
+          content_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          difficulty_level: string
+          duration_minutes: number | null
+          id: string
+          is_active: boolean
+          is_mandatory: boolean
+          learning_objectives: string[] | null
+          order_index: number
+          prerequisites: string[] | null
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content_data?: Json | null
+          content_type: string
+          content_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          difficulty_level: string
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean
+          is_mandatory?: boolean
+          learning_objectives?: string[] | null
+          order_index?: number
+          prerequisites?: string[] | null
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content_data?: Json | null
+          content_type?: string
+          content_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          difficulty_level?: string
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean
+          is_mandatory?: boolean
+          learning_objectives?: string[] | null
+          order_index?: number
+          prerequisites?: string[] | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_materials_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]

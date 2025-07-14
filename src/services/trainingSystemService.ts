@@ -90,7 +90,7 @@ export const trainingSystemService = {
     try {
       const { data, error } = await supabase
         .from('employee_training_progress')
-        .upsert([{
+        .upsert({
           employee_id: employeeId,
           material_id: materialId,
           status: 'in_progress',
@@ -98,7 +98,7 @@ export const trainingSystemService = {
           started_at: new Date().toISOString(),
           last_accessed_at: new Date().toISOString(),
           attempts_count: 1
-        }])
+        })
         .select()
         .single();
 
@@ -208,7 +208,10 @@ export const trainingSystemService = {
     try {
       const { data, error } = await supabase
         .from('training_materials')
-        .insert([materialData])
+        .insert([{
+          ...materialData,
+          tenant_id: 'current' // سيتم ضبطه تلقائياً بواسطة RLS
+        }])
         .select()
         .single();
 

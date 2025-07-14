@@ -48,20 +48,21 @@ export const violationAlertsService = {
     }
   },
 
-  // إنشاء تنبيه انتهاك جديد - استخدام additional_charges مؤقتاً
+  // إنشاء تنبيه انتهاك جديد
   async createViolationAlert(violationData: Omit<CustomerViolation, 'id' | 'created_at'>) {
     try {
       const { data, error } = await supabase
-        .from('additional_charges')
+        .from('customer_violations')
         .insert([{
           customer_id: violationData.customer_id,
-          charge_type: violationData.violation_type,
-          charge_date: violationData.violation_date,
+          violation_type: violationData.violation_type,
+          violation_date: violationData.violation_date,
           description: violationData.description || '',
           amount: violationData.amount || 0,
-          status: 'pending',
+          status: violationData.status || 'active',
+          severity: violationData.severity || 'medium',
           notes: violationData.notes,
-          contract_id: '' // مطلوب ولكن يمكن أن يكون فارغ
+          tenant_id: 'current' // سيتم ضبطه تلقائياً بواسطة RLS
         }])
         .select()
         .single();
@@ -110,7 +111,7 @@ export const vehicleAvailabilityService = {
 
       if (contractsError) throw contractsError;
 
-      const isAvailable = !contracts?.length && vehicle.status === 'active';
+      const isAvailable = !contracts?.length && vehicle.status === 'available';
 
       return {
         data: {
@@ -134,7 +135,7 @@ export const vehicleAvailabilityService = {
       const { data, error } = await supabase
         .from('vehicles')
         .update({
-          status: availabilityData.is_available ? 'active' : 'maintenance'
+          status: availabilityData.is_available ? 'available' : 'maintenance'
         })
         .eq('id', vehicleId)
         .select()
