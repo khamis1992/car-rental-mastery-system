@@ -28,6 +28,7 @@ import Invoicing from "./pages/Invoicing";
 import ChartOfAccounts from "./pages/ChartOfAccounts";
 import JournalEntries from "./pages/JournalEntries";
 import FinancialReports from "./pages/FinancialReports";
+import FixedAssets from "./pages/FixedAssets";
 import BudgetManagement from "./pages/BudgetManagement";
 import AccountingAutomation from "./pages/AccountingAutomation";
 import AccountingValidation from "./pages/AccountingValidation";
@@ -264,6 +265,13 @@ const App = () => (
                        <ProtectedRoute>
                          <Layout>
                            <CostCenters />
+                         </Layout>
+                       </ProtectedRoute>
+                     } />
+                     <Route path="/fixed-assets" element={
+                       <ProtectedRoute>
+                         <Layout>
+                           <FixedAssets />
                          </Layout>
                        </ProtectedRoute>
                      } />
