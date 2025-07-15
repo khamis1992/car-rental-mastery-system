@@ -2209,6 +2209,80 @@ export type Database = {
           },
         ]
       }
+      cost_center_budget_alerts: {
+        Row: {
+          alert_message: string
+          alert_type: string
+          budget_amount: number
+          cost_center_id: string
+          created_at: string | null
+          current_spent: number
+          id: string
+          is_read: boolean | null
+          read_at: string | null
+          read_by: string | null
+          tenant_id: string
+          threshold_percentage: number
+        }
+        Insert: {
+          alert_message: string
+          alert_type: string
+          budget_amount: number
+          cost_center_id: string
+          created_at?: string | null
+          current_spent: number
+          id?: string
+          is_read?: boolean | null
+          read_at?: string | null
+          read_by?: string | null
+          tenant_id: string
+          threshold_percentage: number
+        }
+        Update: {
+          alert_message?: string
+          alert_type?: string
+          budget_amount?: number
+          cost_center_id?: string
+          created_at?: string | null
+          current_spent?: number
+          id?: string
+          is_read?: boolean | null
+          read_at?: string | null
+          read_by?: string | null
+          tenant_id?: string
+          threshold_percentage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_center_budget_alerts_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_center_budget_alerts_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_center_budget_alerts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_cost_center_budget_alerts_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cost_center_budgets: {
         Row: {
           account_id: string | null
@@ -5266,6 +5340,139 @@ export type Database = {
             columns: ["journal_entry_id"]
             isOneToOne: false
             referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entry_attachments: {
+        Row: {
+          description: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          journal_entry_id: string
+          mime_type: string | null
+          tenant_id: string
+          uploaded_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          description?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          journal_entry_id: string
+          mime_type?: string | null
+          tenant_id: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          journal_entry_id?: string
+          mime_type?: string | null
+          tenant_id?: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_journal_entry_attachments_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_attachments_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_attachments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entry_cost_center_allocations: {
+        Row: {
+          allocation_amount: number | null
+          allocation_percentage: number | null
+          cost_center_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          journal_entry_line_id: string
+          notes: string | null
+          tenant_id: string
+        }
+        Insert: {
+          allocation_amount?: number | null
+          allocation_percentage?: number | null
+          cost_center_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          journal_entry_line_id: string
+          notes?: string | null
+          tenant_id: string
+        }
+        Update: {
+          allocation_amount?: number | null
+          allocation_percentage?: number | null
+          cost_center_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          journal_entry_line_id?: string
+          notes?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_je_cost_center_allocations_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_cost_center_allocation_journal_entry_line_id_fkey"
+            columns: ["journal_entry_line_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entry_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_cost_center_allocations_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_cost_center_allocations_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_cost_center_allocations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]

@@ -1,11 +1,12 @@
 import React from 'react';
-import { JournalEntriesTab } from '@/components/Accounting/JournalEntriesTab';
+import { EnhancedJournalEntriesTab } from '@/components/Accounting/EnhancedJournalEntriesTab';
 import { AutomatedJournalEntries } from '@/components/Accounting/AutomatedJournalEntries';
 import { ExpenseVouchersTab } from '@/components/Accounting/ExpenseVouchersTab';
 import { ChecksTab } from '@/components/Accounting/ChecksTab';
 import BankReconciliation from '@/components/BankReconciliation/BankReconciliation';
+import { CostCenterBudgetAlerts } from '@/components/Accounting/CostCenterBudgetAlerts';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Plus, Calendar, Filter, CreditCard } from 'lucide-react';
+import { RefreshCw, Plus, Calendar, Filter, CreditCard, AlertTriangle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const JournalEntries = () => {
@@ -37,9 +38,14 @@ const JournalEntries = () => {
         </div>
       </div>
 
+      {/* تنبيهات مراكز التكلفة */}
+      <div className="mb-4">
+        <CostCenterBudgetAlerts showOnlyUnread={true} maxAlerts={5} />
+      </div>
+
       <Tabs defaultValue="entries" className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="entries">القيود المحاسبية</TabsTrigger>
+          <TabsTrigger value="entries">القيود المحاسبية المحسّنة</TabsTrigger>
           <TabsTrigger value="expenses">سندات المصروفات</TabsTrigger>
           <TabsTrigger value="checks">إدارة الشيكات</TabsTrigger>
           <TabsTrigger value="automated">القيود التلقائية</TabsTrigger>
@@ -47,7 +53,7 @@ const JournalEntries = () => {
         </TabsList>
 
         <TabsContent value="entries" className="space-y-4">
-          <JournalEntriesTab />
+          <EnhancedJournalEntriesTab />
         </TabsContent>
 
         <TabsContent value="expenses" className="space-y-4">
