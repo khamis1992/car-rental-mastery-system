@@ -10532,6 +10532,10 @@ export type Database = {
         Args: { target_year: number; target_month: number }
         Returns: string
       }
+      calculate_monthly_vehicle_depreciation: {
+        Args: { target_month?: string }
+        Returns: number
+      }
       check_budget_overruns: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -10654,6 +10658,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      create_depreciation_journal_entries: {
+        Args: { target_month?: string }
+        Returns: number
+      }
       create_final_chart_of_accounts: {
         Args: { tenant_id_param: string }
         Returns: number
@@ -10717,6 +10725,10 @@ export type Database = {
       }
       create_vehicle_asset_with_hierarchy: {
         Args: { vehicle_id: string; vehicle_data: Json }
+        Returns: string
+      }
+      create_vehicle_cost_journal_entry: {
+        Args: { vehicle_cost_id: string }
         Returns: string
       }
       create_violation_accounting_entry: {
