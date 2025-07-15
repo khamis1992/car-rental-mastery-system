@@ -79,12 +79,15 @@ export function AssetFormDialog({ asset, trigger }: AssetFormDialogProps) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('employees')
-        .select('id, employee_name')
-        .eq('is_active', true)
-        .order('full_name');
+        .select('id, first_name, last_name')
+        .eq('status', 'active')
+        .order('first_name');
       
       if (error) throw error;
-      return data;
+      return data?.map(emp => ({
+        ...emp,
+        full_name: `${emp.first_name} ${emp.last_name}`
+      }));
     }
   });
 
@@ -97,7 +100,8 @@ export function AssetFormDialog({ asset, trigger }: AssetFormDialogProps) {
         insurance_expiry_date: data.insurance_expiry_date ? format(data.insurance_expiry_date, 'yyyy-MM-dd') : null,
         status: 'active',
         book_value: data.purchase_cost - (data.purchase_cost * (data.depreciation_rate / 100)),
-        accumulated_depreciation: 0
+        accumulated_depreciation: 0,
+        tenant_id: 'default-tenant'
       };
 
       if (asset?.id) {

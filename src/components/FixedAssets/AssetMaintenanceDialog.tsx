@@ -60,12 +60,15 @@ export function AssetMaintenanceDialog({ assetId, assetName, trigger }: AssetMai
     queryFn: async () => {
       const { data, error } = await supabase
         .from('employees')
-        .select('id, employee_name')
-        .eq('is_active', true)
-        .order('full_name');
+        .select('id, first_name, last_name')
+        .eq('status', 'active')
+        .order('first_name');
       
       if (error) throw error;
-      return data;
+      return data?.map(emp => ({
+        ...emp,
+        full_name: `${emp.first_name} ${emp.last_name}`
+      }));
     }
   });
 
@@ -77,13 +80,19 @@ export function AssetMaintenanceDialog({ assetId, assetName, trigger }: AssetMai
         .from('asset_maintenance')
         .select(`
           *,
-          performed_by_employee:employees!asset_maintenance_performed_by_fkey(full_name)
+          performed_by_employee:employees!asset_maintenance_performed_by_fkey(first_name, last_name)
         `)
         .eq('asset_id', assetId)
         .order('scheduled_date', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data?.map(maintenance => ({
+        ...maintenance,
+        performed_by_employee: maintenance.performed_by_employee ? {
+          ...maintenance.performed_by_employee,
+          full_name: `${maintenance.performed_by_employee.first_name} ${maintenance.performed_by_employee.last_name}`
+        } : null
+      }));
     }
   });
 
@@ -92,7 +101,8 @@ export function AssetMaintenanceDialog({ assetId, assetName, trigger }: AssetMai
       const maintenanceData = {
         ...data,
         scheduled_date: format(data.scheduled_date, 'yyyy-MM-dd'),
-        status: 'scheduled'
+        status: 'scheduled',
+        tenant_id: 'default-tenant'
       };
 
       const { data: newMaintenance, error } = await supabase

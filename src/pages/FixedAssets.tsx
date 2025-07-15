@@ -66,17 +66,18 @@ const FixedAssets = () => {
         .from('fixed_assets')
         .select(`
           *,
-          assigned_employee:employees!assigned_employee_id(employee_name),
-          asset_assignments!inner(
-            assignment_status,
-            assigned_employee:employees!employee_id(full_name)
-          )
+          assigned_employee:employees!assigned_employee_id(first_name, last_name)
         `)
         .eq('status', 'active')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as FixedAsset[];
+      return data?.map(asset => ({
+        ...asset,
+        assigned_employee: asset.assigned_employee ? {
+          full_name: `${asset.assigned_employee.first_name} ${asset.assigned_employee.last_name}`
+        } : null
+      })) as FixedAsset[];
     }
   });
 
