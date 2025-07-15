@@ -29,6 +29,7 @@ import ChartOfAccounts from "./pages/ChartOfAccounts";
 import JournalEntries from "./pages/JournalEntries";
 import FinancialReports from "./pages/FinancialReports";
 import FixedAssets from "./pages/FixedAssets";
+import ChecksPage from "./pages/ChecksPage";
 import BudgetManagement from "./pages/BudgetManagement";
 import AccountingAutomation from "./pages/AccountingAutomation";
 import AccountingValidation from "./pages/AccountingValidation";
@@ -280,8 +281,15 @@ const App = () => (
                            <FixedAssets />
                          </Layout>
                        </ProtectedRoute>
-                     } />
-                     <Route path="/tenants" element={
+                      } />
+                      <Route path="/checks" element={
+                        <ProtectedRoute>
+                          <Layout>
+                            <ChecksPage />
+                          </Layout>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/tenants" element={
                         <ProtectedRoute requiredRole="super_admin">
                           <Layout>
                             <Tenants />

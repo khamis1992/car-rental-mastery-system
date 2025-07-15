@@ -1564,15 +1564,86 @@ export type Database = {
           },
         ]
       }
+      checkbooks: {
+        Row: {
+          bank_account_id: string
+          checkbook_number: string
+          created_at: string | null
+          created_by: string | null
+          end_check_number: number
+          id: string
+          issue_date: string
+          notes: string | null
+          remaining_checks: number | null
+          start_check_number: number
+          status: string
+          tenant_id: string
+          total_checks: number
+          updated_at: string | null
+          used_checks: number | null
+        }
+        Insert: {
+          bank_account_id: string
+          checkbook_number: string
+          created_at?: string | null
+          created_by?: string | null
+          end_check_number: number
+          id?: string
+          issue_date: string
+          notes?: string | null
+          remaining_checks?: number | null
+          start_check_number: number
+          status?: string
+          tenant_id: string
+          total_checks: number
+          updated_at?: string | null
+          used_checks?: number | null
+        }
+        Update: {
+          bank_account_id?: string
+          checkbook_number?: string
+          created_at?: string | null
+          created_by?: string | null
+          end_check_number?: number
+          id?: string
+          issue_date?: string
+          notes?: string | null
+          remaining_checks?: number | null
+          start_check_number?: number
+          status?: string
+          tenant_id?: string
+          total_checks?: number
+          updated_at?: string | null
+          used_checks?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_checkbooks_bank_account"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_checkbooks_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       checks: {
         Row: {
           amount: number
           bank_account_id: string
           bounced_date: string | null
           bounced_reason: string | null
+          check_category: string | null
           check_date: string
           check_number: string
           check_type: string
+          checkbook_id: string | null
           cleared_date: string | null
           created_at: string
           created_by: string | null
@@ -1594,9 +1665,11 @@ export type Database = {
           bank_account_id: string
           bounced_date?: string | null
           bounced_reason?: string | null
+          check_category?: string | null
           check_date: string
           check_number: string
           check_type?: string
+          checkbook_id?: string | null
           cleared_date?: string | null
           created_at?: string
           created_by?: string | null
@@ -1618,9 +1691,11 @@ export type Database = {
           bank_account_id?: string
           bounced_date?: string | null
           bounced_reason?: string | null
+          check_category?: string | null
           check_date?: string
           check_number?: string
           check_type?: string
+          checkbook_id?: string | null
           cleared_date?: string | null
           created_at?: string
           created_by?: string | null
@@ -1643,6 +1718,13 @@ export type Database = {
             columns: ["bank_account_id"]
             isOneToOne: false
             referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_checks_checkbook"
+            columns: ["checkbook_id"]
+            isOneToOne: false
+            referencedRelation: "checkbooks"
             referencedColumns: ["id"]
           },
           {
@@ -6897,6 +6979,106 @@ export type Database = {
           },
         ]
       }
+      received_checks: {
+        Row: {
+          amount: number
+          bank_name: string
+          bounce_reason: string | null
+          bounced_at: string | null
+          check_date: string
+          check_number: string
+          cleared_at: string | null
+          created_at: string | null
+          created_by: string | null
+          deposit_bank_account_id: string | null
+          deposited_at: string | null
+          drawer_account: string | null
+          drawer_name: string
+          due_date: string | null
+          id: string
+          journal_entry_id: string | null
+          memo: string | null
+          received_date: string
+          reference_id: string | null
+          reference_type: string | null
+          status: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          bank_name: string
+          bounce_reason?: string | null
+          bounced_at?: string | null
+          check_date: string
+          check_number: string
+          cleared_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deposit_bank_account_id?: string | null
+          deposited_at?: string | null
+          drawer_account?: string | null
+          drawer_name: string
+          due_date?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          memo?: string | null
+          received_date?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          bank_name?: string
+          bounce_reason?: string | null
+          bounced_at?: string | null
+          check_date?: string
+          check_number?: string
+          cleared_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deposit_bank_account_id?: string | null
+          deposited_at?: string | null
+          drawer_account?: string | null
+          drawer_name?: string
+          due_date?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          memo?: string | null
+          received_date?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_received_checks_bank_account"
+            columns: ["deposit_bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_received_checks_journal_entry"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_received_checks_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           conditions: Json | null
@@ -9638,6 +9820,10 @@ export type Database = {
       }
       create_invoice_receivable_entry: {
         Args: { invoice_id: string; invoice_data: Json }
+        Returns: string
+      }
+      create_journal_entry_for_received_check: {
+        Args: { received_check_id: string }
         Returns: string
       }
       create_journal_entry_from_check: {
