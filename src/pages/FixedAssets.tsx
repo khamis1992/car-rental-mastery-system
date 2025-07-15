@@ -13,15 +13,23 @@ import {
   Trash2,
   BarChart3,
   Wrench,
-  Calendar
+  Calendar,
+  Users,
+  MapPin,
+  Settings,
+  FileBarChart
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { AssetFormDialog } from "@/components/FixedAssets/AssetFormDialog";
+import { AssetMaintenanceDialog } from "@/components/FixedAssets/AssetMaintenanceDialog";
+import { DepreciationReportsTab } from "@/components/FixedAssets/DepreciationReportsTab";
 
 interface FixedAsset {
   id: string;
   asset_name: string;
+  asset_code: string;
   asset_category: string;
   purchase_cost: number;
   accumulated_depreciation: number;
@@ -30,19 +38,41 @@ interface FixedAsset {
   useful_life_years: number;
   depreciation_method: string;
   status: string;
+  assigned_employee_id?: string;
+  location_description?: string;
+  condition_status: string;
+  warranty_end_date?: string;
+  insurance_expiry_date?: string;
+  last_maintenance_date?: string;
+  next_maintenance_due?: string;
+  barcode?: string;
+  qr_code?: string;
+  photos?: string[];
+  tags?: string[];
+  assigned_employee?: {
+    full_name: string;
+  };
 }
 
 const FixedAssets = () => {
   const [selectedTab, setSelectedTab] = useState("overview");
   const { toast } = useToast();
 
-  // Fetch fixed assets data
+  // Fetch fixed assets data with employee assignments
   const { data: assets, isLoading } = useQuery({
     queryKey: ['fixed-assets'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('fixed_assets')
-        .select('*')
+        .select(`
+          *,
+          assigned_employee:employees!assigned_employee_id(employee_name),
+          asset_assignments!inner(
+            assignment_status,
+            assigned_employee:employees!employee_id(full_name)
+          )
+        `)
+        .eq('status', 'active')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -61,8 +91,32 @@ const FixedAssets = () => {
       case 'vehicles': return Car;
       case 'buildings': return Building2;
       case 'equipment': return Wrench;
+      case 'furniture': return Settings;
+      case 'computer_hardware': return Calculator;
       default: return Building2;
     }
+  };
+
+  const getConditionBadgeVariant = (condition: string) => {
+    switch (condition) {
+      case 'excellent': return 'default';
+      case 'good': return 'secondary';
+      case 'fair': return 'outline';
+      case 'poor': return 'destructive';
+      case 'needs_repair': return 'destructive';
+      default: return 'outline';
+    }
+  };
+
+  const getConditionLabel = (condition: string) => {
+    const labels = {
+      excellent: "ممتازة",
+      good: "جيدة", 
+      fair: "مقبولة",
+      poor: "ضعيفة",
+      needs_repair: "تحتاج إصلاح"
+    };
+    return labels[condition as keyof typeof labels] || condition;
   };
 
   const formatCurrency = (amount: number) => {
@@ -98,10 +152,7 @@ const FixedAssets = () => {
             إدارة ومتابعة الأصول الثابتة والإهلاك
           </p>
         </div>
-        <Button className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          إضافة أصل جديد
-        </Button>
+        <AssetFormDialog />
       </div>
 
       {/* Summary Cards */}
@@ -163,9 +214,10 @@ const FixedAssets = () => {
 
       {/* Main Content Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
           <TabsTrigger value="assets">قائمة الأصول</TabsTrigger>
+          <TabsTrigger value="assignments">التعيينات</TabsTrigger>
           <TabsTrigger value="depreciation">تقارير الإهلاك</TabsTrigger>
         </TabsList>
 
@@ -181,7 +233,7 @@ const FixedAssets = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {['vehicles', 'buildings', 'equipment'].map((category) => {
+                  {['vehicles', 'buildings', 'equipment', 'furniture', 'computer_hardware'].map((category) => {
                     const categoryAssets = assets?.filter(asset => 
                       asset.asset_category.toLowerCase() === category
                     ) || [];
@@ -195,7 +247,10 @@ const FixedAssets = () => {
                           <div className="text-right">
                             <p className="font-medium">
                               {category === 'vehicles' ? 'المركبات' : 
-                               category === 'buildings' ? 'المباني' : 'المعدات'}
+                               category === 'buildings' ? 'المباني' : 
+                               category === 'equipment' ? 'المعدات' :
+                               category === 'furniture' ? 'الأثاث' :
+                               category === 'computer_hardware' ? 'الأجهزة الحاسوبية' : category}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {categoryAssets.length} أصل
@@ -251,63 +306,133 @@ const FixedAssets = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {assets?.map((asset) => (
+                  {assets?.map((asset) => (
+                    <div key={asset.id} className="flex flex-row-reverse items-center justify-between p-4 border rounded-lg">
+                      <div className="flex flex-row-reverse items-center gap-4">
+                        <div className="text-right space-y-1">
+                          <h3 className="font-semibold">{asset.asset_name}</h3>
+                          <p className="text-sm text-muted-foreground">{asset.asset_code}</p>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={getConditionBadgeVariant(asset.condition_status)} className="text-xs">
+                              {getConditionLabel(asset.condition_status)}
+                            </Badge>
+                            {asset.location_description && (
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {asset.location_description}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>تاريخ الشراء: {new Date(asset.purchase_date).toLocaleDateString('ar-SA')}</span>
+                            {asset.assigned_employee && (
+                              <span className="flex items-center gap-1">
+                                <Users className="h-3 w-3" />
+                                {asset.assigned_employee.full_name}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right space-y-1">
+                        <p className="text-sm">التكلفة: {formatCurrency(asset.purchase_cost)}</p>
+                        <p className="text-sm">الإهلاك: {formatCurrency(asset.accumulated_depreciation)}</p>
+                        <p className="text-sm font-medium">القيمة الدفترية: {formatCurrency(asset.book_value)}</p>
+                        {asset.next_maintenance_due && (
+                          <p className="text-xs text-orange-600">
+                            صيانة مستحقة: {new Date(asset.next_maintenance_due).toLocaleDateString('ar-SA')}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Badge variant={asset.status === 'active' ? 'default' : 'secondary'}>
+                          {asset.status === 'active' ? 'نشط' : 'غير نشط'}
+                        </Badge>
+                        <AssetMaintenanceDialog 
+                          assetId={asset.id} 
+                          assetName={asset.asset_name}
+                          trigger={
+                            <Button variant="outline" size="sm">
+                              <Wrench className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        <AssetFormDialog 
+                          asset={asset}
+                          trigger={
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        <Button variant="outline" size="sm">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="assignments" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-right flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                تعيينات الأصول
+              </CardTitle>
+              <CardDescription className="text-right">
+                إدارة تعيين الأصول للموظفين ومتابعة المواقع
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {assets?.filter(asset => asset.assigned_employee).map((asset) => (
                   <div key={asset.id} className="flex flex-row-reverse items-center justify-between p-4 border rounded-lg">
                     <div className="flex flex-row-reverse items-center gap-4">
                       <div className="text-right">
                         <h3 className="font-semibold">{asset.asset_name}</h3>
-                        <p className="text-sm text-muted-foreground">{asset.asset_category}</p>
-                        <p className="text-xs text-muted-foreground">
-                          تاريخ الشراء: {new Date(asset.purchase_date).toLocaleDateString('ar-SA')}
-                        </p>
+                        <p className="text-sm text-muted-foreground">{asset.asset_code}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                          <Users className="h-3 w-3" />
+                          <span>{asset.assigned_employee?.full_name}</span>
+                          {asset.location_description && (
+                            <>
+                              <MapPin className="h-3 w-3 mr-2" />
+                              <span>{asset.location_description}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    
-                    <div className="text-right space-y-1">
-                      <p className="text-sm">التكلفة: {formatCurrency(asset.purchase_cost)}</p>
-                      <p className="text-sm">الإهلاك: {formatCurrency(asset.accumulated_depreciation)}</p>
-                      <p className="text-sm font-medium">القيمة الدفترية: {formatCurrency(asset.book_value)}</p>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Badge variant={asset.status === 'active' ? 'default' : 'secondary'}>
-                        {asset.status === 'active' ? 'نشط' : 'غير نشط'}
+                    <div className="text-right">
+                      <Badge variant={getConditionBadgeVariant(asset.condition_status)}>
+                        {getConditionLabel(asset.condition_status)}
                       </Badge>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
                   </div>
                 ))}
+                
+                {!assets?.some(asset => asset.assigned_employee) && (
+                  <div className="text-center py-12">
+                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">لا توجد أصول معينة</h3>
+                    <p className="text-muted-foreground mb-4">
+                      لم يتم تعيين أي أصول للموظفين بعد
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="depreciation" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-right">تقارير الإهلاك</CardTitle>
-              <CardDescription className="text-right">
-                متابعة وتحليل إهلاك الأصول الثابتة
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">تقارير الإهلاك</h3>
-                <p className="text-muted-foreground mb-4">
-                  سيتم عرض تقارير مفصلة حول إهلاك الأصول هنا
-                </p>
-                <Button variant="outline">
-                  إنشاء تقرير إهلاك
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <DepreciationReportsTab />
         </TabsContent>
       </Tabs>
     </div>

@@ -597,6 +597,83 @@ export type Database = {
           },
         ]
       }
+      asset_assignments: {
+        Row: {
+          asset_id: string
+          assigned_by: string | null
+          assigned_date: string
+          assignment_purpose: string | null
+          assignment_status: string
+          assignment_type: string
+          created_at: string | null
+          employee_id: string
+          id: string
+          notes: string | null
+          return_date: string | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          asset_id: string
+          assigned_by?: string | null
+          assigned_date?: string
+          assignment_purpose?: string | null
+          assignment_status?: string
+          assignment_type?: string
+          created_at?: string | null
+          employee_id: string
+          id?: string
+          notes?: string | null
+          return_date?: string | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          asset_id?: string
+          assigned_by?: string | null
+          assigned_date?: string
+          assignment_purpose?: string | null
+          assignment_status?: string
+          assignment_type?: string
+          created_at?: string | null
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          return_date?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_assignments_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_assignments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asset_categories: {
         Row: {
           category_name: string
@@ -743,6 +820,283 @@ export type Database = {
           },
           {
             foreignKeyName: "asset_depreciation_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_maintenance: {
+        Row: {
+          asset_id: string
+          completed_date: string | null
+          cost: number | null
+          created_at: string | null
+          created_by: string | null
+          description: string
+          documents: string[] | null
+          external_provider: string | null
+          hours_spent: number | null
+          id: string
+          maintenance_type: string
+          notes: string | null
+          parts_replaced: string[] | null
+          performed_by: string | null
+          photos: string[] | null
+          priority: string | null
+          scheduled_date: string
+          status: string
+          tenant_id: string
+          updated_at: string | null
+          warranty_work: boolean | null
+        }
+        Insert: {
+          asset_id: string
+          completed_date?: string | null
+          cost?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description: string
+          documents?: string[] | null
+          external_provider?: string | null
+          hours_spent?: number | null
+          id?: string
+          maintenance_type: string
+          notes?: string | null
+          parts_replaced?: string[] | null
+          performed_by?: string | null
+          photos?: string[] | null
+          priority?: string | null
+          scheduled_date: string
+          status?: string
+          tenant_id: string
+          updated_at?: string | null
+          warranty_work?: boolean | null
+        }
+        Update: {
+          asset_id?: string
+          completed_date?: string | null
+          cost?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string
+          documents?: string[] | null
+          external_provider?: string | null
+          hours_spent?: number | null
+          id?: string
+          maintenance_type?: string
+          notes?: string | null
+          parts_replaced?: string[] | null
+          performed_by?: string | null
+          photos?: string[] | null
+          priority?: string | null
+          scheduled_date?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string | null
+          warranty_work?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_maintenance_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_transfers: {
+        Row: {
+          approved_by: string | null
+          asset_id: string
+          condition_after: string | null
+          condition_before: string | null
+          created_at: string | null
+          created_by: string | null
+          documents: string[] | null
+          from_employee_id: string | null
+          from_location: string | null
+          id: string
+          notes: string | null
+          photos: string[] | null
+          tenant_id: string
+          to_employee_id: string | null
+          to_location: string | null
+          transfer_date: string
+          transfer_reason: string
+          transfer_status: string
+        }
+        Insert: {
+          approved_by?: string | null
+          asset_id: string
+          condition_after?: string | null
+          condition_before?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          documents?: string[] | null
+          from_employee_id?: string | null
+          from_location?: string | null
+          id?: string
+          notes?: string | null
+          photos?: string[] | null
+          tenant_id: string
+          to_employee_id?: string | null
+          to_location?: string | null
+          transfer_date: string
+          transfer_reason: string
+          transfer_status?: string
+        }
+        Update: {
+          approved_by?: string | null
+          asset_id?: string
+          condition_after?: string | null
+          condition_before?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          documents?: string[] | null
+          from_employee_id?: string | null
+          from_location?: string | null
+          id?: string
+          notes?: string | null
+          photos?: string[] | null
+          tenant_id?: string
+          to_employee_id?: string | null
+          to_location?: string | null
+          transfer_date?: string
+          transfer_reason?: string
+          transfer_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_transfers_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_transfers_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_transfers_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_transfers_from_employee_id_fkey"
+            columns: ["from_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_transfers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_transfers_to_employee_id_fkey"
+            columns: ["to_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_valuations: {
+        Row: {
+          appraiser_license: string | null
+          appraiser_name: string | null
+          asset_id: string
+          created_at: string | null
+          created_by: string | null
+          current_market_value: number | null
+          id: string
+          notes: string | null
+          replacement_cost: number | null
+          tenant_id: string
+          valuation_date: string
+          valuation_method: string
+          valuation_report_url: string | null
+        }
+        Insert: {
+          appraiser_license?: string | null
+          appraiser_name?: string | null
+          asset_id: string
+          created_at?: string | null
+          created_by?: string | null
+          current_market_value?: number | null
+          id?: string
+          notes?: string | null
+          replacement_cost?: number | null
+          tenant_id: string
+          valuation_date: string
+          valuation_method: string
+          valuation_report_url?: string | null
+        }
+        Update: {
+          appraiser_license?: string | null
+          appraiser_name?: string | null
+          asset_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          current_market_value?: number | null
+          id?: string
+          notes?: string | null
+          replacement_cost?: number | null
+          tenant_id?: string
+          valuation_date?: string
+          valuation_method?: string
+          valuation_report_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_valuations_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_valuations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_valuations_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -4758,27 +5112,44 @@ export type Database = {
           asset_category: string
           asset_code: string
           asset_name: string
+          assigned_employee_id: string | null
+          barcode: string | null
           book_value: number
+          condition_status: string | null
           created_at: string
           created_by: string | null
+          custom_fields: Json | null
           depreciation_expense_account_id: string | null
           depreciation_method: string
           description: string | null
           disposal_amount: number | null
           disposal_date: string | null
+          disposal_method: string | null
+          disposal_proceeds: number | null
           disposal_reason: string | null
+          documents: string[] | null
           id: string
+          insurance_expiry_date: string | null
+          insurance_policy_number: string | null
           invoice_number: string | null
+          last_maintenance_date: string | null
           location: string | null
+          location_description: string | null
+          maintenance_schedule: string | null
+          next_maintenance_due: string | null
+          photos: string[] | null
           purchase_cost: number
           purchase_date: string
+          qr_code: string | null
           residual_value: number | null
           serial_number: string | null
           status: string
           supplier_name: string | null
+          tags: string[] | null
           tenant_id: string
           updated_at: string
           useful_life_years: number
+          warranty_end_date: string | null
           warranty_expiry: string | null
         }
         Insert: {
@@ -4788,27 +5159,44 @@ export type Database = {
           asset_category: string
           asset_code: string
           asset_name: string
+          assigned_employee_id?: string | null
+          barcode?: string | null
           book_value: number
+          condition_status?: string | null
           created_at?: string
           created_by?: string | null
+          custom_fields?: Json | null
           depreciation_expense_account_id?: string | null
           depreciation_method?: string
           description?: string | null
           disposal_amount?: number | null
           disposal_date?: string | null
+          disposal_method?: string | null
+          disposal_proceeds?: number | null
           disposal_reason?: string | null
+          documents?: string[] | null
           id?: string
+          insurance_expiry_date?: string | null
+          insurance_policy_number?: string | null
           invoice_number?: string | null
+          last_maintenance_date?: string | null
           location?: string | null
+          location_description?: string | null
+          maintenance_schedule?: string | null
+          next_maintenance_due?: string | null
+          photos?: string[] | null
           purchase_cost: number
           purchase_date: string
+          qr_code?: string | null
           residual_value?: number | null
           serial_number?: string | null
           status?: string
           supplier_name?: string | null
+          tags?: string[] | null
           tenant_id: string
           updated_at?: string
           useful_life_years: number
+          warranty_end_date?: string | null
           warranty_expiry?: string | null
         }
         Update: {
@@ -4818,27 +5206,44 @@ export type Database = {
           asset_category?: string
           asset_code?: string
           asset_name?: string
+          assigned_employee_id?: string | null
+          barcode?: string | null
           book_value?: number
+          condition_status?: string | null
           created_at?: string
           created_by?: string | null
+          custom_fields?: Json | null
           depreciation_expense_account_id?: string | null
           depreciation_method?: string
           description?: string | null
           disposal_amount?: number | null
           disposal_date?: string | null
+          disposal_method?: string | null
+          disposal_proceeds?: number | null
           disposal_reason?: string | null
+          documents?: string[] | null
           id?: string
+          insurance_expiry_date?: string | null
+          insurance_policy_number?: string | null
           invoice_number?: string | null
+          last_maintenance_date?: string | null
           location?: string | null
+          location_description?: string | null
+          maintenance_schedule?: string | null
+          next_maintenance_due?: string | null
+          photos?: string[] | null
           purchase_cost?: number
           purchase_date?: string
+          qr_code?: string | null
           residual_value?: number | null
           serial_number?: string | null
           status?: string
           supplier_name?: string | null
+          tags?: string[] | null
           tenant_id?: string
           updated_at?: string
           useful_life_years?: number
+          warranty_end_date?: string | null
           warranty_expiry?: string | null
         }
         Relationships: [
@@ -4854,6 +5259,13 @@ export type Database = {
             columns: ["accumulated_depreciation_account_id"]
             isOneToOne: false
             referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixed_assets_assigned_employee_id_fkey"
+            columns: ["assigned_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
           {
@@ -9598,6 +10010,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      calculate_advanced_depreciation: {
+        Args: { asset_id_param: string; calculation_date?: string }
+        Returns: {
+          depreciation_amount: number
+          accumulated_depreciation: number
+          book_value: number
+          method_used: string
+        }[]
+      }
       calculate_advanced_kpi: {
         Args: { kpi_code_param: string }
         Returns: number
@@ -9928,6 +10349,25 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_asset_report: {
+        Args: { report_date?: string; report_tenant_id?: string }
+        Returns: {
+          asset_id: string
+          asset_name: string
+          asset_code: string
+          category: string
+          purchase_cost: number
+          accumulated_depreciation: number
+          book_value: number
+          assigned_employee: string
+          location_description: string
+          condition_status: string
+          last_maintenance: string
+          next_maintenance: string
+          age_years: number
+          depreciation_rate_percent: number
+        }[]
+      }
       generate_basic_financial_report: {
         Args: {
           p_tenant_id: string
@@ -10193,6 +10633,10 @@ export type Database = {
       run_journal_entry_validations: {
         Args: { entry_id: string }
         Returns: undefined
+      }
+      run_monthly_depreciation: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       safe_delete_contract: {
         Args: { contract_id_param: string; delete_related?: boolean }
