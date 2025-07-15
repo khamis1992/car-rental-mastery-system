@@ -1,6 +1,8 @@
 import React from 'react';
 import { JournalEntriesTab } from '@/components/Accounting/JournalEntriesTab';
 import { AutomatedJournalEntries } from '@/components/Accounting/AutomatedJournalEntries';
+import { ExpenseVouchersTab } from '@/components/Accounting/ExpenseVouchersTab';
+import { ChecksTab } from '@/components/Accounting/ChecksTab';
 import BankReconciliation from '@/components/BankReconciliation/BankReconciliation';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Plus, Calendar, Filter, CreditCard } from 'lucide-react';
@@ -36,14 +38,24 @@ const JournalEntries = () => {
       </div>
 
       <Tabs defaultValue="entries" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="entries">القيود المحاسبية</TabsTrigger>
+          <TabsTrigger value="expenses">سندات المصروفات</TabsTrigger>
+          <TabsTrigger value="checks">إدارة الشيكات</TabsTrigger>
           <TabsTrigger value="automated">القيود التلقائية</TabsTrigger>
           <TabsTrigger value="reconciliation">المطابقة البنكية</TabsTrigger>
         </TabsList>
 
         <TabsContent value="entries" className="space-y-4">
           <JournalEntriesTab />
+        </TabsContent>
+
+        <TabsContent value="expenses" className="space-y-4">
+          <ExpenseVouchersTab />
+        </TabsContent>
+
+        <TabsContent value="checks" className="space-y-4">
+          <ChecksTab />
         </TabsContent>
 
         <TabsContent value="automated" className="space-y-4">

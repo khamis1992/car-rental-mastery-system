@@ -1564,6 +1564,103 @@ export type Database = {
           },
         ]
       }
+      checks: {
+        Row: {
+          amount: number
+          bank_account_id: string
+          bounced_date: string | null
+          bounced_reason: string | null
+          check_date: string
+          check_number: string
+          check_type: string
+          cleared_date: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          due_date: string | null
+          id: string
+          journal_entry_id: string | null
+          memo: string | null
+          payee_account: string | null
+          payee_name: string
+          reference_id: string | null
+          reference_type: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          bank_account_id: string
+          bounced_date?: string | null
+          bounced_reason?: string | null
+          check_date: string
+          check_number: string
+          check_type?: string
+          cleared_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          due_date?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          memo?: string | null
+          payee_account?: string | null
+          payee_name: string
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string
+          bounced_date?: string | null
+          bounced_reason?: string | null
+          check_date?: string
+          check_number?: string
+          check_type?: string
+          cleared_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          due_date?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          memo?: string | null
+          payee_account?: string | null
+          payee_name?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_checks_bank_account"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_checks_journal_entry"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_checks_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_branding: {
         Row: {
           address_ar: string | null
@@ -3824,6 +3921,183 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "exchange_rates_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_voucher_items: {
+        Row: {
+          account_id: string
+          created_at: string
+          description: string
+          expense_voucher_id: string
+          id: string
+          quantity: number | null
+          tax_amount: number | null
+          tax_rate: number | null
+          total_amount: number
+          unit_price: number
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          description: string
+          expense_voucher_id: string
+          id?: string
+          quantity?: number | null
+          tax_amount?: number | null
+          tax_rate?: number | null
+          total_amount: number
+          unit_price: number
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          description?: string
+          expense_voucher_id?: string
+          id?: string
+          quantity?: number | null
+          tax_amount?: number | null
+          tax_rate?: number | null
+          total_amount?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_expense_voucher_items_account"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_voucher_items_voucher"
+            columns: ["expense_voucher_id"]
+            isOneToOne: false
+            referencedRelation: "expense_vouchers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_vouchers: {
+        Row: {
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
+          attachments: string[] | null
+          bank_account_id: string | null
+          check_date: string | null
+          check_number: string | null
+          cost_center_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discount_amount: number | null
+          expense_category: string
+          expense_subcategory: string | null
+          id: string
+          journal_entry_id: string | null
+          net_amount: number
+          notes: string | null
+          payment_method: string
+          supplier_id: string | null
+          tax_amount: number | null
+          tenant_id: string
+          total_amount: number
+          updated_at: string
+          voucher_date: string
+          voucher_number: string
+        }
+        Insert: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          attachments?: string[] | null
+          bank_account_id?: string | null
+          check_date?: string | null
+          check_number?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_amount?: number | null
+          expense_category: string
+          expense_subcategory?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          net_amount: number
+          notes?: string | null
+          payment_method?: string
+          supplier_id?: string | null
+          tax_amount?: number | null
+          tenant_id: string
+          total_amount: number
+          updated_at?: string
+          voucher_date?: string
+          voucher_number: string
+        }
+        Update: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          attachments?: string[] | null
+          bank_account_id?: string | null
+          check_date?: string | null
+          check_number?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_amount?: number | null
+          expense_category?: string
+          expense_subcategory?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          net_amount?: number
+          notes?: string | null
+          payment_method?: string
+          supplier_id?: string | null
+          tax_amount?: number | null
+          tenant_id?: string
+          total_amount?: number
+          updated_at?: string
+          voucher_date?: string
+          voucher_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_expense_vouchers_bank_account"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_vouchers_cost_center"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_vouchers_cost_center"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_vouchers_journal_entry"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_vouchers_tenant"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -8856,6 +9130,14 @@ export type Database = {
       }
       create_invoice_receivable_entry: {
         Args: { invoice_id: string; invoice_data: Json }
+        Returns: string
+      }
+      create_journal_entry_from_check: {
+        Args: { check_id: string }
+        Returns: string
+      }
+      create_journal_entry_from_expense_voucher: {
+        Args: { voucher_id: string }
         Returns: string
       }
       create_maintenance_accounting_entry: {
