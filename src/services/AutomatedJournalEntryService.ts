@@ -133,21 +133,21 @@ export class AutomatedJournalEntryService {
       }
 
       // إنشاء القيد المحاسبي
+      const accountMappings = rule.account_mappings as any;
       const journalEntry = await accountingService.createJournalEntry({
         entry_date: new Date().toISOString().split('T')[0],
-        description: this.generateDescription(rule.account_mappings.description_template, triggerData),
-        reference_type: triggerData.reference_type,
+        description: this.generateDescription(accountMappings.description_template, triggerData),
+        reference_type: 'manual',
         reference_id: triggerData.reference_id,
         total_debit: triggerData.amount,
         total_credit: triggerData.amount,
-        status: 'posted',
-        tenant_id: rule.tenant_id
+        status: 'posted'
       });
 
       // إضافة سطور القيد
       await accountingService.createJournalEntryLine({
         journal_entry_id: journalEntry.id,
-        account_id: rule.account_mappings.debit_account_id,
+        account_id: accountMappings.debit_account_id,
         description: `مدين - ${journalEntry.description}`,
         debit_amount: triggerData.amount,
         credit_amount: 0,
@@ -156,7 +156,7 @@ export class AutomatedJournalEntryService {
 
       await accountingService.createJournalEntryLine({
         journal_entry_id: journalEntry.id,
-        account_id: rule.account_mappings.credit_account_id,
+        account_id: accountMappings.credit_account_id,
         description: `دائن - ${journalEntry.description}`,
         debit_amount: 0,
         credit_amount: triggerData.amount,

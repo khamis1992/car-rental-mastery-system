@@ -5143,6 +5143,116 @@ export type Database = {
           },
         ]
       }
+      journal_automation_executions: {
+        Row: {
+          error_message: string | null
+          executed_at: string
+          execution_time_ms: number
+          id: string
+          journal_entry_id: string | null
+          reference_id: string
+          reference_type: string
+          rule_id: string
+          status: string
+          triggered_by: string
+        }
+        Insert: {
+          error_message?: string | null
+          executed_at?: string
+          execution_time_ms?: number
+          id?: string
+          journal_entry_id?: string | null
+          reference_id: string
+          reference_type: string
+          rule_id: string
+          status: string
+          triggered_by: string
+        }
+        Update: {
+          error_message?: string | null
+          executed_at?: string
+          execution_time_ms?: number
+          id?: string
+          journal_entry_id?: string | null
+          reference_id?: string
+          reference_type?: string
+          rule_id?: string
+          status?: string
+          triggered_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_journal_automation_executions_journal_entry"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_journal_automation_executions_rule"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "journal_automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_automation_rules: {
+        Row: {
+          account_mappings: Json
+          conditions: Json
+          created_at: string
+          created_by: string | null
+          execution_count: number
+          id: string
+          is_active: boolean
+          last_executed: string | null
+          rule_name: string
+          success_rate: number
+          tenant_id: string
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          account_mappings: Json
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          execution_count?: number
+          id?: string
+          is_active?: boolean
+          last_executed?: string | null
+          rule_name: string
+          success_rate?: number
+          tenant_id: string
+          trigger_event: string
+          updated_at?: string
+        }
+        Update: {
+          account_mappings?: Json
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          execution_count?: number
+          id?: string
+          is_active?: boolean
+          last_executed?: string | null
+          rule_name?: string
+          success_rate?: number
+          tenant_id?: string
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_journal_automation_rules_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journal_entries: {
         Row: {
           approval_notes: string | null
