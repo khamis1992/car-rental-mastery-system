@@ -17,11 +17,11 @@ export class ExpenseVoucherService {
 
     // تطبيق الفلاتر
     if (filters.search) {
-      query = query.or(`voucher_number.ilike.%${filters.search}%,beneficiary_name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+      query = query.or(`voucher_number.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
     }
 
     if (filters.status && filters.status.length > 0) {
-      query = query.in('status', filters.status);
+      query = query.in('approval_status', filters.status);
     }
 
     if (filters.date_from) {
@@ -65,7 +65,7 @@ export class ExpenseVoucherService {
   }
 
   // إنشاء سند صرف جديد
-  static async create(voucher: CreateExpenseVoucherForm & { tenant_id: string }): Promise<any> {
+  static async create(voucher: CreateExpenseVoucherForm & { tenant_id: string; expense_category: string }): Promise<any> {
     // إنشاء رقم السند
     const voucherNumber = await this.generateVoucherNumber(voucher.tenant_id);
 
@@ -82,12 +82,10 @@ export class ExpenseVoucherService {
       tenant_id: voucher.tenant_id,
       voucher_number: voucherNumber,
       voucher_date: voucher.voucher_date,
-      beneficiary_name: voucher.beneficiary_name,
-      beneficiary_type: voucher.beneficiary_type,
+      expense_category: voucher.expense_category,
       payment_method: voucher.payment_method,
       bank_account_id: voucher.bank_account_id,
       check_number: voucher.check_number,
-      reference_number: voucher.reference_number,
       description: voucher.description,
       notes: voucher.notes,
       cost_center_id: voucher.cost_center_id,
@@ -95,7 +93,7 @@ export class ExpenseVoucherService {
       tax_amount: taxAmount,
       discount_amount: voucher.discount_amount || 0,
       net_amount: netAmount,
-      status: 'draft' as const
+      approval_status: 'draft' as const
     };
 
     const { data: voucherResult, error: voucherError } = await supabase
@@ -174,13 +172,13 @@ export class ExpenseVoucherService {
 
   // إرسال للموافقة
   static async submitForApproval(id: string): Promise<any> {
-    return await this.update(id, { status: 'pending_approval' });
+    return await this.update(id, { approval_status: 'pending_approval' });
   }
 
   // الموافقة على السند
   static async approve(id: string, approverId: string, comments?: string): Promise<any> {
     const updatedVoucher = await this.update(id, {
-      status: 'approved',
+      approval_status: 'approved',
       approved_by: approverId,
       approved_at: new Date().toISOString()
     });
@@ -200,7 +198,7 @@ export class ExpenseVoucherService {
 
   // رفض السند
   static async reject(id: string, approverId: string, comments: string): Promise<any> {
-    const updatedVoucher = await this.update(id, { status: 'rejected' });
+    const updatedVoucher = await this.update(id, { approval_status: 'rejected' });
 
     // إضافة سجل الرفض
     await supabase.from('expense_approvals').insert([{
