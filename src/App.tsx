@@ -32,6 +32,7 @@ import FixedAssets from "./pages/FixedAssets";
 import BudgetManagement from "./pages/BudgetManagement";
 import AccountingAutomation from "./pages/AccountingAutomation";
 import AccountingValidation from "./pages/AccountingValidation";
+import ExpenseManagement from "./pages/ExpenseManagement";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 
@@ -191,13 +192,18 @@ const App = () => (
                         </Layout>
                       </ProtectedRoute>
                     } />
-                    <Route path="/accounting-validation" element={
-                      <ProtectedRoute>
-                        <Layout>
-                          <AccountingValidation />
-                        </Layout>
-                      </ProtectedRoute>
-                    } />
+                     <Route path="/accounting-validation" element={
+                       <ProtectedRoute>
+                         <Layout>
+                           <AccountingValidation />
+                         </Layout>
+                       </ProtectedRoute>
+                     } />
+                     <Route path="/expense-management" element={
+                       <ProtectedRoute>
+                         <ExpenseManagement />
+                       </ProtectedRoute>
+                     } />
                     <Route path="/settings" element={
                       <ProtectedRoute>
                         <Layout>

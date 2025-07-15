@@ -4002,6 +4002,197 @@ export type Database = {
           },
         ]
       }
+      expense_approvals: {
+        Row: {
+          approval_level: number
+          approved_at: string | null
+          approver_id: string
+          comments: string | null
+          created_at: string | null
+          expense_voucher_id: string
+          id: string
+          required_amount_limit: number | null
+          status: string | null
+        }
+        Insert: {
+          approval_level?: number
+          approved_at?: string | null
+          approver_id: string
+          comments?: string | null
+          created_at?: string | null
+          expense_voucher_id: string
+          id?: string
+          required_amount_limit?: number | null
+          status?: string | null
+        }
+        Update: {
+          approval_level?: number
+          approved_at?: string | null
+          approver_id?: string
+          comments?: string | null
+          created_at?: string | null
+          expense_voucher_id?: string
+          id?: string
+          required_amount_limit?: number | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_expense_approvals_approver"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_approvals_voucher"
+            columns: ["expense_voucher_id"]
+            isOneToOne: false
+            referencedRelation: "expense_vouchers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_categories: {
+        Row: {
+          account_id: string | null
+          approval_limit: number | null
+          category_code: string
+          category_name_ar: string
+          category_name_en: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          parent_category_id: string | null
+          requires_approval: boolean | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          approval_limit?: number | null
+          category_code: string
+          category_name_ar: string
+          category_name_en?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          parent_category_id?: string | null
+          requires_approval?: boolean | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          approval_limit?: number | null
+          category_code?: string
+          category_name_ar?: string
+          category_name_en?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          parent_category_id?: string | null
+          requires_approval?: boolean | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_expense_categories_account"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_categories_parent"
+            columns: ["parent_category_id"]
+            isOneToOne: false
+            referencedRelation: "expense_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_categories_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          default_beneficiary_type: string | null
+          default_cost_center_id: string | null
+          default_payment_method: string | null
+          id: string
+          is_active: boolean | null
+          template_description: string | null
+          template_items: Json
+          template_name: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          default_beneficiary_type?: string | null
+          default_cost_center_id?: string | null
+          default_payment_method?: string | null
+          id?: string
+          is_active?: boolean | null
+          template_description?: string | null
+          template_items?: Json
+          template_name: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          default_beneficiary_type?: string | null
+          default_cost_center_id?: string | null
+          default_payment_method?: string | null
+          id?: string
+          is_active?: boolean | null
+          template_description?: string | null
+          template_items?: Json
+          template_name?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_expense_templates_cost_center"
+            columns: ["default_cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_templates_cost_center"
+            columns: ["default_cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_templates_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expense_voucher_items: {
         Row: {
           account_id: string
