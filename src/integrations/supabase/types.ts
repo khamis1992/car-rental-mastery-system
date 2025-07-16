@@ -10433,6 +10433,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      apply_leasing_chart_to_all_tenants: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       audit_orphaned_entries: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -11106,6 +11110,10 @@ export type Database = {
         Returns: undefined
       }
       setup_enhanced_chart_of_accounts: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
+      setup_leasing_chart_of_accounts: {
         Args: { tenant_id_param: string }
         Returns: number
       }
