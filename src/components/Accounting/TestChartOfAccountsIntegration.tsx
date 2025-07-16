@@ -80,7 +80,7 @@ export const TestChartOfAccountsIntegration = () => {
       // تكوين نتيجة الاختبار
       const result: TestResult = {
         success: true,
-        accounts_created: data?.total_accounts_added || 0,
+        accounts_created: (data as any)?.total_accounts_added || 0,
         accounts_summary: currentAccounts
       };
 
@@ -88,7 +88,7 @@ export const TestChartOfAccountsIntegration = () => {
       
       toast({
         title: 'نجح الاختبار',
-        description: data?.message || `تم إضافة ${data?.total_accounts_added || 0} حساب ناقص بنجاح`,
+        description: (data as any)?.message || `تم إضافة ${(data as any)?.total_accounts_added || 0} حساب ناقص بنجاح`,
       });
 
     } catch (error: any) {

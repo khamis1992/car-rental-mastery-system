@@ -52,7 +52,12 @@ export const TenantAccountsIsolationTest: React.FC = () => {
           .rpc('get_tenant_accounts_stats', { tenant_id_param: currentTenant.id });
 
         if (statsError) throw statsError;
-        setCurrentTenantStats(statsData);
+        // تحويل المصفوفة إلى كائن واحد أو أخذ العنصر الأول
+        if (Array.isArray(statsData) && statsData.length > 0) {
+          setCurrentTenantStats(statsData[0] as AccountStats);
+        } else if (statsData && !Array.isArray(statsData)) {
+          setCurrentTenantStats(statsData as AccountStats);
+        }
       }
 
     } catch (error: any) {
@@ -90,7 +95,7 @@ export const TenantAccountsIsolationTest: React.FC = () => {
       
       toast({
         title: "نجح الاختبار!",
-        description: `تم إضافة ${data.total_accounts_added} حساب افتراضي`,
+        description: `تم إضافة ${(data as any)?.total_accounts_added || 0} حساب افتراضي`,
       });
 
       // إعادة تحميل البيانات
@@ -122,7 +127,7 @@ export const TenantAccountsIsolationTest: React.FC = () => {
       
       toast({
         title: "اكتمل اختبار العزل",
-        description: `تم اختبار ${data.tenants_tested} مؤسسة`,
+        description: `تم اختبار ${(data as any)?.tenants_tested || 0} مؤسسة`,
       });
 
     } catch (error: any) {
