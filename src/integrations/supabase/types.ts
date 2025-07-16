@@ -8849,6 +8849,7 @@ export type Database = {
           id: string
           tenant_id: string
           tenant_name: string
+          tenant_slug: string | null
         }
         Insert: {
           created_at?: string
@@ -8859,6 +8860,7 @@ export type Database = {
           id?: string
           tenant_id: string
           tenant_name: string
+          tenant_slug?: string | null
         }
         Update: {
           created_at?: string
@@ -8869,6 +8871,7 @@ export type Database = {
           id?: string
           tenant_id?: string
           tenant_name?: string
+          tenant_slug?: string | null
         }
         Relationships: []
       }
