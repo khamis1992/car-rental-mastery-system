@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
+import { ChartOfAccountsImportDialog } from '@/components/Accounting/ChartOfAccountsImportDialog';
 import { ChartOfAccountsSetup } from '@/components/Accounting/ChartOfAccountsSetup';
 import { GeneralLedgerReport } from '@/components/Accounting/GeneralLedgerReport';
 import { AccountingDashboard } from '@/components/Accounting/AccountingDashboard';
@@ -21,10 +22,11 @@ const ChartOfAccounts = () => {
             <RefreshCw className="w-4 h-4" />
             تحديث
           </Button>
-          <Button variant="outline" className="flex items-center gap-2">
-            <Upload className="w-4 h-4" />
-            استيراد
-          </Button>
+          <ChartOfAccountsImportDialog 
+            isOpen={false} 
+            onClose={() => {}} 
+            onImportComplete={() => window.location.reload()}
+          />
           <Button variant="outline" className="flex items-center gap-2">
             <Download className="w-4 h-4" />
             تصدير
