@@ -68,7 +68,7 @@ export const AdvancedAccounting = () => {
       </div>
 
       <Tabs defaultValue="realtime" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
           <TabsTrigger value="realtime" className="rtl-tab">
             <Zap className="h-4 w-4 ml-2" />
             المزامنة المباشرة
@@ -80,6 +80,22 @@ export const AdvancedAccounting = () => {
           <TabsTrigger value="currency" className="rtl-tab">
             <DollarSign className="h-4 w-4 ml-2" />
             العملات المتعددة
+          </TabsTrigger>
+          <TabsTrigger value="ai-insights" className="rtl-tab">
+            <Brain className="h-4 w-4 ml-2" />
+            التحليلات الذكية
+          </TabsTrigger>
+          <TabsTrigger value="forecasting" className="rtl-tab">
+            <TrendingUp className="h-4 w-4 ml-2" />
+            التنبؤات المالية
+          </TabsTrigger>
+          <TabsTrigger value="audit" className="rtl-tab">
+            <Calculator className="h-4 w-4 ml-2" />
+            التدقيق والامتثال
+          </TabsTrigger>
+          <TabsTrigger value="integrations" className="rtl-tab">
+            <Link className="h-4 w-4 ml-2" />
+            تكامل الأنظمة
           </TabsTrigger>
         </TabsList>
 
@@ -93,6 +109,22 @@ export const AdvancedAccounting = () => {
 
         <TabsContent value="currency" className="space-y-6">
           <CurrencyConverter />
+        </TabsContent>
+
+        <TabsContent value="ai-insights" className="space-y-6">
+          <AIInsights />
+        </TabsContent>
+
+        <TabsContent value="forecasting" className="space-y-6">
+          <FinancialForecasting />
+        </TabsContent>
+
+        <TabsContent value="audit" className="space-y-6">
+          <AuditCompliance />
+        </TabsContent>
+
+        <TabsContent value="integrations" className="space-y-6">
+          <SystemIntegrations />
         </TabsContent>
       </Tabs>
     </div>
