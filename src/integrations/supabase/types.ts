@@ -10421,6 +10421,22 @@ export type Database = {
       }
     }
     Functions: {
+      activate_tenant_safely: {
+        Args: { tenant_id_param: string }
+        Returns: Json
+      }
+      add_all_missing_accounts_unified: {
+        Args: { tenant_id_param: string }
+        Returns: Json
+      }
+      add_missing_accounts_only: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
+      add_revenue_expense_accounts: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
       analyze_deferred_revenue_account: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -10433,7 +10449,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      apply_default_accounts_to_existing_tenants: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       apply_leasing_chart_to_all_tenants: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      apply_missing_accounts_to_all_tenants: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
@@ -10857,7 +10881,7 @@ export type Database = {
         Returns: string
       }
       generate_employee_number: {
-        Args: Record<PropertyKey, never>
+        Args: Record<PropertyKey, never> | { tenant_id_param: string }
         Returns: string
       }
       generate_financial_summary: {
@@ -10900,6 +10924,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_system_health_report: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       generate_vehicle_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -10940,9 +10968,30 @@ export type Database = {
         Args: { setting_key_param: string }
         Returns: Json
       }
+      get_tenant_accounts_stats: {
+        Args: { tenant_id_param: string }
+        Returns: {
+          assets: number
+          liabilities: number
+          equity: number
+          revenue: number
+          expenses: number
+          total: number
+        }[]
+      }
       get_tenant_theme: {
         Args: { p_tenant_id?: string }
         Returns: Json
+      }
+      get_tenants_with_accounts_count: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          accounts_count: number
+          status: string
+          created_at: string
+        }[]
       }
       get_user_permissions: {
         Args: { _user_id: string; _tenant_id: string }
@@ -11121,7 +11170,19 @@ export type Database = {
         Args: { target_tenant_id: string }
         Returns: Json
       }
+      setup_tenant_default_accounts: {
+        Args: { tenant_id_param: string }
+        Returns: Json
+      }
+      simulate_new_tenant_creation: {
+        Args: { test_tenant_name?: string }
+        Returns: Json
+      }
       test_accounting_data_isolation: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      test_tenant_data_isolation: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
@@ -11175,6 +11236,14 @@ export type Database = {
       }
       validate_chart_of_accounts: {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      validate_employee_creation: {
+        Args: {
+          tenant_id_param: string
+          email_param: string
+          phone_param?: string
+        }
         Returns: Json
       }
       validate_journal_entry_accounts: {

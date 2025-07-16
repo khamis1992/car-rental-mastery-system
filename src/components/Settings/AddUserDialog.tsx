@@ -33,58 +33,158 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onOpenChange, onUse
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!currentTenant?.id) {
+      toast({
+        title: "خطأ",
+        description: "لا يمكن تحديد المؤسسة الحالية",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Create user in auth
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: formData.email,
-        password: formData.password,
-        email_confirm: true
+      console.log('Creating user with email:', formData.email);
+      
+      // 1. التحقق من صحة البيانات قبل الإنشاء
+      const { data: validationResult } = await supabase.rpc('validate_employee_creation', {
+        tenant_id_param: currentTenant.id,
+        email_param: formData.email,
+        phone_param: formData.phone || null
       });
 
-      if (authError) throw authError;
+      if (validationResult && typeof validationResult === 'object' && 'valid' in validationResult && !(validationResult as any).valid) {
+        toast({
+          title: "خطأ في التحقق من البيانات",
+          description: (validationResult as any).error || "البيانات المدخلة غير صحيحة",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      // Generate employee number first
-      const { data: employeeNumber, error: numberError } = await supabase
-        .rpc('generate_employee_number');
+      // 2. توليد رقم الموظف باستخدام الدالة المحسنة
+      const { data: employeeNumber, error: numberError } = await supabase.rpc('generate_employee_number', {
+        tenant_id_param: currentTenant.id
+      });
 
-      if (numberError) throw numberError;
+      if (numberError || !employeeNumber) {
+        console.error('Error generating employee number:', numberError);
+        toast({
+          title: "خطأ في توليد رقم الموظف",
+          description: numberError?.message || "فشل في توليد رقم موظف فريد",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      // Create employee record
-      const { error: employeeError } = await supabase
-        .from('employees')
-        .insert({
-          employee_number: employeeNumber,
-          user_id: authData.user.id,
+      console.log('Generated employee number:', employeeNumber);
+      
+      // 3. إنشاء المستخدم في نظام الأذونات
+      const { data: userData, error: userError } = await supabase.auth.admin.createUser({
+        email: formData.email,
+        password: formData.password,
+        email_confirm: true,
+        user_metadata: {
           first_name: formData.firstName,
           last_name: formData.lastName,
+          phone: formData.phone,
+          tenant_id: currentTenant.id
+        }
+      });
+
+      if (userError) {
+        console.error('Error creating user:', userError);
+        toast({
+          title: "خطأ في إنشاء المستخدم",
+          description: userError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('User created successfully:', userData.user.id);
+      
+      // 4. إنشاء سجل الموظف
+      const { data: employeeData, error: employeeError } = await supabase
+        .from('employees')
+        .insert({
+          user_id: userData.user.id,
+          employee_number: employeeNumber,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          full_name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
           phone: formData.phone,
           position: formData.position,
           department: formData.department,
-          salary: parseFloat(formData.salary),
+          salary: parseFloat(formData.salary) || 0,
           hire_date: new Date().toISOString().split('T')[0],
           status: 'active',
-          tenant_id: currentTenant?.id || ''
+          tenant_id: currentTenant.id
+        })
+        .select()
+        .single();
+
+      if (employeeError) {
+        console.error('Error creating employee:', employeeError);
+        // إذا فشل إنشاء الموظف، يجب حذف المستخدم
+        try {
+          await supabase.auth.admin.deleteUser(userData.user.id);
+        } catch (deleteError) {
+          console.error('Error deleting user after employee creation failure:', deleteError);
+        }
+        toast({
+          title: "خطأ في إنشاء الموظف",
+          description: employeeError.message,
+          variant: "destructive",
         });
+        return;
+      }
 
-      if (employeeError) throw employeeError;
+      console.log('Employee created successfully:', employeeData.id);
 
-      // Update user role in profiles
+      // 5. إنشاء سجل الملف الشخصي وتحديد الدور
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ role: formData.role })
-        .eq('user_id', authData.user.id);
+        .upsert({
+          id: userData.user.id,
+          user_id: userData.user.id,
+          full_name: `${formData.firstName} ${formData.lastName}`,
+          role: formData.role,
+          updated_at: new Date().toISOString()
+        });
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Error creating/updating profile:', profileError);
+        toast({
+          title: "تحذير",
+          description: "تم إنشاء المستخدم ولكن فشل في تحديد الدور",
+        });
+      }
+
+      // 6. إضافة دور المستخدم في جدول user_roles
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({
+          user_id: userData.user.id,
+          role: formData.role
+        });
+
+      if (roleError) {
+        console.error('Error assigning user role:', roleError);
+        toast({
+          title: "تحذير",
+          description: "تم إنشاء المستخدم ولكن فشل في تعيين الدور",
+        });
+      }
 
       toast({
-        title: "تم إنشاء المستخدم بنجاح",
-        description: "تم إضافة المستخدم الجديد إلى النظام",
+        title: "تم بنجاح",
+        description: `تم إنشاء المستخدم والموظف بنجاح - رقم الموظف: ${employeeNumber}`,
       });
 
-      // Reset form and close dialog
+      // إعادة تعيين النموذج وإغلاق الحوار
       setFormData({
         email: '',
         password: '',
@@ -100,8 +200,9 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onOpenChange, onUse
       onUserAdded();
 
     } catch (error: any) {
+      console.error('Unexpected error:', error);
       toast({
-        title: "خطأ في إنشاء المستخدم",
+        title: "خطأ غير متوقع",
         description: error.message || "حدث خطأ أثناء إنشاء المستخدم",
         variant: "destructive",
       });
