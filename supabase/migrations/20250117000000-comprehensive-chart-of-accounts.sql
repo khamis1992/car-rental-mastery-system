@@ -54,36 +54,81 @@ DECLARE
     bank_expenses_id UUID;
     
 BEGIN
-    -- حذف الحسابات الموجودة للمؤسسة المحددة
-    UPDATE public.chart_of_accounts SET parent_account_id = NULL WHERE tenant_id = tenant_id_param;
-    DELETE FROM public.chart_of_accounts WHERE tenant_id = tenant_id_param;
+    -- بدلاً من حذف الحسابات الموجودة، سنضيف الحسابات الجديدة فقط مع تجنب التكرار
+    -- هذا يحافظ على البيانات والقيود المحاسبية الموجودة
     
     -- ==================== المستوى الأول - الحسابات الرئيسية ====================
     
-    -- الأصول
+    -- الأصول - إضافة أو تحديث
     INSERT INTO public.chart_of_accounts (tenant_id, account_code, account_name, account_name_en, account_type, account_category, level, allow_posting, is_active, opening_balance, current_balance)
     VALUES (tenant_id_param, '1', 'الأصول', 'Assets', 'asset', 'current_asset', 1, false, true, 0, 0)
+    ON CONFLICT (tenant_id, account_code) DO UPDATE SET
+        account_name = EXCLUDED.account_name,
+        account_name_en = EXCLUDED.account_name_en,
+        updated_at = now()
     RETURNING id INTO assets_parent_id;
     
-    -- الالتزامات
+    -- إذا لم يتم الإرجاع (الحساب موجود)، احصل على المعرف
+    IF assets_parent_id IS NULL THEN
+        SELECT id INTO assets_parent_id FROM public.chart_of_accounts 
+        WHERE tenant_id = tenant_id_param AND account_code = '1';
+    END IF;
+    
+    -- الالتزامات - إضافة أو تحديث
     INSERT INTO public.chart_of_accounts (tenant_id, account_code, account_name, account_name_en, account_type, account_category, level, allow_posting, is_active, opening_balance, current_balance)
     VALUES (tenant_id_param, '2', 'الالتزامات', 'Liabilities', 'liability', 'current_liability', 1, false, true, 0, 0)
+    ON CONFLICT (tenant_id, account_code) DO UPDATE SET
+        account_name = EXCLUDED.account_name,
+        account_name_en = EXCLUDED.account_name_en,
+        updated_at = now()
     RETURNING id INTO liabilities_parent_id;
     
-    -- حقوق الملكية
+    IF liabilities_parent_id IS NULL THEN
+        SELECT id INTO liabilities_parent_id FROM public.chart_of_accounts 
+        WHERE tenant_id = tenant_id_param AND account_code = '2';
+    END IF;
+    
+    -- حقوق الملكية - إضافة أو تحديث
     INSERT INTO public.chart_of_accounts (tenant_id, account_code, account_name, account_name_en, account_type, account_category, level, allow_posting, is_active, opening_balance, current_balance)
     VALUES (tenant_id_param, '3', 'حقوق الملكية', 'Equity', 'equity', 'capital', 1, false, true, 0, 0)
+    ON CONFLICT (tenant_id, account_code) DO UPDATE SET
+        account_name = EXCLUDED.account_name,
+        account_name_en = EXCLUDED.account_name_en,
+        updated_at = now()
     RETURNING id INTO equity_parent_id;
     
-    -- الإيرادات
+    IF equity_parent_id IS NULL THEN
+        SELECT id INTO equity_parent_id FROM public.chart_of_accounts 
+        WHERE tenant_id = tenant_id_param AND account_code = '3';
+    END IF;
+    
+    -- الإيرادات - إضافة أو تحديث
     INSERT INTO public.chart_of_accounts (tenant_id, account_code, account_name, account_name_en, account_type, account_category, level, allow_posting, is_active, opening_balance, current_balance)
     VALUES (tenant_id_param, '4', 'الإيرادات', 'Revenue', 'revenue', 'operating_revenue', 1, false, true, 0, 0)
+    ON CONFLICT (tenant_id, account_code) DO UPDATE SET
+        account_name = EXCLUDED.account_name,
+        account_name_en = EXCLUDED.account_name_en,
+        updated_at = now()
     RETURNING id INTO revenue_parent_id;
     
-    -- المصروفات
+    IF revenue_parent_id IS NULL THEN
+        SELECT id INTO revenue_parent_id FROM public.chart_of_accounts 
+        WHERE tenant_id = tenant_id_param AND account_code = '4';
+    END IF;
+    
+    -- المصروفات - إضافة أو تحديث
     INSERT INTO public.chart_of_accounts (tenant_id, account_code, account_name, account_name_en, account_type, account_category, level, allow_posting, is_active, opening_balance, current_balance)
     VALUES (tenant_id_param, '5', 'المصروفات', 'Expenses', 'expense', 'operating_expense', 1, false, true, 0, 0)
+    ON CONFLICT (tenant_id, account_code) DO UPDATE SET
+        account_name = EXCLUDED.account_name,
+        account_name_en = EXCLUDED.account_name_en,
+        updated_at = now()
     RETURNING id INTO expenses_parent_id;
+    
+    IF expenses_parent_id IS NULL THEN
+        SELECT id INTO expenses_parent_id FROM public.chart_of_accounts 
+        WHERE tenant_id = tenant_id_param AND account_code = '5';
+    END IF;
     
     inserted_count := inserted_count + 5;
     
@@ -92,12 +137,32 @@ BEGIN
     -- الأصول المتداولة
     INSERT INTO public.chart_of_accounts (tenant_id, account_code, account_name, account_name_en, account_type, account_category, parent_account_id, level, allow_posting, is_active, opening_balance, current_balance)
     VALUES (tenant_id_param, '11', 'الأصول المتداولة', 'Current Assets', 'asset', 'current_asset', assets_parent_id, 2, false, true, 0, 0)
+    ON CONFLICT (tenant_id, account_code) DO UPDATE SET
+        account_name = EXCLUDED.account_name,
+        account_name_en = EXCLUDED.account_name_en,
+        parent_account_id = EXCLUDED.parent_account_id,
+        updated_at = now()
     RETURNING id INTO current_assets_id;
+    
+    IF current_assets_id IS NULL THEN
+        SELECT id INTO current_assets_id FROM public.chart_of_accounts 
+        WHERE tenant_id = tenant_id_param AND account_code = '11';
+    END IF;
     
     -- الأصول الغير متداولة
     INSERT INTO public.chart_of_accounts (tenant_id, account_code, account_name, account_name_en, account_type, account_category, parent_account_id, level, allow_posting, is_active, opening_balance, current_balance)
     VALUES (tenant_id_param, '12', 'الأصول الغير متداولة', 'Non-Current Assets', 'asset', 'fixed_asset', assets_parent_id, 2, false, true, 0, 0)
+    ON CONFLICT (tenant_id, account_code) DO UPDATE SET
+        account_name = EXCLUDED.account_name,
+        account_name_en = EXCLUDED.account_name_en,
+        parent_account_id = EXCLUDED.parent_account_id,
+        updated_at = now()
     RETURNING id INTO non_current_assets_id;
+    
+    IF non_current_assets_id IS NULL THEN
+        SELECT id INTO non_current_assets_id FROM public.chart_of_accounts 
+        WHERE tenant_id = tenant_id_param AND account_code = '12';
+    END IF;
     
     inserted_count := inserted_count + 2;
     
@@ -106,7 +171,16 @@ BEGIN
     -- النقدية وما يعادلها
     INSERT INTO public.chart_of_accounts (tenant_id, account_code, account_name, account_name_en, account_type, account_category, parent_account_id, level, allow_posting, is_active, opening_balance, current_balance)
     VALUES (tenant_id_param, '111', 'النقدية وما يعادلها', 'Cash and Cash Equivalents', 'asset', 'current_asset', current_assets_id, 3, false, true, 0, 0)
+    ON CONFLICT (tenant_id, account_code) DO UPDATE SET
+        account_name = EXCLUDED.account_name,
+        parent_account_id = EXCLUDED.parent_account_id,
+        updated_at = now()
     RETURNING id INTO cash_equivalents_id;
+    
+    IF cash_equivalents_id IS NULL THEN
+        SELECT id INTO cash_equivalents_id FROM public.chart_of_accounts 
+        WHERE tenant_id = tenant_id_param AND account_code = '111';
+    END IF;
     
     -- العملاء التجاريون
     INSERT INTO public.chart_of_accounts (tenant_id, account_code, account_name, account_name_en, account_type, account_category, parent_account_id, level, allow_posting, is_active, opening_balance, current_balance)
@@ -155,7 +229,8 @@ BEGIN
     VALUES 
     (tenant_id_param, '11111', 'الصندوق النقدي الرئيسي', 'Main Cash Box', 'asset', 'current_asset', cash_id, 5, true, true, 0, 0),
     (tenant_id_param, '11112', 'عهدة نقدية دائمة', 'Permanent Cash Custody', 'asset', 'current_asset', cash_id, 5, true, true, 0, 0),
-    (tenant_id_param, '11113', 'عهدة نقدية مؤقتة', 'Temporary Cash Custody', 'asset', 'current_asset', cash_id, 5, true, true, 0, 0);
+    (tenant_id_param, '11113', 'عهدة نقدية مؤقتة', 'Temporary Cash Custody', 'asset', 'current_asset', cash_id, 5, true, true, 0, 0)
+    ON CONFLICT (tenant_id, account_code) DO NOTHING;
     
     -- البنوك المحلية
     INSERT INTO public.chart_of_accounts (tenant_id, account_code, account_name, account_name_en, account_type, account_category, parent_account_id, level, allow_posting, is_active, opening_balance, current_balance)

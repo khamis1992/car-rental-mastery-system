@@ -67,8 +67,8 @@ export const TestChartOfAccountsIntegration = () => {
     setTestResult(null);
 
     try {
-      // استدعاء دالة تطبيق دليل الحسابات الجديد
-      const { data, error } = await supabase.rpc('setup_comprehensive_chart_of_accounts_v2', {
+      // استدعاء الدالة الموحدة لإضافة جميع الحسابات الناقصة (بدون المساس بالحسابات الحالية)
+      const { data, error } = await supabase.rpc('add_all_missing_accounts_unified', {
         tenant_id_param: await getCurrentTenantId()
       });
 
@@ -80,7 +80,7 @@ export const TestChartOfAccountsIntegration = () => {
       // تكوين نتيجة الاختبار
       const result: TestResult = {
         success: true,
-        accounts_created: data || 0,
+        accounts_created: data?.total_accounts_added || 0,
         accounts_summary: currentAccounts
       };
 
@@ -88,7 +88,7 @@ export const TestChartOfAccountsIntegration = () => {
       
       toast({
         title: 'نجح الاختبار',
-        description: `تم إنشاء ${data} حساب بنجاح`,
+        description: data?.message || `تم إضافة ${data?.total_accounts_added || 0} حساب ناقص بنجاح`,
       });
 
     } catch (error: any) {
@@ -163,8 +163,8 @@ export const TestChartOfAccountsIntegration = () => {
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              هذا الاختبار سيطبق دليل الحسابات الشامل الجديد على المؤسسة الحالية. 
-              سيتم حذف الحسابات الموجودة وإنشاء الحسابات الجديدة.
+              هذا الاختبار سيضيف فقط الحسابات الناقصة إلى دليل الحسابات الحالي. 
+              جميع الحسابات الموجودة ستبقى كما هي دون أي تغيير أو حذف.
             </AlertDescription>
           </Alert>
 
@@ -175,7 +175,7 @@ export const TestChartOfAccountsIntegration = () => {
               className="flex items-center gap-2"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {loading ? 'جاري التطبيق...' : 'تطبيق دليل الحسابات الجديد'}
+              {loading ? 'جاري الإضافة...' : 'إضافة الحسابات الناقصة فقط'}
             </Button>
 
             <Button 
@@ -271,8 +271,8 @@ export const TestChartOfAccountsIntegration = () => {
               <Alert>
                 <CheckCircle className="h-4 w-4" />
                 <AlertDescription>
-                  تم تطبيق دليل الحسابات الشامل بنجاح! يحتوي النظام الآن على هيكل محاسبي متكامل 
-                  يشمل جميع الحسابات المطلوبة للعمليات التجارية.
+                  تم إضافة الحسابات الناقصة بنجاح! تم الحفاظ على جميع الحسابات الحالية وإضافة 
+                  الحسابات المفقودة فقط لاستكمال الهيكل المحاسبي المطلوب.
                 </AlertDescription>
               </Alert>
             )}
