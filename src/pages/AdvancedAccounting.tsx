@@ -2,8 +2,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RealTimeStatus } from "@/components/accounting/RealTimeStatus";
 import { AdvancedReports } from "@/components/accounting/AdvancedReports";
 import { CurrencyConverter } from "@/components/accounting/CurrencyConverter";
+import { AIInsights } from "@/components/accounting/AIInsights";
+import { FinancialForecasting } from "@/components/accounting/FinancialForecasting";
+import { AuditCompliance } from "@/components/accounting/AuditCompliance";
+import { SystemIntegrations } from "@/components/accounting/SystemIntegrations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, PieChart, TrendingUp, Zap, DollarSign, Calculator } from "lucide-react";
+import { BarChart3, PieChart, TrendingUp, Zap, DollarSign, Calculator, Brain, Link } from "lucide-react";
 
 export const AdvancedAccounting = () => {
   return (
