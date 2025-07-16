@@ -854,18 +854,16 @@ const AdvancedTenantManagement: React.FC = () => {
                            </DropdownMenuItem>
                          )}
                          
-                         {tenant.status === 'cancelled' && (
-                           <DropdownMenuItem 
-                             className="text-red-600"
-                             onClick={() => {
-                               setTenantToDelete(tenant);
-                               setShowHardDeleteDialog(true);
-                             }}
-                           >
-                             <Trash2 className="w-4 h-4 ml-2" />
-                             حذف نهائي
-                           </DropdownMenuItem>
-                         )}
+                          <DropdownMenuItem 
+                            className="text-red-600"
+                            onClick={() => {
+                              setTenantToDelete(tenant);
+                              setShowHardDeleteDialog(true);
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4 ml-2" />
+                            حذف نهائي
+                          </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
