@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SUBSCRIPTION_PLANS, type SubscriptionPlanCode } from '@/types/subscription-plans';
 
 export const tenantOnboardingSchema = z.object({
   // معلومات المؤسسة الأساسية
@@ -43,7 +44,7 @@ export const tenantOnboardingSchema = z.object({
     .max(10, 'رمز العملة يجب أن يكون أقل من 10 أحرف'),
   
   // خطة الاشتراك
-  subscription_plan: z.enum(['basic', 'standard', 'premium', 'enterprise'], {
+  subscription_plan: z.enum(['basic', 'standard', 'premium', 'enterprise'] as const, {
     errorMap: () => ({ message: 'يجب اختيار خطة اشتراك صالحة' })
   }),
   
@@ -71,44 +72,6 @@ export const tenantOnboardingSchema = z.object({
 
 export type TenantOnboardingFormData = z.infer<typeof tenantOnboardingSchema>;
 
-// خطط الاشتراك المتاحة
-export const subscriptionPlans = {
-  basic: {
-    name: 'أساسي',
-    name_en: 'Basic',
-    max_users: 10,
-    max_vehicles: 50,
-    max_contracts: 100,
-    color: 'bg-gray-100 text-gray-800',
-    features: ['إدارة أساسية للمركبات', 'تقارير بسيطة', 'دعم عبر البريد الإلكتروني'],
-  },
-  standard: {
-    name: 'معياري',
-    name_en: 'Standard',
-    max_users: 25,
-    max_vehicles: 100,
-    max_contracts: 250,
-    color: 'bg-blue-100 text-blue-800',
-    features: ['جميع مميزات الأساسي', 'تقارير متقدمة', 'إدارة متعددة المستخدمين', 'دعم هاتفي'],
-  },
-  premium: {
-    name: 'مميز',
-    name_en: 'Premium',
-    max_users: 50,
-    max_vehicles: 200,
-    max_contracts: 500,
-    color: 'bg-purple-100 text-purple-800',
-    features: ['جميع مميزات المعياري', 'تحليلات متقدمة', 'API للتكامل', 'دعم أولوي'],
-  },
-  enterprise: {
-    name: 'مؤسسي',
-    name_en: 'Enterprise',
-    max_users: 100,
-    max_vehicles: 500,
-    max_contracts: 1000,
-    color: 'bg-amber-100 text-amber-800',
-    features: ['جميع المميزات', 'تخصيص كامل', 'دعم مخصص', 'تدريب مخصص'],
-  }
-} as const;
-
-export type SubscriptionPlanKey = keyof typeof subscriptionPlans;
+// استخدام خطط الاشتراك الموحدة
+export const subscriptionPlans = SUBSCRIPTION_PLANS;
+export type SubscriptionPlanKey = SubscriptionPlanCode;

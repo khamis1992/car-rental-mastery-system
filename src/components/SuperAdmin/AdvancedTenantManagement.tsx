@@ -18,6 +18,7 @@ import { TenantService } from '@/services/tenantService';
 import { Tenant } from '@/types/tenant';
 import { useToast } from "@/hooks/use-toast";
 import { EnhancedTenantOnboarding } from './TenantOnboarding/EnhancedTenantOnboarding';
+import { SUBSCRIPTION_PLANS, type SubscriptionPlanCode, PLAN_COLORS, PLAN_NAMES } from '@/types/subscription-plans';
 
 // نوع محدث للمؤسسة مع الإحصائيات الحقيقية
 interface TenantWithStats extends Tenant {
@@ -44,37 +45,7 @@ const AdvancedTenantManagement: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [planFilter, setPlanFilter] = useState<string>('all');
 
-  // تعريف الباقات المختلفة
-  const subscriptionPlans = {
-    basic: {
-      name: 'أساسي',
-      max_users: 10,
-      max_vehicles: 50,
-      max_contracts: 100,
-      color: 'bg-gray-100 text-gray-800'
-    },
-    standard: {
-      name: 'معياري',
-      max_users: 25,
-      max_vehicles: 100,
-      max_contracts: 250,
-      color: 'bg-blue-100 text-blue-800'
-    },
-    premium: {
-      name: 'مميز',
-      max_users: 50,
-      max_vehicles: 200,
-      max_contracts: 500,
-      color: 'bg-purple-100 text-purple-800'
-    },
-    enterprise: {
-      name: 'مؤسسي',
-      max_users: 100,
-      max_vehicles: 500,
-      max_contracts: 1000,
-      color: 'bg-gold-100 text-gold-800'
-    }
-  };
+  // استخدام خطط الاشتراك الموحدة
 
   const [newTenantData, setNewTenantData] = useState({
     name: '',
@@ -84,10 +55,10 @@ const AdvancedTenantManagement: React.FC = () => {
     country: 'Kuwait',
     timezone: 'Asia/Kuwait',
     currency: 'KWD',
-    subscription_plan: 'basic' as keyof typeof subscriptionPlans,
-    max_users: subscriptionPlans.basic.max_users,
-    max_vehicles: subscriptionPlans.basic.max_vehicles,
-    max_contracts: subscriptionPlans.basic.max_contracts,
+    subscription_plan: 'basic' as SubscriptionPlanCode,
+    max_users: SUBSCRIPTION_PLANS.basic.limits.max_users_per_tenant,
+    max_vehicles: SUBSCRIPTION_PLANS.basic.limits.max_vehicles,
+    max_contracts: SUBSCRIPTION_PLANS.basic.limits.max_contracts,
     admin_user: {
       email: '',
       password: '',
