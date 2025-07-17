@@ -50,7 +50,7 @@ import NotFound from "./pages/NotFound";
 import PublicQuotation from "./pages/PublicQuotation";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import BillingManagement from "./pages/BillingManagement";
-import LandingPageEditor from "./pages/super-admin/LandingPageEditor";
+import LandingEditor from "./pages/super-admin/LandingEditor";
 import MainDashboard from "./pages/super-admin/MainDashboard";
 import TenantManagement from "./pages/super-admin/TenantManagement";
 import UsersAndPermissions from "./pages/super-admin/UsersAndPermissions";
@@ -375,7 +375,9 @@ const App = () => (
                        } />
                         <Route path="/super-admin/landing-editor" element={
                           <ProtectedRoute requiredRole="super_admin">
-                            <LandingPageEditor />
+                            <Layout>
+                              <LandingEditor />
+                            </Layout>
                           </ProtectedRoute>
                         } />
                         <Route path="/tenant-isolation" element={
