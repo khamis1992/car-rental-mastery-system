@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { z } from 'zod';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
+import { Building2, User, Crown, ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { TenantService } from '@/services/tenantService';
-import { TenantOnboardingData } from '@/types/tenant';
-import { Loader2, Building2, User, Mail, Phone, MapPin, Globe, DollarSign } from 'lucide-react';
+import { SUBSCRIPTION_PLANS, type SubscriptionPlanCode } from '@/types/subscription-plans';
 
 const tenantOnboardingSchema = z.object({
-  // Organization Info
   name: z.string().min(2, 'اسم المؤسسة مطلوب'),
   slug: z.string()
     .min(3, 'الرمز يجب أن يكون 3 أحرف على الأقل')
@@ -26,7 +26,7 @@ const tenantOnboardingSchema = z.object({
   country: z.string().default('Kuwait'),
   timezone: z.string().default('Asia/Kuwait'),
   currency: z.string().default('KWD'),
-  subscription_plan: z.enum(['basic', 'standard', 'premium', 'enterprise']),
+  subscription_plan: z.enum(['basic', 'standard', 'premium', 'enterprise'] as const),
   
   // Admin User Info
   admin_email: z.string().email('البريد الإلكتروني غير صحيح'),
@@ -53,7 +53,7 @@ export const TenantOnboarding: React.FC<TenantOnboardingProps> = ({ onSuccess, o
       country: 'Kuwait',
       timezone: 'Asia/Kuwait',
       currency: 'KWD',
-      subscription_plan: 'basic',
+      subscription_plan: 'standard' as SubscriptionPlanCode,
     },
   });
 
@@ -69,7 +69,7 @@ export const TenantOnboarding: React.FC<TenantOnboardingProps> = ({ onSuccess, o
         return;
       }
 
-      const tenantData: TenantOnboardingData = {
+      const tenantData = {
         name: data.name,
         slug: data.slug,
         contact_email: data.contact_email,
@@ -291,7 +291,7 @@ export const TenantOnboarding: React.FC<TenantOnboardingProps> = ({ onSuccess, o
   const renderPlanStep = () => (
     <div className="space-y-4">
       <div className="text-center mb-6">
-        <DollarSign className="w-12 h-12 text-primary mx-auto mb-2" />
+        <Crown className="w-12 h-12 text-primary mx-auto mb-2" />
         <h3 className="text-lg font-semibold">خطة الاشتراك</h3>
         <p className="text-sm text-muted-foreground">اختر الخطة المناسبة لمؤسستك</p>
       </div>
@@ -309,10 +309,14 @@ export const TenantOnboarding: React.FC<TenantOnboardingProps> = ({ onSuccess, o
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="basic">أساسية - 5 مستخدمين، 10 مركبات</SelectItem>
-                <SelectItem value="standard">قياسية - 20 مستخدم، 50 مركبة</SelectItem>
-                <SelectItem value="premium">مميزة - 50 مستخدم، 100 مركبة</SelectItem>
-                <SelectItem value="enterprise">مؤسسية - غير محدود</SelectItem>
+                                 {Object.entries(SUBSCRIPTION_PLANS).map(([code, plan]) => (
+                   <SelectItem key={code} value={code}>
+                     <div className="flex items-center gap-2">
+                       <span>{plan.name}</span>
+                       {code === field.value && <Check className="w-4 h-4 text-green-500" />}
+                     </div>
+                   </SelectItem>
+                 ))}
               </SelectContent>
             </Select>
             <FormMessage />

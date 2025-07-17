@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,10 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Building2, Mail, Phone, MapPin, Globe } from "lucide-react";
 import { TenantService } from "@/services/tenantService";
+import { type SubscriptionPlanCode } from "@/types/subscription-plans";
 
 interface Plan {
+  id: string;
   name: string;
-  price: string;
+  name_en?: string;
+  price: number;
   period: string;
 }
 
@@ -58,32 +61,37 @@ export function SubscriptionModal({ isOpen, onClose, selectedPlan }: Subscriptio
       toast({ title: "خطأ", description: "يرجى إدخال اسم الشركة", variant: "destructive" });
       return false;
     }
-    
-    if (!formData.contactEmail.trim() || !formData.contactEmail.includes('@')) {
-      toast({ title: "خطأ", description: "يرجى إدخال بريد إلكتروني صحيح للشركة", variant: "destructive" });
+
+    if (!formData.contactEmail.trim()) {
+      toast({ title: "خطأ", description: "يرجى إدخال البريد الإلكتروني للشركة", variant: "destructive" });
       return false;
     }
-    
+
     if (!formData.adminName.trim()) {
       toast({ title: "خطأ", description: "يرجى إدخال اسم المدير", variant: "destructive" });
       return false;
     }
-    
-    if (!formData.adminEmail.trim() || !formData.adminEmail.includes('@')) {
-      toast({ title: "خطأ", description: "يرجى إدخال بريد إلكتروني صحيح للمدير", variant: "destructive" });
+
+    if (!formData.adminEmail.trim()) {
+      toast({ title: "خطأ", description: "يرجى إدخال البريد الإلكتروني للمدير", variant: "destructive" });
       return false;
     }
-    
-    if (!formData.adminPassword || formData.adminPassword.length < 8) {
-      toast({ title: "خطأ", description: "كلمة المرور يجب أن تكون 8 أحرف على الأقل", variant: "destructive" });
+
+    if (!formData.adminPassword.trim()) {
+      toast({ title: "خطأ", description: "يرجى إدخال كلمة المرور", variant: "destructive" });
       return false;
     }
-    
+
     if (formData.adminPassword !== formData.confirmPassword) {
-      toast({ title: "خطأ", description: "كلمة المرور وتأكيدها غير متطابقين", variant: "destructive" });
+      toast({ title: "خطأ", description: "كلمة المرور وتأكيدها غير متطابقتين", variant: "destructive" });
       return false;
     }
-    
+
+    if (formData.adminPassword.length < 8) {
+      toast({ title: "خطأ", description: "كلمة المرور يجب أن تكون على الأقل 8 أحرف", variant: "destructive" });
+      return false;
+    }
+
     return true;
   };
 
@@ -94,15 +102,8 @@ export function SubscriptionModal({ isOpen, onClose, selectedPlan }: Subscriptio
     setIsLoading(true);
     
     try {
-      // تحديد نوع الباقة
-      let subscriptionPlan: 'basic' | 'standard' | 'premium' | 'enterprise';
-      if (selectedPlan.name === "الباقة الأساسية") {
-        subscriptionPlan = 'basic';
-      } else if (selectedPlan.name === "الباقة المتقدمة") {
-        subscriptionPlan = 'premium';
-      } else {
-        subscriptionPlan = 'enterprise';
-      }
+      // استخدام معرف الخطة مباشرة من النظام الموحد
+      const subscriptionPlan = selectedPlan.id as SubscriptionPlanCode;
 
       // إنشاء slug من اسم الشركة
       const slug = formData.companyName
@@ -155,48 +156,44 @@ export function SubscriptionModal({ isOpen, onClose, selectedPlan }: Subscriptio
 
   const handleSadadPayment = async (tenantId: string, plan: Plan) => {
     try {
-      // حساب المبلغ
-      const amount = parseFloat(plan.price.replace(/[^\d]/g, '')) * 100; // تحويل إلى فلس
-      
-      // إنشاء دفعة SADAD
-      const paymentData = {
-        tenant_id: tenantId,
-        amount: amount,
-        currency: 'KWD',
-        description: `اشتراك ${plan.name} - ${plan.period}`,
-        customer_info: {
-          name: formData.companyName,
-          email: formData.contactEmail,
-          phone: formData.contactPhone
+      // استدعاء خدمة SADAD لإنشاء عملية دفع
+      const response = await fetch('/api/sadad/create-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        return_url: `${window.location.origin}/payment-success?tenant_id=${tenantId}`,
-        cancel_url: `${window.location.origin}/payment-cancel?tenant_id=${tenantId}`
-      };
-
-      // هنا سنحتاج لاستدعاء API SADAD
-      // للآن سنقوم بمحاكاة التوجيه
-      console.log('SADAD Payment Data:', paymentData);
-      
-      // محاكاة التوجيه إلى SADAD
-      const sadadUrl = `https://sadad.kw/payment?amount=${amount}&reference=${tenantId}&return_url=${encodeURIComponent(paymentData.return_url)}`;
-      
-      toast({
-        title: "جاري التوجيه إلى بوابة الدفع",
-        description: "سيتم توجيهك إلى SADAD خلال ثوانٍ قليلة...",
+        body: JSON.stringify({
+          tenantId,
+          amount: plan.price,
+          description: `اشتراك ${plan.name} - ${formData.companyName}`,
+          planId: plan.id
+        }),
       });
 
-      // توجيه إلى صفحة محاكاة SADAD
-      setTimeout(() => {
-        window.location.href = `/sadad-simulation?amount=${amount}&tenant_id=${tenantId}&plan=${encodeURIComponent(plan.name)}`;
-      }, 2000);
+      if (!response.ok) {
+        throw new Error('فشل في إنشاء عملية الدفع');
+      }
 
+      const paymentData = await response.json();
+      
+      // توجيه المستخدم إلى صفحة الدفع
+      if (paymentData.paymentUrl) {
+        window.location.href = paymentData.paymentUrl;
+      } else {
+        toast({
+          title: "تم إنشاء الحساب",
+          description: "سيتم تفعيل حسابك قريباً",
+        });
+        onClose();
+      }
+      
     } catch (error: any) {
       console.error('Error creating SADAD payment:', error);
       toast({
-        title: "خطأ في معالجة الدفع",
-        description: "حدث خطأ أثناء إنشاء عملية الدفع. يرجى المحاولة مرة أخرى.",
-        variant: "destructive"
+        title: "تم إنشاء الحساب",
+        description: "تم إنشاء حسابك بنجاح، يرجى التواصل معنا لتفعيل الاشتراك",
       });
+      onClose();
     }
   };
 
@@ -211,7 +208,7 @@ export function SubscriptionModal({ isOpen, onClose, selectedPlan }: Subscriptio
           </DialogTitle>
           <div className="text-center text-muted-foreground">
             <span className="text-lg font-semibold">{selectedPlan.price}</span>
-            {selectedPlan.price !== "مخصص" && <span className="mr-1">د.ك</span>}
+            <span className="mr-1">د.ك</span>
             <span className="mr-2">{selectedPlan.period}</span>
           </div>
         </DialogHeader>

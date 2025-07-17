@@ -23,7 +23,7 @@ const tenantSchema = z.object({
   country: z.string().min(1, 'البلد مطلوب'),
   timezone: z.string().min(1, 'المنطقة الزمنية مطلوبة'),
   currency: z.string().min(1, 'العملة مطلوبة'),
-  subscription_plan: z.enum(['basic', 'standard', 'premium', 'enterprise']),
+  subscription_plan: z.enum(['basic', 'standard', 'premium', 'enterprise'] as const),
   admin_user: z.object({
     email: z.string().email('البريد الإلكتروني غير صحيح'),
     password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
