@@ -2,10 +2,10 @@ import { Car, Users, BarChart3, Shield, Clock } from "lucide-react";
 
 const features = [
   {
-    icon: Car,
-    title: "إدارة الأسطول المتقدمة",
-    description: "تتبع شامل للمركبات مع نظام صيانة ذكي ومراقبة الأداء في الوقت الفعلي",
-    color: "text-blue-600 bg-blue-100"
+    icon: Shield,
+    title: "أمان وحماية البيانات",
+    description: "حماية متطورة للبيانات مع نسخ احتياطية آمنة وصلاحيات متدرجة",
+    color: "text-red-600 bg-red-100"
   },
   {
     icon: Users,
@@ -14,22 +14,22 @@ const features = [
     color: "text-green-600 bg-green-100"
   },
   {
-    icon: Shield,
-    title: "أمان وحماية البيانات",
-    description: "حماية متطورة للبيانات مع نسخ احتياطية آمنة وصلاحيات متدرجة",
-    color: "text-red-600 bg-red-100"
-  },
-  {
-    icon: BarChart3,
-    title: "تقارير وتحليلات ذكية",
-    description: "لوحات تحكم تفاعلية وتقارير مفصلة لاتخاذ قرارات مدروسة",
-    color: "text-purple-600 bg-purple-100"
+    icon: Car,
+    title: "إدارة الأسطول المتقدمة",
+    description: "تتبع شامل للمركبات مع نظام صيانة ذكي ومراقبة الأداء في الوقت الفعلي",
+    color: "text-blue-600 bg-blue-100"
   },
   {
     icon: Clock,
     title: "أتمتة العمليات",
     description: "أتمتة العقود والفواتير والتذكيرات لتوفير الوقت والجهد",
     color: "text-orange-600 bg-orange-100"
+  },
+  {
+    icon: BarChart3,
+    title: "تقارير وتحليلات ذكية",
+    description: "لوحات تحكم تفاعلية وتقارير مفصلة لاتخاذ قرارات مدروسة",
+    color: "text-purple-600 bg-purple-100"
   }
 ];
 
