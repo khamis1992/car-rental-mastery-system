@@ -13,8 +13,6 @@ import { accountingService } from '@/services/accountingService';
 import { useToast } from '@/hooks/use-toast';
 import { CostCenterService, CostCenter } from '@/services/BusinessServices/CostCenterService';
 import { CostCenterFinancialAnalysis, AllCostCentersOverview } from './CostCenterFinancialAnalysis';
-import { TraditionalFinancialReports } from './TraditionalFinancialReports';
-import { EnhancedTrialBalance } from './EnhancedTrialBalance';
 
 export const FinancialReportsTab = () => {
   const [trialBalance, setTrialBalance] = useState<TrialBalance[]>([]);
@@ -164,19 +162,13 @@ export const FinancialReportsTab = () => {
       </Card>
 
       {/* التقارير */}
-      <Tabs defaultValue="traditional-analysis" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+      <Tabs defaultValue="trial-balance" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="cost-center-analysis">تحليل مراكز التكلفة</TabsTrigger>
           <TabsTrigger value="balance-sheet">الميزانية العمومية</TabsTrigger>
           <TabsTrigger value="income-statement">قائمة الدخل</TabsTrigger>
           <TabsTrigger value="trial-balance">ميزان المراجعة</TabsTrigger>
-          <TabsTrigger value="traditional-analysis">التحليل التقليدي</TabsTrigger>
         </TabsList>
-
-        {/* التحليل التقليدي */}
-        <TabsContent value="traditional-analysis">
-          <TraditionalFinancialReports />
-        </TabsContent>
 
         {/* تحليل مراكز التكلفة */}
         <TabsContent value="cost-center-analysis">
@@ -205,7 +197,58 @@ export const FinancialReportsTab = () => {
 
         {/* ميزان المراجعة */}
         <TabsContent value="trial-balance">
-          <EnhancedTrialBalance />
+          <Card className="card-elegant">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <Button variant="outline" onClick={() => exportReport('ميزان المراجعة')}>
+                  <Download className="w-4 h-4 ml-2" />
+                  تصدير
+                </Button>
+                <CardTitle>ميزان المراجعة</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-right">الرصيد الدائن</TableHead>
+                    <TableHead className="text-right">الرصيد المدين</TableHead>
+                    <TableHead className="text-right">اسم الحساب</TableHead>
+                    <TableHead className="text-right">رقم الحساب</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {trialBalance.map((account, index) => (
+                    <TableRow key={index}>
+                      <TableCell className={`text-right ${account.credit_balance > 0 ? 'font-medium text-blue-600' : ''}`}>
+                        {account.credit_balance > 0 ? formatAmount(account.credit_balance) : '-'}
+                      </TableCell>
+                      <TableCell className={`text-right ${account.debit_balance > 0 ? 'font-medium text-green-600' : ''}`}>
+                        {account.debit_balance > 0 ? formatAmount(account.debit_balance) : '-'}
+                      </TableCell>
+                      <TableCell className="text-right">{account.account_name}</TableCell>
+                      <TableCell className="font-medium text-right">{account.account_code}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <TableRow className="bg-muted font-bold">
+                  <TableCell className="text-right text-blue-600">
+                    {formatAmount(trialBalance.reduce((sum, acc) => sum + acc.credit_balance, 0))}
+                  </TableCell>
+                  <TableCell className="text-right text-green-600">
+                    {formatAmount(trialBalance.reduce((sum, acc) => sum + acc.debit_balance, 0))}
+                  </TableCell>
+                  <TableCell colSpan={2} className="text-right">الإجمالي</TableCell>
+                </TableRow>
+              </Table>
+              
+              {trialBalance.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  لا توجد بيانات لعرضها في ميزان المراجعة
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* قائمة الدخل */}

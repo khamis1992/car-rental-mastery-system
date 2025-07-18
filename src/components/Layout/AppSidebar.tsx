@@ -14,7 +14,6 @@ import {
   Clock,
   Calendar,
   Building2,
-  Building,
   DollarSign,
   UserCheck,
   ChevronDown,
@@ -109,11 +108,6 @@ const financialItems = [
     title: "مراكز التكلفة", 
     url: "/cost-centers", 
     icon: Building2 
-  },
-  { 
-    title: "الأصول الثابتة", 
-    url: "/fixed-assets", 
-    icon: Building 
   },
 ];
 

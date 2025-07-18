@@ -12,12 +12,11 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface CostCenterFormProps {
   costCenter?: CostCenter;
-  parentId?: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-const CostCenterForm = ({ costCenter, parentId, onClose, onSuccess }: CostCenterFormProps) => {
+const CostCenterForm = ({ costCenter, onClose, onSuccess }: CostCenterFormProps) => {
   const [formData, setFormData] = useState<CreateCostCenterData>({
     cost_center_code: '',
     cost_center_name: '',
@@ -82,14 +81,8 @@ const CostCenterForm = ({ costCenter, parentId, onClose, onSuccess }: CostCenter
         department_id: costCenter.department_id || '',
         parent_id: costCenter.parent_id || ''
       });
-    } else if (parentId) {
-      // إذا كان هناك مركز تكلفة أب محدد، قم بتعيينه
-      setFormData(prev => ({
-        ...prev,
-        parent_id: parentId
-      }));
     }
-  }, [costCenter, parentId]);
+  }, [costCenter]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

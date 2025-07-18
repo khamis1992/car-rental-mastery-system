@@ -1,8 +1,6 @@
 import React from 'react';
 import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
 import { ChartOfAccountsSetup } from '@/components/Accounting/ChartOfAccountsSetup';
-import { GeneralLedgerReport } from '@/components/Accounting/GeneralLedgerReport';
-import { AccountingDashboard } from '@/components/Accounting/AccountingDashboard';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Plus, Upload, Download } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -36,24 +34,14 @@ const ChartOfAccounts = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="dashboard" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard">لوحة المعلومات</TabsTrigger>
+      <Tabs defaultValue="accounts" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
-          <TabsTrigger value="ledger">دفتر الأستاذ</TabsTrigger>
           <TabsTrigger value="setup">إعداد الحسابات</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="dashboard" className="space-y-4">
-          <AccountingDashboard />
-        </TabsContent>
-
         <TabsContent value="accounts" className="space-y-4">
           <ChartOfAccountsTab />
-        </TabsContent>
-
-        <TabsContent value="ledger" className="space-y-4">
-          <GeneralLedgerReport />
         </TabsContent>
 
         <TabsContent value="setup" className="space-y-4">

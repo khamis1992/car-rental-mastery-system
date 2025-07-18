@@ -7,16 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 const FinancialReports = () => {
   const reportTypes = [
     {
-      title: "التحليل التقليدي",
-      description: "تقرير شامل بالأرصدة الافتتاحية والختامية",
+      title: "ميزان المراجعة",
+      description: "عرض جميع الحسابات وأرصدتها",
       icon: <TrendingUp className="w-5 h-5" />,
-      action: "عرض التحليل التقليدي"
-    },
-    {
-      title: "ميزان المراجعة المحسن",
-      description: "ميزان شامل بحركة الفترة والأرصدة",
-      icon: <TrendingUp className="w-5 h-5" />,
-      action: "عرض الميزان المحسن"
+      action: "إنشاء التقرير"
     },
     {
       title: "قائمة الدخل",
