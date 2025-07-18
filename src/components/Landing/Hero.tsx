@@ -59,14 +59,14 @@ export function Hero() {
               </Button>
               
               <Link to="/register">
-                <Button size="lg" variant="outline" className="text-lg px-8 py-4 border-white/30 text-white hover:bg-white/10">
+                <Button size="lg" variant="secondary" className="text-lg px-8 py-4 bg-white text-primary hover:bg-white/90">
                   تسجيل مباشر
                   <ArrowLeft className="w-5 h-5 mr-2" />
                 </Button>
               </Link>
               
               <Link to="/auth">
-                <Button size="lg" variant="ghost" className="text-lg px-6 py-4 text-white/80 hover:text-white hover:bg-white/5">
+                <Button size="lg" variant="secondary" className="text-lg px-8 py-4 bg-white text-primary hover:bg-white/90">
                   دخول
                 </Button>
               </Link>
