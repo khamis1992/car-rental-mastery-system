@@ -46,11 +46,11 @@ export function Features() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center">
           {features.map((feature, index) => (
             <div 
               key={index}
-              className="group relative p-8 bg-white rounded-3xl border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center"
+              className="group relative p-8 bg-white rounded-3xl border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center w-full max-w-sm h-full flex flex-col"
             >
               {/* Icon container */}
               <div className="flex justify-center mb-6">
@@ -65,7 +65,7 @@ export function Features() {
               </h3>
               
               {/* Description */}
-              <p className="text-gray-600 leading-relaxed text-sm">
+              <p className="text-gray-600 leading-relaxed text-sm flex-grow">
                 {feature.description}
               </p>
             </div>
