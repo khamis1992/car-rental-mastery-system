@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTenant } from '@/contexts/TenantContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import AttendanceReminderPopup from './AttendanceReminderPopup';
 
 const AttendanceReminderWrapper = () => {
   const location = useLocation();
-  const { user, session, isSaasAdmin } = useAuth();
-  const { currentTenant, currentUserRole, loading: tenantLoading } = useTenant();
+  const { user, session } = useAuth();
   const { systemSettings } = useSettings();
   const [showAttendanceReminder, setShowAttendanceReminder] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -18,44 +16,7 @@ const AttendanceReminderWrapper = () => {
     return null;
   }
 
-  // إخفاء التذكير للمستخدمين الذين ليسوا من مؤسسة
-  const shouldShowAttendanceReminder = () => {
-    // التحقق من أن المستخدم مسجل دخول
-    if (!user || !session) {
-      return false;
-    }
-
-    // إخفاء التذكير لـ Super Admin
-    if (isSaasAdmin) {
-      return false;
-    }
-
-    // التحقق من وجود مؤسسة حالية ودور المستخدم
-    if (!currentTenant || !currentUserRole) {
-      return false;
-    }
-
-    // التحقق من أن المستخدم له دور صالح في المؤسسة
-    const validTenantRoles = ['tenant_admin', 'manager', 'accountant', 'technician', 'receptionist'];
-    if (!validTenantRoles.includes(currentUserRole)) {
-      return false;
-    }
-
-    // التحقق من تفعيل نظام الحضور
-    if (!systemSettings.attendanceEnabled) {
-      return false;
-    }
-
-    return true;
-  };
-
   const checkAttendanceStatus = () => {
-    // التحقق من الشروط الأساسية أولاً
-    if (!shouldShowAttendanceReminder()) {
-      setShowAttendanceReminder(false);
-      return;
-    }
-
     const today = new Date().toDateString();
     const lastCheckIn = localStorage.getItem('lastCheckInDate');
     const lastReminderShown = localStorage.getItem('lastAttendanceReminderShown');
@@ -76,13 +37,8 @@ const AttendanceReminderWrapper = () => {
   };
 
   useEffect(() => {
-    // انتظار تحميل بيانات المؤسسة أولاً
-    if (tenantLoading) {
-      return;
-    }
-
-    // التحقق من الشروط الأساسية
-    if (!shouldShowAttendanceReminder()) {
+    // التحقق من تفعيل نظام الحضور أولاً
+    if (!systemSettings.attendanceEnabled) {
       setShowAttendanceReminder(false);
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -91,11 +47,14 @@ const AttendanceReminderWrapper = () => {
       return;
     }
 
-    // فحص فوري للحالة
-    checkAttendanceStatus();
-    
-    // إعداد مؤقت يعمل كل 30 دقيقة
-    timerRef.current = setInterval(checkAttendanceStatus, 30 * 60 * 1000);
+    // إذا كان المستخدم مسجل دخول ونظام الحضور مفعل
+    if (user && session) {
+      // فحص فوري للحالة
+      checkAttendanceStatus();
+      
+      // إعداد مؤقت يعمل كل 30 دقيقة
+      timerRef.current = setInterval(checkAttendanceStatus, 30 * 60 * 1000);
+    }
 
     // تنظيف المؤقت عند تغيير التبعيات أو إلغاء تركيب المكون
     return () => {
@@ -104,21 +63,20 @@ const AttendanceReminderWrapper = () => {
         timerRef.current = null;
       }
     };
-  }, [user, session, currentTenant, currentUserRole, systemSettings.attendanceEnabled, tenantLoading, isSaasAdmin]);
+  }, [user, session, systemSettings.attendanceEnabled]);
 
-  // إخفاء التذكير إذا تم إيقاف نظام الحضور أو تغيرت الشروط
+  // إخفاء التذكير إذا تم إيقاف نظام الحضور
   useEffect(() => {
-    if (!shouldShowAttendanceReminder()) {
+    if (!systemSettings.attendanceEnabled) {
       setShowAttendanceReminder(false);
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
     }
-  }, [systemSettings.attendanceEnabled, currentTenant, currentUserRole, isSaasAdmin]);
+  }, [systemSettings.attendanceEnabled]);
 
-  // عدم عرض أي شيء إذا لم تتحقق الشروط الأساسية
-  if (!shouldShowAttendanceReminder()) {
+  if (!systemSettings.attendanceEnabled) {
     return null;
   }
 

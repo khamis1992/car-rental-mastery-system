@@ -85,9 +85,9 @@ export const EnhancedTenantOnboarding: React.FC<EnhancedTenantOnboardingProps> =
       const plan = subscriptionPlans[data.subscription_plan];
       const tenantData = {
         ...data,
-        max_users: plan.limits.max_users_per_tenant,
-        max_vehicles: plan.limits.max_vehicles,
-        max_contracts: plan.limits.max_contracts,
+        max_users: plan.max_users,
+        max_vehicles: plan.max_vehicles,
+        max_contracts: plan.max_contracts,
       };
 
       await tenantService.createTenant(tenantData as any);

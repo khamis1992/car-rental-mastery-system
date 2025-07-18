@@ -22,18 +22,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-dev-debug.log
-# Dependency directories
-node_modules/
-# Environment variables
-.env
-.vscode
-# OS specific
-
-# Cursor MCP configuration (contains API keys)
-.cursor/mcp.json 
-
-# Task files
-# tasks.json
-# tasks/ 

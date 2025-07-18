@@ -2,10 +2,10 @@ import { Car, Users, BarChart3, Shield, Clock } from "lucide-react";
 
 const features = [
   {
-    icon: Shield,
-    title: "أمان وحماية البيانات",
-    description: "حماية متطورة للبيانات مع نسخ احتياطية آمنة وصلاحيات متدرجة",
-    color: "text-red-600 bg-red-100"
+    icon: Car,
+    title: "إدارة الأسطول المتقدمة",
+    description: "تتبع شامل للمركبات مع نظام صيانة ذكي ومراقبة الأداء في الوقت الفعلي",
+    color: "text-blue-600 bg-blue-100"
   },
   {
     icon: Users,
@@ -14,22 +14,22 @@ const features = [
     color: "text-green-600 bg-green-100"
   },
   {
-    icon: Car,
-    title: "إدارة الأسطول المتقدمة",
-    description: "تتبع شامل للمركبات مع نظام صيانة ذكي ومراقبة الأداء في الوقت الفعلي",
-    color: "text-blue-600 bg-blue-100"
-  },
-  {
-    icon: Clock,
-    title: "أتمتة العمليات",
-    description: "أتمتة العقود والفواتير والتذكيرات لتوفير الوقت والجهد",
-    color: "text-orange-600 bg-orange-100"
+    icon: Shield,
+    title: "أمان وحماية البيانات",
+    description: "حماية متطورة للبيانات مع نسخ احتياطية آمنة وصلاحيات متدرجة",
+    color: "text-red-600 bg-red-100"
   },
   {
     icon: BarChart3,
     title: "تقارير وتحليلات ذكية",
     description: "لوحات تحكم تفاعلية وتقارير مفصلة لاتخاذ قرارات مدروسة",
     color: "text-purple-600 bg-purple-100"
+  },
+  {
+    icon: Clock,
+    title: "أتمتة العمليات",
+    description: "أتمتة العقود والفواتير والتذكيرات لتوفير الوقت والجهد",
+    color: "text-orange-600 bg-orange-100"
   }
 ];
 
@@ -46,11 +46,11 @@ export function Features() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <div 
               key={index}
-              className="group relative p-8 bg-white rounded-3xl border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center w-full max-w-sm h-full flex flex-col"
+              className="group relative p-8 bg-white rounded-3xl border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center"
             >
               {/* Icon container */}
               <div className="flex justify-center mb-6">
@@ -65,7 +65,7 @@ export function Features() {
               </h3>
               
               {/* Description */}
-              <p className="text-gray-600 leading-relaxed text-sm flex-grow">
+              <p className="text-gray-600 leading-relaxed text-sm">
                 {feature.description}
               </p>
             </div>

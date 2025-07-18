@@ -1,170 +1,166 @@
 import { Button } from "@/components/ui/button";
-import { Check, Zap, Crown, Building, Star } from "lucide-react";
+import { Check, Zap, Crown, Building } from "lucide-react";
 import { useState } from "react";
 import { SubscriptionModal } from "./SubscriptionModal";
-import { SUBSCRIPTION_PLANS, formatPrice } from "@/types/subscription-plans";
 
-// تحويل خطط SaaS إلى تنسيق صفحة Landing
-const plans = [{
-  id: 'basic',
-  name: SUBSCRIPTION_PLANS.basic.name,
-  name_en: SUBSCRIPTION_PLANS.basic.name_en,
-  icon: Zap,
-  price: SUBSCRIPTION_PLANS.basic.price_monthly,
-  period: "شهرياً",
-  description: "مثالية للشركات الناشئة والصغيرة",
-  features: SUBSCRIPTION_PLANS.basic.features,
-  popular: false,
-  buttonText: "اشترك الآن",
-  limits: {
-    users: SUBSCRIPTION_PLANS.basic.limits.max_users_per_tenant,
-    vehicles: SUBSCRIPTION_PLANS.basic.limits.max_vehicles,
-    contracts: SUBSCRIPTION_PLANS.basic.limits.max_contracts
+const plans = [
+  {
+    name: "الباقة الأساسية",
+    icon: Zap,
+    price: "٢٩٩",
+    period: "شهرياً",
+    description: "مثالية للشركات الناشئة",
+    features: [
+      "إدارة حتى ٥٠ مركبة",
+      "نظام العقود الأساسي",
+      "تقارير شهرية",
+      "دعم فني عبر البريد",
+      "تطبيق الموبايل"
+    ],
+    popular: false,
+    buttonText: "اشترك"
+  },
+  {
+    name: "الباقة المتقدمة",
+    icon: Crown,
+    price: "٥٩٩",
+    period: "شهرياً",
+    description: "الأكثر شعبية للشركات المتوسطة",
+    features: [
+      "إدارة حتى ٢٠٠ مركبة",
+      "نظام العقود المتقدم",
+      "تقارير تفاعلية يومية",
+      "دعم فني ٢٤/٧",
+      "تطبيق موبايل متطور",
+      "نظام GPS للتتبع",
+      "إدارة الصيانة",
+      "تكامل مع البنوك"
+    ],
+    popular: true,
+    buttonText: "اشترك"
+  },
+  {
+    name: "الباقة المؤسسية",
+    icon: Building,
+    price: "مخصص",
+    period: "حسب الاحتياج",
+    description: "للمؤسسات الكبيرة والحكومية",
+    features: [
+      "مركبات غير محدودة",
+      "تخصيص كامل للنظام",
+      "تقارير متقدمة وذكية",
+      "دعم فني مخصص",
+      "تدريب شامل للفريق",
+      "خوادم مخصصة",
+      "أمان إضافي",
+      "تكامل مع الأنظمة الحالية"
+    ],
+    popular: false,
+    buttonText: "تواصل معنا"
   }
-}, {
-  id: 'standard',
-  name: SUBSCRIPTION_PLANS.standard.name,
-  name_en: SUBSCRIPTION_PLANS.standard.name_en,
-  icon: Crown,
-  price: SUBSCRIPTION_PLANS.standard.price_monthly,
-  period: "شهرياً",
-  description: "الأكثر شعبية للشركات المتوسطة",
-  features: SUBSCRIPTION_PLANS.standard.features,
-  popular: true,
-  buttonText: "اشترك الآن",
-  limits: {
-    users: SUBSCRIPTION_PLANS.standard.limits.max_users_per_tenant,
-    vehicles: SUBSCRIPTION_PLANS.standard.limits.max_vehicles,
-    contracts: SUBSCRIPTION_PLANS.standard.limits.max_contracts
-  }
-}, {
-  id: 'premium',
-  name: SUBSCRIPTION_PLANS.premium.name,
-  name_en: SUBSCRIPTION_PLANS.premium.name_en,
-  icon: Star,
-  price: SUBSCRIPTION_PLANS.premium.price_monthly,
-  period: "شهرياً",
-  description: "للشركات الكبيرة والمتقدمة",
-  features: SUBSCRIPTION_PLANS.premium.features,
-  popular: false,
-  buttonText: "اشترك الآن",
-  limits: {
-    users: SUBSCRIPTION_PLANS.premium.limits.max_users_per_tenant,
-    vehicles: SUBSCRIPTION_PLANS.premium.limits.max_vehicles,
-    contracts: SUBSCRIPTION_PLANS.premium.limits.max_contracts
-  }
-}, {
-  id: 'enterprise',
-  name: SUBSCRIPTION_PLANS.enterprise.name,
-  name_en: SUBSCRIPTION_PLANS.enterprise.name_en,
-  icon: Building,
-  price: SUBSCRIPTION_PLANS.enterprise.price_monthly,
-  period: "شهرياً",
-  description: "للمؤسسات الكبيرة والحكومية",
-  features: SUBSCRIPTION_PLANS.enterprise.features,
-  popular: false,
-  buttonText: "تواصل معنا",
-  limits: {
-    users: SUBSCRIPTION_PLANS.enterprise.limits.max_users_per_tenant,
-    vehicles: SUBSCRIPTION_PLANS.enterprise.limits.max_vehicles,
-    contracts: SUBSCRIPTION_PLANS.enterprise.limits.max_contracts
-  }
-}];
+];
+
 export function Pricing() {
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const handleSubscribe = (plan: typeof plans[0]) => {
-    if (plan.id === 'enterprise') {
+    if (plan.price === "مخصص") {
       // للباقة المؤسسية، نحتاج لتوجيه المستخدم للتواصل
       window.location.href = "mailto:sales@saptcogulf.com?subject=استفسار عن الباقة المؤسسية";
       return;
     }
-
-    // توجيه لصفحة التسجيل الجديدة مع الخطة المحددة
-    window.location.href = `/register?plan=${plan.id}`;
+    
+    setSelectedPlan(plan);
+    setIsModalOpen(true);
   };
-  return <section id="pricing" className="py-20 bg-background">
+
+  return (
+    <section id="pricing" className="py-20 bg-background">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-foreground">
             خطط أسعار شفافة
           </h2>
-          
-          
-          {/* CTA Highlight */}
-          
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            اختر الباقة التي تناسب حجم عملك. جميع الباقات تشمل فترة تجريبية مجانية لمدة ١٤ يوم
+          </p>
         </div>
 
-        <div className="grid lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {plans.map((plan, index) => <div key={index} className={`relative p-6 rounded-2xl border transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 ${plan.popular ? 'border-primary bg-card shadow-lg scale-105' : 'border-border bg-card'}`}>
+        <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {plans.map((plan, index) => (
+            <div 
+              key={index}
+              className={`relative p-8 rounded-2xl border transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 ${
+                plan.popular 
+                  ? 'border-primary bg-card shadow-lg scale-105' 
+                  : 'border-border bg-card'
+              }`}
+            >
               {/* Popular Badge */}
-              {plan.popular && <div className="absolute -top-4 right-6 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold">
+              {plan.popular && (
+                <div className="absolute -top-4 right-8 bg-primary text-primary-foreground px-6 py-2 rounded-full text-sm font-semibold">
                   الأكثر اختياراً
-                </div>}
+                </div>
+              )}
 
               {/* Icon */}
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${plan.popular ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                <plan.icon className="w-7 h-7" />
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 ${
+                plan.popular ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+              }`}>
+                <plan.icon className="w-8 h-8" />
               </div>
 
               {/* Plan Details */}
-              <h3 className="text-xl font-bold mb-1 text-card-foreground">
+              <h3 className="text-2xl font-bold mb-2 text-card-foreground">
                 {plan.name}
               </h3>
               
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-muted-foreground mb-6">
                 {plan.description}
               </p>
 
               {/* Price */}
-              <div className="mb-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-card-foreground">
-                    {formatPrice(plan.price)}
+              <div className="mb-8">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold text-card-foreground">
+                    {plan.price}
                   </span>
+                  {plan.price !== "مخصص" && (
+                    <span className="text-muted-foreground">د.ك</span>
+                  )}
                 </div>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground">
                   {plan.period}
                 </span>
               </div>
 
-              {/* Limits */}
-              <div className="mb-4 p-3 bg-muted/30 rounded-lg">
-                <div className="text-xs text-muted-foreground mb-2">الحدود المسموحة:</div>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="text-center">
-                    <div className="font-bold text-primary">{plan.limits.users}</div>
-                    <div className="text-muted-foreground">مستخدم</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-bold text-primary">{plan.limits.vehicles}</div>
-                    <div className="text-muted-foreground">مركبة</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-bold text-primary">{plan.limits.contracts}</div>
-                    <div className="text-muted-foreground">عقد</div>
-                  </div>
-                </div>
-              </div>
-
               {/* Features */}
-              <ul className="space-y-2 mb-6">
-                {plan.features.slice(0, 5).map((feature, featureIndex) => <li key={featureIndex} className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-card-foreground">
+              <ul className="space-y-4 mb-8">
+                {plan.features.map((feature, featureIndex) => (
+                  <li key={featureIndex} className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-card-foreground">
                       {feature}
                     </span>
-                  </li>)}
-                {plan.features.length > 5 && <li className="text-xs text-muted-foreground">
-                    و{plan.features.length - 5} مميزات أخرى...
-                  </li>}
+                  </li>
+                ))}
               </ul>
 
               {/* CTA Button */}
-              <Button className={`w-full ${plan.popular ? 'bg-primary hover:bg-primary/90' : 'variant-outline'}`} size="sm" onClick={() => handleSubscribe(plan)}>
+              <Button 
+                className={`w-full ${
+                  plan.popular 
+                    ? 'bg-primary hover:bg-primary/90' 
+                    : 'variant-outline'
+                }`}
+                size="lg"
+                onClick={() => handleSubscribe(plan)}
+              >
                 {plan.buttonText}
               </Button>
-            </div>)}
+            </div>
+          ))}
         </div>
 
         {/* Additional Info */}
@@ -193,6 +189,11 @@ export function Pricing() {
         </div>
       </div>
 
-      <SubscriptionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} selectedPlan={selectedPlan} />
-    </section>;
+      <SubscriptionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        selectedPlan={selectedPlan}
+      />
+    </section>
+  );
 }

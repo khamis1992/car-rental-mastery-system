@@ -6,21 +6,17 @@ import {
   TrendingUp,
   Globe,
   Crown,
-  RefreshCw,
-  Shield,
-  Server
+  RefreshCw
 } from "lucide-react";
 import SuperAdminStats from "@/components/SuperAdmin/SuperAdminStats";
 import { useSubscriptionRevenue } from "@/hooks/useSubscriptionRevenue";
 import { useTenant } from '@/contexts/TenantContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSuperAdminStats } from '@/hooks/useSuperAdminStats';
 
 const MainDashboard: React.FC = () => {
   const { currentUserRole } = useTenant();
   const { user } = useAuth();
   const { data: revenueData, isLoading: revenueLoading } = useSubscriptionRevenue();
-  const { data: systemStats, isLoading: statsLoading } = useSuperAdminStats();
 
   // التحقق من صلاحيات الوصول
   if (currentUserRole !== 'super_admin') {
@@ -67,41 +63,33 @@ const MainDashboard: React.FC = () => {
         <SuperAdminStats />
 
         {/* Performance Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="border-primary/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-right">
-                <Server className="w-5 h-5 text-primary" />
+                <TrendingUp className="w-5 h-5 text-primary" />
                 أداء النظام العام
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {statsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="h-6 w-6 animate-spin text-primary" />
+              <div className="space-y-4 text-right">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">معدل الاستخدام</span>
+                  <span className="font-medium">92%</span>
                 </div>
-              ) : (
-                <div className="space-y-4 text-right">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">معدل الأداء</span>
-                    <span className="font-medium">{systemStats?.systemPerformance || 0}%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">حجم البيانات</span>
-                    <span className="font-medium">{systemStats?.dataSize || "0 GB"}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">حالة الأمان</span>
-                    <span className={`font-medium ${systemStats?.securityStatus === 'آمن' ? 'text-success' : 'text-warning'}`}>
-                      {systemStats?.securityStatus || "غير محدد"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">المناطق النشطة</span>
-                    <span className="font-medium">{systemStats?.activeRegions || 0}</span>
-                  </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">زمن الاستجابة</span>
+                  <span className="font-medium">127ms</span>
                 </div>
-              )}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">حالة الخوادم</span>
+                  <span className="font-medium text-success">مستقرة</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">الذاكرة المستخدمة</span>
+                  <span className="font-medium">68%</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -109,34 +97,52 @@ const MainDashboard: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-right flex-row-reverse justify-end">
                 <Database className="w-5 h-5 text-primary" />
-                إحصائيات النشاط
+                إحصائيات قاعدة البيانات
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {statsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="h-6 w-6 animate-spin text-primary" />
+              <div className="space-y-4 text-right">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">حجم البيانات</span>
+                  <span className="font-medium">2.3 GB</span>
                 </div>
-              ) : (
-                <div className="space-y-4 text-right">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">إجمالي المؤسسات</span>
-                    <span className="font-medium">{systemStats?.totalTenants || 0}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">إجمالي المستخدمين</span>
-                    <span className="font-medium">{systemStats?.totalUsers || 0}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">المعاملات النشطة</span>
-                    <span className="font-medium">{systemStats?.activeTransactions || 0}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">نمو المؤسسات</span>
-                    <span className="font-medium text-success">{systemStats?.tenantGrowth || "0 هذا الشهر"}</span>
-                  </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">النسخ الاحتياطية</span>
+                  <span className="font-medium text-success">محدثة</span>
                 </div>
-              )}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">الاتصالات النشطة</span>
+                  <span className="font-medium">24</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">الاستعلامات في الثانية</span>
+                  <span className="font-medium">156</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Additional Overview Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-right">
+                <Crown className="w-5 h-5 text-primary" />
+                نشاط المديرين
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 text-right">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">المديرين المتصلين</span>
+                  <span className="font-medium text-success">5</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">آخر نشاط</span>
+                  <span className="font-medium">منذ 3 دقائق</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -144,7 +150,7 @@ const MainDashboard: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-right">
                 <TrendingUp className="w-5 h-5 text-primary" />
-                إيرادات الاشتراكات
+                إيرادات الاشتراكات الشهرية
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -172,42 +178,6 @@ const MainDashboard: React.FC = () => {
                       {revenueData?.growth || "لا توجد بيانات"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">إجمالي الإيرادات</span>
-                    <span className="font-medium">
-                      {systemStats?.totalRevenue?.toFixed(3) || "0.000"} د.ك
-                    </span>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Additional Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-right">
-                <Crown className="w-5 h-5 text-primary" />
-                نشاط المطورين
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {statsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="h-6 w-6 animate-spin text-primary" />
-                </div>
-              ) : (
-                <div className="space-y-3 text-right">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">نمو المستخدمين</span>
-                    <span className="font-medium text-success">{systemStats?.userGrowth || "0% نمو"}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">نمو المعاملات</span>
-                    <span className="font-medium">{systemStats?.transactionGrowth || "0% اليوم"}</span>
-                  </div>
                 </div>
               )}
             </CardContent>
@@ -216,37 +186,21 @@ const MainDashboard: React.FC = () => {
           <Card className="border-primary/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-right">
-                <Shield className="w-5 h-5 text-primary" />
+                <Globe className="w-5 h-5 text-primary" />
                 حالة الأنظمة
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {statsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="h-6 w-6 animate-spin text-primary" />
+              <div className="space-y-3 text-right">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">خدمات الويب</span>
+                  <span className="font-medium text-success">متاحة</span>
                 </div>
-              ) : (
-                <div className="space-y-3 text-right">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">خدمات الويب</span>
-                    <span className="font-medium text-success">متاحة</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">قاعدة البيانات</span>
-                    <span className="font-medium text-success">متاحة</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">حالة الأمان</span>
-                    <span className={`font-medium ${systemStats?.securityStatus === 'آمن' ? 'text-success' : 'text-warning'}`}>
-                      {systemStats?.securityStatus || "غير محدد"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">نمو الإيرادات</span>
-                    <span className="font-medium text-success">{systemStats?.revenueGrowth || "0% هذا الشهر"}</span>
-                  </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">قاعدة البيانات</span>
+                  <span className="font-medium text-success">متاحة</span>
                 </div>
-              )}
+              </div>
             </CardContent>
           </Card>
         </div>

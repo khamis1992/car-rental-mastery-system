@@ -7,6 +7,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -34,19 +56,9 @@ import {
   Filter,
   Send,
   Paperclip,
-  BarChart3,
-  Plus,
-  RefreshCw,
-  Edit
+  BarChart3
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-// استيراد المكونات المحسنة
-import { EnhancedDialog } from '@/components/ui/enhanced-dialog';
-import { EnhancedTable } from '@/components/ui/enhanced-table';
-import { ActionButton, EnhancedButton } from '@/components/ui/enhanced-button';
-import { LoadingState, ErrorBoundary } from '@/components/ui/enhanced-error-handling';
-import { useTranslation, formatStatus } from '@/utils/translationUtils';
 
 interface SupportTicket {
   id: string;
@@ -86,38 +98,12 @@ interface SystemNotification {
 
 const SupportTools: React.FC = () => {
   const { toast } = useToast();
-  const { t, msg, formatNumber } = useTranslation();
-  
-  // State management
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [showTicketDetails, setShowTicketDetails] = useState(false);
-  const [showCreateTicket, setShowCreateTicket] = useState(false);
   const [showCreateNotification, setShowCreateNotification] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
-
-  // نموذج تذكرة جديدة
-  const [newTicketForm, setNewTicketForm] = useState({
-    subject: '',
-    description: '',
-    priority: 'medium' as const,
-    category: 'general' as const,
-    tenantId: '',
-    assignedTo: ''
-  });
-
-  // نموذج إشعار جديد
-  const [newNotificationForm, setNewNotificationForm] = useState({
-    title: '',
-    message: '',
-    type: 'info' as const,
-    targetType: 'all' as const,
-    targetValue: '',
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: ''
-  });
 
   const [supportTickets] = useState<SupportTicket[]>([
     {
@@ -157,6 +143,26 @@ const SupportTools: React.FC = () => {
       tags: ['enhancement', 'reports'],
       responseTime: 4,
       resolutionTime: 24
+    },
+    {
+      id: '3',
+      ticketNumber: 'T-2024-003',
+      subject: 'خطأ في حساب الفاتورة',
+      description: 'الفاتورة رقم INV-001 تحتوي على خطأ في المبلغ',
+      status: 'resolved',
+      priority: 'high',
+      category: 'billing',
+      tenantId: 'tenant-1',
+      tenantName: 'شركة الخليج للنقل',
+      userEmail: 'accounting@gulf-transport.com',
+      userName: 'محمد علي',
+      assignedTo: 'فريق المحاسبة',
+      createdAt: '2024-01-13T16:45:00Z',
+      updatedAt: '2024-01-14T11:30:00Z',
+      lastResponse: '2024-01-14T11:30:00Z',
+      tags: ['billing', 'resolved'],
+      responseTime: 1,
+      resolutionTime: 18
     }
   ]);
 
@@ -172,692 +178,503 @@ const SupportTools: React.FC = () => {
       endDate: '2024-01-20T00:00:00Z',
       createdBy: 'مدير النظام',
       createdAt: '2024-01-15T08:00:00Z'
+    },
+    {
+      id: '2',
+      title: 'ميزة جديدة متاحة',
+      message: 'تم إضافة ميزة التقارير المتقدمة للحسابات المميزة',
+      type: 'success',
+      targetType: 'role',
+      targetValue: 'premium',
+      isActive: true,
+      startDate: '2024-01-14T00:00:00Z',
+      createdBy: 'فريق التطوير',
+      createdAt: '2024-01-14T12:00:00Z'
     }
   ]);
 
-  // تعريف أعمدة جدول التذاكر
-  const ticketColumns = [
-    {
-      key: 'ticketNumber',
-      title: 'رقم التذكرة',
-      sortable: true,
-      render: (value: string, row: SupportTicket) => (
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-            <HeadphonesIcon className="w-4 h-4 text-primary" />
-          </div>
-          <div>
-            <div className="font-medium">{value}</div>
-            <div className="text-xs text-muted-foreground">{row.subject}</div>
-          </div>
-        </div>
-      )
-    },
-    {
-      key: 'priority',
-      title: 'الأولوية',
-      align: 'center' as const,
-      render: (priority: string) => {
-        const priorityColors = {
-          urgent: 'bg-red-100 text-red-800',
-          high: 'bg-orange-100 text-orange-800',
-          medium: 'bg-yellow-100 text-yellow-800',
-          low: 'bg-green-100 text-green-800'
-        };
-        const priorityLabels = {
-          urgent: 'عاجل',
-          high: 'مرتفع',
-          medium: 'متوسط',
-          low: 'منخفض'
-        };
-        return (
-          <Badge className={priorityColors[priority as keyof typeof priorityColors]}>
-            {priorityLabels[priority as keyof typeof priorityLabels]}
-          </Badge>
-        );
-      }
-    },
-    {
-      key: 'status',
-      title: 'الحالة',
-      align: 'center' as const,
-      render: (status: string) => {
-        const statusInfo = formatStatus(status);
-        return (
-          <Badge variant={statusInfo.variant as any}>
-            {statusInfo.text}
-          </Badge>
-        );
-      }
-    },
-    {
-      key: 'tenantName',
-      title: 'المؤسسة',
-      render: (tenantName: string) => (
-        <span className="text-sm text-muted-foreground">{tenantName}</span>
-      )
-    },
-    {
-      key: 'createdAt',
-      title: 'تاريخ الإنشاء',
-      render: (date: string) => (
-        <span className="text-sm text-muted-foreground">
-          {new Date(date).toLocaleDateString('ar-SA')}
-        </span>
-      )
-    }
-  ];
-
-  // تعريف إجراءات التذاكر
-  const ticketActions = [
-    {
-      label: 'عرض التفاصيل',
-      icon: <Eye className="w-4 h-4" />,
-      onClick: (ticket: SupportTicket) => {
-        setSelectedTicket(ticket);
-        setShowTicketDetails(true);
-      }
-    },
-    {
-      label: 'الرد',
-      icon: <MessageCircle className="w-4 h-4" />,
-      onClick: (ticket: SupportTicket) => {
-        toast({
-          title: 'فتح نافذة الرد',
-          description: `سيتم فتح نافذة الرد على التذكرة ${ticket.ticketNumber}`
-        });
-      }
-    },
-    {
-      label: 'تعيين',
-      icon: <User className="w-4 h-4" />,
-      onClick: (ticket: SupportTicket) => {
-        toast({
-          title: 'تعيين التذكرة',
-          description: 'ميزة التعيين ستكون متاحة قريباً'
-        });
-      }
-    }
-  ];
-
-  // معالجات الأحداث
-  const handleCreateTicket = async () => {
-    setLoading(true);
-    try {
-      // منطق إنشاء التذكرة
-      await new Promise(resolve => setTimeout(resolve, 1000)); // محاكاة API
-      
-      toast({
-        title: 'تم إنشاء التذكرة بنجاح',
-        description: `تم إنشاء التذكرة ${newTicketForm.subject} بنجاح`
-      });
-      
-      setShowCreateTicket(false);
-      setNewTicketForm({
-        subject: '',
-        description: '',
-        priority: 'medium',
-        category: 'general',
-        tenantId: '',
-        assignedTo: ''
-      });
-    } catch (error) {
-      toast({
-        title: 'خطأ في إنشاء التذكرة',
-        description: 'حدث خطأ أثناء إنشاء التذكرة',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
+  const getStatusBadge = (status: string) => {
+    const variants = {
+      open: { text: 'مفتوح', color: 'bg-blue-100 text-blue-800' },
+      in_progress: { text: 'قيد المعالجة', color: 'bg-yellow-100 text-yellow-800' },
+      resolved: { text: 'تم الحل', color: 'bg-green-100 text-green-800' },
+      closed: { text: 'مغلق', color: 'bg-gray-100 text-gray-800' }
+    };
+    
+    const statusInfo = variants[status as keyof typeof variants] || variants.open;
+    return (
+      <Badge className={statusInfo.color}>
+        {statusInfo.text}
+      </Badge>
+    );
   };
 
-  const handleCreateNotification = async () => {
-    setLoading(true);
-    try {
-      // منطق إنشاء الإشعار
-      await new Promise(resolve => setTimeout(resolve, 1000)); // محاكاة API
-      
-      toast({
-        title: 'تم إنشاء الإشعار بنجاح',
-        description: `تم إنشاء الإشعار ${newNotificationForm.title} بنجاح`
-      });
-      
-      setShowCreateNotification(false);
-      setNewNotificationForm({
-        title: '',
-        message: '',
-        type: 'info',
-        targetType: 'all',
-        targetValue: '',
-        startDate: new Date().toISOString().split('T')[0],
-        endDate: ''
-      });
-    } catch (error) {
-      toast({
-        title: 'خطأ في إنشاء الإشعار',
-        description: 'حدث خطأ أثناء إنشاء الإشعار',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
+  const getPriorityBadge = (priority: string) => {
+    const variants = {
+      low: { text: 'منخفض', color: 'bg-gray-100 text-gray-800' },
+      medium: { text: 'متوسط', color: 'bg-blue-100 text-blue-800' },
+      high: { text: 'عالي', color: 'bg-orange-100 text-orange-800' },
+      urgent: { text: 'عاجل', color: 'bg-red-100 text-red-800' }
+    };
+    
+    const priorityInfo = variants[priority as keyof typeof variants] || variants.medium;
+    return (
+      <Badge className={priorityInfo.color}>
+        {priorityInfo.text}
+      </Badge>
+    );
   };
 
-  // إحصائيات الدعم
-  const supportStats = {
-    total: supportTickets.length,
-    open: supportTickets.filter(t => t.status === 'open').length,
-    in_progress: supportTickets.filter(t => t.status === 'in_progress').length,
-    resolved: supportTickets.filter(t => t.status === 'resolved').length
+  const getCategoryIcon = (category: string) => {
+    const icons = {
+      technical: Zap,
+      billing: FileText,
+      feature_request: MessageSquare,
+      bug_report: AlertTriangle,
+      general: MessageCircle
+    };
+    
+    const Icon = icons[category as keyof typeof icons] || MessageCircle;
+    return <Icon className="w-4 h-4" />;
   };
 
-  return (
-    <ErrorBoundary>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">أدوات الدعم الفني</h2>
-            <p className="text-muted-foreground">
-              إدارة طلبات الدعم الفني والإشعارات
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <EnhancedButton
-              onClick={() => window.location.reload()}
-              variant="outline"
-              icon={<RefreshCw className="w-4 h-4" />}
-              loadingText="جاري التحديث..."
-            >
-              تحديث
-            </EnhancedButton>
-            <ActionButton
-              action="create"
-              itemName="تذكرة جديدة"
-              onClick={() => setShowCreateTicket(true)}
-              icon={<Plus className="w-4 h-4" />}
-            >
-              تذكرة جديدة
-            </ActionButton>
-            <ActionButton
-              action="create"
-              itemName="إشعار جديد"
-              onClick={() => setShowCreateNotification(true)}
-              icon={<MessageSquare className="w-4 h-4" />}
-              variant="outline"
-            >
-              إشعار جديد
-            </ActionButton>
-          </div>
-        </div>
+  const getNotificationTypeBadge = (type: string) => {
+    const variants = {
+      info: { text: 'معلومات', color: 'bg-blue-100 text-blue-800' },
+      warning: { text: 'تحذير', color: 'bg-yellow-100 text-yellow-800' },
+      error: { text: 'خطأ', color: 'bg-red-100 text-red-800' },
+      success: { text: 'نجح', color: 'bg-green-100 text-green-800' }
+    };
+    
+    const typeInfo = variants[type as keyof typeof variants] || variants.info;
+    return (
+      <Badge className={typeInfo.color}>
+        {typeInfo.text}
+      </Badge>
+    );
+  };
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground text-right">المجموع</p>
-                  <p className="text-2xl font-bold text-right">{formatNumber(supportStats.total)}</p>
-                </div>
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <HeadphonesIcon className="w-4 h-4 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground text-right">مفتوحة</p>
-                  <p className="text-2xl font-bold text-red-600 text-right">{formatNumber(supportStats.open)}</p>
-                </div>
-                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                  <AlertTriangle className="w-4 h-4 text-red-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground text-right">قيد المعالجة</p>
-                  <p className="text-2xl font-bold text-orange-600 text-right">{formatNumber(supportStats.in_progress)}</p>
-                </div>
-                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                  <Clock className="w-4 h-4 text-orange-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground text-right">محلولة</p>
-                  <p className="text-2xl font-bold text-green-600 text-right">{formatNumber(supportStats.resolved)}</p>
-                </div>
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+  const filteredTickets = supportTickets.filter(ticket => {
+    const matchesSearch = ticket.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         ticket.tenantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         ticket.userName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
+    const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
+    
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
 
-        {/* Main Content */}
-        <Tabs defaultValue="tickets" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="tickets">تذاكر الدعم</TabsTrigger>
-            <TabsTrigger value="notifications">الإشعارات</TabsTrigger>
-            <TabsTrigger value="analytics">التحليلات</TabsTrigger>
-          </TabsList>
+  const TicketDetailsDialog = ({ ticket }: { ticket: SupportTicket }) => (
+    <Dialog open={showTicketDetails} onOpenChange={setShowTicketDetails}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            {getCategoryIcon(ticket.category)}
+            التذكرة #{ticket.ticketNumber}
+          </DialogTitle>
+          <DialogDescription className="flex items-center gap-4">
+            {getStatusBadge(ticket.status)}
+            {getPriorityBadge(ticket.priority)}
+            <span>•</span>
+            <span>{ticket.tenantName}</span>
+          </DialogDescription>
+        </DialogHeader>
 
-          <TabsContent value="tickets">
-            <LoadingState
-              loading={false}
-              isEmpty={supportTickets.length === 0}
-              emptyMessage="لا توجد تذاكر دعم"
-            >
-              <EnhancedTable
-                data={supportTickets}
-                columns={ticketColumns}
-                actions={ticketActions}
-                searchable
-                searchPlaceholder="البحث في التذاكر..."
-                onRefresh={() => window.location.reload()}
-                emptyMessage="لا توجد تذاكر دعم"
-                maxHeight="600px"
-                stickyHeader
-              />
-            </LoadingState>
-          </TabsContent>
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-6">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">تفاصيل التذكرة</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">الموضوع:</span>
+                  <span>{ticket.subject}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">الفئة:</span>
+                  <span>
+                    {ticket.category === 'technical' && 'تقني'}
+                    {ticket.category === 'billing' && 'فوترة'}
+                    {ticket.category === 'feature_request' && 'طلب ميزة'}
+                    {ticket.category === 'bug_report' && 'تقرير خطأ'}
+                    {ticket.category === 'general' && 'عام'}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">مُسند إلى:</span>
+                  <span>{ticket.assignedTo || 'غير مُسند'}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">تاريخ الإنشاء:</span>
+                  <span>{new Date(ticket.createdAt).toLocaleString('ar-SA')}</span>
+                </div>
+              </CardContent>
+            </Card>
 
-          <TabsContent value="notifications">
-            <div className="space-y-4">
-              {systemNotifications.map((notification) => (
-                <Card key={notification.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant={notification.type === 'warning' ? 'destructive' : 'default'}>
-                            {notification.type === 'warning' ? 'تحذير' : 'معلومات'}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(notification.createdAt).toLocaleDateString('ar-SA')}
-                          </span>
-                        </div>
-                        <h3 className="font-medium text-lg mb-2">{notification.title}</h3>
-                        <p className="text-muted-foreground">{notification.message}</p>
-                        <div className="mt-3 text-xs text-muted-foreground">
-                          <span>بواسطة: {notification.createdBy}</span>
-                          {notification.endDate && (
-                            <span className="mr-4">
-                              ينتهي: {new Date(notification.endDate).toLocaleDateString('ar-SA')}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="analytics">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>إحصائيات الأداء</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span>متوسط وقت الاستجابة</span>
-                      <span className="font-medium">2.5 ساعة</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>معدل الحل</span>
-                      <span className="font-medium">85%</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>رضا العملاء</span>
-                      <span className="font-medium">4.2/5</span>
-                    </div>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">معلومات المستخدم</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">الاسم:</span>
+                  <span>{ticket.userName}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">البريد:</span>
+                  <span>{ticket.userEmail}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">المؤسسة:</span>
+                  <span>{ticket.tenantName}</span>
+                </div>
+                {ticket.responseTime && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">وقت الرد:</span>
+                    <span>{ticket.responseTime} ساعة</span>
                   </div>
-                </CardContent>
-              </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>التذاكر حسب الفئة</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span>تقنية</span>
-                      <span className="font-medium">45%</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>فوترة</span>
-                      <span className="font-medium">25%</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>طلبات ميزات</span>
-                      <span className="font-medium">20%</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>عامة</span>
-                      <span className="font-medium">10%</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">الوصف</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm">{ticket.description}</p>
+            </CardContent>
+          </Card>
 
-        {/* Create Ticket Dialog */}
-        <EnhancedDialog
-          open={showCreateTicket}
-          onOpenChange={setShowCreateTicket}
-          title="إنشاء تذكرة دعم جديدة"
-          description="قم بملء المعلومات لإنشاء تذكرة دعم جديدة"
-          size="lg"
-          showCloseButton
-        >
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="ticket-subject">موضوع التذكرة</Label>
-                <Input
-                  id="ticket-subject"
-                  value={newTicketForm.subject}
-                  onChange={(e) => setNewTicketForm(prev => ({ ...prev, subject: e.target.value }))}
-                  placeholder="اكتب موضوع التذكرة..."
-                />
-              </div>
-              <div>
-                <Label htmlFor="ticket-priority">الأولوية</Label>
-                <Select
-                  value={newTicketForm.priority}
-                  onValueChange={(value) => setNewTicketForm(prev => ({ ...prev, priority: value as any }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر الأولوية" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">منخفضة</SelectItem>
-                    <SelectItem value="medium">متوسطة</SelectItem>
-                    <SelectItem value="high">مرتفعة</SelectItem>
-                    <SelectItem value="urgent">عاجلة</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="ticket-category">الفئة</Label>
-                <Select
-                  value={newTicketForm.category}
-                  onValueChange={(value) => setNewTicketForm(prev => ({ ...prev, category: value as any }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر الفئة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="technical">تقنية</SelectItem>
-                    <SelectItem value="billing">فوترة</SelectItem>
-                    <SelectItem value="feature_request">طلب ميزة</SelectItem>
-                    <SelectItem value="bug_report">بلاغ خطأ</SelectItem>
-                    <SelectItem value="general">عامة</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="ticket-assigned">المعين إليه</Label>
-                <Input
-                  id="ticket-assigned"
-                  value={newTicketForm.assignedTo}
-                  onChange={(e) => setNewTicketForm(prev => ({ ...prev, assignedTo: e.target.value }))}
-                  placeholder="اسم الموظف المسؤول (اختياري)"
-                />
-              </div>
-            </div>
-
+          {ticket.tags.length > 0 && (
             <div>
-              <Label htmlFor="ticket-description">وصف المشكلة</Label>
-              <Textarea
-                id="ticket-description"
-                value={newTicketForm.description}
-                onChange={(e) => setNewTicketForm(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="اكتب وصفاً مفصلاً للمشكلة..."
-                rows={4}
-              />
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowCreateTicket(false)}
-              >
-                إلغاء
-              </Button>
-              <ActionButton
-                action="create"
-                itemName="التذكرة"
-                onClick={handleCreateTicket}
-                loading={loading}
-              >
-                إنشاء التذكرة
-              </ActionButton>
-            </div>
-          </div>
-        </EnhancedDialog>
-
-        {/* Create Notification Dialog */}
-        <EnhancedDialog
-          open={showCreateNotification}
-          onOpenChange={setShowCreateNotification}
-          title="إنشاء إشعار جديد"
-          description="قم بإنشاء إشعار للمستخدمين في النظام"
-          size="lg"
-          showCloseButton
-        >
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="notification-title">عنوان الإشعار</Label>
-                <Input
-                  id="notification-title"
-                  value={newNotificationForm.title}
-                  onChange={(e) => setNewNotificationForm(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="اكتب عنوان الإشعار..."
-                />
-              </div>
-              <div>
-                <Label htmlFor="notification-type">نوع الإشعار</Label>
-                <Select
-                  value={newNotificationForm.type}
-                  onValueChange={(value) => setNewNotificationForm(prev => ({ ...prev, type: value as any }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر النوع" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="info">معلومات</SelectItem>
-                    <SelectItem value="warning">تحذير</SelectItem>
-                    <SelectItem value="error">خطأ</SelectItem>
-                    <SelectItem value="success">نجاح</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="notification-target">الجمهور المستهدف</Label>
-                <Select
-                  value={newNotificationForm.targetType}
-                  onValueChange={(value) => setNewNotificationForm(prev => ({ ...prev, targetType: value as any }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر الجمهور" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">جميع المستخدمين</SelectItem>
-                    <SelectItem value="tenant">مؤسسة محددة</SelectItem>
-                    <SelectItem value="role">دور محدد</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="notification-start">تاريخ البداية</Label>
-                <Input
-                  id="notification-start"
-                  type="date"
-                  value={newNotificationForm.startDate}
-                  onChange={(e) => setNewNotificationForm(prev => ({ ...prev, startDate: e.target.value }))}
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="notification-message">محتوى الإشعار</Label>
-              <Textarea
-                id="notification-message"
-                value={newNotificationForm.message}
-                onChange={(e) => setNewNotificationForm(prev => ({ ...prev, message: e.target.value }))}
-                placeholder="اكتب محتوى الإشعار..."
-                rows={4}
-              />
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowCreateNotification(false)}
-              >
-                إلغاء
-              </Button>
-              <ActionButton
-                action="create"
-                itemName="الإشعار"
-                onClick={handleCreateNotification}
-                loading={loading}
-              >
-                إنشاء الإشعار
-              </ActionButton>
-            </div>
-          </div>
-        </EnhancedDialog>
-
-        {/* Ticket Details Dialog */}
-        <EnhancedDialog
-          open={showTicketDetails}
-          onOpenChange={setShowTicketDetails}
-          title={selectedTicket ? `تفاصيل التذكرة ${selectedTicket.ticketNumber}` : ''}
-          description="عرض تفاصيل التذكرة والردود"
-          size="xl"
-          showCloseButton
-        >
-          {selectedTicket && (
-            <div className="space-y-6">
-              {/* معلومات التذكرة */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>رقم التذكرة</Label>
-                  <div className="mt-1 text-sm">{selectedTicket.ticketNumber}</div>
-                </div>
-                <div>
-                  <Label>الحالة</Label>
-                  <div className="mt-1">
-                    <Badge variant={selectedTicket.status === 'open' ? 'destructive' : 'default'}>
-                      {selectedTicket.status === 'open' ? 'مفتوحة' : 
-                       selectedTicket.status === 'in_progress' ? 'قيد المعالجة' : 'محلولة'}
-                    </Badge>
-                  </div>
-                </div>
-                <div>
-                  <Label>الأولوية</Label>
-                  <div className="mt-1">
-                    <Badge variant={selectedTicket.priority === 'urgent' ? 'destructive' : 'default'}>
-                      {selectedTicket.priority === 'urgent' ? 'عاجل' : 
-                       selectedTicket.priority === 'high' ? 'مرتفع' : 'متوسط'}
-                    </Badge>
-                  </div>
-                </div>
-                <div>
-                  <Label>المؤسسة</Label>
-                  <div className="mt-1 text-sm">{selectedTicket.tenantName}</div>
-                </div>
-              </div>
-
-              {/* موضوع ووصف التذكرة */}
-              <div>
-                <Label>الموضوع</Label>
-                <div className="mt-1 text-sm font-medium">{selectedTicket.subject}</div>
-              </div>
-
-              <div>
-                <Label>الوصف</Label>
-                <div className="mt-1 text-sm text-muted-foreground p-3 bg-muted rounded-lg">
-                  {selectedTicket.description}
-                </div>
-              </div>
-
-              {/* المرفقات */}
-              {selectedTicket.attachments && selectedTicket.attachments.length > 0 && (
-                <div>
-                  <Label>المرفقات</Label>
-                  <div className="mt-2 flex gap-2">
-                    {selectedTicket.attachments.map((attachment, index) => (
-                      <Badge key={index} variant="outline" className="cursor-pointer">
-                        <Paperclip className="w-3 h-3 mr-1" />
-                        {attachment}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* إجراءات */}
-              <div className="flex justify-end gap-3 pt-4">
-                <Button variant="outline">
-                  <MessageCircle className="w-4 h-4 ml-2" />
-                  إضافة رد
-                </Button>
-                <Button variant="outline">
-                  <User className="w-4 h-4 ml-2" />
-                  تعيين
-                </Button>
-                <Button>
-                  <CheckCircle className="w-4 h-4 ml-2" />
-                  حل التذكرة
-                </Button>
+              <Label className="text-sm font-medium">العلامات</Label>
+              <div className="flex gap-2 mt-2">
+                {ticket.tags.map((tag, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    <Tag className="w-3 h-3 ml-1" />
+                    {tag}
+                  </Badge>
+                ))}
               </div>
             </div>
           )}
-        </EnhancedDialog>
+
+          {ticket.attachments && ticket.attachments.length > 0 && (
+            <div>
+              <Label className="text-sm font-medium">المرفقات</Label>
+              <div className="space-y-2 mt-2">
+                {ticket.attachments.map((attachment, index) => (
+                  <div key={index} className="flex items-center gap-2 p-2 border rounded">
+                    <Paperclip className="w-4 h-4" />
+                    <span className="text-sm">{attachment}</span>
+                    <Button size="sm" variant="ghost">تحميل</Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">الرد على التذكرة</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Textarea
+                placeholder="اكتب ردك هنا..."
+                className="min-h-[100px]"
+              />
+              <div className="flex justify-between items-center">
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline">
+                    <Paperclip className="w-4 h-4" />
+                    إرفاق ملف
+                  </Button>
+                  <Select>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="تغيير الحالة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="open">مفتوح</SelectItem>
+                      <SelectItem value="in_progress">قيد المعالجة</SelectItem>
+                      <SelectItem value="resolved">تم الحل</SelectItem>
+                      <SelectItem value="closed">مغلق</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button>
+                  <Send className="w-4 h-4 ml-2" />
+                  إرسال الرد
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-right">أدوات الدعم الفني</h2>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setShowCreateNotification(true)}
+            className="flex items-center gap-2"
+          >
+            <MessageSquare className="w-4 h-4" />
+            إشعار جديد
+          </Button>
+        </div>
       </div>
-    </ErrorBoundary>
+
+      <Tabs defaultValue="tickets" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="tickets">تذاكر الدعم</TabsTrigger>
+          <TabsTrigger value="notifications">الإشعارات</TabsTrigger>
+          <TabsTrigger value="analytics">تحليلات الدعم</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="tickets">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <HeadphonesIcon className="w-5 h-5" />
+                  تذاكر الدعم الفني
+                </span>
+                <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
+                    <Search className="w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="البحث في التذاكر..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-64"
+                    />
+                  </div>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">كل الحالات</SelectItem>
+                      <SelectItem value="open">مفتوح</SelectItem>
+                      <SelectItem value="in_progress">قيد المعالجة</SelectItem>
+                      <SelectItem value="resolved">تم الحل</SelectItem>
+                      <SelectItem value="closed">مغلق</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">كل الأولويات</SelectItem>
+                      <SelectItem value="urgent">عاجل</SelectItem>
+                      <SelectItem value="high">عالي</SelectItem>
+                      <SelectItem value="medium">متوسط</SelectItem>
+                      <SelectItem value="low">منخفض</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-right">رقم التذكرة</TableHead>
+                    <TableHead className="text-right">الموضوع</TableHead>
+                    <TableHead className="text-right">الحالة</TableHead>
+                    <TableHead className="text-right">الأولوية</TableHead>
+                    <TableHead className="text-right">المؤسسة</TableHead>
+                    <TableHead className="text-right">المستخدم</TableHead>
+                    <TableHead className="text-right">تاريخ الإنشاء</TableHead>
+                    <TableHead className="text-right">الإجراءات</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredTickets.map((ticket) => (
+                    <TableRow key={ticket.id}>
+                      <TableCell className="font-mono text-sm">
+                        {ticket.ticketNumber}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getCategoryIcon(ticket.category)}
+                          <span className="font-medium">{ticket.subject}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(ticket.status)}</TableCell>
+                      <TableCell>{getPriorityBadge(ticket.priority)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-muted-foreground" />
+                          {ticket.tenantName}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{ticket.userName}</div>
+                          <div className="text-sm text-muted-foreground">{ticket.userEmail}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(ticket.createdAt).toLocaleDateString('ar-SA')}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedTicket(ticket);
+                                setShowTicketDetails(true);
+                              }}
+                            >
+                              <Eye className="w-4 h-4 ml-2" />
+                              عرض التفاصيل
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <MessageCircle className="w-4 h-4 ml-2" />
+                              الرد
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <User className="w-4 h-4 ml-2" />
+                              إسناد
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="notifications">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" />
+                  إشعارات النظام
+                </span>
+                <Button
+                  onClick={() => setShowCreateNotification(true)}
+                  className="flex items-center gap-2"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  إشعار جديد
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {systemNotifications.map((notification) => (
+                  <Card key={notification.id}>
+                    <CardContent className="pt-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="font-medium">{notification.title}</h4>
+                            {getNotificationTypeBadge(notification.type)}
+                            {notification.isActive && (
+                              <Badge className="bg-green-100 text-green-800">نشط</Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {notification.message}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span>الهدف: {notification.targetType === 'all' ? 'جميع المستخدمين' : notification.targetValue}</span>
+                            <span>•</span>
+                            <span>بواسطة: {notification.createdBy}</span>
+                            <span>•</span>
+                            <span>{new Date(notification.createdAt).toLocaleDateString('ar-SA')}</span>
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem>تحرير</DropdownMenuItem>
+                            <DropdownMenuItem>تعطيل</DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-600">حذف</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">إجمالي التذاكر</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">124</div>
+                <p className="text-xs text-muted-foreground">+12% من الشهر الماضي</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">متوسط وقت الرد</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">2.5 ساعة</div>
+                <p className="text-xs text-muted-foreground">-15% تحسن</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">معدل الحل</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">94%</div>
+                <p className="text-xs text-muted-foreground">+3% تحسن</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>تحليلات مفصلة</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8 text-muted-foreground">
+                <BarChart3 className="w-12 h-12 mx-auto mb-4" />
+                سيتم تطوير التحليلات المفصلة قريباً
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {selectedTicket && <TicketDetailsDialog ticket={selectedTicket} />}
+    </div>
   );
 };
 

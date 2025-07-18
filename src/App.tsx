@@ -15,7 +15,6 @@ import { GlobalErrorBoundary } from "@/components/ErrorBoundary/GlobalErrorBound
 import { setupGlobalErrorHandling } from "@/utils/errorHandling";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import Register from "./pages/Register";
 import LandingPage from "./pages/LandingPage";
 import SadadSimulation from "./pages/SadadSimulation";
 import PaymentSuccess from "./pages/PaymentSuccess";
@@ -25,7 +24,6 @@ import Fleet from "./pages/Fleet";
 import Quotations from "./pages/Quotations";
 import Contracts from "./pages/Contracts";
 import Invoicing from "./pages/Invoicing";
-import TestPages from "./pages/TestPages";
 
 import ChartOfAccounts from "./pages/ChartOfAccounts";
 import JournalEntries from "./pages/JournalEntries";
@@ -52,7 +50,7 @@ import NotFound from "./pages/NotFound";
 import PublicQuotation from "./pages/PublicQuotation";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import BillingManagement from "./pages/BillingManagement";
-import LandingEditor from "./pages/super-admin/LandingEditor";
+import LandingPageEditor from "./pages/super-admin/LandingPageEditor";
 import MainDashboard from "./pages/super-admin/MainDashboard";
 import TenantManagement from "./pages/super-admin/TenantManagement";
 import UsersAndPermissions from "./pages/super-admin/UsersAndPermissions";
@@ -62,29 +60,39 @@ import SystemMonitoringPage from "./pages/super-admin/SystemMonitoring";
 import MaintenanceToolsPage from "./pages/super-admin/MaintenanceTools";
 import TechnicalSupport from "./pages/super-admin/TechnicalSupport";
 import GlobalSettingsPage from "./pages/super-admin/GlobalSettings";
-import SystemDiagnostics from "./pages/super-admin/SystemDiagnostics";
 import TenantIsolationDashboard from "./pages/TenantIsolationDashboard";
-import BashaerEmergencyFix from "./pages/BashaerEmergencyFix";
-import TenantDiagnosticDashboard from "./pages/TenantDiagnosticDashboard";
-import EnhancedTenantManagement from "./pages/EnhancedTenantManagement";
 import DraftStage from "./pages/ContractStages/DraftStage";
 import PendingStage from "./pages/ContractStages/PendingStage";
 import ActiveStage from "./pages/ContractStages/ActiveStage";
 import PaymentStage from "./pages/ContractStages/PaymentStage";
 import CompletedStage from "./pages/ContractStages/CompletedStage";
 import ContractPrint from "./pages/ContractPrint";
-import AttendanceReminderWrapper from "./components/Attendance/AttendanceReminderWrapper";
-import { SearchDialog } from "./components/Search/SearchDialog";
-import { AdvancedAccounting } from "./pages/AdvancedAccounting";
+import { ContractStageRouter } from "./components/Contracts/ContractStageRouter";
+import AttendanceReminderWrapper from "@/components/Attendance/AttendanceReminderWrapper";
+import { SearchDialog } from "@/components/Search/SearchDialog";
 
-// إعداد معالجة الأخطاء الشاملة
+// إعداد معالج الأخطاء العام
 setupGlobalErrorHandling();
 
+// إعداد QueryClient مع معالجة محسنة للأخطاء
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
+      retry: (failureCount, error: any) => {
+        // تجنب إعادة المحاولة للأخطاء التي لا تحتاج إعادة محاولة
+        if (error?.name === 'AbortError') return false;
+        if (error?.code === 'PGRST301') return false; // JWT errors
+        return failureCount < 2;
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      staleTime: 5 * 60 * 1000, // 5 دقائق
+      gcTime: 10 * 60 * 1000, // 10 دقائق (تم تغيير cacheTime إلى gcTime في الإصدار الجديد)
+    },
+    mutations: {
+      retry: (failureCount, error: any) => {
+        if (error?.name === 'AbortError') return false;
+        return failureCount < 1; // إعادة محاولة واحدة فقط للمطالبات
+      },
     },
   },
 });
@@ -105,8 +113,6 @@ const App = () => (
                   <Routes>
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/auth" element={<Auth />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/test-pages" element={<TestPages />} />
                     <Route path="/sadad-simulation" element={<SadadSimulation />} />
                     <Route path="/payment-success" element={<PaymentSuccess />} />
                     <Route path="/payment-cancel" element={<PaymentCancel />} />
@@ -297,7 +303,7 @@ const App = () => (
                           </Layout>
                         </ProtectedRoute>
                       } />
-                       <Route path="/super-admin/main-dashboard" element={
+                                             <Route path="/super-admin/main-dashboard" element={
                          <ProtectedRoute requiredRole="super_admin">
                            <Layout>
                              <MainDashboard />
@@ -369,30 +375,7 @@ const App = () => (
                        } />
                         <Route path="/super-admin/landing-editor" element={
                           <ProtectedRoute requiredRole="super_admin">
-                            <Layout>
-                              <LandingEditor />
-                            </Layout>
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/bashaer-emergency-fix" element={
-                          <ProtectedRoute requiredRole="super_admin">
-                            <Layout>
-                              <BashaerEmergencyFix />
-                            </Layout>
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/tenant-diagnostic-dashboard" element={
-                          <ProtectedRoute requiredRole="super_admin">
-                            <Layout>
-                              <TenantDiagnosticDashboard />
-                            </Layout>
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/enhanced-tenant-management" element={
-                          <ProtectedRoute requiredRole="super_admin">
-                            <Layout>
-                              <EnhancedTenantManagement />
-                            </Layout>
+                            <LandingPageEditor />
                           </ProtectedRoute>
                         } />
                         <Route path="/tenant-isolation" element={

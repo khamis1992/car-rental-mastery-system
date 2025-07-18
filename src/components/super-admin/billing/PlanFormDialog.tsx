@@ -161,11 +161,11 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }: PlanForm
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
         <DialogHeader>
-          <DialogTitle className="rtl-title">
+          <DialogTitle>
             {plan ? 'تعديل خطة الاشتراك' : 'إضافة خطة اشتراك جديدة'}
           </DialogTitle>
           <DialogDescription>
-            {plan ? 'قم بتعديل بيانات خطة الاشتراك. تأكد من صحة جميع البيانات قبل الحفظ.' : 'أدخل بيانات خطة الاشتراك الجديدة. تأكد من تحديد الأسعار والمميزات بدقة.'}
+            {plan ? 'قم بتعديل بيانات خطة الاشتراك' : 'أدخل بيانات خطة الاشتراك الجديدة'}
           </DialogDescription>
         </DialogHeader>
 
@@ -173,7 +173,7 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }: PlanForm
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="plan_name" className="rtl-label">اسم الخطة (عربي) *</Label>
+              <Label htmlFor="plan_name">اسم الخطة (عربي) *</Label>
               <Input
                 id="plan_name"
                 value={formData.plan_name}
@@ -182,7 +182,7 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }: PlanForm
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="plan_name_en" className="rtl-label">اسم الخطة (انجليزي)</Label>
+              <Label htmlFor="plan_name_en">اسم الخطة (انجليزي)</Label>
               <Input
                 id="plan_name_en"
                 value={formData.plan_name_en}
@@ -193,7 +193,7 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }: PlanForm
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="plan_code" className="rtl-label">كود الخطة *</Label>
+              <Label htmlFor="plan_code">كود الخطة *</Label>
               <Input
                 id="plan_code"
                 value={formData.plan_code}
@@ -203,7 +203,7 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }: PlanForm
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="sort_order" className="rtl-label">ترتيب العرض</Label>
+              <Label htmlFor="sort_order">ترتيب العرض</Label>
               <Input
                 id="sort_order"
                 type="number"
@@ -215,7 +215,7 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }: PlanForm
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description" className="rtl-label">الوصف</Label>
+            <Label htmlFor="description">الوصف</Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -227,7 +227,7 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }: PlanForm
           {/* Pricing */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price_monthly" className="rtl-label">السعر الشهري (د.ك) *</Label>
+              <Label htmlFor="price_monthly">السعر الشهري (د.ك) *</Label>
               <Input
                 id="price_monthly"
                 type="number"
@@ -239,7 +239,7 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }: PlanForm
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="price_yearly" className="rtl-label">السعر السنوي (د.ك) *</Label>
+              <Label htmlFor="price_yearly">السعر السنوي (د.ك) *</Label>
               <Input
                 id="price_yearly"
                 type="number"
@@ -257,7 +257,7 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }: PlanForm
             <h4 className="font-medium">مميزات الخطة</h4>
             
             {/* Add Feature */}
-            <div className="rtl-flex gap-2">
+            <div className="flex gap-2">
               <Input
                 value={newFeature}
                 onChange={(e) => setNewFeature(e.target.value)}
@@ -272,7 +272,7 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }: PlanForm
             {/* Features List */}
             <div className="space-y-2">
               {formData.features.map((feature, index) => (
-                <div key={index} className="rtl-flex gap-2 p-2 bg-muted rounded">
+                <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded">
                   <span className="flex-1">{feature}</span>
                   <Button
                     type="button"
@@ -290,13 +290,13 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }: PlanForm
           {/* Settings */}
           <div className="space-y-4">
             <h4 className="font-medium">إعدادات الخطة</h4>
-            <div className="rtl-flex gap-2">
+            <div className="flex items-center space-x-2">
               <Switch
                 id="is_popular"
                 checked={formData.is_popular}
                 onCheckedChange={(checked) => handleInputChange('is_popular', checked)}
               />
-              <Label htmlFor="is_popular" className="rtl-label">خطة شائعة</Label>
+              <Label htmlFor="is_popular">خطة شائعة</Label>
             </div>
           </div>
 

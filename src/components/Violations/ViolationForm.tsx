@@ -195,9 +195,9 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="rtl-title">إضافة مخالفة مرورية جديدة</DialogTitle>
+          <DialogTitle>إضافة مخالفة مرورية جديدة</DialogTitle>
           <DialogDescription>
-            قم بإدخال بيانات المخالفة المرورية الجديدة. تأكد من اختيار العميل والمركبة ونوع المخالفة بدقة.
+            قم بإدخال بيانات المخالفة المرورية الجديدة
           </DialogDescription>
         </DialogHeader>
 
@@ -210,7 +210,7 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="customer" className="rtl-label">العميل *</Label>
+                  <Label htmlFor="customer">العميل *</Label>
                   <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
                     <SelectTrigger>
                       <SelectValue placeholder="اختر العميل" />
@@ -226,7 +226,7 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="vehicle" className="rtl-label">المركبة *</Label>
+                  <Label htmlFor="vehicle">المركبة *</Label>
                   <Select value={selectedVehicleId} onValueChange={setSelectedVehicleId}>
                     <SelectTrigger>
                       <SelectValue placeholder="اختر المركبة" />
@@ -242,7 +242,7 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="violation_type" className="rtl-label">نوع المخالفة *</Label>
+                  <Label htmlFor="violation_type">نوع المخالفة *</Label>
                   <Select value={formData.violation_type_id} onValueChange={handleViolationTypeChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="اختر نوع المخالفة" />
@@ -259,7 +259,7 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
 
                 {contracts.length > 0 && (
                   <div>
-                    <Label htmlFor="contract" className="rtl-label">العقد المرتبط</Label>
+                    <Label htmlFor="contract">العقد المرتبط</Label>
                     <Input
                       value={contracts[0]?.contract_number || ''}
                       disabled
@@ -279,7 +279,7 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="violation_date" className="rtl-label">تاريخ المخالفة *</Label>
+                  <Label htmlFor="violation_date">تاريخ المخالفة *</Label>
                   <Input
                     id="violation_date"
                     type="date"
@@ -290,7 +290,7 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="location" className="rtl-label">المكان</Label>
+                  <Label htmlFor="location">المكان</Label>
                   <Input
                     id="location"
                     value={formData.location}
@@ -302,13 +302,13 @@ export const ViolationForm: React.FC<ViolationFormProps> = ({
             </CardContent>
           </Card>
 
+
           {/* ملاحظات */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">ملاحظات إضافية</CardTitle>
             </CardHeader>
             <CardContent>
-              <Label htmlFor="notes" className="rtl-label">ملاحظات</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}

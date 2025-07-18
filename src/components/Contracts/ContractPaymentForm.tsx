@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -78,20 +78,17 @@ export const ContractPaymentForm: React.FC<ContractPaymentFormProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="rtl-flex rtl-title">
+          <DialogTitle className="flex items-center gap-2">
             <CreditCard className="w-5 h-5" />
             تسجيل دفع العقد {contract.contract_number}
           </DialogTitle>
-          <DialogDescription>
-            قم بتسجيل دفعة العقد وتفعيله. تأكد من صحة المبلغ وطريقة الدفع قبل الحفظ.
-          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Payment Summary */}
           <Card>
             <CardHeader>
-              <CardTitle className="rtl-flex">
+              <CardTitle className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
                 ملخص الدفع
               </CardTitle>
@@ -119,7 +116,7 @@ export const ContractPaymentForm: React.FC<ContractPaymentFormProps> = ({
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="amount" className="rtl-label">المبلغ المدفوع</Label>
+                <Label htmlFor="amount">المبلغ المدفوع</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -130,7 +127,7 @@ export const ContractPaymentForm: React.FC<ContractPaymentFormProps> = ({
                 />
               </div>
               <div>
-                <Label htmlFor="payment_method" className="rtl-label">طريقة الدفع</Label>
+                <Label htmlFor="payment_method">طريقة الدفع</Label>
                 <Select
                   value={paymentData.payment_method}
                   onValueChange={(value) => updatePaymentData('payment_method', value)}
@@ -148,7 +145,7 @@ export const ContractPaymentForm: React.FC<ContractPaymentFormProps> = ({
                 </Select>
               </div>
               <div>
-                <Label htmlFor="payment_date" className="rtl-label">تاريخ الدفع</Label>
+                <Label htmlFor="payment_date">تاريخ الدفع</Label>
                 <Input
                   id="payment_date"
                   type="date"
@@ -158,7 +155,7 @@ export const ContractPaymentForm: React.FC<ContractPaymentFormProps> = ({
                 />
               </div>
               <div>
-                <Label htmlFor="reference_number" className="rtl-label">رقم المرجع (اختياري)</Label>
+                <Label htmlFor="reference_number">رقم المرجع (اختياري)</Label>
                 <Input
                   id="reference_number"
                   value={paymentData.reference_number}
@@ -167,7 +164,7 @@ export const ContractPaymentForm: React.FC<ContractPaymentFormProps> = ({
                 />
               </div>
               <div className="md:col-span-2">
-                <Label htmlFor="notes" className="rtl-label">ملاحظات (اختياري)</Label>
+                <Label htmlFor="notes">ملاحظات (اختياري)</Label>
                 <Input
                   id="notes"
                   value={paymentData.notes}
