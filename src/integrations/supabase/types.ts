@@ -7797,6 +7797,7 @@ export type Database = {
           description: string | null
           due_date: string | null
           id: string
+          invoice_date: string | null
           invoice_number: string
           invoice_pdf_url: string | null
           metadata: Json | null
@@ -7818,6 +7819,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          invoice_date?: string | null
           invoice_number: string
           invoice_pdf_url?: string | null
           metadata?: Json | null
@@ -7839,6 +7841,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          invoice_date?: string | null
           invoice_number?: string
           invoice_pdf_url?: string | null
           metadata?: Json | null
@@ -11408,6 +11411,10 @@ export type Database = {
       periodic_accounting_maintenance: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      quick_remove_default_organization: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       reorganize_account_codes: {
         Args: Record<PropertyKey, never>
