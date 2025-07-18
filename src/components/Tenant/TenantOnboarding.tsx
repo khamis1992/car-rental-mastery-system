@@ -87,14 +87,14 @@ export const TenantOnboarding: React.FC<TenantOnboardingProps> = ({ onSuccess, o
         },
       };
 
-      const tenant = await tenantService.createTenant(tenantData);
+      const response = await tenantService.createTenant(tenantData);
       
       toast({
         title: 'تم إنشاء المؤسسة بنجاح',
-        description: `مرحباً بك في ${tenant.name}!`,
+        description: response.message || 'تم إنشاء المؤسسة بنجاح!',
       });
 
-      onSuccess(tenant);
+      onSuccess(response);
     } catch (error: any) {
       console.error('Error creating tenant:', error);
       toast({

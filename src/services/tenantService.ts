@@ -1,8 +1,15 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Tenant, TenantUser, TenantOnboardingData } from '@/types/tenant';
+import { 
+  Tenant, 
+  TenantUser, 
+  TenantOnboardingData, 
+  TenantWithCounts, 
+  CreateTenantResponse,
+  TenantInvitation 
+} from '@/types/tenant';
 
 export class TenantService {
-  async getAllTenants(): Promise<Tenant[]> {
+  async getAllTenants(): Promise<TenantWithCounts[]> {
     const { data, error } = await supabase
       .from('tenants')
       .select(`
@@ -31,9 +38,10 @@ export class TenantService {
 
         return {
           ...tenant,
+          status: tenant.status as Tenant['status'],
           actual_users: usersCount || 0,
           actual_vehicles: vehiclesCount || 0,
-        };
+        } as TenantWithCounts;
       })
     );
 
@@ -71,7 +79,7 @@ export class TenantService {
   }
 
   // تحديث دالة إنشاء المؤسسة لضمان الربط الصحيح
-  async createTenant(data: TenantOnboardingData): Promise<{ success: boolean; tenant_id?: string; message?: string }> {
+  async createTenant(data: TenantOnboardingData): Promise<CreateTenantResponse> {
     try {
       console.log('بدء عملية إنشاء المؤسسة:', data);
       
@@ -105,23 +113,26 @@ export class TenantService {
         throw new Error(error.message);
       }
 
-      if (!result || !result.success) {
-        const errorMessage = result?.error || 'فشل في إنشاء المؤسسة لسبب غير معروف';
+      // Type assertion for the result
+      const typedResult = result as any;
+      
+      if (!typedResult || !typedResult.success) {
+        const errorMessage = typedResult?.error || 'فشل في إنشاء المؤسسة لسبب غير معروف';
         console.error('فشل في إنشاء المؤسسة:', errorMessage);
         throw new Error(errorMessage);
       }
 
       // تسجيل النجاح
       console.log('تم إنشاء المؤسسة بنجاح:', {
-        tenant_id: result.tenant_id,
-        user_id: result.user_id,
-        employee_id: result.employee_id
+        tenant_id: typedResult.tenant_id,
+        user_id: typedResult.user_id,
+        employee_id: typedResult.employee_id
       });
 
       return {
         success: true,
-        tenant_id: result.tenant_id,
-        message: result.message
+        tenant_id: typedResult.tenant_id,
+        message: typedResult.message
       };
 
     } catch (error: any) {
@@ -173,6 +184,47 @@ export class TenantService {
 
     } catch (error: any) {
       console.error('خطأ في التحقق من حالة المؤسسة:', error);
+      throw error;
+    }
+  }
+
+  // دالة للتحقق من توفر الرمز
+  async isSlugAvailable(slug: string): Promise<boolean> {
+    try {
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('id')
+        .eq('slug', slug)
+        .maybeSingle();
+
+      if (error) {
+        console.error('خطأ في التحقق من توفر الرمز:', error);
+        return false;
+      }
+
+      return !data; // true if no data found (slug is available)
+    } catch (error: any) {
+      console.error('خطأ في التحقق من توفر الرمز:', error);
+      return false;
+    }
+  }
+
+  // دالة لدعوة مستخدم جديد
+  async inviteUser(invitation: TenantInvitation): Promise<void> {
+    try {
+      // This would typically involve creating an invitation record
+      // and sending an email. For now, we'll just log it.
+      console.log('Inviting user:', invitation);
+      
+      // TODO: Implement actual invitation logic
+      // This might involve:
+      // 1. Creating an invitation record in the database
+      // 2. Sending an email with invitation link
+      // 3. Setting up temporary access tokens
+      
+      throw new Error('User invitation functionality not yet implemented');
+    } catch (error: any) {
+      console.error('خطأ في دعوة المستخدم:', error);
       throw error;
     }
   }

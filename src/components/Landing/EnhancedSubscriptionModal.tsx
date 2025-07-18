@@ -163,9 +163,11 @@ export function EnhancedSubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
       };
 
       console.log('Creating tenant with data:', tenantData);
-      const newTenant = await tenantService.createTenant(tenantData);
+      const response = await tenantService.createTenant(tenantData);
       
-      setTenantId(newTenant.id);
+      if (response.tenant_id) {
+        setTenantId(response.tenant_id);
+      }
       setCurrentStep('payment');
       
       toast({
