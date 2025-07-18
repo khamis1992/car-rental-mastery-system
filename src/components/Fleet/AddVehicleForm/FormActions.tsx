@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Car, RotateCcw } from 'lucide-react';
@@ -14,13 +15,20 @@ export const FormActions: React.FC<FormActionsProps> = ({ onReset, onCancel }) =
         type="button"
         variant="outline"
         onClick={onReset}
-        className="flex items-center gap-2 h-12 px-6"
+        className="rtl-flex h-12 px-6"
       >
         <RotateCcw className="w-4 h-4" />
         تفريغ النموذج
       </Button>
       
-      <div className="flex gap-3">
+      <div className="flex gap-3 flex-row-reverse">
+        <Button 
+          type="submit" 
+          className="rtl-flex h-12 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all"
+        >
+          <Car className="w-4 h-4" />
+          إضافة المركبة
+        </Button>
         <Button
           type="button"
           variant="outline"
@@ -28,13 +36,6 @@ export const FormActions: React.FC<FormActionsProps> = ({ onReset, onCancel }) =
           className="h-12 px-6"
         >
           إلغاء
-        </Button>
-        <Button 
-          type="submit" 
-          className="h-12 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all"
-        >
-          <Car className="w-4 h-4 mr-2" />
-          إضافة المركبة
         </Button>
       </div>
     </div>

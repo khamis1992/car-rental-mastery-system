@@ -20,7 +20,7 @@ export function CompanyInfoStep({ formData, updateFormData }: CompanyInfoStepPro
     <div className="space-y-6">
       <div className="text-center mb-6">
         <Building2 className="w-16 h-16 text-primary mx-auto mb-4" />
-        <h3 className="text-xl font-bold mb-2">معلومات الشركة</h3>
+        <h3 className="rtl-title text-xl font-bold mb-2">معلومات الشركة</h3>
         <p className="text-muted-foreground">
           أدخل المعلومات الأساسية لشركتك لإنشاء حساب جديد
         </p>
@@ -35,6 +35,7 @@ export function CompanyInfoStep({ formData, updateFormData }: CompanyInfoStepPro
             onChange={(e) => updateFormData('companyName', e.target.value)}
             placeholder="مثال: شركة النقل المتقدمة"
             className="mt-1"
+            required
           />
         </div>
         
@@ -47,6 +48,7 @@ export function CompanyInfoStep({ formData, updateFormData }: CompanyInfoStepPro
             onChange={(e) => updateFormData('contactEmail', e.target.value)}
             placeholder="info@company.com"
             className="mt-1"
+            required
           />
         </div>
         
