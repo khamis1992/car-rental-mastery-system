@@ -247,7 +247,12 @@ const AdvancedPermissions: React.FC = () => {
         // تحديث دور موجود
         await updateRoleMutation.mutateAsync({
           id: selectedRole.id,
-          ...newRoleForm
+          updates: {
+            name: newRoleForm.name,
+            display_name: newRoleForm.display_name,
+            description: newRoleForm.description,
+            level: newRoleForm.level
+          }
         });
         toast({
           title: 'تم التحديث بنجاح',
@@ -255,7 +260,12 @@ const AdvancedPermissions: React.FC = () => {
         });
       } else {
         // إنشاء دور جديد
-        await createRoleMutation.mutateAsync(newRoleForm);
+        await createRoleMutation.mutateAsync({
+          ...newRoleForm,
+          is_active: true,
+          is_system: false,
+          is_default: false
+        });
         toast({
           title: 'تم الإنشاء بنجاح',
           description: `تم إنشاء الدور ${newRoleForm.display_name} بنجاح`
@@ -335,7 +345,7 @@ const AdvancedPermissions: React.FC = () => {
           </div>
           <div className="flex gap-2">
             <EnhancedButton
-              onClick={refetchRoles}
+              onClick={() => refetchRoles()}
               variant="outline"
               icon={<RefreshCw className="w-4 h-4" />}
               loadingText="جاري التحديث..."
@@ -393,7 +403,7 @@ const AdvancedPermissions: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground text-right">المستخدمين النشطين</p>
-                    <p className="text-2xl font-bold text-purple-600 text-right">{formatNumber(systemStats.active_users)}</p>
+                    <p className="text-2xl font-bold text-purple-600 text-right">{formatNumber(systemStats.active_users_with_roles)}</p>
                   </div>
                   <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                     <UserCheck className="w-4 h-4 text-purple-600" />
@@ -586,7 +596,7 @@ const AdvancedPermissions: React.FC = () => {
                 إلغاء
               </Button>
               <ActionButton
-                action={selectedRole ? "update" : "create"}
+                action={selectedRole ? "edit" : "create"}
                 itemName="الدور"
                 onClick={handleCreateRole}
                 loading={createRoleMutation.isPending || updateRoleMutation.isPending}

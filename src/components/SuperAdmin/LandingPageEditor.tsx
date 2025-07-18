@@ -303,12 +303,12 @@ const LandingPageEditor: React.FC = () => {
       }
     },
     {
-      label: page => page.isPublished ? 'إلغاء النشر' : 'نشر',
+      label: 'تبديل النشر',
       icon: <Globe className="w-4 h-4" />,
       onClick: (page: LandingPage) => {
         togglePublishPage(page);
       },
-      variant: (page: LandingPage) => page.isPublished ? 'secondary' : 'default'
+      variant: 'default' as const
     },
     {
       label: 'حذف',
@@ -938,7 +938,7 @@ const LandingPageEditor: React.FC = () => {
           onOpenChange={setShowPageEditor}
           title={selectedPage ? `تحرير: ${selectedPage.name}` : ''}
           description="تحرير محتوى وتصميم الصفحة"
-          size="full"
+          size="xl"
           showCloseButton
         >
           {selectedPage && (

@@ -43,6 +43,9 @@ export const EnhancedButton: React.FC<EnhancedButtonProps> = ({
 interface ActionButtonProps extends EnhancedButtonProps {
   action: 'create' | 'edit' | 'delete' | 'view';
   itemName?: string;
+  requireConfirmation?: boolean;
+  confirmationTitle?: string;
+  confirmationMessage?: string;
 }
 
 export const ActionButton: React.FC<ActionButtonProps> = ({

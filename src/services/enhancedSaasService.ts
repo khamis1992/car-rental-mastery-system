@@ -456,6 +456,29 @@ export class EnhancedSaasService {
   }
 
   /**
+   * تحديث حالة الفاتورة
+   */
+  async updateInvoiceStatus(invoiceId: string, status: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('saas_invoices')
+        .update({ 
+          status,
+          updated_at: new Date().toISOString(),
+          ...(status === 'paid' && { paid_at: new Date().toISOString() })
+        })
+        .eq('id', invoiceId);
+
+      if (error) {
+        throw new Error(`خطأ في تحديث حالة الفاتورة: ${error.message}`);
+      }
+    } catch (error) {
+      console.error('خطأ في تحديث حالة الفاتورة:', error);
+      throw error;
+    }
+  }
+
+  /**
    * تحديث استخدام المؤسسة
    */
   async updateTenantUsage(tenantId: string): Promise<any> {
