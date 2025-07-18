@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 
 // Hook للتحكم في Focus Trap
 export const useFocusTrap = (isActive: boolean = true) => {
-  const containerRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isActive || !containerRef.current) return;

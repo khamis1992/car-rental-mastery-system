@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -495,6 +496,37 @@ const Register = () => {
   const handleSkipRecommendation = () => {
     setShowRecommendation(false);
   };
+
+  // مكون تقدم الخطوات
+  const StepProgress = () => (
+    <div className="mb-8">
+      <div className="flex justify-center mb-4">
+        <div className="flex items-center space-x-reverse space-x-4">
+          {[1, 2, 3, 4].map((step) => (
+            <div key={step} className="flex items-center">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  step <= currentStep
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
+                }`}
+              >
+                {step}
+              </div>
+              {step < 4 && (
+                <div
+                  className={`w-8 h-1 mx-2 ${
+                    step < currentStep ? 'bg-primary' : 'bg-muted'
+                  }`}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+      <Progress value={(currentStep / 4) * 100} className="w-full" />
+    </div>
+  );
 
   // خطوة اختيار الخطة مع النظام الذكي
   const PlanStep = () => <div className="space-y-6">

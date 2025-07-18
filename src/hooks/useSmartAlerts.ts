@@ -402,7 +402,12 @@ export const useSmartAlerts = (): SmartAlertsHook => {
           id: crypto.randomUUID(),
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          resolved: false
+          resolved: false,
+          message: alertData.message || '',
+          severity: alertData.severity || 'medium',
+          source: alertData.source || 'system',
+          title: alertData.title || '',
+          type: alertData.type || 'system'
         }])
         .select()
         .single();
@@ -412,7 +417,7 @@ export const useSmartAlerts = (): SmartAlertsHook => {
       }
 
       if (data) {
-        setAlerts(prev => [data, ...prev]);
+        setAlerts(prev => [data as unknown as SmartAlert, ...prev]);
       }
     } catch (err) {
       console.error('خطأ في إنشاء التنبيه:', err);

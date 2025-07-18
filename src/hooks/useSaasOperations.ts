@@ -68,7 +68,7 @@ export const useSubscriptionPlans = () => {
     }
   };
 
-  const createPlan = async (planData: Partial<SubscriptionPlan>) => {
+  const createPlan = async (planData: Partial<SubscriptionPlan> & { plan_code: string; plan_name: string }) => {
     try {
       const { data, error } = await supabase
         .from('subscription_plans')
@@ -197,7 +197,14 @@ export const useSaasSubscriptions = (tenantId?: string) => {
         throw fetchError;
       }
 
-      setSubscriptions(data || []);
+      setSubscriptions((data || []).map(item => ({
+        ...item,
+        status: item.status as any,
+        billing_cycle: item.billing_cycle as any,
+        currency: item.currency as any,
+        discount_percentage: (item as any).discount_percentage || 0,
+        plan: (item.plan as any) || null
+      } as SaasSubscription)));
     } catch (err: any) {
       console.error('خطأ في جلب الاشتراكات:', err);
       setError(err.message);
@@ -207,7 +214,13 @@ export const useSaasSubscriptions = (tenantId?: string) => {
     }
   };
 
-  const createSubscription = async (subscriptionData: Partial<SaasSubscription>) => {
+  const createSubscription = async (subscriptionData: Partial<SaasSubscription> & { 
+    amount: number; 
+    current_period_start: string; 
+    current_period_end: string; 
+    plan_id: string; 
+    tenant_id: string 
+  }) => {
     try {
       const { data, error } = await supabase
         .from('saas_subscriptions')
@@ -311,7 +324,17 @@ export const useSaasInvoices = (tenantId?: string) => {
         throw fetchError;
       }
 
-      setInvoices(data || []);
+      setInvoices((data || []).map(item => ({
+        ...item,
+        status: item.status as any,
+        currency: item.currency as any,
+        subtotal: (item as any).subtotal || item.amount_due,
+        tax_amount: (item as any).tax_amount || 0,
+        discount_amount: (item as any).discount_amount || 0,
+        total_amount: (item as any).total_amount || item.amount_due,
+        paid_amount: (item as any).paid_amount || item.amount_paid,
+        metadata: (item.metadata as any) || {}
+      } as unknown as SaasInvoice)));
     } catch (err: any) {
       console.error('خطأ في جلب الفواتير:', err);
       setError(err.message);
@@ -321,7 +344,13 @@ export const useSaasInvoices = (tenantId?: string) => {
     }
   };
 
-  const createInvoice = async (invoiceData: Partial<SaasInvoice>) => {
+  const createInvoice = async (invoiceData: Partial<SaasInvoice> & {
+    billing_period_start: string;
+    billing_period_end: string;
+    invoice_number: string;
+    subscription_id: string;
+    tenant_id: string;
+  }) => {
     try {
       const { data, error } = await supabase
         .from('saas_invoices')
@@ -424,7 +453,13 @@ export const useSaasPayments = (tenantId?: string) => {
         throw fetchError;
       }
 
-      setPayments(data || []);
+      setPayments((data || []).map(item => ({
+        ...item,
+        status: item.status as any,
+        currency: item.currency as any,
+        payment_method: item.payment_method as any,
+        payment_date: item.paid_at || item.created_at
+      } as unknown as SaasPayment)));
     } catch (err: any) {
       console.error('خطأ في جلب المدفوعات:', err);
       setError(err.message);
@@ -434,7 +469,12 @@ export const useSaasPayments = (tenantId?: string) => {
     }
   };
 
-  const createPayment = async (paymentData: Partial<SaasPayment>) => {
+  const createPayment = async (paymentData: Partial<SaasPayment> & {
+    amount: number;
+    invoice_id: string;
+    subscription_id: string;
+    tenant_id: string;
+  }) => {
     try {
       const { data, error } = await supabase
         .from('saas_payments')
@@ -517,9 +557,9 @@ export const useBillingStats = () => {
         total_subscriptions: subscriptions.length,
         
         // الفواتير
-        pending_invoices: invoices.filter(i => i.status === 'sent' || i.status === 'draft').length,
-        overdue_invoices: invoices.filter(i => i.status === 'overdue').length,
-        paid_invoices: invoices.filter(i => i.status === 'paid').length,
+        pending_invoices: invoices.filter(i => (i as any).status === 'sent' || (i as any).status === 'draft').length,
+        overdue_invoices: invoices.filter(i => (i as any).status === 'overdue').length,
+        paid_invoices: invoices.filter(i => (i as any).status === 'paid').length,
         total_invoices: invoices.length,
         
         // المؤسسات
@@ -601,7 +641,7 @@ export const useTenantUsage = (tenantId: string) => {
         throw functionError;
       }
 
-      setUsage(data);
+      setUsage(data as unknown as TenantUsage);
     } catch (err: any) {
       console.error('خطأ في جلب استخدام المؤسسة:', err);
       setError(err.message);

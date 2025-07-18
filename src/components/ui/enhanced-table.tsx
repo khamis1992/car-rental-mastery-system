@@ -142,7 +142,7 @@ export function EnhancedTable<T>({
             <span className="sr-only">فتح القائمة</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48" dir="rtl">
+        <DropdownMenuContent align="end" className="w-48">
           {actions.map((action, index) => (
             <React.Fragment key={index}>
               {action.separator && index > 0 && <DropdownMenuSeparator />}
@@ -362,7 +362,7 @@ export function EnhancedTable<T>({
 // مكون مساعد لعرض الحالات
 export const StatusBadge: React.FC<{
   status: string;
-  variant?: 'default' | 'success' | 'warning' | 'destructive';
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary';
   children: React.ReactNode;
 }> = ({ status, variant = 'default', children }) => (
   <Badge variant={variant} className="whitespace-nowrap">
