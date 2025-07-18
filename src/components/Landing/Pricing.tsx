@@ -5,137 +5,105 @@ import { SubscriptionModal } from "./SubscriptionModal";
 import { SUBSCRIPTION_PLANS, formatPrice } from "@/types/subscription-plans";
 
 // تحويل خطط SaaS إلى تنسيق صفحة Landing
-const plans = [
-  {
-    id: 'basic',
-    name: SUBSCRIPTION_PLANS.basic.name,
-    name_en: SUBSCRIPTION_PLANS.basic.name_en,
-    icon: Zap,
-    price: SUBSCRIPTION_PLANS.basic.price_monthly,
-    period: "شهرياً",
-    description: "مثالية للشركات الناشئة والصغيرة",
-    features: SUBSCRIPTION_PLANS.basic.features,
-    popular: false,
-    buttonText: "اشترك الآن",
-    limits: {
-      users: SUBSCRIPTION_PLANS.basic.limits.max_users_per_tenant,
-      vehicles: SUBSCRIPTION_PLANS.basic.limits.max_vehicles,
-      contracts: SUBSCRIPTION_PLANS.basic.limits.max_contracts
-    }
-  },
-  {
-    id: 'standard',
-    name: SUBSCRIPTION_PLANS.standard.name,
-    name_en: SUBSCRIPTION_PLANS.standard.name_en,
-    icon: Crown,
-    price: SUBSCRIPTION_PLANS.standard.price_monthly,
-    period: "شهرياً",
-    description: "الأكثر شعبية للشركات المتوسطة",
-    features: SUBSCRIPTION_PLANS.standard.features,
-    popular: true,
-    buttonText: "اشترك الآن",
-    limits: {
-      users: SUBSCRIPTION_PLANS.standard.limits.max_users_per_tenant,
-      vehicles: SUBSCRIPTION_PLANS.standard.limits.max_vehicles,
-      contracts: SUBSCRIPTION_PLANS.standard.limits.max_contracts
-    }
-  },
-  {
-    id: 'premium',
-    name: SUBSCRIPTION_PLANS.premium.name,
-    name_en: SUBSCRIPTION_PLANS.premium.name_en,
-    icon: Star,
-    price: SUBSCRIPTION_PLANS.premium.price_monthly,
-    period: "شهرياً",
-    description: "للشركات الكبيرة والمتقدمة",
-    features: SUBSCRIPTION_PLANS.premium.features,
-    popular: false,
-    buttonText: "اشترك الآن",
-    limits: {
-      users: SUBSCRIPTION_PLANS.premium.limits.max_users_per_tenant,
-      vehicles: SUBSCRIPTION_PLANS.premium.limits.max_vehicles,
-      contracts: SUBSCRIPTION_PLANS.premium.limits.max_contracts
-    }
-  },
-  {
-    id: 'enterprise',
-    name: SUBSCRIPTION_PLANS.enterprise.name,
-    name_en: SUBSCRIPTION_PLANS.enterprise.name_en,
-    icon: Building,
-    price: SUBSCRIPTION_PLANS.enterprise.price_monthly,
-    period: "شهرياً",
-    description: "للمؤسسات الكبيرة والحكومية",
-    features: SUBSCRIPTION_PLANS.enterprise.features,
-    popular: false,
-    buttonText: "تواصل معنا",
-    limits: {
-      users: SUBSCRIPTION_PLANS.enterprise.limits.max_users_per_tenant,
-      vehicles: SUBSCRIPTION_PLANS.enterprise.limits.max_vehicles,
-      contracts: SUBSCRIPTION_PLANS.enterprise.limits.max_contracts
-    }
+const plans = [{
+  id: 'basic',
+  name: SUBSCRIPTION_PLANS.basic.name,
+  name_en: SUBSCRIPTION_PLANS.basic.name_en,
+  icon: Zap,
+  price: SUBSCRIPTION_PLANS.basic.price_monthly,
+  period: "شهرياً",
+  description: "مثالية للشركات الناشئة والصغيرة",
+  features: SUBSCRIPTION_PLANS.basic.features,
+  popular: false,
+  buttonText: "اشترك الآن",
+  limits: {
+    users: SUBSCRIPTION_PLANS.basic.limits.max_users_per_tenant,
+    vehicles: SUBSCRIPTION_PLANS.basic.limits.max_vehicles,
+    contracts: SUBSCRIPTION_PLANS.basic.limits.max_contracts
   }
-];
-
+}, {
+  id: 'standard',
+  name: SUBSCRIPTION_PLANS.standard.name,
+  name_en: SUBSCRIPTION_PLANS.standard.name_en,
+  icon: Crown,
+  price: SUBSCRIPTION_PLANS.standard.price_monthly,
+  period: "شهرياً",
+  description: "الأكثر شعبية للشركات المتوسطة",
+  features: SUBSCRIPTION_PLANS.standard.features,
+  popular: true,
+  buttonText: "اشترك الآن",
+  limits: {
+    users: SUBSCRIPTION_PLANS.standard.limits.max_users_per_tenant,
+    vehicles: SUBSCRIPTION_PLANS.standard.limits.max_vehicles,
+    contracts: SUBSCRIPTION_PLANS.standard.limits.max_contracts
+  }
+}, {
+  id: 'premium',
+  name: SUBSCRIPTION_PLANS.premium.name,
+  name_en: SUBSCRIPTION_PLANS.premium.name_en,
+  icon: Star,
+  price: SUBSCRIPTION_PLANS.premium.price_monthly,
+  period: "شهرياً",
+  description: "للشركات الكبيرة والمتقدمة",
+  features: SUBSCRIPTION_PLANS.premium.features,
+  popular: false,
+  buttonText: "اشترك الآن",
+  limits: {
+    users: SUBSCRIPTION_PLANS.premium.limits.max_users_per_tenant,
+    vehicles: SUBSCRIPTION_PLANS.premium.limits.max_vehicles,
+    contracts: SUBSCRIPTION_PLANS.premium.limits.max_contracts
+  }
+}, {
+  id: 'enterprise',
+  name: SUBSCRIPTION_PLANS.enterprise.name,
+  name_en: SUBSCRIPTION_PLANS.enterprise.name_en,
+  icon: Building,
+  price: SUBSCRIPTION_PLANS.enterprise.price_monthly,
+  period: "شهرياً",
+  description: "للمؤسسات الكبيرة والحكومية",
+  features: SUBSCRIPTION_PLANS.enterprise.features,
+  popular: false,
+  buttonText: "تواصل معنا",
+  limits: {
+    users: SUBSCRIPTION_PLANS.enterprise.limits.max_users_per_tenant,
+    vehicles: SUBSCRIPTION_PLANS.enterprise.limits.max_vehicles,
+    contracts: SUBSCRIPTION_PLANS.enterprise.limits.max_contracts
+  }
+}];
 export function Pricing() {
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const handleSubscribe = (plan: typeof plans[0]) => {
     if (plan.id === 'enterprise') {
       // للباقة المؤسسية، نحتاج لتوجيه المستخدم للتواصل
       window.location.href = "mailto:sales@saptcogulf.com?subject=استفسار عن الباقة المؤسسية";
       return;
     }
-    
+
     // توجيه لصفحة التسجيل الجديدة مع الخطة المحددة
     window.location.href = `/register?plan=${plan.id}`;
   };
-
-  return (
-    <section id="pricing" className="py-20 bg-background">
+  return <section id="pricing" className="py-20 bg-background">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-foreground">
             خطط أسعار شفافة
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-4">
-            اختر الباقة التي تناسب حجم عملك. جميع الباقات تشمل فترة تجريبية مجانية لمدة ١٤ يوم
-          </p>
+          
           
           {/* CTA Highlight */}
-          <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4 max-w-2xl mx-auto">
-            <div className="flex items-center justify-center gap-2 text-green-700">
-              <span className="text-2xl">🎉</span>
-              <span className="font-semibold">تجربة مجانية كاملة ١٤ يوم</span>
-              <span className="text-2xl">🎉</span>
-            </div>
-            <p className="text-sm text-green-600 mt-1">
-              بدون الحاجة لبطاقة ائتمان • إلغاء مجاني في أي وقت • دعم فني مجاني
-            </p>
-          </div>
+          
         </div>
 
         <div className="grid lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {plans.map((plan, index) => (
-            <div 
-              key={index}
-              className={`relative p-6 rounded-2xl border transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 ${
-                plan.popular 
-                  ? 'border-primary bg-card shadow-lg scale-105' 
-                  : 'border-border bg-card'
-              }`}
-            >
+          {plans.map((plan, index) => <div key={index} className={`relative p-6 rounded-2xl border transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 ${plan.popular ? 'border-primary bg-card shadow-lg scale-105' : 'border-border bg-card'}`}>
               {/* Popular Badge */}
-              {plan.popular && (
-                <div className="absolute -top-4 right-6 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold">
+              {plan.popular && <div className="absolute -top-4 right-6 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold">
                   الأكثر اختياراً
-                </div>
-              )}
+                </div>}
 
               {/* Icon */}
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${
-                plan.popular ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-              }`}>
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${plan.popular ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
                 <plan.icon className="w-7 h-7" />
               </div>
 
@@ -181,35 +149,22 @@ export function Pricing() {
 
               {/* Features */}
               <ul className="space-y-2 mb-6">
-                {plan.features.slice(0, 5).map((feature, featureIndex) => (
-                  <li key={featureIndex} className="flex items-start gap-2">
+                {plan.features.slice(0, 5).map((feature, featureIndex) => <li key={featureIndex} className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-card-foreground">
                       {feature}
                     </span>
-                  </li>
-                ))}
-                {plan.features.length > 5 && (
-                  <li className="text-xs text-muted-foreground">
+                  </li>)}
+                {plan.features.length > 5 && <li className="text-xs text-muted-foreground">
                     و{plan.features.length - 5} مميزات أخرى...
-                  </li>
-                )}
+                  </li>}
               </ul>
 
               {/* CTA Button */}
-              <Button 
-                className={`w-full ${
-                  plan.popular 
-                    ? 'bg-primary hover:bg-primary/90' 
-                    : 'variant-outline'
-                }`}
-                size="sm"
-                onClick={() => handleSubscribe(plan)}
-              >
+              <Button className={`w-full ${plan.popular ? 'bg-primary hover:bg-primary/90' : 'variant-outline'}`} size="sm" onClick={() => handleSubscribe(plan)}>
                 {plan.buttonText}
               </Button>
-            </div>
-          ))}
+            </div>)}
         </div>
 
         {/* Additional Info */}
@@ -238,11 +193,6 @@ export function Pricing() {
         </div>
       </div>
 
-      <SubscriptionModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        selectedPlan={selectedPlan}
-      />
-    </section>
-  );
+      <SubscriptionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} selectedPlan={selectedPlan} />
+    </section>;
 }
