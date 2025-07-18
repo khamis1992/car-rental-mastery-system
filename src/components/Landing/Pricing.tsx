@@ -1,7 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { Check, Zap, Crown, Building, Star } from "lucide-react";
 import { useState } from "react";
-import { SubscriptionModal } from "./SubscriptionModal";
+import { EnhancedSubscriptionModal } from "./EnhancedSubscriptionModal";
 import { useSubscriptionPlans } from "@/hooks/useSaasData";
 import { formatPrice } from "@/types/subscription-plans";
 
@@ -209,7 +210,7 @@ export function Pricing() {
         </div>
       </div>
 
-      <SubscriptionModal
+      <EnhancedSubscriptionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         selectedPlan={selectedPlan}
