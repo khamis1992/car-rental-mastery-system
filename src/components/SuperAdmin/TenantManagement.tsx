@@ -101,6 +101,7 @@ const TenantManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
+  const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
 
   const tenantService = new TenantService();
   const { t, msg, formatNumber } = useTranslation();
@@ -227,6 +228,7 @@ const TenantManagement: React.FC = () => {
       icon: <Edit className="w-4 h-4" />,
       onClick: (tenant: Tenant) => {
         console.log('✏️ Edit tenant:', tenant.id);
+        setEditingTenant(tenant);
       }
     },
     {
@@ -406,6 +408,25 @@ const TenantManagement: React.FC = () => {
           open={!!selectedTenant}
           onClose={handleCloseDetails}
         />
+
+        {/* Edit Tenant Dialog */}
+        <EnhancedDialog
+          open={!!editingTenant}
+          onOpenChange={() => setEditingTenant(null)}
+          title={`تحرير ${editingTenant?.name || ''}`}
+          description="تحديث بيانات المؤسسة"
+          size="lg"
+          showCloseButton
+        >
+          <div className="p-4 text-center">
+            <p className="text-muted-foreground mb-4">
+              وظيفة التحرير قيد التطوير
+            </p>
+            <p className="text-sm text-muted-foreground">
+              المؤسسة المحددة: {editingTenant?.name}
+            </p>
+          </div>
+        </EnhancedDialog>
       </div>
     </ErrorBoundary>
   );
