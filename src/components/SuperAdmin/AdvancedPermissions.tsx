@@ -434,7 +434,9 @@ const AdvancedPermissions: React.FC = () => {
                   {formatNumber(systemStats?.total_users || 0)}
                 </p>
               </div>
-              <Users className="w-8 h-8 text-purple-600" />
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <Users className="w-4 h-4 text-blue-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -685,51 +687,33 @@ const AdvancedPermissions: React.FC = () => {
               />
             </div>
 
-            {/* إضافة حقول للخصائص الجديدة */}
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <Switch
-                id="role-active"
-                checked={newRoleForm.is_active}
-                onCheckedChange={(checked) => setNewRoleForm(prev => ({ ...prev, is_active: checked }))}
-              />
-              <Label htmlFor="role-active">الدور نشط</Label>
-            </div>
-
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <Switch
-                id="role-default"
-                checked={newRoleForm.is_default}
-                onCheckedChange={(checked) => setNewRoleForm(prev => ({ ...prev, is_default: checked }))}
-              />
-              <Label htmlFor="role-default">دور افتراضي</Label>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowCreateRole(false);
+                  setSelectedRole(null);
+                  resetNewRoleForm();
+                }}
+              >
+                إلغاء
+              </Button>
+              <Button
+                onClick={handleCreateRole}
+                loading={createRoleMutation.isPending || updateRoleMutation.isPending}
+              >
+                {createRoleMutation.isPending || updateRoleMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {selectedRole ? 'جاري التحديث...' : 'جاري الإنشاء...'}
+                  </>
+                ) : (
+                  selectedRole ? 'تحديث الدور' : 'إنشاء الدور'
+                )}
+              </Button>
             </div>
           </div>
           
-          <div className="flex justify-end space-x-2 space-x-reverse pt-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowCreateRole(false);
-                setSelectedRole(null);
-                resetNewRoleForm();
-              }}
-            >
-              إلغاء
-            </Button>
-            <Button
-              onClick={handleCreateRole}
-              disabled={createRoleMutation.isPending || updateRoleMutation.isPending}
-            >
-              {createRoleMutation.isPending || updateRoleMutation.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {selectedRole ? 'جاري التحديث...' : 'جاري الإنشاء...'}
-                </>
-              ) : (
-                selectedRole ? 'تحديث الدور' : 'إنشاء الدور'
-              )}
-            </Button>
-          </div>
         </DialogContent>
       </Dialog>
 
