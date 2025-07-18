@@ -36,96 +36,83 @@ const SystemMonitoring: React.FC = () => {
       case 'error':
         return <AlertTriangle className="w-4 h-4 text-red-600" />;
       default:
-        return <Activity className="w-4 h-4 text-gray-600" />;
+        return <AlertTriangle className="w-4 h-4 text-gray-600" />;
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'online':
-        return <Badge className="bg-green-100 text-green-800">متصل</Badge>;
       case 'healthy':
-        return <Badge className="bg-green-100 text-green-800">سليم</Badge>;
+        return <Badge variant="default" className="bg-green-100 text-green-800">متصل</Badge>;
       case 'maintenance':
-        return <Badge className="bg-yellow-100 text-yellow-800">صيانة</Badge>;
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">صيانة</Badge>;
       case 'offline':
+      case 'error':
         return <Badge variant="destructive">غير متصل</Badge>;
       default:
-        return <Badge variant="outline">غير محدد</Badge>;
+        return <Badge variant="outline">غير معروف</Badge>;
     }
   };
 
   const getProgressColor = (value: number) => {
-    if (value < 50) return 'bg-green-500';
-    if (value < 80) return 'bg-yellow-500';
-    return 'bg-red-500';
+    if (value >= 90) return 'bg-red-500';
+    if (value >= 70) return 'bg-yellow-500';
+    return 'bg-green-500';
   };
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold">مراقبة النظام</h2>
-          <p className="text-muted-foreground">جاري تحميل بيانات المراقبة...</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i}>
-              <CardContent className="flex items-center p-6">
-                <div className="w-8 h-8 bg-gray-200 rounded mr-3 animate-pulse" />
-                <div className="space-y-2 flex-1">
-                  <div className="h-4 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-6 bg-gray-200 rounded animate-pulse" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-muted-foreground">جارٍ تحميل بيانات النظام...</p>
         </div>
       </div>
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <AlertTriangle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">خطأ في تحميل البيانات</h3>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <Button onClick={refetch} variant="outline">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            إعادة المحاولة
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!metrics) {
+    return null;
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir="rtl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold rtl-title">مراقبة النظام المتقدم</h2>
+          <h1 className="text-3xl font-bold">مراقبة النظام</h1>
           <p className="text-muted-foreground">
-            مراقبة شاملة للأداء والأمان مع تنبيهات ذكية
+            مراقبة شاملة لأداء النظام وحالة الخوادم
           </p>
         </div>
-        <Button onClick={refetch} variant="outline" size="sm" className="rtl-flex">
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''} ml-1`} />
+        <Button onClick={refetch} variant="outline" className="flex items-center gap-2">
+          <RefreshCw className="w-4 h-4" />
           تحديث
         </Button>
       </div>
 
-      {error && (
-        <Card className="border-destructive">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-destructive rtl-flex">
-              <AlertTriangle className="w-4 h-4 ml-1" />
-              <span>{error}</span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <Tabs defaultValue="overview" className="w-full">
+      <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview" className="rtl-flex">
-            <Server className="w-4 h-4 ml-1" />
-            نظرة عامة
-          </TabsTrigger>
-          <TabsTrigger value="alerts" className="rtl-flex">
-            <Bell className="w-4 h-4 ml-1" />
-            التنبيهات الذكية
-          </TabsTrigger>
-          <TabsTrigger value="security" className="rtl-flex">
-            <Shield className="w-4 h-4 ml-1" />
-            الأمان
-          </TabsTrigger>
+          <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
+          <TabsTrigger value="alerts">التنبيهات</TabsTrigger>
+          <TabsTrigger value="security">الأمان</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-6">
@@ -135,28 +122,28 @@ const SystemMonitoring: React.FC = () => {
               <CardContent className="flex items-center p-6">
                 <Server className="w-8 h-8 text-blue-600 mr-3" />
                 <div>
-                  <p className="text-sm text-muted-foreground">الخوادم النشطة</p>
+                  <p className="text-sm text-muted-foreground">وحدة المعالجة</p>
                   <p className="text-2xl font-bold">
-                    {metrics.serverStats.activeServers}/{metrics.serverStats.totalServers}
+                    {metrics.server.cpu_usage.toFixed(1)}%
                   </p>
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="flex items-center p-6">
-                <Database className="w-8 h-8 text-green-600 mr-3" />
+                <MemoryStick className="w-8 h-8 text-green-600 mr-3" />
                 <div>
-                  <p className="text-sm text-muted-foreground">قواعد البيانات</p>
-                  <p className="text-2xl font-bold">{metrics.serverStats.databaseCount}</p>
+                  <p className="text-sm text-muted-foreground">الذاكرة</p>
+                  <p className="text-2xl font-bold">{metrics.server.memory_usage.toFixed(1)}%</p>
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="flex items-center p-6">
-                <Wifi className="w-8 h-8 text-purple-600 mr-3" />
+                <HardDrive className="w-8 h-8 text-purple-600 mr-3" />
                 <div>
-                  <p className="text-sm text-muted-foreground">زمن الاستجابة</p>
-                  <p className="text-2xl font-bold">{metrics.serverStats.responseTime}</p>
+                  <p className="text-sm text-muted-foreground">مساحة القرص</p>
+                  <p className="text-2xl font-bold">{metrics.server.disk_usage.toFixed(1)}%</p>
                 </div>
               </CardContent>
             </Card>
@@ -164,165 +151,181 @@ const SystemMonitoring: React.FC = () => {
               <CardContent className="flex items-center p-6">
                 <Activity className="w-8 h-8 text-orange-600 mr-3" />
                 <div>
-                  <p className="text-sm text-muted-foreground">معدل التوفر</p>
-                  <p className="text-2xl font-bold">{metrics.serverStats.uptime}</p>
+                  <p className="text-sm text-muted-foreground">زمن الاستجابة</p>
+                  <p className="text-2xl font-bold">{metrics.api.responseTime}ms</p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Servers Monitoring */}
+          {/* Database Performance */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Server className="w-5 h-5" />
-                مراقبة الخوادم
+                <Database className="w-5 h-5" />
+                أداء قاعدة البيانات
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {metrics.servers.map((server, index) => (
-                  <div key={index} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(server.status)}
-                        <h4 className="font-medium">{server.name}</h4>
-                      </div>
-                      {getStatusBadge(server.status)}
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm flex items-center gap-1">
-                            <Cpu className="w-3 h-3" />
-                            المعالج
-                          </span>
-                          <span className="text-sm">{server.cpu}%</span>
-                        </div>
-                        <Progress value={server.cpu} className="h-2" />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm flex items-center gap-1">
-                            <MemoryStick className="w-3 h-3" />
-                            الذاكرة
-                          </span>
-                          <span className="text-sm">{server.memory}%</span>
-                        </div>
-                        <Progress value={server.memory} className="h-2" />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm flex items-center gap-1">
-                            <HardDrive className="w-3 h-3" />
-                            القرص الصلب
-                          </span>
-                          <span className="text-sm">{server.disk}%</span>
-                        </div>
-                        <Progress value={server.disk} className="h-2" />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">وقت التشغيل</span>
-                          <span className="text-sm font-medium">{server.uptime}</span>
-                        </div>
-                      </div>
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">الاتصالات النشطة</span>
+                    <span className="font-medium">{metrics.database.connections}/{metrics.database.maxConnections}</span>
                   </div>
-                ))}
+                  <Progress 
+                    value={(metrics.database.connections / metrics.database.maxConnections) * 100} 
+                    className="h-2"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">الاستعلامات في الثانية</span>
+                    <span className="font-medium">{metrics.database.queries_per_second}</span>
+                  </div>
+                  <Progress value={metrics.database.performance} className="h-2" />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">متوسط زمن الاستجابة</span>
+                    <span className="font-medium">{metrics.database.avg_response_time}ms</span>
+                  </div>
+                  <Progress value={100 - (metrics.database.avg_response_time / 10)} className="h-2" />
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Database Monitoring */}
+          {/* Storage & Cache */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Database className="w-5 h-5" />
-                  مراقبة قواعد البيانات
+                  <HardDrive className="w-5 h-5" />
+                  التخزين
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {metrics.databases.map((db, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium">{db.name}</h4>
-                        {getStatusBadge(db.status)}
-                      </div>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">الاتصالات:</span>
-                          <span>{db.connections}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">الحجم:</span>
-                          <span>{db.size}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">آخر نسخة احتياطية:</span>
-                          <span>{db.lastBackup}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+              <CardContent className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">المساحة المستخدمة</span>
+                    <span className="font-medium">{metrics.storage.used}% من {metrics.storage.total}GB</span>
+                  </div>
+                  <Progress value={metrics.storage.used} className="h-2" />
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">الرفوعات</p>
+                    <p className="font-medium">{metrics.storage.uploads}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">النسخ الاحتياطية</p>
+                    <p className="font-medium">{metrics.storage.backups}</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* System Alerts */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5" />
-                  تنبيهات النظام
+                  <Cpu className="w-5 h-5" />
+                  الذاكرة المؤقتة
                 </CardTitle>
               </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">معدل النجاح</span>
+                    <span className="font-medium">{metrics.cache.hitRate}%</span>
+                  </div>
+                  <Progress value={metrics.cache.hitRate} className="h-2" />
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">الذاكرة</p>
+                    <p className="font-medium">{metrics.cache.memory}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">المفاتيح</p>
+                    <p className="font-medium">{metrics.cache.keys.toLocaleString()}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Tenants & Users */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>إحصائيات المؤسسات</CardTitle>
+              </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {metrics.alerts.map((alert) => (
-                    <div key={alert.id} className="border rounded-lg p-3">
-                      <div className="flex items-start gap-2">
-                        {alert.type === 'warning' ? (
-                          <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5" />
-                        ) : alert.type === 'error' ? (
-                          <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5" />
-                        ) : (
-                          <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5" />
-                        )}
-                        <div className="flex-1">
-                          <p className="text-sm">{alert.message}</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {alert.timestamp}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-blue-600">{metrics.tenants.total}</p>
+                    <p className="text-sm text-muted-foreground">إجمالي المؤسسات</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-600">{metrics.tenants.active}</p>
+                    <p className="text-sm text-muted-foreground">نشطة</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-yellow-600">{metrics.tenants.trial}</p>
+                    <p className="text-sm text-muted-foreground">تجريبية</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-red-600">{metrics.tenants.suspended}</p>
+                    <p className="text-sm text-muted-foreground">معلقة</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>إحصائيات المستخدمين</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">إجمالي المستخدمين</span>
+                    <span className="text-lg font-bold">{metrics.users.total}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">متصل الآن</span>
+                    <span className="text-lg font-bold text-green-600">{metrics.users.online}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">نشط في آخر 24 ساعة</span>
+                    <span className="text-lg font-bold text-blue-600">{metrics.users.last_24h}</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
 
-        <TabsContent value="alerts" className="space-y-6 mt-6">
+        <TabsContent value="alerts" className="mt-6">
           <SmartAlertsPanel />
         </TabsContent>
 
-        <TabsContent value="security" className="space-y-6 mt-6">
+        <TabsContent value="security" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle className="rtl-title">أمان النظام</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5" />
+                مراقبة الأمان
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <Shield className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>ميزات الأمان المتقدمة قيد التطوير</p>
+              <div className="text-center py-12">
+                <Shield className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-600 mb-2">قريباً</h3>
+                <p className="text-muted-foreground">
+                  سيتم إضافة مراقبة شاملة للأمان والحماية
+                </p>
               </div>
             </CardContent>
           </Card>
