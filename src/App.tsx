@@ -72,7 +72,7 @@ import CompletedStage from "./pages/ContractStages/CompletedStage";
 import ContractPrint from "./pages/ContractPrint";
 import AttendanceReminderWrapper from "./components/Attendance/AttendanceReminderWrapper";
 import { SearchDialog } from "./components/Search/SearchDialog";
-import AdvancedAccounting from "./pages/AdvancedAccounting";
+import { AdvancedAccounting } from "./pages/AdvancedAccounting";
 
 // إعداد معالجة الأخطاء الشاملة
 setupGlobalErrorHandling();
