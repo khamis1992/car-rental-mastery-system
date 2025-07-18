@@ -142,7 +142,7 @@ export function EnhancedSubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
         .replace(/[^\w\-]/g, '')
         .substring(0, 50);
 
-      const subscriptionPlan = selectedPlan.code || 'basic';
+      const subscriptionPlan = (selectedPlan.code || 'basic') as 'basic' | 'standard' | 'premium' | 'enterprise';
 
       const tenantData = {
         name: formData.companyName,
