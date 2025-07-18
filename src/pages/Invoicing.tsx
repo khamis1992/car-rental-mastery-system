@@ -301,7 +301,7 @@ const Invoicing = () => {
         
         <div className="flex items-center gap-2">
           <Button 
-            className="btn-primary flex items-center gap-2"
+            className="rtl-flex"
             onClick={() => setInvoiceFormOpen(true)}
           >
             <Plus className="w-4 h-4" />
