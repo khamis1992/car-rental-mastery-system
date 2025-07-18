@@ -1,7 +1,8 @@
-
 import React from 'react';
 import { FinancialReportsTab } from '@/components/Accounting/FinancialReportsTab';
 import { FinancialBreadcrumb } from '@/components/Financial/FinancialBreadcrumb';
+import { LazyFinancialChart } from '@/components/Financial/LazyFinancialChart';
+import { FinancialPerformanceMonitor } from '@/components/Financial/FinancialPerformanceMonitor';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,8 +20,24 @@ import {
   Settings,
   Filter
 } from 'lucide-react';
+import { useFinancialCache } from '@/hooks/useFinancialCache';
 
 const FinancialReports = () => {
+  // Use cached data for better performance
+  const { data: reportsData, loading, refetch } = useFinancialCache(
+    'financial-reports',
+    async () => {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return {
+        totalReports: 24,
+        exported: 1247,
+        scheduled: 12,
+        templates: 5
+      };
+    }
+  );
+
   const reportCategories = [
     {
       title: "التقارير الأساسية",
@@ -32,7 +49,12 @@ const FinancialReports = () => {
           icon: TrendingUp,
           color: "bg-green-500",
           status: "ready",
-          lastGenerated: "2024-01-15"
+          lastGenerated: "2024-01-15",
+          chartData: [
+            { name: 'يناير', value: 4000 },
+            { name: 'فبراير', value: 3000 },
+            { name: 'مارس', value: 5000 }
+          ]
         },
         {
           title: "الميزانية العمومية",
@@ -40,7 +62,12 @@ const FinancialReports = () => {
           icon: BarChart3,
           color: "bg-blue-500",
           status: "ready",
-          lastGenerated: "2024-01-15"
+          lastGenerated: "2024-01-15",
+          chartData: [
+            { name: 'أصول', value: 6000 },
+            { name: 'خصوم', value: 4000 },
+            { name: 'حقوق الملكية', value: 2000 }
+          ]
         },
         {
           title: "قائمة التدفقات النقدية",
@@ -48,7 +75,12 @@ const FinancialReports = () => {
           icon: DollarSign,
           color: "bg-purple-500",
           status: "ready",
-          lastGenerated: "2024-01-14"
+          lastGenerated: "2024-01-14",
+          chartData: [
+            { name: 'التشغيل', value: 2500 },
+            { name: 'الاستثمار', value: -1500 },
+            { name: 'التمويل', value: 500 }
+          ]
         }
       ]
     },
@@ -62,7 +94,11 @@ const FinancialReports = () => {
           icon: PieChart,
           color: "bg-indigo-500",
           status: "ready",
-          lastGenerated: "2024-01-15"
+          lastGenerated: "2024-01-15",
+          chartData: [
+            { name: 'افتتاحي', value: 5000 },
+            { name: 'ختامي', value: 5500 }
+          ]
         },
         {
           title: "ميزان المراجعة المحسن",
@@ -70,7 +106,11 @@ const FinancialReports = () => {
           icon: FileText,
           color: "bg-teal-500",
           status: "processing",
-          lastGenerated: "2024-01-12"
+          lastGenerated: "2024-01-12",
+          chartData: [
+            { name: 'مدين', value: 12000 },
+            { name: 'دائن', value: 12000 }
+          ]
         },
         {
           title: "تحليل الربحية",
@@ -78,7 +118,11 @@ const FinancialReports = () => {
           icon: TrendingUp,
           color: "bg-orange-500",
           status: "ready",
-          lastGenerated: "2024-01-15"
+          lastGenerated: "2024-01-15",
+          chartData: [
+            { name: 'مركز 1', value: 3000 },
+            { name: 'مركز 2', value: 2500 }
+          ]
         }
       ]
     },
@@ -92,7 +136,11 @@ const FinancialReports = () => {
           icon: Building,
           color: "bg-red-500",
           status: "ready",
-          lastGenerated: "2024-01-15"
+          lastGenerated: "2024-01-15",
+          chartData: [
+            { name: 'نمو الإيرادات', value: 15 },
+            { name: 'هامش الربح', value: 20 }
+          ]
         },
         {
           title: "تحليل المخاطر المالية",
@@ -100,7 +148,11 @@ const FinancialReports = () => {
           icon: BarChart3,
           color: "bg-yellow-500",
           status: "scheduled",
-          lastGenerated: "2024-01-10"
+          lastGenerated: "2024-01-10",
+          chartData: [
+            { name: 'سيولة', value: 1.2 },
+            { name: 'رافعة مالية', value: 0.8 }
+          ]
         },
         {
           title: "تقرير التوقعات",
@@ -108,7 +160,11 @@ const FinancialReports = () => {
           icon: TrendingUp,
           color: "bg-pink-500",
           status: "ready",
-          lastGenerated: "2024-01-14"
+          lastGenerated: "2024-01-14",
+          chartData: [
+            { name: 'الإيرادات المتوقعة', value: 5500 },
+            { name: 'المصروفات المتوقعة', value: 4500 }
+          ]
         }
       ]
     }
@@ -130,7 +186,7 @@ const FinancialReports = () => {
       {/* Enhanced Navigation */}
       <FinancialBreadcrumb />
       
-      {/* Modern Header */}
+      {/* Modern Header with Performance Monitor */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
@@ -142,27 +198,31 @@ const FinancialReports = () => {
           <p className="text-muted-foreground mt-2">إنشاء وعرض التقارير المالية والمحاسبية بطريقة حديثة ومتقدمة</p>
         </div>
         
-        <div className="flex items-center gap-2">
-          <Button variant="outline" className="flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            تصفية
-          </Button>
-          <Button variant="outline" className="flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            تخصيص الفترة
-          </Button>
-          <Button variant="outline" className="flex items-center gap-2">
-            <RefreshCw className="w-4 h-4" />
-            تحديث
-          </Button>
-          <Button className="btn-primary flex items-center gap-2">
-            <Download className="w-4 h-4" />
-            تصدير جميع التقارير
-          </Button>
+        <div className="flex items-center gap-4">
+          <FinancialPerformanceMonitor componentName="FinancialReports" showDetails />
+          
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="rtl-flex">
+              <Filter className="w-4 h-4" />
+              تصفية
+            </Button>
+            <Button variant="outline" className="rtl-flex">
+              <Calendar className="w-4 h-4" />
+              تخصيص الفترة
+            </Button>
+            <Button variant="outline" onClick={refetch} className="rtl-flex">
+              <RefreshCw className="w-4 h-4" />
+              تحديث
+            </Button>
+            <Button className="btn-primary rtl-flex">
+              <Download className="w-4 h-4" />
+              تصدير جميع التقارير
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Quick Stats */}
+      {/* Quick Stats with Loading State */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="hover:shadow-md transition-shadow">
           <CardContent className="p-4">
@@ -171,7 +231,9 @@ const FinancialReports = () => {
                 <FileText className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-green-600">24</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {loading ? '...' : reportsData?.totalReports || 24}
+                </p>
                 <p className="text-sm text-muted-foreground">تقارير متاحة</p>
               </div>
             </div>
@@ -185,7 +247,9 @@ const FinancialReports = () => {
                 <Download className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-blue-600">1,247</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {loading ? '...' : reportsData?.exported || 1247}
+                </p>
                 <p className="text-sm text-muted-foreground">تم تصديرها</p>
               </div>
             </div>
@@ -199,7 +263,9 @@ const FinancialReports = () => {
                 <Calendar className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-purple-600">12</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {loading ? '...' : reportsData?.scheduled || 12}
+                </p>
                 <p className="text-sm text-muted-foreground">تقارير دورية</p>
               </div>
             </div>
@@ -213,12 +279,41 @@ const FinancialReports = () => {
                 <Settings className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-orange-600">5</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {loading ? '...' : reportsData?.templates || 5}
+                </p>
                 <p className="text-sm text-muted-foreground">قوالب مخصصة</p>
               </div>
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Sample Chart with Lazy Loading */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <LazyFinancialChart
+          title="الإيرادات الشهرية"
+          data={[
+            { name: 'يناير', value: 4000 },
+            { name: 'فبراير', value: 3000 },
+            { name: 'مارس', value: 5000 },
+            { name: 'أبريل', value: 4500 }
+          ]}
+          type="bar"
+          height={300}
+        />
+        
+        <LazyFinancialChart
+          title="توزيع المصروفات"
+          data={[
+            { name: 'الرواتب', value: 35 },
+            { name: 'الإيجار', value: 25 },
+            { name: 'الصيانة', value: 20 },
+            { name: 'أخرى', value: 20 }
+          ]}
+          type="pie"
+          height={300}
+        />
       </div>
 
       {/* Reports Categories */}
