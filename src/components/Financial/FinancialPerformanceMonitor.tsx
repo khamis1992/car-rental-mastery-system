@@ -7,7 +7,7 @@ import {
   Activity, 
   Clock, 
   Database, 
-  Memory, 
+  HardDrive, 
   TrendingUp,
   AlertCircle,
   CheckCircle,
