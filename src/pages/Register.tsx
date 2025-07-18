@@ -498,35 +498,19 @@ const Register = () => {
   };
 
   // مكون تقدم الخطوات
-  const StepProgress = () => (
-    <div className="mb-8">
+  const StepProgress = () => <div className="mb-8">
       <div className="flex justify-center mb-4">
         <div className="flex items-center space-x-reverse space-x-4">
-          {[1, 2, 3, 4].map((step) => (
-            <div key={step} className="flex items-center">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step <= currentStep
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground'
-                }`}
-              >
+          {[1, 2, 3, 4].map(step => <div key={step} className="flex items-center">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step <= currentStep ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
                 {step}
               </div>
-              {step < 4 && (
-                <div
-                  className={`w-8 h-1 mx-2 ${
-                    step < currentStep ? 'bg-primary' : 'bg-muted'
-                  }`}
-                />
-              )}
-            </div>
-          ))}
+              {step < 4 && <div className={`w-8 h-1 mx-2 ${step < currentStep ? 'bg-primary' : 'bg-muted'}`} />}
+            </div>)}
         </div>
       </div>
-      <Progress value={(currentStep / 4) * 100} className="w-full" />
-    </div>
-  );
+      <Progress value={currentStep / 4 * 100} className="w-full" />
+    </div>;
 
   // خطوة اختيار الخطة مع النظام الذكي
   const PlanStep = () => <div className="space-y-6">
@@ -570,12 +554,7 @@ const Register = () => {
         </div>}
 
       {/* تذكير بالتجربة المجانية */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4">
-        
-        <p className="text-sm text-green-600 mt-1 text-center">
-          بدون الحاجة لبطاقة ائتمان • إلغاء مجاني في أي وقت
-        </p>
-      </div>
+      
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {plans.map(plan => <div key={plan.id} className={`relative p-4 sm:p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg min-h-[200px] sm:min-h-[180px] ${formData.selectedPlan === plan.id ? 'border-primary bg-primary/5 shadow-lg' : 'border-border hover:border-primary/50'} ${plan.popular ? 'ring-2 ring-primary/20' : ''}`} onClick={() => updateFormData('selectedPlan', plan.id)}>
