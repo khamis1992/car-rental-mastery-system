@@ -8,6 +8,9 @@ import { FinancialHighlights } from "@/components/Dashboard/FinancialHighlights"
 import { ModernQuickActions } from "@/components/Dashboard/ModernQuickActions";
 import { CashFlowWidget } from "@/components/Dashboard/CashFlowWidget";
 import { AccountsOverview } from "@/components/Dashboard/AccountsOverview";
+import { FinancialNavigationHub } from "@/components/Financial/FinancialNavigationHub";
+import { FinancialQuickActions } from "@/components/Financial/FinancialQuickActions";
+import { FinancialStatusIndicators } from "@/components/Financial/FinancialStatusIndicators";
 import { 
   User, 
   Calendar, 
@@ -73,10 +76,21 @@ const Index = () => {
         </p>
       </div>
 
-      {/* Financial Highlights - New Modern Component */}
+      {/* Financial Navigation Hub - Enhanced Financial Center */}
       <div className="animate-fade-in">
-        <h3 className="text-xl font-semibold mb-4 rtl-title">المؤشرات المالية</h3>
+        <FinancialNavigationHub />
+      </div>
+
+      {/* Enhanced Financial Section */}
+      <div className="space-y-6 animate-fade-in">
+        <h3 className="text-xl font-semibold mb-4 rtl-title">المؤشرات المالية المتقدمة</h3>
         <FinancialHighlights data={financialData} loading={loading} />
+      </div>
+
+      {/* Financial Status & Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+        <FinancialQuickActions />
+        <FinancialStatusIndicators />
       </div>
 
       {/* Quick Actions & Cash Flow Row */}

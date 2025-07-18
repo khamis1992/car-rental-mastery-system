@@ -22,6 +22,7 @@ import {
 import { EnhancedJournalEntriesTab } from '@/components/Accounting/EnhancedJournalEntriesTab';
 import { AutomatedJournalEntries } from '@/components/Accounting/AutomatedJournalEntries';
 import { CostCenterBudgetAlerts } from '@/components/Accounting/CostCenterBudgetAlerts';
+import { FinancialBreadcrumb } from '@/components/Financial/FinancialBreadcrumb';
 import { accountingService } from '@/services/accountingService';
 import { JournalEntry } from '@/types/accounting';
 import { useToast } from '@/hooks/use-toast';
@@ -346,6 +347,9 @@ const JournalEntries = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Enhanced Navigation */}
+      <FinancialBreadcrumb />
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground rtl-title">إدارة القيود المحاسبية</h1>

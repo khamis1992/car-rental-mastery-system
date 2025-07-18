@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { FinancialReportsTab } from '@/components/Accounting/FinancialReportsTab';
+import { FinancialBreadcrumb } from '@/components/Financial/FinancialBreadcrumb';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -126,6 +127,9 @@ const FinancialReports = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Enhanced Navigation */}
+      <FinancialBreadcrumb />
+      
       {/* Modern Header */}
       <div className="flex items-center justify-between">
         <div>

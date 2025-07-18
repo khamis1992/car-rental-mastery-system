@@ -5,6 +5,7 @@ import { ChartOfAccountsSetup } from '@/components/Accounting/ChartOfAccountsSet
 import { GeneralLedgerReport } from '@/components/Accounting/GeneralLedgerReport';
 import { AccountingDashboard } from '@/components/Accounting/AccountingDashboard';
 import { ModernChartOfAccountsTree } from '@/components/Accounting/ModernChartOfAccountsTree';
+import { FinancialBreadcrumb } from '@/components/Financial/FinancialBreadcrumb';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Plus, Upload, Download, BarChart3, Settings, FileText } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -68,6 +69,9 @@ const ChartOfAccounts = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Enhanced Navigation */}
+      <FinancialBreadcrumb />
+      
       {/* Modern Header */}
       <div className="flex items-center justify-between">
         <div>
