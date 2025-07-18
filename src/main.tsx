@@ -1,9 +1,19 @@
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-import { vehicleStatusEventHandler } from './services/VehicleStatusEventHandler'
 
-// تهيئة نظام إدارة حالات المركبات
-vehicleStatusEventHandler.initialize();
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
+import { setupGlobalErrorHandling } from './utils/errorHandling';
+import { realtimeHandler } from './utils/realtimeConnectionHandler';
 
-createRoot(document.getElementById("root")!).render(<App />);
+// إعداد معالجة الأخطاء العامة
+setupGlobalErrorHandling();
+
+// تهيئة اتصال Realtime
+realtimeHandler.initializeConnection();
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);
