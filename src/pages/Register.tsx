@@ -1215,7 +1215,34 @@ const Register = () => {
 
         <Card className="shadow-xl border-0">
           <CardContent className="p-4 sm:p-8">
-            <StepProgress />
+            {/* مؤشر تقدم الخطوات */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                {[1, 2, 3, 4].map((step) => (
+                  <div key={step} className="flex items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                      step <= currentStep 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-muted text-muted-foreground'
+                    }`}>
+                      {step < currentStep ? <CheckCircle className="w-4 h-4" /> : step}
+                    </div>
+                    {step < 4 && (
+                      <div className={`w-8 sm:w-16 h-0.5 mx-2 ${
+                        step < currentStep ? 'bg-primary' : 'bg-muted'
+                      }`} />
+                    )}
+                  </div>
+                ))}
+              </div>
+              <Progress value={(currentStep / 4) * 100} className="h-2" />
+              <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                <span>اختيار الخطة</span>
+                <span>بيانات الشركة</span>
+                <span>بيانات المدير</span>
+                <span>التأكيد</span>
+              </div>
+            </div>
 
             {/* محتوى الخطوات مع تحسين الارتفاع للموبايل */}
             <div className="min-h-[400px] sm:min-h-[500px]">
