@@ -72,7 +72,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
   }
 
   // منع المستخدمين العاديين من الوصول إلى صفحات super-admin
-  if (location.pathname.startsWith('/super-admin') && !isSaasAdmin && currentUserRole !== 'super_admin') {
+  if (location.pathname.startsWith('/super-admin') && !isSaasAdmin && (currentUserRole as string) !== 'super_admin') {
     return (
       <div className="min-h-screen bg-gradient-soft flex items-center justify-center" dir="rtl">
         <Card className="w-full max-w-md border-destructive/20">

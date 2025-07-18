@@ -17,21 +17,27 @@ class RealtimeConnectionHandler {
 
   async initializeConnection(): Promise<void> {
     try {
-      // إعداد معالج الأحداث للاتصال
-      supabase.realtime.onOpen(() => {
-        console.log('✅ تم الاتصال بـ Realtime بنجاح');
-        this.connectionAttempts = 0;
-        this.isRetrying = false;
+      // إنشاء قناة تجريبية لمراقبة حالة الاتصال
+      const testChannel = supabase.channel('connection_monitor');
+      
+      testChannel.on('system', {}, (status) => {
+        if (status.status === 'ok') {
+          console.log('✅ تم الاتصال بـ Realtime بنجاح');
+          this.connectionAttempts = 0;
+          this.isRetrying = false;
+        }
       });
 
-      supabase.realtime.onClose((event) => {
-        console.warn('⚠️ انقطع الاتصال بـ Realtime:', event);
-        this.handleDisconnection();
-      });
-
-      supabase.realtime.onError((error) => {
-        console.error('❌ خطأ في الاتصال بـ Realtime:', error);
-        this.handleConnectionError(error);
+      testChannel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ تم تفعيل مراقبة Realtime');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.warn('⚠️ خطأ في قناة Realtime');
+          this.handleConnectionError('Channel subscription failed');
+        } else if (status === 'CLOSED') {
+          console.warn('⚠️ انقطع الاتصال بـ Realtime');
+          this.handleDisconnection();
+        }
       });
 
     } catch (error) {
