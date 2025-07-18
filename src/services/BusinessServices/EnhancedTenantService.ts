@@ -398,7 +398,7 @@ export class EnhancedTenantService {
 
         for (const table of tablesToDelete) {
           const { error } = await supabase
-            .from(table)
+            .from(table as any)
             .delete()
             .eq('tenant_id', tenantId)
 

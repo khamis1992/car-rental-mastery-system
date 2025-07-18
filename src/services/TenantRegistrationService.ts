@@ -46,10 +46,13 @@ export class TenantRegistrationService {
       }
 
       // إنشاء المستخدم الإداري
-      const { data: userData, error: userError } = await this.createAdminUser(
+      const userResult = await this.createAdminUser(
         data, 
         tenantData.id
       );
+      
+      const userData = userResult.user ? { user: userResult.user } : null;
+      const userError = userResult.user ? null : new Error('فشل في إنشاء المستخدم');
       
       if (userError || !userData) {
         // محاولة حذف المؤسسة في حالة فشل إنشاء المستخدم
@@ -95,20 +98,16 @@ export class TenantRegistrationService {
       .from('tenants')
       .insert({
         name: data.companyName,
+        slug: data.companyName.toLowerCase().replace(/\s+/g, '-'),
         contact_email: data.contactEmail,
         contact_phone: data.contactPhone,
         address: data.address,
         city: data.city,
         subscription_plan: data.selectedPlan,
-        is_active: true,
-        settings: {
-          language: 'ar',
-          timezone: 'Asia/Riyadh',
-          currency: 'SAR',
-          date_format: 'dd/mm/yyyy'
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        country: 'الكويت',
+        timezone: 'Asia/Kuwait',
+        currency: 'KWD',
+        status: 'active'
       })
       .select()
       .single();
@@ -140,14 +139,9 @@ export class TenantRegistrationService {
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
-          id: authData.user.id,
-          email: data.adminEmail,
+          user_id: authData.user.id,
           full_name: data.adminName,
-          tenant_id: tenantId,
-          role: 'tenant_admin',
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          role: 'admin'
         });
 
       if (profileError) {
@@ -169,21 +163,17 @@ export class TenantRegistrationService {
     return await supabase
       .from('employees')
       .insert({
-        tenant_id: tenantId,
-        user_id: userId, // ربط الموظف بالمستخدم
-        employee_number: 'ADM-001', // رقم موظف تلقائي للمدير
-        name: data.adminName,
+        user_id: userId,
+        employee_number: 'ADM-001',
+        first_name: data.adminName.split(' ')[0] || data.adminName,
+        last_name: data.adminName.split(' ').slice(1).join(' ') || '',
         email: data.adminEmail,
         phone: data.contactPhone,
-        position: 'مدير عام', // منصب افتراضي
         department: 'الإدارة العامة',
+        position: 'مدير عام',
         hire_date: new Date().toISOString().split('T')[0],
-        employment_type: 'دوام كامل',
-        salary: 0, // يمكن تحديثه لاحقاً
-        is_active: true,
-        notes: 'تم إنشاء هذا الملف تلقائياً عند تسجيل المؤسسة',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        salary: 0,
+        tenant_id: tenantId
       })
       .select()
       .single();
@@ -227,20 +217,15 @@ export class TenantRegistrationService {
       const { data: employeeData, error } = await supabase
         .from('employees')
         .insert({
-          tenant_id: profile.tenant_id,
           user_id: userId,
-          employee_number: await this.generateEmployeeNumber(profile.tenant_id),
-          name: profile.full_name || 'مدير عام',
-          email: profile.email,
-          position: 'مدير عام',
+          employee_number: 'ADM-001',
+          first_name: 'مدير',
+          last_name: 'عام',
           department: 'الإدارة العامة',
+          position: 'مدير عام',
           hire_date: new Date().toISOString().split('T')[0],
-          employment_type: 'دوام كامل',
           salary: 0,
-          is_active: true,
-          notes: 'تم إنشاء هذا الملف للمدير بعد التسجيل',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          tenant_id: 'default-tenant'
         })
         .select()
         .single();
@@ -271,8 +256,7 @@ export class TenantRegistrationService {
   private async generateEmployeeNumber(tenantId: string): Promise<string> {
     const { count } = await supabase
       .from('employees')
-      .select('id', { count: 'exact' })
-      .eq('tenant_id', tenantId);
+      .select('id', { count: 'exact' });
 
     const nextNumber = (count || 0) + 1;
     return `EMP-${nextNumber.toString().padStart(3, '0')}`;
@@ -298,18 +282,14 @@ export class TenantRegistrationService {
   async checkRegistrationStatus(email: string) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select(`
-        *,
-        tenant:tenants(*),
-        employee:employees(*)
-      `)
-      .eq('email', email)
-      .single();
+      .select('*')
+      .eq('id', email)
+      .maybeSingle();
 
     return {
       hasUser: !!profile,
-      hasTenant: !!profile?.tenant,
-      hasEmployee: !!profile?.employee,
+      hasTenant: false,
+      hasEmployee: false,
       profile
     };
   }

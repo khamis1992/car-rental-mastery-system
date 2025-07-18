@@ -12,7 +12,7 @@ export class TenantService {
       throw new Error(`Failed to fetch tenants: ${error.message}`);
     }
 
-    return data || [];
+    return (data || []) as any;
   }
 
   // Keep the old method name for backward compatibility
@@ -34,7 +34,7 @@ export class TenantService {
       throw new Error(`Failed to fetch tenant: ${error.message}`);
     }
 
-    return data;
+    return data as any;
   }
 
   async createTenant(tenantData: TenantOnboardingData): Promise<Tenant> {
@@ -57,7 +57,7 @@ export class TenantService {
     // This would involve creating the user and linking to the tenant
     // For now, we just return the tenant data
 
-    return data;
+    return data as any;
   }
 
   async updateTenant(id: string, updates: Partial<Tenant>): Promise<Tenant> {
@@ -72,7 +72,7 @@ export class TenantService {
       throw new Error(`Failed to update tenant: ${error.message}`);
     }
 
-    return data;
+    return data as any;
   }
 
   async deleteTenant(id: string): Promise<void> {

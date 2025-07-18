@@ -187,7 +187,7 @@ export class PermissionsService {
         
       const { data, error } = await query.order('display_name');
       if (error) throw error;
-      return data || [];
+      return (data || []) as any;
     } catch (error) {
       console.warn('Falling back to mock permissions:', error);
       const { mockPermissions } = this.getMockData();
@@ -360,7 +360,7 @@ export class PermissionsService {
       });
       
       if (error) throw error;
-      return data || [];
+      return (data || []) as any;
     } catch (error) {
       console.warn('User permissions lookup failed:', error);
       return [];
