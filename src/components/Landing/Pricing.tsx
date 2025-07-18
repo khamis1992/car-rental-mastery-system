@@ -11,16 +11,16 @@ const plans = [
     name: SUBSCRIPTION_PLANS.basic.name,
     name_en: SUBSCRIPTION_PLANS.basic.name_en,
     icon: Zap,
-    price: SUBSCRIPTION_PLANS.basic.monthly_price_kwd,
+    price: SUBSCRIPTION_PLANS.basic.price_monthly,
     period: "شهرياً",
     description: "مثالية للشركات الناشئة والصغيرة",
     features: SUBSCRIPTION_PLANS.basic.features,
     popular: false,
     buttonText: "اشترك الآن",
     limits: {
-      users: SUBSCRIPTION_PLANS.basic.max_users,
-      vehicles: SUBSCRIPTION_PLANS.basic.max_vehicles,
-      contracts: SUBSCRIPTION_PLANS.basic.max_contracts
+      users: SUBSCRIPTION_PLANS.basic.limits.max_users_per_tenant,
+      vehicles: SUBSCRIPTION_PLANS.basic.limits.max_vehicles,
+      contracts: SUBSCRIPTION_PLANS.basic.limits.max_contracts
     }
   },
   {
@@ -28,16 +28,16 @@ const plans = [
     name: SUBSCRIPTION_PLANS.standard.name,
     name_en: SUBSCRIPTION_PLANS.standard.name_en,
     icon: Crown,
-    price: SUBSCRIPTION_PLANS.standard.monthly_price_kwd,
+    price: SUBSCRIPTION_PLANS.standard.price_monthly,
     period: "شهرياً",
     description: "الأكثر شعبية للشركات المتوسطة",
     features: SUBSCRIPTION_PLANS.standard.features,
     popular: true,
     buttonText: "اشترك الآن",
     limits: {
-      users: SUBSCRIPTION_PLANS.standard.max_users,
-      vehicles: SUBSCRIPTION_PLANS.standard.max_vehicles,
-      contracts: SUBSCRIPTION_PLANS.standard.max_contracts
+      users: SUBSCRIPTION_PLANS.standard.limits.max_users_per_tenant,
+      vehicles: SUBSCRIPTION_PLANS.standard.limits.max_vehicles,
+      contracts: SUBSCRIPTION_PLANS.standard.limits.max_contracts
     }
   },
   {
@@ -45,16 +45,16 @@ const plans = [
     name: SUBSCRIPTION_PLANS.premium.name,
     name_en: SUBSCRIPTION_PLANS.premium.name_en,
     icon: Star,
-    price: SUBSCRIPTION_PLANS.premium.monthly_price_kwd,
+    price: SUBSCRIPTION_PLANS.premium.price_monthly,
     period: "شهرياً",
     description: "للشركات الكبيرة والمتقدمة",
     features: SUBSCRIPTION_PLANS.premium.features,
     popular: false,
     buttonText: "اشترك الآن",
     limits: {
-      users: SUBSCRIPTION_PLANS.premium.max_users,
-      vehicles: SUBSCRIPTION_PLANS.premium.max_vehicles,
-      contracts: SUBSCRIPTION_PLANS.premium.max_contracts
+      users: SUBSCRIPTION_PLANS.premium.limits.max_users_per_tenant,
+      vehicles: SUBSCRIPTION_PLANS.premium.limits.max_vehicles,
+      contracts: SUBSCRIPTION_PLANS.premium.limits.max_contracts
     }
   },
   {
@@ -62,16 +62,16 @@ const plans = [
     name: SUBSCRIPTION_PLANS.enterprise.name,
     name_en: SUBSCRIPTION_PLANS.enterprise.name_en,
     icon: Building,
-    price: SUBSCRIPTION_PLANS.enterprise.monthly_price_kwd,
+    price: SUBSCRIPTION_PLANS.enterprise.price_monthly,
     period: "شهرياً",
     description: "للمؤسسات الكبيرة والحكومية",
     features: SUBSCRIPTION_PLANS.enterprise.features,
     popular: false,
     buttonText: "تواصل معنا",
     limits: {
-      users: SUBSCRIPTION_PLANS.enterprise.max_users,
-      vehicles: SUBSCRIPTION_PLANS.enterprise.max_vehicles,
-      contracts: SUBSCRIPTION_PLANS.enterprise.max_contracts
+      users: SUBSCRIPTION_PLANS.enterprise.limits.max_users_per_tenant,
+      vehicles: SUBSCRIPTION_PLANS.enterprise.limits.max_vehicles,
+      contracts: SUBSCRIPTION_PLANS.enterprise.limits.max_contracts
     }
   }
 ];
