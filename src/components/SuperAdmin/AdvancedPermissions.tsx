@@ -43,266 +43,381 @@ import {
   Crown,
   UserCheck,
   AlertTriangle,
-  CheckCircle
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-
-interface Permission {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  level: 'read' | 'write' | 'admin';
-  enabled: boolean;
-}
-
-interface Role {
-  id: string;
-  name: string;
-  description: string;
-  permissions: string[];
-  userCount: number;
-  isDefault: boolean;
-  level: number;
-}
+  CheckCircle,
+  Loader2,
+  Search,
+  Filter,
+  RefreshCw,
+  Info
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import {
+  useRoles,
+  usePermissionsByCategory,
+  usePermissionCategories,
+  useCreateRole,
+  useUpdateRole,
+  useDeleteRole,
+  useUpdateRolePermissions,
+  useAuditLogs,
+  usePermissionSystemStats
+} from '@/hooks/usePermissions';
+import { useTenant } from '@/contexts/TenantContext';
+import type { Role, Permission, PermissionCategory } from '@/services/permissionsService';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 
 const AdvancedPermissions: React.FC = () => {
-  const [roles, setRoles] = useState<Role[]>([
-    {
-      id: '1',
-      name: 'super_admin',
-      description: 'مدير النظام العام - صلاحيات كاملة',
-      permissions: ['all'],
-      userCount: 2,
-      isDefault: true,
-      level: 0
-    },
-    {
-      id: '2',
-      name: 'tenant_admin',
-      description: 'مدير المؤسسة - إدارة كاملة للمؤسسة',
-      permissions: ['tenant_manage', 'users_manage', 'vehicles_manage'],
-      userCount: 15,
-      isDefault: true,
-      level: 1
-    },
-    {
-      id: '3',
-      name: 'manager',
-      description: 'مدير - صلاحيات إدارية محدودة',
-      permissions: ['users_view', 'vehicles_manage', 'contracts_manage'],
-      userCount: 8,
-      isDefault: true,
-      level: 2
-    },
-    {
-      id: '4',
-      name: 'accountant',
-      description: 'محاسب - إدارة المالية والتقارير',
-      permissions: ['accounting_manage', 'reports_view', 'invoices_manage'],
-      userCount: 12,
-      isDefault: true,
-      level: 3
-    },
-    {
-      id: '5',
-      name: 'receptionist',
-      description: 'موظف استقبال - إدارة العقود والعملاء',
-      permissions: ['contracts_manage', 'customers_manage', 'vehicles_view'],
-      userCount: 25,
-      isDefault: true,
-      level: 4
-    },
-    {
-      id: '6',
-      name: 'user',
-      description: 'مستخدم عادي - صلاحيات محدودة',
-      permissions: ['dashboard_view', 'profile_edit'],
-      userCount: 150,
-      isDefault: true,
-      level: 5
-    }
-  ]);
-
-  const [permissions, setPermissions] = useState<Permission[]>([
-    // إدارة النظام
-    { id: 'system_settings', name: 'إعدادات النظام', description: 'إدارة إعدادات النظام العامة', category: 'system', level: 'admin', enabled: true },
-    { id: 'tenant_manage', name: 'إدارة المؤسسات', description: 'إنشاء وتعديل وحذف المؤسسات', category: 'system', level: 'admin', enabled: true },
-    { id: 'global_monitoring', name: 'مراقبة النظام', description: 'مراقبة أداء النظام والخوادم', category: 'system', level: 'read', enabled: true },
-    
-    // إدارة المستخدمين
-    { id: 'users_manage', name: 'إدارة المستخدمين', description: 'إضافة وتعديل وحذف المستخدمين', category: 'users', level: 'admin', enabled: true },
-    { id: 'users_view', name: 'عرض المستخدمين', description: 'عرض قائمة المستخدمين', category: 'users', level: 'read', enabled: true },
-    { id: 'roles_manage', name: 'إدارة الأدوار', description: 'إنشاء وتعديل أدوار المستخدمين', category: 'users', level: 'admin', enabled: true },
-    
-    // إدارة المركبات
-    { id: 'vehicles_manage', name: 'إدارة المركبات', description: 'إضافة وتعديل وحذف المركبات', category: 'fleet', level: 'write', enabled: true },
-    { id: 'vehicles_view', name: 'عرض المركبات', description: 'عرض قائمة المركبات', category: 'fleet', level: 'read', enabled: true },
-    { id: 'maintenance_manage', name: 'إدارة الصيانة', description: 'جدولة وإدارة صيانة المركبات', category: 'fleet', level: 'write', enabled: true },
-    
-    // إدارة العقود
-    { id: 'contracts_manage', name: 'إدارة العقود', description: 'إنشاء وتعديل العقود', category: 'business', level: 'write', enabled: true },
-    { id: 'contracts_view', name: 'عرض العقود', description: 'عرض قائمة العقود', category: 'business', level: 'read', enabled: true },
-    { id: 'customers_manage', name: 'إدارة العملاء', description: 'إضافة وتعديل بيانات العملاء', category: 'business', level: 'write', enabled: true },
-    
-    // المحاسبة والمالية
-    { id: 'accounting_manage', name: 'إدارة المحاسبة', description: 'إدارة الحسابات والقيود المحاسبية', category: 'finance', level: 'admin', enabled: true },
-    { id: 'invoices_manage', name: 'إدارة الفواتير', description: 'إنشاء وإدارة الفواتير', category: 'finance', level: 'write', enabled: true },
-    { id: 'payments_manage', name: 'إدارة المدفوعات', description: 'تسجيل ومعالجة المدفوعات', category: 'finance', level: 'write', enabled: true },
-    { id: 'reports_view', name: 'عرض التقارير', description: 'عرض التقارير المالية والإدارية', category: 'finance', level: 'read', enabled: true },
-    
-    // أساسيات
-    { id: 'dashboard_view', name: 'عرض لوحة التحكم', description: 'الوصول للوحة التحكم الرئيسية', category: 'basic', level: 'read', enabled: true },
-    { id: 'profile_edit', name: 'تحرير الملف الشخصي', description: 'تعديل البيانات الشخصية', category: 'basic', level: 'write', enabled: true }
-  ]);
-
+  const { currentTenant } = useTenant();
+  const { toast } = useToast();
+  
+  // State management
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [showCreateRole, setShowCreateRole] = useState(false);
-  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  
+  // Fetching data using real hooks
+  const { 
+    data: roles = [], 
+    isLoading: rolesLoading, 
+    error: rolesError,
+    refetch: refetchRoles 
+  } = useRoles(currentTenant?.id);
+  
+  const { 
+    data: permissionsByCategory = {}, 
+    isLoading: permissionsLoading,
+    error: permissionsError 
+  } = usePermissionsByCategory();
+  
+  const { 
+    data: categories = [], 
+    isLoading: categoriesLoading,
+    error: categoriesError 
+  } = usePermissionCategories();
+  
+  const { 
+    data: auditLogs = [], 
+    isLoading: auditLoading 
+  } = useAuditLogs(currentTenant?.id, undefined, 50);
+  
+  const { 
+    data: systemStats, 
+    isLoading: statsLoading 
+  } = usePermissionSystemStats();
+  
+  // Mutations
+  const createRoleMutation = useCreateRole();
+  const updateRoleMutation = useUpdateRole();
+  const deleteRoleMutation = useDeleteRole();
+  const updateRolePermissionsMutation = useUpdateRolePermissions();
+
+  // Check if there are any critical errors indicating missing tables
+  const hasCriticalErrors = rolesError || permissionsError || categoriesError;
+  const isUsingMockData = roles.length > 0 && roles[0].id === '1'; // Check if using mock data
+
+  // New role form state
+  const [newRoleForm, setNewRoleForm] = useState({
+    name: '',
+    display_name: '',
+    description: '',
+    level: 100,
+    tenant_id: currentTenant?.id
+  });
 
   const getRoleBadge = (role: Role) => {
     const levelColors = {
       0: 'bg-red-100 text-red-800 border-red-200',
-      1: 'bg-orange-100 text-orange-800 border-orange-200',
-      2: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      3: 'bg-blue-100 text-blue-800 border-blue-200',
-      4: 'bg-green-100 text-green-800 border-green-200',
-      5: 'bg-gray-100 text-gray-800 border-gray-200'
+      10: 'bg-orange-100 text-orange-800 border-orange-200',
+      20: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      30: 'bg-blue-100 text-blue-800 border-blue-200',
+      40: 'bg-green-100 text-green-800 border-green-200',
+      50: 'bg-green-100 text-green-800 border-green-200'
     };
     
+    const colorKey = role.level <= 0 ? 0 : 
+                    role.level <= 10 ? 10 :
+                    role.level <= 20 ? 20 :
+                    role.level <= 30 ? 30 :
+                    role.level <= 40 ? 40 : 50;
+    
     return (
-      <Badge className={levelColors[role.level as keyof typeof levelColors]}>
-        {role.name}
+      <Badge className={levelColors[colorKey]} variant="outline">
+        {role.display_name}
       </Badge>
     );
   };
 
-  const getPermissionLevelBadge = (level: string) => {
-    const levels = {
-      read: { text: 'قراءة', color: 'bg-blue-100 text-blue-800' },
-      write: { text: 'كتابة', color: 'bg-green-100 text-green-800' },
-      admin: { text: 'إدارة', color: 'bg-red-100 text-red-800' }
-    };
-    
-    const levelInfo = levels[level as keyof typeof levels];
-    return (
-      <Badge className={levelInfo.color}>
-        {levelInfo.text}
-      </Badge>
-    );
-  };
-
-  const getCategoryIcon = (category: string) => {
-    const icons = {
-      system: Crown,
-      users: Users,
-      fleet: Settings,
-      business: UserCheck,
-      finance: Shield,
-      basic: Eye
-    };
-    
-    const Icon = icons[category as keyof typeof icons] || Eye;
-    return <Icon className="w-4 h-4" />;
-  };
-
-  const groupedPermissions = permissions.reduce((acc, permission) => {
-    if (!acc[permission.category]) {
-      acc[permission.category] = [];
+  const createNewRole = async () => {
+    try {
+      await createRoleMutation.mutateAsync(newRoleForm);
+      setShowCreateRole(false);
+      setNewRoleForm({
+        name: '',
+        display_name: '',
+        description: '',
+        level: 100,
+        tenant_id: currentTenant?.id
+      });
+    } catch (error: any) {
+      if (error.message.includes('غير متاح حالياً')) {
+        toast({
+          title: 'تنبيه',
+          description: 'نظام الصلاحيات غير مُكتمل الإعداد. يرجى تطبيق migrations أولاً.',
+          variant: 'destructive',
+        });
+      }
     }
-    acc[permission.category].push(permission);
-    return acc;
-  }, {} as Record<string, Permission[]>);
+  };
 
-  const RoleDetailsDialog = ({ role }: { role: Role }) => (
-    <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto" dir="rtl">
+  const updateRole = async (roleId: string, updates: Partial<Role>) => {
+    try {
+      await updateRoleMutation.mutateAsync({ id: roleId, updates });
+      setSelectedRole(null);
+      setShowRoleDialog(false);
+    } catch (error: any) {
+      if (error.message.includes('غير متاح حالياً')) {
+        toast({
+          title: 'تنبيه',
+          description: 'هذه الميزة غير متاحة حالياً في الوضع التجريبي.',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
+  const deleteRole = async (roleId: string) => {
+    try {
+      await deleteRoleMutation.mutateAsync(roleId);
+      setSelectedRole(null);
+      setShowRoleDialog(false);
+    } catch (error: any) {
+      if (error.message.includes('غير متاح حالياً')) {
+        toast({
+          title: 'تنبيه',
+          description: 'هذه الميزة غير متاحة حالياً في الوضع التجريبي.',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
+  const updateRolePermissions = async (roleId: string, permissionIds: string[]) => {
+    try {
+      await updateRolePermissionsMutation.mutateAsync({ roleId, permissionIds });
+      setSelectedRole(null);
+      setShowRoleDialog(false);
+    } catch (error: any) {
+      if (error.message.includes('غير متاح حالياً')) {
+        toast({
+          title: 'تنبيه',
+          description: 'هذه الميزة غير متاحة حالياً في الوضع التجريبي.',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
+  // Filter roles based on search term
+  const filteredRoles = roles.filter(role =>
+    role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    role.display_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Filter permissions based on category
+  const filteredPermissions = selectedCategory === 'all' 
+    ? Object.values(permissionsByCategory).flat()
+    : permissionsByCategory[selectedCategory] || [];
+
+  // Create role dialog component
+  const CreateRoleDialog = () => (
+    <Dialog open={showCreateRole} onOpenChange={setShowCreateRole}>
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            تفاصيل الدور - {role.name}
-          </DialogTitle>
+          <DialogTitle>إنشاء دور جديد</DialogTitle>
           <DialogDescription>
-            {role.description}
+            قم بإنشاء دور جديد مع تحديد مستوى الصلاحيات
           </DialogDescription>
         </DialogHeader>
-
+        
         <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="pt-4">
-                <div className="text-center">
-                  <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
-                  <div className="text-2xl font-bold">{role.userCount}</div>
-                  <div className="text-sm text-muted-foreground">مستخدم</div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-4">
-                <div className="text-center">
-                  <Key className="w-8 h-8 mx-auto mb-2 text-primary" />
-                  <div className="text-2xl font-bold">{role.permissions.length}</div>
-                  <div className="text-sm text-muted-foreground">صلاحية</div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-4">
-                <div className="text-center">
-                  <Shield className="w-8 h-8 mx-auto mb-2 text-primary" />
-                  <div className="text-2xl font-bold">{role.level}</div>
-                  <div className="text-sm text-muted-foreground">مستوى</div>
-                </div>
-              </CardContent>
-            </Card>
+          <div>
+            <Label htmlFor="role-name">اسم الدور (بالإنجليزية)</Label>
+            <Input
+              id="role-name"
+              value={newRoleForm.name}
+              onChange={(e) => setNewRoleForm({ ...newRoleForm, name: e.target.value })}
+              placeholder="مثال: department_manager"
+            />
           </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">الصلاحيات المخصصة</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {Object.entries(groupedPermissions).map(([category, perms]) => (
-                  <div key={category}>
-                    <h4 className="font-medium mb-2 flex items-center gap-2">
-                      {getCategoryIcon(category)}
-                      {category === 'system' && 'إدارة النظام'}
-                      {category === 'users' && 'إدارة المستخدمين'}
-                      {category === 'fleet' && 'إدارة الأسطول'}
-                      {category === 'business' && 'الأعمال'}
-                      {category === 'finance' && 'المالية'}
-                      {category === 'basic' && 'أساسيات'}
-                    </h4>
-                    <div className="grid grid-cols-1 gap-2">
-                      {perms
-                        .filter(p => role.permissions.includes(p.id) || role.permissions.includes('all'))
-                        .map(permission => (
-                        <div key={permission.id} className="flex items-center justify-between p-2 border rounded">
-                          <div>
-                            <div className="font-medium">{permission.name}</div>
-                            <div className="text-sm text-muted-foreground">{permission.description}</div>
-                          </div>
-                          {getPermissionLevelBadge(permission.level)}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          
+          <div>
+            <Label htmlFor="role-display">الاسم المعروض</Label>
+            <Input
+              id="role-display"
+              value={newRoleForm.display_name}
+              onChange={(e) => setNewRoleForm({ ...newRoleForm, display_name: e.target.value })}
+              placeholder="مثال: مدير القسم"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="role-desc">الوصف</Label>
+            <Input
+              id="role-desc"
+              value={newRoleForm.description}
+              onChange={(e) => setNewRoleForm({ ...newRoleForm, description: e.target.value })}
+              placeholder="وصف مختصر لصلاحيات هذا الدور"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="role-level">مستوى الصلاحية (0-100)</Label>
+            <Input
+              id="role-level"
+              type="number"
+              min="0"
+              max="100"
+              value={newRoleForm.level}
+              onChange={(e) => setNewRoleForm({ ...newRoleForm, level: parseInt(e.target.value) || 100 })}
+            />
+            <p className="text-sm text-muted-foreground mt-1">
+              أقل رقم = صلاحيات أكثر (0 = مدير النظام، 100 = مستخدم عادي)
+            </p>
+          </div>
+          
+          <div className="flex gap-2 pt-4">
+            <Button 
+              onClick={createNewRole}
+              disabled={!newRoleForm.name || !newRoleForm.display_name || createRoleMutation.isPending}
+              className="flex-1"
+            >
+              {createRoleMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  إنشاء...
+                </>
+              ) : (
+                'إنشاء الدور'
+              )}
+            </Button>
+            <Button variant="outline" onClick={() => setShowCreateRole(false)}>
+              إلغاء
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 
+  // Role details dialog component  
+  const RoleDetailsDialog = () => {
+    if (!selectedRole) return null;
+
+    const rolePermissions = selectedRole.permissions || [];
+
+    return (
+      <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCheck className="w-5 h-5" />
+              {selectedRole.display_name}
+            </DialogTitle>
+            <DialogDescription>
+              إدارة صلاحيات دور: {selectedRole.name}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            {/* Role info */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>مستوى الصلاحية</Label>
+                <div className="text-lg font-semibold">{selectedRole.level}</div>
+              </div>
+              <div>
+                <Label>عدد المستخدمين</Label>
+                <div className="text-lg font-semibold">{selectedRole.user_count || 0}</div>
+              </div>
+            </div>
+
+            {/* Permissions */}
+            <div>
+              <Label className="text-base font-semibold">الصلاحيات المُخصصة</Label>
+              <div className="mt-2 space-y-2">
+                {rolePermissions.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {rolePermissions.map((permission: Permission) => (
+                      <div key={permission.id} className="flex items-center space-x-2 p-2 border rounded">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <div>
+                          <div className="font-medium">{permission.display_name}</div>
+                          <div className="text-sm text-muted-foreground">{permission.name}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-4 text-muted-foreground">
+                    لا توجد صلاحيات مُخصصة لهذا الدور
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowRoleDialog(false)}>
+                إغلاق
+              </Button>
+              {isUsingMockData && (
+                <Badge variant="secondary" className="ml-2">
+                  <Info className="w-3 h-3 mr-1" />
+                  معاينة فقط
+                </Badge>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  if (rolesLoading || permissionsLoading || categoriesLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* تحذير إذا كان النظام يستخدم بيانات وهمية */}
+      {isUsingMockData && (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertTitle>وضع العرض التجريبي</AlertTitle>
+          <AlertDescription>
+            يعرض النظام حالياً بيانات تجريبية. لتفعيل الميزات الكاملة، يرجى تطبيق إعدادات قاعدة البيانات.
+            {' '}
+            <Button 
+              variant="link" 
+              className="p-0 h-auto font-normal"
+              onClick={() => window.open('docs/fix-permissions-error.md', '_blank')}
+            >
+              دليل الإعداد
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-right">نظام الصلاحيات المتقدم</h2>
         <div className="flex gap-2">
@@ -310,78 +425,152 @@ const AdvancedPermissions: React.FC = () => {
             variant="outline"
             onClick={() => setShowCreateRole(true)}
             className="flex items-center gap-2"
+            disabled={isUsingMockData}
           >
             <Plus className="w-4 h-4" />
             دور جديد
           </Button>
-          <Button className="flex items-center gap-2">
-            <Settings className="w-4 h-4" />
-            إعدادات الصلاحيات
+          <Button 
+            variant="outline"
+            onClick={() => refetchRoles()}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            تحديث
           </Button>
         </div>
       </div>
 
-      <Tabs defaultValue="roles" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="roles">الأدوار</TabsTrigger>
-          <TabsTrigger value="permissions">الصلاحيات</TabsTrigger>
-          <TabsTrigger value="audit">سجل التتبع</TabsTrigger>
+      {/* إحصائيات سريعة */}
+      {systemStats && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <Users className="w-6 h-6 mx-auto mb-2 text-primary" />
+                <div className="text-2xl font-bold">{systemStats.total_roles}</div>
+                <div className="text-sm text-muted-foreground">إجمالي الأدوار</div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <Key className="w-6 h-6 mx-auto mb-2 text-primary" />
+                <div className="text-2xl font-bold">{systemStats.total_permissions}</div>
+                <div className="text-sm text-muted-foreground">إجمالي الصلاحيات</div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <Shield className="w-6 h-6 mx-auto mb-2 text-primary" />
+                <div className="text-2xl font-bold">{systemStats.total_categories}</div>
+                <div className="text-sm text-muted-foreground">فئات الصلاحيات</div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <UserCheck className="w-6 h-6 mx-auto mb-2 text-primary" />
+                <div className="text-2xl font-bold">{systemStats.active_users_with_roles}</div>
+                <div className="text-sm text-muted-foreground">مستخدمين نشطين</div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      <Tabs defaultValue="roles" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="roles" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            الأدوار
+          </TabsTrigger>
+          <TabsTrigger value="permissions" className="flex items-center gap-2">
+            <Key className="w-4 h-4" />
+            الصلاحيات
+          </TabsTrigger>
+          <TabsTrigger value="categories" className="flex items-center gap-2">
+            <Shield className="w-4 h-4" />
+            الفئات
+          </TabsTrigger>
+          <TabsTrigger value="audit" className="flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            سجل الأنشطة
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="roles">
+        {/* الأدوار */}
+        <TabsContent value="roles" className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
+              <Input
+                placeholder="البحث في الأدوار..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-right">
+              <CardTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                إدارة الأدوار
+                أدوار النظام ({filteredRoles.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-right">الدور</TableHead>
-                    <TableHead className="text-right">الوصف</TableHead>
-                    <TableHead className="text-right">المستوى</TableHead>
-                    <TableHead className="text-right">المستخدمون</TableHead>
-                    <TableHead className="text-right">الحالة</TableHead>
-                    <TableHead className="text-right">الإجراءات</TableHead>
+                    <TableHead>الدور</TableHead>
+                    <TableHead>المستوى</TableHead>
+                    <TableHead>عدد المستخدمين</TableHead>
+                    <TableHead>الحالة</TableHead>
+                    <TableHead>الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {roles.map((role) => (
+                  {filteredRoles.map((role) => (
                     <TableRow key={role.id}>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          {getRoleBadge(role)}
-                          {role.isDefault && (
-                            <Badge variant="outline" className="text-xs">
-                              افتراضي
-                            </Badge>
+                        <div>
+                          <div className="font-medium">{role.display_name}</div>
+                          <div className="text-sm text-muted-foreground">{role.name}</div>
+                          {role.description && (
+                            <div className="text-sm text-muted-foreground mt-1">{role.description}</div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="max-w-xs">
-                          <div className="text-sm">{role.description}</div>
+                        {getRoleBadge(role)}
+                        <div className="text-sm text-muted-foreground mt-1">
+                          مستوى {role.level}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary">
-                          مستوى {role.level}
-                        </Badge>
+                        <div className="text-lg font-semibold">{role.user_count || 0}</div>
                       </TableCell>
-                      <TableCell>{role.userCount}</TableCell>
                       <TableCell>
-                        <Badge className="bg-green-100 text-green-800">
-                          نشط
+                        <Badge variant={role.is_active ? "default" : "secondary"}>
+                          {role.is_active ? 'نشط' : 'غير نشط'}
                         </Badge>
+                        {role.is_system && (
+                          <Badge variant="outline" className="ml-2">
+                            نظام
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
+                            variant="outline"
                             size="sm"
-                            variant="ghost"
                             onClick={() => {
                               setSelectedRole(role);
                               setShowRoleDialog(true);
@@ -389,15 +578,15 @@ const AdvancedPermissions: React.FC = () => {
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
-                          {!role.isDefault && (
-                            <>
-                              <Button size="sm" variant="ghost">
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button size="sm" variant="ghost" className="text-red-600">
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </>
+                          {!role.is_system && !isUsingMockData && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => deleteRole(role.id)}
+                              disabled={deleteRoleMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           )}
                         </div>
                       </TableCell>
@@ -409,77 +598,185 @@ const AdvancedPermissions: React.FC = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="permissions">
-          <div className="space-y-6">
-            {Object.entries(groupedPermissions).map(([category, perms]) => (
-              <Card key={category}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    {getCategoryIcon(category)}
-                    {category === 'system' && 'صلاحيات إدارة النظام'}
-                    {category === 'users' && 'صلاحيات إدارة المستخدمين'}
-                    {category === 'fleet' && 'صلاحيات إدارة الأسطول'}
-                    {category === 'business' && 'صلاحيات الأعمال'}
-                    {category === 'finance' && 'صلاحيات المالية'}
-                    {category === 'basic' && 'الصلاحيات الأساسية'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {perms.map((permission) => (
-                      <div
-                        key={permission.id}
-                        className="flex items-center justify-between p-3 border rounded-lg"
-                      >
-                        <div className="flex-1">
-                          <div className="font-medium">{permission.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {permission.description}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          {getPermissionLevelBadge(permission.level)}
-                          <Switch
-                            checked={permission.enabled}
-                            onCheckedChange={(checked) => {
-                              setPermissions(prev =>
-                                prev.map(p =>
-                                  p.id === permission.id
-                                    ? { ...p, enabled: checked }
-                                    : p
-                                )
-                              );
-                            }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+        {/* الصلاحيات */}
+        <TabsContent value="permissions" className="space-y-4">
+          <div className="flex items-center gap-4">
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="اختر الفئة" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع الفئات</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.name}>
+                    {category.display_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5" />
+                صلاحيات النظام ({filteredPermissions.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>الصلاحية</TableHead>
+                    <TableHead>المستوى</TableHead>
+                    <TableHead>الفئة</TableHead>
+                    <TableHead>الحالة</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredPermissions.map((permission) => (
+                    <TableRow key={permission.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{permission.display_name}</div>
+                          <div className="text-sm text-muted-foreground">{permission.name}</div>
+                          {permission.description && (
+                            <div className="text-sm text-muted-foreground mt-1">{permission.description}</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={
+                            permission.level === 'admin' ? 'destructive' :
+                            permission.level === 'write' ? 'default' : 'secondary'
+                          }
+                        >
+                          {permission.level === 'admin' ? 'إدارة' :
+                           permission.level === 'write' ? 'كتابة' : 'قراءة'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {permission.category?.display_name || 'غير محدد'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={permission.is_active ? "default" : "secondary"}>
+                          {permission.is_active ? 'نشط' : 'غير نشط'}
+                        </Badge>
+                        {permission.is_system && (
+                          <Badge variant="outline" className="ml-2">
+                            نظام
+                          </Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        <TabsContent value="audit">
+        {/* الفئات */}
+        <TabsContent value="categories" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="w-5 h-5" />
-                سجل تتبع الصلاحيات
+                فئات الصلاحيات ({categories.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <AlertTriangle className="w-12 h-12 mx-auto mb-4" />
-                سيتم تطوير سجل التتبع قريباً
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {categories.map((category) => {
+                  const categoryPermissions = permissionsByCategory[category.name] || [];
+                  return (
+                    <Card key={category.id}>
+                      <CardContent className="pt-4">
+                        <div className="text-center">
+                          <div className="flex items-center justify-center mb-2">
+                            {category.icon === 'Crown' && <Crown className="w-6 h-6" />}
+                            {category.icon === 'Users' && <Users className="w-6 h-6" />}
+                            {category.icon === 'Settings' && <Settings className="w-6 h-6" />}
+                            {category.icon === 'UserCheck' && <UserCheck className="w-6 h-6" />}
+                            {category.icon === 'Shield' && <Shield className="w-6 h-6" />}
+                            {category.icon === 'Eye' && <Eye className="w-6 h-6" />}
+                          </div>
+                          <h3 className="font-semibold">{category.display_name}</h3>
+                          <p className="text-sm text-muted-foreground mt-1">{category.description}</p>
+                          <div className="mt-3">
+                            <Badge variant="outline">
+                              {categoryPermissions.length} صلاحية
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* سجل الأنشطة */}
+        <TabsContent value="audit" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5" />
+                سجل الأنشطة
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {auditLogs.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>النشاط</TableHead>
+                      <TableHead>المستخدم</TableHead>
+                      <TableHead>التفاصيل</TableHead>
+                      <TableHead>التاريخ</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {auditLogs.map((log, index) => (
+                      <TableRow key={index}>
+                        <TableCell>
+                          <Badge variant="outline">{log.action}</Badge>
+                        </TableCell>
+                        <TableCell>{log.user_id}</TableCell>
+                        <TableCell>
+                          {log.details && (
+                            <div className="text-sm text-muted-foreground">
+                              {JSON.stringify(log.details, null, 2)}
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>{new Date(log.created_at).toLocaleString('ar-SA')}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="text-center p-8 text-muted-foreground">
+                  <Eye className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>لا توجد أنشطة مسجلة</p>
+                  {isUsingMockData && (
+                    <p className="text-sm mt-2">سيتم عرض الأنشطة بعد تفعيل النظام الكامل</p>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {selectedRole && <RoleDetailsDialog role={selectedRole} />}
+      {/* Dialogs */}
+      <CreateRoleDialog />
+      <RoleDetailsDialog />
     </div>
   );
 };

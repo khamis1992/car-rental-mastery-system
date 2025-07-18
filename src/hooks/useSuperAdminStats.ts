@@ -80,28 +80,103 @@ export const useSuperAdminStats = () => {
         ? `${parseFloat(revenueGrowthPercentage) > 0 ? '+' : ''}${revenueGrowthPercentage}% هذا الشهر`
         : "أول شهر";
 
-      // Calculate growth rates (mock for now - would need historical data)
-      const tenantGrowth = "+2 هذا الشهر";
-      const userGrowth = "+18% نمو";
-      const transactionGrowth = "+5.2% اليوم";
+      // Calculate tenant growth - compare current month vs previous month
+      const { count: currentMonthTenants } = await supabase
+        .from('tenants')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', startOfMonth.toISOString())
+        .lte('created_at', endOfMonth.toISOString());
 
-      // Calculate data size (mock - would need actual DB size query)
-      const dataSize = "2.3 TB";
+      const { count: previousMonthTenants } = await supabase
+        .from('tenants')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', previousMonth.toISOString())
+        .lte('created_at', endOfPreviousMonth.toISOString());
 
-      // System performance (mock - would need actual monitoring)
-      const systemPerformance = 99.8;
+      const tenantGrowth = `${currentMonthTenants || 0} هذا الشهر`;
 
-      // Security status (mock - would need actual security monitoring)
-      const securityStatus = "آمن";
+      // Calculate user growth - compare current month vs previous month  
+      const { count: currentMonthUsers } = await supabase
+        .from('tenant_users')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', startOfMonth.toISOString())
+        .lte('created_at', endOfMonth.toISOString());
 
-      // Active regions (based on tenants with different locations)
+      const { count: previousMonthUsers } = await supabase
+        .from('tenant_users')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', previousMonth.toISOString())
+        .lte('created_at', endOfPreviousMonth.toISOString());
+
+      const userGrowthPercentage = (previousMonthUsers || 0) > 0 
+        ? (((currentMonthUsers || 0) - (previousMonthUsers || 0)) / (previousMonthUsers || 1) * 100).toFixed(1)
+        : '0';
+      
+      const userGrowth = `${parseFloat(userGrowthPercentage) > 0 ? '+' : ''}${userGrowthPercentage}% نمو`;
+
+      // Calculate transaction growth - compare today vs yesterday
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+      const startOfYesterday = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+      const endOfYesterday = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate() + 1);
+
+      const { count: todayTransactions } = await supabase
+        .from('contracts')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', startOfToday.toISOString())
+        .lt('created_at', endOfToday.toISOString());
+
+      const { count: yesterdayTransactions } = await supabase
+        .from('contracts')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', startOfYesterday.toISOString())
+        .lt('created_at', endOfYesterday.toISOString());
+
+      const transactionGrowthPercentage = (yesterdayTransactions || 0) > 0 
+        ? (((todayTransactions || 0) - (yesterdayTransactions || 0)) / (yesterdayTransactions || 1) * 100).toFixed(1)
+        : '0';
+      
+      const transactionGrowth = `${parseFloat(transactionGrowthPercentage) > 0 ? '+' : ''}${transactionGrowthPercentage}% اليوم`;
+
+      // Calculate actual database size using PostgreSQL system tables
+      const { data: dbSizeData } = await supabase
+        .rpc('get_database_size')
+        .single();
+
+      const dataSizeBytes = dbSizeData?.database_size || 0;
+      const dataSizeGB = (dataSizeBytes / (1024 * 1024 * 1024)).toFixed(2);
+      const dataSize = `${dataSizeGB} GB`;
+
+      // Get system performance from actual uptime and response times
+      const startTime = Date.now();
+      await supabase.from('tenants').select('id').limit(1);
+      const responseTime = Date.now() - startTime;
+      
+      // Calculate performance score based on response time (lower is better)
+      const performanceScore = Math.max(0, Math.min(100, 100 - (responseTime / 10)));
+      const systemPerformance = parseFloat(performanceScore.toFixed(1));
+
+      // Check security status by checking for suspicious activities
+      const { count: suspiciousLogins } = await supabase
+        .from('auth.audit_log_entries')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .eq('event_name', 'sign_in_failure');
+
+      const securityStatus = (suspiciousLogins || 0) > 10 ? "تحذير" : "آمن";
+
+      // Get active regions based on tenants with different countries
       const { data: regionsData } = await supabase
         .from('tenants')
         .select('country')
         .not('country', 'is', null);
 
-      const uniqueRegions = new Set(regionsData?.map(t => t.country) || []);
-      const activeRegions = uniqueRegions.size || 3;
+      const uniqueRegions = new Set(regionsData?.map(t => t.country?.trim()) || []);
+      const activeRegions = uniqueRegions.size;
 
       return {
         totalTenants: tenantsCount || 0,

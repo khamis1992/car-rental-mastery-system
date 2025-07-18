@@ -1,242 +1,365 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { 
-  DollarSign,
-  Building2,
-  CreditCard,
+  CreditCard, 
+  DollarSign, 
+  Users, 
+  FileText, 
   TrendingUp,
-  ArrowRight,
+  Calendar,
+  AlertTriangle,
+  CheckCircle,
+  Plus,
   Settings,
-  Users,
-  Receipt,
-  BarChart3
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useBillingStats } from '@/hooks/useSaasData';
-import SubscriptionPlansManager from './SubscriptionPlansManager';
-import { SubscriptionPlan } from '@/types/unified-saas';
+  Shield
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+// استيراد نظام الصلاحيات الجديد
+import { PermissionGuard, AdminOnly } from '@/components/PermissionGuard';
+import { useCurrentRole, useCommonPermissions } from '@/hooks/usePermissionGuard';
+
+// استيراد المكونات المطلوبة
+import { SubscriptionPlansTab } from '@/components/super-admin/billing/SubscriptionPlansTab';
+import { SubscriptionsTab } from '@/components/super-admin/billing/SubscriptionsTab';
+import { InvoicesTab } from '@/components/super-admin/billing/InvoicesTab';
+import { PaymentsTab } from '@/components/super-admin/billing/PaymentsTab';
+import { ReportsTab } from '@/components/super-admin/billing/ReportsTab';
 
 const BillingAndSubscriptions: React.FC = () => {
-  const navigate = useNavigate();
-  const { data: stats, isLoading: statsLoading } = useBillingStats();
-  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
-  const [isCreatePlanOpen, setIsCreatePlanOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+  const { toast } = useToast();
+  
+  // الحصول على معلومات الدور والصلاحيات
+  const { 
+    isSuperAdmin, 
+    isTenantAdmin, 
+    canManageSystem,
+    isLoading: roleLoading 
+  } = useCurrentRole();
+  
+  const { 
+    canManageAccounting,
+    isLoading: permissionsLoading 
+  } = useCommonPermissions();
 
-  // دالة تنسيق العملة
-  const formatCurrency = (amount: number) => `${amount.toFixed(3)} د.ك`;
-
-  const billingStats = [
-    {
-      title: "إجمالي الإيرادات",
-      value: stats ? formatCurrency(stats.total_revenue) : "0.000 د.ك",
-      icon: DollarSign,
-      trend: `${stats?.growth_rate || 0}%`,
-      trendUp: (stats?.growth_rate || 0) >= 0
-    },
-    {
-      title: "الاشتراكات النشطة",
-      value: stats?.active_subscriptions?.toString() || "0",
-      icon: Building2,
-      trend: `${stats?.trial_subscriptions || 0} تجريبي`,
-      trendUp: true
-    },
-    {
-      title: "الإيرادات الشهرية",
-      value: stats ? formatCurrency(stats.monthly_revenue) : "0.000 د.ك",
-      icon: TrendingUp,
-      trend: "هذا الشهر",
-      trendUp: true
-    },
-    {
-      title: "الفواتير المتأخرة",
-      value: stats?.overdue_invoices?.toString() || "0",
-      icon: CreditCard,
-      trend: "تحتاج متابعة",
-      trendUp: false
-    }
-  ];
-
-  const handleCreatePlan = () => {
-    setIsCreatePlanOpen(true);
+  // إحصائيات وهمية (ستستبدل بالبيانات الحقيقية)
+  const stats = {
+    total_revenue: 125000,
+    monthly_revenue: 32000,
+    active_subscriptions: 45,
+    trial_subscriptions: 12,
+    canceled_subscriptions: 8,
+    overdue_invoices: 3,
+    total_tenants: 45,
+    growth_rate: 15.2
   };
 
-  const handleEditPlan = (plan: SubscriptionPlan) => {
-    setSelectedPlan(plan);
-  };
+  if (roleLoading || permissionsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* العنوان الرئيسي */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">إدارة الفوترة والاشتراكات</h1>
-          <p className="text-muted-foreground">
-            نظرة شاملة على جميع جوانب الفوترة وإدارة اشتراكات العملاء
-          </p>
+      {/* Header مع حماية الصلاحيات */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-right">إدارة الفوترة والاشتراكات</h1>
+        
+        {/* أزرار الإجراءات محمية بالصلاحيات */}
+        <div className="flex gap-2">
+          <PermissionGuard 
+            permissions="finance.invoices.manage"
+            hideOnNoAccess
+          >
+            <Button variant="outline" className="flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              فاتورة جديدة
+            </Button>
+          </PermissionGuard>
+          
+          <AdminOnly level="super" hideOnNoAccess>
+            <Button className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              إعدادات الفوترة
+            </Button>
+          </AdminOnly>
         </div>
       </div>
 
-      {/* الإحصائيات السريعة */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {billingStats.map((stat, index) => (
-          <Card key={index} className="border-primary/20 hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
+      {/* إحصائيات سريعة */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">إجمالي الإيرادات</p>
+                <p className="text-2xl font-bold">{stats.total_revenue.toLocaleString()} د.ك</p>
+              </div>
+              <DollarSign className="w-8 h-8 text-primary" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">الإيرادات الشهرية</p>
+                <p className="text-2xl font-bold">{stats.monthly_revenue.toLocaleString()} د.ك</p>
+              </div>
+              <Calendar className="w-8 h-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">الاشتراكات النشطة</p>
+                <p className="text-2xl font-bold">{stats.active_subscriptions}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <TrendingUp className="w-3 h-3 text-green-600" />
+                  <span className="text-xs text-green-600">+{stats.growth_rate}%</span>
+                </div>
+              </div>
+              <Users className="w-8 h-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <PermissionGuard 
+          permissions="finance.reports.view"
+          fallback={
+            <Card className="opacity-50">
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-center h-16">
+                  <Shield className="w-6 h-6 text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+          }
+        >
+          <Card>
+            <CardContent className="pt-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">{stat.title}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                  <p className={`text-xs mt-1 ${stat.trendUp ? 'text-success' : 'text-warning'}`}>
-                    {stat.trend}
-                  </p>
+                  <p className="text-sm font-medium text-muted-foreground">الفواتير المتأخرة</p>
+                  <p className="text-2xl font-bold text-red-600">{stats.overdue_invoices}</p>
                 </div>
-                <div className="bg-gradient-primary p-3 rounded-xl">
-                  <stat.icon className="w-6 h-6 text-primary-foreground" />
-                </div>
+                <AlertTriangle className="w-8 h-8 text-red-600" />
               </div>
             </CardContent>
           </Card>
-        ))}
+        </PermissionGuard>
       </div>
 
-      {/* التبويبات الرئيسية */}
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview" className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4" />
-            نظرة عامة
-          </TabsTrigger>
-          <TabsTrigger value="plans" className="flex items-center gap-2">
-            <Settings className="w-4 h-4" />
-            خطط الاشتراك
-          </TabsTrigger>
-          <TabsTrigger value="subscriptions" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            الاشتراكات
-          </TabsTrigger>
-          <TabsTrigger value="invoices" className="flex items-center gap-2">
-            <Receipt className="w-4 h-4" />
-            الفواتير
-          </TabsTrigger>
+      {/* تحذيرات للصلاحيات */}
+      {!isSuperAdmin && !canManageAccounting && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2 text-orange-800">
+              <Shield className="w-5 h-5" />
+              <p className="font-medium">
+                بعض الميزات محدودة بناءً على دورك الحالي ({
+                  isSuperAdmin ? 'مشرف عام' : 
+                  isTenantAdmin ? 'مدير مؤسسة' : 
+                  'مستخدم عادي'
+                })
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* علامات التبويب مع حماية الصلاحيات */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
+          <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
+          
+          <PermissionGuard permissions="system.tenants.manage" hideOnNoAccess>
+            <TabsTrigger value="plans">خطط الاشتراك</TabsTrigger>
+          </PermissionGuard>
+          
+          <TabsTrigger value="subscriptions">الاشتراكات</TabsTrigger>
+          
+          <PermissionGuard permissions="finance.invoices.manage">
+            <TabsTrigger value="invoices">الفواتير</TabsTrigger>
+          </PermissionGuard>
+          
+          <PermissionGuard permissions="finance.payments.manage">
+            <TabsTrigger value="payments">المدفوعات</TabsTrigger>
+          </PermissionGuard>
+          
+          <PermissionGuard permissions="finance.reports.view">
+            <TabsTrigger value="reports">التقارير</TabsTrigger>
+          </PermissionGuard>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          {/* الإجراءات السريعة */}
+        <TabsContent value="overview">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="border-primary/20">
+            {/* إحصائيات تفصيلية */}
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-primary" />
-                  إدارة الاشتراكات
-                </CardTitle>
+                <CardTitle>حالة الاشتراكات</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  عرض وإدارة اشتراكات المؤسسات، تجديد الخطط، وتعديل الحدود
-                </p>
-                <Button 
-                  onClick={() => navigate('/billing')}
-                  className="w-full"
-                >
-                  فتح إدارة الفوترة الكاملة
-                  <ArrowRight className="w-4 h-4 mr-2" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-primary" />
-                  الفواتير والمدفوعات
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  متابعة الفواتير المرسلة، المدفوعات المستلمة، والمتأخرات
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="text-center p-3 bg-success/10 rounded-lg">
-                    <p className="text-sm text-muted-foreground">فواتير مدفوعة</p>
-                    <p className="font-semibold text-success">22</p>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span>نشطة</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="default">{stats.active_subscriptions}</Badge>
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                    </div>
                   </div>
-                  <div className="text-center p-3 bg-warning/10 rounded-lg">
-                    <p className="text-sm text-muted-foreground">فواتير معلقة</p>
-                    <p className="font-semibold text-warning">{stats?.overdue_invoices || 0}</p>
+                  <div className="flex justify-between items-center">
+                    <span>تجريبية</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">{stats.trial_subscriptions}</Badge>
+                      <Calendar className="w-4 h-4 text-blue-600" />
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>ملغاة</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="destructive">{stats.canceled_subscriptions}</Badge>
+                      <AlertTriangle className="w-4 h-4 text-red-600" />
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+
+            {/* آخر الأنشطة - محمية بالصلاحيات */}
+            <PermissionGuard 
+              permissions="finance.reports.view"
+              fallback={
+                <Card>
+                  <CardHeader>
+                    <CardTitle>آخر الأنشطة</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-center h-32 text-muted-foreground">
+                      <div className="text-center">
+                        <Shield className="w-8 h-8 mx-auto mb-2" />
+                        <p>يتطلب صلاحيات عرض التقارير</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              }
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>آخر الأنشطة</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 p-2 border rounded">
+                      <CreditCard className="w-4 h-4 text-green-600" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">دفعة جديدة</p>
+                        <p className="text-xs text-muted-foreground">شركة البشائر - 299 د.ك</p>
+                      </div>
+                      <span className="text-xs text-muted-foreground">منذ 5 دقائق</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 border rounded">
+                      <FileText className="w-4 h-4 text-blue-600" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">فاتورة جديدة</p>
+                        <p className="text-xs text-muted-foreground">شركة النجاح - 599 د.ك</p>
+                      </div>
+                      <span className="text-xs text-muted-foreground">منذ ساعة</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </PermissionGuard>
           </div>
-
-          {/* النشاط الأخير */}
-          <Card className="border-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-primary" />
-                النشاط الأخير
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <div>
-                    <p className="font-medium">تم تجديد اشتراك شركة البشائر الخليجية</p>
-                    <p className="text-sm text-muted-foreground">خطة المؤسسة - 12 شهر</p>
-                  </div>
-                  <span className="text-success font-medium">+500.000 د.ك</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <div>
-                    <p className="font-medium">دفعة جديدة من مؤسسة النقل الحديث</p>
-                    <p className="text-sm text-muted-foreground">فاتورة شهر يناير</p>
-                  </div>
-                  <span className="text-success font-medium">+150.000 د.ك</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <div>
-                    <p className="font-medium">تذكير دفع لشركة التوصيل السريع</p>
-                    <p className="text-sm text-muted-foreground">فاتورة متأخرة 5 أيام</p>
-                  </div>
-                  <span className="text-warning font-medium">75.000 د.ك</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
+        {/* خطط الاشتراك - للمشرفين العامين فقط */}
         <TabsContent value="plans">
-          <SubscriptionPlansManager 
-            onCreatePlan={handleCreatePlan}
-            onEditPlan={handleEditPlan}
-          />
+          <AdminOnly 
+            level="super"
+            fallback={
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center text-muted-foreground">
+                    <Shield className="w-12 h-12 mx-auto mb-4" />
+                    <p>إدارة خطط الاشتراك متاحة للمشرفين العامين فقط</p>
+                  </div>
+                </CardContent>
+              </Card>
+            }
+          >
+            <SubscriptionPlansTab />
+          </AdminOnly>
         </TabsContent>
 
         <TabsContent value="subscriptions">
-          <Card>
-            <CardHeader>
-              <CardTitle>إدارة اشتراكات العملاء</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                هذا القسم قيد التطوير. سيتم إضافة إدارة اشتراكات العملاء قريباً.
-              </p>
-            </CardContent>
-          </Card>
+          <SubscriptionsTab />
         </TabsContent>
 
         <TabsContent value="invoices">
-          <Card>
-            <CardHeader>
-              <CardTitle>إدارة الفواتير</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                هذا القسم قيد التطوير. سيتم إضافة إدارة الفواتير والمدفوعات قريباً.
-              </p>
-            </CardContent>
-          </Card>
+          <PermissionGuard 
+            permissions="finance.invoices.manage"
+            fallback={
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center text-muted-foreground">
+                    <Shield className="w-12 h-12 mx-auto mb-4" />
+                    <p>يتطلب صلاحيات إدارة الفواتير</p>
+                  </div>
+                </CardContent>
+              </Card>
+            }
+          >
+            <InvoicesTab />
+          </PermissionGuard>
+        </TabsContent>
+
+        <TabsContent value="payments">
+          <PermissionGuard 
+            permissions="finance.payments.manage"
+            fallback={
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center text-muted-foreground">
+                    <Shield className="w-12 h-12 mx-auto mb-4" />
+                    <p>يتطلب صلاحيات إدارة المدفوعات</p>
+                  </div>
+                </CardContent>
+              </Card>
+            }
+          >
+            <PaymentsTab />
+          </PermissionGuard>
+        </TabsContent>
+
+        <TabsContent value="reports">
+          <PermissionGuard 
+            permissions="finance.reports.view"
+            fallback={
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center text-muted-foreground">
+                    <Shield className="w-12 h-12 mx-auto mb-4" />
+                    <p>يتطلب صلاحيات عرض التقارير</p>
+                  </div>
+                </CardContent>
+              </Card>
+            }
+          >
+            <ReportsTab />
+          </PermissionGuard>
         </TabsContent>
       </Tabs>
     </div>

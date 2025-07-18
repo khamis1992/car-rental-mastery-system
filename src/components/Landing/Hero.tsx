@@ -43,10 +43,31 @@ export function Hero() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link to="/auth">
-                <Button size="lg" variant="secondary" className="text-lg px-8 py-4 bg-white text-primary hover:bg-white/90">
-                  {getContentValue('hero', 'cta_text') || 'ابدأ الآن'}
+              <Button 
+                size="lg" 
+                variant="secondary" 
+                className="text-lg px-8 py-4 bg-white text-primary hover:bg-white/90"
+                onClick={() => {
+                  const pricingSection = document.getElementById('pricing');
+                  if (pricingSection) {
+                    pricingSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+              >
+                {getContentValue('hero', 'cta_text') || 'ابدأ تجربتك المجانية'}
+                <ArrowLeft className="w-5 h-5 mr-2" />
+              </Button>
+              
+              <Link to="/register">
+                <Button size="lg" variant="outline" className="text-lg px-8 py-4 border-white/30 text-white hover:bg-white/10">
+                  تسجيل مباشر
                   <ArrowLeft className="w-5 h-5 mr-2" />
+                </Button>
+              </Link>
+              
+              <Link to="/auth">
+                <Button size="lg" variant="ghost" className="text-lg px-6 py-4 text-white/80 hover:text-white hover:bg-white/5">
+                  دخول
                 </Button>
               </Link>
             </div>

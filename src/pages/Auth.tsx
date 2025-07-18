@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, ArrowRight, UserPlus, Home } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
@@ -60,6 +60,16 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg border border-border p-8">
+        {/* Back to Home Button */}
+        <div className="mb-6">
+          <Link to="/">
+            <Button variant="ghost" className="text-muted-foreground hover:text-primary">
+              <Home className="w-4 h-4 ml-2" />
+              العودة للرئيسية
+            </Button>
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-[#0066CC] mb-2">
@@ -90,7 +100,7 @@ const Auth = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full h-12 text-right bg-gray-50 border border-input rounded-lg px-4 focus:bg-white focus:border-primary transition-colors"
-              placeholder=""
+              placeholder="admin@example.com"
             />
           </div>
 
@@ -135,6 +145,41 @@ const Auth = () => {
             <ArrowLeft className="w-4 h-4" />
           </Button>
         </form>
+
+        {/* New User Section */}
+        <div className="mt-8 pt-6 border-t border-border">
+          <div className="text-center space-y-4">
+            <p className="text-sm text-muted-foreground">
+              لا تملك حساباً؟ ابدأ رحلتك معنا اليوم!
+            </p>
+            <div className="space-y-3">
+              <Link to="/register">
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 border-primary text-primary hover:bg-primary hover:text-white transition-colors"
+                >
+                  <UserPlus className="w-4 h-4 ml-2" />
+                  إنشاء حساب جديد - تجربة مجانية ١٤ يوم
+                  <ArrowRight className="w-4 h-4 mr-2" />
+                </Button>
+              </Link>
+              
+              <p className="text-xs text-muted-foreground">
+                🎉 تجربة مجانية لمدة ١٤ يوماً • بدون التزام • إلغاء في أي وقت
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Help Section */}
+        <div className="mt-6 text-center">
+          <p className="text-xs text-muted-foreground">
+            تحتاج مساعدة؟ 
+            <a href="mailto:support@fleetify.com" className="text-primary hover:underline mr-1">
+              تواصل معنا
+            </a>
+          </p>
+        </div>
 
       </div>
     </div>

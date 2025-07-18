@@ -87,8 +87,8 @@ export function Pricing() {
       return;
     }
     
-    setSelectedPlan(plan);
-    setIsModalOpen(true);
+    // توجيه لصفحة التسجيل الجديدة مع الخطة المحددة
+    window.location.href = `/register?plan=${plan.id}`;
   };
 
   return (
@@ -98,9 +98,21 @@ export function Pricing() {
           <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-foreground">
             خطط أسعار شفافة
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-4">
             اختر الباقة التي تناسب حجم عملك. جميع الباقات تشمل فترة تجريبية مجانية لمدة ١٤ يوم
           </p>
+          
+          {/* CTA Highlight */}
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4 max-w-2xl mx-auto">
+            <div className="flex items-center justify-center gap-2 text-green-700">
+              <span className="text-2xl">🎉</span>
+              <span className="font-semibold">تجربة مجانية كاملة ١٤ يوم</span>
+              <span className="text-2xl">🎉</span>
+            </div>
+            <p className="text-sm text-green-600 mt-1">
+              بدون الحاجة لبطاقة ائتمان • إلغاء مجاني في أي وقت • دعم فني مجاني
+            </p>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-4 gap-6 max-w-7xl mx-auto">

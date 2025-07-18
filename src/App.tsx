@@ -15,6 +15,7 @@ import { GlobalErrorBoundary } from "@/components/ErrorBoundary/GlobalErrorBound
 import { setupGlobalErrorHandling } from "@/utils/errorHandling";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Register from "./pages/Register";
 import LandingPage from "./pages/LandingPage";
 import SadadSimulation from "./pages/SadadSimulation";
 import PaymentSuccess from "./pages/PaymentSuccess";
@@ -113,6 +114,7 @@ const App = () => (
                   <Routes>
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/auth" element={<Auth />} />
+                    <Route path="/register" element={<Register />} />
                     <Route path="/sadad-simulation" element={<SadadSimulation />} />
                     <Route path="/payment-success" element={<PaymentSuccess />} />
                     <Route path="/payment-cancel" element={<PaymentCancel />} />
