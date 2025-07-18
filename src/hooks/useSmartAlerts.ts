@@ -395,15 +395,26 @@ export const useSmartAlerts = (): SmartAlertsHook => {
 
   const createAlert = async (alertData: Partial<SmartAlert>) => {
     try {
+      const alertToInsert = {
+        id: crypto.randomUUID(),
+        type: alertData.type || 'system',
+        severity: alertData.severity || 'medium',
+        title: alertData.title || 'تنبيه جديد',
+        message: alertData.message || 'رسالة تنبيه',
+        source: alertData.source || 'system',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        resolved: false,
+        description: alertData.description,
+        tenant_id: alertData.tenant_id,
+        metadata: alertData.metadata,
+        auto_resolve: alertData.auto_resolve,
+        expiry_date: alertData.expiry_date
+      };
+
       const { data, error } = await supabase
         .from('system_alerts')
-        .insert([{
-          ...alertData,
-          id: crypto.randomUUID(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          resolved: false
-        }])
+        .insert([alertToInsert])
         .select()
         .single();
 
@@ -412,7 +423,15 @@ export const useSmartAlerts = (): SmartAlertsHook => {
       }
 
       if (data) {
-        setAlerts(prev => [data, ...prev]);
+        const transformedAlert: SmartAlert = {
+          ...data,
+          type: data.type as SmartAlert['type'],
+          severity: data.severity as SmartAlert['severity'],
+          metadata: data.metadata as Record<string, any> || {},
+          actions: generateAlertActions(data),
+          tenant_name: (data as any).tenant?.name
+        };
+        setAlerts(prev => [transformedAlert, ...prev]);
       }
     } catch (err) {
       console.error('خطأ في إنشاء التنبيه:', err);

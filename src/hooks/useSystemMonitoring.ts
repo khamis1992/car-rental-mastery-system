@@ -117,13 +117,13 @@ export const useSystemMonitoring = (): SystemMonitoringHook => {
     // حساب مقاييس النظام (يمكن الحصول عليها من APIs خارجية أو مراقبة)
     const systemMetrics: SystemMetrics = {
       database: {
-        status: dbStats?.performance > 90 ? 'healthy' : dbStats?.performance > 70 ? 'warning' : 'error',
-        connections: dbStats?.active_connections || 25,
+        status: ((dbStats as any)?.performance || 0) > 90 ? 'healthy' : ((dbStats as any)?.performance || 0) > 70 ? 'warning' : 'error',
+        connections: (dbStats as any)?.active_connections || 25,
         maxConnections: 100,
-        size: dbStats?.database_size || '2.3 GB',
-        performance: dbStats?.performance || 92,
-        queries_per_second: dbStats?.queries_per_second || 150,
-        avg_response_time: dbStats?.avg_response_time || 45
+        size: (dbStats as any)?.database_size || '2.3 GB',
+        performance: (dbStats as any)?.performance || 92,
+        queries_per_second: (dbStats as any)?.queries_per_second || 150,
+        avg_response_time: (dbStats as any)?.avg_response_time || 45
       },
       storage: {
         status: 'healthy',

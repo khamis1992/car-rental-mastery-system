@@ -91,13 +91,28 @@ export class EnhancedSaasService {
    */
   async createSubscriptionPlan(planData: Partial<SubscriptionPlan>): Promise<SubscriptionPlan> {
     try {
+      const planToInsert = {
+        plan_name: planData.plan_name || '',
+        plan_code: planData.plan_code || '',
+        description: planData.description,
+        price_monthly: planData.price_monthly || 0,
+        price_yearly: planData.price_yearly || 0,
+        max_tenants: planData.max_tenants,
+        max_users_per_tenant: planData.max_users_per_tenant || 0,
+        max_contracts: planData.max_contracts || 0,
+        max_vehicles: planData.max_vehicles || 0,
+        storage_limit_gb: planData.storage_limit_gb || 0,
+        features: planData.features || [],
+        is_active: planData.is_active ?? true,
+        is_popular: planData.is_popular ?? false,
+        sort_order: planData.sort_order || 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
       const { data, error } = await supabase
         .from('subscription_plans')
-        .insert([{
-          ...planData,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }])
+        .insert([planToInsert])
         .select()
         .single();
 
@@ -183,7 +198,13 @@ export class EnhancedSaasService {
         return [];
       }
 
-      return data || [];
+      // تحويل البيانات لتتطابق مع الواجهة
+      const transformedData = (data || []).map((sub: any) => ({
+        ...sub,
+        discount_percentage: sub.discount_percentage || 0,
+        next_billing_date: sub.current_period_end
+      }));
+      return transformedData;
     } catch (error) {
       console.error('خطأ في خدمة اشتراكات المؤسسة:', error);
       return [];
@@ -252,7 +273,12 @@ export class EnhancedSaasService {
         throw new Error(`فشل في إنشاء الاشتراك: ${error.message}`);
       }
 
-      return data;
+      return {
+        ...data,
+        status: data.status as SaasSubscription['status'],
+        discount_percentage: (data as any).discount_percentage || 0,
+        next_billing_date: data.current_period_end
+      } as SaasSubscription;
     } catch (error: any) {
       console.error('خطأ في إنشاء الاشتراك:', error);
       throw error;
@@ -289,7 +315,12 @@ export class EnhancedSaasService {
         throw new Error(`فشل في تحديث حالة الاشتراك: ${error.message}`);
       }
 
-      return data;
+      return {
+        ...data,
+        status: data.status as SaasSubscription['status'],
+        discount_percentage: (data as any).discount_percentage || 0,
+        next_billing_date: data.current_period_end
+      } as SaasSubscription;
     } catch (error: any) {
       console.error('خطأ في تحديث حالة الاشتراك:', error);
       throw error;
@@ -323,28 +354,27 @@ export class EnhancedSaasService {
       const now = new Date();
       const dueDate = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 يوم
 
+      const invoiceToInsert = {
+        subscription_id: subscriptionId,
+        tenant_id: (subscription as any).tenant_id,
+        status: 'draft',
+        invoice_number: `INV-${Date.now()}`,
+        billing_period_start: (subscription as any).current_period_start,
+        billing_period_end: (subscription as any).current_period_end,
+        subtotal: (subscription as any).amount,
+        tax_amount: 0,
+        discount_amount: ((subscription as any).amount * ((subscription as any).discount_percentage || 0)) / 100,
+        total_amount: (subscription as any).amount - (((subscription as any).amount * ((subscription as any).discount_percentage || 0)) / 100),
+        currency: (subscription as any).currency || 'KWD',
+        due_date: dueDate.toISOString().split('T')[0],
+        description: `فاتورة اشتراك ${(subscription as any).plan?.plan_name}`,
+        created_at: now.toISOString(),
+        updated_at: now.toISOString(),
+      };
+
       const { data, error } = await supabase
         .from('saas_invoices')
-        .insert([{
-          subscription_id: subscriptionId,
-          tenant_id: subscription.tenant_id,
-          status: 'draft',
-          invoice_date: now.toISOString().split('T')[0],
-          due_date: dueDate.toISOString().split('T')[0],
-          subtotal: subscription.amount,
-          tax_rate: 0,
-          tax_amount: 0,
-          discount_percentage: subscription.discount_percentage || 0,
-          discount_amount: (subscription.amount * (subscription.discount_percentage || 0)) / 100,
-          total_amount: subscription.amount - ((subscription.amount * (subscription.discount_percentage || 0)) / 100),
-          paid_amount: 0,
-          currency: subscription.currency || 'KWD',
-          billing_period_start: subscription.current_period_start,
-          billing_period_end: subscription.current_period_end,
-          notes: `فاتورة اشتراك ${subscription.plan?.plan_name}`,
-          created_at: now.toISOString(),
-          updated_at: now.toISOString(),
-        }])
+        .insert([invoiceToInsert])
         .select()
         .single();
 
@@ -352,7 +382,14 @@ export class EnhancedSaasService {
         throw new Error(`فشل في إنشاء الفاتورة: ${error.message}`);
       }
 
-      return data;
+      return {
+        ...data,
+        status: data.status as SaasInvoice['status'],
+        subtotal: (data as any).subtotal || (data as any).amount_due || 0,
+        tax_amount: (data as any).tax_amount || 0,
+        discount_amount: (data as any).discount_amount || 0,
+        total_amount: (data as any).total_amount || (data as any).amount_due || 0
+      } as unknown as SaasInvoice;
     } catch (error: any) {
       console.error('خطأ في إنشاء الفاتورة:', error);
       throw error;
@@ -381,7 +418,16 @@ export class EnhancedSaasService {
         return [];
       }
 
-      return data || [];
+      // تحويل البيانات لتتطابق مع الواجهة
+      const transformedData = (data || []).map((invoice: any) => ({
+        ...invoice,
+        status: invoice.status as SaasInvoice['status'],
+        subtotal: invoice.subtotal || invoice.amount_due || 0,
+        tax_amount: invoice.tax_amount || 0,
+        discount_amount: invoice.discount_amount || 0,
+        total_amount: invoice.total_amount || invoice.amount_due || 0
+      }));
+      return transformedData;
     } catch (error) {
       console.error('خطأ في خدمة فواتير المؤسسة:', error);
       return [];
@@ -426,9 +472,9 @@ export class EnhancedSaasService {
         total_subscriptions: subscriptionsData.length,
 
         // الفواتير
-        pending_invoices: invoicesData.filter(i => ['sent', 'draft'].includes(i.status)).length,
-        overdue_invoices: invoicesData.filter(i => i.status === 'overdue').length,
-        paid_invoices: invoicesData.filter(i => i.status === 'paid').length,
+        pending_invoices: invoicesData.filter(i => ['sent', 'draft'].includes((i as any).status || '')).length,
+        overdue_invoices: invoicesData.filter(i => (i as any).status === 'overdue').length,
+        paid_invoices: invoicesData.filter(i => (i as any).status === 'paid').length,
         total_invoices: invoicesData.length,
 
         // المؤسسات

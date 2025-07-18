@@ -212,7 +212,15 @@ export const useSaasSubscriptions = (tenantId?: string) => {
         throw fetchError;
       }
 
-      setSubscriptions(data || []);
+      // تحويل البيانات لتتطابق مع الواجهة
+      const transformedData = (data || []).map((sub: any) => ({
+        ...sub,
+        discount_percentage: sub.discount_percentage || 0,
+        next_billing_date: sub.current_period_end,
+        plan: sub.plan || null,
+        tenant: sub.tenant || null
+      }));
+      setSubscriptions(transformedData);
     } catch (err: any) {
       console.error('خطأ في جلب الاشتراكات:', err);
       setError(err.message);
@@ -338,7 +346,15 @@ export const useSaasInvoices = (tenantId?: string) => {
         throw fetchError;
       }
 
-      setInvoices(data || []);
+      // تحويل البيانات لتتطابق مع الواجهة
+      const transformedData = (data || []).map((invoice: any) => ({
+        ...invoice,
+        subtotal: invoice.subtotal || invoice.amount_due || 0,
+        tax_amount: invoice.tax_amount || 0,
+        discount_amount: invoice.discount_amount || 0,
+        total_amount: invoice.total_amount || invoice.amount_due || 0
+      }));
+      setInvoices(transformedData);
     } catch (err: any) {
       console.error('خطأ في جلب الفواتير:', err);
       setError(err.message);
@@ -360,9 +376,7 @@ export const useSaasInvoices = (tenantId?: string) => {
         tax_amount: invoiceData.tax_amount || 0,
         discount_amount: invoiceData.discount_amount || 0,
         total_amount: invoiceData.total_amount || 0,
-        amount_due: invoiceData.amount_due || 0,
-        amount_paid: invoiceData.amount_paid || 0,
-        amount_remaining: invoiceData.amount_remaining || 0,
+        // هذه الحقول لا تتطابق مع واجهة SaasInvoice، سيتم حسابها تلقائياً
         due_date: invoiceData.due_date,
         status: invoiceData.status,
         currency: invoiceData.currency,
@@ -470,7 +484,12 @@ export const useSaasPayments = (tenantId?: string) => {
         throw fetchError;
       }
 
-      setPayments(data || []);
+      // تحويل البيانات لتتطابق مع الواجهة
+      const transformedData = (data || []).map((payment: any) => ({
+        ...payment,
+        payment_date: payment.paid_at || payment.created_at
+      }));
+      setPayments(transformedData);
     } catch (err: any) {
       console.error('خطأ في جلب المدفوعات:', err);
       setError(err.message);
@@ -662,7 +681,7 @@ export const useTenantUsage = (tenantId: string) => {
         throw functionError;
       }
 
-      setUsage(data as TenantUsage);
+      setUsage(data as unknown as TenantUsage);
     } catch (err: any) {
       console.error('خطأ في جلب استخدام المؤسسة:', err);
       setError(err.message);
