@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -61,4 +62,4 @@ const TenantManagement: React.FC = () => {
   );
 };
 
-export default TenantManagement; 
+export default TenantManagement;
