@@ -56,11 +56,11 @@ interface MaintenanceTask {
   id: string;
   name: string;
   description: string;
-  type: 'backup' | 'cleanup' | 'optimization' | 'security' | 'monitoring' | 'custom';
-  status: 'scheduled' | 'running' | 'completed' | 'failed' | 'paused';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  type: string;
+  status: string;
+  priority: string;
   schedule: {
-    type: 'once' | 'daily' | 'weekly' | 'monthly';
+    type: string;
     time: string;
     dayOfWeek?: number;
     dayOfMonth?: number;
@@ -110,9 +110,9 @@ const MaintenanceTools: React.FC = () => {
   const [newTaskForm, setNewTaskForm] = useState({
     name: '',
     description: '',
-    type: 'backup' as const,
-    priority: 'medium' as const,
-    scheduleType: 'once' as const,
+    type: 'backup',
+    priority: 'medium',
+    scheduleType: 'once',
     scheduleTime: '',
     dayOfWeek: 1,
     dayOfMonth: 1
@@ -355,12 +355,12 @@ const MaintenanceTools: React.FC = () => {
       }
     },
     {
-      label: task => task.status === 'running' ? 'إيقاف' : 'إيقاف مؤقت',
+      label: 'إيقاف مؤقت',
       icon: <Pause className="w-4 h-4" />,
       onClick: (task: MaintenanceTask) => {
         pauseTask(task);
       },
-      variant: 'secondary' as const
+      variant: 'default' as const
     },
     {
       label: 'حذف',
@@ -456,7 +456,7 @@ const MaintenanceTools: React.FC = () => {
               status: 'completed', 
               progress: 100,
               lastRun: new Date().toISOString(),
-              nextRun: calculateNextRun({ ...newTaskForm, scheduleType: task.schedule.type })
+              nextRun: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
             } : t)
           );
           toast({
@@ -918,7 +918,7 @@ const MaintenanceTools: React.FC = () => {
                 إلغاء
               </Button>
               <ActionButton
-                action={selectedTask ? "update" : "create"}
+                action={selectedTask ? "edit" : "create"}
                 itemName="المهمة"
                 onClick={handleCreateTask}
                 loading={loading}

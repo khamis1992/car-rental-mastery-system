@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, createContext, ReactNode } from 'react';
+import React, { useState, useEffect, useContext, createContext, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 // تعريف الأذونات المتاحة
@@ -56,6 +56,10 @@ export const PERMISSIONS = {
   // الأمان
   SECURITY_VIEW: 'security.view',
   SECURITY_MANAGE: 'security.manage',
+  
+  // التقارير
+  REPORTS_VIEW: 'reports.view',
+  REPORTS_CREATE: 'reports.create',
 } as const;
 
 // تعريف الأدوار
@@ -107,6 +111,8 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     PERMISSIONS.ANALYTICS_EXPORT,
     PERMISSIONS.SECURITY_VIEW,
     PERMISSIONS.SECURITY_MANAGE,
+    PERMISSIONS.REPORTS_VIEW,
+    PERMISSIONS.REPORTS_CREATE,
   ],
   [ROLES.TENANT_ADMIN]: [
     PERMISSIONS.USER_VIEW,
@@ -118,6 +124,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     PERMISSIONS.BILLING_VIEW,
     PERMISSIONS.ANALYTICS_VIEW,
     PERMISSIONS.SECURITY_VIEW,
+    PERMISSIONS.REPORTS_VIEW,
   ],
   [ROLES.MANAGER]: [
     PERMISSIONS.USER_VIEW,
@@ -145,9 +152,13 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
 export interface User {
   id: string;
   email: string;
+  name: string;
   role: string;
   permissions?: string[];
   tenant_id?: string;
+  tenantId?: string;
+  isActive: boolean;
+  avatar?: string;
 }
 
 export interface RoleBasedAccessContextType {
@@ -166,8 +177,13 @@ export interface RoleBasedAccessContextType {
 
 const RoleBasedAccessContext = createContext<RoleBasedAccessContextType | undefined>(undefined);
 
-// مقدم السياق (Provider)
-export const RoleBasedAccessProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+// مقدم السياق (Provider)  
+interface RoleBasedAccessProviderProps {
+  children: ReactNode;
+  currentUser?: User;
+}
+
+export const RoleBasedAccessProvider: React.FC<RoleBasedAccessProviderProps> = ({ children, currentUser: providedUser }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [impersonatedUser, setImpersonatedUser] = useState<User | null>(null);
   const [isImpersonating, setIsImpersonating] = useState(false);
@@ -178,16 +194,22 @@ export const RoleBasedAccessProvider: React.FC<{ children: ReactNode }> = ({ chi
 
   // تحميل بيانات المستخدم عند بدء تشغيل التطبيق
   useEffect(() => {
-    // هنا يمكن تحميل بيانات المستخدم من API أو localStorage
-    // مؤقتاً سنضع مستخدم افتراضي
-    const mockUser: User = {
-      id: '1',
-      email: 'admin@system.com',
-      role: ROLES.SUPER_ADMIN,
-      permissions: ROLE_PERMISSIONS[ROLES.SUPER_ADMIN]
-    };
-    setCurrentUser(mockUser);
-  }, []);
+    if (providedUser) {
+      setCurrentUser(providedUser);
+    } else {
+      // هنا يمكن تحميل بيانات المستخدم من API أو localStorage
+      // مؤقتاً سنضع مستخدم افتراضي
+      const mockUser: User = {
+        id: '1',
+        email: 'admin@system.com',
+        name: 'مدير النظام',
+        role: ROLES.SUPER_ADMIN,
+        permissions: ROLE_PERMISSIONS[ROLES.SUPER_ADMIN],
+        isActive: true
+      };
+      setCurrentUser(mockUser);
+    }
+  }, [providedUser]);
 
   // فحص الصلاحية الواحدة
   const hasPermission = (permission: string): boolean => {
@@ -389,24 +411,105 @@ export const useModuleAccess = (module: string): boolean => {
 };
 
 // Additional hooks for API operations
-export const useRoles = () => {
+export const useRoles = (tenantId?: string) => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const fetchRoles = async () => {
     setLoading(true);
+    setError(null);
     try {
       // Mock data for now
       setRoles([
-        { id: '1', name: 'Super Admin', permissions: ROLE_PERMISSIONS[ROLES.SUPER_ADMIN], is_active: true, is_system: true, is_default: false },
-        { id: '2', name: 'Tenant Admin', permissions: ROLE_PERMISSIONS[ROLES.TENANT_ADMIN], is_active: true, is_system: true, is_default: false },
-        { id: '3', name: 'Manager', permissions: ROLE_PERMISSIONS[ROLES.MANAGER], is_active: true, is_system: true, is_default: false },
-        { id: '4', name: 'Accountant', permissions: ROLE_PERMISSIONS[ROLES.ACCOUNTANT], is_active: true, is_system: true, is_default: false },
-        { id: '5', name: 'Receptionist', permissions: ROLE_PERMISSIONS[ROLES.RECEPTIONIST], is_active: true, is_system: true, is_default: false },
-        { id: '6', name: 'User', permissions: ROLE_PERMISSIONS[ROLES.USER], is_active: true, is_system: true, is_default: true },
+        { 
+          id: '1', 
+          name: 'super_admin',
+          display_name: 'Super Admin', 
+          description: 'مدير النظام العام',
+          level: 1000,
+          permissions: ROLE_PERMISSIONS[ROLES.SUPER_ADMIN], 
+          is_active: true, 
+          is_system: true, 
+          is_default: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          tenant_id: tenantId
+        },
+        { 
+          id: '2', 
+          name: 'tenant_admin',
+          display_name: 'Tenant Admin', 
+          description: 'مدير المؤسسة',
+          level: 900,
+          permissions: ROLE_PERMISSIONS[ROLES.TENANT_ADMIN], 
+          is_active: true, 
+          is_system: true, 
+          is_default: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          tenant_id: tenantId
+        },
+        { 
+          id: '3', 
+          name: 'manager',
+          display_name: 'Manager', 
+          description: 'مدير',
+          level: 500,
+          permissions: ROLE_PERMISSIONS[ROLES.MANAGER], 
+          is_active: true, 
+          is_system: true, 
+          is_default: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          tenant_id: tenantId
+        },
+        { 
+          id: '4', 
+          name: 'accountant',
+          display_name: 'Accountant', 
+          description: 'محاسب',
+          level: 300,
+          permissions: ROLE_PERMISSIONS[ROLES.ACCOUNTANT], 
+          is_active: true, 
+          is_system: true, 
+          is_default: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          tenant_id: tenantId
+        },
+        { 
+          id: '5', 
+          name: 'receptionist',
+          display_name: 'Receptionist', 
+          description: 'موظف استقبال',
+          level: 200,
+          permissions: ROLE_PERMISSIONS[ROLES.RECEPTIONIST], 
+          is_active: true, 
+          is_system: true, 
+          is_default: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          tenant_id: tenantId
+        },
+        { 
+          id: '6', 
+          name: 'user',
+          display_name: 'User', 
+          description: 'مستخدم عادي',
+          level: 100,
+          permissions: ROLE_PERMISSIONS[ROLES.USER], 
+          is_active: true, 
+          is_system: true, 
+          is_default: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          tenant_id: tenantId
+        },
       ]);
     } catch (error) {
       console.error('Error fetching roles:', error);
+      setError(error);
     } finally {
       setLoading(false);
     }
@@ -414,71 +517,99 @@ export const useRoles = () => {
 
   useEffect(() => {
     fetchRoles();
-  }, []);
+  }, [tenantId]);
 
-  return { data: roles, isLoading: loading, refetch: fetchRoles };
+  return { data: roles, isLoading: loading, error, refetch: fetchRoles };
 };
 
 export const usePermissionsByCategory = () => {
-  const permissions = [
-    {
-      category: 'إدارة النظام',
-      permissions: [
-        { id: PERMISSIONS.SYSTEM_ADMIN, name: 'إدارة النظام', description: 'الوصول الكامل لإعدادات النظام' },
-        { id: PERMISSIONS.SYSTEM_MAINTENANCE, name: 'صيانة النظام', description: 'إجراء صيانة وتحديثات النظام' },
-        { id: PERMISSIONS.SYSTEM_BACKUP, name: 'النسخ الاحتياطي', description: 'إنشاء واستعادة النسخ الاحتياطية' },
-        { id: PERMISSIONS.SYSTEM_LOGS, name: 'سجلات النظام', description: 'عرض وإدارة سجلات النظام' },
-        { id: PERMISSIONS.SYSTEM_SETTINGS, name: 'إعدادات النظام', description: 'تعديل إعدادات النظام العامة' },
-      ]
-    },
-    {
-      category: 'إدارة المؤسسات',
-      permissions: [
-        { id: PERMISSIONS.TENANT_VIEW, name: 'عرض المؤسسات', description: 'عرض قائمة المؤسسات' },
-        { id: PERMISSIONS.TENANT_CREATE, name: 'إنشاء مؤسسة', description: 'إنشاء مؤسسات جديدة' },
-        { id: PERMISSIONS.TENANT_EDIT, name: 'تعديل المؤسسة', description: 'تعديل بيانات المؤسسات' },
-        { id: PERMISSIONS.TENANT_DELETE, name: 'حذف المؤسسة', description: 'حذف المؤسسات' },
-        { id: PERMISSIONS.TENANT_IMPERSONATE, name: 'انتحال الهوية', description: 'انتحال هوية مستخدمي المؤسسات' },
-      ]
-    },
-    {
-      category: 'إدارة المستخدمين',
-      permissions: [
-        { id: PERMISSIONS.USER_VIEW, name: 'عرض المستخدمين', description: 'عرض قائمة المستخدمين' },
-        { id: PERMISSIONS.USER_CREATE, name: 'إنشاء مستخدم', description: 'إنشاء مستخدمين جدد' },
-        { id: PERMISSIONS.USER_EDIT, name: 'تعديل المستخدم', description: 'تعديل بيانات المستخدمين' },
-        { id: PERMISSIONS.USER_DELETE, name: 'حذف المستخدم', description: 'حذف المستخدمين' },
-      ]
-    },
-    {
-      category: 'إدارة الأدوار',
-      permissions: [
-        { id: PERMISSIONS.ROLE_VIEW, name: 'عرض الأدوار', description: 'عرض قائمة الأدوار' },
-        { id: PERMISSIONS.ROLE_CREATE, name: 'إنشاء دور', description: 'إنشاء أدوار جديدة' },
-        { id: PERMISSIONS.ROLE_EDIT, name: 'تعديل الدور', description: 'تعديل الأدوار الموجودة' },
-        { id: PERMISSIONS.ROLE_DELETE, name: 'حذف الدور', description: 'حذف الأدوار' },
-        { id: PERMISSIONS.PERMISSION_MANAGE, name: 'إدارة الصلاحيات', description: 'إدارة صلاحيات الأدوار' },
-      ]
-    }
-  ];
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  return permissions;
+  useEffect(() => {
+    setIsLoading(true);
+    try {
+      const permissions = [
+        {
+          category: 'إدارة النظام',
+          permissions: [
+            { id: PERMISSIONS.SYSTEM_ADMIN, name: 'إدارة النظام', description: 'الوصول الكامل لإعدادات النظام' },
+            { id: PERMISSIONS.SYSTEM_MAINTENANCE, name: 'صيانة النظام', description: 'إجراء صيانة وتحديثات النظام' },
+            { id: PERMISSIONS.SYSTEM_BACKUP, name: 'النسخ الاحتياطي', description: 'إنشاء واستعادة النسخ الاحتياطية' },
+            { id: PERMISSIONS.SYSTEM_LOGS, name: 'سجلات النظام', description: 'عرض وإدارة سجلات النظام' },
+            { id: PERMISSIONS.SYSTEM_SETTINGS, name: 'إعدادات النظام', description: 'تعديل إعدادات النظام العامة' },
+          ]
+        },
+        {
+          category: 'إدارة المؤسسات',
+          permissions: [
+            { id: PERMISSIONS.TENANT_VIEW, name: 'عرض المؤسسات', description: 'عرض قائمة المؤسسات' },
+            { id: PERMISSIONS.TENANT_CREATE, name: 'إنشاء مؤسسة', description: 'إنشاء مؤسسات جديدة' },
+            { id: PERMISSIONS.TENANT_EDIT, name: 'تعديل المؤسسة', description: 'تعديل بيانات المؤسسات' },
+            { id: PERMISSIONS.TENANT_DELETE, name: 'حذف المؤسسة', description: 'حذف المؤسسات' },
+            { id: PERMISSIONS.TENANT_IMPERSONATE, name: 'انتحال الهوية', description: 'انتحال هوية مستخدمي المؤسسات' },
+          ]
+        },
+        {
+          category: 'إدارة المستخدمين',
+          permissions: [
+            { id: PERMISSIONS.USER_VIEW, name: 'عرض المستخدمين', description: 'عرض قائمة المستخدمين' },
+            { id: PERMISSIONS.USER_CREATE, name: 'إنشاء مستخدم', description: 'إنشاء مستخدمين جدد' },
+            { id: PERMISSIONS.USER_EDIT, name: 'تعديل المستخدم', description: 'تعديل بيانات المستخدمين' },
+            { id: PERMISSIONS.USER_DELETE, name: 'حذف المستخدم', description: 'حذف المستخدمين' },
+          ]
+        },
+        {
+          category: 'إدارة الأدوار',
+          permissions: [
+            { id: PERMISSIONS.ROLE_VIEW, name: 'عرض الأدوار', description: 'عرض قائمة الأدوار' },
+            { id: PERMISSIONS.ROLE_CREATE, name: 'إنشاء دور', description: 'إنشاء أدوار جديدة' },
+            { id: PERMISSIONS.ROLE_EDIT, name: 'تعديل الدور', description: 'تعديل الأدوار الموجودة' },
+            { id: PERMISSIONS.ROLE_DELETE, name: 'حذف الدور', description: 'حذف الأدوار' },
+            { id: PERMISSIONS.PERMISSION_MANAGE, name: 'إدارة الصلاحيات', description: 'إدارة صلاحيات الأدوار' },
+          ]
+        }
+      ];
+      setData(permissions);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  return { data, isLoading, error };
 };
 
 export const usePermissionCategories = () => {
-  const categories = [
-    'إدارة النظام',
-    'إدارة المؤسسات', 
-    'إدارة المستخدمين',
-    'إدارة الأدوار',
-    'الدعم الفني',
-    'محرر الصفحات',
-    'المالية والفوترة',
-    'التحليلات',
-    'الأمان'
-  ];
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  return categories;
+  useEffect(() => {
+    setIsLoading(true);
+    try {
+      const categories = [
+        'إدارة النظام',
+        'إدارة المؤسسات', 
+        'إدارة المستخدمين',
+        'إدارة الأدوار',
+        'الدعم الفني',
+        'محرر الصفحات',
+        'المالية والفوترة',
+        'التحليلات',
+        'الأمان'
+      ];
+      setData(categories);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  return { data, isLoading, error };
 };
 
 export const useCreateRole = () => {
@@ -503,7 +634,7 @@ export const useCreateRole = () => {
     }
   };
 
-  return { mutateAsync: createRole };
+  return { mutateAsync: createRole, isPending: false };
 };
 
 export const useUpdateRole = () => {
@@ -528,7 +659,7 @@ export const useUpdateRole = () => {
     }
   };
 
-  return { mutateAsync: updateRole };
+  return { mutateAsync: updateRole, isPending: false };
 };
 
 export const useDeleteRole = () => {
@@ -553,10 +684,10 @@ export const useDeleteRole = () => {
     }
   };
 
-  return { mutateAsync: deleteRole };
+  return { mutateAsync: deleteRole, isPending: false };
 };
 
-export const useAuditLogs = () => {
+export const useAuditLogs = (tenantId?: string, userId?: string, limit: number = 50) => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -589,20 +720,61 @@ export const useAuditLogs = () => {
 
   useEffect(() => {
     fetchLogs();
-  }, []);
+  }, [tenantId, userId, limit]);
 
   return { data: logs, isLoading: loading };
 };
 
 export const usePermissionSystemStats = () => {
-  const stats = {
-    total_roles: 6,
-    total_permissions: Object.keys(PERMISSIONS).length,
-    active_users: 150,
-    system_admins: 3
-  };
+  const [stats, setStats] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  return { data: stats };
+  useEffect(() => {
+    setIsLoading(true);
+    const mockStats = {
+      total_roles: 6,
+      total_permissions: Object.keys(PERMISSIONS).length,
+      active_users: 150,
+      system_admins: 3
+    };
+    setStats(mockStats);
+    setIsLoading(false);
+  }, []);
+
+  return { data: stats, isLoading };
 };
 
-export default useRoleBasedAccess; 
+// Protected Component
+interface ProtectedComponentProps {
+  children: ReactNode;
+  permission?: string;
+  permissions?: string[];
+  requireAll?: boolean;
+  fallback?: ReactNode;
+}
+
+export const ProtectedComponent: React.FC<ProtectedComponentProps> = ({ 
+  children, 
+  permission, 
+  permissions = [], 
+  requireAll = false, 
+  fallback = null 
+}) => {
+  const { hasPermission, hasAnyPermission, hasAllPermissions } = useRoleBasedAccess();
+  
+  let hasAccess = true;
+  
+  if (permission) {
+    hasAccess = hasPermission(permission);
+  } else if (permissions.length > 0) {
+    hasAccess = requireAll ? hasAllPermissions(permissions) : hasAnyPermission(permissions);
+  }
+  
+  if (!hasAccess) {
+    return <>{fallback}</>;
+  }
+  
+  return <>{children}</>;
+};
+
+export default useRoleBasedAccess;

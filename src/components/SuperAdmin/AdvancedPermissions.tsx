@@ -430,9 +430,9 @@ const AdvancedPermissions: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-600">إجمالي المستخدمين</p>
-                <p className="text-2xl font-bold text-purple-600 text-right">
-                  {formatNumber(systemStats?.total_users || 0)}
-                </p>
+                        <p className="text-2xl font-bold text-purple-600 text-right">
+                          {formatNumber(systemStats?.active_users || 0)}
+                        </p>
               </div>
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                 <Users className="w-4 h-4 text-blue-600" />
@@ -446,9 +446,9 @@ const AdvancedPermissions: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-600">الأدوار النشطة</p>
-                <p className="text-2xl font-bold text-blue-600 text-right">
-                  {formatNumber(systemStats?.active_roles || 0)}
-                </p>
+                        <p className="text-2xl font-bold text-blue-600 text-right">
+                          {formatNumber(systemStats?.total_roles || 0)}
+                        </p>
               </div>
               <Shield className="w-8 h-8 text-blue-600" />
             </div>
@@ -474,9 +474,9 @@ const AdvancedPermissions: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-600">دخول حديث</p>
-                <p className="text-2xl font-bold text-orange-600 text-right">
-                  {formatNumber(systemStats?.recent_logins || 0)}
-                </p>
+                        <p className="text-2xl font-bold text-orange-600 text-right">
+                          {formatNumber(systemStats?.system_admins || 0)}
+                        </p>
               </div>
               <UserCheck className="w-8 h-8 text-orange-600" />
             </div>
@@ -700,7 +700,7 @@ const AdvancedPermissions: React.FC = () => {
               </Button>
               <Button
                 onClick={handleCreateRole}
-                loading={createRoleMutation.isPending || updateRoleMutation.isPending}
+                disabled={createRoleMutation.isPending || updateRoleMutation.isPending}
               >
                 {createRoleMutation.isPending || updateRoleMutation.isPending ? (
                   <>

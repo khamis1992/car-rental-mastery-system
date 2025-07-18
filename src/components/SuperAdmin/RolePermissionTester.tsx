@@ -425,7 +425,7 @@ const RolePermissionTester: React.FC = () => {
               مسح النتائج
             </EnhancedButton>
             <ActionButton
-              action="test"
+              action="view"
               itemName="الصلاحيات"
               onClick={runTests}
               loading={isRunning}
