@@ -16,6 +16,7 @@ import {
 import { TenantService } from "@/services/tenantService";
 import { Tenant } from "@/types/tenant";
 import { TenantOnboarding } from "@/components/Tenants/TenantOnboarding";
+import TenantEdit from "./TenantEdit";
 import { toast } from "@/hooks/use-toast";
 
 // استيراد المكونات المحسنة
@@ -110,7 +111,8 @@ const TenantManagement: React.FC = () => {
     tenantsCount: tenants.length, 
     loading, 
     error: error?.slice(0, 100),
-    selectedTenant: selectedTenant?.id
+    selectedTenant: selectedTenant?.id,
+    editingTenant: editingTenant?.id
   });
 
   const loadTenants = async () => {
@@ -216,6 +218,49 @@ const TenantManagement: React.FC = () => {
     setSelectedTenant(null);
   };
 
+  const handleEditTenant = (tenant: Tenant) => {
+    console.log('✏️ Edit tenant:', tenant.id);
+    setEditingTenant(tenant);
+  };
+
+  const handleSaveTenant = async (updatedData: Partial<Tenant>) => {
+    if (!editingTenant) return;
+
+    try {
+      console.log('💾 Saving tenant updates:', editingTenant.id, updatedData);
+      
+      // التحقق من صحة البيانات
+      const validationErrors = await tenantService.validateTenantData(updatedData, editingTenant.id);
+      if (validationErrors.length > 0) {
+        throw new Error(validationErrors.join(', '));
+      }
+
+      const updatedTenant = await tenantService.updateTenant(editingTenant.id, updatedData);
+      
+      // تحديث قائمة المؤسسات
+      setTenants(prev => prev.map(tenant => 
+        tenant.id === editingTenant.id ? updatedTenant : tenant
+      ));
+      
+      setEditingTenant(null);
+      
+      toast({
+        title: "تم التحديث بنجاح",
+        description: `تم تحديث بيانات ${updatedTenant.name} بنجاح`,
+      });
+      
+      console.log('✅ Tenant updated successfully');
+    } catch (error: any) {
+      console.error('❌ Error updating tenant:', error);
+      throw error; // Re-throw to be handled by TenantEdit component
+    }
+  };
+
+  const handleCancelEdit = () => {
+    console.log('❌ Cancel edit tenant');
+    setEditingTenant(null);
+  };
+
   // تعريف إجراءات الجدول
   const actions = [
     {
@@ -226,10 +271,7 @@ const TenantManagement: React.FC = () => {
     {
       label: 'تحرير',
       icon: <Edit className="w-4 h-4" />,
-      onClick: (tenant: Tenant) => {
-        console.log('✏️ Edit tenant:', tenant.id);
-        setEditingTenant(tenant);
-      }
+      onClick: handleEditTenant
     },
     {
       label: 'الإعدادات',
@@ -414,18 +456,17 @@ const TenantManagement: React.FC = () => {
           open={!!editingTenant}
           onOpenChange={() => setEditingTenant(null)}
           title={`تحرير ${editingTenant?.name || ''}`}
-          description="تحديث بيانات المؤسسة"
-          size="lg"
+          description="تحديث بيانات وإعدادات المؤسسة"
+          size="xl"
           showCloseButton
         >
-          <div className="p-4 text-center">
-            <p className="text-muted-foreground mb-4">
-              وظيفة التحرير قيد التطوير
-            </p>
-            <p className="text-sm text-muted-foreground">
-              المؤسسة المحددة: {editingTenant?.name}
-            </p>
-          </div>
+          {editingTenant && (
+            <TenantEdit
+              tenant={editingTenant}
+              onSave={handleSaveTenant}
+              onCancel={handleCancelEdit}
+            />
+          )}
         </EnhancedDialog>
       </div>
     </ErrorBoundary>

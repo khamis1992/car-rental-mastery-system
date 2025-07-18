@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Tenant, TenantOnboardingData } from '@/types/tenant';
 
@@ -86,12 +87,17 @@ export class TenantService {
     }
   }
 
-  async isSlugAvailable(slug: string): Promise<boolean> {
-    const { data, error } = await supabase
+  async isSlugAvailable(slug: string, excludeId?: string): Promise<boolean> {
+    let query = supabase
       .from('tenants')
       .select('id')
-      .eq('slug', slug)
-      .single();
+      .eq('slug', slug);
+
+    if (excludeId) {
+      query = query.neq('id', excludeId);
+    }
+
+    const { data, error } = await query.single();
 
     if (error && error.code === 'PGRST116') {
       return true; // No data found, slug is available
@@ -100,33 +106,61 @@ export class TenantService {
     return false; // Found a tenant with this slug
   }
 
-  private getMaxUsersByPlan(plan: string): number {
-    switch (plan) {
-      case 'basic': return 5;
-      case 'standard': return 25;
-      case 'premium': return 100;
-      case 'enterprise': return 1000;
-      default: return 5;
+  async validateTenantData(data: Partial<Tenant>, excludeId?: string): Promise<string[]> {
+    const errors: string[] = [];
+
+    // Check slug availability
+    if (data.slug) {
+      const isAvailable = await this.isSlugAvailable(data.slug, excludeId);
+      if (!isAvailable) {
+        errors.push('هذا المعرف مستخدم بالفعل');
+      }
     }
+
+    // Validate subscription plan limits
+    if (data.subscription_plan) {
+      const limits = this.getPlanLimits(data.subscription_plan);
+      
+      if (data.max_users && data.max_users > limits.maxUsers) {
+        errors.push(`عدد المستخدمين لا يمكن أن يتجاوز ${limits.maxUsers} للخطة المحددة`);
+      }
+      
+      if (data.max_vehicles && data.max_vehicles > limits.maxVehicles) {
+        errors.push(`عدد المركبات لا يمكن أن يتجاوز ${limits.maxVehicles} للخطة المحددة`);
+      }
+      
+      if (data.max_contracts && data.max_contracts > limits.maxContracts) {
+        errors.push(`عدد العقود لا يمكن أن يتجاوز ${limits.maxContracts} للخطة المحددة`);
+      }
+    }
+
+    return errors;
+  }
+
+  private getPlanLimits(plan: string): { maxUsers: number; maxVehicles: number; maxContracts: number } {
+    switch (plan) {
+      case 'basic':
+        return { maxUsers: 5, maxVehicles: 10, maxContracts: 50 };
+      case 'standard':
+        return { maxUsers: 25, maxVehicles: 50, maxContracts: 250 };
+      case 'premium':
+        return { maxUsers: 100, maxVehicles: 200, maxContracts: 1000 };
+      case 'enterprise':
+        return { maxUsers: 1000, maxVehicles: 1000, maxContracts: 10000 };
+      default:
+        return { maxUsers: 5, maxVehicles: 10, maxContracts: 50 };
+    }
+  }
+
+  private getMaxUsersByPlan(plan: string): number {
+    return this.getPlanLimits(plan).maxUsers;
   }
 
   private getMaxVehiclesByPlan(plan: string): number {
-    switch (plan) {
-      case 'basic': return 10;
-      case 'standard': return 50;
-      case 'premium': return 200;
-      case 'enterprise': return 1000;
-      default: return 10;
-    }
+    return this.getPlanLimits(plan).maxVehicles;
   }
 
   private getMaxContractsByPlan(plan: string): number {
-    switch (plan) {
-      case 'basic': return 50;
-      case 'standard': return 250;
-      case 'premium': return 1000;
-      case 'enterprise': return 10000;
-      default: return 50;
-    }
+    return this.getPlanLimits(plan).maxContracts;
   }
 }
