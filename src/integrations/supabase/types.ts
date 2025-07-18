@@ -597,6 +597,83 @@ export type Database = {
           },
         ]
       }
+      asset_assignments: {
+        Row: {
+          asset_id: string
+          assigned_by: string | null
+          assigned_date: string
+          assignment_purpose: string | null
+          assignment_status: string
+          assignment_type: string
+          created_at: string | null
+          employee_id: string
+          id: string
+          notes: string | null
+          return_date: string | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          asset_id: string
+          assigned_by?: string | null
+          assigned_date?: string
+          assignment_purpose?: string | null
+          assignment_status?: string
+          assignment_type?: string
+          created_at?: string | null
+          employee_id: string
+          id?: string
+          notes?: string | null
+          return_date?: string | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          asset_id?: string
+          assigned_by?: string | null
+          assigned_date?: string
+          assignment_purpose?: string | null
+          assignment_status?: string
+          assignment_type?: string
+          created_at?: string | null
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          return_date?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_assignments_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_assignments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asset_categories: {
         Row: {
           category_name: string
@@ -743,6 +820,283 @@ export type Database = {
           },
           {
             foreignKeyName: "asset_depreciation_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_maintenance: {
+        Row: {
+          asset_id: string
+          completed_date: string | null
+          cost: number | null
+          created_at: string | null
+          created_by: string | null
+          description: string
+          documents: string[] | null
+          external_provider: string | null
+          hours_spent: number | null
+          id: string
+          maintenance_type: string
+          notes: string | null
+          parts_replaced: string[] | null
+          performed_by: string | null
+          photos: string[] | null
+          priority: string | null
+          scheduled_date: string
+          status: string
+          tenant_id: string
+          updated_at: string | null
+          warranty_work: boolean | null
+        }
+        Insert: {
+          asset_id: string
+          completed_date?: string | null
+          cost?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description: string
+          documents?: string[] | null
+          external_provider?: string | null
+          hours_spent?: number | null
+          id?: string
+          maintenance_type: string
+          notes?: string | null
+          parts_replaced?: string[] | null
+          performed_by?: string | null
+          photos?: string[] | null
+          priority?: string | null
+          scheduled_date: string
+          status?: string
+          tenant_id: string
+          updated_at?: string | null
+          warranty_work?: boolean | null
+        }
+        Update: {
+          asset_id?: string
+          completed_date?: string | null
+          cost?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string
+          documents?: string[] | null
+          external_provider?: string | null
+          hours_spent?: number | null
+          id?: string
+          maintenance_type?: string
+          notes?: string | null
+          parts_replaced?: string[] | null
+          performed_by?: string | null
+          photos?: string[] | null
+          priority?: string | null
+          scheduled_date?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string | null
+          warranty_work?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_maintenance_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_transfers: {
+        Row: {
+          approved_by: string | null
+          asset_id: string
+          condition_after: string | null
+          condition_before: string | null
+          created_at: string | null
+          created_by: string | null
+          documents: string[] | null
+          from_employee_id: string | null
+          from_location: string | null
+          id: string
+          notes: string | null
+          photos: string[] | null
+          tenant_id: string
+          to_employee_id: string | null
+          to_location: string | null
+          transfer_date: string
+          transfer_reason: string
+          transfer_status: string
+        }
+        Insert: {
+          approved_by?: string | null
+          asset_id: string
+          condition_after?: string | null
+          condition_before?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          documents?: string[] | null
+          from_employee_id?: string | null
+          from_location?: string | null
+          id?: string
+          notes?: string | null
+          photos?: string[] | null
+          tenant_id: string
+          to_employee_id?: string | null
+          to_location?: string | null
+          transfer_date: string
+          transfer_reason: string
+          transfer_status?: string
+        }
+        Update: {
+          approved_by?: string | null
+          asset_id?: string
+          condition_after?: string | null
+          condition_before?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          documents?: string[] | null
+          from_employee_id?: string | null
+          from_location?: string | null
+          id?: string
+          notes?: string | null
+          photos?: string[] | null
+          tenant_id?: string
+          to_employee_id?: string | null
+          to_location?: string | null
+          transfer_date?: string
+          transfer_reason?: string
+          transfer_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_transfers_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_transfers_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_transfers_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_transfers_from_employee_id_fkey"
+            columns: ["from_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_transfers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_transfers_to_employee_id_fkey"
+            columns: ["to_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_valuations: {
+        Row: {
+          appraiser_license: string | null
+          appraiser_name: string | null
+          asset_id: string
+          created_at: string | null
+          created_by: string | null
+          current_market_value: number | null
+          id: string
+          notes: string | null
+          replacement_cost: number | null
+          tenant_id: string
+          valuation_date: string
+          valuation_method: string
+          valuation_report_url: string | null
+        }
+        Insert: {
+          appraiser_license?: string | null
+          appraiser_name?: string | null
+          asset_id: string
+          created_at?: string | null
+          created_by?: string | null
+          current_market_value?: number | null
+          id?: string
+          notes?: string | null
+          replacement_cost?: number | null
+          tenant_id: string
+          valuation_date: string
+          valuation_method: string
+          valuation_report_url?: string | null
+        }
+        Update: {
+          appraiser_license?: string | null
+          appraiser_name?: string | null
+          asset_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          current_market_value?: number | null
+          id?: string
+          notes?: string | null
+          replacement_cost?: number | null
+          tenant_id?: string
+          valuation_date?: string
+          valuation_method?: string
+          valuation_report_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_valuations_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_valuations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_valuations_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -1564,6 +1918,185 @@ export type Database = {
           },
         ]
       }
+      checkbooks: {
+        Row: {
+          bank_account_id: string
+          checkbook_number: string
+          created_at: string | null
+          created_by: string | null
+          end_check_number: number
+          id: string
+          issue_date: string
+          notes: string | null
+          remaining_checks: number | null
+          start_check_number: number
+          status: string
+          tenant_id: string
+          total_checks: number
+          updated_at: string | null
+          used_checks: number | null
+        }
+        Insert: {
+          bank_account_id: string
+          checkbook_number: string
+          created_at?: string | null
+          created_by?: string | null
+          end_check_number: number
+          id?: string
+          issue_date: string
+          notes?: string | null
+          remaining_checks?: number | null
+          start_check_number: number
+          status?: string
+          tenant_id: string
+          total_checks: number
+          updated_at?: string | null
+          used_checks?: number | null
+        }
+        Update: {
+          bank_account_id?: string
+          checkbook_number?: string
+          created_at?: string | null
+          created_by?: string | null
+          end_check_number?: number
+          id?: string
+          issue_date?: string
+          notes?: string | null
+          remaining_checks?: number | null
+          start_check_number?: number
+          status?: string
+          tenant_id?: string
+          total_checks?: number
+          updated_at?: string | null
+          used_checks?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_checkbooks_bank_account"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_checkbooks_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checks: {
+        Row: {
+          amount: number
+          bank_account_id: string
+          bounced_date: string | null
+          bounced_reason: string | null
+          check_category: string | null
+          check_date: string
+          check_number: string
+          check_type: string
+          checkbook_id: string | null
+          cleared_date: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          due_date: string | null
+          id: string
+          journal_entry_id: string | null
+          memo: string | null
+          payee_account: string | null
+          payee_name: string
+          reference_id: string | null
+          reference_type: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          bank_account_id: string
+          bounced_date?: string | null
+          bounced_reason?: string | null
+          check_category?: string | null
+          check_date: string
+          check_number: string
+          check_type?: string
+          checkbook_id?: string | null
+          cleared_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          due_date?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          memo?: string | null
+          payee_account?: string | null
+          payee_name: string
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string
+          bounced_date?: string | null
+          bounced_reason?: string | null
+          check_category?: string | null
+          check_date?: string
+          check_number?: string
+          check_type?: string
+          checkbook_id?: string | null
+          cleared_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          due_date?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          memo?: string | null
+          payee_account?: string | null
+          payee_name?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_checks_bank_account"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_checks_checkbook"
+            columns: ["checkbook_id"]
+            isOneToOne: false
+            referencedRelation: "checkbooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_checks_journal_entry"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_checks_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_branding: {
         Row: {
           address_ar: string | null
@@ -2108,6 +2641,80 @@ export type Database = {
             columns: ["cost_center_id"]
             isOneToOne: false
             referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cost_center_budget_alerts: {
+        Row: {
+          alert_message: string
+          alert_type: string
+          budget_amount: number
+          cost_center_id: string
+          created_at: string | null
+          current_spent: number
+          id: string
+          is_read: boolean | null
+          read_at: string | null
+          read_by: string | null
+          tenant_id: string
+          threshold_percentage: number
+        }
+        Insert: {
+          alert_message: string
+          alert_type: string
+          budget_amount: number
+          cost_center_id: string
+          created_at?: string | null
+          current_spent: number
+          id?: string
+          is_read?: boolean | null
+          read_at?: string | null
+          read_by?: string | null
+          tenant_id: string
+          threshold_percentage: number
+        }
+        Update: {
+          alert_message?: string
+          alert_type?: string
+          budget_amount?: number
+          cost_center_id?: string
+          created_at?: string | null
+          current_spent?: number
+          id?: string
+          is_read?: boolean | null
+          read_at?: string | null
+          read_by?: string | null
+          tenant_id?: string
+          threshold_percentage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_center_budget_alerts_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_center_budget_alerts_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_center_budget_alerts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_cost_center_budget_alerts_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -3831,6 +4438,374 @@ export type Database = {
           },
         ]
       }
+      expense_approvals: {
+        Row: {
+          approval_level: number
+          approved_at: string | null
+          approver_id: string
+          comments: string | null
+          created_at: string | null
+          expense_voucher_id: string
+          id: string
+          required_amount_limit: number | null
+          status: string | null
+        }
+        Insert: {
+          approval_level?: number
+          approved_at?: string | null
+          approver_id: string
+          comments?: string | null
+          created_at?: string | null
+          expense_voucher_id: string
+          id?: string
+          required_amount_limit?: number | null
+          status?: string | null
+        }
+        Update: {
+          approval_level?: number
+          approved_at?: string | null
+          approver_id?: string
+          comments?: string | null
+          created_at?: string | null
+          expense_voucher_id?: string
+          id?: string
+          required_amount_limit?: number | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_expense_approvals_approver"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_approvals_voucher"
+            columns: ["expense_voucher_id"]
+            isOneToOne: false
+            referencedRelation: "expense_vouchers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_categories: {
+        Row: {
+          account_id: string | null
+          approval_limit: number | null
+          category_code: string
+          category_name_ar: string
+          category_name_en: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          parent_category_id: string | null
+          requires_approval: boolean | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          approval_limit?: number | null
+          category_code: string
+          category_name_ar: string
+          category_name_en?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          parent_category_id?: string | null
+          requires_approval?: boolean | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          approval_limit?: number | null
+          category_code?: string
+          category_name_ar?: string
+          category_name_en?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          parent_category_id?: string | null
+          requires_approval?: boolean | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_expense_categories_account"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_categories_parent"
+            columns: ["parent_category_id"]
+            isOneToOne: false
+            referencedRelation: "expense_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_categories_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          default_beneficiary_type: string | null
+          default_cost_center_id: string | null
+          default_payment_method: string | null
+          id: string
+          is_active: boolean | null
+          template_description: string | null
+          template_items: Json
+          template_name: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          default_beneficiary_type?: string | null
+          default_cost_center_id?: string | null
+          default_payment_method?: string | null
+          id?: string
+          is_active?: boolean | null
+          template_description?: string | null
+          template_items?: Json
+          template_name: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          default_beneficiary_type?: string | null
+          default_cost_center_id?: string | null
+          default_payment_method?: string | null
+          id?: string
+          is_active?: boolean | null
+          template_description?: string | null
+          template_items?: Json
+          template_name?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_expense_templates_cost_center"
+            columns: ["default_cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_templates_cost_center"
+            columns: ["default_cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_templates_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_voucher_items: {
+        Row: {
+          account_id: string
+          created_at: string
+          description: string
+          expense_voucher_id: string
+          id: string
+          quantity: number | null
+          tax_amount: number | null
+          tax_rate: number | null
+          total_amount: number
+          unit_price: number
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          description: string
+          expense_voucher_id: string
+          id?: string
+          quantity?: number | null
+          tax_amount?: number | null
+          tax_rate?: number | null
+          total_amount: number
+          unit_price: number
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          description?: string
+          expense_voucher_id?: string
+          id?: string
+          quantity?: number | null
+          tax_amount?: number | null
+          tax_rate?: number | null
+          total_amount?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_expense_voucher_items_account"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_voucher_items_voucher"
+            columns: ["expense_voucher_id"]
+            isOneToOne: false
+            referencedRelation: "expense_vouchers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_vouchers: {
+        Row: {
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
+          attachments: string[] | null
+          bank_account_id: string | null
+          check_date: string | null
+          check_number: string | null
+          cost_center_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discount_amount: number | null
+          expense_category: string
+          expense_subcategory: string | null
+          id: string
+          journal_entry_id: string | null
+          net_amount: number
+          notes: string | null
+          payment_method: string
+          supplier_id: string | null
+          tax_amount: number | null
+          tenant_id: string
+          total_amount: number
+          updated_at: string
+          voucher_date: string
+          voucher_number: string
+        }
+        Insert: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          attachments?: string[] | null
+          bank_account_id?: string | null
+          check_date?: string | null
+          check_number?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_amount?: number | null
+          expense_category: string
+          expense_subcategory?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          net_amount: number
+          notes?: string | null
+          payment_method?: string
+          supplier_id?: string | null
+          tax_amount?: number | null
+          tenant_id: string
+          total_amount: number
+          updated_at?: string
+          voucher_date?: string
+          voucher_number: string
+        }
+        Update: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          attachments?: string[] | null
+          bank_account_id?: string | null
+          check_date?: string | null
+          check_number?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_amount?: number | null
+          expense_category?: string
+          expense_subcategory?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          net_amount?: number
+          notes?: string | null
+          payment_method?: string
+          supplier_id?: string | null
+          tax_amount?: number | null
+          tenant_id?: string
+          total_amount?: number
+          updated_at?: string
+          voucher_date?: string
+          voucher_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_expense_vouchers_bank_account"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_vouchers_cost_center"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_vouchers_cost_center"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_vouchers_journal_entry"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_expense_vouchers_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       external_integrations: {
         Row: {
           api_key_name: string | null
@@ -4137,27 +5112,44 @@ export type Database = {
           asset_category: string
           asset_code: string
           asset_name: string
+          assigned_employee_id: string | null
+          barcode: string | null
           book_value: number
+          condition_status: string | null
           created_at: string
           created_by: string | null
+          custom_fields: Json | null
           depreciation_expense_account_id: string | null
           depreciation_method: string
           description: string | null
           disposal_amount: number | null
           disposal_date: string | null
+          disposal_method: string | null
+          disposal_proceeds: number | null
           disposal_reason: string | null
+          documents: string[] | null
           id: string
+          insurance_expiry_date: string | null
+          insurance_policy_number: string | null
           invoice_number: string | null
+          last_maintenance_date: string | null
           location: string | null
+          location_description: string | null
+          maintenance_schedule: string | null
+          next_maintenance_due: string | null
+          photos: string[] | null
           purchase_cost: number
           purchase_date: string
+          qr_code: string | null
           residual_value: number | null
           serial_number: string | null
           status: string
           supplier_name: string | null
+          tags: string[] | null
           tenant_id: string
           updated_at: string
           useful_life_years: number
+          warranty_end_date: string | null
           warranty_expiry: string | null
         }
         Insert: {
@@ -4167,27 +5159,44 @@ export type Database = {
           asset_category: string
           asset_code: string
           asset_name: string
+          assigned_employee_id?: string | null
+          barcode?: string | null
           book_value: number
+          condition_status?: string | null
           created_at?: string
           created_by?: string | null
+          custom_fields?: Json | null
           depreciation_expense_account_id?: string | null
           depreciation_method?: string
           description?: string | null
           disposal_amount?: number | null
           disposal_date?: string | null
+          disposal_method?: string | null
+          disposal_proceeds?: number | null
           disposal_reason?: string | null
+          documents?: string[] | null
           id?: string
+          insurance_expiry_date?: string | null
+          insurance_policy_number?: string | null
           invoice_number?: string | null
+          last_maintenance_date?: string | null
           location?: string | null
+          location_description?: string | null
+          maintenance_schedule?: string | null
+          next_maintenance_due?: string | null
+          photos?: string[] | null
           purchase_cost: number
           purchase_date: string
+          qr_code?: string | null
           residual_value?: number | null
           serial_number?: string | null
           status?: string
           supplier_name?: string | null
+          tags?: string[] | null
           tenant_id: string
           updated_at?: string
           useful_life_years: number
+          warranty_end_date?: string | null
           warranty_expiry?: string | null
         }
         Update: {
@@ -4197,27 +5206,44 @@ export type Database = {
           asset_category?: string
           asset_code?: string
           asset_name?: string
+          assigned_employee_id?: string | null
+          barcode?: string | null
           book_value?: number
+          condition_status?: string | null
           created_at?: string
           created_by?: string | null
+          custom_fields?: Json | null
           depreciation_expense_account_id?: string | null
           depreciation_method?: string
           description?: string | null
           disposal_amount?: number | null
           disposal_date?: string | null
+          disposal_method?: string | null
+          disposal_proceeds?: number | null
           disposal_reason?: string | null
+          documents?: string[] | null
           id?: string
+          insurance_expiry_date?: string | null
+          insurance_policy_number?: string | null
           invoice_number?: string | null
+          last_maintenance_date?: string | null
           location?: string | null
+          location_description?: string | null
+          maintenance_schedule?: string | null
+          next_maintenance_due?: string | null
+          photos?: string[] | null
           purchase_cost?: number
           purchase_date?: string
+          qr_code?: string | null
           residual_value?: number | null
           serial_number?: string | null
           status?: string
           supplier_name?: string | null
+          tags?: string[] | null
           tenant_id?: string
           updated_at?: string
           useful_life_years?: number
+          warranty_end_date?: string | null
           warranty_expiry?: string | null
         }
         Relationships: [
@@ -4233,6 +5259,13 @@ export type Database = {
             columns: ["accumulated_depreciation_account_id"]
             isOneToOne: false
             referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixed_assets_assigned_employee_id_fkey"
+            columns: ["assigned_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
           {
@@ -4629,6 +5662,151 @@ export type Database = {
           },
         ]
       }
+      inventory_accounting: {
+        Row: {
+          account_id: string | null
+          category: string
+          cost_center_id: string | null
+          created_at: string | null
+          id: string
+          item_code: string
+          item_name: string
+          last_updated: string | null
+          quantity_on_hand: number | null
+          reorder_level: number | null
+          supplier_id: string | null
+          tenant_id: string
+          total_value: number | null
+          unit_cost: number
+          valuation_method: string | null
+          warehouse_location: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          category: string
+          cost_center_id?: string | null
+          created_at?: string | null
+          id?: string
+          item_code: string
+          item_name: string
+          last_updated?: string | null
+          quantity_on_hand?: number | null
+          reorder_level?: number | null
+          supplier_id?: string | null
+          tenant_id: string
+          total_value?: number | null
+          unit_cost: number
+          valuation_method?: string | null
+          warehouse_location?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          category?: string
+          cost_center_id?: string | null
+          created_at?: string | null
+          id?: string
+          item_code?: string
+          item_name?: string
+          last_updated?: string | null
+          quantity_on_hand?: number | null
+          reorder_level?: number | null
+          supplier_id?: string | null
+          tenant_id?: string
+          total_value?: number | null
+          unit_cost?: number
+          valuation_method?: string | null
+          warehouse_location?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_inventory_account"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_inventory_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_movements: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          inventory_item_id: string
+          journal_entry_id: string | null
+          movement_date: string
+          movement_type: string
+          quantity: number
+          reference_id: string | null
+          reference_type: string | null
+          tenant_id: string
+          total_amount: number | null
+          unit_cost: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          inventory_item_id: string
+          journal_entry_id?: string | null
+          movement_date: string
+          movement_type: string
+          quantity: number
+          reference_id?: string | null
+          reference_type?: string | null
+          tenant_id: string
+          total_amount?: number | null
+          unit_cost?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          inventory_item_id?: string
+          journal_entry_id?: string | null
+          movement_date?: string
+          movement_type?: string
+          quantity?: number
+          reference_id?: string | null
+          reference_type?: string | null
+          tenant_id?: string
+          total_amount?: number | null
+          unit_cost?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_movement_inventory"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_accounting"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_movement_journal_entry"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_movement_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_items: {
         Row: {
           created_at: string
@@ -4788,6 +5966,116 @@ export type Database = {
           },
           {
             foreignKeyName: "invoices_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_automation_executions: {
+        Row: {
+          error_message: string | null
+          executed_at: string
+          execution_time_ms: number
+          id: string
+          journal_entry_id: string | null
+          reference_id: string
+          reference_type: string
+          rule_id: string
+          status: string
+          triggered_by: string
+        }
+        Insert: {
+          error_message?: string | null
+          executed_at?: string
+          execution_time_ms?: number
+          id?: string
+          journal_entry_id?: string | null
+          reference_id: string
+          reference_type: string
+          rule_id: string
+          status: string
+          triggered_by: string
+        }
+        Update: {
+          error_message?: string | null
+          executed_at?: string
+          execution_time_ms?: number
+          id?: string
+          journal_entry_id?: string | null
+          reference_id?: string
+          reference_type?: string
+          rule_id?: string
+          status?: string
+          triggered_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_journal_automation_executions_journal_entry"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_journal_automation_executions_rule"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "journal_automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_automation_rules: {
+        Row: {
+          account_mappings: Json
+          conditions: Json
+          created_at: string
+          created_by: string | null
+          execution_count: number
+          id: string
+          is_active: boolean
+          last_executed: string | null
+          rule_name: string
+          success_rate: number
+          tenant_id: string
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          account_mappings: Json
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          execution_count?: number
+          id?: string
+          is_active?: boolean
+          last_executed?: string | null
+          rule_name: string
+          success_rate?: number
+          tenant_id: string
+          trigger_event: string
+          updated_at?: string
+        }
+        Update: {
+          account_mappings?: Json
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          execution_count?: number
+          id?: string
+          is_active?: boolean
+          last_executed?: string | null
+          rule_name?: string
+          success_rate?: number
+          tenant_id?: string
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_journal_automation_rules_tenant"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -4992,6 +6280,139 @@ export type Database = {
             columns: ["journal_entry_id"]
             isOneToOne: false
             referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entry_attachments: {
+        Row: {
+          description: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          journal_entry_id: string
+          mime_type: string | null
+          tenant_id: string
+          uploaded_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          description?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          journal_entry_id: string
+          mime_type?: string | null
+          tenant_id: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          journal_entry_id?: string
+          mime_type?: string | null
+          tenant_id?: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_journal_entry_attachments_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_attachments_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_attachments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entry_cost_center_allocations: {
+        Row: {
+          allocation_amount: number | null
+          allocation_percentage: number | null
+          cost_center_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          journal_entry_line_id: string
+          notes: string | null
+          tenant_id: string
+        }
+        Insert: {
+          allocation_amount?: number | null
+          allocation_percentage?: number | null
+          cost_center_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          journal_entry_line_id: string
+          notes?: string | null
+          tenant_id: string
+        }
+        Update: {
+          allocation_amount?: number | null
+          allocation_percentage?: number | null
+          cost_center_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          journal_entry_line_id?: string
+          notes?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_je_cost_center_allocations_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_cost_center_allocation_journal_entry_line_id_fkey"
+            columns: ["journal_entry_line_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entry_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_cost_center_allocations_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_cost_center_allocations_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_cost_center_allocations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -6115,6 +7536,106 @@ export type Database = {
           },
         ]
       }
+      received_checks: {
+        Row: {
+          amount: number
+          bank_name: string
+          bounce_reason: string | null
+          bounced_at: string | null
+          check_date: string
+          check_number: string
+          cleared_at: string | null
+          created_at: string | null
+          created_by: string | null
+          deposit_bank_account_id: string | null
+          deposited_at: string | null
+          drawer_account: string | null
+          drawer_name: string
+          due_date: string | null
+          id: string
+          journal_entry_id: string | null
+          memo: string | null
+          received_date: string
+          reference_id: string | null
+          reference_type: string | null
+          status: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          bank_name: string
+          bounce_reason?: string | null
+          bounced_at?: string | null
+          check_date: string
+          check_number: string
+          cleared_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deposit_bank_account_id?: string | null
+          deposited_at?: string | null
+          drawer_account?: string | null
+          drawer_name: string
+          due_date?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          memo?: string | null
+          received_date?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          bank_name?: string
+          bounce_reason?: string | null
+          bounced_at?: string | null
+          check_date?: string
+          check_number?: string
+          cleared_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deposit_bank_account_id?: string | null
+          deposited_at?: string | null
+          drawer_account?: string | null
+          drawer_name?: string
+          due_date?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          memo?: string | null
+          received_date?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_received_checks_bank_account"
+            columns: ["deposit_bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_received_checks_journal_entry"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_received_checks_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           conditions: Json | null
@@ -6850,6 +8371,145 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      supplier_accounting: {
+        Row: {
+          account_id: string | null
+          address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          credit_limit: number | null
+          current_balance: number | null
+          id: string
+          is_active: boolean | null
+          payment_terms: string | null
+          preferred_payment_method: string | null
+          supplier_code: string
+          supplier_name: string
+          tax_number: string | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          credit_limit?: number | null
+          current_balance?: number | null
+          id?: string
+          is_active?: boolean | null
+          payment_terms?: string | null
+          preferred_payment_method?: string | null
+          supplier_code: string
+          supplier_name: string
+          tax_number?: string | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          credit_limit?: number | null
+          current_balance?: number | null
+          id?: string
+          is_active?: boolean | null
+          payment_terms?: string | null
+          preferred_payment_method?: string | null
+          supplier_code?: string
+          supplier_name?: string
+          tax_number?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_supplier_account"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_supplier_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_ledger: {
+        Row: {
+          created_at: string | null
+          credit_amount: number | null
+          debit_amount: number | null
+          description: string
+          id: string
+          journal_entry_id: string | null
+          reference_id: string | null
+          reference_type: string | null
+          running_balance: number | null
+          supplier_id: string
+          tenant_id: string
+          transaction_date: string
+        }
+        Insert: {
+          created_at?: string | null
+          credit_amount?: number | null
+          debit_amount?: number | null
+          description: string
+          id?: string
+          journal_entry_id?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          running_balance?: number | null
+          supplier_id: string
+          tenant_id: string
+          transaction_date: string
+        }
+        Update: {
+          created_at?: string | null
+          credit_amount?: number | null
+          debit_amount?: number | null
+          description?: string
+          id?: string
+          journal_entry_id?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          running_balance?: number | null
+          supplier_id?: string
+          tenant_id?: string
+          transaction_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_supplier_ledger_journal_entry"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_supplier_ledger_supplier"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_accounting"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_supplier_ledger_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       system_settings: {
         Row: {
@@ -7992,6 +9652,149 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_costs: {
+        Row: {
+          amount: number
+          cost_center_id: string | null
+          cost_date: string
+          cost_type: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          invoice_number: string | null
+          journal_entry_id: string | null
+          reference_id: string | null
+          reference_type: string | null
+          status: string | null
+          supplier_id: string | null
+          tenant_id: string
+          updated_at: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          amount: number
+          cost_center_id?: string | null
+          cost_date: string
+          cost_type: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          invoice_number?: string | null
+          journal_entry_id?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string | null
+          supplier_id?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          amount?: number
+          cost_center_id?: string | null
+          cost_date?: string
+          cost_type?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          invoice_number?: string | null
+          journal_entry_id?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string | null
+          supplier_id?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_vehicle_costs_journal_entry"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_vehicle_costs_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_vehicle_costs_vehicle"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_depreciation_schedule: {
+        Row: {
+          accumulated_depreciation: number
+          book_value: number
+          created_at: string | null
+          depreciation_date: string
+          id: string
+          is_processed: boolean | null
+          journal_entry_id: string | null
+          monthly_depreciation: number
+          tenant_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          accumulated_depreciation: number
+          book_value: number
+          created_at?: string | null
+          depreciation_date: string
+          id?: string
+          is_processed?: boolean | null
+          journal_entry_id?: string | null
+          monthly_depreciation: number
+          tenant_id: string
+          vehicle_id: string
+        }
+        Update: {
+          accumulated_depreciation?: number
+          book_value?: number
+          created_at?: string | null
+          depreciation_date?: string
+          id?: string
+          is_processed?: boolean | null
+          journal_entry_id?: string | null
+          monthly_depreciation?: number
+          tenant_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_depreciation_journal_entry"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_depreciation_tenant"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_depreciation_vehicle"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_insurance: {
         Row: {
           coverage_amount: number | null
@@ -8622,6 +10425,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      apply_complete_chart_to_all_tenants: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       apply_comprehensive_default_chart: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -8633,6 +10440,15 @@ export type Database = {
       auto_distribute_costs: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      calculate_advanced_depreciation: {
+        Args: { asset_id_param: string; calculation_date?: string }
+        Returns: {
+          depreciation_amount: number
+          accumulated_depreciation: number
+          book_value: number
+          method_used: string
+        }[]
       }
       calculate_advanced_kpi: {
         Args: { kpi_code_param: string }
@@ -8720,6 +10536,10 @@ export type Database = {
         Args: { target_year: number; target_month: number }
         Returns: string
       }
+      calculate_monthly_vehicle_depreciation: {
+        Args: { target_month?: string }
+        Returns: number
+      }
       check_budget_overruns: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -8757,6 +10577,10 @@ export type Database = {
         Returns: number
       }
       complete_liabilities_equity_revenue_expenses: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
+      complete_missing_chart_accounts: {
         Args: { tenant_id_param: string }
         Returns: number
       }
@@ -8842,6 +10666,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      create_depreciation_journal_entries: {
+        Args: { target_month?: string }
+        Returns: number
+      }
       create_final_chart_of_accounts: {
         Args: { tenant_id_param: string }
         Returns: number
@@ -8856,6 +10684,18 @@ export type Database = {
       }
       create_invoice_receivable_entry: {
         Args: { invoice_id: string; invoice_data: Json }
+        Returns: string
+      }
+      create_journal_entry_for_received_check: {
+        Args: { received_check_id: string }
+        Returns: string
+      }
+      create_journal_entry_from_check: {
+        Args: { check_id: string }
+        Returns: string
+      }
+      create_journal_entry_from_expense_voucher: {
+        Args: { voucher_id: string }
         Returns: string
       }
       create_maintenance_accounting_entry: {
@@ -8893,6 +10733,10 @@ export type Database = {
       }
       create_vehicle_asset_with_hierarchy: {
         Args: { vehicle_id: string; vehicle_data: Json }
+        Returns: string
+      }
+      create_vehicle_cost_journal_entry: {
+        Args: { vehicle_cost_id: string }
         Returns: string
       }
       create_violation_accounting_entry: {
@@ -8951,6 +10795,25 @@ export type Database = {
       generate_asset_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      generate_asset_report: {
+        Args: { report_date?: string; report_tenant_id?: string }
+        Returns: {
+          asset_id: string
+          asset_name: string
+          asset_code: string
+          category: string
+          purchase_cost: number
+          accumulated_depreciation: number
+          book_value: number
+          assigned_employee: string
+          location_description: string
+          condition_status: string
+          last_maintenance: string
+          next_maintenance: string
+          age_years: number
+          depreciation_rate_percent: number
+        }[]
       }
       generate_basic_financial_report: {
         Args: {
@@ -9217,6 +11080,10 @@ export type Database = {
       run_journal_entry_validations: {
         Args: { entry_id: string }
         Returns: undefined
+      }
+      run_monthly_depreciation: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       safe_delete_contract: {
         Args: { contract_id_param: string; delete_related?: boolean }
