@@ -92,21 +92,21 @@ export const SubscriptionPlanSection: React.FC<SubscriptionPlanSectionProps> = (
                     <div className="flex items-center justify-center mb-1">
                       <Users className="w-4 h-4 text-primary" />
                     </div>
-                    <div className="text-xl font-bold text-primary">{currentPlan.max_users}</div>
+                    <div className="text-xl font-bold text-primary">{currentPlan.limits.max_users_per_tenant}</div>
                     <div className="text-xs text-muted-foreground">مستخدم</div>
                   </div>
                   <div className="text-center p-2 rounded-lg bg-background/50">
                     <div className="flex items-center justify-center mb-1">
                       <Car className="w-4 h-4 text-primary" />
                     </div>
-                    <div className="text-xl font-bold text-primary">{currentPlan.max_vehicles}</div>
+                    <div className="text-xl font-bold text-primary">{currentPlan.limits.max_vehicles}</div>
                     <div className="text-xs text-muted-foreground">مركبة</div>
                   </div>
                   <div className="text-center p-2 rounded-lg bg-background/50">
                     <div className="flex items-center justify-center mb-1">
                       <FileText className="w-4 h-4 text-primary" />
                     </div>
-                    <div className="text-xl font-bold text-primary">{currentPlan.max_contracts}</div>
+                    <div className="text-xl font-bold text-primary">{currentPlan.limits.max_contracts}</div>
                     <div className="text-xs text-muted-foreground">عقد</div>
                   </div>
                 </div>

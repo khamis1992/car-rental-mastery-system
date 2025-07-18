@@ -170,7 +170,7 @@ const TenantManagement: React.FC = () => {
   const stats = {
     total: tenants.length,
     active: tenants.filter(t => t.status === 'active').length,
-    pending: tenants.filter(t => t.status === 'pending').length,
+    trial: tenants.filter(t => t.status === 'trial').length,
     suspended: tenants.filter(t => t.status === 'suspended').length
   };
 
@@ -237,8 +237,8 @@ const TenantManagement: React.FC = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground text-right">{t('pending')}</p>
-                  <p className="text-2xl font-bold text-yellow-600 text-right">{formatNumber(stats.pending)}</p>
+                  <p className="text-sm font-medium text-muted-foreground text-right">تجريبية</p>
+                  <p className="text-2xl font-bold text-yellow-600 text-right">{formatNumber(stats.trial)}</p>
                 </div>
                 <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
                   <div className="w-4 h-4 bg-yellow-600 rounded-full"></div>

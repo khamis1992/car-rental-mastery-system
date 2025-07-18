@@ -86,6 +86,20 @@ export class TenantService {
     }
   }
 
+  async isSlugAvailable(slug: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('tenants')
+      .select('id')
+      .eq('slug', slug)
+      .single();
+
+    if (error && error.code === 'PGRST116') {
+      return true; // No data found, slug is available
+    }
+
+    return false; // Found a tenant with this slug
+  }
+
   private getMaxUsersByPlan(plan: string): number {
     switch (plan) {
       case 'basic': return 5;
