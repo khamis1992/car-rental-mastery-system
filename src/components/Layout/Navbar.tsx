@@ -10,8 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Calendar, User, Search, LogOut, Settings, Shield, Building } from "lucide-react";
-import { useState } from "react";
+import { Calendar, User, Search, LogOut, Settings, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { NotificationCenter } from "@/components/Navbar/NotificationCenter";
@@ -19,26 +18,11 @@ import DailyTasksButton from "@/components/Navbar/DailyTasksButton";
 import { AttendanceClock } from "@/components/Navbar/AttendanceClock";
 import { useSearch } from "@/contexts/SearchContext";
 import TenantSwitcher from "./TenantSwitcher";
-import { EnhancedSubscriptionModal } from "../Landing/EnhancedSubscriptionModal";
 
 const Navbar = () => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const { setIsOpen } = useSearch();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<any>(null);
-
-  const handleCreateOrganization = () => {
-    // خطة افتراضية للتجربة
-    const defaultPlan = {
-      name: "الخطة الأساسية",
-      price: "مجاني",
-      period: "تجريبي 30 يوم",
-      code: "basic"
-    };
-    setSelectedPlan(defaultPlan);
-    setIsModalOpen(true);
-  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -167,17 +151,6 @@ const Navbar = () => {
             </Button>
           </div>
           
-          {/* زر إنشاء مؤسسة جديدة */}
-          <Button
-            variant="default"
-            size="sm"
-            className="hidden lg:flex items-center gap-2"
-            onClick={handleCreateOrganization}
-          >
-            <Building className="w-4 h-4" />
-            إنشاء مؤسسة
-          </Button>
-          
           {/* محدد المؤسسة */}
           <TenantSwitcher />
           
@@ -195,12 +168,6 @@ const Navbar = () => {
         </div>
 
       </div>
-      
-      <EnhancedSubscriptionModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        selectedPlan={selectedPlan}
-      />
     </header>
   );
 };
