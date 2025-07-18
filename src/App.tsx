@@ -64,6 +64,9 @@ import TechnicalSupport from "./pages/super-admin/TechnicalSupport";
 import GlobalSettingsPage from "./pages/super-admin/GlobalSettings";
 import SystemDiagnostics from "./pages/super-admin/SystemDiagnostics";
 import TenantIsolationDashboard from "./pages/TenantIsolationDashboard";
+import BashaerEmergencyFix from "./pages/BashaerEmergencyFix";
+import TenantDiagnosticDashboard from "./pages/TenantDiagnosticDashboard";
+import EnhancedTenantManagement from "./pages/EnhancedTenantManagement";
 import DraftStage from "./pages/ContractStages/DraftStage";
 import PendingStage from "./pages/ContractStages/PendingStage";
 import ActiveStage from "./pages/ContractStages/ActiveStage";
@@ -368,6 +371,27 @@ const App = () => (
                           <ProtectedRoute requiredRole="super_admin">
                             <Layout>
                               <LandingEditor />
+                            </Layout>
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/bashaer-emergency-fix" element={
+                          <ProtectedRoute requiredRole="super_admin">
+                            <Layout>
+                              <BashaerEmergencyFix />
+                            </Layout>
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/tenant-diagnostic-dashboard" element={
+                          <ProtectedRoute requiredRole="super_admin">
+                            <Layout>
+                              <TenantDiagnosticDashboard />
+                            </Layout>
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/enhanced-tenant-management" element={
+                          <ProtectedRoute requiredRole="super_admin">
+                            <Layout>
+                              <EnhancedTenantManagement />
                             </Layout>
                           </ProtectedRoute>
                         } />
