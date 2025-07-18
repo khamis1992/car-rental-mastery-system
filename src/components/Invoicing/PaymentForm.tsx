@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -92,7 +92,10 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>تسجيل دفعة جديدة</DialogTitle>
+          <DialogTitle className="rtl-title">تسجيل دفعة جديدة</DialogTitle>
+          <DialogDescription>
+            قم بتسجيل دفعة جديدة للفاتورة. تأكد من صحة المبلغ وطريقة الدفع قبل الحفظ.
+          </DialogDescription>
         </DialogHeader>
 
         {invoice && (
@@ -133,7 +136,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="amount">المبلغ</Label>
+                <Label htmlFor="amount" className="rtl-label">المبلغ</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -149,7 +152,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
               </div>
 
               <div>
-                <Label htmlFor="payment_date">تاريخ الدفع</Label>
+                <Label htmlFor="payment_date" className="rtl-label">تاريخ الدفع</Label>
                 <Input
                   id="payment_date"
                   type="date"
@@ -160,7 +163,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
               </div>
 
               <div className="md:col-span-2">
-                <Label htmlFor="payment_method">طريقة الدفع</Label>
+                <Label htmlFor="payment_method" className="rtl-label">طريقة الدفع</Label>
                 <Select 
                   value={formData.payment_method} 
                   onValueChange={(value: any) => setFormData(prev => ({ ...prev, payment_method: value }))}
@@ -189,7 +192,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {(formData.payment_method === 'bank_transfer' || formData.payment_method === 'card' || formData.payment_method === 'online') && (
                   <div>
-                    <Label htmlFor="transaction_reference">رقم المعاملة</Label>
+                    <Label htmlFor="transaction_reference" className="rtl-label">رقم المعاملة</Label>
                     <Input
                       id="transaction_reference"
                       value={formData.transaction_reference || ''}
@@ -201,7 +204,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 
                 {(formData.payment_method === 'bank_transfer' || formData.payment_method === 'card') && (
                   <div>
-                    <Label htmlFor="bank_name">اسم البنك</Label>
+                    <Label htmlFor="bank_name" className="rtl-label">اسم البنك</Label>
                     <Input
                       id="bank_name"
                       value={formData.bank_name || ''}
@@ -214,7 +217,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                 {formData.payment_method === 'check' && (
                   <>
                     <div>
-                      <Label htmlFor="check_number">رقم الشيك</Label>
+                      <Label htmlFor="check_number" className="rtl-label">رقم الشيك</Label>
                       <Input
                         id="check_number"
                         value={formData.check_number || ''}
@@ -224,7 +227,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                       />
                     </div>
                     <div>
-                      <Label htmlFor="bank_name">البنك المسحوب عليه</Label>
+                      <Label htmlFor="bank_name" className="rtl-label">البنك المسحوب عليه</Label>
                       <Input
                         id="bank_name"
                         value={formData.bank_name || ''}
@@ -245,7 +248,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
               <CardTitle>ملاحظات</CardTitle>
             </CardHeader>
             <CardContent>
-              <Label htmlFor="notes">ملاحظات إضافية</Label>
+              <Label htmlFor="notes" className="rtl-label">ملاحظات إضافية</Label>
               <Textarea
                 id="notes"
                 value={formData.notes || ''}

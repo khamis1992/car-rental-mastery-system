@@ -40,25 +40,32 @@ export const EnhancedDialog: React.FC<EnhancedDialogProps> = ({
   children,
   className,
 }) => {
+  const descriptionId = React.useMemo(() => `enhanced-dialog-desc-${Math.random().toString(36).substr(2, 9)}`, []);
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn(sizeClasses[size], className)} dir="rtl">
+      <DialogContent 
+        className={cn(sizeClasses[size], className)} 
+        dir="rtl"
+        aria-describedby={description ? descriptionId : undefined}
+      >
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-right">{title}</DialogTitle>
+            <DialogTitle className="rtl-title">{title}</DialogTitle>
             {showCloseButton && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => onOpenChange(false)}
                 className="h-8 w-8 p-0"
+                aria-label="إغلاق النافذة"
               >
                 <X className="h-4 w-4" />
               </Button>
             )}
           </div>
           {description && (
-            <DialogDescription className="text-right">
+            <DialogDescription id={descriptionId}>
               {description}
             </DialogDescription>
           )}

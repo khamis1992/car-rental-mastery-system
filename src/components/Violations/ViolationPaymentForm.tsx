@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -106,7 +106,10 @@ export const ViolationPaymentForm: React.FC<ViolationPaymentFormProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>تسجيل دفعة مخالفة - {violation.violation_number}</DialogTitle>
+          <DialogTitle className="rtl-title">تسجيل دفعة مخالفة - {violation.violation_number}</DialogTitle>
+          <DialogDescription>
+            قم بتسجيل دفعة جديدة للمخالفة. تأكد من صحة المبلغ وتفاصيل الدفع قبل الحفظ.
+          </DialogDescription>
         </DialogHeader>
 
         <Card>
@@ -132,7 +135,7 @@ export const ViolationPaymentForm: React.FC<ViolationPaymentFormProps> = ({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="amount">المبلغ المدفوع (د.ك) *</Label>
+              <Label htmlFor="amount" className="rtl-label">المبلغ المدفوع (د.ك) *</Label>
               <Input
                 id="amount"
                 type="number"
@@ -146,7 +149,7 @@ export const ViolationPaymentForm: React.FC<ViolationPaymentFormProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="payment_date">تاريخ الدفع *</Label>
+              <Label htmlFor="payment_date" className="rtl-label">تاريخ الدفع *</Label>
               <Input
                 id="payment_date"
                 type="date"
@@ -157,7 +160,7 @@ export const ViolationPaymentForm: React.FC<ViolationPaymentFormProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="payment_method">طريقة الدفع *</Label>
+              <Label htmlFor="payment_method" className="rtl-label">طريقة الدفع *</Label>
             <Select value={formData.payment_method} onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value as 'cash' | 'card' | 'bank_transfer' | 'check' }))}>
               <SelectTrigger>
                 <SelectValue />
@@ -173,7 +176,7 @@ export const ViolationPaymentForm: React.FC<ViolationPaymentFormProps> = ({
 
             {formData.payment_method === 'bank_transfer' && (
               <div>
-                <Label htmlFor="transaction_reference">رقم المعاملة</Label>
+                <Label htmlFor="transaction_reference" className="rtl-label">رقم المعاملة</Label>
                 <Input
                   id="transaction_reference"
                   value={formData.transaction_reference}
@@ -185,7 +188,7 @@ export const ViolationPaymentForm: React.FC<ViolationPaymentFormProps> = ({
 
             {formData.payment_method === 'bank_transfer' && (
               <div>
-                <Label htmlFor="bank_name">اسم البنك</Label>
+                <Label htmlFor="bank_name" className="rtl-label">اسم البنك</Label>
                 <Input
                   id="bank_name"
                   value={formData.bank_name}
@@ -197,7 +200,7 @@ export const ViolationPaymentForm: React.FC<ViolationPaymentFormProps> = ({
 
             {formData.payment_method === 'check' && (
               <div>
-                <Label htmlFor="check_number">رقم الشيك</Label>
+                <Label htmlFor="check_number" className="rtl-label">رقم الشيك</Label>
                 <Input
                   id="check_number"
                   value={formData.check_number}
@@ -209,7 +212,7 @@ export const ViolationPaymentForm: React.FC<ViolationPaymentFormProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="notes">ملاحظات</Label>
+            <Label htmlFor="notes" className="rtl-label">ملاحظات</Label>
             <Textarea
               id="notes"
               value={formData.notes}

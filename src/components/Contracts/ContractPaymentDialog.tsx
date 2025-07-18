@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { InvoiceAndPaymentForm } from '@/components/Invoicing/InvoiceAndPaymentForm';
 import { useToast } from '@/hooks/use-toast';
 
@@ -30,9 +31,12 @@ export const ContractPaymentDialog: React.FC<ContractPaymentDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-right">
+          <DialogTitle className="rtl-title">
             إدارة الفواتير والمدفوعات - العقد رقم {contract?.contract_number}
           </DialogTitle>
+          <DialogDescription>
+            قم بإنشاء الفواتير وتسجيل المدفوعات للعقد. يمكنك إضافة عدة فواتير ودفعات حسب الحاجة.
+          </DialogDescription>
         </DialogHeader>
         
         {contract && (
