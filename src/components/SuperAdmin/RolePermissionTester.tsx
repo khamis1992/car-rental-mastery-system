@@ -17,7 +17,7 @@ import {
   Shield,
   Crown,
   Users,
-  User,
+  User as UserIcon, // تغيير الاسم لتجنب التضارب
   Building2,
   Settings,
   Eye,
@@ -39,7 +39,7 @@ import {
   useRoleBasedAccess, 
   PERMISSIONS, 
   ROLE_PERMISSIONS,
-  User 
+  User as UserType // تغيير الاسم لتجنب التضارب
 } from '@/hooks/useRoleBasedAccess';
 
 interface TestCase {
@@ -48,68 +48,81 @@ interface TestCase {
   description: string;
   module: string;
   permission: string;
-  expectedResults: Record<string, boolean>; // role -> should have access
-  category: 'critical' | 'normal' | 'basic';
-}
-
-interface TestResult {
-  testId: string;
   role: string;
-  expected: boolean;
-  actual: boolean;
-  passed: boolean;
+  expectedResult: boolean;
+  actualResult?: boolean;
+  status?: 'passed' | 'failed' | 'pending';
   error?: string;
 }
 
-const TEST_USERS: Record<string, User> = {
-  'super-admin': {
-    id: 'test-super-admin',
-    email: 'super@test.com',
-    name: 'مدير النظام التجريبي',
+interface TestSuite {
+  id: string;
+  name: string;
+  description: string;
+  testCases: TestCase[];
+  status?: 'passed' | 'failed' | 'running' | 'pending';
+  passedCount?: number;
+  failedCount?: number;
+  totalCount?: number;
+}
+
+// بيانات تجريبية للمستخدمين
+const mockUsers: UserType[] = [
+  {
+    id: '1',
+    name: 'أحمد محمد',
+    email: 'admin@company.com',
     role: 'super-admin',
-    isActive: true
+    permissions: ROLE_PERMISSIONS['super-admin'] || [],
+    isActive: true,
+    avatar: undefined
   },
-  'tenant-admin': {
-    id: 'test-tenant-admin',
-    email: 'tenant@test.com',
-    name: 'مدير المؤسسة التجريبي',
+  {
+    id: '2',
+    name: 'سارة أحمد',
+    email: 'manager@company.com',
     role: 'tenant-admin',
-    tenantId: 'test-tenant',
-    isActive: true
+    permissions: ROLE_PERMISSIONS['tenant-admin'] || [],
+    isActive: true,
+    avatar: undefined
   },
-  'manager': {
-    id: 'test-manager',
-    email: 'manager@test.com',
-    name: 'المدير التجريبي',
-    role: 'manager',
-    tenantId: 'test-tenant',
-    isActive: true
-  },
-  'accountant': {
-    id: 'test-accountant',
-    email: 'accountant@test.com',
-    name: 'المحاسب التجريبي',
+  {
+    id: '3',
+    name: 'محمد علي',
+    email: 'accountant@company.com',
     role: 'accountant',
-    tenantId: 'test-tenant',
-    isActive: true
+    permissions: ROLE_PERMISSIONS['accountant'] || [],
+    isActive: true,
+    avatar: undefined
   },
-  'support': {
-    id: 'test-support',
-    email: 'support@test.com',
-    name: 'موظف الدعم التجريبي',
-    role: 'support',
-    tenantId: 'test-tenant',
-    isActive: true
+  {
+    id: '4',
+    name: 'فاطمة خالد',
+    email: 'manager@company.com',
+    role: 'manager',
+    permissions: ROLE_PERMISSIONS['manager'] || [],
+    isActive: true,
+    avatar: undefined
   },
-  'user': {
-    id: 'test-user',
-    email: 'user@test.com',
-    name: 'المستخدم التجريبي',
-    role: 'user',
-    tenantId: 'test-tenant',
-    isActive: true
+  {
+    id: '5',
+    name: 'يوسف أحمد',
+    email: 'technician@company.com',
+    role: 'technician',
+    permissions: ROLE_PERMISSIONS['technician'] || [],
+    isActive: true,
+    avatar: undefined
+  },
+  {
+    id: '6',
+    name: 'ليلى محمود',
+    email: 'receptionist@company.com',
+    role: 'receptionist',
+    permissions: ROLE_PERMISSIONS['receptionist'] || [],
+    isActive: true,
+    avatar: undefined
   }
-};
+];
 
 const TEST_CASES: TestCase[] = [
   // اختبارات الوحدات الحرجة
@@ -119,15 +132,9 @@ const TEST_CASES: TestCase[] = [
     description: 'الوصول لأدوات صيانة النظام',
     module: 'maintenance-tools',
     permission: PERMISSIONS.SYSTEM_MAINTENANCE,
-    expectedResults: {
-      'super-admin': true,
-      'tenant-admin': false,
-      'manager': false,
-      'accountant': false,
-      'support': false,
-      'user': false
-    },
-    category: 'critical'
+    expectedResult: true,
+    role: 'super-admin',
+    status: 'pending'
   },
   {
     id: 'system-backup',
@@ -135,15 +142,9 @@ const TEST_CASES: TestCase[] = [
     description: 'إنشاء وإدارة النسخ الاحتياطية',
     module: 'backup-tools',
     permission: PERMISSIONS.SYSTEM_BACKUP,
-    expectedResults: {
-      'super-admin': true,
-      'tenant-admin': false,
-      'manager': false,
-      'accountant': false,
-      'support': false,
-      'user': false
-    },
-    category: 'critical'
+    expectedResult: true,
+    role: 'super-admin',
+    status: 'pending'
   },
   {
     id: 'user-impersonation',
@@ -151,15 +152,9 @@ const TEST_CASES: TestCase[] = [
     description: 'انتحال هوية المستخدمين الآخرين',
     module: 'user-impersonation',
     permission: PERMISSIONS.TENANT_IMPERSONATE,
-    expectedResults: {
-      'super-admin': true,
-      'tenant-admin': false,
-      'manager': false,
-      'accountant': false,
-      'support': false,
-      'user': false
-    },
-    category: 'critical'
+    expectedResult: true,
+    role: 'super-admin',
+    status: 'pending'
   },
   {
     id: 'landing-publish',
@@ -167,15 +162,9 @@ const TEST_CASES: TestCase[] = [
     description: 'نشر الصفحات المقصودة',
     module: 'landing-editor',
     permission: PERMISSIONS.LANDING_PUBLISH,
-    expectedResults: {
-      'super-admin': true,
-      'tenant-admin': false,
-      'manager': false,
-      'accountant': false,
-      'support': false,
-      'user': false
-    },
-    category: 'critical'
+    expectedResult: true,
+    role: 'super-admin',
+    status: 'pending'
   },
   {
     id: 'permission-management',
@@ -183,15 +172,9 @@ const TEST_CASES: TestCase[] = [
     description: 'تعديل الأدوار والصلاحيات',
     module: 'permissions',
     permission: PERMISSIONS.PERMISSION_MANAGE,
-    expectedResults: {
-      'super-admin': true,
-      'tenant-admin': false,
-      'manager': false,
-      'accountant': false,
-      'support': false,
-      'user': false
-    },
-    category: 'critical'
+    expectedResult: true,
+    role: 'super-admin',
+    status: 'pending'
   },
 
   // اختبارات الوحدات العادية
@@ -201,15 +184,9 @@ const TEST_CASES: TestCase[] = [
     description: 'عرض وإدارة المؤسسات',
     module: 'tenant-management',
     permission: PERMISSIONS.TENANT_VIEW,
-    expectedResults: {
-      'super-admin': true,
-      'tenant-admin': true,
-      'manager': false,
-      'accountant': false,
-      'support': false,
-      'user': false
-    },
-    category: 'normal'
+    expectedResult: true,
+    role: 'tenant-admin',
+    status: 'pending'
   },
   {
     id: 'user-management',
@@ -217,15 +194,9 @@ const TEST_CASES: TestCase[] = [
     description: 'عرض وإدارة المستخدمين',
     module: 'user-management',
     permission: PERMISSIONS.USER_VIEW,
-    expectedResults: {
-      'super-admin': true,
-      'tenant-admin': true,
-      'manager': true,
-      'accountant': false,
-      'support': true,
-      'user': false
-    },
-    category: 'normal'
+    expectedResult: true,
+    role: 'tenant-admin',
+    status: 'pending'
   },
   {
     id: 'billing-management',
@@ -233,15 +204,9 @@ const TEST_CASES: TestCase[] = [
     description: 'عرض وإدارة الفوترة',
     module: 'billing',
     permission: PERMISSIONS.BILLING_VIEW,
-    expectedResults: {
-      'super-admin': true,
-      'tenant-admin': true,
-      'manager': true,
-      'accountant': true,
-      'support': false,
-      'user': false
-    },
-    category: 'normal'
+    expectedResult: true,
+    role: 'tenant-admin',
+    status: 'pending'
   },
 
   // اختبارات الوحدات الأساسية
@@ -251,15 +216,9 @@ const TEST_CASES: TestCase[] = [
     description: 'عرض طلبات الدعم الفني',
     module: 'support',
     permission: PERMISSIONS.SUPPORT_VIEW,
-    expectedResults: {
-      'super-admin': true,
-      'tenant-admin': true,
-      'manager': true,
-      'accountant': false,
-      'support': true,
-      'user': true
-    },
-    category: 'basic'
+    expectedResult: true,
+    role: 'manager',
+    status: 'pending'
   },
   {
     id: 'reports-view',
@@ -267,15 +226,9 @@ const TEST_CASES: TestCase[] = [
     description: 'عرض التقارير والإحصائيات',
     module: 'reports',
     permission: PERMISSIONS.REPORTS_VIEW,
-    expectedResults: {
-      'super-admin': true,
-      'tenant-admin': true,
-      'manager': true,
-      'accountant': true,
-      'support': false,
-      'user': false
-    },
-    category: 'basic'
+    expectedResult: true,
+    role: 'accountant',
+    status: 'pending'
   }
 ];
 
@@ -284,7 +237,7 @@ const RolePermissionTester: React.FC = () => {
   const { t, formatNumber } = useTranslation();
   
   const [selectedRole, setSelectedRole] = useState<string>('super-admin');
-  const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [testResults, setTestResults] = useState<TestCase[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -295,31 +248,28 @@ const RolePermissionTester: React.FC = () => {
     setTestResults([]);
     
     try {
-      const results: TestResult[] = [];
+      const results: TestCase[] = [];
       
       // اختبار كل دور مع كل حالة اختبار
-      for (const role of Object.keys(TEST_USERS)) {
+      for (const user of mockUsers) {
         for (const testCase of TEST_CASES) {
-          if (selectedCategory !== 'all' && testCase.category !== selectedCategory) {
+          if (selectedCategory !== 'all' && testCase.module !== selectedCategory) {
             continue;
           }
 
           try {
             // محاكاة فحص الصلاحية
-            const user = TEST_USERS[role];
-            const userPermissions = ROLE_PERMISSIONS[role as keyof typeof ROLE_PERMISSIONS] || [];
+            const userPermissions = user.permissions || [];
             const hasPermission = userPermissions.includes(testCase.permission);
             
-            const expected = testCase.expectedResults[role];
+            const expected = testCase.expectedResult;
             const actual = hasPermission;
             const passed = expected === actual;
 
             results.push({
-              testId: testCase.id,
-              role,
-              expected,
-              actual,
-              passed,
+              ...testCase,
+              actualResult: actual,
+              status: passed ? 'passed' : 'failed',
               error: passed ? undefined : `متوقع: ${expected ? 'لديه صلاحية' : 'ليس لديه صلاحية'}, الفعلي: ${actual ? 'لديه صلاحية' : 'ليس لديه صلاحية'}`
             });
 
@@ -327,11 +277,9 @@ const RolePermissionTester: React.FC = () => {
             await new Promise(resolve => setTimeout(resolve, 100));
           } catch (error) {
             results.push({
-              testId: testCase.id,
-              role,
-              expected: testCase.expectedResults[role],
-              actual: false,
-              passed: false,
+              ...testCase,
+              actualResult: false,
+              status: 'failed',
               error: `خطأ في الاختبار: ${error}`
             });
           }
@@ -343,7 +291,7 @@ const RolePermissionTester: React.FC = () => {
       
       // إحصائيات النتائج
       const totalTests = results.length;
-      const passedTests = results.filter(r => r.passed).length;
+      const passedTests = results.filter(r => r.status === 'passed').length;
       const failedTests = totalTests - passedTests;
       
       toast({
@@ -365,25 +313,25 @@ const RolePermissionTester: React.FC = () => {
   // تصفية الاختبارات حسب الفئة
   const filteredTests = selectedCategory === 'all' 
     ? TEST_CASES 
-    : TEST_CASES.filter(test => test.category === selectedCategory);
+    : TEST_CASES.filter(test => test.module === selectedCategory);
 
   // إحصائيات النتائج
   const resultStats = testResults.length > 0 ? {
     total: testResults.length,
-    passed: testResults.filter(r => r.passed).length,
-    failed: testResults.filter(r => !r.passed).length,
+    passed: testResults.filter(r => r.status === 'passed').length,
+    failed: testResults.filter(r => r.status === 'failed').length,
     byCategory: {
       critical: testResults.filter(r => {
-        const test = TEST_CASES.find(t => t.id === r.testId);
-        return test?.category === 'critical';
+        const test = TEST_CASES.find(t => t.id === r.id);
+        return test?.module === 'maintenance-tools' || test?.module === 'backup-tools' || test?.module === 'user-impersonation' || test?.module === 'landing-editor' || test?.module === 'permissions';
       }),
       normal: testResults.filter(r => {
-        const test = TEST_CASES.find(t => t.id === r.testId);
-        return test?.category === 'normal';
+        const test = TEST_CASES.find(t => t.id === r.id);
+        return test?.module === 'tenant-management' || test?.module === 'user-management' || test?.module === 'billing';
       }),
       basic: testResults.filter(r => {
-        const test = TEST_CASES.find(t => t.id === r.testId);
-        return test?.category === 'basic';
+        const test = TEST_CASES.find(t => t.id === r.id);
+        return test?.module === 'support' || test?.module === 'reports';
       })
     }
   } : null;
@@ -391,35 +339,37 @@ const RolePermissionTester: React.FC = () => {
   // تعريف أعمدة جدول النتائج
   const resultColumns = [
     {
-      key: 'testId',
+      key: 'name',
       title: 'الاختبار',
-      render: (testId: string) => {
-        const test = TEST_CASES.find(t => t.id === testId);
-        return test ? test.name : testId;
-      }
+      render: (testCase: TestCase) => (
+        <div className="flex items-center">
+          <TestTube className="w-4 h-4 mr-2 text-blue-600" />
+          {testCase.name}
+        </div>
+      )
     },
     {
       key: 'role',
       title: 'الدور',
-      render: (role: string) => {
+      render: (testCase: TestCase) => {
         const roleLabels = {
           'super-admin': 'مدير النظام',
           'tenant-admin': 'مدير المؤسسة',
           'manager': 'مدير',
           'accountant': 'محاسب',
-          'support': 'دعم فني',
-          'user': 'مستخدم'
+          'technician': 'فني دعم',
+          'receptionist': 'موظف دعم'
         };
-        return roleLabels[role as keyof typeof roleLabels] || role;
+        return roleLabels[testCase.role as keyof typeof roleLabels] || testCase.role;
       }
     },
     {
       key: 'expected',
       title: 'المتوقع',
       align: 'center' as const,
-      render: (expected: boolean) => (
-        <Badge variant={expected ? 'default' : 'secondary'}>
-          {expected ? 'لديه صلاحية' : 'ليس لديه صلاحية'}
+      render: (testCase: TestCase) => (
+        <Badge variant={testCase.expectedResult ? 'default' : 'secondary'}>
+          {testCase.expectedResult ? 'لديه صلاحية' : 'ليس لديه صلاحية'}
         </Badge>
       )
     },
@@ -427,19 +377,19 @@ const RolePermissionTester: React.FC = () => {
       key: 'actual',
       title: 'الفعلي',
       align: 'center' as const,
-      render: (actual: boolean) => (
-        <Badge variant={actual ? 'default' : 'secondary'}>
-          {actual ? 'لديه صلاحية' : 'ليس لديه صلاحية'}
+      render: (testCase: TestCase) => (
+        <Badge variant={testCase.actualResult ? 'default' : 'secondary'}>
+          {testCase.actualResult ? 'لديه صلاحية' : 'ليس لديه صلاحية'}
         </Badge>
       )
     },
     {
-      key: 'passed',
+      key: 'status',
       title: 'النتيجة',
       align: 'center' as const,
-      render: (passed: boolean) => (
-        <Badge variant={passed ? 'default' : 'destructive'}>
-          {passed ? (
+      render: (testCase: TestCase) => (
+        <Badge variant={testCase.status === 'passed' ? 'default' : 'destructive'}>
+          {testCase.status === 'passed' ? (
             <>
               <CheckCircle className="w-3 h-3 mr-1" />
               نجح
@@ -504,16 +454,23 @@ const RolePermissionTester: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">جميع الاختبارات</SelectItem>
-                    <SelectItem value="critical">الاختبارات الحرجة</SelectItem>
-                    <SelectItem value="normal">الاختبارات العادية</SelectItem>
-                    <SelectItem value="basic">الاختبارات الأساسية</SelectItem>
+                    <SelectItem value="maintenance-tools">أدوات الصيانة</SelectItem>
+                    <SelectItem value="backup-tools">النسخ الاحتياطي</SelectItem>
+                    <SelectItem value="user-impersonation">انتحال الهوية</SelectItem>
+                    <SelectItem value="landing-editor">نشر الصفحات</SelectItem>
+                    <SelectItem value="permissions">إدارة الصلاحيات</SelectItem>
+                    <SelectItem value="tenant-management">إدارة المؤسسات</SelectItem>
+                    <SelectItem value="user-management">إدارة المستخدمين</SelectItem>
+                    <SelectItem value="billing">إدارة الفوترة</SelectItem>
+                    <SelectItem value="support">عرض الدعم الفني</SelectItem>
+                    <SelectItem value="reports">عرض التقارير</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label>عدد الاختبارات المحددة</Label>
                 <div className="mt-2 text-2xl font-bold">
-                  {formatNumber(filteredTests.length * Object.keys(TEST_USERS).length)}
+                  {formatNumber(filteredTests.length * mockUsers.length)}
                 </div>
               </div>
             </div>
@@ -545,7 +502,7 @@ const RolePermissionTester: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground text-right">الاختبارات الحرجة</p>
                   <p className="text-2xl font-bold text-red-600 text-right">
-                    {formatNumber(TEST_CASES.filter(t => t.category === 'critical').length)}
+                    {formatNumber(TEST_CASES.filter(t => t.module === 'maintenance-tools' || t.module === 'backup-tools' || t.module === 'user-impersonation' || t.module === 'landing-editor' || t.module === 'permissions').length)}
                   </p>
                 </div>
                 <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
@@ -561,7 +518,7 @@ const RolePermissionTester: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground text-right">الاختبارات العادية</p>
                   <p className="text-2xl font-bold text-orange-600 text-right">
-                    {formatNumber(TEST_CASES.filter(t => t.category === 'normal').length)}
+                    {formatNumber(TEST_CASES.filter(t => t.module === 'tenant-management' || t.module === 'user-management' || t.module === 'billing').length)}
                   </p>
                 </div>
                 <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
@@ -577,11 +534,11 @@ const RolePermissionTester: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground text-right">الاختبارات الأساسية</p>
                   <p className="text-2xl font-bold text-green-600 text-right">
-                    {formatNumber(TEST_CASES.filter(t => t.category === 'basic').length)}
+                    {formatNumber(TEST_CASES.filter(t => t.module === 'support' || t.module === 'reports').length)}
                   </p>
                 </div>
                 <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-green-600" />
+                  <UserIcon className="w-4 h-4 text-green-600" />
                 </div>
               </div>
             </CardContent>

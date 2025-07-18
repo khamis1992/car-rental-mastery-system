@@ -38,23 +38,13 @@ export class TenantService {
   }
 
   async createTenant(tenantData: TenantOnboardingData): Promise<Tenant> {
+    const { admin_user, ...tenantInfo } = tenantData;
+    
     const { data, error } = await supabase
       .from('tenants')
       .insert([{
-        name: tenantData.name,
-        slug: tenantData.slug,
-        contact_email: tenantData.contact_email,
-        contact_phone: tenantData.contact_phone,
-        address: tenantData.address,
-        city: tenantData.city,
-        country: tenantData.country,
-        timezone: tenantData.timezone,
-        currency: tenantData.currency,
-        subscription_plan: tenantData.subscription_plan,
-        status: 'active',
-        max_users: this.getMaxUsersByPlan(tenantData.subscription_plan),
-        max_vehicles: this.getMaxVehiclesByPlan(tenantData.subscription_plan),
-        max_contracts: this.getMaxContractsByPlan(tenantData.subscription_plan),
+        ...tenantInfo,
+        status: 'active' // Set default status
       }])
       .select()
       .single();
@@ -62,6 +52,10 @@ export class TenantService {
     if (error) {
       throw new Error(`Failed to create tenant: ${error.message}`);
     }
+
+    // TODO: Create admin user for the tenant
+    // This would involve creating the user and linking to the tenant
+    // For now, we just return the tenant data
 
     return data;
   }

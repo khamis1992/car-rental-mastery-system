@@ -1,0 +1,165 @@
+# Car Rental System - Tenant Management & System Reliability Improvements
+
+<context>
+# Overview  
+The car rental management system is currently operational on the Lovable platform but experiencing critical tenant management issues. Users are unable to log in to their organizations (specifically مؤسسة البشائر/Bashaer Company) due to broken relationships between users, tenant records, and employee profiles. This PRD focuses on resolving these issues and implementing robust tenant management, diagnostic tools, and system reliability improvements.
+
+# Core Problems Being Solved
+- **Tenant-User Relationship Issues**: Users created but not properly linked to their organizations
+- **Missing Employee Profiles**: Admin users lack corresponding employee records for HR functions  
+- **Authentication Failures**: Login errors preventing access to tenant-specific data
+- **Data Integrity Issues**: Inconsistent relationships between users, profiles, tenants, and employees
+- **Lack of Diagnostic Tools**: No systematic way to identify and fix tenant-related issues
+
+# Target Users
+- **Super Administrators**: Need tools to diagnose and fix tenant issues across the platform
+- **Tenant Administrators**: Company managers who need reliable access to their organization's data
+- **System Operators**: Technical staff maintaining the multi-tenant system
+</context>
+
+<PRD>
+# Technical Architecture  
+
+## Current System Components
+- **Auth System**: Supabase Auth for user authentication
+- **Tenant Management**: Multi-tenant architecture with tenant isolation
+- **User Profiles**: Extended user information and role management
+- **Employee Management**: HR records linked to user accounts
+- **Row Level Security (RLS)**: Tenant data isolation at database level
+
+## Required Improvements
+- **Tenant Registration Service**: Comprehensive service for creating tenants with all required relationships
+- **Diagnostic Tools**: Real-time system health monitoring and issue detection
+- **Repair Services**: Automated fixing of common tenant relationship issues
+- **Admin Dashboard**: Centralized management interface for super administrators
+
+# Development Roadmap  
+
+## Phase 1: Emergency Fixes (Critical - Immediate)
+**Goal: Restore access for existing users like مؤسسة البشائر**
+
+### 1.1 Bashaer Tenant Emergency Fix
+- Create diagnostic function to analyze Bashaer tenant status
+- Implement automated repair function for Bashaer-specific issues
+- Ensure admin@bashaererp.com can access the system
+- Verify all tenant relationships are properly established
+
+### 1.2 Critical Data Relationship Repair
+- Fix broken tenant_users relationships
+- Create missing employee profiles for admin users
+- Repair user profiles with correct tenant associations
+- Apply default chart of accounts to affected tenants
+
+## Phase 2: Systematic Tenant Management (High Priority)
+**Goal: Prevent future tenant relationship issues**
+
+### 2.1 Enhanced Tenant Registration Service
+- Implement atomic transaction-based tenant creation
+- Ensure all required records are created in proper sequence
+- Add comprehensive error handling and rollback capabilities
+- Include automatic employee profile creation for admins
+
+### 2.2 Tenant Diagnostic Dashboard
+- Real-time tenant health monitoring
+- Comprehensive search and diagnostic tools
+- Visual representation of tenant-user relationships
+- Automated issue detection with severity ratings
+
+### 2.3 Admin Employee Profile Creator
+- Automated detection of admin users without employee profiles
+- One-click employee profile creation with proper defaults
+- Bulk processing capabilities for multiple users
+- Employee number generation and assignment
+
+## Phase 3: Advanced Diagnostics & Maintenance (Medium Priority)
+**Goal: Proactive system maintenance and monitoring**
+
+### 3.1 System Diagnostic Tools
+- Comprehensive system health checks
+- Performance monitoring and optimization
+- Database integrity validation
+- Automated cleanup of orphaned records
+
+### 3.2 Tenant Isolation Verification
+- Security audit tools for tenant data isolation
+- RLS policy validation and testing
+- Cross-tenant data leak detection
+- Access control verification matrix
+
+### 3.3 Backup and Recovery Tools
+- Tenant-specific backup creation
+- Selective data restoration capabilities
+- Migration tools for tenant data
+- Disaster recovery procedures
+
+# Logical Dependency Chain
+
+## Foundation Layer (Must Complete First)
+1. **Database Schema Fixes**: Ensure all tables have proper foreign keys and constraints
+2. **RLS Policy Updates**: Verify tenant isolation is working correctly
+3. **Authentication Flow Fix**: Resolve login issues for existing users
+
+## Core Service Layer (Build Upon Foundation)
+1. **Tenant Registration Service**: Robust tenant creation with transaction safety
+2. **Diagnostic Engine**: Core diagnostic capabilities for detecting issues
+3. **Repair Service**: Automated fixing of common relationship problems
+
+## Interface Layer (User-Facing Tools)
+1. **Emergency Repair Interface**: Quick fixes for critical issues
+2. **Diagnostic Dashboard**: Comprehensive system monitoring
+3. **Admin Management Tools**: User-friendly tenant administration
+
+## Monitoring Layer (Ongoing Operations)
+1. **Health Monitoring**: Continuous system health checks
+2. **Alert System**: Proactive notification of issues
+3. **Performance Optimization**: Ongoing system tuning
+
+# Risks and Mitigations  
+
+## Technical Challenges
+- **Data Consistency**: Risk of creating inconsistent relationships during repairs
+  - *Mitigation*: Use database transactions and comprehensive validation
+- **System Downtime**: Risk of disrupting service during fixes
+  - *Mitigation*: Implement all changes with zero-downtime deployment strategies
+
+## Business Risks
+- **User Access**: Risk of breaking additional tenants while fixing issues
+  - *Mitigation*: Extensive testing in isolated environments before production deployment
+- **Data Loss**: Risk of losing important tenant data during repairs
+  - *Mitigation*: Complete backups before any repair operations
+
+## MVP Requirements
+- **Immediate Access Restoration**: Users can log into their tenants within 24 hours
+- **Diagnostic Capability**: Ability to quickly identify tenant relationship issues
+- **Repair Functionality**: One-click fixes for common problems
+
+# Success Metrics
+
+## Immediate Success (Phase 1)
+- ✅ مؤسسة البشائر admin can successfully log in and access tenant data
+- ✅ All tenant-user relationships are properly established
+- ✅ Employee profiles exist for all admin users
+
+## System Reliability (Phase 2)
+- 🎯 100% successful tenant creation rate
+- 🎯 Zero authentication failures due to missing relationships  
+- 🎯 Complete tenant relationship integrity
+
+## Operational Excellence (Phase 3)
+- 📊 Real-time monitoring of tenant health
+- 🔧 Automated detection and resolution of common issues
+- 📈 Proactive maintenance reducing manual intervention by 90%
+
+# Appendix  
+
+## Current System State
+- Multiple tenants exist but some have broken user relationships
+- Authentication system is functional but tenant association is failing
+- Employee management system exists but admin users lack employee profiles
+- Chart of accounts system needs to be applied to repaired tenants
+
+## Technical Specifications
+- **Database**: PostgreSQL with Supabase
+- **Authentication**: Supabase Auth
+- **Frontend**: React/TypeScript with Lovable platform integration
+- **Deployment**: Must maintain compatibility with existing Lovable structure 

@@ -1,15 +1,15 @@
 {
   "models": {
     "main": {
-      "provider": "anthropic",
-      "modelId": "claude-sonnet-4-20250514",
-      "maxTokens": 64000,
+      "provider": "gemini-cli",
+      "modelId": "gemini-2.5-flash",
+      "maxTokens": 65536,
       "temperature": 0.2
     },
     "research": {
-      "provider": "perplexity",
-      "modelId": "sonar-pro",
-      "maxTokens": 8700,
+      "provider": "mcp",
+      "modelId": "mcp-sampling",
+      "maxTokens": 100000,
       "temperature": 0.1
     },
     "fallback": {
@@ -30,7 +30,8 @@
     "bedrockBaseURL": "https://bedrock.us-east-1.amazonaws.com",
     "responseLanguage": "English",
     "defaultTag": "master",
-    "azureOpenaiBaseURL": "https://your-endpoint.openai.azure.com/"
+    "azureOpenaiBaseURL": "https://your-endpoint.openai.azure.com/",
+    "userId": "1234567890"
   },
   "claudeCode": {}
 }

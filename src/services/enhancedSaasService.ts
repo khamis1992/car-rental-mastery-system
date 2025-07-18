@@ -524,6 +524,182 @@ export class EnhancedSaasService {
     const yearlyTotal = plan.price_yearly;
     return Math.round(((monthlyTotal - yearlyTotal) / monthlyTotal) * 100);
   }
+
+  // =======================================================
+  // إدارة الفواتير (Invoice Management)
+  // =======================================================
+
+  /**
+   * تحديث حالة الفاتورة
+   */
+  async updateInvoiceStatus(invoiceId: string, status: string, paidAmount?: number): Promise<SaasInvoice> {
+    try {
+      const updateData: any = {
+        status,
+        updated_at: new Date().toISOString()
+      };
+
+      // إضافة paid_amount إذا تم تمرير قيمة
+      if (paidAmount !== undefined) {
+        updateData.paid_amount = paidAmount;
+      }
+
+      // إضافة paid_at إذا كانت الحالة paid
+      if (status === 'paid') {
+        updateData.paid_at = new Date().toISOString();
+      }
+
+      const { data, error } = await supabase
+        .from('saas_invoices')
+        .update(updateData)
+        .eq('id', invoiceId)
+        .select('*')
+        .single();
+
+      if (error) {
+        throw new Error(`فشل في تحديث حالة الفاتورة: ${error.message}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('خطأ في تحديث حالة الفاتورة:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * الحصول على فاتورة محددة
+   */
+  async getInvoice(invoiceId: string): Promise<SaasInvoice | null> {
+    try {
+      const { data, error } = await supabase
+        .from('saas_invoices')
+        .select(`
+          *,
+          subscription:saas_subscriptions(
+            *,
+            plan:subscription_plans(*)
+          ),
+          tenant:tenants(id, name, contact_email),
+          items:saas_invoice_items(*),
+          payments:saas_payments(*)
+        `)
+        .eq('id', invoiceId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return null; // الفاتورة غير موجودة
+        }
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('خطأ في جلب الفاتورة:', error);
+      return null;
+    }
+  }
+
+  /**
+   * حذف فاتورة
+   */
+  async deleteInvoice(invoiceId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('saas_invoices')
+        .delete()
+        .eq('id', invoiceId);
+
+      if (error) {
+        throw error;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('خطأ في حذف الفاتورة:', error);
+      return false;
+    }
+  }
+
+  /**
+   * إرسال فاتورة بالبريد الإلكتروني
+   */
+  async sendInvoiceEmail(invoiceId: string): Promise<boolean> {
+    try {
+      // هنا يمكن إضافة منطق إرسال البريد الإلكتروني
+      // مؤقتاً سنحديث حالة الفاتورة إلى 'sent'
+      await this.updateInvoiceStatus(invoiceId, 'sent');
+      return true;
+    } catch (error) {
+      console.error('خطأ في إرسال الفاتورة:', error);
+      return false;
+    }
+  }
+
+  /**
+   * إنشاء رابط دفع للفاتورة
+   */
+  async createPaymentLink(invoiceId: string): Promise<string | null> {
+    try {
+      // هذا سيتم تطويره لاحقاً مع تكامل بوابات الدفع
+      return `${window.location.origin}/payment/${invoiceId}`;
+    } catch (error) {
+      console.error('خطأ في إنشاء رابط الدفع:', error);
+      return null;
+    }
+  }
+
+  /**
+   * إحصائيات الفواتير
+   */
+  async getInvoiceStats(tenantId?: string): Promise<{
+    total_invoices: number;
+    paid_invoices: number;
+    overdue_invoices: number;
+    total_amount: number;
+    paid_amount: number;
+    outstanding_amount: number;
+  }> {
+    try {
+      let query = supabase
+        .from('saas_invoices')
+        .select('status, total_amount, paid_amount');
+
+      if (tenantId) {
+        query = query.eq('tenant_id', tenantId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      const stats = {
+        total_invoices: data?.length || 0,
+        paid_invoices: data?.filter(inv => inv.status === 'paid').length || 0,
+        overdue_invoices: data?.filter(inv => inv.status === 'overdue').length || 0,
+        total_amount: data?.reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
+        paid_amount: data?.reduce((sum, inv) => sum + (inv.paid_amount || 0), 0) || 0,
+        outstanding_amount: 0
+      };
+
+      stats.outstanding_amount = stats.total_amount - stats.paid_amount;
+
+      return stats;
+    } catch (error) {
+      console.error('خطأ في جلب إحصائيات الفواتير:', error);
+      return {
+        total_invoices: 0,
+        paid_invoices: 0,
+        overdue_invoices: 0,
+        total_amount: 0,
+        paid_amount: 0,
+        outstanding_amount: 0
+      };
+    }
+  }
 }
 
 // إنشاء مثيل واحد للخدمة

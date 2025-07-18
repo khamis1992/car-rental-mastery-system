@@ -31,9 +31,9 @@ node_modules/
 .vscode
 # OS specific
 
+# Cursor MCP configuration (contains API keys)
+.cursor/mcp.json 
+
 # Task files
 # tasks.json
 # tasks/ 
-
-# Cursor MCP configuration (contains API keys)
-.cursor/mcp.json 

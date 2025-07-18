@@ -922,9 +922,6 @@ const LandingPageEditor: React.FC = () => {
                 itemName="القسم"
                 onClick={handleAddSection}
                 loading={loading}
-                requireConfirmation
-                confirmationTitle="تأكيد إضافة القسم"
-                confirmationMessage="هل أنت متأكد من إضافة هذا القسم؟"
               >
                 إضافة القسم
               </ActionButton>
@@ -938,7 +935,7 @@ const LandingPageEditor: React.FC = () => {
           onOpenChange={setShowPageEditor}
           title={selectedPage ? `تحرير: ${selectedPage.name}` : ''}
           description="تحرير محتوى وتصميم الصفحة"
-          size="full"
+          size="lg"
           showCloseButton
         >
           {selectedPage && (

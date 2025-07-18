@@ -1,0 +1,31 @@
+# Task ID: 5
+# Title: Admin Employee Profile Creator
+# Status: pending
+# Dependencies: 1
+# Priority: medium
+# Description: Automated tool to create missing employee profiles for admin users
+# Details:
+Many admin users lack corresponding employee profiles needed for HR functions. This tool should detect and create these profiles automatically.
+
+# Test Strategy:
+All admin users have corresponding employee profiles after running the tool
+
+# Subtasks:
+## 5.1. Create Detection Logic [pending]
+### Dependencies: None
+### Description: Identify admin users without employee profiles
+### Details:
+Query to find users with admin/manager roles but no corresponding employee record
+
+## 5.2. Implement Profile Creation [pending]
+### Dependencies: None
+### Description: Generate employee profiles with proper defaults
+### Details:
+Create employee records with generated employee numbers, appropriate titles, and user linkage
+
+## 5.3. Build UI Component [pending]
+### Dependencies: None
+### Description: User interface for managing employee profile creation
+### Details:
+Component should show missing profiles and allow bulk or individual creation
+

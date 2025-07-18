@@ -1,0 +1,31 @@
+# Task ID: 2
+# Title: Implement Database Diagnostic Functions
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Create comprehensive SQL functions for diagnosing and repairing tenant relationship issues
+# Details:
+Develop reusable database functions that can identify and automatically fix common tenant setup issues. These functions should be atomic and safe to run repeatedly.
+
+# Test Strategy:
+Functions successfully identify issues in test scenarios and can repair them without data loss
+
+# Subtasks:
+## 2.1. Create diagnose_bashaer_tenant Function [pending]
+### Dependencies: None
+### Description: SQL function to analyze Bashaer tenant health
+### Details:
+Function should check tenant record, user existence in auth, profile record, tenant_users relationship, and employee profile
+
+## 2.2. Create fix_bashaer_tenant_issues Function [pending]
+### Dependencies: None
+### Description: Automated repair function for Bashaer tenant
+### Details:
+Function should create missing records, repair broken relationships, and ensure data consistency
+
+## 2.3. Create Generic Tenant Diagnostic Function [pending]
+### Dependencies: None
+### Description: Reusable function for any tenant diagnosis
+### Details:
+Parameterized function that can diagnose any tenant by ID or email domain
+

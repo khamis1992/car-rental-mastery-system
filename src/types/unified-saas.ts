@@ -198,6 +198,7 @@ export interface SaasInvoice {
   tax_amount: number;
   discount_amount: number;
   total_amount: number;
+  paid_amount?: number; // إضافة paid_amount
   currency: Currency;
   
   // فترة الفوترة
@@ -205,6 +206,7 @@ export interface SaasInvoice {
   billing_period_end: string;
   
   // تواريخ مهمة
+  invoice_date?: string; // إضافة invoice_date
   due_date?: string;
   paid_at?: string;
   

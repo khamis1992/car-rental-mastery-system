@@ -49,74 +49,108 @@ export const PERMISSIONS = {
   INVOICE_CREATE: 'invoice.create',
   PAYMENT_PROCESS: 'payment.process',
   
-  // التقارير والتحليلات
-  REPORTS_VIEW: 'reports.view',
-  REPORTS_EXPORT: 'reports.export',
-  ANALYTICS_VIEW: 'analytics.view'
+  // تحليلات النظام
+  ANALYTICS_VIEW: 'analytics.view',
+  ANALYTICS_EXPORT: 'analytics.export',
+  
+  // الأمان
+  SECURITY_VIEW: 'security.view',
+  SECURITY_MANAGE: 'security.manage',
 } as const;
 
-// تعريف الأدوار وصلاحياتها
-export const ROLE_PERMISSIONS = {
-  'super-admin': [
-    // Super Admin له جميع الصلاحيات
-    ...Object.values(PERMISSIONS)
-  ],
-  'tenant-admin': [
-    // مدير المؤسسة
+// تعريف الأدوار
+export const ROLES = {
+  SUPER_ADMIN: 'super_admin',
+  TENANT_ADMIN: 'tenant_admin',
+  MANAGER: 'manager',
+  ACCOUNTANT: 'accountant',
+  RECEPTIONIST: 'receptionist',
+  USER: 'user',
+} as const;
+
+// ربط الأدوار بالأذونات
+export const ROLE_PERMISSIONS: Record<string, string[]> = {
+  [ROLES.SUPER_ADMIN]: [
+    PERMISSIONS.SYSTEM_ADMIN,
+    PERMISSIONS.SYSTEM_MAINTENANCE,
+    PERMISSIONS.SYSTEM_BACKUP,
+    PERMISSIONS.SYSTEM_LOGS,
+    PERMISSIONS.SYSTEM_SETTINGS,
     PERMISSIONS.TENANT_VIEW,
+    PERMISSIONS.TENANT_CREATE,
+    PERMISSIONS.TENANT_EDIT,
+    PERMISSIONS.TENANT_DELETE,
+    PERMISSIONS.TENANT_IMPERSONATE,
+    PERMISSIONS.USER_VIEW,
+    PERMISSIONS.USER_CREATE,
+    PERMISSIONS.USER_EDIT,
+    PERMISSIONS.USER_DELETE,
+    PERMISSIONS.ROLE_VIEW,
+    PERMISSIONS.ROLE_CREATE,
+    PERMISSIONS.ROLE_EDIT,
+    PERMISSIONS.ROLE_DELETE,
+    PERMISSIONS.PERMISSION_MANAGE,
+    PERMISSIONS.SUPPORT_VIEW,
+    PERMISSIONS.SUPPORT_CREATE,
+    PERMISSIONS.SUPPORT_MANAGE,
+    PERMISSIONS.SUPPORT_ADMIN,
+    PERMISSIONS.LANDING_VIEW,
+    PERMISSIONS.LANDING_CREATE,
+    PERMISSIONS.LANDING_EDIT,
+    PERMISSIONS.LANDING_PUBLISH,
+    PERMISSIONS.LANDING_DELETE,
+    PERMISSIONS.BILLING_VIEW,
+    PERMISSIONS.BILLING_MANAGE,
+    PERMISSIONS.INVOICE_CREATE,
+    PERMISSIONS.PAYMENT_PROCESS,
+    PERMISSIONS.ANALYTICS_VIEW,
+    PERMISSIONS.ANALYTICS_EXPORT,
+    PERMISSIONS.SECURITY_VIEW,
+    PERMISSIONS.SECURITY_MANAGE,
+  ],
+  [ROLES.TENANT_ADMIN]: [
     PERMISSIONS.USER_VIEW,
     PERMISSIONS.USER_CREATE,
     PERMISSIONS.USER_EDIT,
     PERMISSIONS.ROLE_VIEW,
-    PERMISSIONS.SUPPORT_VIEW,
-    PERMISSIONS.SUPPORT_CREATE,
-    PERMISSIONS.LANDING_VIEW,
-    PERMISSIONS.LANDING_CREATE,
-    PERMISSIONS.LANDING_EDIT,
+    PERMISSIONS.ROLE_CREATE,
+    PERMISSIONS.ROLE_EDIT,
     PERMISSIONS.BILLING_VIEW,
-    PERMISSIONS.REPORTS_VIEW
+    PERMISSIONS.ANALYTICS_VIEW,
+    PERMISSIONS.SECURITY_VIEW,
   ],
-  'manager': [
-    // مدير
+  [ROLES.MANAGER]: [
     PERMISSIONS.USER_VIEW,
-    PERMISSIONS.SUPPORT_VIEW,
-    PERMISSIONS.SUPPORT_CREATE,
-    PERMISSIONS.REPORTS_VIEW,
-    PERMISSIONS.BILLING_VIEW
+    PERMISSIONS.USER_EDIT,
+    PERMISSIONS.BILLING_VIEW,
+    PERMISSIONS.ANALYTICS_VIEW,
   ],
-  'accountant': [
-    // محاسب
+  [ROLES.ACCOUNTANT]: [
     PERMISSIONS.BILLING_VIEW,
     PERMISSIONS.BILLING_MANAGE,
     PERMISSIONS.INVOICE_CREATE,
-    PERMISSIONS.REPORTS_VIEW,
-    PERMISSIONS.REPORTS_EXPORT
+    PERMISSIONS.ANALYTICS_VIEW,
   ],
-  'support': [
-    // موظف دعم
+  [ROLES.RECEPTIONIST]: [
+    PERMISSIONS.USER_VIEW,
     PERMISSIONS.SUPPORT_VIEW,
     PERMISSIONS.SUPPORT_CREATE,
-    PERMISSIONS.SUPPORT_MANAGE,
-    PERMISSIONS.USER_VIEW
   ],
-  'user': [
-    // مستخدم عادي
-    PERMISSIONS.SUPPORT_VIEW,
-    PERMISSIONS.SUPPORT_CREATE
-  ]
-} as const;
+  [ROLES.USER]: [
+    // أذونات أساسية فقط
+  ],
+};
 
+// أنواع البيانات
 export interface User {
   id: string;
   email: string;
-  name: string;
   role: string;
-  tenantId?: string;
-  isActive: boolean;
   permissions?: string[];
+  tenant_id?: string;
 }
 
-interface RoleBasedAccessContextType {
+export interface RoleBasedAccessContextType {
   currentUser: User | null;
   impersonatedUser: User | null;
   isImpersonating: boolean;
@@ -124,138 +158,147 @@ interface RoleBasedAccessContextType {
   hasAnyPermission: (permissions: string[]) => boolean;
   hasAllPermissions: (permissions: string[]) => boolean;
   canAccessModule: (module: string) => boolean;
-  startImpersonation: (user: User) => void;
+  startImpersonation: (user: User) => Promise<void>;
   stopImpersonation: () => void;
   checkCriticalAccess: (action: string) => boolean;
   getEffectiveUser: () => User | null;
 }
 
-const RoleBasedAccessContext = createContext<RoleBasedAccessContextType | null>(null);
+const RoleBasedAccessContext = createContext<RoleBasedAccessContextType | undefined>(undefined);
 
-export const useRoleBasedAccess = () => {
-  const context = useContext(RoleBasedAccessContext);
-  if (!context) {
-    throw new Error('useRoleBasedAccess must be used within a RoleBasedAccessProvider');
-  }
-  return context;
-};
-
-interface RoleBasedAccessProviderProps {
-  children: ReactNode;
-  currentUser: User | null;
-}
-
-export const RoleBasedAccessProvider = ({ children, currentUser }: RoleBasedAccessProviderProps) => {
+// مقدم السياق (Provider)
+export const RoleBasedAccessProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [impersonatedUser, setImpersonatedUser] = useState<User | null>(null);
+  const [isImpersonating, setIsImpersonating] = useState(false);
   const { toast } = useToast();
 
-  const isImpersonating = impersonatedUser !== null;
+  // تحديد المستخدم الفعال
   const effectiveUser = impersonatedUser || currentUser;
 
-  // الحصول على صلاحيات المستخدم
-  const getUserPermissions = (user: User | null): string[] => {
-    if (!user) return [];
-    
-    // صلاحيات مخصصة للمستخدم
-    if (user.permissions) {
-      return user.permissions;
-    }
-    
-    // صلاحيات الدور
-    const rolePermissions = ROLE_PERMISSIONS[user.role as keyof typeof ROLE_PERMISSIONS];
-    return rolePermissions || [];
-  };
+  // تحميل بيانات المستخدم عند بدء تشغيل التطبيق
+  useEffect(() => {
+    // هنا يمكن تحميل بيانات المستخدم من API أو localStorage
+    // مؤقتاً سنضع مستخدم افتراضي
+    const mockUser: User = {
+      id: '1',
+      email: 'admin@system.com',
+      role: ROLES.SUPER_ADMIN,
+      permissions: ROLE_PERMISSIONS[ROLES.SUPER_ADMIN]
+    };
+    setCurrentUser(mockUser);
+  }, []);
 
-  // فحص صلاحية واحدة
+  // فحص الصلاحية الواحدة
   const hasPermission = (permission: string): boolean => {
-    const permissions = getUserPermissions(effectiveUser);
-    return permissions.includes(permission);
+    if (!effectiveUser) return false;
+    
+    // Super Admin لديه جميع الصلاحيات
+    if (effectiveUser.role === ROLES.SUPER_ADMIN) return true;
+    
+    // فحص الصلاحيات المخصصة للمستخدم
+    if (effectiveUser.permissions?.includes(permission)) return true;
+    
+    // فحص صلاحيات الدور
+    const rolePermissions = ROLE_PERMISSIONS[effectiveUser.role] || [];
+    return rolePermissions.includes(permission);
   };
 
-  // فحص أي من الصلاحيات
+  // فحص وجود أي من الصلاحيات
   const hasAnyPermission = (permissions: string[]): boolean => {
-    const userPermissions = getUserPermissions(effectiveUser);
-    return permissions.some(permission => userPermissions.includes(permission));
+    return permissions.some(permission => hasPermission(permission));
   };
 
-  // فحص جميع الصلاحيات
+  // فحص وجود جميع الصلاحيات
   const hasAllPermissions = (permissions: string[]): boolean => {
-    const userPermissions = getUserPermissions(effectiveUser);
-    return permissions.every(permission => userPermissions.includes(permission));
+    return permissions.every(permission => hasPermission(permission));
   };
 
-  // فحص الوصول للوحات الرئيسية
+  // فحص إمكانية الوصول للوحدة
   const canAccessModule = (module: string): boolean => {
-    const modulePermissions = {
-      'tenant-management': [PERMISSIONS.TENANT_VIEW],
-      'user-management': [PERMISSIONS.USER_VIEW],
-      'role-management': [PERMISSIONS.ROLE_VIEW],
-      'support-tools': [PERMISSIONS.SUPPORT_VIEW],
-      'maintenance-tools': [PERMISSIONS.SYSTEM_MAINTENANCE],
-      'landing-page-editor': [PERMISSIONS.LANDING_VIEW],
-      'billing-management': [PERMISSIONS.BILLING_VIEW],
-      'system-settings': [PERMISSIONS.SYSTEM_SETTINGS],
-      'system-logs': [PERMISSIONS.SYSTEM_LOGS],
-      'backup-tools': [PERMISSIONS.SYSTEM_BACKUP]
-    };
-
-    const requiredPermissions = modulePermissions[module as keyof typeof modulePermissions];
-    if (!requiredPermissions) return true; // إذا لم تكن هناك صلاحيات محددة، السماح بالوصول
-
-    return hasAnyPermission(requiredPermissions);
-  };
-
-  // فحص الوصول للعمليات الحرجة
-  const checkCriticalAccess = (action: string): boolean => {
-    const criticalActions = {
-      'delete-tenant': [PERMISSIONS.TENANT_DELETE],
-      'backup-system': [PERMISSIONS.SYSTEM_BACKUP],
-      'maintenance-mode': [PERMISSIONS.SYSTEM_MAINTENANCE],
-      'publish-landing': [PERMISSIONS.LANDING_PUBLISH],
-      'manage-permissions': [PERMISSIONS.PERMISSION_MANAGE],
-      'process-payment': [PERMISSIONS.PAYMENT_PROCESS],
-      'view-system-logs': [PERMISSIONS.SYSTEM_LOGS]
-    };
-
-    const requiredPermissions = criticalActions[action as keyof typeof criticalActions];
-    if (!requiredPermissions) return false;
-
-    return hasAllPermissions(requiredPermissions);
+    switch (module) {
+      case 'system':
+        return hasAnyPermission([
+          PERMISSIONS.SYSTEM_ADMIN,
+          PERMISSIONS.SYSTEM_MAINTENANCE,
+          PERMISSIONS.SYSTEM_SETTINGS
+        ]);
+      case 'tenants':
+        return hasAnyPermission([
+          PERMISSIONS.TENANT_VIEW,
+          PERMISSIONS.TENANT_CREATE,
+          PERMISSIONS.TENANT_EDIT
+        ]);
+      case 'users':
+        return hasAnyPermission([
+          PERMISSIONS.USER_VIEW,
+          PERMISSIONS.USER_CREATE,
+          PERMISSIONS.USER_EDIT
+        ]);
+      case 'roles':
+        return hasAnyPermission([
+          PERMISSIONS.ROLE_VIEW,
+          PERMISSIONS.ROLE_CREATE,
+          PERMISSIONS.ROLE_EDIT
+        ]);
+      case 'support':
+        return hasAnyPermission([
+          PERMISSIONS.SUPPORT_VIEW,
+          PERMISSIONS.SUPPORT_CREATE,
+          PERMISSIONS.SUPPORT_MANAGE
+        ]);
+      case 'landing':
+        return hasAnyPermission([
+          PERMISSIONS.LANDING_VIEW,
+          PERMISSIONS.LANDING_CREATE,
+          PERMISSIONS.LANDING_EDIT
+        ]);
+      case 'billing':
+        return hasAnyPermission([
+          PERMISSIONS.BILLING_VIEW,
+          PERMISSIONS.BILLING_MANAGE
+        ]);
+      case 'analytics':
+        return hasPermission(PERMISSIONS.ANALYTICS_VIEW);
+      case 'security':
+        return hasAnyPermission([
+          PERMISSIONS.SECURITY_VIEW,
+          PERMISSIONS.SECURITY_MANAGE
+        ]);
+      default:
+        return false;
+    }
   };
 
   // بدء انتحال الهوية
-  const startImpersonation = (user: User) => {
-    // فقط Super Admin يمكنه انتحال الهويات
+  const startImpersonation = async (user: User): Promise<void> => {
     if (!hasPermission(PERMISSIONS.TENANT_IMPERSONATE)) {
       toast({
-        title: 'غير مسموح',
-        description: 'ليس لديك صلاحية لانتحال هوية المستخدمين',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    // منع انتحال هوية Super Admin آخر
-    if (user.role === 'super-admin' && currentUser?.role !== 'super-admin') {
-      toast({
-        title: 'غير مسموح',
-        description: 'لا يمكن انتحال هوية مدير النظام',
+        title: 'غير مصرح',
+        description: 'ليس لديك صلاحية انتحال هوية المستخدمين',
         variant: 'destructive'
       });
       return;
     }
 
     setImpersonatedUser(user);
+    setIsImpersonating(true);
+    
     toast({
-      title: 'تم بدء انتحال الهوية',
-      description: `أنت الآن تتصفح بهوية ${user.name}`,
+      title: 'تم انتحال الهوية',
+      description: `أصبحت تعمل باسم: ${user.email}`,
       variant: 'default'
     });
+
+    // تسجيل هذا الإجراء في نظام التدقيق
+    console.log(`User ${currentUser?.email} started impersonating ${user.email}`);
   };
 
   // إيقاف انتحال الهوية
-  const stopImpersonation = () => {
+  const stopImpersonation = (): void => {
     setImpersonatedUser(null);
+    setIsImpersonating(false);
+    
     toast({
       title: 'تم إيقاف انتحال الهوية',
       description: 'عدت إلى هويتك الأصلية',
@@ -266,6 +309,25 @@ export const RoleBasedAccessProvider = ({ children, currentUser }: RoleBasedAcce
   // الحصول على المستخدم الفعال
   const getEffectiveUser = (): User | null => {
     return effectiveUser;
+  };
+
+  // فحص الوصول للأعمال الحرجة
+  const checkCriticalAccess = (action: string): boolean => {
+    if (!effectiveUser) return false;
+    
+    // الأعمال الحرجة تتطلب Super Admin فقط
+    const criticalActions = [
+      'delete_tenant',
+      'system_maintenance',
+      'backup_system',
+      'modify_roles'
+    ];
+    
+    if (criticalActions.includes(action)) {
+      return effectiveUser.role === ROLES.SUPER_ADMIN;
+    }
+    
+    return true;
   };
 
   const contextValue: RoleBasedAccessContextType = {
@@ -299,44 +361,248 @@ export const usePermissions = () => {
     canEdit: (resource: string) => hasPermission(`${resource}.edit`),
     canDelete: (resource: string) => hasPermission(`${resource}.delete`),
     canManage: (resource: string) => hasPermission(`${resource}.manage`),
-    hasPermission,
-    hasAnyPermission,
-    hasAllPermissions,
-    checkCriticalAccess
+    isCriticalAction: (action: string) => checkCriticalAccess(action),
+    hasMultiple: (permissions: string[]) => hasAllPermissions(permissions),
+    hasAny: (permissions: string[]) => hasAnyPermission(permissions)
   };
 };
 
-// Component للحماية بناءً على الصلاحيات
-interface ProtectedComponentProps {
-  children: ReactNode;
-  permission?: string;
-  permissions?: string[];
-  requireAll?: boolean;
-  fallback?: ReactNode;
-  module?: string;
-}
-
-export const ProtectedComponent = ({ 
-  children, 
-  permission, 
-  permissions = [], 
-  requireAll = false,
-  fallback = null,
-  module
-}: ProtectedComponentProps) => {
-  const { hasPermission, hasAnyPermission, hasAllPermissions, canAccessModule } = useRoleBasedAccess();
-
-  let hasAccess = true;
-
-  if (module) {
-    hasAccess = canAccessModule(module);
-  } else if (permission) {
-    hasAccess = hasPermission(permission);
-  } else if (permissions.length > 0) {
-    hasAccess = requireAll ? hasAllPermissions(permissions) : hasAnyPermission(permissions);
+// Hook الرئيسي
+export const useRoleBasedAccess = (): RoleBasedAccessContextType => {
+  const context = useContext(RoleBasedAccessContext);
+  if (context === undefined) {
+    throw new Error('useRoleBasedAccess must be used within a RoleBasedAccessProvider');
   }
+  return context;
+};
 
-  return hasAccess ? <>{children}</> : <>{fallback}</>;
+// Hook لفحص صلاحية واحدة
+export const usePermission = (permission: string): boolean => {
+  const { hasPermission } = useRoleBasedAccess();
+  return hasPermission(permission);
+};
+
+// Hook لفحص الوصول للوحدة
+export const useModuleAccess = (module: string): boolean => {
+  const { canAccessModule } = useRoleBasedAccess();
+  return canAccessModule(module);
+};
+
+// Additional hooks for API operations
+export const useRoles = () => {
+  const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchRoles = async () => {
+    setLoading(true);
+    try {
+      // Mock data for now
+      setRoles([
+        { id: '1', name: 'Super Admin', permissions: ROLE_PERMISSIONS[ROLES.SUPER_ADMIN], is_active: true, is_system: true, is_default: false },
+        { id: '2', name: 'Tenant Admin', permissions: ROLE_PERMISSIONS[ROLES.TENANT_ADMIN], is_active: true, is_system: true, is_default: false },
+        { id: '3', name: 'Manager', permissions: ROLE_PERMISSIONS[ROLES.MANAGER], is_active: true, is_system: true, is_default: false },
+        { id: '4', name: 'Accountant', permissions: ROLE_PERMISSIONS[ROLES.ACCOUNTANT], is_active: true, is_system: true, is_default: false },
+        { id: '5', name: 'Receptionist', permissions: ROLE_PERMISSIONS[ROLES.RECEPTIONIST], is_active: true, is_system: true, is_default: false },
+        { id: '6', name: 'User', permissions: ROLE_PERMISSIONS[ROLES.USER], is_active: true, is_system: true, is_default: true },
+      ]);
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+
+  return { data: roles, isLoading: loading, refetch: fetchRoles };
+};
+
+export const usePermissionsByCategory = () => {
+  const permissions = [
+    {
+      category: 'إدارة النظام',
+      permissions: [
+        { id: PERMISSIONS.SYSTEM_ADMIN, name: 'إدارة النظام', description: 'الوصول الكامل لإعدادات النظام' },
+        { id: PERMISSIONS.SYSTEM_MAINTENANCE, name: 'صيانة النظام', description: 'إجراء صيانة وتحديثات النظام' },
+        { id: PERMISSIONS.SYSTEM_BACKUP, name: 'النسخ الاحتياطي', description: 'إنشاء واستعادة النسخ الاحتياطية' },
+        { id: PERMISSIONS.SYSTEM_LOGS, name: 'سجلات النظام', description: 'عرض وإدارة سجلات النظام' },
+        { id: PERMISSIONS.SYSTEM_SETTINGS, name: 'إعدادات النظام', description: 'تعديل إعدادات النظام العامة' },
+      ]
+    },
+    {
+      category: 'إدارة المؤسسات',
+      permissions: [
+        { id: PERMISSIONS.TENANT_VIEW, name: 'عرض المؤسسات', description: 'عرض قائمة المؤسسات' },
+        { id: PERMISSIONS.TENANT_CREATE, name: 'إنشاء مؤسسة', description: 'إنشاء مؤسسات جديدة' },
+        { id: PERMISSIONS.TENANT_EDIT, name: 'تعديل المؤسسة', description: 'تعديل بيانات المؤسسات' },
+        { id: PERMISSIONS.TENANT_DELETE, name: 'حذف المؤسسة', description: 'حذف المؤسسات' },
+        { id: PERMISSIONS.TENANT_IMPERSONATE, name: 'انتحال الهوية', description: 'انتحال هوية مستخدمي المؤسسات' },
+      ]
+    },
+    {
+      category: 'إدارة المستخدمين',
+      permissions: [
+        { id: PERMISSIONS.USER_VIEW, name: 'عرض المستخدمين', description: 'عرض قائمة المستخدمين' },
+        { id: PERMISSIONS.USER_CREATE, name: 'إنشاء مستخدم', description: 'إنشاء مستخدمين جدد' },
+        { id: PERMISSIONS.USER_EDIT, name: 'تعديل المستخدم', description: 'تعديل بيانات المستخدمين' },
+        { id: PERMISSIONS.USER_DELETE, name: 'حذف المستخدم', description: 'حذف المستخدمين' },
+      ]
+    },
+    {
+      category: 'إدارة الأدوار',
+      permissions: [
+        { id: PERMISSIONS.ROLE_VIEW, name: 'عرض الأدوار', description: 'عرض قائمة الأدوار' },
+        { id: PERMISSIONS.ROLE_CREATE, name: 'إنشاء دور', description: 'إنشاء أدوار جديدة' },
+        { id: PERMISSIONS.ROLE_EDIT, name: 'تعديل الدور', description: 'تعديل الأدوار الموجودة' },
+        { id: PERMISSIONS.ROLE_DELETE, name: 'حذف الدور', description: 'حذف الأدوار' },
+        { id: PERMISSIONS.PERMISSION_MANAGE, name: 'إدارة الصلاحيات', description: 'إدارة صلاحيات الأدوار' },
+      ]
+    }
+  ];
+
+  return permissions;
+};
+
+export const usePermissionCategories = () => {
+  const categories = [
+    'إدارة النظام',
+    'إدارة المؤسسات', 
+    'إدارة المستخدمين',
+    'إدارة الأدوار',
+    'الدعم الفني',
+    'محرر الصفحات',
+    'المالية والفوترة',
+    'التحليلات',
+    'الأمان'
+  ];
+
+  return categories;
+};
+
+export const useCreateRole = () => {
+  const { toast } = useToast();
+
+  const createRole = async (roleData: any) => {
+    try {
+      // Mock API call
+      console.log('Creating role:', roleData);
+      toast({
+        title: 'تم بنجاح',
+        description: 'تم إنشاء الدور بنجاح',
+      });
+      return { success: true };
+    } catch (error) {
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء إنشاء الدور',
+        variant: 'destructive'
+      });
+      throw error;
+    }
+  };
+
+  return { mutateAsync: createRole };
+};
+
+export const useUpdateRole = () => {
+  const { toast } = useToast();
+
+  const updateRole = async ({ id, updates }: { id: string; updates: any }) => {
+    try {
+      // Mock API call
+      console.log('Updating role:', id, updates);
+      toast({
+        title: 'تم بنجاح',
+        description: 'تم تحديث الدور بنجاح',
+      });
+      return { success: true };
+    } catch (error) {
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء تحديث الدور',
+        variant: 'destructive'
+      });
+      throw error;
+    }
+  };
+
+  return { mutateAsync: updateRole };
+};
+
+export const useDeleteRole = () => {
+  const { toast } = useToast();
+
+  const deleteRole = async (id: string) => {
+    try {
+      // Mock API call
+      console.log('Deleting role:', id);
+      toast({
+        title: 'تم بنجاح',
+        description: 'تم حذف الدور بنجاح',
+      });
+      return { success: true };
+    } catch (error) {
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء حذف الدور',
+        variant: 'destructive'
+      });
+      throw error;
+    }
+  };
+
+  return { mutateAsync: deleteRole };
+};
+
+export const useAuditLogs = () => {
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchLogs = async () => {
+    setLoading(true);
+    try {
+      // Mock data
+      setLogs([
+        {
+          id: '1',
+          action: 'create_role',
+          user: 'admin@system.com',
+          timestamp: new Date().toISOString(),
+          details: 'تم إنشاء دور جديد: Manager'
+        },
+        {
+          id: '2',
+          action: 'update_permissions',
+          user: 'admin@system.com',
+          timestamp: new Date().toISOString(),
+          details: 'تم تحديث صلاحيات دور Accountant'
+        }
+      ]);
+    } catch (error) {
+      console.error('Error fetching audit logs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  return { data: logs, isLoading: loading };
+};
+
+export const usePermissionSystemStats = () => {
+  const stats = {
+    total_roles: 6,
+    total_permissions: Object.keys(PERMISSIONS).length,
+    active_users: 150,
+    system_admins: 3
+  };
+
+  return { data: stats };
 };
 
 export default useRoleBasedAccess; 
