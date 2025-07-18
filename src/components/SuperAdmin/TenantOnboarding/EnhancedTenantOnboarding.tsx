@@ -18,11 +18,10 @@ import { AdminUserSection } from './AdminUserSection';
 import { FormActions } from './FormActions';
 import { 
   tenantOnboardingSchema, 
-  type TenantOnboardingFormData, 
-  subscriptionPlans,
-  type SubscriptionPlanKey 
+  type TenantOnboardingFormData
 } from './types';
 import { TenantService } from '@/services/tenantService';
+import { useSubscriptionPlans } from '@/hooks/useSaasData';
 
 interface EnhancedTenantOnboardingProps {
   open: boolean;
@@ -38,6 +37,7 @@ export const EnhancedTenantOnboarding: React.FC<EnhancedTenantOnboardingProps> =
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const tenantService = new TenantService();
+  const { data: subscriptionPlans = [] } = useSubscriptionPlans();
 
   const form = useForm<TenantOnboardingFormData>({
     resolver: zodResolver(tenantOnboardingSchema),
@@ -60,7 +60,7 @@ export const EnhancedTenantOnboarding: React.FC<EnhancedTenantOnboardingProps> =
     },
   });
 
-  const selectedPlan = form.watch('subscription_plan') as SubscriptionPlanKey;
+  const selectedPlan = form.watch('subscription_plan') as string;
 
   const generateSlug = (name: string) => {
     return name
@@ -82,12 +82,12 @@ export const EnhancedTenantOnboarding: React.FC<EnhancedTenantOnboardingProps> =
       setIsSubmitting(true);
       
       // إضافة حدود الخطة تلقائياً
-      const plan = subscriptionPlans[data.subscription_plan];
+      const plan = subscriptionPlans.find(p => p.plan_code === data.subscription_plan);
       const tenantData = {
         ...data,
-        max_users: plan.max_users,
-        max_vehicles: plan.max_vehicles,
-        max_contracts: plan.max_contracts,
+        max_users: plan?.max_users_per_tenant || 10,
+        max_vehicles: plan?.max_vehicles || 25,
+        max_contracts: plan?.max_contracts || 100,
       };
 
       await tenantService.createTenant(tenantData as any);
