@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { AlertTriangle, Loader2, RefreshCw, FileX } from 'lucide-react';
 
 interface LoadingStateProps {
   loading: boolean;
@@ -17,7 +17,7 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
   loading,
   error,
   isEmpty = false,
-  emptyMessage = 'لا توجد بيانات',
+  emptyMessage = "لا توجد بيانات",
   onRetry,
   children,
 }) => {
@@ -26,8 +26,8 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
       <Card>
         <CardContent className="flex items-center justify-center py-12">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-            <p>جاري التحميل...</p>
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-muted-foreground">جاري التحميل...</p>
           </div>
         </CardContent>
       </Card>
@@ -36,14 +36,15 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
 
   if (error) {
     return (
-      <Card>
+      <Card className="border-destructive/20">
         <CardContent className="flex items-center justify-center py-12">
           <div className="text-center">
-            <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
-            <p className="text-destructive mb-4">{error}</p>
+            <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-destructive" />
+            <h3 className="text-lg font-medium mb-2 text-destructive">حدث خطأ</h3>
+            <p className="text-muted-foreground mb-6">{error}</p>
             {onRetry && (
               <Button onClick={onRetry} variant="outline">
-                <RefreshCw className="w-4 h-4 mr-2" />
+                <RefreshCw className="w-4 h-4 ml-2" />
                 إعادة المحاولة
               </Button>
             )}
@@ -57,8 +58,9 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-12">
-          <div className="text-center text-muted-foreground">
-            {emptyMessage}
+          <div className="text-center">
+            <FileX className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-muted-foreground">{emptyMessage}</p>
           </div>
         </CardContent>
       </Card>
@@ -87,25 +89,25 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error('🚨 Error caught by ErrorBoundary:', error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <Card>
+        <Card className="border-destructive/20">
           <CardContent className="flex items-center justify-center py-12">
             <div className="text-center">
-              <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">حدث خطأ غير متوقع</h3>
-              <p className="text-muted-foreground mb-4">
+              <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-destructive" />
+              <h3 className="text-lg font-medium mb-2 text-destructive">حدث خطأ غير متوقع</h3>
+              <p className="text-muted-foreground mb-6">
                 {this.state.error?.message || 'خطأ غير معروف'}
               </p>
-              <Button
-                onClick={() => window.location.reload()}
+              <Button 
+                onClick={() => window.location.reload()} 
                 variant="outline"
               >
-                <RefreshCw className="w-4 h-4 mr-2" />
+                <RefreshCw className="w-4 h-4 ml-2" />
                 إعادة تحميل الصفحة
               </Button>
             </div>

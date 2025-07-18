@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,76 @@ import { ActionButton, EnhancedButton } from '@/components/ui/enhanced-button';
 import { LoadingState, ErrorBoundary } from '@/components/ui/enhanced-error-handling';
 import { useTranslation, formatStatus } from '@/utils/translationUtils';
 
+// مكون محسن لتتبع الأخطاء
+const TenantDetailsDialog: React.FC<{
+  tenant: Tenant | null;
+  open: boolean;
+  onClose: () => void;
+}> = ({ tenant, open, onClose }) => {
+  console.log('🔍 TenantDetailsDialog rendered:', { tenant: tenant?.id, open });
+  
+  if (!tenant) {
+    console.log('⚠️ TenantDetailsDialog: No tenant provided');
+    return null;
+  }
+
+  const handleClose = () => {
+    console.log('🔄 TenantDetailsDialog: Closing dialog');
+    onClose();
+  };
+
+  return (
+    <EnhancedDialog
+      open={open}
+      onOpenChange={handleClose}
+      title={`تفاصيل ${tenant.name}`}
+      size="lg"
+    >
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium text-muted-foreground">اسم المؤسسة</label>
+            <p className="font-medium">{tenant.name}</p>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-muted-foreground">المعرف</label>
+            <p className="font-mono text-sm">{tenant.slug}</p>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-muted-foreground">الحالة</label>
+            <div className="mt-1">
+              {(() => {
+                const statusInfo = formatStatus(tenant.status);
+                return (
+                  <Badge variant={statusInfo.variant as any}>
+                    {statusInfo.text}
+                  </Badge>
+                );
+              })()}
+            </div>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-muted-foreground">البريد الإلكتروني</label>
+            <p>{tenant.contact_email}</p>
+          </div>
+        </div>
+        
+        {tenant.contact_phone && (
+          <div>
+            <label className="text-sm font-medium text-muted-foreground">رقم الهاتف</label>
+            <p>{tenant.contact_phone}</p>
+          </div>
+        )}
+        
+        <div>
+          <label className="text-sm font-medium text-muted-foreground">تاريخ الإنشاء</label>
+          <p>{new Date(tenant.created_at).toLocaleDateString('ar-SA')}</p>
+        </div>
+      </div>
+    </EnhancedDialog>
+  );
+};
+
 const TenantManagement: React.FC = () => {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,14 +105,29 @@ const TenantManagement: React.FC = () => {
   const tenantService = new TenantService();
   const { t, msg, formatNumber } = useTranslation();
 
+  console.log('🔄 TenantManagement rendered:', { 
+    tenantsCount: tenants.length, 
+    loading, 
+    error: error?.slice(0, 100),
+    selectedTenant: selectedTenant?.id
+  });
+
   const loadTenants = async () => {
     try {
+      console.log('📡 Loading tenants...');
       setLoading(true);
       setError(null);
       const data = await tenantService.getTenants();
+      console.log('✅ Tenants loaded successfully:', data.length);
       setTenants(data);
     } catch (err: any) {
+      console.error('❌ Error loading tenants:', err);
       setError(err.message);
+      toast({
+        title: "خطأ في تحميل البيانات",
+        description: err.message,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -109,29 +195,45 @@ const TenantManagement: React.FC = () => {
     }
   ];
 
+  const handleViewDetails = (tenant: Tenant) => {
+    console.log('👁️ View details clicked for tenant:', tenant.id);
+    try {
+      setSelectedTenant(tenant);
+      console.log('✅ Selected tenant set successfully');
+    } catch (error) {
+      console.error('❌ Error setting selected tenant:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء فتح تفاصيل المؤسسة",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCloseDetails = () => {
+    console.log('🔄 Closing tenant details');
+    setSelectedTenant(null);
+  };
+
   // تعريف إجراءات الجدول
   const actions = [
     {
       label: 'عرض التفاصيل',
       icon: <Eye className="w-4 h-4" />,
-      onClick: (tenant: Tenant) => {
-        setSelectedTenant(tenant);
-      }
+      onClick: handleViewDetails
     },
     {
       label: 'تحرير',
       icon: <Edit className="w-4 h-4" />,
       onClick: (tenant: Tenant) => {
-        // تحرير المؤسسة
-        console.log('Edit tenant:', tenant);
+        console.log('✏️ Edit tenant:', tenant.id);
       }
     },
     {
       label: 'الإعدادات',
       icon: <Settings className="w-4 h-4" />,
       onClick: (tenant: Tenant) => {
-        // إعدادات المؤسسة
-        console.log('Settings for:', tenant);
+        console.log('⚙️ Settings for tenant:', tenant.id);
       },
       separator: true
     },
@@ -145,6 +247,7 @@ const TenantManagement: React.FC = () => {
   ];
 
   const handleDeleteTenant = async (tenant: Tenant) => {
+    console.log('🗑️ Delete tenant requested:', tenant.id);
     try {
       await tenantService.deleteTenant(tenant.id);
       await loadTenants();
@@ -153,6 +256,7 @@ const TenantManagement: React.FC = () => {
         description: `تم حذف ${tenant.name} بنجاح`
       });
     } catch (error: any) {
+      console.error('❌ Error deleting tenant:', error);
       toast({
         title: msg('error', 'failed', t('delete')),
         description: error.message,
@@ -162,6 +266,7 @@ const TenantManagement: React.FC = () => {
   };
 
   const handleCreateTenant = async () => {
+    console.log('➕ Create tenant completed');
     setShowOnboarding(false);
     await loadTenants();
   };
@@ -296,56 +401,11 @@ const TenantManagement: React.FC = () => {
         </EnhancedDialog>
 
         {/* Tenant Details Dialog */}
-        {selectedTenant && (
-          <EnhancedDialog
-            open={!!selectedTenant}
-            onOpenChange={() => setSelectedTenant(null)}
-            title={`تفاصيل ${selectedTenant.name}`}
-            size="lg"
-          >
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">اسم المؤسسة</label>
-                  <p className="font-medium">{selectedTenant.name}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">المعرف</label>
-                  <p className="font-mono text-sm">{selectedTenant.slug}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">الحالة</label>
-                  <div className="mt-1">
-                    {(() => {
-                      const statusInfo = formatStatus(selectedTenant.status);
-                      return (
-                        <Badge variant={statusInfo.variant as any}>
-                          {statusInfo.text}
-                        </Badge>
-                      );
-                    })()}
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">البريد الإلكتروني</label>
-                  <p>{selectedTenant.contact_email}</p>
-                </div>
-              </div>
-              
-              {selectedTenant.contact_phone && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">رقم الهاتف</label>
-                  <p>{selectedTenant.contact_phone}</p>
-                </div>
-              )}
-              
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">تاريخ الإنشاء</label>
-                <p>{new Date(selectedTenant.created_at).toLocaleDateString('ar-SA')}</p>
-              </div>
-            </div>
-          </EnhancedDialog>
-        )}
+        <TenantDetailsDialog
+          tenant={selectedTenant}
+          open={!!selectedTenant}
+          onClose={handleCloseDetails}
+        />
       </div>
     </ErrorBoundary>
   );

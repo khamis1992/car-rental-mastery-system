@@ -1,10 +1,9 @@
 
 import React from 'react';
-import { Button, ButtonProps } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
-interface EnhancedButtonProps extends ButtonProps {
+interface EnhancedButtonProps extends React.ComponentProps<typeof Button> {
   loading?: boolean;
   loadingText?: string;
   icon?: React.ReactNode;
@@ -16,23 +15,21 @@ export const EnhancedButton: React.FC<EnhancedButtonProps> = ({
   loadingText,
   icon,
   disabled,
-  className,
   ...props
 }) => {
   return (
-    <Button
-      disabled={disabled || loading}
-      className={cn('flex items-center gap-2', className)}
+    <Button 
+      disabled={disabled || loading} 
       {...props}
     >
       {loading ? (
         <>
-          <Loader2 className="w-4 h-4 animate-spin" />
+          <Loader2 className="w-4 h-4 animate-spin ml-2" />
           {loadingText || children}
         </>
       ) : (
         <>
-          {icon}
+          {icon && <span className="ml-2">{icon}</span>}
           {children}
         </>
       )}
@@ -43,9 +40,6 @@ export const EnhancedButton: React.FC<EnhancedButtonProps> = ({
 interface ActionButtonProps extends EnhancedButtonProps {
   action: 'create' | 'edit' | 'delete' | 'view';
   itemName?: string;
-  requireConfirmation?: boolean;
-  confirmationTitle?: string;
-  confirmationMessage?: string;
 }
 
 export const ActionButton: React.FC<ActionButtonProps> = ({
@@ -56,11 +50,12 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
 }) => {
   const getVariant = () => {
     switch (action) {
-      case 'delete': return 'destructive';
-      case 'create': return 'default';
-      case 'edit': return 'outline';
-      case 'view': return 'ghost';
-      default: return 'default';
+      case 'delete':
+        return 'destructive' as const;
+      case 'create':
+        return 'default' as const;
+      default:
+        return 'outline' as const;
     }
   };
 
