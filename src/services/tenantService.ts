@@ -291,19 +291,31 @@ export class TenantService {
   async getTenantUsers(tenantId: string): Promise<TenantUser[]> {
     const { data, error } = await supabase
       .from('tenant_users')
-      .select(`
-        *,
-        profiles:user_id(*)
-      `)
+      .select('*')
       .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return (data || []).map(user => ({
-      ...user,
-      role: user.role as TenantUser['role'],
-      status: user.status as TenantUser['status']
-    }));
+    
+    // Get user profiles separately to avoid relation issues
+    const enrichedUsers = await Promise.all(
+      (data || []).map(async (user) => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('user_id', user.user_id)
+          .maybeSingle();
+        
+        return {
+          ...user,
+          role: user.role as TenantUser['role'],
+          status: user.status as TenantUser['status'],
+          profiles: profile ? { full_name: profile.full_name } : undefined
+        };
+      })
+    );
+    
+    return enrichedUsers;
   }
 
   // Invite user to tenant

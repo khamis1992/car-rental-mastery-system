@@ -37,6 +37,9 @@ export interface TenantUser {
   joined_at: string;
   created_at: string;
   updated_at: string;
+  profiles?: {
+    full_name?: string;
+  };
 }
 
 export interface SubscriptionHistory {
