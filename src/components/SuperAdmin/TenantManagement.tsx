@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,8 @@ import {
   Edit,
   Trash2,
   Eye,
-  Loader2
+  Loader2,
+  UserCheck
 } from "lucide-react";
 import { TenantService } from "@/services/tenantService";
 import { Tenant } from "@/types/tenant";
@@ -34,8 +36,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+// Extend Tenant type to include actual counts
+type TenantWithCounts = Tenant & { 
+  actual_users: number; 
+  actual_vehicles: number; 
+};
+
 const TenantManagement: React.FC = () => {
-  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [tenants, setTenants] = useState<TenantWithCounts[]>([]);
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const tenantService = new TenantService();
@@ -147,7 +155,7 @@ const TenantManagement: React.FC = () => {
             <div>
               <p className="text-sm text-muted-foreground">إجمالي المستخدمين</p>
               <p className="text-2xl font-bold">
-                {tenants.reduce((sum, t) => sum + t.max_users, 0)}
+                {tenants.reduce((sum, t) => sum + t.actual_users, 0)}
               </p>
             </div>
           </CardContent>
@@ -158,7 +166,7 @@ const TenantManagement: React.FC = () => {
             <div>
               <p className="text-sm text-muted-foreground">إجمالي المركبات</p>
               <p className="text-2xl font-bold">
-                {tenants.reduce((sum, t) => sum + t.max_vehicles, 0)}
+                {tenants.reduce((sum, t) => sum + t.actual_vehicles, 0)}
               </p>
             </div>
           </CardContent>
@@ -183,8 +191,8 @@ const TenantManagement: React.FC = () => {
                   <TableHead>اسم المؤسسة</TableHead>
                   <TableHead>الحالة</TableHead>
                   <TableHead>خطة الاشتراك</TableHead>
-                  <TableHead>الحد الأقصى للمستخدمين</TableHead>
-                  <TableHead>الحد الأقصى للمركبات</TableHead>
+                  <TableHead>المستخدمين (فعلي/حد أقصى)</TableHead>
+                  <TableHead>المركبات (فعلي/حد أقصى)</TableHead>
                   <TableHead>العملة</TableHead>
                   <TableHead>تاريخ الإنشاء</TableHead>
                   <TableHead>الإجراءات</TableHead>
@@ -204,8 +212,18 @@ const TenantManagement: React.FC = () => {
                       <TableCell className="font-medium">{tenant.name}</TableCell>
                       <TableCell>{getStatusBadge(tenant.status)}</TableCell>
                       <TableCell>{getSubscriptionBadge(tenant.subscription_plan)}</TableCell>
-                      <TableCell>{tenant.max_users}</TableCell>
-                      <TableCell>{tenant.max_vehicles}</TableCell>
+                      <TableCell>
+                        <span className={tenant.actual_users > tenant.max_users ? "text-red-600 font-medium" : ""}>
+                          {tenant.actual_users} / {tenant.max_users}
+                          {tenant.actual_users > tenant.max_users && " ⚠️"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className={tenant.actual_vehicles > tenant.max_vehicles ? "text-red-600 font-medium" : ""}>
+                          {tenant.actual_vehicles} / {tenant.max_vehicles}
+                          {tenant.actual_vehicles > tenant.max_vehicles && " ⚠️"}
+                        </span>
+                      </TableCell>
                       <TableCell>{tenant.currency}</TableCell>
                       <TableCell>{new Date(tenant.created_at).toLocaleDateString('ar-SA')}</TableCell>
                       <TableCell>
@@ -216,6 +234,10 @@ const TenantManagement: React.FC = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem>
+                              <UserCheck className="mr-2 h-4 w-4" />
+                              إدارة المستخدمين ({tenant.actual_users})
+                            </DropdownMenuItem>
                             <DropdownMenuItem>
                               <Eye className="mr-2 h-4 w-4" />
                               عرض التفاصيل

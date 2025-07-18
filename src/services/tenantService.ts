@@ -43,21 +43,71 @@ export class TenantService {
     return false; // suspended أو cancelled
   }
 
-  // Get all tenants for super admin
-  async getAllTenants(): Promise<Tenant[]> {
+  // Get all tenants for super admin with actual user counts
+  async getAllTenants(): Promise<(Tenant & { actual_users: number; actual_vehicles: number })[]> {
     const { data, error } = await supabase
       .from('tenants')
       .select('*')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return (data || []).map(tenant => ({
+    
+    const tenants = (data || []).map(tenant => ({
       ...tenant,
       status: tenant.status as Tenant['status'],
       subscription_plan: tenant.subscription_plan as Tenant['subscription_plan'],
       subscription_status: tenant.subscription_status as Tenant['subscription_status'],
       settings: (tenant.settings as Record<string, any>) || {}
     }));
+
+    // جلب عدد المستخدمين الفعلي لكل مؤسسة
+    const tenantsWithCounts = await Promise.all(
+      tenants.map(async (tenant) => {
+        const [userCount, vehicleCount] = await Promise.all([
+          this.getTenantActualUserCount(tenant.id),
+          this.getTenantActualVehicleCount(tenant.id)
+        ]);
+        
+        return {
+          ...tenant,
+          actual_users: userCount,
+          actual_vehicles: vehicleCount
+        };
+      })
+    );
+
+    return tenantsWithCounts;
+  }
+
+  // Get actual user count for a tenant
+  async getTenantActualUserCount(tenantId: string): Promise<number> {
+    const { count, error } = await supabase
+      .from('tenant_users')
+      .select('*', { count: 'exact', head: true })
+      .eq('tenant_id', tenantId)
+      .eq('status', 'active');
+
+    if (error) {
+      console.error('Error fetching user count for tenant:', tenantId, error);
+      return 0;
+    }
+
+    return count || 0;
+  }
+
+  // Get actual vehicle count for a tenant
+  async getTenantActualVehicleCount(tenantId: string): Promise<number> {
+    const { count, error } = await supabase
+      .from('vehicles')
+      .select('*', { count: 'exact', head: true })
+      .eq('tenant_id', tenantId);
+
+    if (error) {
+      console.error('Error fetching vehicle count for tenant:', tenantId, error);
+      return 0;
+    }
+
+    return count || 0;
   }
 
   // Create new tenant (onboarding)

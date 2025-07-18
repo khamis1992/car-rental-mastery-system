@@ -16,7 +16,9 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle,
-  Clock
+  Clock,
+  UserCheck,
+  Car
 } from "lucide-react";
 import { TenantService } from "@/services/tenantService";
 import { Tenant } from "@/types/tenant";
@@ -44,11 +46,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import TenantUsersDialog from "./TenantUsersDialog";
+
+// Extend Tenant type to include actual counts
+type TenantWithCounts = Tenant & { 
+  actual_users: number; 
+  actual_vehicles: number; 
+};
 
 const AdvancedTenantManagement: React.FC = () => {
-  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [tenants, setTenants] = useState<TenantWithCounts[]>([]);
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [selectedTenant, setSelectedTenant] = useState<{id: string, name: string} | null>(null);
+  const [showUsersDialog, setShowUsersDialog] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const tenantService = new TenantService();
 
@@ -74,6 +85,11 @@ const AdvancedTenantManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewUsers = (tenant: TenantWithCounts) => {
+    setSelectedTenant({ id: tenant.id, name: tenant.name });
+    setShowUsersDialog(true);
   };
 
   const getStatusBadge = (status: string) => {
@@ -122,6 +138,16 @@ const AdvancedTenantManagement: React.FC = () => {
     const config = subscriptionConfig[subscription as keyof typeof subscriptionConfig] || subscriptionConfig.basic;
     
     return <Badge className={config.className}>{config.label}</Badge>;
+  };
+
+  const getUsersDisplayText = (actual: number, max: number) => {
+    const isOverLimit = actual > max;
+    return (
+      <span className={isOverLimit ? "text-red-600 font-medium" : ""}>
+        {actual} / {max}
+        {isOverLimit && " ⚠️"}
+      </span>
+    );
   };
 
   if (error && !loading) {
@@ -207,7 +233,7 @@ const AdvancedTenantManagement: React.FC = () => {
             <div className="text-right">
               <p className="text-sm text-muted-foreground">إجمالي المستخدمين</p>
               <p className="text-2xl font-bold">
-                {tenants.reduce((sum, t) => sum + t.max_users, 0)}
+                {tenants.reduce((sum, t) => sum + t.actual_users, 0)}
               </p>
             </div>
           </CardContent>
@@ -215,12 +241,12 @@ const AdvancedTenantManagement: React.FC = () => {
         <Card className="hover:shadow-md transition-shadow">
           <CardContent className="flex items-center p-6">
             <div className="bg-orange-100 p-3 rounded-lg mr-4">
-              <Settings className="w-6 h-6 text-orange-600" />
+              <Car className="w-6 h-6 text-orange-600" />
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground">إجمالي المركبات</p>
               <p className="text-2xl font-bold">
-                {tenants.reduce((sum, t) => sum + t.max_vehicles, 0)}
+                {tenants.reduce((sum, t) => sum + t.actual_vehicles, 0)}
               </p>
             </div>
           </CardContent>
@@ -255,8 +281,8 @@ const AdvancedTenantManagement: React.FC = () => {
                     <TableHead className="text-right">اسم المؤسسة</TableHead>
                     <TableHead className="text-right">الحالة</TableHead>
                     <TableHead className="text-right">خطة الاشتراك</TableHead>
-                    <TableHead className="text-right">المستخدمين</TableHead>
-                    <TableHead className="text-right">المركبات</TableHead>
+                    <TableHead className="text-right">المستخدمين (فعلي/حد أقصى)</TableHead>
+                    <TableHead className="text-right">المركبات (فعلي/حد أقصى)</TableHead>
                     <TableHead className="text-right">العملة</TableHead>
                     <TableHead className="text-right">تاريخ الإنشاء</TableHead>
                     <TableHead className="text-right">الإجراءات</TableHead>
@@ -295,8 +321,19 @@ const AdvancedTenantManagement: React.FC = () => {
                         </TableCell>
                         <TableCell>{getStatusBadge(tenant.status)}</TableCell>
                         <TableCell>{getSubscriptionBadge(tenant.subscription_plan)}</TableCell>
-                        <TableCell>{tenant.max_users}</TableCell>
-                        <TableCell>{tenant.max_vehicles}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewUsers(tenant)}
+                            className="h-auto p-0 hover:bg-transparent"
+                          >
+                            {getUsersDisplayText(tenant.actual_users, tenant.max_users)}
+                          </Button>
+                        </TableCell>
+                        <TableCell>
+                          {getUsersDisplayText(tenant.actual_vehicles, tenant.max_vehicles)}
+                        </TableCell>
                         <TableCell>
                           <Badge variant="outline">{tenant.currency}</Badge>
                         </TableCell>
@@ -315,6 +352,10 @@ const AdvancedTenantManagement: React.FC = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleViewUsers(tenant)}>
+                                <UserCheck className="ml-2 h-4 w-4" />
+                                إدارة المستخدمين ({tenant.actual_users})
+                              </DropdownMenuItem>
                               <DropdownMenuItem>
                                 <Eye className="ml-2 h-4 w-4" />
                                 عرض التفاصيل
@@ -339,6 +380,20 @@ const AdvancedTenantManagement: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Users Management Dialog */}
+      {selectedTenant && (
+        <TenantUsersDialog
+          tenantId={selectedTenant.id}
+          tenantName={selectedTenant.name}
+          isOpen={showUsersDialog}
+          onClose={() => {
+            setShowUsersDialog(false);
+            setSelectedTenant(null);
+            loadTenants(); // Refresh data when dialog closes
+          }}
+        />
+      )}
     </div>
   );
 };
