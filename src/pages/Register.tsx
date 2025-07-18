@@ -9,28 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { SmartInput } from '@/components/ui/smart-input';
 import { PlanRecommendation } from '@/components/ui/plan-recommendation';
-import { 
-  Building2, 
-  User, 
-  CreditCard, 
-  CheckCircle, 
-  ArrowRight, 
-  ArrowLeft, 
-  Home,
-  Eye,
-  EyeOff,
-  Star,
-  Zap,
-  Crown,
-  Building,
-  Loader2,
-  Save,
-  RotateCcw,
-  Lightbulb,
-  Target,
-  Phone,
-  Mail
-} from 'lucide-react';
+import { Building2, User, CreditCard, CheckCircle, ArrowRight, ArrowLeft, Home, Eye, EyeOff, Star, Zap, Crown, Building, Loader2, Save, RotateCcw, Lightbulb, Target, Phone, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { TenantService } from '@/services/tenantService';
 import { SUBSCRIPTION_PLANS, formatPrice } from '@/types/subscription-plans';
@@ -38,76 +17,69 @@ import type { SubscriptionPlanCode } from '@/types/subscription-plans';
 import { analyzePasswordStrength } from '@/utils/smartSuggestions';
 import { EnhancedLoading, useEnhancedLoading } from '@/components/ui/enhanced-loading';
 import { HelpSystem } from '@/components/ui/help-system';
-import { StepProgress } from '@/components/ui/step-progress';
 
 // تحويل خطط SaaS إلى تنسيق التسجيل
-const plans = [
-  {
-    id: 'basic',
-    name: SUBSCRIPTION_PLANS.basic.name,
-    name_en: SUBSCRIPTION_PLANS.basic.name_en,
-    icon: Zap,
-    price: SUBSCRIPTION_PLANS.basic.price_monthly,
-    period: "شهرياً",
-    description: "مثالية للشركات الناشئة والصغيرة",
-    features: SUBSCRIPTION_PLANS.basic.features,
-    popular: false,
-    limits: {
-      users: SUBSCRIPTION_PLANS.basic.limits.max_users_per_tenant,
-      vehicles: SUBSCRIPTION_PLANS.basic.limits.max_vehicles,
-      contracts: SUBSCRIPTION_PLANS.basic.limits.max_contracts
-    }
-  },
-  {
-    id: 'standard',
-    name: SUBSCRIPTION_PLANS.standard.name,
-    name_en: SUBSCRIPTION_PLANS.standard.name_en,
-    icon: Crown,
-    price: SUBSCRIPTION_PLANS.standard.price_monthly,
-    period: "شهرياً",
-    description: "الأكثر شعبية للشركات المتوسطة",
-    features: SUBSCRIPTION_PLANS.standard.features,
-    popular: true,
-    limits: {
-      users: SUBSCRIPTION_PLANS.standard.limits.max_users_per_tenant,
-      vehicles: SUBSCRIPTION_PLANS.standard.limits.max_vehicles,
-      contracts: SUBSCRIPTION_PLANS.standard.limits.max_contracts
-    }
-  },
-  {
-    id: 'premium',
-    name: SUBSCRIPTION_PLANS.premium.name,
-    name_en: SUBSCRIPTION_PLANS.premium.name_en,
-    icon: Star,
-    price: SUBSCRIPTION_PLANS.premium.price_monthly,
-    period: "شهرياً",
-    description: "للشركات الكبيرة والمتقدمة",
-    features: SUBSCRIPTION_PLANS.premium.features,
-    popular: false,
-    limits: {
-      users: SUBSCRIPTION_PLANS.premium.limits.max_users_per_tenant,
-      vehicles: SUBSCRIPTION_PLANS.premium.limits.max_vehicles,
-      contracts: SUBSCRIPTION_PLANS.premium.limits.max_contracts
-    }
-  },
-  {
-    id: 'enterprise',
-    name: SUBSCRIPTION_PLANS.enterprise.name,
-    name_en: SUBSCRIPTION_PLANS.enterprise.name_en,
-    icon: Building,
-    price: SUBSCRIPTION_PLANS.enterprise.price_monthly,
-    period: "شهرياً",
-    description: "للمؤسسات الكبيرة والحكومية",
-    features: SUBSCRIPTION_PLANS.enterprise.features,
-    popular: false,
-    limits: {
-      users: SUBSCRIPTION_PLANS.enterprise.limits.max_users_per_tenant,
-      vehicles: SUBSCRIPTION_PLANS.enterprise.limits.max_vehicles,
-      contracts: SUBSCRIPTION_PLANS.enterprise.limits.max_contracts
-    }
+const plans = [{
+  id: 'basic',
+  name: SUBSCRIPTION_PLANS.basic.name,
+  name_en: SUBSCRIPTION_PLANS.basic.name_en,
+  icon: Zap,
+  price: SUBSCRIPTION_PLANS.basic.price_monthly,
+  period: "شهرياً",
+  description: "مثالية للشركات الناشئة والصغيرة",
+  features: SUBSCRIPTION_PLANS.basic.features,
+  popular: false,
+  limits: {
+    users: SUBSCRIPTION_PLANS.basic.limits.max_users_per_tenant,
+    vehicles: SUBSCRIPTION_PLANS.basic.limits.max_vehicles,
+    contracts: SUBSCRIPTION_PLANS.basic.limits.max_contracts
   }
-];
-
+}, {
+  id: 'standard',
+  name: SUBSCRIPTION_PLANS.standard.name,
+  name_en: SUBSCRIPTION_PLANS.standard.name_en,
+  icon: Crown,
+  price: SUBSCRIPTION_PLANS.standard.price_monthly,
+  period: "شهرياً",
+  description: "الأكثر شعبية للشركات المتوسطة",
+  features: SUBSCRIPTION_PLANS.standard.features,
+  popular: true,
+  limits: {
+    users: SUBSCRIPTION_PLANS.standard.limits.max_users_per_tenant,
+    vehicles: SUBSCRIPTION_PLANS.standard.limits.max_vehicles,
+    contracts: SUBSCRIPTION_PLANS.standard.limits.max_contracts
+  }
+}, {
+  id: 'premium',
+  name: SUBSCRIPTION_PLANS.premium.name,
+  name_en: SUBSCRIPTION_PLANS.premium.name_en,
+  icon: Star,
+  price: SUBSCRIPTION_PLANS.premium.price_monthly,
+  period: "شهرياً",
+  description: "للشركات الكبيرة والمتقدمة",
+  features: SUBSCRIPTION_PLANS.premium.features,
+  popular: false,
+  limits: {
+    users: SUBSCRIPTION_PLANS.premium.limits.max_users_per_tenant,
+    vehicles: SUBSCRIPTION_PLANS.premium.limits.max_vehicles,
+    contracts: SUBSCRIPTION_PLANS.premium.limits.max_contracts
+  }
+}, {
+  id: 'enterprise',
+  name: SUBSCRIPTION_PLANS.enterprise.name,
+  name_en: SUBSCRIPTION_PLANS.enterprise.name_en,
+  icon: Building,
+  price: SUBSCRIPTION_PLANS.enterprise.price_monthly,
+  period: "شهرياً",
+  description: "للمؤسسات الكبيرة والحكومية",
+  features: SUBSCRIPTION_PLANS.enterprise.features,
+  popular: false,
+  limits: {
+    users: SUBSCRIPTION_PLANS.enterprise.limits.max_users_per_tenant,
+    vehicles: SUBSCRIPTION_PLANS.enterprise.limits.max_vehicles,
+    contracts: SUBSCRIPTION_PLANS.enterprise.limits.max_contracts
+  }
+}];
 interface FormData {
   // بيانات الشركة
   companyName: string;
@@ -123,13 +95,14 @@ interface FormData {
   // الخطة
   selectedPlan: string;
 }
-
 const Register = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const tenantService = new TenantService();
-  
+
   // نظام التحميل المحسن
   const {
     isLoading: isEnhancedLoading,
@@ -138,7 +111,6 @@ const Register = () => {
     updateProgress,
     LoadingComponent
   } = useEnhancedLoading();
-
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -149,7 +121,6 @@ const Register = () => {
   const [showRecommendation, setShowRecommendation] = useState(false);
   const [recommendedPlan, setRecommendedPlan] = useState<string | null>(null);
   const [hasUsedRecommendation, setHasUsedRecommendation] = useState(false);
-
   const [formData, setFormData] = useState<FormData>({
     companyName: '',
     contactEmail: '',
@@ -173,13 +144,15 @@ const Register = () => {
       try {
         const parsed = JSON.parse(savedData);
         if (parsed.formData && parsed.step) {
-          setFormData(prev => ({ ...prev, ...parsed.formData }));
+          setFormData(prev => ({
+            ...prev,
+            ...parsed.formData
+          }));
           setCurrentStep(parsed.step);
           setLastSaved(new Date(parsed.timestamp));
-          
           toast({
             title: "تم استرداد البيانات المحفوظة",
-            description: "تم العثور على بيانات محفوظة مسبقاً وتم استردادها",
+            description: "تم العثور على بيانات محفوظة مسبقاً وتم استردادها"
           });
         }
       } catch (error) {
@@ -192,21 +165,19 @@ const Register = () => {
   useEffect(() => {
     // لا نحفظ إذا كانت البيانات فارغة تماماً
     const hasData = Object.values(formData).some(value => value.trim() !== '');
-    
     if (hasData) {
       setIsAutoSaving(true);
-      
       const saveTimeout = setTimeout(() => {
         const dataToSave = {
           formData: {
             ...formData,
-            adminPassword: '', // لا نحفظ كلمة المرور لأسباب الأمان
+            adminPassword: '',
+            // لا نحفظ كلمة المرور لأسباب الأمان
             confirmPassword: ''
           },
           step: currentStep,
           timestamp: new Date().toISOString()
         };
-        
         localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
         setLastSaved(new Date());
         setIsAutoSaving(false);
@@ -225,7 +196,7 @@ const Register = () => {
     setLastSaved(null);
     toast({
       title: "تم مسح البيانات المحفوظة",
-      description: "تم حذف جميع البيانات المحفوظة مسبقاً",
+      description: "تم حذف جميع البيانات المحفوظة مسبقاً"
     });
   };
 
@@ -234,25 +205,29 @@ const Register = () => {
 
   // تحديث البيانات مع التحقق الفوري
   const updateFormData = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+
     // مسح رسالة الخطأ عند التحديث
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
     }
   };
 
   // التحقق من البيانات مع رسائل محسنة
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
-
     if (step === 1) {
       // التحقق من الخطة
       if (!formData.selectedPlan) {
         newErrors.selectedPlan = 'يرجى اختيار خطة الاشتراك المناسبة لحجم عملك';
       }
     }
-
     if (step === 2) {
       // التحقق من بيانات الشركة مع رسائل واضحة
       if (!formData.companyName.trim()) {
@@ -260,7 +235,6 @@ const Register = () => {
       } else if (formData.companyName.trim().length < 2) {
         newErrors.companyName = 'اسم الشركة يجب أن يكون حرفين على الأقل';
       }
-
       if (!formData.contactEmail.trim()) {
         newErrors.contactEmail = 'البريد الإلكتروني للشركة مطلوب للتواصل والإشعارات';
       } else if (!/\S+@\S+\.\S+/.test(formData.contactEmail)) {
@@ -272,7 +246,6 @@ const Register = () => {
         newErrors.contactPhone = 'رقم الهاتف غير صحيح (مثال: +965 1234 5678)';
       }
     }
-
     if (step === 3) {
       // التحقق من بيانات المدير مع رسائل واضحة
       if (!formData.adminName.trim()) {
@@ -280,7 +253,6 @@ const Register = () => {
       } else if (formData.adminName.trim().length < 2) {
         newErrors.adminName = 'اسم المدير يجب أن يكون حرفين على الأقل';
       }
-
       if (!formData.adminEmail.trim()) {
         newErrors.adminEmail = 'البريد الإلكتروني للمدير مطلوب للدخول للنظام';
       } else if (!/\S+@\S+\.\S+/.test(formData.adminEmail)) {
@@ -288,7 +260,6 @@ const Register = () => {
       } else if (formData.adminEmail === formData.contactEmail) {
         newErrors.adminEmail = 'يُفضل أن يكون بريد المدير مختلف عن بريد الشركة';
       }
-
       if (!formData.adminPassword) {
         newErrors.adminPassword = 'كلمة المرور مطلوبة لحماية حساب المدير';
       } else if (formData.adminPassword.length < 8) {
@@ -300,22 +271,21 @@ const Register = () => {
       } else if (!/(?=.*\d)/.test(formData.adminPassword)) {
         newErrors.adminPassword = 'كلمة المرور يجب أن تحتوي على رقم واحد على الأقل';
       }
-
       if (!formData.confirmPassword) {
         newErrors.confirmPassword = 'يرجى تأكيد كلمة المرور';
       } else if (formData.adminPassword !== formData.confirmPassword) {
         newErrors.confirmPassword = 'كلمة المرور وتأكيدها غير متطابقتين';
       }
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   // تحقق فوري من البيانات أثناء الكتابة
   const validateField = (field: keyof FormData, value: string) => {
-    const newErrors = { ...errors };
-
+    const newErrors = {
+      ...errors
+    };
     switch (field) {
       case 'companyName':
         if (!value.trim()) {
@@ -326,7 +296,6 @@ const Register = () => {
           delete newErrors.companyName;
         }
         break;
-
       case 'contactEmail':
         if (!value.trim()) {
           newErrors.contactEmail = 'البريد الإلكتروني مطلوب';
@@ -336,7 +305,6 @@ const Register = () => {
           delete newErrors.contactEmail;
         }
         break;
-
       case 'adminEmail':
         if (!value.trim()) {
           newErrors.adminEmail = 'البريد الإلكتروني مطلوب';
@@ -348,7 +316,6 @@ const Register = () => {
           delete newErrors.adminEmail;
         }
         break;
-
       case 'adminPassword':
         if (!value) {
           newErrors.adminPassword = 'كلمة المرور مطلوبة';
@@ -360,7 +327,6 @@ const Register = () => {
           delete newErrors.adminPassword;
         }
         break;
-
       case 'confirmPassword':
         if (!value) {
           newErrors.confirmPassword = 'تأكيد كلمة المرور مطلوب';
@@ -370,11 +336,9 @@ const Register = () => {
           delete newErrors.confirmPassword;
         }
         break;
-
       default:
         break;
     }
-
     setErrors(newErrors);
   };
 
@@ -408,7 +372,6 @@ const Register = () => {
       description: 'يرجى الانتظار بينما نقوم بإعداد شركتك',
       progress: 0
     });
-
     try {
       const subscriptionPlan = formData.selectedPlan as SubscriptionPlanCode;
 
@@ -417,13 +380,10 @@ const Register = () => {
       await new Promise(resolve => setTimeout(resolve, 800)); // محاكاة التحقق
 
       // إنشاء slug من اسم الشركة مع تنظيف أفضل
-      const slug = formData.companyName
-        .toLowerCase()
-        .trim()
-        .replace(/[^\u0600-\u06FFa-zA-Z0-9\s]/g, '') // إزالة الرموز الخاصة
-        .replace(/\s+/g, '-') // استبدال المسافات بشرطات
-        .replace(/-+/g, '-') // إزالة الشرطات المتتالية
-        .substring(0, 50);
+      const slug = formData.companyName.toLowerCase().trim().replace(/[^\u0600-\u06FFa-zA-Z0-9\s]/g, '') // إزالة الرموز الخاصة
+      .replace(/\s+/g, '-') // استبدال المسافات بشرطات
+      .replace(/-+/g, '-') // إزالة الشرطات المتتالية
+      .substring(0, 50);
 
       // التحقق من صحة الـ slug
       if (slug.length < 2) {
@@ -461,10 +421,15 @@ const Register = () => {
 
       // خطوة 3: إنشاء الحساب
       updateProgress(60);
-      console.log('Creating tenant with data:', { ...tenantData, admin_user: { ...tenantData.admin_user, password: '[HIDDEN]' } });
-      
+      console.log('Creating tenant with data:', {
+        ...tenantData,
+        admin_user: {
+          ...tenantData.admin_user,
+          password: '[HIDDEN]'
+        }
+      });
       const newTenant = await tenantService.createTenant(tenantData);
-      
+
       // خطوة 4: إعداد البيئة
       updateProgress(80);
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -472,12 +437,10 @@ const Register = () => {
       // خطوة 5: الإنهاء
       updateProgress(100);
       await new Promise(resolve => setTimeout(resolve, 500));
-
       hideLoading();
-      
       toast({
         title: "تم إنشاء الشركة بنجاح! 🎉",
-        description: "سيتم توجيهك إلى بوابة SADAD لإتمام الدفع",
+        description: "سيتم توجيهك إلى بوابة SADAD لإتمام الدفع"
       });
 
       // مسح البيانات المحفوظة بعد النجاح
@@ -490,11 +453,9 @@ const Register = () => {
       setTimeout(() => {
         window.location.href = `/sadad-simulation?amount=${selectedPlan.price * 100}&tenant_id=${newTenant.id}&plan=${encodeURIComponent(selectedPlan.name)}`;
       }, 2000);
-      
     } catch (error: any) {
       console.error('Error creating tenant:', error);
       hideLoading();
-      
       let errorMessage = "حدث خطأ غير متوقع";
       let errorDescription = "يرجى المحاولة مرة أخرى أو التواصل مع الدعم الفني";
 
@@ -512,7 +473,6 @@ const Register = () => {
         errorMessage = "خطأ في البيانات المدخلة";
         errorDescription = "يرجى التحقق من صحة جميع البيانات";
       }
-
       toast({
         title: errorMessage,
         description: errorDescription,
@@ -527,28 +487,24 @@ const Register = () => {
     updateFormData('selectedPlan', planId);
     setShowRecommendation(false);
     setHasUsedRecommendation(true);
-    
     toast({
       title: "تم العثور على الخطة المثالية! 🎯",
-      description: `بناءً على احتياجاتك، ننصح بخطة ${plans.find(p => p.id === planId)?.name}`,
+      description: `بناءً على احتياجاتك، ننصح بخطة ${plans.find(p => p.id === planId)?.name}`
     });
   };
-
   const handleSkipRecommendation = () => {
     setShowRecommendation(false);
   };
 
   // خطوة اختيار الخطة مع النظام الذكي
-  const PlanStep = () => (
-    <div className="space-y-6">
+  const PlanStep = () => <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-2">اختر خطة الاشتراك</h2>
         <p className="text-muted-foreground">اختر الخطة التي تناسب حجم عملك</p>
       </div>
 
       {/* النظام الذكي للتوصية */}
-      {!hasUsedRecommendation && (
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4 mb-6">
+      {!hasUsedRecommendation && <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="bg-blue-100 p-2 rounded-lg">
@@ -559,21 +515,15 @@ const Register = () => {
                 <p className="text-sm text-blue-700">أجب على 4 أسئلة سريعة وسنختار لك الخطة المثالية</p>
               </div>
             </div>
-            <Button
-              onClick={() => setShowRecommendation(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-              size="sm"
-            >
+            <Button onClick={() => setShowRecommendation(true)} className="bg-blue-600 hover:bg-blue-700 text-white" size="sm">
               <Lightbulb className="w-4 h-4 mr-2" />
               ابدأ التوصية
             </Button>
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* عرض الخطة الموصى بها */}
-      {recommendedPlan && hasUsedRecommendation && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 mb-6">
+      {recommendedPlan && hasUsedRecommendation && <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="bg-green-100 p-2 rounded-lg">
               <CheckCircle className="w-5 h-5 text-green-600" />
@@ -585,37 +535,21 @@ const Register = () => {
               </p>
             </div>
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* تذكير بالتجربة المجانية */}
       <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4">
-        <div className="flex items-center justify-center gap-2 text-green-700">
-          <span className="text-2xl">🎉</span>
-          <span className="font-semibold">تجربة مجانية كاملة ١٤ يوم</span>
-          <span className="text-2xl">🎉</span>
-        </div>
+        
         <p className="text-sm text-green-600 mt-1 text-center">
           بدون الحاجة لبطاقة ائتمان • إلغاء مجاني في أي وقت
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {plans.map((plan) => (
-          <div
-            key={plan.id}
-            className={`relative p-4 sm:p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg min-h-[200px] sm:min-h-[180px] ${
-              formData.selectedPlan === plan.id
-                ? 'border-primary bg-primary/5 shadow-lg'
-                : 'border-border hover:border-primary/50'
-            } ${plan.popular ? 'ring-2 ring-primary/20' : ''}`}
-            onClick={() => updateFormData('selectedPlan', plan.id)}
-          >
-            {plan.popular && (
-              <div className="absolute -top-3 right-4 bg-primary text-white px-3 py-1 rounded-full text-xs font-semibold">
+        {plans.map(plan => <div key={plan.id} className={`relative p-4 sm:p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg min-h-[200px] sm:min-h-[180px] ${formData.selectedPlan === plan.id ? 'border-primary bg-primary/5 shadow-lg' : 'border-border hover:border-primary/50'} ${plan.popular ? 'ring-2 ring-primary/20' : ''}`} onClick={() => updateFormData('selectedPlan', plan.id)}>
+            {plan.popular && <div className="absolute -top-3 right-4 bg-primary text-white px-3 py-1 rounded-full text-xs font-semibold">
                 الأكثر اختياراً
-              </div>
-            )}
+              </div>}
 
             <div className="text-center h-full flex flex-col justify-between">
               <div>
@@ -646,20 +580,15 @@ const Register = () => {
             </div>
 
             {/* مؤشر التحديد */}
-            {formData.selectedPlan === plan.id && (
-              <div className="absolute top-2 left-2">
+            {formData.selectedPlan === plan.id && <div className="absolute top-2 left-2">
                 <CheckCircle className="w-6 h-6 text-primary bg-white rounded-full" />
-              </div>
-            )}
-          </div>
-        ))}
+              </div>}
+          </div>)}
       </div>
 
-      {errors.selectedPlan && (
-        <Alert variant="destructive">
+      {errors.selectedPlan && <Alert variant="destructive">
           <AlertDescription>{errors.selectedPlan}</AlertDescription>
-        </Alert>
-      )}
+        </Alert>}
 
       {/* مقارنة سريعة محسنة للموبايل */}
       <div className="bg-gray-50 rounded-xl p-4 sm:p-6 mt-8">
@@ -716,12 +645,10 @@ const Register = () => {
           👈 اسحب الجدول للمشاهدة الكاملة
         </p>
       </div>
-    </div>
-  );
+    </div>;
 
   // خطوة بيانات الشركة مع الاقتراحات الذكية
-  const CompanyStep = () => (
-    <div className="space-y-6">
+  const CompanyStep = () => <div className="space-y-6">
       <div className="text-center">
         <Building2 className="w-12 h-12 mx-auto mb-4 text-primary" />
         <h2 className="text-2xl font-bold mb-2">معلومات الشركة</h2>
@@ -738,77 +665,22 @@ const Register = () => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
-        <SmartInput
-          label="اسم الشركة"
-          field="companyName"
-          placeholder="مثال: شركة النقل المتقدمة"
-          description="سيظهر في جميع الفواتير والعقود"
-          value={formData.companyName}
-          onChange={(value) => updateFormData('companyName', value)}
-          formData={formData}
-          error={errors.companyName}
-          required={true}
-          showSuggestions={true}
-        />
+        <SmartInput label="اسم الشركة" field="companyName" placeholder="مثال: شركة النقل المتقدمة" description="سيظهر في جميع الفواتير والعقود" value={formData.companyName} onChange={value => updateFormData('companyName', value)} formData={formData} error={errors.companyName} required={true} showSuggestions={true} />
 
-        <SmartInput
-          label="البريد الإلكتروني للشركة"
-          field="contactEmail"
-          type="email"
-          placeholder="info@company.com"
-          description="للتواصل الرسمي والإشعارات"
-          value={formData.contactEmail}
-          onChange={(value) => updateFormData('contactEmail', value)}
-          formData={formData}
-          error={errors.contactEmail}
-          required={true}
-          showSuggestions={true}
-        />
+        <SmartInput label="البريد الإلكتروني للشركة" field="contactEmail" type="email" placeholder="info@company.com" description="للتواصل الرسمي والإشعارات" value={formData.contactEmail} onChange={value => updateFormData('contactEmail', value)} formData={formData} error={errors.contactEmail} required={true} showSuggestions={true} />
 
-        <SmartInput
-          label="رقم الهاتف"
-          field="contactPhone"
-          placeholder="+965 XXXX XXXX"
-          description="رقم التواصل الرسمي (اختياري)"
-          value={formData.contactPhone}
-          onChange={(value) => updateFormData('contactPhone', value)}
-          formData={formData}
-          error={errors.contactPhone}
-          showSuggestions={true}
-        />
+        <SmartInput label="رقم الهاتف" field="contactPhone" placeholder="+965 XXXX XXXX" description="رقم التواصل الرسمي (اختياري)" value={formData.contactPhone} onChange={value => updateFormData('contactPhone', value)} formData={formData} error={errors.contactPhone} showSuggestions={true} />
 
-        <SmartInput
-          label="المدينة"
-          field="city"
-          placeholder="الكويت"
-          description="المدينة الرئيسية للشركة (اختياري)"
-          value={formData.city}
-          onChange={(value) => updateFormData('city', value)}
-          formData={formData}
-          error={errors.city}
-          showSuggestions={true}
-        />
+        <SmartInput label="المدينة" field="city" placeholder="الكويت" description="المدينة الرئيسية للشركة (اختياري)" value={formData.city} onChange={value => updateFormData('city', value)} formData={formData} error={errors.city} showSuggestions={true} />
 
         <div className="md:col-span-2">
-          <SmartInput
-            label="العنوان"
-            field="address"
-            placeholder="الشارع، المنطقة، المحافظة"
-            description="العنوان الكامل للشركة (اختياري)"
-            value={formData.address}
-            onChange={(value) => updateFormData('address', value)}
-            formData={formData}
-            error={errors.address}
-            showSuggestions={false}
-          />
+          <SmartInput label="العنوان" field="address" placeholder="الشارع، المنطقة، المحافظة" description="العنوان الكامل للشركة (اختياري)" value={formData.address} onChange={value => updateFormData('address', value)} formData={formData} error={errors.address} showSuggestions={false} />
         </div>
       </div>
-    </div>
-  );
+    </div>;
 
   // خطوة بيانات المدير مع الاقتراحات الذكية
-  const AdminStep = () => (
-    <div className="space-y-6">
+  const AdminStep = () => <div className="space-y-6">
       <div className="text-center">
         <User className="w-12 h-12 mx-auto mb-4 text-primary" />
         <h2 className="text-2xl font-bold mb-2">معلومات المدير</h2>
@@ -825,65 +697,17 @@ const Register = () => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
-        <SmartInput
-          label="اسم المدير"
-          field="adminName"
-          placeholder="الاسم الكامل للمدير"
-          description="اسم المدير الرئيسي للنظام"
-          value={formData.adminName}
-          onChange={(value) => updateFormData('adminName', value)}
-          formData={formData}
-          error={errors.adminName}
-          required={true}
-          showSuggestions={false}
-        />
+        <SmartInput label="اسم المدير" field="adminName" placeholder="الاسم الكامل للمدير" description="اسم المدير الرئيسي للنظام" value={formData.adminName} onChange={value => updateFormData('adminName', value)} formData={formData} error={errors.adminName} required={true} showSuggestions={false} />
 
-        <SmartInput
-          label="البريد الإلكتروني للمدير"
-          field="adminEmail"
-          type="email"
-          placeholder="admin@company.com"
-          description="سيستخدم هذا للدخول للنظام"
-          value={formData.adminEmail}
-          onChange={(value) => updateFormData('adminEmail', value)}
-          formData={formData}
-          error={errors.adminEmail}
-          required={true}
-          showSuggestions={true}
-        />
+        <SmartInput label="البريد الإلكتروني للمدير" field="adminEmail" type="email" placeholder="admin@company.com" description="سيستخدم هذا للدخول للنظام" value={formData.adminEmail} onChange={value => updateFormData('adminEmail', value)} formData={formData} error={errors.adminEmail} required={true} showSuggestions={true} />
 
-        <SmartInput
-          label="كلمة المرور"
-          field="adminPassword"
-          placeholder="8 أحرف على الأقل"
-          description="استخدم كلمة مرور قوية لحماية حسابك"
-          value={formData.adminPassword}
-          onChange={(value) => updateFormData('adminPassword', value)}
-          formData={formData}
-          error={errors.adminPassword}
-          required={true}
-          isPassword={true}
-          showSuggestions={false}
-        />
+        <SmartInput label="كلمة المرور" field="adminPassword" placeholder="8 أحرف على الأقل" description="استخدم كلمة مرور قوية لحماية حسابك" value={formData.adminPassword} onChange={value => updateFormData('adminPassword', value)} formData={formData} error={errors.adminPassword} required={true} isPassword={true} showSuggestions={false} />
 
-        <SmartInput
-          label="تأكيد كلمة المرور"
-          field="confirmPassword"
-          placeholder="أعد كتابة كلمة المرور"
-          description="تأكد من تطابق كلمة المرور"
-          value={formData.confirmPassword}
-          onChange={(value) => updateFormData('confirmPassword', value)}
-          formData={formData}
-          error={errors.confirmPassword}
-          required={true}
-          isPassword={true}
-          showSuggestions={false}
-        />
+        <SmartInput label="تأكيد كلمة المرور" field="confirmPassword" placeholder="أعد كتابة كلمة المرور" description="تأكد من تطابق كلمة المرور" value={formData.confirmPassword} onChange={value => updateFormData('confirmPassword', value)} formData={formData} error={errors.confirmPassword} required={true} isPassword={true} showSuggestions={false} />
       </div>
 
       {/* نصائح كلمة المرور الذكية */}
-      {formData.adminPassword && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+      {formData.adminPassword && <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <h4 className="text-sm font-semibold text-green-800 mb-2 flex items-center gap-2">
             <Zap className="w-4 h-4" />
             نصائح ذكية لكلمة مرور قوية
@@ -906,22 +730,16 @@ const Register = () => {
               استخدم 12 حرف أو أكثر
             </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 
   // خطوة التأكيد والإنهاء المحسنة
-  const ConfirmationStep = () => (
-    <div className="space-y-6 text-center">
-      {isLoading ? (
-        <div className="py-12">
+  const ConfirmationStep = () => <div className="space-y-6 text-center">
+      {isLoading ? <div className="py-12">
           <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin text-primary" />
           <h2 className="text-2xl font-bold mb-2">جاري إنشاء حسابك...</h2>
           <p className="text-muted-foreground">يرجى الانتظار بينما نقوم بإعداد شركتك</p>
-        </div>
-      ) : (
-        <>
+        </div> : <>
           <div className="relative">
             <CheckCircle className="w-20 h-20 mx-auto mb-4 text-green-500" />
             <div className="absolute -top-2 -right-2 animate-bounce">
@@ -1030,26 +848,21 @@ const Register = () => {
             </p>
             <Progress value={100} className="h-2 mt-2" />
           </div>
-        </>
-      )}
-    </div>
-  );
+        </>}
+    </div>;
 
   // تقييم قوة كلمة المرور
   const passwordStrength = analyzePasswordStrength(formData.adminPassword);
 
   // مكون معاينة الخطة المختارة محسن للموبايل
-  const PlanPreview = () => (
-    <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 rounded-xl p-3 sm:p-4 mb-6">
+  const PlanPreview = () => <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 rounded-xl p-3 sm:p-4 mb-6">
       <div className="flex items-center gap-3 mb-3">
         <selectedPlan.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0" />
         <div className="flex-1 min-w-0">
           <h4 className="font-semibold text-primary text-sm sm:text-base truncate">الخطة المختارة: {selectedPlan.name}</h4>
           <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">{selectedPlan.description}</p>
         </div>
-        {selectedPlan.popular && (
-          <Badge className="bg-primary text-white text-xs flex-shrink-0">الأكثر اختياراً</Badge>
-        )}
+        {selectedPlan.popular && <Badge className="bg-primary text-white text-xs flex-shrink-0">الأكثر اختياراً</Badge>}
       </div>
       
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-sm">
@@ -1073,26 +886,20 @@ const Register = () => {
       
       <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mt-3 pt-3 border-t border-primary/10">
         <span className="text-xs text-green-600 text-center">✅ تجربة مجانية ١٤ يوماً</span>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => setCurrentStep(1)}
-          className="text-xs h-auto py-1 px-2 text-primary hover:bg-primary/10 w-full sm:w-auto"
-        >
+        <Button variant="ghost" size="sm" onClick={() => setCurrentStep(1)} className="text-xs h-auto py-1 px-2 text-primary hover:bg-primary/10 w-full sm:w-auto">
           تغيير الخطة
         </Button>
       </div>
-    </div>
-  );
+    </div>;
 
   // مكون حقل الإدخال مع مؤشر الحالة
-  const InputWithStatus = ({ 
-    label, 
-    field, 
-    type = 'text', 
-    placeholder, 
+  const InputWithStatus = ({
+    label,
+    field,
+    type = 'text',
+    placeholder,
     description,
-    isPassword = false 
+    isPassword = false
   }: {
     label: string;
     field: keyof FormData;
@@ -1105,9 +912,7 @@ const Register = () => {
     const error = errors[field];
     const isValid = value && !error;
     const isInvalid = value && error;
-
-    return (
-      <div>
+    return <div>
         <Label htmlFor={field} className="flex items-center gap-2">
           {label}
           {field.includes('admin') || field.includes('contact') ? <span className="text-red-500">*</span> : null}
@@ -1116,54 +921,27 @@ const Register = () => {
         </Label>
         
         <div className="relative">
-          <Input
-            id={field}
-            type={isPassword ? (field === 'adminPassword' ? (showPassword ? 'text' : 'password') : (showConfirmPassword ? 'text' : 'password')) : type}
-            value={value}
-            onChange={(e) => updateFormData(field, e.target.value)}
-            placeholder={placeholder}
-            className={`${
-              isValid ? 'border-green-500 bg-green-50/50' : 
-              isInvalid ? 'border-destructive bg-red-50/50' : ''
-            } transition-colors`}
-          />
+          <Input id={field} type={isPassword ? field === 'adminPassword' ? showPassword ? 'text' : 'password' : showConfirmPassword ? 'text' : 'password' : type} value={value} onChange={e => updateFormData(field, e.target.value)} placeholder={placeholder} className={`${isValid ? 'border-green-500 bg-green-50/50' : isInvalid ? 'border-destructive bg-red-50/50' : ''} transition-colors`} />
           
-          {isPassword && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 h-auto p-1"
-              onClick={() => field === 'adminPassword' ? setShowPassword(!showPassword) : setShowConfirmPassword(!showConfirmPassword)}
-            >
+          {isPassword && <Button type="button" variant="ghost" size="sm" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-auto p-1" onClick={() => field === 'adminPassword' ? setShowPassword(!showPassword) : setShowConfirmPassword(!showConfirmPassword)}>
               {(field === 'adminPassword' ? showPassword : showConfirmPassword) ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </Button>
-          )}
+            </Button>}
         </div>
         
-        {description && !error && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
-        )}
+        {description && !error && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
         
-        {error && (
-          <p className="text-sm text-destructive mt-1 flex items-center gap-1">
+        {error && <p className="text-sm text-destructive mt-1 flex items-center gap-1">
             <span className="text-red-500">⚠️</span>
             {error}
-          </p>
-        )}
+          </p>}
         
-        {isValid && (
-          <p className="text-sm text-green-600 mt-1 flex items-center gap-1">
+        {isValid && <p className="text-sm text-green-600 mt-1 flex items-center gap-1">
             <CheckCircle className="w-4 h-4" />
             ممتاز!
-          </p>
-        )}
-      </div>
-    );
+          </p>}
+      </div>;
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background flex items-center justify-center p-2 sm:p-4">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background flex items-center justify-center p-2 sm:p-4">
       <div className="w-full max-w-4xl">
         {/* Header محسن للموبايل مع مؤشر الحفظ */}
         <div className="text-center mb-6 sm:mb-8">
@@ -1175,75 +953,34 @@ const Register = () => {
             
             {/* مؤشر الحفظ التلقائي */}
             <div className="flex items-center gap-2">
-              {isAutoSaving && (
-                <div className="flex items-center gap-1 text-xs text-blue-600">
+              {isAutoSaving && <div className="flex items-center gap-1 text-xs text-blue-600">
                   <Save className="w-3 h-3 animate-pulse" />
                   <span className="hidden sm:inline">حفظ...</span>
-                </div>
-              )}
+                </div>}
               
-              {lastSaved && !isAutoSaving && (
-                <div className="flex items-center gap-1 text-xs text-green-600">
+              {lastSaved && !isAutoSaving && <div className="flex items-center gap-1 text-xs text-green-600">
                   <CheckCircle className="w-3 h-3" />
                   <span className="hidden sm:inline">محفوظ</span>
-                </div>
-              )}
+                </div>}
               
-              {lastSaved && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearSavedData}
-                  className="text-xs h-auto py-1 px-2 text-muted-foreground hover:text-destructive"
-                  title="مسح البيانات المحفوظة"
-                >
+              {lastSaved && <Button variant="ghost" size="sm" onClick={clearSavedData} className="text-xs h-auto py-1 px-2 text-muted-foreground hover:text-destructive" title="مسح البيانات المحفوظة">
                   <RotateCcw className="w-3 h-3" />
                   <span className="hidden sm:inline mr-1">مسح</span>
-                </Button>
-              )}
+                </Button>}
             </div>
           </div>
           
           <h1 className="text-2xl sm:text-4xl font-bold text-primary mb-2">إنشاء حساب جديد</h1>
           <p className="text-sm sm:text-base text-muted-foreground">ابدأ تجربتك المجانية اليوم مع Fleetify</p>
           
-          {lastSaved && (
-            <p className="text-xs text-muted-foreground mt-2">
+          {lastSaved && <p className="text-xs text-muted-foreground mt-2">
               آخر حفظ: {lastSaved.toLocaleTimeString('ar-KW')}
-            </p>
-          )}
+            </p>}
         </div>
 
         <Card className="shadow-xl border-0">
           <CardContent className="p-4 sm:p-8">
-            {/* مؤشر تقدم الخطوات */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                {[1, 2, 3, 4].map((step) => (
-                  <div key={step} className="flex items-center">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                      step <= currentStep 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-muted text-muted-foreground'
-                    }`}>
-                      {step < currentStep ? <CheckCircle className="w-4 h-4" /> : step}
-                    </div>
-                    {step < 4 && (
-                      <div className={`w-8 sm:w-16 h-0.5 mx-2 ${
-                        step < currentStep ? 'bg-primary' : 'bg-muted'
-                      }`} />
-                    )}
-                  </div>
-                ))}
-              </div>
-              <Progress value={(currentStep / 4) * 100} className="h-2" />
-              <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>اختيار الخطة</span>
-                <span>بيانات الشركة</span>
-                <span>بيانات المدير</span>
-                <span>التأكيد</span>
-              </div>
-            </div>
+            <StepProgress />
 
             {/* محتوى الخطوات مع تحسين الارتفاع للموبايل */}
             <div className="min-h-[400px] sm:min-h-[500px]">
@@ -1254,61 +991,35 @@ const Register = () => {
             </div>
 
             {/* أزرار التحكم محسنة للموبايل */}
-            {currentStep < 4 && !isLoading && (
-              <div className="flex flex-col sm:flex-row justify-between gap-3 pt-6 sm:pt-8 border-t">
+            {currentStep < 4 && !isLoading && <div className="flex flex-col sm:flex-row justify-between gap-3 pt-6 sm:pt-8 border-t">
                 <div className="order-2 sm:order-1">
-                  {currentStep > 1 && (
-                    <Button 
-                      variant="outline" 
-                      onClick={prevStep}
-                      className="w-full sm:w-auto h-12 sm:h-10 text-base sm:text-sm"
-                    >
+                  {currentStep > 1 && <Button variant="outline" onClick={prevStep} className="w-full sm:w-auto h-12 sm:h-10 text-base sm:text-sm">
                       <ArrowRight className="w-4 h-4 mr-2" />
                       السابق
-                    </Button>
-                  )}
+                    </Button>}
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 order-1 sm:order-2 sm:mr-auto">
                   <Link to="/auth" className="order-2 sm:order-1">
-                    <Button 
-                      variant="ghost" 
-                      className="w-full sm:w-auto h-12 sm:h-10 text-base sm:text-sm"
-                    >
+                    <Button variant="ghost" className="w-full sm:w-auto h-12 sm:h-10 text-base sm:text-sm">
                       لديك حساب؟ دخول
                     </Button>
                   </Link>
 
-                  {currentStep < 3 ? (
-                    <Button 
-                      onClick={nextStep}
-                      className="w-full sm:w-auto h-12 sm:h-10 text-base sm:text-sm order-1 sm:order-2"
-                    >
+                  {currentStep < 3 ? <Button onClick={nextStep} className="w-full sm:w-auto h-12 sm:h-10 text-base sm:text-sm order-1 sm:order-2">
                       التالي
                       <ArrowLeft className="w-4 h-4 mr-2" />
-                    </Button>
-                  ) : (
-                    <Button 
-                      onClick={handleSubmit} 
-                      disabled={isLoading || isEnhancedLoading}
-                      className="w-full sm:w-auto h-12 sm:h-10 text-base sm:text-sm order-1 sm:order-2"
-                    >
-                      {isLoading || isEnhancedLoading ? (
-                        <>
+                    </Button> : <Button onClick={handleSubmit} disabled={isLoading || isEnhancedLoading} className="w-full sm:w-auto h-12 sm:h-10 text-base sm:text-sm order-1 sm:order-2">
+                      {isLoading || isEnhancedLoading ? <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           جاري الإنشاء...
-                        </>
-                      ) : (
-                        <>
+                        </> : <>
                           إنشاء الحساب والمتابعة
                           <ArrowLeft className="w-4 h-4 mr-2" />
-                        </>
-                      )}
-                    </Button>
-                  )}
+                        </>}
+                    </Button>}
                 </div>
-              </div>
-            )}
+              </div>}
 
             {/* روابط المساعدة */}
             <div className="text-center text-xs text-muted-foreground border-t pt-4 mt-6">
@@ -1324,19 +1035,13 @@ const Register = () => {
       </div>
 
       {/* نظام التوصية الذكي */}
-      <PlanRecommendation
-        isOpen={showRecommendation}
-        onRecommendation={handleRecommendation}
-        onSkip={handleSkipRecommendation}
-      />
+      <PlanRecommendation isOpen={showRecommendation} onRecommendation={handleRecommendation} onSkip={handleSkipRecommendation} />
 
       {/* نظام التحميل المحسن */}
       {isEnhancedLoading && <LoadingComponent />}
 
       {/* نظام المساعدة التفاعلي */}
       <HelpSystem currentStep={currentStep} context="registration" />
-    </div>
-  );
+    </div>;
 };
-
-export default Register; 
+export default Register;
