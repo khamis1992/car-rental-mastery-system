@@ -10,7 +10,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
-import { Building2 } from 'lucide-react';
+import { Building2, CheckCircle, AlertCircle } from 'lucide-react';
 import { OrganizationInfoSection } from './OrganizationInfoSection';
 import { ContactInfoSection } from './ContactInfoSection';
 import { SubscriptionPlanSection } from './SubscriptionPlanSection';
@@ -35,6 +35,11 @@ export const EnhancedTenantOnboarding: React.FC<EnhancedTenantOnboardingProps> =
   onSuccess,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [creationStatus, setCreationStatus] = useState<{
+    step: string;
+    success: boolean;
+    details?: any;
+  } | null>(null);
   const { toast } = useToast();
   const tenantService = new TenantService();
   const { data: subscriptionPlans = [] } = useSubscriptionPlans();
@@ -80,6 +85,7 @@ export const EnhancedTenantOnboarding: React.FC<EnhancedTenantOnboardingProps> =
   const onSubmit = async (data: TenantOnboardingFormData) => {
     try {
       setIsSubmitting(true);
+      setCreationStatus({ step: 'بدء إنشاء المؤسسة...', success: false });
       
       // إضافة حدود الخطة تلقائياً
       const plan = subscriptionPlans.find(p => p.plan_code === data.subscription_plan);
@@ -90,18 +96,52 @@ export const EnhancedTenantOnboarding: React.FC<EnhancedTenantOnboardingProps> =
         max_contracts: plan?.max_contracts || 100,
       };
 
-      await tenantService.createTenant(tenantData as any);
+      console.log('بيانات إنشاء المؤسسة:', tenantData);
+      setCreationStatus({ step: 'إنشاء المؤسسة والمدير...', success: false });
+
+      const result = await tenantService.createTenant(tenantData as any);
       
-      toast({
-        title: 'تم إنشاء المؤسسة بنجاح',
-        description: `تم إنشاء مؤسسة "${data.name}" وحساب المدير بنجاح`,
+      if (!result.success || !result.tenant_id) {
+        throw new Error(result.message || 'فشل في إنشاء المؤسسة');
+      }
+
+      setCreationStatus({ step: 'التحقق من إنشاء المؤسسة...', success: false });
+
+      // التحقق من نجاح الإنشاء
+      const verification = await tenantService.verifyTenantCreation(result.tenant_id);
+      
+      setCreationStatus({ 
+        step: 'تم الإنشاء بنجاح', 
+        success: true, 
+        details: {
+          tenantName: verification.tenant?.name,
+          usersCount: verification.users.length,
+          hasAdmin: verification.hasAdmin
+        }
       });
 
-      form.reset();
-      onOpenChange(false);
-      onSuccess();
+      toast({
+        title: 'تم إنشاء المؤسسة بنجاح',
+        description: `تم إنشاء مؤسسة "${data.name}" مع ${verification.users.length} مستخدم${verification.hasAdmin ? ' (يتضمن مدير)' : ''}`,
+      });
+
+      // تأخير قصير لعرض النجاح
+      setTimeout(() => {
+        form.reset();
+        setCreationStatus(null);
+        onOpenChange(false);
+        onSuccess();
+      }, 2000);
+
     } catch (error: any) {
       console.error('خطأ في إنشاء المؤسسة:', error);
+      
+      setCreationStatus({ 
+        step: 'فشل في الإنشاء', 
+        success: false,
+        details: { error: error.message }
+      });
+
       toast({
         title: 'خطأ في إنشاء المؤسسة',
         description: error.message || 'حدث خطأ أثناء إنشاء المؤسسة',
@@ -144,6 +184,36 @@ export const EnhancedTenantOnboarding: React.FC<EnhancedTenantOnboardingProps> =
             قم بملء النموذج أدناه لإضافة مؤسسة جديدة إلى النظام
           </DialogDescription>
         </DialogHeader>
+
+        {/* عرض حالة الإنشاء */}
+        {creationStatus && (
+          <div className={`flex items-center gap-3 p-4 rounded-lg border ${
+            creationStatus.success 
+              ? 'bg-green-50 border-green-200 text-green-800' 
+              : 'bg-blue-50 border-blue-200 text-blue-800'
+          }`}>
+            {creationStatus.success ? (
+              <CheckCircle className="w-5 h-5 text-green-600" />
+            ) : (
+              <AlertCircle className="w-5 h-5 text-blue-600 animate-pulse" />
+            )}
+            <div>
+              <p className="font-medium">{creationStatus.step}</p>
+              {creationStatus.details && creationStatus.success && (
+                <p className="text-sm mt-1">
+                  المؤسسة: {creationStatus.details.tenantName} | 
+                  المستخدمين: {creationStatus.details.usersCount} | 
+                  المدير: {creationStatus.details.hasAdmin ? 'موجود' : 'غير موجود'}
+                </p>
+              )}
+              {creationStatus.details && !creationStatus.success && creationStatus.details.error && (
+                <p className="text-sm mt-1 text-red-600">
+                  {creationStatus.details.error}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
