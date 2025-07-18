@@ -106,11 +106,11 @@ const SmartAlertsPanel: React.FC = () => {
         <Card>
           <CardContent className="flex items-center p-4">
             <div className="flex items-center space-x-2 space-x-reverse">
-              {getHealthIcon(systemHealth.overall)}
+              {getHealthIcon(systemHealth?.overall_score || 0)}
               <div>
                 <p className="text-sm text-muted-foreground">الصحة العامة</p>
-                <p className={`text-2xl font-bold ${getHealthColor(systemHealth.overall)}`}>
-                  {systemHealth.overall}%
+                <p className={`text-2xl font-bold ${getHealthColor(systemHealth?.overall_score || 0)}`}>
+                  {systemHealth?.overall_score || 0}%
                 </p>
               </div>
             </div>
@@ -123,8 +123,8 @@ const SmartAlertsPanel: React.FC = () => {
               <Activity className="w-4 h-4 text-orange-600" />
               <div>
                 <p className="text-sm text-muted-foreground">الأداء</p>
-                <p className={`text-lg font-semibold ${getHealthColor(systemHealth.performance)}`}>
-                  {systemHealth.performance}%
+                <p className={`text-lg font-semibold ${getHealthColor(systemHealth?.api_health || 0)}`}>
+                  {systemHealth?.api_health || 0}%
                 </p>
               </div>
             </div>
@@ -137,8 +137,8 @@ const SmartAlertsPanel: React.FC = () => {
               <Shield className="w-4 h-4 text-blue-600" />
               <div>
                 <p className="text-sm text-muted-foreground">الأمان</p>
-                <p className={`text-lg font-semibold ${getHealthColor(systemHealth.security)}`}>
-                  {systemHealth.security}%
+                <p className={`text-lg font-semibold ${getHealthColor(systemHealth?.security_health || 0)}`}>
+                  {systemHealth?.security_health || 0}%
                 </p>
               </div>
             </div>
@@ -151,8 +151,8 @@ const SmartAlertsPanel: React.FC = () => {
               <Database className="w-4 h-4 text-purple-600" />
               <div>
                 <p className="text-sm text-muted-foreground">قاعدة البيانات</p>
-                <p className={`text-lg font-semibold ${getHealthColor(systemHealth.database)}`}>
-                  {systemHealth.database}%
+                <p className={`text-lg font-semibold ${getHealthColor(systemHealth?.database_health || 0)}`}>
+                  {systemHealth?.database_health || 0}%
                 </p>
               </div>
             </div>
@@ -165,8 +165,8 @@ const SmartAlertsPanel: React.FC = () => {
               <Wifi className="w-4 h-4 text-green-600" />
               <div>
                 <p className="text-sm text-muted-foreground">الاتصال</p>
-                <p className={`text-lg font-semibold ${getHealthColor(systemHealth.connectivity)}`}>
-                  {systemHealth.connectivity}%
+                <p className={`text-lg font-semibold ${getHealthColor(systemHealth?.storage_health || 0)}`}>
+                  {systemHealth?.storage_health || 0}%
                 </p>
               </div>
             </div>
@@ -242,7 +242,7 @@ const SmartAlertsPanel: React.FC = () => {
                 <div 
                   key={alert.id}
                   className={`flex items-start justify-between p-3 rounded-lg border ${
-                    alert.isRead ? 'bg-gray-50' : 'bg-white'
+                    (alert as any).read_at ? 'bg-gray-50' : 'bg-white'
                   } ${
                     alert.severity === 'high' ? 'border-red-200' :
                     alert.severity === 'medium' ? 'border-yellow-200' :
@@ -253,7 +253,7 @@ const SmartAlertsPanel: React.FC = () => {
                     {getAlertIcon(alert.type, alert.severity)}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className={`text-sm font-medium ${alert.isRead ? 'text-gray-600' : 'text-gray-900'}`}>
+                        <h4 className={`text-sm font-medium ${(alert as any).read_at ? 'text-gray-600' : 'text-gray-900'}`}>
                           {alert.title}
                         </h4>
                         <Badge 
@@ -267,24 +267,24 @@ const SmartAlertsPanel: React.FC = () => {
                           {alert.severity === 'high' ? 'عالي' :
                            alert.severity === 'medium' ? 'متوسط' : 'منخفض'}
                         </Badge>
-                        {alert.actionRequired && (
+                        {alert.actions && alert.actions.length > 0 && (
                           <Badge variant="outline" className="text-xs">
                             يتطلب إجراء
                           </Badge>
                         )}
                       </div>
-                      <p className={`text-sm ${alert.isRead ? 'text-gray-500' : 'text-gray-700'}`}>
+                      <p className={`text-sm ${(alert as any).read_at ? 'text-gray-500' : 'text-gray-700'}`}>
                         {alert.message}
                       </p>
                       <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                        <span>{new Date(alert.timestamp).toLocaleString('ar-SA')}</span>
+                        <span>{new Date(alert.created_at).toLocaleString('ar-SA')}</span>
                         <span>المصدر: {alert.source}</span>
                       </div>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-1">
-                    {!alert.isRead && (
+                    {!(alert as any).read_at && (
                       <Button
                         onClick={() => markAsRead(alert.id)}
                         variant="ghost"

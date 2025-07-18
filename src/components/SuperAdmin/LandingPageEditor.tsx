@@ -199,7 +199,13 @@ const LandingPageEditor: React.FC = () => {
       if (data) {
         setConfig({
           ...data,
-          sections: data.sections || getDefaultSections()
+          sections: Array.isArray(data.sections) 
+            ? data.sections 
+            : (typeof data.sections === 'string' ? JSON.parse(data.sections) : getDefaultSections()),
+          last_updated: data.updated_at || new Date().toISOString(),
+          meta_tags: typeof data.meta_tags === 'object' && data.meta_tags !== null 
+            ? data.meta_tags as Record<string, string>
+            : { keywords: '', author: '', robots: 'index,follow' }
         });
       } else {
         // إنشاء تكوين افتراضي
@@ -260,13 +266,34 @@ const LandingPageEditor: React.FC = () => {
 
       const { data, error } = await supabase
         .from('landing_page_config')
-        .upsert([configToSave])
+        .upsert([{
+          id: configToSave.id,
+          site_title: configToSave.site_title,
+          site_description: configToSave.site_description,
+          logo_url: configToSave.logo_url,
+          favicon_url: configToSave.favicon_url,
+          primary_color: configToSave.primary_color,
+          secondary_color: configToSave.secondary_color,
+          font_family: configToSave.font_family,
+          custom_css: configToSave.custom_css,
+          meta_tags: configToSave.meta_tags as any,
+          sections: JSON.stringify(configToSave.sections),
+          published: configToSave.published,
+          updated_at: configToSave.last_updated
+        }])
         .select()
         .single();
 
       if (error) throw error;
 
-      setConfig(data);
+      setConfig({
+        ...data,
+        sections: typeof data.sections === 'string' ? JSON.parse(data.sections) : data.sections || [],
+        last_updated: data.updated_at || new Date().toISOString(),
+        meta_tags: typeof data.meta_tags === 'object' && data.meta_tags !== null 
+          ? data.meta_tags as Record<string, string>
+          : { keywords: '', author: '', robots: 'index,follow' }
+      });
       
       toast({
         title: "تم الحفظ",
