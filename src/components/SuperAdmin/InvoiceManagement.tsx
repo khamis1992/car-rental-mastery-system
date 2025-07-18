@@ -77,7 +77,7 @@ const InvoiceManagement: React.FC<InvoiceManagementProps> = ({
     // فلتر التاريخ
     let matchesDate = true;
     if (dateFilter !== 'all') {
-      const invoiceDate = new Date(invoice.invoice_date);
+      const invoiceDate = new Date(invoice.created_at);
       const now = new Date();
       
       switch (dateFilter) {
@@ -182,7 +182,7 @@ const InvoiceManagement: React.FC<InvoiceManagementProps> = ({
       return { label: 'مدفوعة بالكامل', color: 'text-green-600' };
     }
     
-    if (invoice.paid_amount > 0) {
+    if ((invoice as any).amount_paid > 0) {
       return { label: 'مدفوعة جزئياً', color: 'text-orange-600' };
     }
     
@@ -279,10 +279,10 @@ const InvoiceManagement: React.FC<InvoiceManagementProps> = ({
                       <span className="text-muted-foreground">الحالة:</span>
                       {getStatusBadge(selectedInvoice.status)}
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">تاريخ الإصدار:</span>
-                      <span>{selectedInvoice.invoice_date}</span>
-                    </div>
+                     <div className="flex justify-between">
+                       <span className="text-muted-foreground">تاريخ الإصدار:</span>
+                       <span>{new Date(selectedInvoice.created_at).toLocaleDateString('ar-SA')}</span>
+                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">تاريخ الاستحقاق:</span>
                       <span>{selectedInvoice.due_date}</span>
@@ -311,12 +311,12 @@ const InvoiceManagement: React.FC<InvoiceManagementProps> = ({
                       <span>المجموع الكلي:</span>
                       <span>{formatPrice(selectedInvoice.total_amount)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">المدفوع:</span>
-                      <span className={getPaymentStatus(selectedInvoice).color}>
-                        {formatPrice(selectedInvoice.paid_amount)}
-                      </span>
-                    </div>
+                     <div className="flex justify-between">
+                       <span className="text-muted-foreground">المدفوع:</span>
+                       <span className={getPaymentStatus(selectedInvoice).color}>
+                         {formatPrice((selectedInvoice as any).amount_paid || 0)}
+                       </span>
+                     </div>
                   </CardContent>
                 </Card>
               </div>
@@ -610,10 +610,10 @@ const InvoiceManagement: React.FC<InvoiceManagementProps> = ({
                   <TableCell>{getStatusBadge(invoice.status)}</TableCell>
                   <TableCell className="font-mono">{formatPrice(invoice.total_amount)}</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4 text-muted-foreground" />
-                      {invoice.invoice_date}
-                    </div>
+                     <div className="flex items-center gap-1">
+                       <Calendar className="w-4 h-4 text-muted-foreground" />
+                       {new Date(invoice.created_at).toLocaleDateString('ar-SA')}
+                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">

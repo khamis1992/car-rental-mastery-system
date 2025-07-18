@@ -14,6 +14,26 @@ import type {
  */
 export class EnhancedSaasService {
   
+  /**
+   * تحديث حالة الفاتورة
+   */
+  async updateInvoiceStatus(invoiceId: string, status: SaasInvoice['status']): Promise<void> {
+    const updates: any = { status };
+    
+    if (status === 'paid') {
+      updates.paid_at = new Date().toISOString();
+    }
+
+    const { error } = await supabase
+      .from('saas_invoices')
+      .update(updates)
+      .eq('id', invoiceId);
+
+    if (error) {
+      throw new Error(`فشل في تحديث حالة الفاتورة: ${error.message}`);
+    }
+  }
+  
   // =======================================================
   // خطط الاشتراك (Subscription Plans)
   // =======================================================

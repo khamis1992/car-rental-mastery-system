@@ -262,14 +262,14 @@ const AdvancedTenantManagement: React.FC = () => {
     }
   };
   // معالج تغيير الباقة
-  const handlePlanChange = (selectedPlan: keyof typeof subscriptionPlans) => {
-    const plan = subscriptionPlans[selectedPlan];
+  const handlePlanChange = (selectedPlan: SubscriptionPlanCode) => {
+    const plan = SUBSCRIPTION_PLANS[selectedPlan];
     setNewTenantData(prev => ({
       ...prev,
       subscription_plan: selectedPlan,
-      max_users: plan.max_users,
-      max_vehicles: plan.max_vehicles,
-      max_contracts: plan.max_contracts
+      max_users: plan.limits.max_users_per_tenant,
+      max_vehicles: plan.limits.max_vehicles,
+      max_contracts: plan.limits.max_contracts
     }));
   };
 
@@ -312,10 +312,10 @@ const AdvancedTenantManagement: React.FC = () => {
         country: 'Kuwait',
         timezone: 'Asia/Kuwait',
         currency: 'KWD',
-        subscription_plan: 'basic',
-        max_users: subscriptionPlans.basic.max_users,
-        max_vehicles: subscriptionPlans.basic.max_vehicles,
-        max_contracts: subscriptionPlans.basic.max_contracts,
+        subscription_plan: 'basic' as SubscriptionPlanCode,
+        max_users: SUBSCRIPTION_PLANS.basic.limits.max_users_per_tenant,
+        max_vehicles: SUBSCRIPTION_PLANS.basic.limits.max_vehicles,
+        max_contracts: SUBSCRIPTION_PLANS.basic.limits.max_contracts,
         admin_user: {
           email: '',
           password: '',
