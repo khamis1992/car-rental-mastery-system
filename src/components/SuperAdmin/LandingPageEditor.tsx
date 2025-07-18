@@ -1,756 +1,1107 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { 
-  Save, 
-  Eye, 
-  Upload, 
-  Download,
-  RefreshCw,
-  Plus,
-  Trash2,
-  Edit,
-  Image,
-  Type,
-  Palette,
+import {
   Layout,
+  Type,
+  Image as ImageIcon,
+  Video,
+  Code,
+  Palette,
+  Eye,
+  Save,
+  Trash2,
+  Plus,
+  Move,
   Settings,
-  Globe,
   Monitor,
   Smartphone,
   Tablet,
-  Check,
-  X
+  Undo,
+  Redo,
+  Copy,
+  Edit,
+  AlertTriangle,
+  CheckCircle,
+  RefreshCw,
+  Upload,
+  Download,
+  Globe
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
-interface LandingPageSection {
+// استيراد المكونات المحسنة
+import { EnhancedDialog } from '@/components/ui/enhanced-dialog';
+import { EnhancedTable } from '@/components/ui/enhanced-table';
+import { ActionButton, EnhancedButton } from '@/components/ui/enhanced-button';
+import { LoadingState, ErrorBoundary } from '@/components/ui/enhanced-error-handling';
+import { useTranslation, formatStatus } from '@/utils/translationUtils';
+
+interface PageSection {
   id: string;
-  type: 'hero' | 'features' | 'pricing' | 'testimonials' | 'cta' | 'footer';
+  type: 'hero' | 'features' | 'testimonials' | 'pricing' | 'contact' | 'gallery' | 'about' | 'custom';
   title: string;
-  subtitle?: string;
-  content: string;
-  image_url?: string;
+  content: any;
   order: number;
-  enabled: boolean;
-  settings: Record<string, any>;
+  isVisible: boolean;
+  settings: {
+    backgroundColor?: string;
+    textColor?: string;
+    padding?: string;
+    margin?: string;
+    customCSS?: string;
+  };
 }
 
-interface LandingPageConfig {
-  id?: string;
-  site_title: string;
-  site_description: string;
-  logo_url?: string;
-  favicon_url?: string;
-  primary_color: string;
-  secondary_color: string;
-  font_family: string;
-  custom_css?: string;
-  meta_tags: Record<string, string>;
-  sections: LandingPageSection[];
-  published: boolean;
-  last_updated: string;
+interface LandingPage {
+  id: string;
+  name: string;
+  slug: string;
+  title: string;
+  description: string;
+  tenantId: string;
+  tenantName: string;
+  sections: PageSection[];
+  settings: {
+    theme: 'light' | 'dark' | 'custom';
+    primaryColor: string;
+    secondaryColor: string;
+    fontFamily: string;
+    customCSS: string;
+  };
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
+}
+
+interface Template {
+  id: string;
+  name: string;
+  description: string;
+  preview: string;
+  sections: Omit<PageSection, 'id'>[];
+  category: 'business' | 'portfolio' | 'blog' | 'ecommerce';
 }
 
 const LandingPageEditor: React.FC = () => {
   const { toast } = useToast();
-  const [config, setConfig] = useState<LandingPageConfig>({
-    site_title: 'نظام إدارة تأجير السيارات',
-    site_description: 'نظام شامل لإدارة تأجير السيارات مع جميع الميزات المتقدمة',
-    primary_color: '#3B82F6',
-    secondary_color: '#10B981',
-    font_family: 'Inter',
-    meta_tags: {
-      keywords: 'تأجير السيارات, إدارة الأسطول, نظام SaaS',
-      author: 'Car Rental System',
-      robots: 'index,follow'
-    },
-    sections: [],
-    published: false,
-    last_updated: new Date().toISOString()
-  });
-
-  const [activeTab, setActiveTab] = useState('general');
+  const { t, msg, formatNumber } = useTranslation();
+  
+  // State management
+  const [selectedPage, setSelectedPage] = useState<LandingPage | null>(null);
+  const [showPageEditor, setShowPageEditor] = useState(false);
+  const [showCreatePage, setShowCreatePage] = useState(false);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [showSectionEditor, setShowSectionEditor] = useState(false);
+  const [selectedSection, setSelectedSection] = useState<PageSection | null>(null);
   const [previewMode, setPreviewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [confirmationDialog, setConfirmationDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
 
-  const sectionTemplates = {
-    hero: {
-      type: 'hero' as const,
-      title: 'مرحباً بك في نظام إدارة تأجير السيارات',
-      subtitle: 'الحل الشامل لإدارة أعمال تأجير السيارات',
-      content: 'نظام متكامل وسهل الاستخدام يوفر جميع الأدوات اللازمة لإدارة أسطول السيارات والعقود والعملاء بكفاءة عالية.',
-      settings: {
-        background_type: 'image',
-        background_value: '/hero-rental.jpg',
-        text_alignment: 'center',
-        button_text: 'ابدأ الآن',
-        button_link: '/auth'
-      }
-    },
-    features: {
-      type: 'features' as const,
-      title: 'الميزات الرئيسية',
-      subtitle: 'كل ما تحتاجه لإدارة أعمال تأجير السيارات',
-      content: JSON.stringify([
+  // نموذج صفحة جديدة
+  const [newPageForm, setNewPageForm] = useState({
+    name: '',
+    slug: '',
+    title: '',
+    description: '',
+    tenantId: '',
+    theme: 'light' as const,
+    primaryColor: '#3b82f6',
+    secondaryColor: '#64748b'
+  });
+
+  // نموذج قسم جديد
+  const [newSectionForm, setNewSectionForm] = useState({
+    type: 'hero' as const,
+    title: '',
+    content: {},
+    backgroundColor: '#ffffff',
+    textColor: '#000000'
+  });
+
+  // بيانات تجريبية
+  const [landingPages, setLandingPages] = useState<LandingPage[]>([
+    {
+      id: '1',
+      name: 'صفحة شركة الخليج للنقل',
+      slug: 'gulf-transport',
+      title: 'شركة الخليج للنقل - خدمات النقل المتميزة',
+      description: 'نوفر خدمات النقل والخدمات اللوجستية بأعلى معايير الجودة',
+      tenantId: 'tenant-1',
+      tenantName: 'شركة الخليج للنقل',
+      sections: [
         {
-          icon: 'Car',
-          title: 'إدارة الأسطول',
-          description: 'تتبع وإدارة جميع المركبات بسهولة'
-        },
-        {
-          icon: 'FileText',
-          title: 'إدارة العقود',
-          description: 'إنشاء وإدارة عقود التأجير بكفاءة'
-        },
-        {
-          icon: 'Users',
-          title: 'إدارة العملاء',
-          description: 'قاعدة بيانات شاملة للعملاء'
-        },
-        {
-          icon: 'BarChart3',
-          title: 'التقارير والتحليلات',
-          description: 'تقارير مفصلة لاتخاذ قرارات ذكية'
+          id: 's1',
+          type: 'hero',
+          title: 'القسم الرئيسي',
+          content: {
+            headline: 'عنوان رئيسي جذاب',
+            subtitle: 'وصف مختصر وواضح',
+            buttonText: 'ابدأ الآن',
+            backgroundImage: '/images/hero-bg.jpg'
+          },
+          order: 1,
+          isVisible: true,
+          settings: {
+            backgroundColor: '#1e40af',
+            textColor: '#ffffff'
+          }
         }
-      ]),
+      ],
       settings: {
-        layout: 'grid',
-        columns: 2,
-        show_icons: true
-      }
-    },
-    pricing: {
-      type: 'pricing' as const,
-      title: 'خطط الاشتراك',
-      subtitle: 'اختر الخطة المناسبة لك',
-      content: JSON.stringify([
-        {
-          name: 'أساسية',
-          price: '29.999',
-          currency: 'KWD',
-          period: 'شهرياً',
-          features: ['حتى 10 مركبات', '100 عقد شهرياً', 'دعم فني أساسي'],
-          popular: false
-        },
-        {
-          name: 'احترافية',
-          price: '49.999',
-          currency: 'KWD', 
-          period: 'شهرياً',
-          features: ['حتى 50 مركبة', '500 عقد شهرياً', 'تقارير متقدمة', 'دعم فني 24/7'],
-          popular: true
-        },
-        {
-          name: 'مؤسسية',
-          price: '99.999',
-          currency: 'KWD',
-          period: 'شهرياً',
-          features: ['مركبات غير محدودة', 'عقود غير محدودة', 'تخصيص كامل', 'دعم مخصص'],
-          popular: false
-        }
-      ]),
-      settings: {
-        layout: 'cards',
-        show_currency: true,
-        highlight_popular: true
-      }
-    },
-    cta: {
-      type: 'cta' as const,
-      title: 'هل أنت مستعد للبدء؟',
-      subtitle: 'ابدأ رحلتك معنا اليوم',
-      content: 'انضم إلى آلاف العملاء الذين يثقون في نظامنا لإدارة أعمال تأجير السيارات',
-      settings: {
-        button_text: 'ابدأ تجربتك المجانية',
-        button_link: '/auth',
-        background_color: '#3B82F6',
-        text_color: '#FFFFFF'
-      }
+        theme: 'light',
+        primaryColor: '#3b82f6',
+        secondaryColor: '#64748b',
+        fontFamily: 'Tajawal',
+        customCSS: ''
+      },
+      isPublished: true,
+      createdAt: '2024-01-10T09:00:00Z',
+      updatedAt: '2024-01-15T14:30:00Z',
+      publishedAt: '2024-01-12T10:00:00Z'
     }
-  };
+  ]);
 
-  useEffect(() => {
-    loadLandingPageConfig();
-  }, []);
+  const [templates] = useState<Template[]>([
+    {
+      id: 't1',
+      name: 'قالب الأعمال الاحترافي',
+      description: 'قالب متكامل للشركات والأعمال التجارية',
+      preview: '/templates/business-pro.jpg',
+      category: 'business',
+      sections: [
+        {
+          type: 'hero',
+          title: 'القسم الرئيسي',
+          content: {
+            headline: 'عنوان رئيسي جذاب',
+            subtitle: 'وصف مختصر وواضح لخدماتك',
+            buttonText: 'ابدأ الآن'
+          },
+          order: 1,
+          isVisible: true,
+          settings: {}
+        },
+        {
+          type: 'features',
+          title: 'المميزات',
+          content: {
+            features: [
+              { title: 'ميزة رائعة', description: 'وصف الميزة', icon: 'star' },
+              { title: 'ميزة أخرى', description: 'وصف الميزة', icon: 'check' },
+              { title: 'ميزة ثالثة', description: 'وصف الميزة', icon: 'heart' }
+            ]
+          },
+          order: 2,
+          isVisible: true,
+          settings: {}
+        }
+      ]
+    }
+  ]);
 
-  const loadLandingPageConfig = async () => {
-    try {
-      setLoading(true);
-      
-      const { data, error } = await supabase
-        .from('landing_page_config')
-        .select('*')
-        .single();
+  // تعريف أعمدة جدول الصفحات
+  const pageColumns = [
+    {
+      key: 'name',
+      title: 'اسم الصفحة',
+      sortable: true,
+      render: (value: string, row: LandingPage) => (
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+            <Layout className="w-4 h-4 text-primary" />
+          </div>
+          <div>
+            <div className="font-medium">{value}</div>
+            <div className="text-xs text-muted-foreground">{row.slug}</div>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'tenantName',
+      title: 'المؤسسة',
+      render: (tenantName: string) => (
+        <span className="text-sm text-muted-foreground">{tenantName}</span>
+      )
+    },
+    {
+      key: 'isPublished',
+      title: 'الحالة',
+      align: 'center' as const,
+      render: (isPublished: boolean) => (
+        <Badge variant={isPublished ? 'default' : 'secondary'}>
+          {isPublished ? 'منشورة' : 'مسودة'}
+        </Badge>
+      )
+    },
+    {
+      key: 'sections',
+      title: 'الأقسام',
+      align: 'center' as const,
+      render: (sections: PageSection[]) => (
+        <span className="font-medium">{formatNumber(sections.length)}</span>
+      )
+    },
+    {
+      key: 'updatedAt',
+      title: 'آخر تحديث',
+      render: (date: string) => (
+        <span className="text-sm text-muted-foreground">
+          {new Date(date).toLocaleDateString('ar-SA')}
+        </span>
+      )
+    }
+  ];
 
-      if (error && !error.message.includes('0 rows')) {
-        throw error;
+  // تعريف إجراءات الصفحات
+  const pageActions = [
+    {
+      label: 'تحرير',
+      icon: <Edit className="w-4 h-4" />,
+      onClick: (page: LandingPage) => {
+        setSelectedPage(page);
+        setShowPageEditor(true);
       }
-
-      if (data) {
-        setConfig({
-          ...data,
-          sections: data.sections || getDefaultSections()
+    },
+    {
+      label: 'معاينة',
+      icon: <Eye className="w-4 h-4" />,
+      onClick: (page: LandingPage) => {
+        window.open(`/preview/${page.slug}`, '_blank');
+      }
+    },
+    {
+      label: 'نسخ',
+      icon: <Copy className="w-4 h-4" />,
+      onClick: (page: LandingPage) => {
+        duplicatePage(page);
+      }
+    },
+    {
+      label: page => page.isPublished ? 'إلغاء النشر' : 'نشر',
+      icon: <Globe className="w-4 h-4" />,
+      onClick: (page: LandingPage) => {
+        togglePublishPage(page);
+      },
+      variant: (page: LandingPage) => page.isPublished ? 'secondary' : 'default'
+    },
+    {
+      label: 'حذف',
+      icon: <Trash2 className="w-4 h-4" />,
+      onClick: (page: LandingPage) => {
+        setConfirmationDialog({
+          isOpen: true,
+          title: 'تأكيد حذف الصفحة',
+          message: `هل أنت متأكد من حذف الصفحة "${page.name}"؟ هذا الإجراء لا يمكن التراجع عنه.`,
+          onConfirm: () => deletePage(page)
         });
-      } else {
-        // إنشاء تكوين افتراضي
-        setConfig(prev => ({
-          ...prev,
-          sections: getDefaultSections()
-        }));
-      }
-    } catch (err) {
-      console.error('خطأ في تحميل تكوين الصفحة الرئيسية:', err);
+      },
+      variant: 'destructive' as const,
+      separator: true
+    }
+  ];
+
+  // معالجات الأحداث
+  const handleCreatePage = async () => {
+    setLoading(true);
+    try {
+      const newPage: LandingPage = {
+        id: Date.now().toString(),
+        name: newPageForm.name,
+        slug: newPageForm.slug || newPageForm.name.toLowerCase().replace(/\s+/g, '-'),
+        title: newPageForm.title,
+        description: newPageForm.description,
+        tenantId: newPageForm.tenantId || 'default',
+        tenantName: 'المؤسسة الافتراضية',
+        sections: [],
+        settings: {
+          theme: newPageForm.theme,
+          primaryColor: newPageForm.primaryColor,
+          secondaryColor: newPageForm.secondaryColor,
+          fontFamily: 'Tajawal',
+          customCSS: ''
+        },
+        isPublished: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      setLandingPages(prev => [...prev, newPage]);
+      
       toast({
-        title: "خطأ",
-        description: "فشل في تحميل تكوين الصفحة الرئيسية",
-        variant: "destructive"
+        title: 'تم إنشاء الصفحة بنجاح',
+        description: `تم إنشاء الصفحة "${newPageForm.name}" بنجاح`
+      });
+      
+      setShowCreatePage(false);
+      resetPageForm();
+    } catch (error) {
+      toast({
+        title: 'خطأ في إنشاء الصفحة',
+        description: 'حدث خطأ أثناء إنشاء الصفحة',
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const getDefaultSections = (): LandingPageSection[] => {
-    return [
-      {
-        id: 'hero-1',
-        ...sectionTemplates.hero,
-        order: 1,
-        enabled: true
-      },
-      {
-        id: 'features-1',
-        ...sectionTemplates.features,
-        order: 2,
-        enabled: true
-      },
-      {
-        id: 'pricing-1',
-        ...sectionTemplates.pricing,
-        order: 3,
-        enabled: true
-      },
-      {
-        id: 'cta-1',
-        ...sectionTemplates.cta,
-        order: 4,
-        enabled: true
+  const handleAddSection = async () => {
+    if (!selectedPage) return;
+
+    // إظهار تأكيد قبل إضافة القسم
+    setConfirmationDialog({
+      isOpen: true,
+      title: 'تأكيد إضافة قسم جديد',
+      message: `هل تريد إضافة قسم "${t(newSectionForm.type)}" إلى الصفحة؟`,
+      onConfirm: () => {
+        const newSection: PageSection = {
+          id: `section-${Date.now()}`,
+          type: newSectionForm.type,
+          title: newSectionForm.title || t(newSectionForm.type),
+          content: getDefaultSectionContent(newSectionForm.type),
+          order: selectedPage.sections.length + 1,
+          isVisible: true,
+          settings: {
+            backgroundColor: newSectionForm.backgroundColor,
+            textColor: newSectionForm.textColor
+          }
+        };
+
+        const updatedPage = {
+          ...selectedPage,
+          sections: [...selectedPage.sections, newSection],
+          updatedAt: new Date().toISOString()
+        };
+
+        setLandingPages(prev =>
+          prev.map(page => page.id === selectedPage.id ? updatedPage : page)
+        );
+
+        setSelectedPage(updatedPage);
+        setShowSectionEditor(false);
+        resetSectionForm();
+
+        toast({
+          title: 'تم إضافة القسم بنجاح',
+          description: `تم إضافة قسم "${newSection.title}" إلى الصفحة`
+        });
       }
-    ];
+    });
   };
 
-  const saveLandingPageConfig = async () => {
-    try {
-      setSaving(true);
-
-      const configToSave = {
-        ...config,
-        last_updated: new Date().toISOString()
-      };
-
-      const { data, error } = await supabase
-        .from('landing_page_config')
-        .upsert([configToSave])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setConfig(data);
-      
-      toast({
-        title: "تم الحفظ",
-        description: "تم حفظ تكوين الصفحة الرئيسية بنجاح",
-      });
-    } catch (err) {
-      console.error('خطأ في حفظ التكوين:', err);
-      toast({
-        title: "خطأ",
-        description: "فشل في حفظ التكوين",
-        variant: "destructive"
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const publishLandingPage = async () => {
-    try {
-      setSaving(true);
-
-      const { error } = await supabase
-        .from('landing_page_config')
-        .update({ 
-          published: true,
-          published_at: new Date().toISOString()
-        })
-        .eq('id', config.id);
-
-      if (error) throw error;
-
-      setConfig(prev => ({ ...prev, published: true }));
-      
-      toast({
-        title: "تم النشر",
-        description: "تم نشر الصفحة الرئيسية بنجاح",
-      });
-    } catch (err) {
-      console.error('خطأ في نشر الصفحة:', err);
-      toast({
-        title: "خطأ",
-        description: "فشل في نشر الصفحة الرئيسية",
-        variant: "destructive"
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const addSection = (templateKey: string) => {
-    const template = sectionTemplates[templateKey as keyof typeof sectionTemplates];
-    if (!template) return;
-
-    const newSection: LandingPageSection = {
-      id: `${template.type}-${Date.now()}`,
-      ...template,
-      order: config.sections.length + 1,
-      enabled: true
+  const getDefaultSectionContent = (type: PageSection['type']) => {
+    const defaults = {
+      hero: {
+        headline: 'عنوان رئيسي جذاب',
+        subtitle: 'وصف مختصر وواضح',
+        buttonText: 'ابدأ الآن',
+        backgroundImage: ''
+      },
+      features: {
+        features: [
+          { title: 'ميزة رائعة', description: 'وصف الميزة', icon: 'star' }
+        ]
+      },
+      testimonials: {
+        testimonials: [
+          { name: 'عميل راضي', comment: 'خدمة ممتازة', rating: 5 }
+        ]
+      },
+      pricing: {
+        plans: [
+          { name: 'الباقة الأساسية', price: '99', features: ['ميزة 1', 'ميزة 2'] }
+        ]
+      },
+      contact: {
+        title: 'تواصل معنا',
+        phone: '+966 50 123 4567',
+        email: 'info@example.com',
+        address: 'الرياض، المملكة العربية السعودية'
+      },
+      gallery: {
+        images: []
+      },
+      about: {
+        title: 'من نحن',
+        description: 'نبذة عن الشركة',
+        team: []
+      },
+      custom: {
+        html: '<div class="text-center"><h2>محتوى مخصص</h2></div>'
+      }
     };
 
-    setConfig(prev => ({
-      ...prev,
-      sections: [...prev.sections, newSection]
-    }));
+    return defaults[type] || {};
   };
 
-  const updateSection = (sectionId: string, updates: Partial<LandingPageSection>) => {
-    setConfig(prev => ({
-      ...prev,
-      sections: prev.sections.map(section =>
-        section.id === sectionId ? { ...section, ...updates } : section
-      )
-    }));
-  };
-
-  const removeSection = (sectionId: string) => {
-    setConfig(prev => ({
-      ...prev,
-      sections: prev.sections.filter(section => section.id !== sectionId)
-    }));
-  };
-
-  const moveSection = (sectionId: string, direction: 'up' | 'down') => {
-    const sections = [...config.sections];
-    const index = sections.findIndex(s => s.id === sectionId);
-    
-    if (index === -1) return;
-    
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    
-    if (newIndex < 0 || newIndex >= sections.length) return;
-    
-    [sections[index], sections[newIndex]] = [sections[newIndex], sections[index]];
-    
-    // إعادة ترقيم الأقسام
-    sections.forEach((section, i) => {
-      section.order = i + 1;
+  const deletePage = (page: LandingPage) => {
+    setLandingPages(prev => prev.filter(p => p.id !== page.id));
+    if (selectedPage?.id === page.id) {
+      setSelectedPage(null);
+      setShowPageEditor(false);
+    }
+    toast({
+      title: 'تم حذف الصفحة',
+      description: `تم حذف الصفحة "${page.name}" بنجاح`
     });
-    
-    setConfig(prev => ({ ...prev, sections }));
+    setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <RefreshCw className="w-8 h-8 animate-spin text-primary" />
-      </div>
+  const duplicatePage = (page: LandingPage) => {
+    const duplicatedPage: LandingPage = {
+      ...page,
+      id: Date.now().toString(),
+      name: `${page.name} - نسخة`,
+      slug: `${page.slug}-copy`,
+      isPublished: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      publishedAt: undefined
+    };
+
+    setLandingPages(prev => [...prev, duplicatedPage]);
+    toast({
+      title: 'تم نسخ الصفحة',
+      description: `تم إنشاء نسخة من الصفحة "${page.name}"`
+    });
+  };
+
+  const togglePublishPage = (page: LandingPage) => {
+    const updatedPage = {
+      ...page,
+      isPublished: !page.isPublished,
+      publishedAt: !page.isPublished ? new Date().toISOString() : undefined,
+      updatedAt: new Date().toISOString()
+    };
+
+    setLandingPages(prev =>
+      prev.map(p => p.id === page.id ? updatedPage : p)
     );
-  }
+
+    if (selectedPage?.id === page.id) {
+      setSelectedPage(updatedPage);
+    }
+
+    toast({
+      title: page.isPublished ? 'تم إلغاء نشر الصفحة' : 'تم نشر الصفحة',
+      description: page.isPublished 
+        ? `تم إلغاء نشر الصفحة "${page.name}"` 
+        : `تم نشر الصفحة "${page.name}" بنجاح`
+    });
+  };
+
+  const resetPageForm = () => {
+    setNewPageForm({
+      name: '',
+      slug: '',
+      title: '',
+      description: '',
+      tenantId: '',
+      theme: 'light',
+      primaryColor: '#3b82f6',
+      secondaryColor: '#64748b'
+    });
+  };
+
+  const resetSectionForm = () => {
+    setNewSectionForm({
+      type: 'hero',
+      title: '',
+      content: {},
+      backgroundColor: '#ffffff',
+      textColor: '#000000'
+    });
+  };
+
+  // إحصائيات الصفحات
+  const pageStats = {
+    total: landingPages.length,
+    published: landingPages.filter(p => p.isPublished).length,
+    drafts: landingPages.filter(p => !p.isPublished).length,
+    sections: landingPages.reduce((sum, page) => sum + page.sections.length, 0)
+  };
 
   return (
-    <div className="space-y-6" dir="rtl">
-      {/* Header Controls */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Globe className="w-6 h-6 text-primary" />
-              <div>
-                <CardTitle>محرر الصفحة الرئيسية</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  آخر تحديث: {new Date(config.last_updated).toLocaleString('ar-SA')}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant={config.published ? "default" : "secondary"}>
-                {config.published ? 'منشورة' : 'مسودة'}
-              </Badge>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open('/', '_blank')}
-              >
-                <Eye className="w-4 h-4 ml-2" />
-                معاينة
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={saveLandingPageConfig}
-                disabled={saving}
-              >
-                <Save className="w-4 h-4 ml-2" />
-                حفظ
-              </Button>
-              <Button
-                size="sm"
-                onClick={publishLandingPage}
-                disabled={saving || !config.sections.length}
-              >
-                <Globe className="w-4 h-4 ml-2" />
-                نشر
-              </Button>
-            </div>
+    <ErrorBoundary>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold">محرر الصفحات المقصودة</h2>
+            <p className="text-muted-foreground">
+              إنشاء وإدارة الصفحات المقصودة للمؤسسات
+            </p>
           </div>
-        </CardHeader>
-      </Card>
-
-      {/* Main Editor */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Editor Panel */}
-        <div className="lg:col-span-2 space-y-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="general">عام</TabsTrigger>
-              <TabsTrigger value="sections">الأقسام</TabsTrigger>
-              <TabsTrigger value="design">التصميم</TabsTrigger>
-              <TabsTrigger value="seo">SEO</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="general" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>الإعدادات العامة</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="site_title">عنوان الموقع</Label>
-                      <Input
-                        id="site_title"
-                        value={config.site_title}
-                        onChange={(e) => setConfig(prev => ({ ...prev, site_title: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="site_description">وصف الموقع</Label>
-                      <Input
-                        id="site_description"
-                        value={config.site_description}
-                        onChange={(e) => setConfig(prev => ({ ...prev, site_description: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="logo_url">رابط الشعار</Label>
-                      <Input
-                        id="logo_url"
-                        value={config.logo_url || ''}
-                        onChange={(e) => setConfig(prev => ({ ...prev, logo_url: e.target.value }))}
-                        placeholder="https://example.com/logo.png"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="favicon_url">رابط الأيقونة المفضلة</Label>
-                      <Input
-                        id="favicon_url"
-                        value={config.favicon_url || ''}
-                        onChange={(e) => setConfig(prev => ({ ...prev, favicon_url: e.target.value }))}
-                        placeholder="https://example.com/favicon.ico"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="sections" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle>إدارة الأقسام</CardTitle>
-                    <div className="flex gap-2">
-                      {Object.keys(sectionTemplates).map(key => (
-                        <Button
-                          key={key}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => addSection(key)}
-                        >
-                          <Plus className="w-4 h-4 ml-1" />
-                          {key === 'hero' ? 'البانر' : 
-                           key === 'features' ? 'الميزات' :
-                           key === 'pricing' ? 'الأسعار' :
-                           key === 'cta' ? 'دعوة للعمل' : key}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {config.sections
-                      .sort((a, b) => a.order - b.order)
-                      .map((section) => (
-                        <Card key={section.id} className="border-l-4 border-l-primary">
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center gap-2">
-                                <Switch
-                                  checked={section.enabled}
-                                  onCheckedChange={(enabled) => updateSection(section.id, { enabled })}
-                                />
-                                <h4 className="font-medium">{section.title}</h4>
-                                <Badge variant="outline">{section.type}</Badge>
-                              </div>
-                              <div className="flex gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => moveSection(section.id, 'up')}
-                                  disabled={section.order === 1}
-                                >
-                                  ↑
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => moveSection(section.id, 'down')}
-                                  disabled={section.order === config.sections.length}
-                                >
-                                  ↓
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => removeSection(section.id)}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              <div>
-                                <Label>العنوان</Label>
-                                <Input
-                                  value={section.title}
-                                  onChange={(e) => updateSection(section.id, { title: e.target.value })}
-                                />
-                              </div>
-                              {section.subtitle !== undefined && (
-                                <div>
-                                  <Label>العنوان الفرعي</Label>
-                                  <Input
-                                    value={section.subtitle || ''}
-                                    onChange={(e) => updateSection(section.id, { subtitle: e.target.value })}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                            
-                            <div className="mt-3">
-                              <Label>المحتوى</Label>
-                              <Textarea
-                                value={section.content}
-                                onChange={(e) => updateSection(section.id, { content: e.target.value })}
-                                rows={3}
-                              />
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="design" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>إعدادات التصميم</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="primary_color">اللون الأساسي</Label>
-                      <Input
-                        id="primary_color"
-                        type="color"
-                        value={config.primary_color}
-                        onChange={(e) => setConfig(prev => ({ ...prev, primary_color: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="secondary_color">اللون الثانوي</Label>
-                      <Input
-                        id="secondary_color"
-                        type="color"
-                        value={config.secondary_color}
-                        onChange={(e) => setConfig(prev => ({ ...prev, secondary_color: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="font_family">خط النص</Label>
-                    <select
-                      id="font_family"
-                      className="w-full p-2 border rounded-md"
-                      value={config.font_family}
-                      onChange={(e) => setConfig(prev => ({ ...prev, font_family: e.target.value }))}
-                    >
-                      <option value="Inter">Inter</option>
-                      <option value="Cairo">Cairo</option>
-                      <option value="Roboto">Roboto</option>
-                      <option value="Open Sans">Open Sans</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="custom_css">CSS مخصص</Label>
-                    <Textarea
-                      id="custom_css"
-                      value={config.custom_css || ''}
-                      onChange={(e) => setConfig(prev => ({ ...prev, custom_css: e.target.value }))}
-                      rows={8}
-                      placeholder="/* أضف CSS مخصص هنا */"
-                      className="font-mono"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="seo" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>إعدادات SEO</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="keywords">الكلمات المفتاحية</Label>
-                    <Input
-                      id="keywords"
-                      value={config.meta_tags.keywords || ''}
-                      onChange={(e) => setConfig(prev => ({
-                        ...prev,
-                        meta_tags: { ...prev.meta_tags, keywords: e.target.value }
-                      }))}
-                      placeholder="كلمة1، كلمة2، كلمة3"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="author">المؤلف</Label>
-                    <Input
-                      id="author"
-                      value={config.meta_tags.author || ''}
-                      onChange={(e) => setConfig(prev => ({
-                        ...prev,
-                        meta_tags: { ...prev.meta_tags, author: e.target.value }
-                      }))}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="robots">توجيهات محركات البحث</Label>
-                    <select
-                      id="robots"
-                      className="w-full p-2 border rounded-md"
-                      value={config.meta_tags.robots || 'index,follow'}
-                      onChange={(e) => setConfig(prev => ({
-                        ...prev,
-                        meta_tags: { ...prev.meta_tags, robots: e.target.value }
-                      }))}
-                    >
-                      <option value="index,follow">فهرسة ومتابعة الروابط</option>
-                      <option value="index,nofollow">فهرسة بدون متابعة الروابط</option>
-                      <option value="noindex,follow">عدم فهرسة مع متابعة الروابط</option>
-                      <option value="noindex,nofollow">عدم فهرسة أو متابعة</option>
-                    </select>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          <div className="flex gap-2">
+            <EnhancedButton
+              onClick={() => window.location.reload()}
+              variant="outline"
+              icon={<RefreshCw className="w-4 h-4" />}
+              loadingText="جاري التحديث..."
+            >
+              تحديث
+            </EnhancedButton>
+            <ActionButton
+              action="create"
+              itemName="صفحة جديدة"
+              onClick={() => {
+                resetPageForm();
+                setShowCreatePage(true);
+              }}
+              icon={<Plus className="w-4 h-4" />}
+            >
+              صفحة جديدة
+            </ActionButton>
+          </div>
         </div>
 
-        {/* Preview Panel */}
-        <div className="lg:col-span-1">
-          <Card className="sticky top-6">
-            <CardHeader>
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm">معاينة</CardTitle>
-                <div className="flex gap-1">
-                  <Button
-                    variant={previewMode === 'desktop' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setPreviewMode('desktop')}
-                  >
-                    <Monitor className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant={previewMode === 'tablet' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setPreviewMode('tablet')}
-                  >
-                    <Tablet className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant={previewMode === 'mobile' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setPreviewMode('mobile')}
-                  >
-                    <Smartphone className="w-4 h-4" />
-                  </Button>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground text-right">إجمالي الصفحات</p>
+                  <p className="text-2xl font-bold text-right">{formatNumber(pageStats.total)}</p>
+                </div>
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Layout className="w-4 h-4 text-blue-600" />
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div 
-                className={`border rounded-lg overflow-hidden transition-all ${
-                  previewMode === 'mobile' ? 'max-w-sm mx-auto' :
-                  previewMode === 'tablet' ? 'max-w-md mx-auto' :
-                  'w-full'
-                }`}
-              >
-                <div className="bg-gray-100 h-64 flex items-center justify-center text-gray-500">
-                  <div className="text-center">
-                    <Eye className="w-8 h-8 mx-auto mb-2" />
-                    <p className="text-sm">معاينة الصفحة الرئيسية</p>
-                    <p className="text-xs">{config.sections.length} أقسام</p>
-                  </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground text-right">منشورة</p>
+                  <p className="text-2xl font-bold text-green-600 text-right">{formatNumber(pageStats.published)}</p>
+                </div>
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground text-right">مسودات</p>
+                  <p className="text-2xl font-bold text-orange-600 text-right">{formatNumber(pageStats.drafts)}</p>
+                </div>
+                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                  <Edit className="w-4 h-4 text-orange-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground text-right">الأقسام</p>
+                  <p className="text-2xl font-bold text-purple-600 text-right">{formatNumber(pageStats.sections)}</p>
+                </div>
+                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                  <Type className="w-4 h-4 text-purple-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Main Content */}
+        <Tabs defaultValue="pages" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="pages">الصفحات</TabsTrigger>
+            <TabsTrigger value="templates">القوالب</TabsTrigger>
+            <TabsTrigger value="settings">الإعدادات</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="pages">
+            <LoadingState
+              loading={false}
+              isEmpty={landingPages.length === 0}
+              emptyMessage="لا توجد صفحات مقصودة"
+            >
+              <EnhancedTable
+                data={landingPages}
+                columns={pageColumns}
+                actions={pageActions}
+                searchable
+                searchPlaceholder="البحث في الصفحات..."
+                onRefresh={() => window.location.reload()}
+                emptyMessage="لا توجد صفحات مقصودة"
+                maxHeight="600px"
+                stickyHeader
+              />
+            </LoadingState>
+          </TabsContent>
+
+          <TabsContent value="templates">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {templates.map((template) => (
+                <Card key={template.id} className="cursor-pointer hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center">
+                      <Layout className="w-12 h-12 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-medium text-lg mb-2">{template.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">{template.description}</p>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline">{template.category}</Badge>
+                      <Button size="sm">
+                        استخدام القالب
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>إعدادات عامة</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>النطاق الافتراضي</Label>
+                    <Input defaultValue="https://example.com" />
+                  </div>
+                  <div>
+                    <Label>اللغة الافتراضية</Label>
+                    <Select defaultValue="ar">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ar">العربية</SelectItem>
+                        <SelectItem value="en">الإنجليزية</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>إعدادات التحسين</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label>ضغط الصور</Label>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>تحسين الـ CSS</Label>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>تشغيل التخزين المؤقت</Label>
+                    <Switch defaultChecked />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Create Page Dialog */}
+        <EnhancedDialog
+          open={showCreatePage}
+          onOpenChange={setShowCreatePage}
+          title="إنشاء صفحة مقصودة جديدة"
+          description="قم بملء المعلومات الأساسية للصفحة الجديدة"
+          size="lg"
+          showCloseButton
+        >
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="page-name">اسم الصفحة</Label>
+                <Input
+                  id="page-name"
+                  value={newPageForm.name}
+                  onChange={(e) => setNewPageForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="مثال: صفحة الشركة الرئيسية"
+                />
+              </div>
+              <div>
+                <Label htmlFor="page-slug">الرابط المختصر</Label>
+                <Input
+                  id="page-slug"
+                  value={newPageForm.slug}
+                  onChange={(e) => setNewPageForm(prev => ({ ...prev, slug: e.target.value }))}
+                  placeholder="company-homepage"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="page-title">عنوان الصفحة</Label>
+              <Input
+                id="page-title"
+                value={newPageForm.title}
+                onChange={(e) => setNewPageForm(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="العنوان الذي سيظهر في تبويب المتصفح"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="page-description">وصف الصفحة</Label>
+              <Textarea
+                id="page-description"
+                value={newPageForm.description}
+                onChange={(e) => setNewPageForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="وصف مختصر للصفحة سيظهر في نتائج البحث"
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="page-theme">السمة</Label>
+                <Select
+                  value={newPageForm.theme}
+                  onValueChange={(value) => setNewPageForm(prev => ({ ...prev, theme: value as any }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">فاتح</SelectItem>
+                    <SelectItem value="dark">داكن</SelectItem>
+                    <SelectItem value="custom">مخصص</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="primary-color">اللون الأساسي</Label>
+                <Input
+                  id="primary-color"
+                  type="color"
+                  value={newPageForm.primaryColor}
+                  onChange={(e) => setNewPageForm(prev => ({ ...prev, primaryColor: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="secondary-color">اللون الثانوي</Label>
+                <Input
+                  id="secondary-color"
+                  type="color"
+                  value={newPageForm.secondaryColor}
+                  onChange={(e) => setNewPageForm(prev => ({ ...prev, secondaryColor: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowCreatePage(false)}
+              >
+                إلغاء
+              </Button>
+              <ActionButton
+                action="create"
+                itemName="الصفحة"
+                onClick={handleCreatePage}
+                loading={loading}
+              >
+                إنشاء الصفحة
+              </ActionButton>
+            </div>
+          </div>
+        </EnhancedDialog>
+
+        {/* Add Section Dialog */}
+        <EnhancedDialog
+          open={showSectionEditor}
+          onOpenChange={setShowSectionEditor}
+          title="إضافة قسم جديد"
+          description="اختر نوع القسم وأعدّ محتواه"
+          size="md"
+          showCloseButton
+        >
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="section-type">نوع القسم</Label>
+              <Select
+                value={newSectionForm.type}
+                onValueChange={(value) => setNewSectionForm(prev => ({ ...prev, type: value as any }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hero">القسم الرئيسي</SelectItem>
+                  <SelectItem value="features">المميزات</SelectItem>
+                  <SelectItem value="testimonials">آراء العملاء</SelectItem>
+                  <SelectItem value="pricing">الأسعار</SelectItem>
+                  <SelectItem value="contact">التواصل</SelectItem>
+                  <SelectItem value="gallery">معرض الصور</SelectItem>
+                  <SelectItem value="about">من نحن</SelectItem>
+                  <SelectItem value="custom">مخصص</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="section-title">عنوان القسم</Label>
+              <Input
+                id="section-title"
+                value={newSectionForm.title}
+                onChange={(e) => setNewSectionForm(prev => ({ ...prev, title: e.target.value }))}
+                placeholder={t(newSectionForm.type)}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="bg-color">لون الخلفية</Label>
+                <Input
+                  id="bg-color"
+                  type="color"
+                  value={newSectionForm.backgroundColor}
+                  onChange={(e) => setNewSectionForm(prev => ({ ...prev, backgroundColor: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="text-color">لون النص</Label>
+                <Input
+                  id="text-color"
+                  type="color"
+                  value={newSectionForm.textColor}
+                  onChange={(e) => setNewSectionForm(prev => ({ ...prev, textColor: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowSectionEditor(false)}
+              >
+                إلغاء
+              </Button>
+              <ActionButton
+                action="create"
+                itemName="القسم"
+                onClick={handleAddSection}
+                loading={loading}
+                requireConfirmation
+                confirmationTitle="تأكيد إضافة القسم"
+                confirmationMessage="هل أنت متأكد من إضافة هذا القسم؟"
+              >
+                إضافة القسم
+              </ActionButton>
+            </div>
+          </div>
+        </EnhancedDialog>
+
+        {/* Page Editor Dialog */}
+        <EnhancedDialog
+          open={showPageEditor}
+          onOpenChange={setShowPageEditor}
+          title={selectedPage ? `تحرير: ${selectedPage.name}` : ''}
+          description="تحرير محتوى وتصميم الصفحة"
+          size="full"
+          showCloseButton
+        >
+          {selectedPage && (
+            <div className="flex h-full">
+              {/* Sidebar */}
+              <div className="w-80 border-l bg-muted/30 p-4">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-medium">أقسام الصفحة</h3>
+                    <Button
+                      size="sm"
+                      onClick={() => setShowSectionEditor(true)}
+                    >
+                      <Plus className="w-4 h-4 ml-1" />
+                      إضافة قسم
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {selectedPage.sections.map((section) => (
+                      <div
+                        key={section.id}
+                        className="flex items-center justify-between p-3 border rounded cursor-pointer hover:bg-background"
+                      >
+                        <div>
+                          <div className="font-medium text-sm">{section.title}</div>
+                          <div className="text-xs text-muted-foreground">{t(section.type)}</div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button size="sm" variant="ghost">
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button size="sm" variant="ghost">
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Preview Controls */}
+                  <div className="pt-4 border-t">
+                    <Label className="text-sm font-medium">معاينة</Label>
+                    <div className="flex gap-1 mt-2">
+                      <Button
+                        size="sm"
+                        variant={previewMode === 'desktop' ? 'default' : 'outline'}
+                        onClick={() => setPreviewMode('desktop')}
+                      >
+                        <Monitor className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={previewMode === 'tablet' ? 'default' : 'outline'}
+                        onClick={() => setPreviewMode('tablet')}
+                      >
+                        <Tablet className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={previewMode === 'mobile' ? 'default' : 'outline'}
+                        onClick={() => setPreviewMode('mobile')}
+                      >
+                        <Smartphone className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Editor Area */}
+              <div className="flex-1 p-4">
+                <div className={`mx-auto border rounded-lg bg-white ${
+                  previewMode === 'mobile' ? 'max-w-sm' :
+                  previewMode === 'tablet' ? 'max-w-2xl' : 'max-w-6xl'
+                }`}>
+                  <div className="p-8">
+                    <h1 className="text-2xl font-bold mb-4">{selectedPage.title}</h1>
+                    <p className="text-muted-foreground mb-8">{selectedPage.description}</p>
+                    
+                    {selectedPage.sections.length === 0 ? (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <Layout className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                        <h3 className="text-lg font-medium mb-2">لا توجد أقسام</h3>
+                        <p>ابدأ بإضافة قسم جديد لبناء صفحتك</p>
+                        <Button
+                          className="mt-4"
+                          onClick={() => setShowSectionEditor(true)}
+                        >
+                          <Plus className="w-4 h-4 ml-2" />
+                          إضافة قسم
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-8">
+                        {selectedPage.sections
+                          .sort((a, b) => a.order - b.order)
+                          .map((section) => (
+                            <div
+                              key={section.id}
+                              className="border-2 border-dashed border-muted rounded-lg p-6"
+                              style={{
+                                backgroundColor: section.settings.backgroundColor,
+                                color: section.settings.textColor
+                              }}
+                            >
+                              <h2 className="text-xl font-bold mb-4">{section.title}</h2>
+                              <div className="text-sm text-muted-foreground">
+                                قسم من نوع: {t(section.type)}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </EnhancedDialog>
+
+        {/* Confirmation Dialog */}
+        <EnhancedDialog
+          open={confirmationDialog.isOpen}
+          onOpenChange={(open) => setConfirmationDialog(prev => ({ ...prev, isOpen: open }))}
+          title={confirmationDialog.title}
+          description="تأكيد الإجراء"
+          size="sm"
+          showCloseButton
+        >
+          <div className="space-y-4">
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex">
+                <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 ml-2" />
+                <div>
+                  <p className="text-sm text-yellow-800">
+                    {confirmationDialog.message}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setConfirmationDialog(prev => ({ ...prev, isOpen: false }))}
+              >
+                إلغاء
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  confirmationDialog.onConfirm();
+                  setConfirmationDialog(prev => ({ ...prev, isOpen: false }));
+                }}
+              >
+                تأكيد
+              </Button>
+            </div>
+          </div>
+        </EnhancedDialog>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 };
 

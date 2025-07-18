@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   Building2, 
@@ -8,7 +7,6 @@ import {
   Settings, 
   Users, 
   Activity,
-  MoreHorizontal,
   Edit,
   Trash2,
   Eye,
@@ -16,230 +14,340 @@ import {
 } from "lucide-react";
 import { TenantService } from "@/services/tenantService";
 import { Tenant } from "@/types/tenant";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { TenantOnboarding } from "@/components/Tenants/TenantOnboarding";
 import { toast } from "@/hooks/use-toast";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
+// استيراد المكونات المحسنة
+import { EnhancedDialog } from '@/components/ui/enhanced-dialog';
+import { EnhancedTable } from '@/components/ui/enhanced-table';
+import { ActionButton, EnhancedButton } from '@/components/ui/enhanced-button';
+import { LoadingState, ErrorBoundary } from '@/components/ui/enhanced-error-handling';
+import { useTranslation, formatStatus } from '@/utils/translationUtils';
 
 const TenantManagement: React.FC = () => {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const tenantService = new TenantService();
+  const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
 
-  useEffect(() => {
-    loadTenants();
-  }, []);
+  const tenantService = new TenantService();
+  const { t, msg, formatNumber } = useTranslation();
 
   const loadTenants = async () => {
     try {
       setLoading(true);
-      const data = await tenantService.getAllTenants();
+      setError(null);
+      const data = await tenantService.getTenants();
       setTenants(data);
-    } catch (error) {
-      console.error('Error loading tenants:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في تحميل بيانات المؤسسات",
-        variant: "destructive",
-      });
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge variant="default" className="bg-green-100 text-green-800">نشط</Badge>;
-      case 'inactive':
-        return <Badge variant="secondary" className="bg-red-100 text-red-800">غير نشط</Badge>;
-      case 'suspended':
-        return <Badge variant="destructive">معلق</Badge>;
-      default:
-        return <Badge variant="outline">غير محدد</Badge>;
+  useEffect(() => {
+    loadTenants();
+  }, []);
+
+  // تعريف أعمدة الجدول
+  const columns = [
+    {
+      key: 'name',
+      title: t('organization'),
+      sortable: true,
+      render: (value: string, row: Tenant) => (
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+            <Building2 className="w-4 h-4 text-primary" />
+          </div>
+          <div>
+            <div className="font-medium">{value}</div>
+            <div className="text-xs text-muted-foreground">{row.slug}</div>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'status',
+      title: 'الحالة',
+      align: 'center' as const,
+      render: (status: string) => {
+        const statusInfo = formatStatus(status);
+        return (
+          <Badge variant={statusInfo.variant as any}>
+            {statusInfo.text}
+          </Badge>
+        );
+      }
+    },
+    {
+      key: 'contact_email',
+      title: 'البريد الإلكتروني',
+      render: (email: string) => (
+        <span className="text-sm text-muted-foreground">{email}</span>
+      )
+    },
+    {
+      key: 'user_count',
+      title: 'المستخدمين',
+      align: 'center' as const,
+      render: (count: number) => (
+        <div className="flex items-center justify-center gap-1">
+          <Users className="w-4 h-4" />
+          <span>{formatNumber(count || 0)}</span>
+        </div>
+      )
+    },
+    {
+      key: 'created_at',
+      title: 'تاريخ الإنشاء',
+      render: (date: string) => (
+        new Date(date).toLocaleDateString('ar-SA')
+      )
+    }
+  ];
+
+  // تعريف إجراءات الجدول
+  const actions = [
+    {
+      label: 'عرض التفاصيل',
+      icon: <Eye className="w-4 h-4" />,
+      onClick: (tenant: Tenant) => {
+        setSelectedTenant(tenant);
+      }
+    },
+    {
+      label: 'تحرير',
+      icon: <Edit className="w-4 h-4" />,
+      onClick: (tenant: Tenant) => {
+        // تحرير المؤسسة
+        console.log('Edit tenant:', tenant);
+      }
+    },
+    {
+      label: 'الإعدادات',
+      icon: <Settings className="w-4 h-4" />,
+      onClick: (tenant: Tenant) => {
+        // إعدادات المؤسسة
+        console.log('Settings for:', tenant);
+      },
+      separator: true
+    },
+    {
+      label: 'حذف',
+      icon: <Trash2 className="w-4 h-4" />,
+      onClick: (tenant: Tenant) => handleDeleteTenant(tenant),
+      variant: 'destructive' as const,
+      disabled: (tenant: Tenant) => tenant.status === 'active'
+    }
+  ];
+
+  const handleDeleteTenant = async (tenant: Tenant) => {
+    try {
+      await tenantService.deleteTenant(tenant.id);
+      await loadTenants();
+      toast({
+        title: msg('success', 'deleted', t('organization')),
+        description: `تم حذف ${tenant.name} بنجاح`
+      });
+    } catch (error: any) {
+      toast({
+        title: msg('error', 'failed', t('delete')),
+        description: error.message,
+        variant: 'destructive'
+      });
     }
   };
 
-  const getSubscriptionBadge = (subscription: string) => {
-    switch (subscription) {
-      case 'premium':
-        return <Badge className="bg-purple-100 text-purple-800">مميز</Badge>;
-      case 'standard':
-        return <Badge className="bg-blue-100 text-blue-800">عادي</Badge>;
-      case 'basic':
-        return <Badge variant="outline">أساسي</Badge>;
-      default:
-        return <Badge variant="outline">غير محدد</Badge>;
-    }
+  const handleCreateTenant = async () => {
+    setShowOnboarding(false);
+    await loadTenants();
+  };
+
+  // إحصائيات سريعة
+  const stats = {
+    total: tenants.length,
+    active: tenants.filter(t => t.status === 'active').length,
+    pending: tenants.filter(t => t.status === 'pending').length,
+    suspended: tenants.filter(t => t.status === 'suspended').length
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">إدارة المؤسسات</h2>
-          <p className="text-muted-foreground">
-            إدارة جميع المؤسسات المشتركة في النظام
-          </p>
+    <ErrorBoundary>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold">{t('admin')} {t('organization')}</h2>
+            <p className="text-muted-foreground">
+              إدارة جميع المؤسسات المشتركة في النظام
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <EnhancedButton
+              onClick={loadTenants}
+              variant="outline"
+              icon={<Activity className="w-4 h-4" />}
+              loadingText="جاري التحديث..."
+            >
+              {t('update')}
+            </EnhancedButton>
+            <ActionButton
+              action="create"
+              itemName={t('organization')}
+              onClick={() => setShowOnboarding(true)}
+              icon={<Plus className="w-4 h-4" />}
+            >
+              {t('add')} {t('organization')}
+            </ActionButton>
+          </div>
         </div>
-        <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              إضافة مؤسسة جديدة
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>إضافة مؤسسة جديدة</DialogTitle>
-              <DialogDescription>
-                قم بإنشاء مؤسسة جديدة وإعداد الحساب الإداري
-              </DialogDescription>
-            </DialogHeader>
-            <TenantOnboarding onComplete={() => {
-              setShowOnboarding(false);
-              loadTenants();
-            }} />
-          </DialogContent>
-        </Dialog>
-      </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <Building2 className="w-8 h-8 text-blue-600 mr-3" />
-            <div>
-              <p className="text-sm text-muted-foreground">إجمالي المؤسسات</p>
-              <p className="text-2xl font-bold">{tenants.length}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <Activity className="w-8 h-8 text-green-600 mr-3" />
-            <div>
-              <p className="text-sm text-muted-foreground">المؤسسات النشطة</p>
-              <p className="text-2xl font-bold">
-                {tenants.filter(t => t.status === 'active').length}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <Users className="w-8 h-8 text-purple-600 mr-3" />
-            <div>
-              <p className="text-sm text-muted-foreground">إجمالي المستخدمين</p>
-              <p className="text-2xl font-bold">
-                {tenants.reduce((sum, t) => sum + t.max_users, 0)}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <Settings className="w-8 h-8 text-orange-600 mr-3" />
-            <div>
-              <p className="text-sm text-muted-foreground">إجمالي المركبات</p>
-              <p className="text-2xl font-bold">
-                {tenants.reduce((sum, t) => sum + t.max_vehicles, 0)}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground text-right">{t('total')}</p>
+                  <p className="text-2xl font-bold text-right">{formatNumber(stats.total)}</p>
+                </div>
+                <Building2 className="w-8 h-8 text-muted-foreground" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground text-right">{t('active')}</p>
+                  <p className="text-2xl font-bold text-green-600 text-right">{formatNumber(stats.active)}</p>
+                </div>
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <div className="w-4 h-4 bg-green-600 rounded-full"></div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground text-right">{t('pending')}</p>
+                  <p className="text-2xl font-bold text-yellow-600 text-right">{formatNumber(stats.pending)}</p>
+                </div>
+                <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                  <div className="w-4 h-4 bg-yellow-600 rounded-full"></div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground text-right">{t('suspended')}</p>
+                  <p className="text-2xl font-bold text-red-600 text-right">{formatNumber(stats.suspended)}</p>
+                </div>
+                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                  <div className="w-4 h-4 bg-red-600 rounded-full"></div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Tenants Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>قائمة المؤسسات</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin" />
-              <span className="mr-2">جاري تحميل المؤسسات...</span>
+        {/* Tenants Table */}
+        <LoadingState
+          loading={loading}
+          error={error}
+          isEmpty={tenants.length === 0}
+          emptyMessage={msg('info', 'empty')}
+          onRetry={loadTenants}
+        >
+          <EnhancedTable
+            data={tenants}
+            columns={columns}
+            actions={actions}
+            searchable
+            searchPlaceholder={`${t('search')} ${t('organization')}...`}
+            onRefresh={loadTenants}
+            emptyMessage={msg('info', 'empty')}
+            maxHeight="600px"
+            stickyHeader
+          />
+        </LoadingState>
+
+        {/* Create Tenant Dialog */}
+        <EnhancedDialog
+          open={showOnboarding}
+          onOpenChange={setShowOnboarding}
+          title={`${t('add')} ${t('organization')}`}
+          description="قم بإنشاء مؤسسة جديدة وإعداد الحساب الإداري"
+          size="xl"
+          showCloseButton
+        >
+          <TenantOnboarding onComplete={handleCreateTenant} />
+        </EnhancedDialog>
+
+        {/* Tenant Details Dialog */}
+        {selectedTenant && (
+          <EnhancedDialog
+            open={!!selectedTenant}
+            onOpenChange={() => setSelectedTenant(null)}
+            title={`تفاصيل ${selectedTenant.name}`}
+            size="lg"
+          >
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">اسم المؤسسة</label>
+                  <p className="font-medium">{selectedTenant.name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">المعرف</label>
+                  <p className="font-mono text-sm">{selectedTenant.slug}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">الحالة</label>
+                  <div className="mt-1">
+                    {(() => {
+                      const statusInfo = formatStatus(selectedTenant.status);
+                      return (
+                        <Badge variant={statusInfo.variant as any}>
+                          {statusInfo.text}
+                        </Badge>
+                      );
+                    })()}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">البريد الإلكتروني</label>
+                  <p>{selectedTenant.contact_email}</p>
+                </div>
+              </div>
+              
+              {selectedTenant.contact_phone && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">رقم الهاتف</label>
+                  <p>{selectedTenant.contact_phone}</p>
+                </div>
+              )}
+              
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">تاريخ الإنشاء</label>
+                <p>{new Date(selectedTenant.created_at).toLocaleDateString('ar-SA')}</p>
+              </div>
             </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>اسم المؤسسة</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead>خطة الاشتراك</TableHead>
-                  <TableHead>الحد الأقصى للمستخدمين</TableHead>
-                  <TableHead>الحد الأقصى للمركبات</TableHead>
-                  <TableHead>العملة</TableHead>
-                  <TableHead>تاريخ الإنشاء</TableHead>
-                  <TableHead>الإجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tenants.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-12">
-                      <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">لا توجد مؤسسات مسجلة في النظام</p>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  tenants.map((tenant) => (
-                    <TableRow key={tenant.id}>
-                      <TableCell className="font-medium">{tenant.name}</TableCell>
-                      <TableCell>{getStatusBadge(tenant.status)}</TableCell>
-                      <TableCell>{getSubscriptionBadge(tenant.subscription_plan)}</TableCell>
-                      <TableCell>{tenant.max_users}</TableCell>
-                      <TableCell>{tenant.max_vehicles}</TableCell>
-                      <TableCell>{tenant.currency}</TableCell>
-                      <TableCell>{new Date(tenant.created_at).toLocaleDateString('ar-SA')}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Eye className="mr-2 h-4 w-4" />
-                              عرض التفاصيل
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 h-4 w-4" />
-                              تعديل
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              حذف
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          </EnhancedDialog>
+        )}
+      </div>
+    </ErrorBoundary>
   );
 };
 

@@ -6,10 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Building2, Users, MoreHorizontal, Shield, AlertTriangle, CheckCircle, Clock, TrendingUp, Settings, Eye, Edit, Trash2, UserPlus, Crown, Database, Activity, Globe, Search, Filter, Plus, Download, Upload, RefreshCw } from "lucide-react";
 import DomainManagement from "./DomainManagement";
@@ -19,6 +15,13 @@ import { Tenant } from '@/types/tenant';
 import { useToast } from "@/hooks/use-toast";
 import { EnhancedTenantOnboarding } from './TenantOnboarding/EnhancedTenantOnboarding';
 import { SUBSCRIPTION_PLANS, type SubscriptionPlanCode, PLAN_COLORS, PLAN_NAMES } from '@/types/subscription-plans';
+
+// استيراد المكونات المحسنة
+import { EnhancedDialog } from '@/components/ui/enhanced-dialog';
+import { EnhancedTable } from '@/components/ui/enhanced-table';
+import { ActionButton, EnhancedButton } from '@/components/ui/enhanced-button';
+import { LoadingState, ErrorBoundary } from '@/components/ui/enhanced-error-handling';
+import { useTranslation, formatStatus } from '@/utils/translationUtils';
 
 // نوع محدث للمؤسسة مع الإحصائيات الحقيقية
 interface TenantWithStats extends Tenant {
@@ -31,12 +34,11 @@ const AdvancedTenantManagement: React.FC = () => {
   const [tenants, setTenants] = useState<TenantWithStats[]>([]);
   const [filteredTenants, setFilteredTenants] = useState<TenantWithStats[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedTenant, setSelectedTenant] = useState<TenantWithStats | null>(null);
   const [showTenantDetails, setShowTenantDetails] = useState(false);
   const [showAddTenantDialog, setShowAddTenantDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showHardDeleteDialog, setShowHardDeleteDialog] = useState(false);
-  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [tenantToDelete, setTenantToDelete] = useState<TenantWithStats | null>(null);
   const [deleteReason, setDeleteReason] = useState('');
   
@@ -45,937 +47,426 @@ const AdvancedTenantManagement: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [planFilter, setPlanFilter] = useState<string>('all');
 
-  // استخدام خطط الاشتراك الموحدة
-
-  const [newTenantData, setNewTenantData] = useState({
-    name: '',
-    slug: '',
-    contact_email: '',
-    contact_phone: '',
-    country: 'Kuwait',
-    timezone: 'Asia/Kuwait',
-    currency: 'KWD',
-    subscription_plan: 'basic' as SubscriptionPlanCode,
-    max_users: SUBSCRIPTION_PLANS.basic.limits.max_users_per_tenant,
-    max_vehicles: SUBSCRIPTION_PLANS.basic.limits.max_vehicles,
-    max_contracts: SUBSCRIPTION_PLANS.basic.limits.max_contracts,
-    admin_user: {
-      email: '',
-      password: '',
-      full_name: ''
-    }
-  });
-
   const tenantService = new TenantService();
   const { toast } = useToast();
-  
+  const { t, msg, formatNumber } = useTranslation();
+
+  // تحميل البيانات
+  const loadTenants = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await tenantService.getTenants();
+      setTenants(data);
+      setFilteredTenants(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadTenants();
   }, []);
 
-  // تأثير البحث والفلترة
-  useEffect(() => {
-    let filtered = tenants;
-
-    // تطبيق البحث
-    if (searchTerm) {
-      filtered = filtered.filter(tenant => 
-        tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tenant.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tenant.contact_email?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // تطبيق فلتر الحالة
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(tenant => tenant.status === statusFilter);
-    }
-
-    // تطبيق فلتر الخطة
-    if (planFilter !== 'all') {
-      filtered = filtered.filter(tenant => tenant.subscription_plan === planFilter);
-    }
-
-    setFilteredTenants(filtered);
-  }, [tenants, searchTerm, statusFilter, planFilter]);
-  // دالة جلب البيانات الحقيقية مع الإحصائيات
-  const loadTenantsWithStats = async () => {
-    try {
-      // استعلام مبسط لجلب المؤسسات مع الإحصائيات
-      const { data: tenantsData, error: tenantsError } = await supabase
-        .from('tenants')
-        .select('*')
-        .order('created_at', { ascending: false });
-        
-      if (tenantsError) throw tenantsError;
-      
-      // جلب الإحصائيات لكل مؤسسة
-      const tenantsWithStats = await Promise.all(
-        (tenantsData || []).map(async (tenant) => {
-          // جلب عدد المستخدمين الفعلي
-          const { count: usersCount } = await supabase
-            .from('tenant_users')
-            .select('*', { count: 'exact', head: true })
-            .eq('tenant_id', tenant.id)
-            .eq('status', 'active');
-            
-          // جلب عدد المركبات الفعلي
-          const { count: vehiclesCount } = await supabase
-            .from('vehicles')
-            .select('*', { count: 'exact', head: true })
-            .eq('tenant_id', tenant.id);
-            
-          // جلب عدد العقود الفعلي
-          const { count: contractsCount } = await supabase
-            .from('contracts')
-            .select('*', { count: 'exact', head: true })
-            .eq('tenant_id', tenant.id);
-            
-          return {
-            ...tenant,
-            actual_users: usersCount || 0,
-            actual_vehicles: vehiclesCount || 0,
-            actual_contracts: contractsCount || 0
-          } as TenantWithStats;
-        })
-      );
-      
-      setTenants(tenantsWithStats);
-    } catch (error: any) {
-      toast({
-        title: "خطأ",
-        description: "فشل في تحميل المؤسسات",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadTenants = loadTenantsWithStats;
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      active: {
-        variant: 'default' as const,
-        text: 'نشط',
-        color: 'bg-green-100 text-green-800'
-      },
-      trial: {
-        variant: 'secondary' as const,
-        text: 'تجريبي',
-        color: 'bg-blue-100 text-blue-800'
-      },
-      suspended: {
-        variant: 'destructive' as const,
-        text: 'معلق',
-        color: 'bg-red-100 text-red-800'
-      },
-      cancelled: {
-        variant: 'outline' as const,
-        text: 'ملغي',
-        color: 'bg-gray-100 text-gray-800'
+  // تعريف أعمدة الجدول
+  const columns = [
+    {
+      key: 'name',
+      title: t('organization'),
+      sortable: true,
+      render: (value: string, row: TenantWithStats) => (
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+            <Building2 className="w-4 h-4 text-primary" />
+          </div>
+          <div>
+            <div className="font-medium">{value}</div>
+            <div className="text-xs text-muted-foreground">{row.slug}</div>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'subscription_plan',
+      title: 'الخطة',
+      align: 'center' as const,
+      render: (plan: string) => {
+        const planInfo = SUBSCRIPTION_PLANS[plan as SubscriptionPlanCode];
+        return (
+          <Badge 
+            className={`${PLAN_COLORS[plan as SubscriptionPlanCode] || 'bg-gray-100 text-gray-800'}`}
+          >
+            {PLAN_NAMES[plan as SubscriptionPlanCode] || plan}
+          </Badge>
+        );
       }
-    };
-    const statusInfo = variants[status as keyof typeof variants] || variants.active;
-    return <Badge className={statusInfo.color}>
-        {statusInfo.text}
-      </Badge>;
-  };
-  const getSubscriptionBadge = (plan: string) => {
-    const plans = {
-      basic: {
-        text: 'أساسي',
-        color: 'bg-gray-100 text-gray-800'
-      },
-      standard: {
-        text: 'معياري',
-        color: 'bg-blue-100 text-blue-800'
-      },
-      premium: {
-        text: 'مميز',
-        color: 'bg-purple-100 text-purple-800'
-      },
-      enterprise: {
-        text: 'مؤسسي',
-        color: 'bg-gold-100 text-gold-800'
+    },
+    {
+      key: 'status',
+      title: 'الحالة',
+      align: 'center' as const,
+      render: (status: string) => {
+        const statusInfo = formatStatus(status);
+        return (
+          <Badge variant={statusInfo.variant as any}>
+            {statusInfo.text}
+          </Badge>
+        );
       }
-    };
-    const planInfo = plans[plan as keyof typeof plans] || plans.basic;
-    return <Badge className={planInfo.color}>
-        {planInfo.text}
-      </Badge>;
-  };
-  const handleTenantAction = async (tenantId: string, action: string) => {
-    try {
-      switch (action) {
-        case 'suspend':
-          await tenantService.updateTenant(tenantId, {
-            status: 'suspended'
-          });
-          toast({
-            title: "تم بنجاح",
-            description: "تم تعليق المؤسسة"
-          });
-          break;
-        case 'activate':
-          // استخدام الدالة المحسنة لتفعيل المؤسسة
-          const { data: activationResult, error: activationError } = await supabase.rpc('activate_tenant_safely', {
-            tenant_id_param: tenantId
-          });
-          
-          if (activationError) {
-            throw new Error(activationError.message);
-          }
-          
-          if (activationResult && typeof activationResult === 'object' && 'success' in activationResult) {
-            const result = activationResult as any;
-            if (result.success) {
-              toast({
-                title: "تم بنجاح",
-                description: result.message || "تم تفعيل المؤسسة وإنشاء دليل الحسابات"
-              });
-            } else {
-              throw new Error(result.error || "فشل في تفعيل المؤسسة");
-            }
-          } else {
-            // fallback للطريقة القديمة
-            await tenantService.updateTenant(tenantId, {
-              status: 'active'
-            });
-            toast({
-              title: "تم بنجاح",
-              description: "تم تفعيل المؤسسة"
-            });
-          }
-          break;
-        case 'delete':
-          // يتم التعامل مع الحذف عبر handleDeleteTenant
-          break;
+    },
+    {
+      key: 'actual_users',
+      title: 'المستخدمين',
+      align: 'center' as const,
+      render: (users: number, row: TenantWithStats) => (
+        <div className="text-center">
+          <div className="font-medium">{formatNumber(users || 0)}</div>
+          <div className="text-xs text-muted-foreground">
+            من {formatNumber(row.max_users || 0)}
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'contact_email',
+      title: 'البريد الإلكتروني',
+      render: (email: string) => (
+        <span className="text-sm text-muted-foreground">{email}</span>
+      )
+    }
+  ];
+
+  // تعريف الإجراءات
+  const actions = [
+    {
+      label: 'عرض التفاصيل',
+      icon: <Eye className="w-4 h-4" />,
+      onClick: (tenant: TenantWithStats) => {
+        setSelectedTenant(tenant);
+        setShowTenantDetails(true);
       }
-      loadTenants();
-    } catch (error: any) {
-      toast({
-        title: "خطأ",
-        description: error.message || "فشل في تنفيذ العملية",
-        variant: "destructive"
-      });
+    },
+    {
+      label: 'تحرير',
+      icon: <Edit className="w-4 h-4" />,
+      onClick: (tenant: TenantWithStats) => {
+        // منطق التحرير
+        toast({
+          title: 'قريباً',
+          description: 'ميزة التحرير ستكون متاحة قريباً'
+        });
+      }
+    },
+    {
+      label: 'إدارة النطاقات',
+      icon: <Globe className="w-4 h-4" />,
+      onClick: (tenant: TenantWithStats) => {
+        // منطق إدارة النطاقات
+        toast({
+          title: 'قريباً',
+          description: 'ميزة إدارة النطاقات ستكون متاحة قريباً'
+        });
+      }
+    },
+    {
+      label: 'حذف',
+      icon: <Trash2 className="w-4 h-4" />,
+      onClick: (tenant: TenantWithStats) => {
+        setTenantToDelete(tenant);
+        setShowDeleteDialog(true);
+      },
+      variant: 'destructive' as const,
+      separator: true
     }
-  };
-  // معالج تغيير الباقة
-  const handlePlanChange = (selectedPlan: keyof typeof subscriptionPlans) => {
-    const plan = subscriptionPlans[selectedPlan];
-    setNewTenantData(prev => ({
-      ...prev,
-      subscription_plan: selectedPlan,
-      max_users: plan.max_users,
-      max_vehicles: plan.max_vehicles,
-      max_contracts: plan.max_contracts
-    }));
-  };
+  ];
 
-  const handleAddTenant = async (e?: React.FormEvent) => {
-    if (e) {
-      e.preventDefault();
-    }
-
-    if (!newTenantData.name.trim()) {
-      toast({
-        title: "خطأ",
-        description: "اسم المؤسسة مطلوب",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!newTenantData.slug.trim()) {
-      toast({
-        title: "خطأ",
-        description: "المعرف الفريد مطلوب",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await tenantService.createTenant(newTenantData);
-      toast({
-        title: "تم بنجاح",
-        description: "تم إضافة المؤسسة الجديدة"
-      });
-      setShowAddTenantDialog(false);
-      setNewTenantData({
-        name: '',
-        slug: '',
-        contact_email: '',
-        contact_phone: '',
-        country: 'Kuwait',
-        timezone: 'Asia/Kuwait',
-        currency: 'KWD',
-        subscription_plan: 'basic',
-        max_users: subscriptionPlans.basic.max_users,
-        max_vehicles: subscriptionPlans.basic.max_vehicles,
-        max_contracts: subscriptionPlans.basic.max_contracts,
-        admin_user: {
-          email: '',
-          password: '',
-          full_name: ''
-        }
-      });
-      loadTenants();
-    } catch (error: any) {
-      toast({
-        title: "خطأ",
-        description: error.message || "فشل في إضافة المؤسسة",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+  // معالج إنشاء مؤسسة جديدة
+  const handleCreateTenant = async () => {
+    setShowAddTenantDialog(false);
+    await loadTenants();
   };
 
-  // وظيفة إلغاء المؤسسة (soft delete)
+  // معالج حذف المؤسسة
   const handleDeleteTenant = async () => {
     if (!tenantToDelete) return;
-    
+
     try {
-      setLoading(true);
-      
-      // استدعاء API لإلغاء المؤسسة
-      const result = await tenantService.deleteTenant(tenantToDelete.id, deleteReason || "إلغاء من لوحة الإدارة العامة", false);
-      
+      await tenantService.deleteTenant(tenantToDelete.id, deleteReason);
       toast({
-        title: "تم بنجاح",
-        description: result.message || `تم إلغاء المؤسسة ${tenantToDelete.name} بنجاح`
+        title: 'تم الحذف بنجاح',
+        description: `تم حذف المؤسسة ${tenantToDelete.name} بنجاح`
       });
-      
       setShowDeleteDialog(false);
       setTenantToDelete(null);
       setDeleteReason('');
       await loadTenants();
     } catch (error: any) {
-      console.error('Error cancelling tenant:', error);
       toast({
-        title: "خطأ",
-        description: error.message || "فشل في إلغاء المؤسسة",
-        variant: "destructive"
+        title: 'خطأ في الحذف',
+        description: error.message,
+        variant: 'destructive'
       });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // وظيفة الحذف النهائي للمؤسسة (hard delete)
-  const handleHardDeleteTenant = async () => {
-    if (!tenantToDelete) return;
-    
-    try {
-      setLoading(true);
-      
-      // استدعاء API للحذف النهائي
-      const result = await tenantService.deleteTenant(tenantToDelete.id, deleteReason || "حذف نهائي من لوحة الإدارة العامة", true);
-      
-      toast({
-        title: "تم بنجاح",
-        description: result.message || `تم حذف المؤسسة ${tenantToDelete.name} نهائياً`
-      });
-      
-      setShowHardDeleteDialog(false);
-      setTenantToDelete(null);
-      setDeleteReason('');
-      await loadTenants();
-    } catch (error: any) {
-      console.error('Error hard deleting tenant:', error);
-      toast({
-        title: "خطأ",
-        description: error.message || "فشل في الحذف النهائي للمؤسسة",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // وظيفة استعادة المؤسسة الملغاة
-  const handleRestoreTenant = async () => {
-    if (!tenantToDelete) return;
-    
-    try {
-      setLoading(true);
-      
-      // استدعاء API لاستعادة المؤسسة
-      const result = await tenantService.restoreTenant(tenantToDelete.id, deleteReason || "استعادة من لوحة الإدارة العامة");
-      
-      toast({
-        title: "تم بنجاح",
-        description: result.message || `تم استعادة المؤسسة ${tenantToDelete.name} بنجاح`
-      });
-      
-      setShowRestoreDialog(false);
-      setTenantToDelete(null);
-      setDeleteReason('');
-      await loadTenants();
-    } catch (error: any) {
-      console.error('Error restoring tenant:', error);
-      toast({
-        title: "خطأ",
-        description: error.message || "فشل في استعادة المؤسسة",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
   // إحصائيات سريعة
-  const getQuickStats = () => {
-    const totalTenants = tenants.length;
-    const activeTenants = tenants.filter(t => t.status === 'active').length;
-    const suspendedTenants = tenants.filter(t => t.status === 'suspended').length;
-    const totalUsers = tenants.reduce((sum, t) => sum + (t.actual_users || 0), 0);
-
-    return {
-      total: totalTenants,
-      active: activeTenants,
-      suspended: suspendedTenants,
-      users: totalUsers
-    };
+  const stats = {
+    total: tenants.length,
+    active: tenants.filter(t => t.status === 'active').length,
+    trial: tenants.filter(t => t.status === 'trial').length,
+    suspended: tenants.filter(t => t.status === 'suspended').length
   };
 
-  const stats = getQuickStats();
-
-  // No longer needed - replaced with EnhancedTenantOnboarding component
-  const TenantDetailsDialog = ({
-    tenant
-  }: {
-    tenant: TenantWithStats;
-  }) => <Dialog open={showTenantDetails} onOpenChange={setShowTenantDetails}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" dir="rtl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Building2 className="w-5 h-5" />
-            تفاصيل المؤسسة - {tenant.name}
-          </DialogTitle>
-        </DialogHeader>
-
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-            <TabsTrigger value="users">المستخدمون</TabsTrigger>
-            <TabsTrigger value="domains">الدومين</TabsTrigger>
-            <TabsTrigger value="usage">الاستخدام</TabsTrigger>
-            <TabsTrigger value="billing">الفوترة</TabsTrigger>
-            <TabsTrigger value="settings">الإعدادات</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">معلومات أساسية</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">الاسم:</span>
-                    <span>{tenant.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">المعرف:</span>
-                    <span className="font-mono text-xs">{tenant.slug}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">الحالة:</span>
-                    {getStatusBadge(tenant.status)}
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">الخطة:</span>
-                    {getSubscriptionBadge(tenant.subscription_plan)}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">إحصائيات الاستخدام</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">المستخدمون:</span>
-                    <span>{tenant.actual_users || 0} / {tenant.max_users}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">المركبات:</span>
-                    <span>{tenant.actual_vehicles || 0} / {tenant.max_vehicles}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">العقود:</span>
-                    <span>{tenant.actual_contracts || 0} / {tenant.max_contracts}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>إدارة المستخدمين</span>
-                  <Button size="sm" className="flex items-center gap-2">
-                    <UserPlus className="w-4 h-4" />
-                    إضافة مستخدم
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  سيتم تطوير إدارة المستخدمين قريباً
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="domains">
-            <DomainManagement 
-              tenantId={tenant.id}
-              tenantName={tenant.name}
-              currentDomain={tenant.domain}
-            />
-          </TabsContent>
-
-          <TabsContent value="usage">
-            <div className="grid grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm">استخدام التخزين</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>المستخدم</span>
-                      <span>2.1 GB / 10 GB</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{
-                      width: '21%'
-                    }}></div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm">API المكالمات</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>هذا الشهر</span>
-                      <span>15,234 / 50,000</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-green-600 h-2 rounded-full" style={{
-                      width: '30%'
-                    }}></div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="billing">
-            <Card>
-              <CardHeader>
-                <CardTitle>معلومات الفوترة</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  سيتم تطوير نظام الفوترة قريباً
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle>إعدادات المؤسسة</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  سيتم تطوير إعدادات المؤسسة قريباً
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>;
-  if (loading) {
-    return <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>;
-  }
-  return <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-right">إدارة المؤسسات المتقدمة</h2>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={loadTenants} className="flex items-center gap-2">
-            <RefreshCw className="w-4 h-4" />
-            تحديث
-          </Button>
-          <Button className="flex items-center gap-2" onClick={() => setShowAddTenantDialog(true)}>
-            <Building2 className="w-4 h-4" />
-            إضافة مؤسسة جديدة
-          </Button>
+  return (
+    <ErrorBoundary>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold">{t('admin')} {t('organization')}</h2>
+            <p className="text-muted-foreground">
+              إدارة جميع المؤسسات المشتركة في النظام
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <EnhancedButton
+              onClick={loadTenants}
+              variant="outline"
+              icon={<RefreshCw className="w-4 h-4" />}
+              loadingText="جاري التحديث..."
+            >
+              {t('update')}
+            </EnhancedButton>
+            <ActionButton
+              action="create"
+              itemName={t('organization')}
+              onClick={() => setShowAddTenantDialog(true)}
+              icon={<Plus className="w-4 h-4" />}
+            >
+              {t('add')} {t('organization')}
+            </ActionButton>
+          </div>
         </div>
-      </div>
 
-      {/* إحصائيات سريعة */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground text-right">إجمالي المؤسسات</p>
-                <p className="text-2xl font-bold text-right">{stats.total}</p>
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground text-right">المجموع</p>
+                  <p className="text-2xl font-bold text-right">{formatNumber(stats.total)}</p>
+                </div>
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Building2 className="w-4 h-4 text-blue-600" />
+                </div>
               </div>
-              <Building2 className="w-8 h-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground text-right">المؤسسات النشطة</p>
-                <p className="text-2xl font-bold text-green-600 text-right">{stats.active}</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground text-right">{t('active')}</p>
+                  <p className="text-2xl font-bold text-green-600 text-right">{formatNumber(stats.active)}</p>
+                </div>
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                </div>
               </div>
-              <CheckCircle className="w-8 h-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground text-right">المؤسسات المعلقة</p>
-                <p className="text-2xl font-bold text-red-600 text-right">{stats.suspended}</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground text-right">تجريبي</p>
+                  <p className="text-2xl font-bold text-blue-600 text-right">{formatNumber(stats.trial)}</p>
+                </div>
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-blue-600" />
+                </div>
               </div>
-              <Shield className="w-8 h-8 text-red-600" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground text-right">إجمالي المستخدمين</p>
-                <p className="text-2xl font-bold text-right">{stats.users}</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground text-right">{t('suspended')}</p>
+                  <p className="text-2xl font-bold text-red-600 text-right">{formatNumber(stats.suspended)}</p>
+                </div>
+                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                  <div className="w-4 h-4 bg-red-600 rounded-full"></div>
+                </div>
               </div>
-              <Users className="w-8 h-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* أدوات البحث والفلترة */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="البحث في المؤسسات..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pr-10 text-right"
+        {/* Tenants Table */}
+        <LoadingState
+          loading={loading}
+          error={error}
+          isEmpty={tenants.length === 0}
+          emptyMessage={msg('info', 'empty')}
+          onRetry={loadTenants}
+        >
+          <EnhancedTable
+            data={tenants}
+            columns={columns}
+            actions={actions}
+            searchable
+            searchPlaceholder={`${t('search')} ${t('organization')}...`}
+            onRefresh={loadTenants}
+            emptyMessage={msg('info', 'empty')}
+            maxHeight="600px"
+            stickyHeader
+          />
+        </LoadingState>
+
+        {/* Create Tenant Dialog */}
+        <EnhancedTenantOnboarding
+          open={showAddTenantDialog}
+          onOpenChange={setShowAddTenantDialog}
+          onSuccess={handleCreateTenant}
+        />
+
+        {/* Tenant Details Dialog */}
+        <EnhancedDialog
+          open={showTenantDetails}
+          onOpenChange={setShowTenantDetails}
+          title={selectedTenant ? `تفاصيل ${selectedTenant.name}` : ''}
+          description="عرض تفاصيل المؤسسة وإحصائياتها"
+          size="lg"
+          showCloseButton
+        >
+          {selectedTenant && (
+            <div className="space-y-6">
+              {/* معلومات أساسية */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>اسم المؤسسة</Label>
+                  <div className="mt-1 text-sm">{selectedTenant.name}</div>
+                </div>
+                <div>
+                  <Label>الرمز المختصر</Label>
+                  <div className="mt-1 text-sm">{selectedTenant.slug}</div>
+                </div>
+                <div>
+                  <Label>البريد الإلكتروني</Label>
+                  <div className="mt-1 text-sm">{selectedTenant.contact_email}</div>
+                </div>
+                <div>
+                  <Label>رقم الهاتف</Label>
+                  <div className="mt-1 text-sm">{selectedTenant.contact_phone || 'غير محدد'}</div>
+                </div>
+              </div>
+
+              {/* إحصائيات الاستخدام */}
+              <div>
+                <Label>إحصائيات الاستخدام</Label>
+                <div className="mt-2 grid grid-cols-3 gap-4">
+                  <div className="text-center p-3 bg-muted rounded-lg">
+                    <div className="text-lg font-bold">{selectedTenant.actual_users || 0}</div>
+                    <div className="text-xs text-muted-foreground">المستخدمين</div>
+                  </div>
+                  <div className="text-center p-3 bg-muted rounded-lg">
+                    <div className="text-lg font-bold">{selectedTenant.actual_vehicles || 0}</div>
+                    <div className="text-xs text-muted-foreground">المركبات</div>
+                  </div>
+                  <div className="text-center p-3 bg-muted rounded-lg">
+                    <div className="text-lg font-bold">{selectedTenant.actual_contracts || 0}</div>
+                    <div className="text-xs text-muted-foreground">العقود</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* إدارة النطاقات */}
+              <div>
+                <Label>إدارة النطاقات</Label>
+                <DomainManagement 
+                  tenantId={selectedTenant.id}
+                  tenantName={selectedTenant.name}
+                  currentDomain={selectedTenant.custom_domain}
+                />
+              </div>
+            </div>
+          )}
+        </EnhancedDialog>
+
+        {/* Delete Confirmation Dialog */}
+        <EnhancedDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          title="تأكيد الحذف"
+          description="هذا الإجراء لا يمكن التراجع عنه"
+          size="md"
+          showCloseButton
+        >
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex">
+                <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 ml-2" />
+                <div>
+                  <h4 className="text-sm font-medium text-red-800">
+                    تحذير: حذف نهائي
+                  </h4>
+                  <p className="mt-1 text-sm text-red-700">
+                    سيتم حذف جميع البيانات المرتبطة بهذه المؤسسة نهائياً
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {tenantToDelete && (
+              <div>
+                <Label>المؤسسة المراد حذفها</Label>
+                <div className="mt-1 font-medium">{tenantToDelete.name}</div>
+              </div>
+            )}
+
+            <div>
+              <Label htmlFor="delete-reason">سبب الحذف (اختياري)</Label>
+              <Textarea
+                id="delete-reason"
+                value={deleteReason}
+                onChange={(e) => setDeleteReason(e.target.value)}
+                placeholder="اذكر سبب حذف هذه المؤسسة..."
+                className="mt-1"
               />
             </div>
-            
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="فلترة حسب الحالة" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
-                <SelectItem value="active">نشط</SelectItem>
-                <SelectItem value="trial">تجريبي</SelectItem>
-                <SelectItem value="suspended">معلق</SelectItem>
-                <SelectItem value="cancelled">ملغي</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select value={planFilter} onValueChange={setPlanFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="فلترة حسب الخطة" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع الخطط</SelectItem>
-                <SelectItem value="basic">أساسي</SelectItem>
-                <SelectItem value="standard">معياري</SelectItem>
-                <SelectItem value="premium">مميز</SelectItem>
-                <SelectItem value="enterprise">مؤسسي</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <Download className="w-4 h-4" />
-                تصدير
+
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowDeleteDialog(false);
+                  setTenantToDelete(null);
+                  setDeleteReason('');
+                }}
+              >
+                إلغاء
               </Button>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <Filter className="w-4 h-4" />
-                المزيد
-              </Button>
+              <ActionButton
+                action="delete"
+                itemName="المؤسسة"
+                onClick={handleDeleteTenant}
+                variant="destructive"
+              >
+                حذف نهائي
+              </ActionButton>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-right">
-            <Database className="w-5 h-5" />
-            قائمة المؤسسات
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-right">المؤسسة</TableHead>
-                <TableHead className="text-right">الحالة</TableHead>
-                <TableHead className="text-right">الخطة</TableHead>
-                <TableHead className="text-right">المستخدمون</TableHead>
-                <TableHead className="text-right">تاريخ الإنشاء</TableHead>
-                <TableHead className="text-right">الإجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTenants.map(tenant => <TableRow key={tenant.id}>
-                  <TableCell className="text-right">
-                    <div>
-                      <div className="font-medium">{tenant.name}</div>
-                      <div className="text-sm text-muted-foreground">{tenant.slug}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{getStatusBadge(tenant.status)}</TableCell>
-                  <TableCell className="text-right">{getSubscriptionBadge(tenant.subscription_plan)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4 text-muted-foreground" />
-                      <span>{tenant.actual_users || 0}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {new Date(tenant.created_at).toLocaleDateString('ar-SA', { calendar: 'gregory' })}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => {
-                      setSelectedTenant(tenant);
-                      setShowTenantDetails(true);
-                    }}>
-                          <Eye className="w-4 h-4 ml-2" />
-                          عرض التفاصيل
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Edit className="w-4 h-4 ml-2" />
-                          تحرير
-                        </DropdownMenuItem>
-                         {tenant.status === 'active' ? <DropdownMenuItem onClick={() => handleTenantAction(tenant.id, 'suspend')}>
-                            <Shield className="w-4 h-4 ml-2" />
-                            تعليق
-                          </DropdownMenuItem> : tenant.status === 'cancelled' ? <DropdownMenuItem 
-                            className="text-green-600"
-                            onClick={() => {
-                              setTenantToDelete(tenant);
-                              setShowRestoreDialog(true);
-                            }}
-                          >
-                            <CheckCircle className="w-4 h-4 ml-2" />
-                            استعادة
-                          </DropdownMenuItem> : <DropdownMenuItem onClick={() => handleTenantAction(tenant.id, 'activate')}>
-                            <CheckCircle className="w-4 h-4 ml-2" />
-                            تفعيل
-                          </DropdownMenuItem>}
-                          
-                         {tenant.status !== 'active' && (
-                           <DropdownMenuItem 
-                             className="text-orange-600"
-                             onClick={() => {
-                               setTenantToDelete(tenant);
-                               setShowDeleteDialog(true);
-                             }}
-                           >
-                             <Trash2 className="w-4 h-4 ml-2" />
-                             إلغاء
-                           </DropdownMenuItem>
-                         )}
-                         
-                          <DropdownMenuItem 
-                            className="text-red-600"
-                            onClick={() => {
-                              setTenantToDelete(tenant);
-                              setShowHardDeleteDialog(true);
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4 ml-2" />
-                            حذف نهائي
-                          </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>)}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {selectedTenant && <TenantDetailsDialog tenant={selectedTenant} />}
-      
-      <EnhancedTenantOnboarding
-        open={showAddTenantDialog}
-        onOpenChange={setShowAddTenantDialog}
-        onSuccess={loadTenants}
-      />
-      
-      {/* مربع حوار تأكيد الإلغاء */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent dir="rtl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-right">
-              <AlertTriangle className="w-5 h-5 text-orange-600" />
-              تأكيد إلغاء المؤسسة
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-right">
-              هل أنت متأكد من رغبتك في إلغاء المؤسسة "{tenantToDelete?.name}"؟
-              <br />
-              سيتم إلغاء تفعيل المؤسسة ويمكن استعادتها لاحقاً.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="deleteReason" className="text-right">سبب الإلغاء (اختياري)</Label>
-              <Textarea
-                id="deleteReason"
-                placeholder="اذكر سبب إلغاء المؤسسة..."
-                value={deleteReason}
-                onChange={(e) => setDeleteReason(e.target.value)}
-                className="mt-2 text-right"
-                rows={3}
-              />
-            </div>
-          </div>
-          <AlertDialogFooter className="flex gap-2">
-            <AlertDialogCancel onClick={() => setDeleteReason('')}>إلغاء</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteTenant}
-              className="bg-orange-600 hover:bg-orange-700"
-            >
-              إلغاء المؤسسة
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* مربع حوار تأكيد الحذف النهائي */}
-      <AlertDialog open={showHardDeleteDialog} onOpenChange={setShowHardDeleteDialog}>
-        <AlertDialogContent dir="rtl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-right">
-              <AlertTriangle className="w-5 h-5 text-destructive" />
-              تأكيد الحذف النهائي
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-right">
-              <strong className="text-destructive">
-                تحذير خطير: هذا الإجراء لا يمكن التراجع عنه!
-              </strong>
-              <br />
-              سيتم حذف المؤسسة "{tenantToDelete?.name}" وجميع البيانات المرتبطة بها نهائياً من النظام.
-              <br />
-              <span className="text-sm text-muted-foreground">
-                يشمل ذلك: المستخدمين، العقود، المركبات، الفواتير، وجميع البيانات الأخرى.
-              </span>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="hardDeleteReason" className="text-right">سبب الحذف النهائي (مطلوب)</Label>
-              <Textarea
-                id="hardDeleteReason"
-                placeholder="اذكر سبب الحذف النهائي للمؤسسة..."
-                value={deleteReason}
-                onChange={(e) => setDeleteReason(e.target.value)}
-                className="mt-2 text-right"
-                rows={3}
-                required
-              />
-            </div>
-          </div>
-          <AlertDialogFooter className="flex gap-2">
-            <AlertDialogCancel onClick={() => setDeleteReason('')}>إلغاء</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleHardDeleteTenant}
-              className="bg-destructive hover:bg-destructive/90"
-              disabled={!deleteReason.trim()}
-            >
-              حذف نهائي
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* مربع حوار تأكيد الاستعادة */}
-      <AlertDialog open={showRestoreDialog} onOpenChange={setShowRestoreDialog}>
-        <AlertDialogContent dir="rtl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-right">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              تأكيد استعادة المؤسسة
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-right">
-              هل أنت متأكد من رغبتك في استعادة المؤسسة "{tenantToDelete?.name}"؟
-              <br />
-              سيتم إعادة تفعيل المؤسسة وجميع المستخدمين المرتبطين بها.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="restoreReason" className="text-right">سبب الاستعادة (اختياري)</Label>
-              <Textarea
-                id="restoreReason"
-                placeholder="اذكر سبب استعادة المؤسسة..."
-                value={deleteReason}
-                onChange={(e) => setDeleteReason(e.target.value)}
-                className="mt-2 text-right"
-                rows={3}
-              />
-            </div>
-          </div>
-          <AlertDialogFooter className="flex gap-2">
-            <AlertDialogCancel onClick={() => setDeleteReason('')}>إلغاء</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleRestoreTenant}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              استعادة المؤسسة
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>;
+        </EnhancedDialog>
+      </div>
+    </ErrorBoundary>
+  );
 };
+
 export default AdvancedTenantManagement;
