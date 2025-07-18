@@ -1,68 +1,96 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Loader2, Plus, X, RotateCcw } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Building, Loader2, ArrowLeft } from "lucide-react";
 
 interface FormActionsProps {
+  onBack: () => void;
   isSubmitting: boolean;
-  onCancel: () => void;
-  onReset?: () => void;
+  canGoBack: boolean;
+  currentStep: number;
+  totalSteps: number;
 }
 
-export const FormActions: React.FC<FormActionsProps> = ({ 
-  isSubmitting, 
-  onCancel, 
-  onReset 
+const FormActions: React.FC<FormActionsProps> = ({
+  onBack,
+  isSubmitting,
+  canGoBack,
+  currentStep,
+  totalSteps
 }) => {
-  console.log('FormActions rendered with isSubmitting:', isSubmitting);
+  console.info('FormActions rendered with isSubmitting:', isSubmitting);
   
   return (
-    <div className="flex justify-between items-center pt-6 border-t border-border/50 bg-card rounded-lg p-4 mt-4">
-      <div className="flex gap-2">
-        {onReset && (
+    <div className="flex flex-col gap-4 p-6 bg-gradient-soft rounded-lg border shadow-elegant" dir="rtl">
+      {/* Progress indicator */}
+      <div className="rtl-title mb-4">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm font-medium text-muted-foreground">
+            الخطوة {currentStep} من {totalSteps}
+          </span>
+          <span className="text-sm text-primary font-semibold">
+            {Math.round((currentStep / totalSteps) * 100)}%
+          </span>
+        </div>
+        <div className="w-full bg-muted rounded-full h-2">
+          <div 
+            className="bg-gradient-primary h-2 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex gap-3 justify-end">
+        {/* Back button */}
+        {canGoBack && (
           <Button
             type="button"
             variant="outline"
-            size="sm"
-            onClick={onReset}
+            onClick={onBack}
             disabled={isSubmitting}
-            className="rtl-flex"
+            className="rtl-button hover:bg-muted/80 transition-colors"
           >
-            <RotateCcw className="w-4 h-4" />
-            إعادة تعيين
+            <ArrowLeft className="w-4 h-4" />
+            <span>السابق</span>
           </Button>
         )}
-      </div>
-      
-      <div className="flex gap-3 flex-row-reverse">
+
+        {/* Submit button - always visible with clear styling */}
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="rtl-flex h-12 px-8 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+          className="rtl-button bg-gradient-primary hover:opacity-90 text-white font-semibold 
+                     shadow-lg hover:shadow-glow transition-all duration-300 
+                     disabled:opacity-50 disabled:cursor-not-allowed min-w-[150px]
+                     flex-shrink-0"
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              جاري الإنشاء...
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>جاري الإنشاء...</span>
             </>
           ) : (
             <>
-              <Plus className="w-5 h-5" />
-              إنشاء المؤسسة
+              <Building className="w-4 h-4" />
+              <span>إنشاء المؤسسة</span>
             </>
           )}
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isSubmitting}
-          className="rtl-flex h-12 px-6"
-        >
-          <X className="w-4 h-4" />
-          إلغاء
-        </Button>
+      </div>
+
+      {/* Helper text */}
+      <div className="rtl-title text-xs text-muted-foreground mt-2 p-3 bg-muted/30 rounded">
+        <div className="flex items-start gap-2">
+          <div className="w-2 h-2 bg-primary rounded-full mt-1.5 flex-shrink-0" />
+          <div>
+            <p className="font-medium mb-1">ملاحظة مهمة:</p>
+            <p>سيتم إنشاء المؤسسة الجديدة مع حساب مدير افتراضي. تأكد من صحة البيانات قبل المتابعة.</p>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
+
+export default FormActions;

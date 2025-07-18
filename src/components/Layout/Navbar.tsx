@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
@@ -79,7 +80,7 @@ const Navbar = () => {
     <header className="bg-card border-b border-border shadow-elegant px-6 py-3">
       <div className="rtl-header">
         {/* منطقة المستخدم والإشعارات */}
-        <div className="flex items-center gap-4">
+        <div className="rtl-flex gap-4">
           {/* أيقونة مهام اليوم */}
           <DailyTasksButton />
           
@@ -89,14 +90,14 @@ const Navbar = () => {
           {/* قائمة المستخدم */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 p-2">
+              <Button variant="ghost" className="rtl-flex p-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="/placeholder.svg" />
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     <User className="w-4 h-4" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="text-right hidden md:block">
+                <div className="rtl-title hidden md:block">
                   <p className="text-sm font-medium">
                     {profile?.full_name || user?.email || 'المستخدم'}
                   </p>
@@ -107,7 +108,7 @@ const Navbar = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel className="text-right">
+              <DropdownMenuLabel className="rtl-title">
                 <div className="flex flex-col">
                   <span className="font-medium">
                     {profile?.full_name || 'المستخدم'}
@@ -121,19 +122,19 @@ const Navbar = () => {
               <DropdownMenuSeparator />
               
               <DropdownMenuItem 
-                className="cursor-pointer"
+                className="cursor-pointer rtl-menu-item"
                 onClick={() => navigate('/settings')}
               >
-                <Settings className="w-4 h-4 ml-2" />
+                <Settings className="w-4 h-4" />
                 الإعدادات
               </DropdownMenuItem>
               
               {(profile?.role === 'admin' || profile?.role === 'manager') && (
                 <DropdownMenuItem 
-                  className="cursor-pointer"
+                  className="cursor-pointer rtl-menu-item"
                   onClick={() => navigate('/settings?tab=users')}
                 >
-                  <Shield className="w-4 h-4 ml-2" />
+                  <Shield className="w-4 h-4" />
                   إدارة المستخدمين
                 </DropdownMenuItem>
               )}
@@ -141,10 +142,10 @@ const Navbar = () => {
               <DropdownMenuSeparator />
               
               <DropdownMenuItem 
-                className="cursor-pointer text-red-600"
+                className="cursor-pointer text-red-600 rtl-menu-item"
                 onClick={handleSignOut}
               >
-                <LogOut className="w-4 h-4 ml-2" />
+                <LogOut className="w-4 h-4" />
                 تسجيل الخروج
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -156,10 +157,10 @@ const Navbar = () => {
           <div className="flex-1 max-w-md">
             <Button
               variant="outline"
-              className="w-full justify-start text-muted-foreground h-10 px-3"
+              className="w-full rtl-button text-muted-foreground h-10 px-3"
               onClick={() => setIsOpen(true)}
             >
-              <Search className="w-4 h-4 ml-2" />
+              <Search className="w-4 h-4" />
               البحث في النظام...
               <div className="ml-auto text-xs text-muted-foreground">
                 Ctrl+K
@@ -171,7 +172,7 @@ const Navbar = () => {
           <Button
             variant="default"
             size="sm"
-            className="hidden lg:flex items-center gap-2"
+            className="hidden lg:flex rtl-button"
             onClick={handleCreateOrganization}
           >
             <Building className="w-4 h-4" />

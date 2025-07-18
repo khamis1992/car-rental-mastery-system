@@ -1,0 +1,127 @@
+
+/* RTL Layout Styles - التخطيط العربي */
+
+/* RTL Header Layout */
+.rtl-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  direction: rtl;
+}
+
+/* RTL Flex for icons and text */
+.rtl-flex {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-direction: row-reverse;
+}
+
+/* RTL Title alignment */
+.rtl-title {
+  text-align: right;
+  direction: rtl;
+}
+
+/* RTL Label alignment */
+.rtl-label {
+  text-align: right;
+  direction: rtl;
+  font-weight: 500;
+}
+
+/* RTL Button with icon */
+.rtl-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+/* RTL Form Layout */
+.rtl-form {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl-form input,
+.rtl-form textarea,
+.rtl-form select {
+  text-align: right;
+  direction: rtl;
+}
+
+/* RTL Card Header */
+.rtl-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row-reverse;
+}
+
+/* RTL Dialog Title */
+.rtl-dialog-title {
+  text-align: right;
+  direction: rtl;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* RTL Navigation */
+.rtl-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-direction: row-reverse;
+}
+
+/* RTL Stats Card */
+.rtl-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-direction: row-reverse;
+}
+
+/* RTL Menu Item */
+.rtl-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+  text-align: right;
+}
+
+/* مخصص للمشاريع المتقدمة */
+.rtl-advanced {
+  direction: rtl;
+}
+
+.rtl-advanced .flex {
+  flex-direction: row-reverse;
+}
+
+.rtl-advanced .justify-between {
+  justify-content: space-between;
+  flex-direction: row-reverse;
+}
+
+/* تصحيح المسافات في RTL */
+[dir="rtl"] .ml-2 { margin-left: 0; margin-right: 0.5rem; }
+[dir="rtl"] .mr-2 { margin-right: 0; margin-left: 0.5rem; }
+[dir="rtl"] .ml-3 { margin-left: 0; margin-right: 0.75rem; }
+[dir="rtl"] .mr-3 { margin-right: 0; margin-left: 0.75rem; }
+[dir="rtl"] .ml-4 { margin-left: 0; margin-right: 1rem; }
+[dir="rtl"] .mr-4 { margin-right: 0; margin-left: 1rem; }
+
+/* تحسين الأزرار في RTL */
+[dir="rtl"] button {
+  direction: rtl;
+}
+
+[dir="rtl"] .flex.items-center.gap-2 {
+  flex-direction: row-reverse;
+}
