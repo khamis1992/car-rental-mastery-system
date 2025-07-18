@@ -139,9 +139,7 @@ export function SubscriptionModal({ isOpen, onClose, selectedPlan }: Subscriptio
       });
 
       // الآن نحتاج لتوجيه المستخدم إلى SADAD
-      if (newTenant.tenant_id) {
-        await handleSadadPayment(newTenant.tenant_id, selectedPlan);
-      }
+      await handleSadadPayment(newTenant.id, selectedPlan);
       
     } catch (error: any) {
       console.error('Error creating tenant:', error);

@@ -37,9 +37,6 @@ export interface TenantUser {
   joined_at: string;
   created_at: string;
   updated_at: string;
-  profiles?: {
-    full_name?: string;
-  };
 }
 
 export interface SubscriptionHistory {
@@ -92,25 +89,9 @@ export interface TenantOnboardingData {
   timezone: string;
   currency: string;
   subscription_plan: Tenant['subscription_plan'];
-  max_users?: number;
-  max_vehicles?: number;
-  max_contracts?: number;
   admin_user: {
     email: string;
     password: string;
     full_name: string;
   };
-}
-
-// Extended tenant type with actual counts
-export interface TenantWithCounts extends Tenant {
-  actual_users: number;
-  actual_vehicles: number;
-}
-
-// Create tenant response type
-export interface CreateTenantResponse {
-  success: boolean;
-  tenant_id?: string;
-  message?: string;
 }

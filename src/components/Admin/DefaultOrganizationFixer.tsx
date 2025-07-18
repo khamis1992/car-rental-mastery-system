@@ -89,12 +89,9 @@ export const DefaultOrganizationFixer: React.FC = () => {
       setIsLoading(true);
       setFixResult(null);
 
-      // استدعاء دالة الحذف النهائي للمؤسسة الافتراضية
+      // استدعاء دالة الحذف السريع
       const { data, error } = await supabase
-        .rpc('hard_delete_tenant', {
-          tenant_id_param: defaultOrg.id,
-          deletion_reason: 'حذف المؤسسة الافتراضية'
-        });
+        .rpc('quick_remove_default_organization');
 
       if (error) {
         // إذا فشلت الدالة، نحاول الحذف اليدوي

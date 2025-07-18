@@ -1,12 +1,8 @@
-
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTenant } from '@/contexts/TenantContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent } from '@/components/ui/card';
-import { Building2, Crown, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import TenantGuard from './TenantGuard';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -14,11 +10,8 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
-  const { user, profile, loading: authLoading, isSaasAdmin } = useAuth();
-  const { currentTenant, currentUserRole, loading: tenantLoading, error: tenantError } = useTenant();
+  const { user, profile, loading, isSaasAdmin } = useAuth();
   const location = useLocation();
-
-  const loading = authLoading || tenantLoading;
 
   if (loading) {
     return (
@@ -44,7 +37,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
   }
 
   // معالجة خاصة لمدير النظام العام (admin@admin.com)
-  if (isSaasAdmin || currentUserRole === 'super_admin') {
+  if (isSaasAdmin) {
     // السماح فقط بالوصول إلى صفحات super-admin
     if (!location.pathname.startsWith('/super-admin')) {
       console.log('🔧 SaaS Admin redirected to super-admin dashboard');
@@ -57,95 +50,36 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
   // For super_admin role, check the old profile system for backward compatibility
   if (requiredRole === 'super_admin' && profile && profile.role !== 'admin') {
     return (
-      <div className="min-h-screen bg-gradient-soft flex items-center justify-center" dir="rtl">
-        <Card className="w-full max-w-md border-destructive/20">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Crown className="w-16 h-16 text-destructive mb-4" />
-            <h3 className="text-lg font-medium mb-2 text-destructive">غير مصرح بالوصول</h3>
-            <p className="text-muted-foreground text-center">
-              تحتاج إلى صلاحية مدير النظام للوصول إلى هذه الصفحة
-            </p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gradient-soft flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-destructive mb-4">
+            غير مصرح لك بالوصول
+          </h1>
+          <p className="text-muted-foreground">
+            تحتاج إلى صلاحية مدير النظام للوصول إلى هذه الصفحة
+          </p>
+        </div>
       </div>
     );
   }
 
   // منع المستخدمين العاديين من الوصول إلى صفحات super-admin
-  if (location.pathname.startsWith('/super-admin') && !isSaasAdmin && (currentUserRole as string) !== 'super_admin') {
+  if (location.pathname.startsWith('/super-admin') && !isSaasAdmin) {
     return (
-      <div className="min-h-screen bg-gradient-soft flex items-center justify-center" dir="rtl">
-        <Card className="w-full max-w-md border-destructive/20">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Crown className="w-16 h-16 text-destructive mb-4" />
-            <h3 className="text-lg font-medium mb-2 text-destructive">غير مصرح بالوصول</h3>
-            <p className="text-muted-foreground text-center">
-              هذه الصفحة مخصصة لمديري النظام العام فقط
-            </p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gradient-soft flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-destructive mb-4">
+            غير مصرح لك بالوصول
+          </h1>
+          <p className="text-muted-foreground">
+            هذه الصفحة مخصصة لمديري النظام العام فقط
+          </p>
+        </div>
       </div>
     );
   }
 
-  // التعامل مع أخطاء تحميل بيانات المؤسسة
-  if (tenantError) {
-    return (
-      <div className="min-h-screen bg-gradient-soft flex items-center justify-center p-6" dir="rtl">
-        <Card className="w-full max-w-md border-destructive/20">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <AlertCircle className="w-16 h-16 text-destructive mb-4" />
-            <h3 className="text-lg font-medium mb-2 text-destructive">خطأ في تحميل البيانات</h3>
-            <p className="text-muted-foreground text-center mb-6">{tenantError}</p>
-            <Button 
-              onClick={() => window.location.reload()} 
-              variant="outline"
-              className="w-full"
-            >
-              إعادة المحاولة
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // التعامل مع المستخدمين الذين لا يملكون مؤسسة
-  if (!currentTenant && currentUserRole === 'user') {
-    return (
-      <div className="min-h-screen bg-gradient-soft flex items-center justify-center p-6" dir="rtl">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Building2 className="w-16 h-16 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">مرحباً بك</h3>
-            <p className="text-muted-foreground text-center mb-6">
-              لم يتم ربطك بأي مؤسسة بعد. يرجى التواصل مع مدير النظام لإضافتك إلى مؤسسة.
-            </p>
-            <div className="flex gap-2 w-full">
-              <Button 
-                onClick={() => window.location.reload()} 
-                variant="outline"
-                className="flex-1"
-              >
-                إعادة التحديث
-              </Button>
-              <Button 
-                onClick={() => {
-                  // يمكن إضافة منطق للتواصل مع الدعم
-                  console.log('Contact support requested');
-                }}
-                className="flex-1"
-              >
-                طلب المساعدة
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  return <>{children}</>;
+  return <TenantGuard>{children}</TenantGuard>;
 };
 
 export default ProtectedRoute;

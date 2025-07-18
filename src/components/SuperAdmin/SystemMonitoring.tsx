@@ -136,9 +136,9 @@ const SystemMonitoring: React.FC = () => {
                 <Server className="w-8 h-8 text-blue-600 mr-3" />
                 <div>
                   <p className="text-sm text-muted-foreground">الخوادم النشطة</p>
-          <p className="text-2xl font-bold">
-            {metrics?.tenants?.active || 0}/{metrics?.tenants?.total || 0}
-          </p>
+                  <p className="text-2xl font-bold">
+                    {metrics.serverStats.activeServers}/{metrics.serverStats.totalServers}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -147,7 +147,7 @@ const SystemMonitoring: React.FC = () => {
                 <Database className="w-8 h-8 text-green-600 mr-3" />
                 <div>
                   <p className="text-sm text-muted-foreground">قواعد البيانات</p>
-                  <p className="text-2xl font-bold">{metrics?.database?.connections || 0}</p>
+                  <p className="text-2xl font-bold">{metrics.serverStats.databaseCount}</p>
                 </div>
               </CardContent>
             </Card>
@@ -156,7 +156,7 @@ const SystemMonitoring: React.FC = () => {
                 <Wifi className="w-8 h-8 text-purple-600 mr-3" />
                 <div>
                   <p className="text-sm text-muted-foreground">زمن الاستجابة</p>
-                  <p className="text-2xl font-bold">{metrics?.api?.responseTime || 0}ms</p>
+                  <p className="text-2xl font-bold">{metrics.serverStats.responseTime}</p>
                 </div>
               </CardContent>
             </Card>
@@ -165,7 +165,7 @@ const SystemMonitoring: React.FC = () => {
                 <Activity className="w-8 h-8 text-orange-600 mr-3" />
                 <div>
                   <p className="text-sm text-muted-foreground">معدل التوفر</p>
-                  <p className="text-2xl font-bold">{metrics?.api?.uptime || '99.9%'}</p>
+                  <p className="text-2xl font-bold">{metrics.serverStats.uptime}</p>
                 </div>
               </CardContent>
             </Card>
@@ -181,14 +181,14 @@ const SystemMonitoring: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {metrics?.server ? [(
-                  <div key="server" className="border rounded-lg p-4">
+                {metrics.servers.map((server, index) => (
+                  <div key={index} className="border rounded-lg p-4">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        {getStatusIcon('healthy')}
-                        <h4 className="font-medium">الخادم الرئيسي</h4>
+                        {getStatusIcon(server.status)}
+                        <h4 className="font-medium">{server.name}</h4>
                       </div>
-                      {getStatusBadge('healthy')}
+                      {getStatusBadge(server.status)}
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -198,9 +198,9 @@ const SystemMonitoring: React.FC = () => {
                             <Cpu className="w-3 h-3" />
                             المعالج
                           </span>
-                          <span className="text-sm">{metrics.server.cpu_usage}%</span>
+                          <span className="text-sm">{server.cpu}%</span>
                         </div>
-                        <Progress value={metrics.server.cpu_usage} className="h-2" />
+                        <Progress value={server.cpu} className="h-2" />
                       </div>
                       
                       <div className="space-y-2">
@@ -209,9 +209,9 @@ const SystemMonitoring: React.FC = () => {
                             <MemoryStick className="w-3 h-3" />
                             الذاكرة
                           </span>
-                          <span className="text-sm">{metrics.server.memory_usage}%</span>
+                          <span className="text-sm">{server.memory}%</span>
                         </div>
-                        <Progress value={metrics.server.memory_usage} className="h-2" />
+                        <Progress value={server.memory} className="h-2" />
                       </div>
                       
                       <div className="space-y-2">
@@ -220,20 +220,20 @@ const SystemMonitoring: React.FC = () => {
                             <HardDrive className="w-3 h-3" />
                             القرص الصلب
                           </span>
-                          <span className="text-sm">{metrics.server.disk_usage}%</span>
+                          <span className="text-sm">{server.disk}%</span>
                         </div>
-                        <Progress value={metrics.server.disk_usage} className="h-2" />
+                        <Progress value={server.disk} className="h-2" />
                       </div>
                       
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm">معدل التحميل</span>
-                          <span className="text-sm font-medium">{metrics.server.load_average}</span>
+                          <span className="text-sm">وقت التشغيل</span>
+                          <span className="text-sm font-medium">{server.uptime}</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                )] : []}
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -249,28 +249,28 @@ const SystemMonitoring: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {metrics?.database ? [(
-                    <div key="database" className="border rounded-lg p-4">
+                  {metrics.databases.map((db, index) => (
+                    <div key={index} className="border rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium">قاعدة البيانات الرئيسية</h4>
-                        {getStatusBadge(metrics.database.status)}
+                        <h4 className="font-medium">{db.name}</h4>
+                        {getStatusBadge(db.status)}
                       </div>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">الاتصالات:</span>
-                          <span>{metrics.database.connections}/{metrics.database.maxConnections}</span>
+                          <span>{db.connections}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">الحجم:</span>
-                          <span>{metrics.database.size}</span>
+                          <span>{db.size}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">الأداء:</span>
-                          <span>{metrics.database.performance}%</span>
+                          <span className="text-muted-foreground">آخر نسخة احتياطية:</span>
+                          <span>{db.lastBackup}</span>
                         </div>
                       </div>
                     </div>
-                  )] : []}
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -285,7 +285,7 @@ const SystemMonitoring: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {[] /* No alerts from metrics */ .map((alert: any) => (
+                  {metrics.alerts.map((alert) => (
                     <div key={alert.id} className="border rounded-lg p-3">
                       <div className="flex items-start gap-2">
                         {alert.type === 'warning' ? (

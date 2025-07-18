@@ -70,24 +70,9 @@ export const useSubscriptionPlans = () => {
 
   const createPlan = async (planData: Partial<SubscriptionPlan>) => {
     try {
-      const planToInsert = {
-        plan_code: planData.plan_code || '',
-        plan_name: planData.plan_name || '',
-        description: planData.description,
-        features: planData.features || [],
-        price_monthly: planData.price_monthly,
-        price_yearly: planData.price_yearly,
-        max_tenants: planData.max_tenants,
-        max_users_per_tenant: planData.max_users_per_tenant,
-        max_contracts: planData.max_contracts,
-        storage_limit_gb: planData.storage_limit_gb,
-        is_active: planData.is_active ?? true,
-        is_popular: planData.is_popular ?? false
-      };
-
       const { data, error } = await supabase
         .from('subscription_plans')
-        .insert([planToInsert])
+        .insert([planData])
         .select()
         .single();
 
@@ -212,15 +197,7 @@ export const useSaasSubscriptions = (tenantId?: string) => {
         throw fetchError;
       }
 
-      // تحويل البيانات لتتطابق مع الواجهة
-      const transformedData = (data || []).map((sub: any) => ({
-        ...sub,
-        discount_percentage: sub.discount_percentage || 0,
-        next_billing_date: sub.current_period_end,
-        plan: sub.plan || null,
-        tenant: sub.tenant || null
-      }));
-      setSubscriptions(transformedData);
+      setSubscriptions(data || []);
     } catch (err: any) {
       console.error('خطأ في جلب الاشتراكات:', err);
       setError(err.message);
@@ -232,21 +209,9 @@ export const useSaasSubscriptions = (tenantId?: string) => {
 
   const createSubscription = async (subscriptionData: Partial<SaasSubscription>) => {
     try {
-      const subscriptionToInsert = {
-        tenant_id: subscriptionData.tenant_id || '',
-        plan_id: subscriptionData.plan_id || '',
-        amount: subscriptionData.amount || 0,
-        current_period_start: subscriptionData.current_period_start || new Date().toISOString(),
-        current_period_end: subscriptionData.current_period_end || new Date().toISOString(),
-        billing_cycle: subscriptionData.billing_cycle,
-        auto_renew: subscriptionData.auto_renew,
-        currency: subscriptionData.currency,
-        discount_percentage: subscriptionData.discount_percentage || 0
-      };
-
       const { data, error } = await supabase
         .from('saas_subscriptions')
-        .insert([subscriptionToInsert])
+        .insert([subscriptionData])
         .select()
         .single();
 
@@ -346,15 +311,7 @@ export const useSaasInvoices = (tenantId?: string) => {
         throw fetchError;
       }
 
-      // تحويل البيانات لتتطابق مع الواجهة
-      const transformedData = (data || []).map((invoice: any) => ({
-        ...invoice,
-        subtotal: invoice.subtotal || invoice.amount_due || 0,
-        tax_amount: invoice.tax_amount || 0,
-        discount_amount: invoice.discount_amount || 0,
-        total_amount: invoice.total_amount || invoice.amount_due || 0
-      }));
-      setInvoices(transformedData);
+      setInvoices(data || []);
     } catch (err: any) {
       console.error('خطأ في جلب الفواتير:', err);
       setError(err.message);
@@ -366,26 +323,9 @@ export const useSaasInvoices = (tenantId?: string) => {
 
   const createInvoice = async (invoiceData: Partial<SaasInvoice>) => {
     try {
-      const invoiceToInsert = {
-        tenant_id: invoiceData.tenant_id || '',
-        subscription_id: invoiceData.subscription_id || '',
-        invoice_number: invoiceData.invoice_number || '',
-        billing_period_start: invoiceData.billing_period_start || new Date().toISOString(),
-        billing_period_end: invoiceData.billing_period_end || new Date().toISOString(),
-        subtotal: invoiceData.subtotal || 0,
-        tax_amount: invoiceData.tax_amount || 0,
-        discount_amount: invoiceData.discount_amount || 0,
-        total_amount: invoiceData.total_amount || 0,
-        // هذه الحقول لا تتطابق مع واجهة SaasInvoice، سيتم حسابها تلقائياً
-        due_date: invoiceData.due_date,
-        status: invoiceData.status,
-        currency: invoiceData.currency,
-        description: invoiceData.description
-      };
-
       const { data, error } = await supabase
         .from('saas_invoices')
-        .insert([invoiceToInsert])
+        .insert([invoiceData])
         .select()
         .single();
 
@@ -484,12 +424,7 @@ export const useSaasPayments = (tenantId?: string) => {
         throw fetchError;
       }
 
-      // تحويل البيانات لتتطابق مع الواجهة
-      const transformedData = (data || []).map((payment: any) => ({
-        ...payment,
-        payment_date: payment.paid_at || payment.created_at
-      }));
-      setPayments(transformedData);
+      setPayments(data || []);
     } catch (err: any) {
       console.error('خطأ في جلب المدفوعات:', err);
       setError(err.message);
@@ -501,24 +436,9 @@ export const useSaasPayments = (tenantId?: string) => {
 
   const createPayment = async (paymentData: Partial<SaasPayment>) => {
     try {
-      const paymentToInsert = {
-        invoice_id: paymentData.invoice_id || '',
-        subscription_id: paymentData.subscription_id || '',
-        tenant_id: paymentData.tenant_id || '',
-        amount: paymentData.amount || 0,
-        payment_date: paymentData.payment_date || new Date().toISOString(),
-        payment_method: paymentData.payment_method,
-        payment_reference: paymentData.payment_reference,
-        status: paymentData.status,
-        currency: paymentData.currency,
-        metadata: paymentData.metadata,
-        failure_reason: paymentData.failure_reason,
-        paid_at: paymentData.paid_at
-      };
-
       const { data, error } = await supabase
         .from('saas_payments')
-        .insert([paymentToInsert])
+        .insert([paymentData])
         .select()
         .single();
 
@@ -597,9 +517,9 @@ export const useBillingStats = () => {
         total_subscriptions: subscriptions.length,
         
         // الفواتير
-        pending_invoices: invoices.filter((i: any) => i.status === 'sent' || i.status === 'draft').length,
-        overdue_invoices: invoices.filter((i: any) => i.status === 'overdue').length,
-        paid_invoices: invoices.filter((i: any) => i.status === 'paid').length,
+        pending_invoices: invoices.filter(i => i.status === 'sent' || i.status === 'draft').length,
+        overdue_invoices: invoices.filter(i => i.status === 'overdue').length,
+        paid_invoices: invoices.filter(i => i.status === 'paid').length,
         total_invoices: invoices.length,
         
         // المؤسسات
@@ -681,7 +601,7 @@ export const useTenantUsage = (tenantId: string) => {
         throw functionError;
       }
 
-      setUsage(data as unknown as TenantUsage);
+      setUsage(data);
     } catch (err: any) {
       console.error('خطأ في جلب استخدام المؤسسة:', err);
       setError(err.message);

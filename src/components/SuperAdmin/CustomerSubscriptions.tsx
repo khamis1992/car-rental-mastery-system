@@ -488,7 +488,7 @@ const CustomerSubscriptions: React.FC<CustomerSubscriptionsProps> = ({
                           <TableCell className="font-mono">{invoice.invoice_number}</TableCell>
                           <TableCell>{getStatusBadge(invoice.status, 'invoice')}</TableCell>
                           <TableCell className="font-mono">{formatPrice(invoice.total_amount)}</TableCell>
-                          <TableCell>{new Date(invoice.created_at).toLocaleDateString('ar-SA')}</TableCell>
+                          <TableCell>{invoice.invoice_date}</TableCell>
                           <TableCell>{invoice.due_date}</TableCell>
                           <TableCell>
                             <Button size="sm" variant="ghost" onClick={() => {

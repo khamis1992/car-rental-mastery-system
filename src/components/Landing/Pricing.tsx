@@ -1,76 +1,72 @@
-
 import { Button } from "@/components/ui/button";
-import { Check, Zap, Crown, Building, Star } from "lucide-react";
+import { Check, Zap, Crown, Building } from "lucide-react";
 import { useState } from "react";
-import { EnhancedSubscriptionModal } from "./EnhancedSubscriptionModal";
-import { useSubscriptionPlans } from "@/hooks/useSaasData";
-import { formatPrice } from "@/types/subscription-plans";
+import { SubscriptionModal } from "./SubscriptionModal";
 
-// Map icons to plan codes
-const planIcons = {
-  basic: Zap,
-  standard: Crown,
-  premium: Star,
-  enterprise: Building,
-} as const;
+const plans = [
+  {
+    name: "الباقة الأساسية",
+    icon: Zap,
+    price: "٢٩٩",
+    period: "شهرياً",
+    description: "مثالية للشركات الناشئة",
+    features: [
+      "إدارة حتى ٥٠ مركبة",
+      "نظام العقود الأساسي",
+      "تقارير شهرية",
+      "دعم فني عبر البريد",
+      "تطبيق الموبايل"
+    ],
+    popular: false,
+    buttonText: "اشترك"
+  },
+  {
+    name: "الباقة المتقدمة",
+    icon: Crown,
+    price: "٥٩٩",
+    period: "شهرياً",
+    description: "الأكثر شعبية للشركات المتوسطة",
+    features: [
+      "إدارة حتى ٢٠٠ مركبة",
+      "نظام العقود المتقدم",
+      "تقارير تفاعلية يومية",
+      "دعم فني ٢٤/٧",
+      "تطبيق موبايل متطور",
+      "نظام GPS للتتبع",
+      "إدارة الصيانة",
+      "تكامل مع البنوك"
+    ],
+    popular: true,
+    buttonText: "اشترك"
+  },
+  {
+    name: "الباقة المؤسسية",
+    icon: Building,
+    price: "مخصص",
+    period: "حسب الاحتياج",
+    description: "للمؤسسات الكبيرة والحكومية",
+    features: [
+      "مركبات غير محدودة",
+      "تخصيص كامل للنظام",
+      "تقارير متقدمة وذكية",
+      "دعم فني مخصص",
+      "تدريب شامل للفريق",
+      "خوادم مخصصة",
+      "أمان إضافي",
+      "تكامل مع الأنظمة الحالية"
+    ],
+    popular: false,
+    buttonText: "تواصل معنا"
+  }
+];
 
 export function Pricing() {
-  const { data: subscriptionPlans, isLoading } = useSubscriptionPlans();
-  const [selectedPlan, setSelectedPlan] = useState<any>(null);
+  const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Helper function to get default descriptions
-  function getDefaultDescription(code: string) {
-    const descriptions = {
-      basic: 'مثالية للشركات الناشئة',
-      standard: 'الأكثر شعبية للشركات المتوسطة', 
-      premium: 'للشركات الكبيرة مع ميزات متقدمة',
-      enterprise: 'للمؤسسات الكبيرة والحكومية'
-    };
-    return descriptions[code as keyof typeof descriptions] || '';
-  }
-
-  // Helper function to get default features
-  function getDefaultFeatures(code: string, plan: any) {
-    const baseFeatures = [
-      `إدارة حتى ${plan.max_vehicles || 'غير محدود'} مركبة`,
-      `حتى ${plan.max_users_per_tenant || 'غير محدود'} مستخدم`,
-      `حتى ${plan.max_contracts || 'غير محدود'} عقد`,
-      'نظام إدارة العقود',
-      'تقارير مفصلة',
-      'دعم فني'
-    ];
-
-    const advancedFeatures = {
-      basic: ['تطبيق الموبايل'],
-      standard: ['تطبيق موبايل متطور', 'نظام GPS للتتبع', 'إدارة الصيانة'],
-      premium: ['تحليلات متقدمة', 'API للتكامل', 'دعم أولوي', 'تخصيص التقارير'],
-      enterprise: ['تخصيص كامل', 'دعم مخصص 24/7', 'تدريب شامل', 'خوادم مخصصة']
-    };
-
-    return [...baseFeatures, ...(advancedFeatures[code as keyof typeof advancedFeatures] || [])];
-  }
-
-  // Transform database plans to display format
-  const plans = subscriptionPlans?.map(plan => {
-    const IconComponent = planIcons[plan.plan_code as keyof typeof planIcons] || Building;
-    
-    return {
-      name: plan.plan_name,
-      code: plan.plan_code,
-      icon: IconComponent,
-      price: plan.plan_code === 'enterprise' ? 'مخصص' : formatPrice(plan.price_monthly).replace(' د.ك.', ''),
-      period: plan.plan_code === 'enterprise' ? 'حسب الاحتياج' : 'شهرياً',
-      description: plan.description || getDefaultDescription(plan.plan_code),
-      features: plan.features || getDefaultFeatures(plan.plan_code, plan),
-      popular: plan.is_popular,
-      buttonText: plan.plan_code === 'enterprise' ? 'تواصل معنا' : 'اشترك',
-      originalPlan: plan
-    };
-  }) || [];
-
-  const handleSubscribe = (plan: any) => {
-    if (plan.code === 'enterprise') {
+  const handleSubscribe = (plan: typeof plans[0]) => {
+    if (plan.price === "مخصص") {
+      // للباقة المؤسسية، نحتاج لتوجيه المستخدم للتواصل
       window.location.href = "mailto:sales@saptcogulf.com?subject=استفسار عن الباقة المؤسسية";
       return;
     }
@@ -78,23 +74,6 @@ export function Pricing() {
     setSelectedPlan(plan);
     setIsModalOpen(true);
   };
-
-  if (isLoading) {
-    return (
-      <section id="pricing" className="py-20 bg-background">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-foreground">
-              خطط أسعار شفافة
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              جاري تحميل خطط الأسعار...
-            </p>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section id="pricing" className="py-20 bg-background">
@@ -108,7 +87,7 @@ export function Pricing() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {plans.map((plan, index) => (
             <div 
               key={index}
@@ -158,7 +137,7 @@ export function Pricing() {
 
               {/* Features */}
               <ul className="space-y-4 mb-8">
-                {plan.features.map((feature: string, featureIndex: number) => (
+                {plan.features.map((feature, featureIndex) => (
                   <li key={featureIndex} className="flex items-start gap-3">
                     <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
                     <span className="text-card-foreground">
@@ -210,7 +189,7 @@ export function Pricing() {
         </div>
       </div>
 
-      <EnhancedSubscriptionModal
+      <SubscriptionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         selectedPlan={selectedPlan}
