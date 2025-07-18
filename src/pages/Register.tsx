@@ -38,6 +38,7 @@ import type { SubscriptionPlanCode } from '@/types/subscription-plans';
 import { analyzePasswordStrength } from '@/utils/smartSuggestions';
 import { EnhancedLoading, useEnhancedLoading } from '@/components/ui/enhanced-loading';
 import { HelpSystem } from '@/components/ui/help-system';
+import { StepProgress } from '@/components/ui/step-progress';
 
 // تحويل خطط SaaS إلى تنسيق التسجيل
 const plans = [
