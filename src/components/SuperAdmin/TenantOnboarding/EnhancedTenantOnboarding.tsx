@@ -15,7 +15,7 @@ import { OrganizationInfoSection } from './OrganizationInfoSection';
 import { ContactInfoSection } from './ContactInfoSection';
 import { SubscriptionPlanSection } from './SubscriptionPlanSection';
 import { AdminUserSection } from './AdminUserSection';
-import FormActions from './FormActions';
+import { FormActions } from './FormActions';
 import { 
   tenantOnboardingSchema, 
   type TenantOnboardingFormData
@@ -158,11 +158,9 @@ export const EnhancedTenantOnboarding: React.FC<EnhancedTenantOnboardingProps> =
             />
             <AdminUserSection control={form.control} />
             <FormActions
-              onBack={() => onOpenChange(false)}
               isSubmitting={isSubmitting}
-              canGoBack={true}
-              currentStep={1}
-              totalSteps={1}
+              onCancel={() => onOpenChange(false)}
+              onReset={resetForm}
             />
           </form>
         </Form>
