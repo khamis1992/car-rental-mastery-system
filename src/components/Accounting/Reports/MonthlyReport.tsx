@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Download, Printer } from 'lucide-react';
 import { accountingService } from '@/services/accountingService';
+import { formatDate, formatDateTime } from '@/lib/utils';
 
 interface MonthlyReportProps {
   month?: number;
@@ -189,7 +190,7 @@ export const MonthlyReport: React.FC<MonthlyReportProps> = ({
                   {reportData?.entries.slice(0, 20).map((entry: any) => (
                     <tr key={entry.id}>
                       <td>{entry.entry_number}</td>
-                      <td>{new Date(entry.entry_date).toLocaleDateString('ar-SA')}</td>
+                      <td>{formatDate(entry.entry_date)}</td>
                       <td>{entry.description}</td>
                       <td>{entry.total_debit.toFixed(3)} د.ك</td>
                       <td>{entry.total_credit.toFixed(3)} د.ك</td>
@@ -214,7 +215,7 @@ export const MonthlyReport: React.FC<MonthlyReportProps> = ({
 
           {/* Report Footer */}
           <div className="text-center text-sm text-muted-foreground pt-4 border-t">
-            تم إنشاء التقرير في: {new Date().toLocaleDateString('ar-SA')} - {new Date().toLocaleTimeString('ar-SA')}
+            تم إنشاء التقرير في: {formatDateTime(new Date())}
           </div>
         </CardContent>
       </Card>

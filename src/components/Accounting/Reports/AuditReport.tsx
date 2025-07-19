@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Download, Printer, AlertTriangle, Shield, Eye } from 'lucide-react';
 import { accountingService } from '@/services/accountingService';
+import { formatDateTime } from '@/lib/utils';
 
 export const AuditReport: React.FC = () => {
   const [reportData, setReportData] = useState<any>(null);
@@ -434,7 +435,7 @@ export const AuditReport: React.FC = () => {
           <div className="text-center text-sm text-muted-foreground pt-4 border-t">
             <div className="flex items-center justify-center gap-2 mb-2">
               <Eye className="w-4 h-4" />
-              <span>تم إجراء المراجعة في: {reportData?.auditDate.toLocaleDateString('ar-SA')} - {reportData?.auditDate.toLocaleTimeString('ar-SA')}</span>
+              <span>تم إجراء المراجعة في: {formatDateTime(reportData?.auditDate)}</span>
             </div>
             <p>يُنصح بإجراء مراجعة دورية كل شهر للحفاظ على سلامة البيانات المحاسبية</p>
           </div>

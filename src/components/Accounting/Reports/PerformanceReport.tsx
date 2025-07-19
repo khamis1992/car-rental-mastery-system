@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Download, Printer, Activity, Target, Clock } from 'lucide-react';
 import { accountingService } from '@/services/accountingService';
+import { formatDate, formatDateTime } from '@/lib/utils';
 
 export const PerformanceReport: React.FC = () => {
   const [reportData, setReportData] = useState<any>(null);
@@ -57,7 +58,7 @@ export const PerformanceReport: React.FC = () => {
         });
         
         entryTrends.push({
-          date: date.toLocaleDateString('ar-SA'),
+          date: formatDate(date),
           count: dayEntries.length,
           value: dayEntries.reduce((sum, e) => sum + e.total_debit, 0)
         });
@@ -328,7 +329,7 @@ export const PerformanceReport: React.FC = () => {
 
           {/* Report Footer */}
           <div className="text-center text-sm text-muted-foreground pt-4 border-t">
-            تم إنشاء التقرير في: {new Date().toLocaleDateString('ar-SA')} - {new Date().toLocaleTimeString('ar-SA')}
+            تم إنشاء التقرير في: {formatDateTime(new Date())}
           </div>
         </CardContent>
       </Card>
