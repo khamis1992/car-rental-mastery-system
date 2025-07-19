@@ -352,7 +352,7 @@ const JournalEntries = () => {
           <RefreshCw className="w-4 h-4 mr-2" />
           تحديث البيانات
         </Button>
-        <div>
+        <div style={{ direction: 'rtl' }}>
           <h1 className="text-3xl font-bold text-foreground rtl-title">إدارة القيود المحاسبية</h1>
           <p className="text-muted-foreground">
             مركز شامل لإدارة جميع القيود المحاسبية اليدوية والتلقائية
