@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Download, Printer, Activity, Target, Clock } from 'lucide-react';
+import { TrendingUp, Download, Activity, Target, Clock } from 'lucide-react';
 import { accountingService } from '@/services/accountingService';
 import { formatDate, formatDateTime } from '@/lib/utils';
 
@@ -101,10 +101,6 @@ export const PerformanceReport: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   const handleDownload = () => {
@@ -494,10 +490,6 @@ export const PerformanceReport: React.FC = () => {
     <div className="space-y-4">
       {/* Action Buttons */}
       <div className="flex gap-2 no-print">
-        <Button onClick={handlePrint} variant="outline">
-          <Printer className="w-4 h-4 mr-2" />
-          طباعة
-        </Button>
         <Button onClick={handleDownload} variant="outline">
           <Download className="w-4 h-4 mr-2" />
           تحميل
