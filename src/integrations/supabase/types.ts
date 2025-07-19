@@ -10425,10 +10425,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
-      apply_complete_chart_to_all_tenants: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
       apply_comprehensive_default_chart: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -10577,10 +10573,6 @@ export type Database = {
         Returns: number
       }
       complete_liabilities_equity_revenue_expenses: {
-        Args: { tenant_id_param: string }
-        Returns: number
-      }
-      complete_missing_chart_accounts: {
         Args: { tenant_id_param: string }
         Returns: number
       }
