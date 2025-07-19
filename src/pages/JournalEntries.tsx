@@ -19,7 +19,7 @@ import {
   Link,
   Target
 } from 'lucide-react';
-import { EnhancedJournalEntriesTab } from '@/components/Accounting/EnhancedJournalEntriesTab';
+import { JournalEntriesWrapper } from '@/components/Accounting/JournalEntriesWrapper';
 import { AutomatedJournalEntries } from '@/components/Accounting/AutomatedJournalEntries';
 import { CostCenterBudgetAlerts } from '@/components/Accounting/CostCenterBudgetAlerts';
 import { accountingService } from '@/services/accountingService';
@@ -366,7 +366,7 @@ const JournalEntries = () => {
 
 
         <TabsContent value="manual" className="space-y-4">
-          <EnhancedJournalEntriesTab />
+          <JournalEntriesWrapper />
         </TabsContent>
 
         <TabsContent value="automated" className="space-y-4">
