@@ -528,7 +528,12 @@ const SourceLinks = () => {
   const loadLinkedEntries = async () => {
     try {
       const entries = await accountingService.getJournalEntries();
-      const linked = entries.filter(e => e.reference_type && e.reference_type !== 'manual');
+      // Transform entries data to match interface
+      const transformedEntries = entries.map((entry: any) => ({
+        ...entry,
+        reference_type: entry.reference_type as 'manual' | 'contract' | 'invoice' | 'payment' | 'adjustment'
+      }));
+      const linked = transformedEntries.filter(e => e.reference_type && e.reference_type !== 'manual');
       setLinkedEntries(linked);
     } catch (error) {
       console.error('Error loading linked entries:', error);

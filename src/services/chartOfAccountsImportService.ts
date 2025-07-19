@@ -264,7 +264,14 @@ export const chartOfAccountsImportService = {
       tenant_id: tenantId
     } as any);
 
-    return newAccount;
+    // Transform account data to match interface
+    const transformedAccount = {
+      ...newAccount,
+      account_type: newAccount.account_type as 'asset' | 'liability' | 'equity' | 'revenue' | 'expense',
+      account_category: newAccount.account_category as 'current_asset' | 'fixed_asset' | 'current_liability' | 'long_term_liability' | 'capital' | 'operating_revenue' | 'other_revenue' | 'operating_expense' | 'other_expense'
+    };
+    
+    return transformedAccount;
   },
 
   async updateExistingAccount(

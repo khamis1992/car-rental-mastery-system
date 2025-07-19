@@ -69,7 +69,12 @@ export const AdvancedKPIsDashboard = () => {
     try {
       setLoading(true);
       const data = await accountingService.getAdvancedKPIs();
-      setKpis(data);
+      // Transform the data to match TypeScript interface
+      const transformedData = data.map((kpi: any) => ({
+        ...kpi,
+        category: kpi.category as 'profitability' | 'liquidity' | 'efficiency' | 'growth' | 'risk'
+      }));
+      setKpis(transformedData);
     } catch (error) {
       console.error('Error loading KPIs:', error);
       toast({

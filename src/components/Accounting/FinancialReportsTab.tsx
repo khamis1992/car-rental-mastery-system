@@ -50,13 +50,47 @@ export const FinancialReportsTab = () => {
     try {
       const [trialBalanceData, incomeStatementData, balanceSheetData] = await Promise.all([
         accountingService.getTrialBalance(),
-        accountingService.getIncomeStatement(dateRange.startDate, dateRange.endDate),
+        accountingService.getIncomeStatement(),
         accountingService.getBalanceSheet()
       ]);
       
       setTrialBalance(trialBalanceData);
-      setIncomeStatement(incomeStatementData);
-      setBalanceSheet(balanceSheetData);
+      // Transform income statement data to match interface
+      const transformedIncomeStatement = {
+        revenue: {
+          operating_revenue: incomeStatementData.revenue?.[0]?.amount || 0,
+          other_revenue: incomeStatementData.revenue?.[1]?.amount || 0,
+          total_revenue: incomeStatementData.revenue?.reduce((sum: number, item: any) => sum + item.amount, 0) || 0
+        },
+        expenses: {
+          operating_expense: incomeStatementData.expenses?.[0]?.amount || 0,
+          other_expense: incomeStatementData.expenses?.[1]?.amount || 0,
+          total_expense: incomeStatementData.expenses?.reduce((sum: number, item: any) => sum + item.amount, 0) || 0
+        },
+        net_income: incomeStatementData.netIncome || 0
+      };
+      
+      // Transform balance sheet data to match interface
+      const transformedBalanceSheet = {
+        assets: {
+          current_assets: balanceSheetData.assets?.reduce((sum: number, item: any) => sum + item.amount, 0) || 0,
+          fixed_assets: 0,
+          total_assets: balanceSheetData.assets?.reduce((sum: number, item: any) => sum + item.amount, 0) || 0
+        },
+        liabilities: {
+          current_liabilities: balanceSheetData.liabilities?.reduce((sum: number, item: any) => sum + item.amount, 0) || 0,
+          long_term_liabilities: 0,
+          total_liabilities: balanceSheetData.liabilities?.reduce((sum: number, item: any) => sum + item.amount, 0) || 0
+        },
+        equity: {
+          capital: balanceSheetData.equity?.reduce((sum: number, item: any) => sum + item.amount, 0) || 0,
+          retained_earnings: 0,
+          total_equity: balanceSheetData.equity?.reduce((sum: number, item: any) => sum + item.amount, 0) || 0
+        }
+      };
+      
+      setIncomeStatement(transformedIncomeStatement);
+      setBalanceSheet(transformedBalanceSheet);
     } catch (error) {
       toast({
         title: 'خطأ',

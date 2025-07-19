@@ -53,7 +53,12 @@ export const AutomatedJournalEntries = () => {
       ]);
 
       setRules(rulesData);
-      setAccounts(accountsData.filter(acc => acc.allow_posting));
+      // Transform accounts data to match TypeScript interface
+      const transformedAccounts = accountsData.filter(acc => acc.allow_posting).map((account: any) => ({
+        ...account,
+        account_type: account.account_type as 'asset' | 'liability' | 'equity' | 'revenue' | 'expense'
+      }));
+      setAccounts(transformedAccounts);
       setExecutions(executionsData);
 
       // إنشاء قواعد افتراضية إذا لم توجد قواعد

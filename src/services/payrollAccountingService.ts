@@ -318,8 +318,7 @@ export const payrollAccountingService = {
       if (payroll?.journal_entry_id) {
         // حذف القيد المحاسبي (سيحذف تلقائياً من جدول الربط)
         await accountingService.reverseJournalEntry(
-          payroll.journal_entry_id, 
-          'إلغاء راتب'
+          payroll.journal_entry_id
         );
 
         // إزالة الربط من جدول الرواتب

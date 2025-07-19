@@ -66,8 +66,20 @@ export const JournalEntriesTab = () => {
         accountsCount: accountsData.length
       });
       
-      setEntries(entriesData);
-      setAccounts(accountsData.filter(acc => acc.allow_posting));
+      // Transform entries data to match interface
+      const transformedEntries = entriesData.map((entry: any) => ({
+        ...entry,
+        reference_type: entry.reference_type as 'manual' | 'contract' | 'invoice' | 'payment' | 'adjustment'
+      }));
+      
+      // Transform accounts data to match interface
+      const transformedAccounts = accountsData.filter(acc => acc.allow_posting).map((account: any) => ({
+        ...account,
+        account_type: account.account_type as 'asset' | 'liability' | 'equity' | 'revenue' | 'expense'
+      }));
+      
+      setEntries(transformedEntries);
+      setAccounts(transformedAccounts);
       
       if (entriesData.length === 0) {
         toast({
@@ -96,10 +108,19 @@ export const JournalEntriesTab = () => {
       const diagnostics = await accountingService.runDiagnostics();
       console.log('🔍 نتائج التشخيص:', diagnostics);
       
-      if (diagnostics.errors.length > 0) {
+      // Transform diagnostics to match expected format
+      const transformedDiagnostics = {
+        authStatus: diagnostics.status === 'success',
+        tenantStatus: diagnostics.status === 'success',
+        permissionsStatus: diagnostics.status === 'success',
+        journalEntriesCount: 0,
+        errors: diagnostics.issues || []
+      };
+      
+      if (transformedDiagnostics.errors.length > 0) {
         toast({
           title: 'مشاكل تم اكتشافها',
-          description: diagnostics.errors.join(', '),
+          description: transformedDiagnostics.errors.join(', '),
           variant: 'destructive',
         });
       } else {

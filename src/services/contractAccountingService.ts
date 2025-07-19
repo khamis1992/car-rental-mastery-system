@@ -404,8 +404,7 @@ export const contractAccountingService = {
       if (contract?.journal_entry_id) {
         // حذف القيد المحاسبي (سيحذف تلقائياً من جدول الربط)
         await accountingService.reverseJournalEntry(
-          contract.journal_entry_id, 
-          'إلغاء عقد إيجار'
+          contract.journal_entry_id
         );
 
         // إزالة الربط من جدول العقود

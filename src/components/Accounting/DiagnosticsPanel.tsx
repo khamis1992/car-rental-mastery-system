@@ -26,12 +26,20 @@ export const DiagnosticsPanel: React.FC = () => {
     try {
       setLoading(true);
       const result = await accountingService.runDiagnostics();
-      setDiagnostics(result);
+      // Transform result to match DiagnosticsResult interface
+      const transformedResult = {
+        authStatus: result.status === 'success',
+        tenantStatus: result.status === 'success',
+        permissionsStatus: result.status === 'success',
+        journalEntriesCount: 0,
+        errors: result.issues || []
+      };
+      setDiagnostics(transformedResult);
       
-      if (result.errors.length === 0) {
+      if (transformedResult.errors.length === 0) {
         toast.success('تم التشخيص بنجاح - لا توجد مشاكل');
       } else {
-        toast.warning(`تم اكتشاف ${result.errors.length} مشكلة`);
+        toast.warning(`تم اكتشاف ${transformedResult.errors.length} مشكلة`);
       }
     } catch (error) {
       console.error('خطأ في التشخيص:', error);

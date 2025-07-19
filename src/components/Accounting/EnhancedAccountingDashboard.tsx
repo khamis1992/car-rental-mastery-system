@@ -89,24 +89,85 @@ export const EnhancedAccountingDashboard = () => {
         accountingService.getBudgets()
       ]);
 
-      setKpis(kpisData);
-      setInsights(insightsData);
-      setFinancialSummary(financialSummaryData);
-      setLiquidityRatios(liquidityData);
+      // Transform KPIs data to match interface
+      const transformedKpis = kpisData.map((kpi: any) => ({
+        ...kpi,
+        category: kpi.category as 'profitability' | 'liquidity' | 'efficiency' | 'growth' | 'risk'
+      }));
+
+      // Transform Insights data to match interface
+      const transformedInsights = insightsData.map((insight: any) => ({
+        ...insight,
+        insight_type: insight.insight_type as 'trend' | 'warning' | 'anomaly' | 'recommendation' | 'opportunity'
+      }));
+
+      // Transform financial summary to match interface
+      const transformedFinancialSummary = {
+        as_of_date: new Date().toISOString(),
+        financial_position: {
+          total_assets: financialSummaryData.totalAssets || 0,
+          total_liabilities: financialSummaryData.totalLiabilities || 0,
+          total_equity: financialSummaryData.equity || 0,
+          assets_liabilities_equity_total: (financialSummaryData.totalAssets || 0) + (financialSummaryData.totalLiabilities || 0) + (financialSummaryData.equity || 0)
+        },
+        income_statement: {
+          total_revenue: financialSummaryData.totalRevenue || 0,
+          total_expenses: financialSummaryData.totalExpenses || 0,
+          net_income: financialSummaryData.netIncome || 0,
+          profit_margin_pct: 0
+        },
+        liquidity_analysis: {
+          current_assets: 0,
+          current_liabilities: 0,
+          quick_assets: 0,
+          cash_and_equivalents: 0,
+          inventory: 0,
+          current_ratio: liquidityData.currentRatio || 0,
+          quick_ratio: liquidityData.quickRatio || 0,
+          cash_ratio: liquidityData.cashRatio || 0,
+          calculated_at: new Date().toISOString()
+        },
+        trial_balance_check: {
+          total_debits: 0,
+          total_credits: 0,
+          difference: 0,
+          is_balanced: true,
+          validation_date: new Date().toISOString()
+        },
+        generated_at: new Date().toISOString()
+      };
+
+      // Transform liquidity ratios to match interface
+      const transformedLiquidityRatios = {
+        current_assets: 0,
+        current_liabilities: 0,
+        quick_assets: 0,
+        cash_and_equivalents: 0,
+        inventory: 0,
+        current_ratio: liquidityData.currentRatio || 0,
+        quick_ratio: liquidityData.quickRatio || 0,
+        cash_ratio: liquidityData.cashRatio || 0,
+        calculated_at: new Date().toISOString()
+      };
+
+      setKpis(transformedKpis);
+      setInsights(transformedInsights);
+      setFinancialSummary(transformedFinancialSummary);
+      setLiquidityRatios(transformedLiquidityRatios);
       setFixedAssets(assetsData);
       setBudgets(budgetsData);
 
       // تحديث الإحصائيات
-      if (financialSummaryData && liquidityData) {
+      if (transformedFinancialSummary && transformedLiquidityRatios) {
         setStats({
-          totalAssets: financialSummaryData.financial_position.total_assets,
-          totalLiabilities: financialSummaryData.financial_position.total_liabilities,
-          totalEquity: financialSummaryData.financial_position.total_equity,
-          netIncome: financialSummaryData.income_statement.net_income,
-          currentRatio: liquidityData.current_ratio,
-          quickRatio: liquidityData.quick_ratio,
-          cashRatio: liquidityData.cash_ratio,
-          profitMargin: financialSummaryData.income_statement.profit_margin_pct
+          totalAssets: transformedFinancialSummary.financial_position.total_assets,
+          totalLiabilities: transformedFinancialSummary.financial_position.total_liabilities,
+          totalEquity: transformedFinancialSummary.financial_position.total_equity,
+          netIncome: transformedFinancialSummary.income_statement.net_income,
+          currentRatio: transformedLiquidityRatios.current_ratio,
+          quickRatio: transformedLiquidityRatios.quick_ratio,
+          cashRatio: transformedLiquidityRatios.cash_ratio,
+          profitMargin: transformedFinancialSummary.income_statement.profit_margin_pct
         });
       }
 

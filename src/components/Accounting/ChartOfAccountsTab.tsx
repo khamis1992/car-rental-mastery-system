@@ -51,7 +51,12 @@ export const ChartOfAccountsTab = () => {
   const loadAccounts = async () => {
     try {
       const data = await accountingService.getChartOfAccounts();
-      setAccounts(data);
+      // Transform accounts data to match TypeScript interface
+      const transformedAccounts = data.map((account: any) => ({
+        ...account,
+        account_type: account.account_type as 'asset' | 'liability' | 'equity' | 'revenue' | 'expense'
+      }));
+      setAccounts(transformedAccounts);
     } catch (error) {
       toast({
         title: 'خطأ',
