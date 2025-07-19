@@ -16,14 +16,14 @@ interface Asset {
   id: string;
   asset_name: string;
   asset_code: string;
-  category_id?: string;
+  asset_category?: string;
   description?: string;
   purchase_cost: number;
   purchase_date: string;
   vendor?: string;
   warranty_expiry?: string;
   location_id?: string;
-  assigned_to?: string;
+  assigned_employee_id?: string;
   status: string;
   serial_number?: string;
   model?: string;
@@ -87,7 +87,7 @@ export const AssetEditDialog: React.FC<AssetEditDialogProps> = ({
   const [formData, setFormData] = useState({
     asset_name: '',
     asset_code: '',
-    category_id: '',
+    asset_category: '',
     description: '',
     purchase_cost: '',
     purchase_date: '',
@@ -109,14 +109,14 @@ export const AssetEditDialog: React.FC<AssetEditDialogProps> = ({
       setFormData({
         asset_name: asset.asset_name || '',
         asset_code: asset.asset_code || '',
-        category_id: asset.category_id || '',
+        asset_category: asset.asset_category || '',
         description: asset.description || '',
         purchase_cost: asset.purchase_cost?.toString() || '',
         purchase_date: asset.purchase_date || '',
         vendor: asset.vendor || '',
         warranty_expiry: asset.warranty_expiry || '',
         location_id: asset.location_id || '',
-        assigned_to: asset.assigned_to || '',
+        assigned_to: asset.assigned_employee_id || '',
         status: asset.status || 'available',
         serial_number: asset.serial_number || '',
         model: asset.model || '',
@@ -140,12 +140,23 @@ export const AssetEditDialog: React.FC<AssetEditDialogProps> = ({
     setIsSubmitting(true);
     
     try {
+      const purchaseCost = parseFloat(formData.purchase_cost) || 0;
+      
       const updateData = {
-        ...formData,
-        purchase_cost: parseFloat(formData.purchase_cost) || 0,
-        assigned_to: formData.assigned_to || null,
+        asset_name: formData.asset_name,
+        asset_code: formData.asset_code,
+        asset_category: formData.asset_category || 'general',
+        description: formData.description,
+        purchase_cost: purchaseCost,
+        purchase_date: formData.purchase_date,
+        vendor: formData.vendor,
+        warranty_expiry: formData.warranty_expiry,
         location_id: formData.location_id || null,
-        category_id: formData.category_id || null,
+        assigned_employee_id: formData.assigned_to || null,
+        status: formData.status,
+        serial_number: formData.serial_number,
+        model: formData.model,
+        manufacturer: formData.manufacturer
       };
 
       const { error } = await supabase
@@ -208,12 +219,12 @@ export const AssetEditDialog: React.FC<AssetEditDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category_id" className="text-right block font-medium">
+              <Label htmlFor="asset_category" className="text-right block font-medium">
                 الفئة
               </Label>
               <Select
-                value={formData.category_id}
-                onValueChange={(value) => handleInputChange('category_id', value)}
+                value={formData.asset_category}
+                onValueChange={(value) => handleInputChange('asset_category', value)}
                 disabled={categoriesLoading}
               >
                 <SelectTrigger className="text-right">
@@ -221,7 +232,7 @@ export const AssetEditDialog: React.FC<AssetEditDialogProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
+                    <SelectItem key={category.id} value={category.category_name}>
                       {category.category_name}
                     </SelectItem>
                   ))}

@@ -98,14 +98,31 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
     setIsSubmitting(true);
     
     try {
+      const purchaseCost = parseFloat(formData.purchase_cost) || 0;
+      
       const assetData = {
-        ...formData,
         tenant_id: currentTenant.id,
-        purchase_cost: parseFloat(formData.purchase_cost) || 0,
-        current_value: parseFloat(formData.purchase_cost) || 0,
-        assigned_to: formData.assigned_to || null,
+        asset_name: formData.asset_name,
+        asset_code: formData.asset_code,
+        asset_category: formData.category_id || 'general', // Required field with default
+        description: formData.description,
+        purchase_cost: purchaseCost,
+        current_value: purchaseCost, // Set current value to purchase cost initially
+        book_value: purchaseCost, // Required field
+        purchase_date: formData.purchase_date,
+        vendor: formData.vendor,
+        warranty_expiry: formData.warranty_expiry,
         location_id: formData.location_id || null,
-        category_id: formData.category_id || null,
+        assigned_employee_id: formData.assigned_to || null, // Use correct field name
+        status: formData.status,
+        serial_number: formData.serial_number,
+        model: formData.model,
+        manufacturer: formData.manufacturer,
+        useful_life_years: 5, // Default useful life (required field)
+        depreciation_method: 'straight_line', // Default depreciation method
+        accumulated_depreciation: 0, // Start with zero accumulated depreciation
+        residual_value: purchaseCost * 0.1, // Default 10% residual value
+        is_active: true
       };
 
       const { error } = await supabase
@@ -197,7 +214,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
+                    <SelectItem key={category.id} value={category.category_name}>
                       {category.category_name}
                     </SelectItem>
                   ))}
