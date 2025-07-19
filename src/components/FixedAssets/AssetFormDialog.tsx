@@ -173,7 +173,7 @@ export function AssetFormDialog({ asset, trigger }: AssetFormDialogProps) {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-5 flex-row-reverse">
               <TabsTrigger value="basic">البيانات الأساسية</TabsTrigger>
               <TabsTrigger value="financial">البيانات المالية</TabsTrigger>
               <TabsTrigger value="assignment">التعيين والموقع</TabsTrigger>
