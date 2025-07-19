@@ -219,331 +219,14 @@ export const AuditReport: React.FC = () => {
         <html>
           <head>
             <title>تقرير المراجعة</title>
-            <meta charset="UTF-8">
             <style>
-              @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap');
-              
-              body { 
-                font-family: 'Noto Sans Arabic', Arial, sans-serif; 
-                direction: rtl; 
-                margin: 0;
-                padding: 20px;
-                background: #ffffff;
-                color: #1a1a1a;
-                line-height: 1.6;
-              }
-              
-              .report-header { 
-                text-align: center; 
-                margin-bottom: 40px; 
-                padding: 30px 0;
-                border-bottom: 3px solid #2563eb;
-                position: relative;
-              }
-              
-              .report-header::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 8px;
-                background: linear-gradient(90deg, #2563eb, #1d4ed8, #2563eb);
-              }
-              
-              .report-title {
-                font-size: 28px;
-                font-weight: 700;
-                color: #1e40af;
-                margin-bottom: 8px;
-              }
-              
-              .report-subtitle {
-                font-size: 16px;
-                color: #64748b;
-                margin-bottom: 20px;
-              }
-              
-              .report-meta {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                background: #f8fafc;
-                padding: 15px 20px;
-                border-radius: 8px;
-                margin-top: 20px;
-              }
-              
-              .company-info {
-                text-align: right;
-              }
-              
-              .company-name {
-                font-size: 18px;
-                font-weight: 600;
-                color: #1e40af;
-                margin-bottom: 4px;
-              }
-              
-              .company-details {
-                font-size: 14px;
-                color: #64748b;
-              }
-              
-              .report-date {
-                text-align: left;
-                font-size: 14px;
-                color: #64748b;
-              }
-              
-              .report-section { 
-                margin-bottom: 35px; 
-                padding: 25px;
-                border: 1px solid #e2e8f0;
-                border-radius: 12px;
-                background: #ffffff;
-                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-                page-break-inside: avoid;
-              }
-              
-              .section-title {
-                font-size: 20px;
-                font-weight: 600;
-                color: #1e40af;
-                margin-bottom: 20px;
-                padding-bottom: 10px;
-                border-bottom: 2px solid #e2e8f0;
-              }
-              
-              .report-table { 
-                width: 100%; 
-                border-collapse: collapse; 
-                margin-top: 15px;
-                font-size: 13px;
-              }
-              
-              .report-table th { 
-                background: linear-gradient(135deg, #2563eb, #1d4ed8);
-                color: white;
-                font-weight: 600;
-                padding: 12px 8px;
-                text-align: center;
-                border: none;
-                font-size: 14px;
-              }
-              
-              .report-table th:first-child {
-                border-top-right-radius: 8px;
-              }
-              
-              .report-table th:last-child {
-                border-top-left-radius: 8px;
-              }
-              
-              .report-table td { 
-                padding: 10px 8px;
-                text-align: center;
-                border-bottom: 1px solid #e2e8f0;
-                vertical-align: middle;
-              }
-              
-              .report-table tbody tr:hover {
-                background-color: #f8fafc;
-              }
-              
-              .report-table tbody tr:last-child td {
-                border-bottom: none;
-              }
-              
-              .score-display {
-                text-align: center;
-                margin: 30px 0;
-                padding: 40px;
-                background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-                border-radius: 16px;
-                border: 2px solid #0ea5e9;
-              }
-              
-              .score-number {
-                font-size: 48px;
-                font-weight: 700;
-                margin-bottom: 10px;
-              }
-              
-              .score-excellent { color: #059669; }
-              .score-good { color: #d97706; }
-              .score-poor { color: #dc2626; }
-              
-              .score-description {
-                font-size: 16px;
-                color: #64748b;
-                margin-bottom: 25px;
-              }
-              
-              .metrics-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 20px;
-                margin-top: 20px;
-              }
-              
-              .metric-card {
-                text-align: center;
-                padding: 20px;
-                border: 1px solid #e2e8f0;
-                border-radius: 10px;
-                background: #ffffff;
-              }
-              
-              .metric-number {
-                font-size: 24px;
-                font-weight: 600;
-                margin-bottom: 8px;
-              }
-              
-              .metric-critical { color: #dc2626; }
-              .metric-high { color: #d97706; }
-              .metric-medium { color: #2563eb; }
-              
-              .metric-label {
-                font-size: 12px;
-                color: #64748b;
-              }
-              
-              .audit-checks {
-                display: grid;
-                gap: 15px;
-              }
-              
-              .audit-check-item {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 20px;
-                border: 1px solid #e2e8f0;
-                border-radius: 10px;
-                background: #ffffff;
-              }
-              
-              .check-info {
-                display: flex;
-                align-items: center;
-                gap: 15px;
-              }
-              
-              .check-status {
-                width: 12px;
-                height: 12px;
-                border-radius: 50%;
-                flex-shrink: 0;
-              }
-              
-              .check-success { background-color: #059669; }
-              .check-failed { background-color: #dc2626; }
-              
-              .check-details h4 {
-                font-weight: 600;
-                margin: 0 0 4px 0;
-                color: #1e40af;
-              }
-              
-              .check-stats {
-                font-size: 12px;
-                color: #64748b;
-                margin: 0;
-              }
-              
-              .check-percentage {
-                font-size: 24px;
-                font-weight: 700;
-                color: #1e40af;
-              }
-              
-              .recommendations {
-                background: #fefce8;
-                border: 1px solid #facc15;
-                border-radius: 12px;
-                padding: 25px;
-              }
-              
-              .recommendation-item {
-                margin-bottom: 15px;
-                padding: 15px;
-                border-radius: 8px;
-                border-left: 4px solid;
-              }
-              
-              .rec-critical { 
-                background: #fef2f2; 
-                border-left-color: #dc2626; 
-              }
-              
-              .rec-medium { 
-                background: #fffbeb; 
-                border-left-color: #d97706; 
-              }
-              
-              .rec-success { 
-                background: #f0fdf4; 
-                border-left-color: #059669; 
-              }
-              
-              .rec-title {
-                font-weight: 600;
-                margin-bottom: 5px;
-              }
-              
-              .rec-description {
-                font-size: 13px;
-                color: #64748b;
-                margin-bottom: 8px;
-              }
-              
-              .rec-action {
-                display: inline-block;
-                background: #f1f5f9;
-                color: #475569;
-                padding: 4px 8px;
-                border-radius: 4px;
-                font-size: 11px;
-                font-weight: 500;
-              }
-              
-              .report-footer {
-                text-align: center;
-                margin-top: 50px;
-                padding-top: 30px;
-                border-top: 2px solid #e2e8f0;
-                font-size: 12px;
-                color: #64748b;
-              }
-              
-              .footer-logo {
-                font-size: 16px;
-                font-weight: 600;
-                color: #1e40af;
-                margin-bottom: 10px;
-              }
-              
-              .badge {
-                display: inline-block;
-                padding: 3px 8px;
-                border-radius: 4px;
-                font-size: 11px;
-                font-weight: 500;
-              }
-              
-              .badge-critical { background: #fecaca; color: #991b1b; }
-              .badge-high { background: #fed7aa; color: #9a3412; }
-              .badge-medium { background: #dbeafe; color: #1e40af; }
-              
-              @media print { 
-                body { margin: 0; padding: 15px; }
-                .no-print { display: none !important; }
-                .report-section { page-break-inside: avoid; }
-                .score-display { page-break-inside: avoid; }
-                h3 { page-break-after: avoid; }
-              }
+              body { font-family: Arial, sans-serif; direction: rtl; }
+              .report-header { text-align: center; margin-bottom: 20px; }
+              .report-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; }
+              .report-table { width: 100%; border-collapse: collapse; }
+              .report-table th, .report-table td { border: 1px solid #ddd; padding: 8px; text-align: right; }
+              .report-table th { background-color: #f5f5f5; }
+              @media print { .no-print { display: none; } }
             </style>
           </head>
           <body>${content.innerHTML}</body>
@@ -602,71 +285,60 @@ export const AuditReport: React.FC = () => {
 
       {/* Report Content */}
       <Card id="audit-report">
-        <div className="report-header">
-          <h1 className="report-title">
-            <Shield className="w-8 h-8 inline-block ml-3" />
-            تقرير المراجعة المحاسبية
-          </h1>
-          <p className="report-subtitle">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">
+            <Shield className="w-6 h-6 inline-block ml-2" />
+            تقرير المراجعة
+          </CardTitle>
+          <p className="text-muted-foreground">
             تقرير شامل لمراجعة سلامة وصحة القيود المحاسبية
           </p>
-          <div className="report-meta">
-            <div className="company-info">
-              <div className="company-name">نظام بشائر المحاسبي</div>
-              <div className="company-details">دولة الكويت • النظام المحاسبي المتكامل</div>
-            </div>
-            <div className="report-date">
-              <div>تاريخ التقرير</div>
-              <div style={{ fontWeight: '600', color: '#1e40af' }}>{formatDateTime(reportData?.auditDate)}</div>
-            </div>
-          </div>
-        </div>
+        </CardHeader>
         <CardContent className="space-y-6">
           {/* Overall Score */}
-          <div className="score-display">
-            <h3 className="section-title" style={{ borderBottom: 'none', marginBottom: '15px' }}>النتيجة الإجمالية للمراجعة</h3>
-            <div className={`score-number ${
-              (reportData?.overallScore || 0) >= 95 ? 'score-excellent' : 
-              (reportData?.overallScore || 0) >= 80 ? 'score-good' : 'score-poor'
-            }`}>
+          <div className="report-section text-center">
+            <h3 className="text-lg font-semibold mb-4">النتيجة الإجمالية</h3>
+            <div className={`text-6xl font-bold mb-2 ${getScoreColor(reportData?.overallScore || 0)}`}>
               {(reportData?.overallScore || 0).toFixed(1)}%
             </div>
-            <p className="score-description">
-              نتيجة فحص {reportData?.totalEntries || 0} قيد محاسبي
+            <p className="text-muted-foreground">
+              من أصل {reportData?.totalEntries || 0} قيد محاسبي
             </p>
-            <div className="metrics-grid">
-              <div className="metric-card">
-                <p className="metric-number metric-critical">{reportData?.criticalIssues.length || 0}</p>
-                <p className="metric-label">مشاكل حرجة</p>
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 border rounded">
+                <p className="text-2xl font-bold text-red-600">{reportData?.criticalIssues.length || 0}</p>
+                <p className="text-sm text-red-700">مشاكل حرجة</p>
               </div>
-              <div className="metric-card">
-                <p className="metric-number metric-high">{reportData?.highIssues.length || 0}</p>
-                <p className="metric-label">مشاكل عالية</p>
+              <div className="text-center p-4 border rounded">
+                <p className="text-2xl font-bold text-yellow-600">{reportData?.highIssues.length || 0}</p>
+                <p className="text-sm text-yellow-700">مشاكل عالية</p>
               </div>
-              <div className="metric-card">
-                <p className="metric-number metric-medium">{reportData?.mediumIssues.length || 0}</p>
-                <p className="metric-label">مشاكل متوسطة</p>
+              <div className="text-center p-4 border rounded">
+                <p className="text-2xl font-bold text-blue-600">{reportData?.mediumIssues.length || 0}</p>
+                <p className="text-sm text-blue-700">مشاكل متوسطة</p>
               </div>
             </div>
           </div>
 
           {/* Audit Checks Summary */}
           <div className="report-section">
-            <h3 className="section-title">ملخص فحوصات المراجعة</h3>
-            <div className="audit-checks">
+            <h3 className="text-lg font-semibold mb-4">ملخص الفحوصات</h3>
+            <div className="space-y-4">
               {Object.entries(reportData?.auditChecks || {}).map(([key, check]: [string, any]) => (
-                <div key={key} className="audit-check-item">
-                  <div className="check-info">
-                    <div className={`check-status ${check.failed === 0 ? 'check-success' : 'check-failed'}`}></div>
-                    <div className="check-details">
-                      <h4>{check.name}</h4>
-                      <p className="check-stats">
-                        {check.passed} نجح • {check.failed} فشل
+                <div key={key} className="flex items-center justify-between p-4 border rounded">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-4 h-4 rounded-full ${check.failed === 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                    <div>
+                      <p className="font-medium">{check.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {check.passed} نجح، {check.failed} فشل
                       </p>
                     </div>
                   </div>
-                  <div className="check-percentage">
-                    {check.passed + check.failed > 0 ? ((check.passed / (check.passed + check.failed)) * 100).toFixed(0) : 100}%
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">
+                      {check.passed + check.failed > 0 ? ((check.passed / (check.passed + check.failed)) * 100).toFixed(0) : 100}%
+                    </p>
                   </div>
                 </div>
               ))}
@@ -676,27 +348,29 @@ export const AuditReport: React.FC = () => {
           {/* Critical Issues */}
           {reportData?.criticalIssues.length > 0 && (
             <div className="report-section">
-              <h3 className="section-title" style={{ color: '#dc2626' }}>
-                <AlertTriangle className="w-6 h-6 inline-block ml-2" />
-                المشاكل الحرجة التي تتطلب إجراءً فورياً
+              <h3 className="text-lg font-semibold mb-4 text-red-600">
+                <AlertTriangle className="w-5 h-5 inline-block ml-2" />
+                مشاكل حرجة
               </h3>
               <div className="overflow-x-auto">
-                <table className="report-table">
+                <table className="report-table w-full">
                   <thead>
                     <tr>
                       <th>رقم القيد</th>
-                      <th>وصف المشكلة</th>
-                      <th>مستوى الخطورة</th>
-                      <th>الإجراء المطلوب</th>
+                      <th>المشكلة</th>
+                      <th>الخطورة</th>
+                      <th>إجراء مطلوب</th>
                     </tr>
                   </thead>
                   <tbody>
                     {reportData.criticalIssues.map((issue: any, index: number) => (
                       <tr key={index}>
-                        <td style={{ fontWeight: '600' }}>{issue.entry_number}</td>
+                        <td>{issue.entry_number}</td>
                         <td>{issue.issue}</td>
-                        <td><span className="badge badge-critical">حرج</span></td>
-                        <td><span className="badge badge-critical">فوري</span></td>
+                        <td>{getSeverityBadge(issue.severity)}</td>
+                        <td>
+                          <Badge variant="destructive">فوري</Badge>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -708,14 +382,14 @@ export const AuditReport: React.FC = () => {
           {/* All Issues */}
           {reportData?.totalIssues > 0 && (
             <div className="report-section">
-              <h3 className="section-title">جميع المشاكل المكتشفة</h3>
+              <h3 className="text-lg font-semibold mb-4">جميع المشاكل المكتشفة</h3>
               <div className="overflow-x-auto">
-                <table className="report-table">
+                <table className="report-table w-full">
                   <thead>
                     <tr>
                       <th>رقم القيد</th>
-                      <th>وصف المشكلة</th>
-                      <th>مستوى الخطورة</th>
+                      <th>المشكلة</th>
+                      <th>الخطورة</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -723,59 +397,47 @@ export const AuditReport: React.FC = () => {
                       .slice(0, 20)
                       .map((issue: any, index: number) => (
                         <tr key={index}>
-                          <td style={{ fontWeight: '600' }}>{issue.entry_number}</td>
+                          <td>{issue.entry_number}</td>
                           <td>{issue.issue}</td>
-                          <td>
-                            <span className={`badge ${
-                              issue.severity === 'critical' ? 'badge-critical' :
-                              issue.severity === 'high' ? 'badge-high' : 'badge-medium'
-                            }`}>
-                              {issue.severity === 'critical' ? 'حرج' :
-                               issue.severity === 'high' ? 'عالي' : 'متوسط'}
-                            </span>
-                          </td>
+                          <td>{getSeverityBadge(issue.severity)}</td>
                         </tr>
                       ))}
                   </tbody>
                 </table>
               </div>
               {reportData.totalIssues > 20 && (
-                <p style={{ textAlign: 'center', marginTop: '15px', fontSize: '13px', color: '#64748b' }}>
-                  وهناك {reportData.totalIssues - 20} مشكلة أخرى تتطلب المراجعة...
+                <p className="text-sm text-muted-foreground mt-2 text-center">
+                  وهناك {reportData.totalIssues - 20} مشكلة أخرى...
                 </p>
               )}
             </div>
           )}
 
           {/* Recommendations */}
-          <div className="recommendations">
-            <h3 className="section-title" style={{ color: '#d97706' }}>التوصيات والإجراءات المقترحة</h3>
-            <div style={{ display: 'grid', gap: '15px' }}>
+          <div className="report-section">
+            <h3 className="text-lg font-semibold mb-4">التوصيات</h3>
+            <div className="space-y-3">
               {reportData?.recommendations.map((rec: any, index: number) => (
-                <div key={index} className={`recommendation-item ${
-                  rec.type === 'critical' ? 'rec-critical' :
-                  rec.type === 'medium' ? 'rec-medium' :
-                  'rec-success'
+                <div key={index} className={`p-4 border rounded ${
+                  rec.type === 'critical' ? 'bg-red-50 border-red-200' :
+                  rec.type === 'medium' ? 'bg-yellow-50 border-yellow-200' :
+                  'bg-green-50 border-green-200'
                 }`}>
-                  <h4 className="rec-title">{rec.title}</h4>
-                  <p className="rec-description">{rec.description}</p>
-                  <span className="rec-action">{rec.action}</span>
+                  <h4 className="font-semibold">{rec.title}</h4>
+                  <p className="text-sm mt-1">{rec.description}</p>
+                  <Badge variant="outline" className="mt-2">{rec.action}</Badge>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Report Footer */}
-          <div className="report-footer">
-            <div className="footer-logo">نظام بشائر المحاسبي</div>
-            <div style={{ marginBottom: '10px' }}>
-              <Eye className="w-4 h-4 inline-block ml-1" />
-              تم إجراء المراجعة في: {formatDateTime(reportData?.auditDate)}
+          <div className="text-center text-sm text-muted-foreground pt-4 border-t">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Eye className="w-4 h-4" />
+              <span>تم إجراء المراجعة في: {formatDateTime(reportData?.auditDate)}</span>
             </div>
             <p>يُنصح بإجراء مراجعة دورية كل شهر للحفاظ على سلامة البيانات المحاسبية</p>
-            <p style={{ marginTop: '10px', fontSize: '11px' }}>
-              هذا التقرير تم إنشاؤه تلقائياً بواسطة نظام بشائر المحاسبي المتكامل
-            </p>
           </div>
         </CardContent>
       </Card>
