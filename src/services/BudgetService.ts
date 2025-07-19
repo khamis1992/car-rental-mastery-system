@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
@@ -36,12 +35,33 @@ export interface BudgetSummary {
   overbudget_items: number;
 }
 
+// Helper function to get current tenant ID
+const getCurrentTenantId = async (): Promise<string> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('المستخدم غير مسجل دخول');
+  
+  const { data: tenantUser } = await supabase
+    .from('tenant_users')
+    .select('tenant_id')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .single();
+    
+  if (!tenantUser) throw new Error('لا توجد مؤسسة نشطة للمستخدم');
+  return tenantUser.tenant_id;
+};
+
 export class BudgetService {
   // إنشاء ميزانية جديدة
-  async createBudget(budgetData: BudgetInsert): Promise<Budget> {
+  async createBudget(budgetData: Omit<BudgetInsert, 'tenant_id'>): Promise<Budget> {
+    const tenantId = await getCurrentTenantId();
+    
     const { data, error } = await supabase
       .from('budgets')
-      .insert(budgetData)
+      .insert({
+        ...budgetData,
+        tenant_id: tenantId
+      })
       .select()
       .single();
 
@@ -115,10 +135,16 @@ export class BudgetService {
   }
 
   // إضافة بند للميزانية
-  async addBudgetItem(budgetItem: BudgetItemInsert): Promise<BudgetItem> {
+  async addBudgetItem(budgetItem: Omit<BudgetItemInsert, 'tenant_id' | 'item_type'>): Promise<BudgetItem> {
+    const tenantId = await getCurrentTenantId();
+    
     const { data, error } = await supabase
       .from('budget_items')
-      .insert(budgetItem)
+      .insert({
+        ...budgetItem,
+        tenant_id: tenantId,
+        item_type: 'regular'
+      })
       .select()
       .single();
 
@@ -259,7 +285,9 @@ export class BudgetService {
   }
 
   // نسخ الميزانية
-  async copyBudget(budgetId: string, newBudgetData: Partial<BudgetInsert>): Promise<Budget> {
+  async copyBudget(budgetId: string, newBudgetData: Partial<Omit<BudgetInsert, 'tenant_id'>>): Promise<Budget> {
+    const tenantId = await getCurrentTenantId();
+    
     // جلب الميزانية الأصلية مع البنود
     const originalBudget = await this.getBudgetById(budgetId);
     if (!originalBudget) {
