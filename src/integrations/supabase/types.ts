@@ -14,6 +14,187 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_audit_log: {
+        Row: {
+          account_id: string
+          action_type: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          modification_request_id: string | null
+          new_values: Json | null
+          notes: string | null
+          old_values: Json | null
+          tenant_id: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          action_type: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          modification_request_id?: string | null
+          new_values?: Json | null
+          notes?: string | null
+          old_values?: Json | null
+          tenant_id: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          action_type?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          modification_request_id?: string | null
+          new_values?: Json | null
+          notes?: string | null
+          old_values?: Json | null
+          tenant_id?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_audit_log_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_audit_log_modification_request_id_fkey"
+            columns: ["modification_request_id"]
+            isOneToOne: false
+            referencedRelation: "account_modification_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_audit_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      account_modification_requests: {
+        Row: {
+          account_id: string
+          approved_at: string | null
+          approver_id: string | null
+          created_at: string
+          current_values: Json
+          expires_at: string | null
+          id: string
+          justification: string
+          priority: string
+          proposed_values: Json
+          rejection_reason: string | null
+          request_type: string
+          requested_at: string
+          requester_id: string
+          reviewed_at: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          approved_at?: string | null
+          approver_id?: string | null
+          created_at?: string
+          current_values?: Json
+          expires_at?: string | null
+          id?: string
+          justification: string
+          priority?: string
+          proposed_values?: Json
+          rejection_reason?: string | null
+          request_type: string
+          requested_at?: string
+          requester_id: string
+          reviewed_at?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          approved_at?: string | null
+          approver_id?: string | null
+          created_at?: string
+          current_values?: Json
+          expires_at?: string | null
+          id?: string
+          justification?: string
+          priority?: string
+          proposed_values?: Json
+          rejection_reason?: string | null
+          request_type?: string
+          requested_at?: string
+          requester_id?: string
+          reviewed_at?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_modification_requests_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_modification_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      account_templates: {
+        Row: {
+          business_type: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          template_name: string
+          template_name_en: string | null
+          template_structure: Json
+          updated_at: string
+        }
+        Insert: {
+          business_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          template_name: string
+          template_name_en?: string | null
+          template_structure: Json
+          updated_at?: string
+        }
+        Update: {
+          business_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          template_name?: string
+          template_name_en?: string | null
+          template_structure?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       accounting_audit_trail: {
         Row: {
           action: string
@@ -1818,12 +1999,17 @@ export type Database = {
           created_at: string
           created_by: string | null
           current_balance: number | null
+          first_transaction_date: string | null
           id: string
           is_active: boolean | null
+          is_locked: boolean | null
           ksaap_compliant: boolean | null
           legal_reference: string | null
           level: number
+          locked_at: string | null
+          locked_by: string | null
           ministry_commerce_code: string | null
+          modification_requires_approval: boolean | null
           notes: string | null
           opening_balance: number | null
           parent_account_id: string | null
@@ -1848,12 +2034,17 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           current_balance?: number | null
+          first_transaction_date?: string | null
           id?: string
           is_active?: boolean | null
+          is_locked?: boolean | null
           ksaap_compliant?: boolean | null
           legal_reference?: string | null
           level?: number
+          locked_at?: string | null
+          locked_by?: string | null
           ministry_commerce_code?: string | null
+          modification_requires_approval?: boolean | null
           notes?: string | null
           opening_balance?: number | null
           parent_account_id?: string | null
@@ -1878,12 +2069,17 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           current_balance?: number | null
+          first_transaction_date?: string | null
           id?: string
           is_active?: boolean | null
+          is_locked?: boolean | null
           ksaap_compliant?: boolean | null
           legal_reference?: string | null
           level?: number
+          locked_at?: string | null
+          locked_by?: string | null
           ministry_commerce_code?: string | null
+          modification_requires_approval?: boolean | null
           notes?: string | null
           opening_balance?: number | null
           parent_account_id?: string | null
@@ -1911,6 +2107,59 @@ export type Database = {
           },
           {
             foreignKeyName: "chart_of_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chart_of_accounts_settings: {
+        Row: {
+          account_code_format: Json
+          allow_posting_levels: Json
+          auto_code_generation: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          level_naming: Json
+          max_account_levels: number
+          require_parent_for_level: Json
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          account_code_format?: Json
+          allow_posting_levels?: Json
+          auto_code_generation?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          level_naming?: Json
+          max_account_levels?: number
+          require_parent_for_level?: Json
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          account_code_format?: Json
+          allow_posting_levels?: Json
+          auto_code_generation?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          level_naming?: Json
+          max_account_levels?: number
+          require_parent_for_level?: Json
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_chart_settings_tenant"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -2179,6 +2428,101 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      comparison_report_items: {
+        Row: {
+          account_code: string
+          account_id: string
+          account_name: string
+          analysis_notes: string | null
+          comparison_period_amount: number | null
+          created_at: string | null
+          id: string
+          primary_period_amount: number | null
+          report_id: string
+          variance_amount: number | null
+          variance_percentage: number | null
+        }
+        Insert: {
+          account_code: string
+          account_id: string
+          account_name: string
+          analysis_notes?: string | null
+          comparison_period_amount?: number | null
+          created_at?: string | null
+          id?: string
+          primary_period_amount?: number | null
+          report_id: string
+          variance_amount?: number | null
+          variance_percentage?: number | null
+        }
+        Update: {
+          account_code?: string
+          account_id?: string
+          account_name?: string
+          analysis_notes?: string | null
+          comparison_period_amount?: number | null
+          created_at?: string | null
+          id?: string
+          primary_period_amount?: number | null
+          report_id?: string
+          variance_amount?: number | null
+          variance_percentage?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comparison_report_items_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "comparison_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comparison_reports: {
+        Row: {
+          comparison_period_end: string
+          comparison_period_start: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          primary_period_end: string
+          primary_period_start: string
+          report_data: Json
+          report_name: string
+          report_type: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          comparison_period_end: string
+          comparison_period_start: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          primary_period_end: string
+          primary_period_start: string
+          report_data?: Json
+          report_name: string
+          report_type: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          comparison_period_end?: string
+          comparison_period_start?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          primary_period_end?: string
+          primary_period_start?: string
+          report_data?: Json
+          report_name?: string
+          report_type?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       contract_accounting_entries: {
         Row: {
@@ -5011,39 +5355,71 @@ export type Database = {
       }
       financial_periods: {
         Row: {
+          closed_at: string | null
+          closed_by: string | null
+          closing_reason: string | null
           created_at: string
           created_by: string | null
           end_date: string
           fiscal_year: number
           id: string
           is_closed: boolean | null
+          is_locked: boolean | null
           period_name: string
+          reopened_at: string | null
+          reopened_by: string | null
+          reopening_reason: string | null
           start_date: string
+          tenant_id: string
           updated_at: string
         }
         Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_reason?: string | null
           created_at?: string
           created_by?: string | null
           end_date: string
           fiscal_year: number
           id?: string
           is_closed?: boolean | null
+          is_locked?: boolean | null
           period_name: string
+          reopened_at?: string | null
+          reopened_by?: string | null
+          reopening_reason?: string | null
           start_date: string
+          tenant_id: string
           updated_at?: string
         }
         Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_reason?: string | null
           created_at?: string
           created_by?: string | null
           end_date?: string
           fiscal_year?: number
           id?: string
           is_closed?: boolean | null
+          is_locked?: boolean | null
           period_name?: string
+          reopened_at?: string | null
+          reopened_by?: string | null
+          reopening_reason?: string | null
           start_date?: string
+          tenant_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "financial_periods_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       financial_report_templates: {
         Row: {
@@ -7153,6 +7529,63 @@ export type Database = {
             columns: ["payroll_id"]
             isOneToOne: false
             referencedRelation: "payroll"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      period_closing_audit: {
+        Row: {
+          action_type: string
+          additional_data: Json | null
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          performed_at: string
+          performed_by: string
+          period_id: string
+          reason: string | null
+          tenant_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          action_type: string
+          additional_data?: Json | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          performed_at?: string
+          performed_by: string
+          period_id: string
+          reason?: string | null
+          tenant_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          action_type?: string
+          additional_data?: Json | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          performed_at?: string
+          performed_by?: string
+          period_id?: string
+          reason?: string | null
+          tenant_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "period_closing_audit_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "financial_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "period_closing_audit_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -10437,6 +10870,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      batch_post_journal_entries: {
+        Args: { entry_ids: string[]; posted_by?: string }
+        Returns: {
+          success_count: number
+          failed_count: number
+          failed_entries: Json
+          total_debit: number
+          total_credit: number
+        }[]
+      }
       calculate_advanced_depreciation: {
         Args: { asset_id_param: string; calculation_date?: string }
         Returns: {
@@ -10546,6 +10989,10 @@ export type Database = {
         }
         Returns: Json
       }
+      can_modify_account: {
+        Args: { account_id_param: string; user_id_param: string }
+        Returns: Json
+      }
       check_budget_overruns: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -10562,12 +11009,25 @@ export type Database = {
         Args: { contract_id_param: string }
         Returns: Json
       }
+      check_period_status: {
+        Args: { period_date: string }
+        Returns: Json
+      }
       cleanup_duplicate_accounts: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
       cleanup_orphaned_journal_entries: {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      close_financial_period: {
+        Args: {
+          period_id_param: string
+          closing_reason_param?: string
+          user_ip?: string
+          user_agent_param?: string
+        }
         Returns: Json
       }
       complete_chart_of_accounts_part2: {
@@ -10794,6 +11254,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      generate_account_code: {
+        Args: {
+          p_tenant_id: string
+          p_parent_account_id?: string
+          p_account_type?: string
+        }
+        Returns: string
+      }
       generate_asset_code: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -10898,6 +11366,26 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_period_comparison: {
+        Args: {
+          tenant_id_param: string
+          primary_start_date: string
+          primary_end_date: string
+          comparison_start_date: string
+          comparison_end_date: string
+          account_types?: string[]
+        }
+        Returns: {
+          account_id: string
+          account_code: string
+          account_name: string
+          account_type: string
+          primary_amount: number
+          comparison_amount: number
+          variance_amount: number
+          variance_percentage: number
+        }[]
+      }
       generate_public_quotation_link: {
         Args: { quotation_id: string; expires_in_days?: number }
         Returns: string
@@ -10975,6 +11463,10 @@ export type Database = {
       }
       has_any_tenant_role: {
         Args: { _roles: string[] }
+        Returns: boolean
+      }
+      has_financial_transactions: {
+        Args: { account_id_param: string }
         Returns: boolean
       }
       has_permission: {
@@ -11075,6 +11567,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      reopen_financial_period: {
+        Args: {
+          period_id_param: string
+          reopening_reason_param: string
+          user_ip?: string
+          user_agent_param?: string
+        }
+        Returns: Json
+      }
       reorganize_account_codes: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -11106,6 +11607,19 @@ export type Database = {
       safe_delete_tenant: {
         Args: { tenant_id_param: string; deletion_reason?: string }
         Returns: Json
+      }
+      save_comparison_report: {
+        Args: {
+          tenant_id_param: string
+          report_name_param: string
+          report_type_param: string
+          primary_start_date: string
+          primary_end_date: string
+          comparison_start_date: string
+          comparison_end_date: string
+          created_by_param?: string
+        }
+        Returns: string
       }
       setup_complete_chart_of_accounts: {
         Args: { tenant_id_param: string }
@@ -11162,6 +11676,15 @@ export type Database = {
           updated_by_param?: string
         }
         Returns: boolean
+      }
+      validate_account_structure: {
+        Args: {
+          p_tenant_id: string
+          p_account_code: string
+          p_parent_account_id?: string
+          p_level?: number
+        }
+        Returns: Json
       }
       validate_accounting_access: {
         Args: { target_tenant_id: string }
