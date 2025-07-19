@@ -191,32 +191,8 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
             <IconComponent className={`h-5 w-5 ${config.color}`} />
           </div>
 
-          {/* Account Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-1">
-              <span className="font-semibold text-foreground text-sm">
-                {account.account_code}
-              </span>
-              <Badge variant="outline" className="text-xs font-normal bg-background">
-                {config.label}
-              </Badge>
-              {!account.is_active && (
-                <Badge variant="destructive" className="text-xs">
-                  غير نشط
-                </Badge>
-              )}
-            </div>
-            <p 
-              className="text-sm text-muted-foreground truncate cursor-pointer hover:text-primary transition-colors"
-              onClick={() => onViewLedger?.(account)}
-              title="انقر لعرض دفتر الأستاذ"
-            >
-              {account.account_name}
-            </p>
-          </div>
-
-          {/* Balance */}
-          <div className="text-left min-w-[120px]">
+          {/* Balance - moved to left */}
+          <div className="text-right min-w-[120px]">
             <p className="text-sm font-semibold text-foreground">
               {formatCurrencyKWD(account.current_balance)}
             </p>
@@ -225,6 +201,30 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
                 قابل للترحيل
               </Badge>
             )}
+          </div>
+
+          {/* Account Info - moved to right */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-1 justify-end">
+              <Badge variant="outline" className="text-xs font-normal bg-background">
+                {config.label}
+              </Badge>
+              {!account.is_active && (
+                <Badge variant="destructive" className="text-xs">
+                  غير نشط
+                </Badge>
+              )}
+              <span className="font-semibold text-foreground text-sm">
+                {account.account_code}
+              </span>
+            </div>
+            <p 
+              className="text-sm text-muted-foreground truncate cursor-pointer hover:text-primary transition-colors text-right"
+              onClick={() => onViewLedger?.(account)}
+              title="انقر لعرض دفتر الأستاذ"
+            >
+              {account.account_name}
+            </p>
           </div>
 
           {/* Actions Menu */}
