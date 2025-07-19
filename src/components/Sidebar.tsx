@@ -27,17 +27,17 @@ import {
   User,
   Users,
 } from "lucide-react";
-import { useLocation } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@supabase/auth-helpers-react";
 import { DropdownMenu, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { supabase } from "@/integrations/supabase/client";
+import { signOut } from "@/services/authService";
 
 interface NavItem {
   name: string;
   href: string;
-  icon: any;
+  icon: React.LucideIcon;
 }
 
 const generalItems: NavItem[] = [
@@ -70,9 +70,8 @@ const settingsItems: NavItem[] = [
 ];
 
 const Sidebar = () => {
-  const location = useLocation();
+  const pathname = usePathname();
   const user = useUser();
-  const pathname = location.pathname;
 
   return (
     <Sheet>
@@ -93,10 +92,11 @@ const Sidebar = () => {
           <NavigationMenuList>
             {generalItems.map((item) => (
               <NavigationMenuItem key={item.name}>
-                <Link to={item.href}>
+                <Link href={item.href} legacyBehavior passHref>
                   <Button
                     variant={pathname === item.href ? "secondary" : "ghost"}
-                    className="justify-start rtl-flex w-full"
+                    className="justify-start rtl-flex"
+                    asChild
                   >
                     <item.icon className="h-4 w-4 ml-2" />
                     <span>{item.name}</span>
@@ -114,10 +114,11 @@ const Sidebar = () => {
           <NavigationMenuList>
             {accountingItems.map((item) => (
               <NavigationMenuItem key={item.name}>
-                <Link to={item.href}>
+                <Link href={item.href} legacyBehavior passHref>
                   <Button
                     variant={pathname === item.href ? "secondary" : "ghost"}
-                    className="justify-start rtl-flex w-full"
+                    className="justify-start rtl-flex"
+                    asChild
                   >
                     <item.icon className="h-4 w-4 ml-2" />
                     <span>{item.name}</span>
@@ -135,10 +136,11 @@ const Sidebar = () => {
           <NavigationMenuList>
             {inventoryItems.map((item) => (
               <NavigationMenuItem key={item.name}>
-                <Link to={item.href}>
+                <Link href={item.href} legacyBehavior passHref>
                   <Button
                     variant={pathname === item.href ? "secondary" : "ghost"}
-                    className="justify-start rtl-flex w-full"
+                    className="justify-start rtl-flex"
+                    asChild
                   >
                     <item.icon className="h-4 w-4 ml-2" />
                     <span>{item.name}</span>
@@ -156,10 +158,11 @@ const Sidebar = () => {
           <NavigationMenuList>
             {taskItems.map((item) => (
               <NavigationMenuItem key={item.name}>
-                <Link to={item.href}>
+                <Link href={item.href} legacyBehavior passHref>
                   <Button
                     variant={pathname === item.href ? "secondary" : "ghost"}
-                    className="justify-start rtl-flex w-full"
+                    className="justify-start rtl-flex"
+                    asChild
                   >
                     <item.icon className="h-4 w-4 ml-2" />
                     <span>{item.name}</span>
@@ -177,10 +180,11 @@ const Sidebar = () => {
           <NavigationMenuList>
             {settingsItems.map((item) => (
               <NavigationMenuItem key={item.name}>
-                <Link to={item.href}>
+                <Link href={item.href} legacyBehavior passHref>
                   <Button
                     variant={pathname === item.href ? "secondary" : "ghost"}
-                    className="justify-start rtl-flex w-full"
+                    className="justify-start rtl-flex"
+                    asChild
                   >
                     <item.icon className="h-4 w-4 ml-2" />
                     <span>{item.name}</span>

@@ -2429,101 +2429,6 @@ export type Database = {
           },
         ]
       }
-      comparison_report_items: {
-        Row: {
-          account_code: string
-          account_id: string
-          account_name: string
-          analysis_notes: string | null
-          comparison_period_amount: number | null
-          created_at: string | null
-          id: string
-          primary_period_amount: number | null
-          report_id: string
-          variance_amount: number | null
-          variance_percentage: number | null
-        }
-        Insert: {
-          account_code: string
-          account_id: string
-          account_name: string
-          analysis_notes?: string | null
-          comparison_period_amount?: number | null
-          created_at?: string | null
-          id?: string
-          primary_period_amount?: number | null
-          report_id: string
-          variance_amount?: number | null
-          variance_percentage?: number | null
-        }
-        Update: {
-          account_code?: string
-          account_id?: string
-          account_name?: string
-          analysis_notes?: string | null
-          comparison_period_amount?: number | null
-          created_at?: string | null
-          id?: string
-          primary_period_amount?: number | null
-          report_id?: string
-          variance_amount?: number | null
-          variance_percentage?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "comparison_report_items_report_id_fkey"
-            columns: ["report_id"]
-            isOneToOne: false
-            referencedRelation: "comparison_reports"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      comparison_reports: {
-        Row: {
-          comparison_period_end: string
-          comparison_period_start: string
-          created_at: string | null
-          created_by: string | null
-          id: string
-          primary_period_end: string
-          primary_period_start: string
-          report_data: Json
-          report_name: string
-          report_type: string
-          tenant_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          comparison_period_end: string
-          comparison_period_start: string
-          created_at?: string | null
-          created_by?: string | null
-          id?: string
-          primary_period_end: string
-          primary_period_start: string
-          report_data?: Json
-          report_name: string
-          report_type: string
-          tenant_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          comparison_period_end?: string
-          comparison_period_start?: string
-          created_at?: string | null
-          created_by?: string | null
-          id?: string
-          primary_period_end?: string
-          primary_period_start?: string
-          report_data?: Json
-          report_name?: string
-          report_type?: string
-          tenant_id?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       contract_accounting_entries: {
         Row: {
           amount: number
@@ -5355,71 +5260,39 @@ export type Database = {
       }
       financial_periods: {
         Row: {
-          closed_at: string | null
-          closed_by: string | null
-          closing_reason: string | null
           created_at: string
           created_by: string | null
           end_date: string
           fiscal_year: number
           id: string
           is_closed: boolean | null
-          is_locked: boolean | null
           period_name: string
-          reopened_at: string | null
-          reopened_by: string | null
-          reopening_reason: string | null
           start_date: string
-          tenant_id: string
           updated_at: string
         }
         Insert: {
-          closed_at?: string | null
-          closed_by?: string | null
-          closing_reason?: string | null
           created_at?: string
           created_by?: string | null
           end_date: string
           fiscal_year: number
           id?: string
           is_closed?: boolean | null
-          is_locked?: boolean | null
           period_name: string
-          reopened_at?: string | null
-          reopened_by?: string | null
-          reopening_reason?: string | null
           start_date: string
-          tenant_id: string
           updated_at?: string
         }
         Update: {
-          closed_at?: string | null
-          closed_by?: string | null
-          closing_reason?: string | null
           created_at?: string
           created_by?: string | null
           end_date?: string
           fiscal_year?: number
           id?: string
           is_closed?: boolean | null
-          is_locked?: boolean | null
           period_name?: string
-          reopened_at?: string | null
-          reopened_by?: string | null
-          reopening_reason?: string | null
           start_date?: string
-          tenant_id?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "financial_periods_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       financial_report_templates: {
         Row: {
@@ -7529,63 +7402,6 @@ export type Database = {
             columns: ["payroll_id"]
             isOneToOne: false
             referencedRelation: "payroll"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      period_closing_audit: {
-        Row: {
-          action_type: string
-          additional_data: Json | null
-          created_at: string | null
-          id: string
-          ip_address: string | null
-          performed_at: string
-          performed_by: string
-          period_id: string
-          reason: string | null
-          tenant_id: string
-          user_agent: string | null
-        }
-        Insert: {
-          action_type: string
-          additional_data?: Json | null
-          created_at?: string | null
-          id?: string
-          ip_address?: string | null
-          performed_at?: string
-          performed_by: string
-          period_id: string
-          reason?: string | null
-          tenant_id: string
-          user_agent?: string | null
-        }
-        Update: {
-          action_type?: string
-          additional_data?: Json | null
-          created_at?: string | null
-          id?: string
-          ip_address?: string | null
-          performed_at?: string
-          performed_by?: string
-          period_id?: string
-          reason?: string | null
-          tenant_id?: string
-          user_agent?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "period_closing_audit_period_id_fkey"
-            columns: ["period_id"]
-            isOneToOne: false
-            referencedRelation: "financial_periods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "period_closing_audit_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -11009,25 +10825,12 @@ export type Database = {
         Args: { contract_id_param: string }
         Returns: Json
       }
-      check_period_status: {
-        Args: { period_date: string }
-        Returns: Json
-      }
       cleanup_duplicate_accounts: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
       cleanup_orphaned_journal_entries: {
         Args: Record<PropertyKey, never>
-        Returns: Json
-      }
-      close_financial_period: {
-        Args: {
-          period_id_param: string
-          closing_reason_param?: string
-          user_ip?: string
-          user_agent_param?: string
-        }
         Returns: Json
       }
       complete_chart_of_accounts_part2: {
@@ -11366,26 +11169,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
-      generate_period_comparison: {
-        Args: {
-          tenant_id_param: string
-          primary_start_date: string
-          primary_end_date: string
-          comparison_start_date: string
-          comparison_end_date: string
-          account_types?: string[]
-        }
-        Returns: {
-          account_id: string
-          account_code: string
-          account_name: string
-          account_type: string
-          primary_amount: number
-          comparison_amount: number
-          variance_amount: number
-          variance_percentage: number
-        }[]
-      }
       generate_public_quotation_link: {
         Args: { quotation_id: string; expires_in_days?: number }
         Returns: string
@@ -11567,15 +11350,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
-      reopen_financial_period: {
-        Args: {
-          period_id_param: string
-          reopening_reason_param: string
-          user_ip?: string
-          user_agent_param?: string
-        }
-        Returns: Json
-      }
       reorganize_account_codes: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -11607,19 +11381,6 @@ export type Database = {
       safe_delete_tenant: {
         Args: { tenant_id_param: string; deletion_reason?: string }
         Returns: Json
-      }
-      save_comparison_report: {
-        Args: {
-          tenant_id_param: string
-          report_name_param: string
-          report_type_param: string
-          primary_start_date: string
-          primary_end_date: string
-          comparison_start_date: string
-          comparison_end_date: string
-          created_by_param?: string
-        }
-        Returns: string
       }
       setup_complete_chart_of_accounts: {
         Args: { tenant_id_param: string }

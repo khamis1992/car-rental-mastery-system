@@ -1,87 +1,165 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Dashboard from '@/pages/Dashboard';
 import JournalEntries from '@/pages/JournalEntries';
 import GeneralLedger from '@/pages/GeneralLedger';
 import ChartOfAccounts from '@/pages/ChartOfAccounts';
 import FinancialReports from '@/pages/FinancialReports';
 import AccountModificationRequestsPage from '@/pages/AccountModificationRequests';
-import Sidebar from './components/Sidebar';
+import { Sidebar } from './components/Sidebar';
 import { Auth } from '@supabase/auth-ui-react'
-import { supabase } from '@/integrations/supabase/client'
+import {
+  AuthenticatedTemplate,
+  useSupabaseClient,
+  UnauthenticatedTemplate,
+} from '@supabase/auth-helpers-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
-import { useAuth } from '@/hooks/useAuth';
-
-// Protected Route Component
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth();
-  
-  if (loading) {
-    return <div className="flex h-screen items-center justify-center">جاري التحميل...</div>;
-  }
-  
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-  
-  return (
-    <div className="flex h-screen">
-      <Sidebar />
-      {children}
-    </div>
-  );
-};
+import ChartOfAccountsSettingsPage from './components/ChartOfAccounts/ChartOfAccountsSettings';
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen bg-background">
         <Routes>
-          <Route path="/auth" element={
-            <div className="flex h-screen items-center justify-center">
-              <Auth
-                supabaseClient={supabase}
-                appearance={{ theme: ThemeSupa }}
-                providers={['google']}
-                redirectTo={window.location.origin}
-              />
-            </div>
-          } />
-          
           <Route path="/" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
+            <>
+              <AuthenticatedTemplate>
+                <div className="flex h-screen">
+                  <Sidebar />
+                  <Dashboard />
+                </div>
+              </AuthenticatedTemplate>
+              <UnauthenticatedTemplate>
+                <div className="flex h-screen">
+                  <Auth
+                    supabaseClient={useSupabaseClient()}
+                    appearance={{ theme: ThemeSupa }}
+                    providers={['google', 'github']}
+                    redirectTo="http://localhost:3000/"
+                  />
+                </div>
+              </UnauthenticatedTemplate>
+            </>
           } />
-          
           <Route path="/chart-of-accounts" element={
-            <ProtectedRoute>
-              <ChartOfAccounts />
-            </ProtectedRoute>
+            <>
+              <AuthenticatedTemplate>
+                <div className="flex h-screen">
+                  <Sidebar />
+                  <ChartOfAccounts />
+                </div>
+              </AuthenticatedTemplate>
+              <UnauthenticatedTemplate>
+                <div className="flex h-screen">
+                  <Auth
+                    supabaseClient={useSupabaseClient()}
+                    appearance={{ theme: ThemeSupa }}
+                    providers={['google', 'github']}
+                    redirectTo="http://localhost:3000/chart-of-accounts"
+                  />
+                </div>
+              </UnauthenticatedTemplate>
+            </>
           } />
-          
+          <Route path="/chart-of-accounts-settings" element={
+            <>
+              <AuthenticatedTemplate>
+                <div className="flex h-screen">
+                  <Sidebar />
+                  <ChartOfAccountsSettingsPage />
+                </div>
+              </AuthenticatedTemplate>
+              <UnauthenticatedTemplate>
+                <div className="flex h-screen">
+                  <Auth
+                    supabaseClient={useSupabaseClient()}
+                    appearance={{ theme: ThemeSupa }}
+                    providers={['google', 'github']}
+                    redirectTo="http://localhost:3000/chart-of-accounts-settings"
+                  />
+                </div>
+              </UnauthenticatedTemplate>
+            </>
+          } />
           <Route path="/journal-entries" element={
-            <ProtectedRoute>
-              <JournalEntries />
-            </ProtectedRoute>
+            <>
+              <AuthenticatedTemplate>
+                <div className="flex h-screen">
+                  <Sidebar />
+                  <JournalEntries />
+                </div>
+              </AuthenticatedTemplate>
+              <UnauthenticatedTemplate>
+                <div className="flex h-screen">
+                  <Auth
+                    supabaseClient={useSupabaseClient()}
+                    appearance={{ theme: ThemeSupa }}
+                    providers={['google', 'github']}
+                    redirectTo="http://localhost:3000/journal-entries"
+                  />
+                </div>
+              </UnauthenticatedTemplate>
+            </>
           } />
-          
           <Route path="/general-ledger" element={
-            <ProtectedRoute>
-              <GeneralLedger />
-            </ProtectedRoute>
+            <>
+              <AuthenticatedTemplate>
+                <div className="flex h-screen">
+                  <Sidebar />
+                  <GeneralLedger />
+                </div>
+              </AuthenticatedTemplate>
+              <UnauthenticatedTemplate>
+                <div className="flex h-screen">
+                  <Auth
+                    supabaseClient={useSupabaseClient()}
+                    appearance={{ theme: ThemeSupa }}
+                    providers={['google', 'github']}
+                    redirectTo="http://localhost:3000/general-ledger"
+                  />
+                </div>
+              </UnauthenticatedTemplate>
+            </>
           } />
-          
           <Route path="/financial-reports" element={
-            <ProtectedRoute>
-              <FinancialReports />
-            </ProtectedRoute>
+            <>
+              <AuthenticatedTemplate>
+                <div className="flex h-screen">
+                  <Sidebar />
+                  <FinancialReports />
+                </div>
+              </AuthenticatedTemplate>
+              <UnauthenticatedTemplate>
+                <div className="flex h-screen">
+                  <Auth
+                    supabaseClient={useSupabaseClient()}
+                    appearance={{ theme: ThemeSupa }}
+                    providers={['google', 'github']}
+                    redirectTo="http://localhost:3000/financial-reports"
+                  />
+                </div>
+              </UnauthenticatedTemplate>
+            </>
           } />
-          
           <Route path="/account-modification-requests" element={
-            <ProtectedRoute>
-              <AccountModificationRequestsPage />
-            </ProtectedRoute>
+            <>
+              <AuthenticatedTemplate>
+                <div className="flex h-screen">
+                  <Sidebar />
+                  <AccountModificationRequestsPage />
+                </div>
+              </AuthenticatedTemplate>
+              <UnauthenticatedTemplate>
+                <div className="flex h-screen">
+                  <Auth
+                    supabaseClient={useSupabaseClient()}
+                    appearance={{ theme: ThemeSupa }}
+                    providers={['google', 'github']}
+                    redirectTo="http://localhost:3000/account-modification-requests"
+                  />
+                </div>
+              </UnauthenticatedTemplate>
+            </>
           } />
         </Routes>
       </div>
