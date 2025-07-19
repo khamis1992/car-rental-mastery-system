@@ -19,6 +19,12 @@ interface AddSubAccountDialogProps {
   onAccountCreated: () => void;
 }
 
+interface AccountTypeOption {
+  value: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
+  label: string;
+  isRecommended?: boolean;
+}
+
 export const AddSubAccountDialog: React.FC<AddSubAccountDialogProps> = ({
   isOpen,
   onClose,
@@ -26,7 +32,17 @@ export const AddSubAccountDialog: React.FC<AddSubAccountDialogProps> = ({
   onAccountCreated
 }) => {
   const { createSubAccount, loading } = useAccountOperations();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    account_code: string;
+    account_name: string;
+    account_name_en: string;
+    account_type: ChartOfAccount['account_type'] | '';
+    account_category: ChartOfAccount['account_category'] | '';
+    is_active: boolean;
+    allow_posting: boolean;
+    opening_balance: number;
+    notes: string;
+  }>({
     account_code: '',
     account_name: '',
     account_name_en: '',
@@ -85,6 +101,8 @@ export const AddSubAccountDialog: React.FC<AddSubAccountDialogProps> = ({
         ...formData,
         parent_account_id: parentAccount.id,
         account_code: formData.account_code.trim() || undefined, // Let system generate if empty
+        account_type: formData.account_type as ChartOfAccount['account_type'],
+        account_category: formData.account_category as ChartOfAccount['account_category']
       });
       
       resetForm();
@@ -101,8 +119,8 @@ export const AddSubAccountDialog: React.FC<AddSubAccountDialogProps> = ({
     onClose();
   };
 
-  const getAccountTypeOptions = () => {
-    const baseOptions = [
+  const getAccountTypeOptions = (): AccountTypeOption[] => {
+    const baseOptions: AccountTypeOption[] = [
       { value: 'asset', label: 'أصول' },
       { value: 'liability', label: 'خصوم' },
       { value: 'equity', label: 'حقوق الملكية' },
@@ -204,9 +222,9 @@ export const AddSubAccountDialog: React.FC<AddSubAccountDialogProps> = ({
               <Label htmlFor="account_type" className="rtl-label">
                 نوع الحساب *
               </Label>
-              <Select
+               <Select
                 value={formData.account_type}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, account_type: value }))}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, account_type: value as ChartOfAccount['account_type'] }))}
                 required
               >
                 <SelectTrigger>

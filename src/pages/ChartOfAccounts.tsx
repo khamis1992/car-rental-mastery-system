@@ -62,7 +62,7 @@ const ChartOfAccounts = () => {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            حدث خطأ في تحميل البيانات: {typeof error === 'string' ? error : error.message || 'خطأ غير معروف'}
+            حدث خطأ في تحميل البيانات: {typeof error === 'string' ? error : (error as Error)?.message || 'خطأ غير معروف'}
           </AlertDescription>
         </Alert>
       )}

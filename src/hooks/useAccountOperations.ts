@@ -151,13 +151,17 @@ export const useAccountOperations = () => {
       // Generate account code if not provided
       let accountCode = accountData.account_code?.trim();
       if (!accountCode) {
-        accountCode = await generateSubAccountCode(parentAccount);
+        accountCode = await generateSubAccountCode(parentAccount as ChartOfAccount);
         console.log('🔢 تم توليد رقم الحساب تلقائياً:', accountCode);
       }
 
       // Validate account data
-      const validatedData = { ...accountData, account_code: accountCode };
-      validateAccountData(validatedData, parentAccount);
+      const validatedData = { 
+        ...accountData, 
+        account_code: accountCode,
+        account_type: accountData.account_type as ChartOfAccount['account_type']
+      };
+      validateAccountData(validatedData as ChartOfAccount, parentAccount as ChartOfAccount);
 
       // Check for duplicate account code
       const { data: existingAccount, error: checkError } = await supabase
@@ -181,7 +185,7 @@ export const useAccountOperations = () => {
         account_code: accountCode,
         account_name: accountData.account_name!.trim(),
         account_name_en: accountData.account_name_en?.trim() || null,
-        account_type: accountData.account_type!,
+        account_type: accountData.account_type as ChartOfAccount['account_type'],
         account_category: accountData.account_category || parentAccount.account_category,
         parent_account_id: parentAccount.id,
         level: parentAccount.level + 1,
