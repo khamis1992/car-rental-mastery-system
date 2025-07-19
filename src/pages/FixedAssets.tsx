@@ -216,10 +216,10 @@ const FixedAssets = () => {
       {/* Main Content Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-          <TabsTrigger value="assets">قائمة الأصول</TabsTrigger>
-          <TabsTrigger value="assignments">التعيينات</TabsTrigger>
           <TabsTrigger value="depreciation">تقارير الإهلاك</TabsTrigger>
+          <TabsTrigger value="assignments">التعيينات</TabsTrigger>
+          <TabsTrigger value="assets">قائمة الأصول</TabsTrigger>
+          <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
