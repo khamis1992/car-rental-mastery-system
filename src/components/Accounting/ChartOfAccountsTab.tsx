@@ -1,43 +1,32 @@
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Eye, Upload } from 'lucide-react';
+import { Plus, Search, Edit, Eye, Upload, GitBranch } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
 import { ChartOfAccount } from '@/types/accounting';
 import { accountingService } from '@/services/accountingService';
 import { useToast } from '@/hooks/use-toast';
 import { AccountDetailsModal } from './AccountDetailsModal';
 import { ChartOfAccountsImportDialog } from './ChartOfAccountsImportDialog';
+import { SubAccountCreator } from './SubAccountCreator';
 
 export const ChartOfAccountsTab = () => {
   const [accounts, setAccounts] = useState<ChartOfAccount[]>([]);
   const [filteredAccounts, setFilteredAccounts] = useState<ChartOfAccount[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingAccount, setEditingAccount] = useState<ChartOfAccount | null>(null);
+  const [selectedLevel, setSelectedLevel] = useState<string>('all');
+  const [isSubAccountDialogOpen, setIsSubAccountDialogOpen] = useState(false);
+  const [selectedParentAccount, setSelectedParentAccount] = useState<ChartOfAccount | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedAccountForDetails, setSelectedAccountForDetails] = useState<ChartOfAccount | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const { toast } = useToast();
-
-  const [formData, setFormData] = useState({
-    account_code: '',
-    account_name: '',
-    account_type: '',
-    account_category: '',
-    parent_account_id: '',
-    allow_posting: true,
-    opening_balance: 0,
-    notes: ''
-  });
 
   useEffect(() => {
     loadAccounts();
@@ -45,7 +34,7 @@ export const ChartOfAccountsTab = () => {
 
   useEffect(() => {
     filterAccounts();
-  }, [accounts, searchTerm, selectedType]);
+  }, [accounts, searchTerm, selectedType, selectedLevel]);
 
   const loadAccounts = async () => {
     try {
@@ -76,75 +65,53 @@ export const ChartOfAccountsTab = () => {
       filtered = filtered.filter(account => account.account_type === selectedType);
     }
 
+    if (selectedLevel !== 'all') {
+      filtered = filtered.filter(account => account.level === parseInt(selectedLevel));
+    }
+
+    // ترتيب الحسابات حسب الرقم
+    filtered.sort((a, b) => a.account_code.localeCompare(b.account_code));
+
     setFilteredAccounts(filtered);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreateSubAccount = async (accountData: any) => {
     try {
-      if (editingAccount) {
-        await accountingService.updateAccount(editingAccount.id, formData as any);
-        toast({
-          title: 'تم بنجاح',
-          description: 'تم تحديث الحساب بنجاح',
-        });
-      } else {
-        await accountingService.createAccount({
-          ...formData,
-          level: formData.parent_account_id ? 3 : 1,
-          is_active: true,
-          current_balance: formData.opening_balance
-        } as any);
-        toast({
-          title: 'تم بنجاح',
-          description: 'تم إنشاء الحساب بنجاح',
-        });
-      }
+      await accountingService.createAccount(accountData);
+      toast({
+        title: 'تم بنجاح',
+        description: 'تم إنشاء الحساب الفرعي بنجاح',
+      });
       
-      setIsDialogOpen(false);
-      setEditingAccount(null);
-      resetForm();
+      setIsSubAccountDialogOpen(false);
+      setSelectedParentAccount(null);
       loadAccounts();
     } catch (error) {
       toast({
         title: 'خطأ',
-        description: 'فشل في حفظ الحساب',
+        description: 'فشل في إنشاء الحساب الفرعي',
         variant: 'destructive',
       });
     }
   };
 
-  const handleEdit = (account: ChartOfAccount) => {
-    setEditingAccount(account);
-    setFormData({
-      account_code: account.account_code,
-      account_name: account.account_name,
-      account_type: account.account_type,
-      account_category: account.account_category,
-      parent_account_id: account.parent_account_id || '',
-      allow_posting: account.allow_posting,
-      opening_balance: account.opening_balance,
-      notes: account.notes || ''
-    });
-    setIsDialogOpen(true);
-  };
-
-  const resetForm = () => {
-    setFormData({
-      account_code: '',
-      account_name: '',
-      account_type: '',
-      account_category: '',
-      parent_account_id: '',
-      allow_posting: true,
-      opening_balance: 0,
-      notes: ''
-    });
-  };
-
   const handleViewDetails = (account: ChartOfAccount) => {
     setSelectedAccountForDetails(account);
     setIsDetailsModalOpen(true);
+  };
+
+  const handleAddSubAccount = (parentAccount: ChartOfAccount) => {
+    if (parentAccount.level >= 5) {
+      toast({
+        title: 'تحذير',
+        description: 'لا يمكن إضافة حسابات فرعية للمستوى الخامس',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setSelectedParentAccount(parentAccount);
+    setIsSubAccountDialogOpen(true);
   };
 
   const getAccountTypeLabel = (type: string) => {
@@ -162,6 +129,10 @@ export const ChartOfAccountsTab = () => {
     return `د.ك ${amount.toFixed(3)}`;
   };
 
+  const getSubAccountsCount = (parentId: string) => {
+    return accounts.filter(acc => acc.parent_account_id === parentId).length;
+  };
+
   if (loading) {
     return <div className="flex justify-center items-center h-64">جاري التحميل...</div>;
   }
@@ -172,74 +143,13 @@ export const ChartOfAccountsTab = () => {
         <div className="flex justify-between items-center">
           <CardTitle className="rtl-title">قائمة الحسابات</CardTitle>
           <div className="flex gap-2 flex-row-reverse">
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={() => { resetForm(); setEditingAccount(null); }} className="rtl-flex">
-                  <Plus className="w-4 h-4" />
-                  إضافة حساب جديد
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="rtl-title">
-                    {editingAccount ? 'تعديل الحساب' : 'إضافة حساب جديد'}
-                  </DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="account_code" className="rtl-label">رقم الحساب</Label>
-                    <Input
-                      id="account_code"
-                      value={formData.account_code}
-                      onChange={(e) => setFormData({...formData, account_code: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="account_name" className="rtl-label">اسم الحساب</Label>
-                    <Input
-                      id="account_name"
-                      value={formData.account_name}
-                      onChange={(e) => setFormData({...formData, account_name: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="account_type" className="rtl-label">نوع الحساب</Label>
-                    <Select value={formData.account_type} onValueChange={(value) => setFormData({...formData, account_type: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="اختر نوع الحساب" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="asset">أصول</SelectItem>
-                        <SelectItem value="liability">خصوم</SelectItem>
-                        <SelectItem value="equity">حقوق ملكية</SelectItem>
-                        <SelectItem value="revenue">إيرادات</SelectItem>
-                        <SelectItem value="expense">مصروفات</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="opening_balance" className="rtl-label">الرصيد الافتتاحي</Label>
-                    <Input
-                      id="opening_balance"
-                      type="number"
-                      step="0.001"
-                      value={formData.opening_balance}
-                      onChange={(e) => setFormData({...formData, opening_balance: parseFloat(e.target.value) || 0})}
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2 flex-row-reverse">
-                    <Button type="submit">
-                      {editingAccount ? 'تحديث' : 'إضافة'}
-                    </Button>
-                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                      إلغاء
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <Button 
+              onClick={() => setIsSubAccountDialogOpen(true)}
+              className="rtl-flex"
+            >
+              <Plus className="w-4 h-4" />
+              إضافة حساب جديد
+            </Button>
             <Button 
               variant="outline" 
               onClick={() => setIsImportDialogOpen(true)}
@@ -252,8 +162,22 @@ export const ChartOfAccountsTab = () => {
         </div>
       </CardHeader>
       <CardContent>
-        {/* فلاتر البحث */}
-        <div className="flex gap-4 mb-4 flex-row-reverse">
+        {/* فلاتر البحث المحسنة */}
+        <div className="flex gap-4 mb-4 flex-row-reverse flex-wrap">
+          <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="المستوى" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">جميع المستويات</SelectItem>
+              <SelectItem value="1">المستوى 1</SelectItem>
+              <SelectItem value="2">المستوى 2</SelectItem>
+              <SelectItem value="3">المستوى 3</SelectItem>
+              <SelectItem value="4">المستوى 4</SelectItem>
+              <SelectItem value="5">المستوى 5</SelectItem>
+            </SelectContent>
+          </Select>
+
           <Select value={selectedType} onValueChange={setSelectedType}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="نوع الحساب" />
@@ -267,6 +191,7 @@ export const ChartOfAccountsTab = () => {
               <SelectItem value="expense">مصروفات</SelectItem>
             </SelectContent>
           </Select>
+
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -280,66 +205,84 @@ export const ChartOfAccountsTab = () => {
           </div>
         </div>
 
-        {/* جدول الحسابات */}
+        {/* جدول الحسابات المحسن */}
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="text-right">رقم الحساب</TableHead>
               <TableHead className="text-right">اسم الحساب</TableHead>
               <TableHead className="text-right">النوع</TableHead>
+              <TableHead className="text-right">المستوى</TableHead>
+              <TableHead className="text-right">الحسابات الفرعية</TableHead>
               <TableHead className="text-right">الرصيد الحالي</TableHead>
               <TableHead className="text-right">الحالة</TableHead>
               <TableHead className="text-right">إجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredAccounts.map((account) => (
-              <TableRow key={account.id}>
-                <TableCell className="text-right font-medium">{account.account_code}</TableCell>
-                <TableCell className="text-right">
-                  <div style={{ paddingRight: `${(account.level - 1) * 20}px` }}>
-                    {account.account_name}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end">
-                    <Badge variant="outline">
-                      {getAccountTypeLabel(account.account_type)}
-                    </Badge>
-                  </div>
-                </TableCell>
-                <TableCell className={`text-right font-medium ${account.current_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatBalance(account.current_balance)}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end">
-                    <Badge variant={account.is_active ? 'default' : 'secondary'}>
-                      {account.is_active ? 'نشط' : 'غير نشط'}
-                    </Badge>
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center gap-1 flex-row-reverse">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleViewDetails(account)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleEdit(account)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+            {filteredAccounts.map((account) => {
+              const subAccountsCount = getSubAccountsCount(account.id);
+              return (
+                <TableRow key={account.id}>
+                  <TableCell className="text-right font-medium">{account.account_code}</TableCell>
+                  <TableCell className="text-right">
+                    <div style={{ paddingRight: `${(account.level - 1) * 20}px` }}>
+                      {account.account_name}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end">
+                      <Badge variant="outline">
+                        {getAccountTypeLabel(account.account_type)}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Badge variant="secondary">مستوى {account.level}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <span className="text-sm text-muted-foreground">{subAccountsCount}</span>
+                      {subAccountsCount > 0 && <GitBranch className="w-3 h-3" />}
+                    </div>
+                  </TableCell>
+                  <TableCell className={`text-right font-medium ${account.current_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatBalance(account.current_balance)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end">
+                      <Badge variant={account.is_active ? 'default' : 'secondary'}>
+                        {account.is_active ? 'نشط' : 'غير نشط'}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center gap-1 flex-row-reverse">
+                      {account.level < 5 && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleAddSubAccount(account)}
+                          className="h-8 w-8 p-0"
+                          title="إضافة حساب فرعي"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleViewDetails(account)}
+                        className="h-8 w-8 p-0"
+                        title="عرض التفاصيل"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
 
@@ -368,6 +311,18 @@ export const ChartOfAccountsTab = () => {
           setIsImportDialogOpen(false);
           loadAccounts();
         }}
+      />
+
+      {/* Sub Account Creator Dialog */}
+      <SubAccountCreator
+        isOpen={isSubAccountDialogOpen}
+        onClose={() => {
+          setIsSubAccountDialogOpen(false);
+          setSelectedParentAccount(null);
+        }}
+        onSubmit={handleCreateSubAccount}
+        accounts={accounts}
+        parentAccount={selectedParentAccount}
       />
     </Card>
   );
