@@ -286,11 +286,11 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="rtl-title">دليل الحسابات</CardTitle>
           <Button onClick={() => onAddAccount?.()}>
             <Plus className="h-4 w-4 ml-2" />
             حساب جديد
           </Button>
+          <CardTitle className="rtl-title">دليل الحسابات</CardTitle>
         </div>
         
         {/* Search and Filter */}
