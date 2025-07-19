@@ -1422,6 +1422,56 @@ export type Database = {
         }
         Relationships: []
       }
+      automated_entry_rules: {
+        Row: {
+          account_mappings: Json
+          conditions: Json | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          rule_name: string
+          template_description: string | null
+          tenant_id: string
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          account_mappings?: Json
+          conditions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          rule_name: string
+          template_description?: string | null
+          tenant_id: string
+          trigger_event: string
+          updated_at?: string
+        }
+        Update: {
+          account_mappings?: Json
+          conditions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          rule_name?: string
+          template_description?: string | null
+          tenant_id?: string
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automated_entry_rules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_accounts: {
         Row: {
           account_id: string | null
@@ -4323,6 +4373,112 @@ export type Database = {
           },
         ]
       }
+      document_attachments: {
+        Row: {
+          created_at: string
+          document_category: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          is_required: boolean | null
+          notes: string | null
+          reference_id: string
+          reference_type: string
+          tenant_id: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_category?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          is_required?: boolean | null
+          notes?: string | null
+          reference_id: string
+          reference_type: string
+          tenant_id: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_category?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          is_required?: boolean | null
+          notes?: string | null
+          reference_id?: string
+          reference_type?: string
+          tenant_id?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_attachments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_review_checklist: {
+        Row: {
+          approval_workflow: Json | null
+          created_at: string
+          created_by: string | null
+          entry_type: string
+          id: string
+          is_active: boolean | null
+          required_documents: Json
+          review_points: Json
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          approval_workflow?: Json | null
+          created_at?: string
+          created_by?: string | null
+          entry_type: string
+          id?: string
+          is_active?: boolean | null
+          required_documents?: Json
+          review_points?: Json
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          approval_workflow?: Json | null
+          created_at?: string
+          created_by?: string | null
+          entry_type?: string
+          id?: string
+          is_active?: boolean | null
+          required_documents?: Json
+          review_points?: Json
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_review_checklist_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_sequences: {
         Row: {
           branch_id: string | null
@@ -5517,6 +5673,62 @@ export type Database = {
           },
         ]
       }
+      financial_reports: {
+        Row: {
+          created_at: string
+          generated_at: string
+          generated_by: string | null
+          id: string
+          is_scheduled: boolean | null
+          next_generation_date: string | null
+          report_data: Json | null
+          report_format: string | null
+          report_name: string
+          report_parameters: Json | null
+          report_type: string
+          schedule_frequency: string | null
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          is_scheduled?: boolean | null
+          next_generation_date?: string | null
+          report_data?: Json | null
+          report_format?: string | null
+          report_name: string
+          report_parameters?: Json | null
+          report_type: string
+          schedule_frequency?: string | null
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          is_scheduled?: boolean | null
+          next_generation_date?: string | null
+          report_data?: Json | null
+          report_format?: string | null
+          report_name?: string
+          report_parameters?: Json | null
+          report_type?: string
+          schedule_frequency?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_reports_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fixed_assets: {
         Row: {
           account_id: string | null
@@ -6505,6 +6717,7 @@ export type Database = {
           attachment_urls: string[] | null
           audit_trail: Json | null
           auto_reverse_date: string | null
+          automated_rule_id: string | null
           base_currency: string | null
           branch_id: string | null
           created_at: string
@@ -6528,13 +6741,16 @@ export type Database = {
           reference_type: string | null
           rejection_reason: string | null
           requires_approval: boolean | null
+          requires_review: boolean | null
           reversal_entry_id: string | null
           reversal_reason: string | null
           reversed_at: string | null
           reversed_by: string | null
           reversed_by_entry_id: string | null
+          review_status: string | null
           status: string
           supporting_documents: Json | null
+          supporting_documents_complete: boolean | null
           tenant_id: string
           total_credit: number
           total_debit: number
@@ -6549,6 +6765,7 @@ export type Database = {
           attachment_urls?: string[] | null
           audit_trail?: Json | null
           auto_reverse_date?: string | null
+          automated_rule_id?: string | null
           base_currency?: string | null
           branch_id?: string | null
           created_at?: string
@@ -6572,13 +6789,16 @@ export type Database = {
           reference_type?: string | null
           rejection_reason?: string | null
           requires_approval?: boolean | null
+          requires_review?: boolean | null
           reversal_entry_id?: string | null
           reversal_reason?: string | null
           reversed_at?: string | null
           reversed_by?: string | null
           reversed_by_entry_id?: string | null
+          review_status?: string | null
           status?: string
           supporting_documents?: Json | null
+          supporting_documents_complete?: boolean | null
           tenant_id: string
           total_credit?: number
           total_debit?: number
@@ -6593,6 +6813,7 @@ export type Database = {
           attachment_urls?: string[] | null
           audit_trail?: Json | null
           auto_reverse_date?: string | null
+          automated_rule_id?: string | null
           base_currency?: string | null
           branch_id?: string | null
           created_at?: string
@@ -6616,13 +6837,16 @@ export type Database = {
           reference_type?: string | null
           rejection_reason?: string | null
           requires_approval?: boolean | null
+          requires_review?: boolean | null
           reversal_entry_id?: string | null
           reversal_reason?: string | null
           reversed_at?: string | null
           reversed_by?: string | null
           reversed_by_entry_id?: string | null
+          review_status?: string | null
           status?: string
           supporting_documents?: Json | null
+          supporting_documents_complete?: boolean | null
           tenant_id?: string
           total_credit?: number
           total_debit?: number
@@ -6630,6 +6854,13 @@ export type Database = {
           zakat_calculated?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "journal_entries_automated_rule_id_fkey"
+            columns: ["automated_rule_id"]
+            isOneToOne: false
+            referencedRelation: "automated_entry_rules"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "journal_entries_branch_id_fkey"
             columns: ["branch_id"]
@@ -6928,6 +7159,59 @@ export type Database = {
           },
           {
             foreignKeyName: "journal_entry_lines_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entry_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          journal_entry_id: string
+          missing_documents: Json | null
+          required_documents: Json | null
+          review_checklist: Json | null
+          review_comments: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewer_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          journal_entry_id: string
+          missing_documents?: Json | null
+          required_documents?: Json | null
+          review_checklist?: Json | null
+          review_comments?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewer_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          journal_entry_id?: string
+          missing_documents?: Json | null
+          required_documents?: Json | null
+          review_checklist?: Json | null
+          review_comments?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewer_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entry_reviews_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -11143,6 +11427,15 @@ export type Database = {
         Args: { attendance_data: Json }
         Returns: string
       }
+      create_automated_journal_entry: {
+        Args: {
+          rule_id: string
+          reference_type: string
+          reference_id: string
+          transaction_data: Json
+        }
+        Returns: string
+      }
       create_automatic_journal_entry: {
         Args: {
           p_tenant_id: string
@@ -11293,6 +11586,15 @@ export type Database = {
       }
       debug_user_tenant_status: {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      evaluate_journal_entry_review: {
+        Args: {
+          entry_id: string
+          reviewer_id: string
+          review_status: string
+          comments?: string
+        }
         Returns: Json
       }
       execute_analytics_query: {
