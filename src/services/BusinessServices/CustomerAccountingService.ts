@@ -118,13 +118,28 @@ export class CustomerAccountingService {
     invoice_number?: string;
   }) {
     try {
+      // الحصول على معرف المؤسسة
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: tenantUser } = await supabase
+        .from('tenant_users')
+        .select('tenant_id')
+        .eq('user_id', user?.id)
+        .single();
+
       const { data, error } = await supabase
         .from('customer_subsidiary_ledger')
         .insert({
-          ...entry,
+          customer_id: entry.customer_id,
+          transaction_date: entry.transaction_date,
+          reference_id: entry.reference_id,
+          reference_type: entry.reference_type,
           debit_amount: entry.debit_amount || 0,
           credit_amount: entry.credit_amount || 0,
-          created_by: (await supabase.auth.getUser()).data.user?.id
+          description: entry.description,
+          invoice_number: entry.invoice_number || '',
+          journal_entry_id: '', // سيتم تحديثه لاحقاً
+          tenant_id: tenantUser?.tenant_id || '',
+          created_by: user?.id
         })
         .select()
         .single();
@@ -175,7 +190,7 @@ export class CustomerAccountingService {
    * الحصول على العملاء الذين لديهم أرصدة
    */
   async getCustomersWithBalances(filters?: {
-    customerType?: string;
+    customerType?: 'individual' | 'company';
     balanceStatus?: 'with_balance' | 'overdue' | 'all';
     minBalance?: number;
     maxBalance?: number;
@@ -187,8 +202,8 @@ export class CustomerAccountingService {
           id,
           name,
           customer_type,
-          contact_phone,
-          contact_email,
+          email,
+          phone,
           customer_subsidiary_ledger!customer_id (
             debit_amount,
             credit_amount,
@@ -206,7 +221,9 @@ export class CustomerAccountingService {
       const customersWithBalance = [];
 
       for (const customer of customers || []) {
-        const transactions = customer.customer_subsidiary_ledger || [];
+        if (!customer || typeof customer !== 'object') continue;
+        
+        const transactions = (customer as any).customer_subsidiary_ledger || [];
         const currentBalance = transactions.reduce((sum: number, t: any) => 
           sum + (t.debit_amount || 0) - (t.credit_amount || 0), 0);
 
@@ -220,7 +237,7 @@ export class CustomerAccountingService {
         if (filters?.maxBalance && currentBalance > filters.maxBalance) continue;
 
         customersWithBalance.push({
-          ...customer,
+          ...(customer as any),
           current_balance: currentBalance,
           last_transaction_date: transactions.length > 0 
             ? Math.max(...transactions.map((t: any) => new Date(t.transaction_date).getTime()))
@@ -228,7 +245,7 @@ export class CustomerAccountingService {
         });
       }
 
-      return customersWithBalance.sort((a, b) => b.current_balance - a.current_balance);
+      return customersWithBalance.sort((a: any, b: any) => b.current_balance - a.current_balance);
     } catch (error) {
       console.error('❌ Error getting customers with balances:', error);
       throw error;
@@ -390,7 +407,12 @@ export class CustomerAccountingService {
       for (const customer of customersWithBalances) {
         if (customer.current_balance > 0) {
           const aging = await this.getCustomerAgingAnalysis(customer.id);
-          if ((aging.days_30_60 + aging.days_61_90 + aging.days_91_120 + aging.over_120_days) > 0) {
+          const agingData = aging as any;
+          if (agingData && (
+            (agingData.days_30_60 || 0) + 
+            (agingData.days_61_90 || 0) + 
+            (agingData.days_91_120 || 0) + 
+            (agingData.over_120_days || 0)) > 0) {
             overdueCustomers++;
           }
         }
