@@ -62,6 +62,319 @@ class AccountingService {
     }
   }
 
+  async getChartOfAccounts() {
+    try {
+      const { data, error } = await supabase
+        .from('chart_of_accounts')
+        .select('*')
+        .eq('is_active', true)
+        .order('account_code');
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching chart of accounts:', error);
+      throw error;
+    }
+  }
+
+  async createAccount(accountData: any) {
+    try {
+      const { data, error } = await supabase
+        .from('chart_of_accounts')
+        .insert(accountData)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creating account:', error);
+      throw error;
+    }
+  }
+
+  async updateAccount(id: string, accountData: any) {
+    try {
+      const { data, error } = await supabase
+        .from('chart_of_accounts')
+        .update(accountData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error updating account:', error);
+      throw error;
+    }
+  }
+
+  async deleteAccount(id: string) {
+    try {
+      const { error } = await supabase
+        .from('chart_of_accounts')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      throw error;
+    }
+  }
+
+  async getJournalEntries() {
+    try {
+      const { data, error } = await supabase
+        .from('journal_entries')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching journal entries:', error);
+      throw error;
+    }
+  }
+
+  async createJournalEntry(entryData: any) {
+    try {
+      const { data, error } = await supabase
+        .from('journal_entries')
+        .insert(entryData)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creating journal entry:', error);
+      throw error;
+    }
+  }
+
+  async updateJournalEntry(id: string, entryData: any) {
+    try {
+      const { data, error } = await supabase
+        .from('journal_entries')
+        .update(entryData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error updating journal entry:', error);
+      throw error;
+    }
+  }
+
+  async createJournalEntryLine(lineData: any) {
+    try {
+      const { data, error } = await supabase
+        .from('journal_entry_lines')
+        .insert(lineData)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creating journal entry line:', error);
+      throw error;
+    }
+  }
+
+  async postJournalEntry(id: string) {
+    try {
+      const { data, error } = await supabase
+        .from('journal_entries')
+        .update({ status: 'posted' })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error posting journal entry:', error);
+      throw error;
+    }
+  }
+
+  async reverseJournalEntry(id: string) {
+    try {
+      const { data, error } = await supabase
+        .from('journal_entries')
+        .update({ status: 'reversed' })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error reversing journal entry:', error);
+      throw error;
+    }
+  }
+
+  async getAdvancedKPIs() {
+    try {
+      const { data, error } = await supabase
+        .from('advanced_kpis')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching advanced KPIs:', error);
+      return [];
+    }
+  }
+
+  async calculateAllKPIs() {
+    try {
+      // This would trigger KPI calculations
+      return { success: true };
+    } catch (error) {
+      console.error('Error calculating KPIs:', error);
+      throw error;
+    }
+  }
+
+  async getAIInsights() {
+    try {
+      const { data, error } = await supabase
+        .from('ai_insights')
+        .select('*')
+        .eq('is_dismissed', false)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching AI insights:', error);
+      return [];
+    }
+  }
+
+  async dismissAIInsight(id: string) {
+    try {
+      const { error } = await supabase
+        .from('ai_insights')
+        .update({ is_dismissed: true })
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error dismissing AI insight:', error);
+      throw error;
+    }
+  }
+
+  async getFinancialSummary() {
+    try {
+      // Return mock financial summary data
+      return {
+        totalRevenue: 0,
+        totalExpenses: 0,
+        netIncome: 0,
+        totalAssets: 0,
+        totalLiabilities: 0,
+        equity: 0
+      };
+    } catch (error) {
+      console.error('Error fetching financial summary:', error);
+      return null;
+    }
+  }
+
+  async getLiquidityRatios() {
+    try {
+      // Return mock liquidity ratios
+      return {
+        currentRatio: 0,
+        quickRatio: 0,
+        cashRatio: 0
+      };
+    } catch (error) {
+      console.error('Error fetching liquidity ratios:', error);
+      return null;
+    }
+  }
+
+  async getFixedAssets() {
+    try {
+      // Return mock fixed assets data
+      return [];
+    } catch (error) {
+      console.error('Error fetching fixed assets:', error);
+      return [];
+    }
+  }
+
+  async getBudgets() {
+    try {
+      // Return mock budgets data
+      return [];
+    } catch (error) {
+      console.error('Error fetching budgets:', error);
+      return [];
+    }
+  }
+
+  async getIncomeStatement() {
+    try {
+      // Return mock income statement data
+      return {
+        revenue: [],
+        expenses: [],
+        netIncome: 0
+      };
+    } catch (error) {
+      console.error('Error fetching income statement:', error);
+      return null;
+    }
+  }
+
+  async getBalanceSheet() {
+    try {
+      // Return mock balance sheet data
+      return {
+        assets: [],
+        liabilities: [],
+        equity: []
+      };
+    } catch (error) {
+      console.error('Error fetching balance sheet:', error);
+      return null;
+    }
+  }
+
+  async runDiagnostics() {
+    try {
+      // Return mock diagnostics data
+      return {
+        issues: [],
+        status: 'healthy'
+      };
+    } catch (error) {
+      console.error('Error running diagnostics:', error);
+      return null;
+    }
+  }
+
+  getCurrentTenantId() {
+    // This would return the current tenant ID
+    return 'current-tenant-id';
+  }
+
   async getGeneralLedgerEntries(
     accountId: string, 
     startDate: string, 
