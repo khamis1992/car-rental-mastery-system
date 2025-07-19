@@ -25,12 +25,14 @@ import { Loader, Save, X } from 'lucide-react';
 
 interface CostCenterFormProps {
   costCenter?: CostCenter;
+  parentId?: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
 const CostCenterForm: React.FC<CostCenterFormProps> = ({ 
   costCenter, 
+  parentId,
   onClose, 
   onSuccess 
 }) => {
@@ -39,7 +41,7 @@ const CostCenterForm: React.FC<CostCenterFormProps> = ({
     cost_center_code: costCenter?.cost_center_code || '',
     cost_center_name: costCenter?.cost_center_name || '',
     cost_center_type: costCenter?.cost_center_type || '',
-    parent_cost_center_id: costCenter?.parent_cost_center_id || '',
+    parent_cost_center_id: costCenter?.parent_cost_center_id || parentId || '',
     description: costCenter?.description || '',
     is_active: costCenter?.is_active ?? true,
     budget_amount: costCenter?.budget_amount || 0,

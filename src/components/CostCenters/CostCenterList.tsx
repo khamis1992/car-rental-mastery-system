@@ -219,9 +219,9 @@ const CostCenterList = ({ costCenters, onRefresh, isLoading }: CostCenterListPro
                         <Badge variant="secondary" className={`bg-${getCostCenterTypeColor(costCenter.cost_center_type)}-100`}>
                           {getCostCenterTypeLabel(costCenter.cost_center_type)}
                         </Badge>
-                        {costCenter.cost_center_category && (
+                        {costCenter.cost_center_type && (
                           <div className="text-xs text-muted-foreground">
-                            {getCategoryLabel(costCenter.cost_center_category)}
+                            {getCategoryLabel(costCenter.cost_center_type)}
                           </div>
                         )}
                       </div>

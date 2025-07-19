@@ -7,6 +7,7 @@ export interface CostCenter {
   cost_center_name: string;
   cost_center_type: string;
   parent_cost_center_id?: string;
+  parent_id?: string; // alias for parent_cost_center_id
   description?: string;
   is_active: boolean;
   budget_amount?: number;
@@ -15,7 +16,8 @@ export interface CostCenter {
   manager_id?: string;
   department_id?: string;
   location?: string;
-  approval_required: boolean;
+  approval_required?: boolean; // Made optional to match database
+  level?: number; // for tree view hierarchy
   created_at: string;
   updated_at: string;
   created_by?: string;
@@ -25,11 +27,49 @@ export interface CostCenter {
 export interface CostCenterReport {
   id: string;
   cost_center_name: string;
+  cost_center_code: string;
   cost_center_type: string;
   budget_amount: number;
   actual_spent: number;
   variance: number;
   budget_utilization_percentage: number;
+  contract_count?: number;
+  employee_count?: number;
+  manager_name?: string;
+  department_name?: string;
+  level?: number;
+}
+
+export interface CostCenterAllocation {
+  id: string;
+  cost_center_id: string;
+  reference_type: string;
+  reference_id?: string;
+  allocation_percentage?: number;
+  allocation_amount?: number;
+  allocation_date?: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+  created_by?: string;
+}
+
+export interface CostCenterSetting {
+  id: string;
+  setting_key: string;
+  setting_value: any;
+  setting_type: string;
+  description?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SettingGroup {
+  type: string;
+  title: string;
+  description: string;
+  settings: CostCenterSetting[];
 }
 
 export interface CostCenterMetrics {
@@ -252,6 +292,123 @@ export class CostCenterService {
     }
   }
 
+  async getCostCenterById(id: string): Promise<CostCenter> {
+    try {
+      const { data, error } = await supabase
+        .from('cost_centers')
+        .select('*')
+        .eq('id', id)
+        .eq('is_active', true)
+        .single();
+
+      if (error) {
+        console.error('Error fetching cost center by ID:', error);
+        throw new Error('فشل في جلب بيانات مركز التكلفة');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getCostCenterById:', error);
+      throw error;
+    }
+  }
+
+  async getAllocationsByCostCenter(costCenterId: string): Promise<CostCenterAllocation[]> {
+    try {
+      const { data, error } = await supabase
+        .from('cost_center_allocations')
+        .select('*')
+        .eq('cost_center_id', costCenterId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching cost center allocations:', error);
+        throw new Error('فشل في جلب توزيعات مركز التكلفة');
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getAllocationsByCostCenter:', error);
+      throw error;
+    }
+  }
+
+  async getAllAllocations(): Promise<CostCenterAllocation[]> {
+    try {
+      const { data, error } = await supabase
+        .from('cost_center_allocations')
+        .select(`
+          *,
+          cost_centers!inner(cost_center_name)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching all allocations:', error);
+        throw new Error('فشل في جلب جميع التوزيعات');
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getAllAllocations:', error);
+      throw error;
+    }
+  }
+
+  async createAllocation(allocationData: Partial<CostCenterAllocation>): Promise<CostCenterAllocation> {
+    try {
+      if (!allocationData.cost_center_id || !allocationData.reference_type) {
+        throw new Error('مركز التكلفة ونوع المرجع مطلوبان');
+      }
+
+      const insertData = {
+        cost_center_id: allocationData.cost_center_id,
+        reference_type: allocationData.reference_type,
+        reference_id: allocationData.reference_id || '',
+        allocation_percentage: allocationData.allocation_percentage || 0,
+        allocation_amount: allocationData.allocation_amount || 0,
+        allocation_date: allocationData.allocation_date || new Date().toISOString().split('T')[0],
+        notes: allocationData.notes || null,
+        created_by: (await supabase.auth.getUser()).data?.user?.id || null
+      };
+
+      const { data, error } = await supabase
+        .from('cost_center_allocations')
+        .insert([insertData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating allocation:', error);
+        throw new Error('فشل في إنشاء التوزيع');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in createAllocation:', error);
+      throw error;
+    }
+  }
+
+  async deleteAllocation(id: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('cost_center_allocations')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting allocation:', error);
+        throw new Error('فشل في حذف التوزيع');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error in deleteAllocation:', error);
+      throw error;
+    }
+  }
+
   async getCostCenterReport(): Promise<CostCenterReport[]> {
     try {
       const { data, error } = await supabase
@@ -259,6 +416,7 @@ export class CostCenterService {
         .select(`
           id,
           cost_center_name,
+          cost_center_code,
           cost_center_type,
           budget_amount,
           actual_spent
@@ -411,6 +569,26 @@ export class CostCenterService {
       return data;
     } catch (error) {
       console.error('Error in getSetting:', error);
+      throw error;
+    }
+  }
+
+  async getAllSettings(): Promise<CostCenterSetting[]> {
+    try {
+      const { data, error } = await supabase
+        .from('cost_center_settings')
+        .select('*')
+        .eq('is_active', true)
+        .order('setting_type', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching all settings:', error);
+        throw new Error('فشل في جلب جميع الإعدادات');
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getAllSettings:', error);
       throw error;
     }
   }
