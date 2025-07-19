@@ -11,7 +11,8 @@ interface Account {
   id: string;
   account_code: string;
   account_name: string;
-  account_type: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
+  account_type: string;
+  account_category: string;
   current_balance: number;
   level: number;
   parent_account_id?: string;
