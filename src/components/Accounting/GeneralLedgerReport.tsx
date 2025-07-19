@@ -1,137 +1,174 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { BookOpen, Search, Download, Filter, Calendar } from 'lucide-react';
-import { ChartOfAccount } from '@/types/accounting';
-import { accountingService } from '@/services/accountingService';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { BookOpen, Calendar, Search, AlertTriangle, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+interface ChartOfAccount {
+  id: string;
+  account_code: string;
+  account_name: string;
+  account_type: string;
+  current_balance: number;
+}
+
 interface GeneralLedgerEntry {
   id: string;
-  date: string;
+  entry_date: string;
   entry_number: string;
   description: string;
-  reference_type: string;
-  reference_id: string;
   debit_amount: number;
   credit_amount: number;
   running_balance: number;
+  reference_id?: string;
+  reference_type?: string;
 }
 
-interface GeneralLedgerFilters {
-  account_id: string;
-  start_date: string;
-  end_date: string;
-  reference_type: string;
-}
-
-export const GeneralLedgerReport = () => {
+export const GeneralLedgerReport: React.FC = () => {
   const [accounts, setAccounts] = useState<ChartOfAccount[]>([]);
+  const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [ledgerEntries, setLedgerEntries] = useState<GeneralLedgerEntry[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedAccount, setSelectedAccount] = useState<ChartOfAccount | null>(null);
+  const [accountsLoading, setAccountsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState({
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0]
+  });
   const { toast } = useToast();
 
-  const [filters, setFilters] = useState<GeneralLedgerFilters>({
-    account_id: '',
-    start_date: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0], // بداية السنة
-    end_date: new Date().toISOString().split('T')[0], // اليوم
-    reference_type: 'all'
-  });
-
+  // Load accounts on component mount
   useEffect(() => {
     loadAccounts();
   }, []);
 
+  // Load ledger entries when account or date range changes
   useEffect(() => {
-    if (filters.account_id) {
-      loadGeneralLedger();
+    if (selectedAccountId) {
+      loadLedgerEntries();
+    } else {
+      setLedgerEntries([]);
     }
-  }, [filters]);
+  }, [selectedAccountId, dateRange]);
 
   const loadAccounts = async () => {
     try {
-      const data = await accountingService.getChartOfAccounts();
-      const activeAccounts = data.filter(account => account.is_active && account.allow_posting);
-      setAccounts(activeAccounts);
+      setAccountsLoading(true);
+      setError(null);
+      
+      console.log('Loading accounts...');
+      
+      const { data, error: accountsError } = await supabase
+        .from('chart_of_accounts')
+        .select('id, account_code, account_name, account_type, current_balance')
+        .eq('is_active', true)
+        .eq('allow_posting', true)
+        .order('account_code');
+
+      if (accountsError) {
+        console.error('Error loading accounts:', accountsError);
+        throw new Error(`فشل في تحميل الحسابات: ${accountsError.message}`);
+      }
+
+      console.log('Accounts loaded successfully:', data?.length || 0);
+      setAccounts(data || []);
+      
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف في تحميل الحسابات';
+      console.error('Load accounts error:', errorMessage);
+      setError(errorMessage);
       toast({
         title: 'خطأ',
-        description: 'فشل في تحميل الحسابات',
+        description: errorMessage,
         variant: 'destructive',
       });
+    } finally {
+      setAccountsLoading(false);
     }
   };
 
-  const loadGeneralLedger = async () => {
-    if (!filters.account_id) return;
+  const loadLedgerEntries = async () => {
+    if (!selectedAccountId) return;
 
-    setLoading(true);
     try {
-      // العثور على الحساب المحدد
-      const account = accounts.find(acc => acc.id === filters.account_id);
-      setSelectedAccount(account || null);
+      setLoading(true);
+      setError(null);
+      
+      console.log('Loading ledger entries for account:', selectedAccountId);
+      console.log('Date range:', dateRange);
 
-      // جلب قيود اليومية للحساب
-      let query = supabase
-        .from('journal_entry_lines')
+      // Fixed query without problematic ordering
+      const { data, error: ledgerError } = await supabase
+        .from('journal_entry_details')
         .select(`
-          *,
-          journal_entries!inner(
+          id,
+          debit_amount,
+          credit_amount,
+          description,
+          reference_id,
+          reference_type,
+          journal_entries!inner (
+            id,
             entry_number,
             entry_date,
-            description,
-            reference_type,
-            reference_id,
-            status
+            description
           )
         `)
-        .eq('account_id', filters.account_id)
-        .eq('journal_entries.status', 'posted')
-        .gte('journal_entries.entry_date', filters.start_date)
-        .lte('journal_entries.entry_date', filters.end_date)
-        .order('journal_entries.entry_date', { ascending: true });
+        .eq('account_id', selectedAccountId)
+        .gte('journal_entries.entry_date', dateRange.startDate)
+        .lte('journal_entries.entry_date', dateRange.endDate)
+        .order('created_at', { ascending: true });
 
-      if (filters.reference_type !== 'all') {
-        query = query.eq('journal_entries.reference_type', filters.reference_type);
+      if (ledgerError) {
+        console.error('Error loading ledger entries:', ledgerError);
+        throw new Error(`فشل في تحميل بيانات دفتر الأستاذ: ${ledgerError.message}`);
       }
 
-      const { data, error } = await query;
+      console.log('Raw ledger data:', data);
 
-      if (error) throw error;
+      // Process and calculate running balance
+      let runningBalance = 0;
+      const processedEntries: GeneralLedgerEntry[] = (data || []).map((entry: any) => {
+        const debitAmount = entry.debit_amount || 0;
+        const creditAmount = entry.credit_amount || 0;
+        runningBalance += (debitAmount - creditAmount);
 
-      // تحويل البيانات وحساب الرصيد الجاري
-      let runningBalance = account?.opening_balance || 0;
-      const formattedEntries: GeneralLedgerEntry[] = (data || []).map((item: any) => {
-        const netAmount = item.debit_amount - item.credit_amount;
-        runningBalance += netAmount;
-        
         return {
-          id: item.id,
-          date: item.journal_entries.entry_date,
-          entry_number: item.journal_entries.entry_number,
-          description: item.description || item.journal_entries.description,
-          reference_type: item.journal_entries.reference_type || 'general',
-          reference_id: item.journal_entries.reference_id || '',
-          debit_amount: item.debit_amount || 0,
-          credit_amount: item.credit_amount || 0,
-          running_balance: runningBalance
+          id: entry.id,
+          entry_date: entry.journal_entries.entry_date,
+          entry_number: entry.journal_entries.entry_number,
+          description: entry.description || entry.journal_entries.description,
+          debit_amount: debitAmount,
+          credit_amount: creditAmount,
+          running_balance: runningBalance,
+          reference_id: entry.reference_id,
+          reference_type: entry.reference_type
         };
       });
 
-      setLedgerEntries(formattedEntries);
+      console.log('Processed entries:', processedEntries.length);
+      setLedgerEntries(processedEntries);
+      
+      toast({
+        title: 'تم التحميل',
+        description: `تم تحميل ${processedEntries.length} قيد محاسبي`,
+      });
 
     } catch (error) {
-      console.error('Error loading general ledger:', error);
+      const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف في تحميل دفتر الأستاذ';
+      console.error('Load ledger entries error:', errorMessage);
+      setError(errorMessage);
       toast({
         title: 'خطأ',
-        description: 'فشل في تحميل دفتر الأستاذ العام',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -139,388 +176,222 @@ export const GeneralLedgerReport = () => {
     }
   };
 
-  const handleFilterChange = (key: keyof GeneralLedgerFilters, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-  };
-
-  const formatBalance = (amount: number) => {
-    return `د.ك ${amount.toFixed(3)}`;
-  };
-
-  const getReferenceTypeLabel = (type: string) => {
-    const labels = {
-      contract: 'عقد',
-      invoice: 'فاتورة',
-      payment: 'دفعة',
-      expense_voucher: 'سند مصروفات',
-      receipt_voucher: 'سند قبض',
-      general: 'عام',
-      all: 'جميع الأنواع'
-    };
-    return labels[type as keyof typeof labels] || type;
-  };
-
-  const downloadHTML = () => {
-    if (ledgerEntries.length === 0) {
-      toast({
-        title: 'تنبيه',
-        description: 'لا توجد بيانات للتحميل',
-        variant: 'destructive',
-      });
-      return;
+  const handleRefresh = () => {
+    if (selectedAccountId) {
+      loadLedgerEntries();
+    } else {
+      loadAccounts();
     }
-
-    // حساب الإجماليات محلياً
-    const totalDebits = ledgerEntries.reduce((sum, entry) => sum + entry.debit_amount, 0);
-    const totalCredits = ledgerEntries.reduce((sum, entry) => sum + entry.credit_amount, 0);
-    const netMovement = totalDebits - totalCredits;
-
-    const htmlContent = `
-<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دفتر الأستاذ العام - ${selectedAccount?.account_name}</title>
-    <style>
-        body { font-family: Arial, sans-serif; direction: rtl; margin: 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .account-info { background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
-        th { background-color: #f8f9fa; font-weight: bold; }
-        .debit { color: #16a34a; }
-        .credit { color: #dc2626; }
-        .balance-positive { color: #16a34a; font-weight: bold; }
-        .balance-negative { color: #dc2626; font-weight: bold; }
-        .totals { background: #f8f9fa; padding: 15px; border-radius: 5px; }
-        .total-row { display: flex; justify-content: space-between; margin: 5px 0; }
-        .print-date { text-align: left; margin-top: 20px; font-size: 12px; color: #666; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>دفتر الأستاذ العام</h1>
-        <h2>${selectedAccount?.account_name} (${selectedAccount?.account_code})</h2>
-        <p>من ${filters.start_date} إلى ${filters.end_date}</p>
-    </div>
-    
-    <div class="account-info">
-        <div class="total-row">
-            <strong>اسم الحساب:</strong>
-            <span>${selectedAccount?.account_name}</span>
-        </div>
-        <div class="total-row">
-            <strong>رقم الحساب:</strong>
-            <span>${selectedAccount?.account_code}</span>
-        </div>
-        <div class="total-row">
-            <strong>نوع الحساب:</strong>
-            <span>${selectedAccount?.account_type}</span>
-        </div>
-        <div class="total-row">
-            <strong>الرصيد الحالي:</strong>
-            <span class="${selectedAccount?.current_balance >= 0 ? 'balance-positive' : 'balance-negative'}">
-                ${formatBalance(selectedAccount?.current_balance || 0)}
-            </span>
-        </div>
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>التاريخ</th>
-                <th>رقم القيد</th>
-                <th>الوصف</th>
-                <th>المرجع</th>
-                <th>مدين</th>
-                <th>دائن</th>
-                <th>الرصيد الجاري</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${ledgerEntries.map(entry => `
-                <tr>
-                    <td>${new Date(entry.date).toLocaleDateString('ar-KW')}</td>
-                    <td>${entry.entry_number}</td>
-                    <td>${entry.description}</td>
-                    <td>${getReferenceTypeLabel(entry.reference_type)}</td>
-                    <td class="debit">${entry.debit_amount > 0 ? formatBalance(entry.debit_amount) : '-'}</td>
-                    <td class="credit">${entry.credit_amount > 0 ? formatBalance(entry.credit_amount) : '-'}</td>
-                    <td class="${entry.running_balance >= 0 ? 'balance-positive' : 'balance-negative'}">
-                        ${formatBalance(entry.running_balance)}
-                    </td>
-                </tr>
-            `).join('')}
-        </tbody>
-    </table>
-
-    <div class="totals">
-        <h3>الإجماليات</h3>
-        <div class="total-row">
-            <strong>إجمالي المدين:</strong>
-            <span class="debit">${formatBalance(totalDebits)}</span>
-        </div>
-        <div class="total-row">
-            <strong>إجمالي الدائن:</strong>
-            <span class="credit">${formatBalance(totalCredits)}</span>
-        </div>
-        <div class="total-row">
-            <strong>صافي الحركة:</strong>
-            <span class="${netMovement >= 0 ? 'balance-positive' : 'balance-negative'}">
-                ${formatBalance(netMovement)}
-            </span>
-        </div>
-        <div class="total-row">
-            <strong>عدد القيود:</strong>
-            <span>${ledgerEntries.length}</span>
-        </div>
-    </div>
-
-    <div class="print-date">
-        تاريخ الطباعة: ${new Date().toLocaleDateString('ar-KW')} ${new Date().toLocaleTimeString('ar-KW')}
-    </div>
-</body>
-</html>
-    `;
-
-    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `دفتر_الأستاذ_العام_${selectedAccount?.account_name}_${new Date().toISOString().split('T')[0]}.html`;
-    link.click();
-    
-    toast({
-      title: 'تم التحميل',
-      description: 'تم تحميل تقرير دفتر الأستاذ العام بصيغة HTML',
-    });
   };
 
-  const calculateTotals = () => {
-    const totalDebits = ledgerEntries.reduce((sum, entry) => sum + entry.debit_amount, 0);
-    const totalCredits = ledgerEntries.reduce((sum, entry) => sum + entry.credit_amount, 0);
-    const netMovement = totalDebits - totalCredits;
-    
-    return { totalDebits, totalCredits, netMovement };
+  const formatAmount = (amount: number) => {
+    return amount.toFixed(3);
   };
 
-  const totals = calculateTotals();
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ar-KW');
+  };
+
+  const selectedAccount = accounts.find(acc => acc.id === selectedAccountId);
+
+  if (accountsLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-40 w-full" />
+      </div>
+    );
+  }
 
   return (
-    <Card className="card-elegant">
-      <CardHeader>
-        <CardTitle className="text-right flex items-center gap-2 flex-row-reverse">
-          <BookOpen className="w-5 h-5" />
-          دفتر الأستاذ العام
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* فلاتر البحث */}
-        <Card className="bg-muted/50">
+    <div className="space-y-6">
+      {/* Filters Section */}
+      <Card className="card-elegant">
+        <CardHeader>
+          <CardTitle className="rtl-title flex items-center gap-2">
+            <Search className="w-5 h-5" />
+            فلاتر دفتر الأستاذ العام
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div>
+              <Label htmlFor="account">الحساب</Label>
+              <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر الحساب" />
+                </SelectTrigger>
+                <SelectContent>
+                  {accounts.map((account) => (
+                    <SelectItem key={account.id} value={account.id}>
+                      {account.account_code} - {account.account_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="start_date">من تاريخ</Label>
+              <Input
+                id="start_date"
+                type="date"
+                value={dateRange.startDate}
+                onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="end_date">إلى تاريخ</Label>
+              <Input
+                id="end_date"
+                type="date"
+                value={dateRange.endDate}
+                onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleRefresh} 
+                disabled={loading}
+                className="rtl-flex"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                تحديث
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Error Display */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Account Summary */}
+      {selectedAccount && (
+        <Card className="card-elegant">
           <CardHeader>
-            <CardTitle className="text-right text-lg flex items-center gap-2 flex-row-reverse">
-              <Filter className="w-4 h-4" />
-              فلاتر البحث
+            <CardTitle className="rtl-title">
+              معلومات الحساب - {selectedAccount.account_code}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="account_select">الحساب</Label>
-                <Select 
-                  value={filters.account_id} 
-                  onValueChange={(value) => handleFilterChange('account_id', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر الحساب" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {accounts.map((account) => (
-                      <SelectItem key={account.id} value={account.id}>
-                        {account.account_code} - {account.account_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">اسم الحساب</p>
+                <p className="font-semibold">{selectedAccount.account_name}</p>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="start_date">من تاريخ</Label>
-                <Input
-                  id="start_date"
-                  type="date"
-                  value={filters.start_date}
-                  onChange={(e) => handleFilterChange('start_date', e.target.value)}
-                />
+              <div>
+                <p className="text-sm text-muted-foreground">نوع الحساب</p>
+                <p className="font-semibold">{selectedAccount.account_type}</p>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="end_date">إلى تاريخ</Label>
-                <Input
-                  id="end_date"
-                  type="date"
-                  value={filters.end_date}
-                  onChange={(e) => handleFilterChange('end_date', e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="reference_type">نوع المرجع</Label>
-                <Select 
-                  value={filters.reference_type} 
-                  onValueChange={(value) => handleFilterChange('reference_type', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="نوع المرجع" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">جميع الأنواع</SelectItem>
-                    <SelectItem value="contract">عقود</SelectItem>
-                    <SelectItem value="invoice">فواتير</SelectItem>
-                    <SelectItem value="payment">دفعات</SelectItem>
-                    <SelectItem value="expense_voucher">سندات مصروفات</SelectItem>
-                    <SelectItem value="receipt_voucher">سندات قبض</SelectItem>
-                    <SelectItem value="general">عام</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div>
+                <p className="text-sm text-muted-foreground">الرصيد الحالي</p>
+                <p className={`font-semibold text-lg ${selectedAccount.current_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  د.ك {formatAmount(selectedAccount.current_balance)}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
+      )}
 
-        {/* معلومات الحساب المحدد */}
-        {selectedAccount && (
-          <Card className="bg-primary/5">
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <div className="text-lg font-bold text-primary">{selectedAccount.account_code}</div>
-                  <div className="text-sm text-muted-foreground">رقم الحساب</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold">{selectedAccount.account_name}</div>
-                  <div className="text-sm text-muted-foreground">اسم الحساب</div>
-                </div>
-                <div className="text-center">
-                  <div className={`text-lg font-bold ${selectedAccount.current_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatBalance(selectedAccount.current_balance)}
-                  </div>
-                  <div className="text-sm text-muted-foreground">الرصيد الحالي</div>
-                </div>
-                <div className="text-center">
-                  <Badge variant="outline">{selectedAccount.account_type}</Badge>
-                  <div className="text-sm text-muted-foreground mt-1">نوع الحساب</div>
-                </div>
+      {/* Ledger Entries Table */}
+      <Card className="card-elegant">
+        <CardHeader>
+          <CardTitle className="rtl-title flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5" />
+              حركة الحساب
+            </div>
+            {selectedAccount && (
+              <span className="text-sm font-normal text-muted-foreground">
+                {ledgerEntries.length} قيد
+              </span>
+            )}
+          </CardTitle>
+        </CardContent>
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="p-6">
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* أزرار التحكم */}
-        <div className="flex justify-between items-center">
-          <div className="flex gap-2">
-            <Button
-              onClick={downloadHTML}
-              disabled={ledgerEntries.length === 0}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              تحميل
-            </Button>
-          </div>
-          
-          <div className="text-sm text-muted-foreground">
-            إجمالي القيود: {ledgerEntries.length}
-          </div>
-        </div>
-
-        {/* جدول دفتر الأستاذ */}
-        {loading ? (
-          <div className="text-center py-8">جاري التحميل...</div>
-        ) : ledgerEntries.length > 0 ? (
-          <div className="space-y-4">
+            </div>
+          ) : !selectedAccountId ? (
+            <div className="text-center py-12">
+              <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-lg text-muted-foreground">يرجى اختيار حساب لعرض حركته</p>
+            </div>
+          ) : ledgerEntries.length === 0 ? (
+            <div className="text-center py-12">
+              <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-lg text-muted-foreground">لا توجد حركات للحساب في هذة الفترة</p>
+              <p className="text-sm text-muted-foreground mt-2">جرب تغيير نطاق التاريخ</p>
+            </div>
+          ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-right">الرصيد الجاري</TableHead>
-                    <TableHead className="text-right">دائن</TableHead>
-                    <TableHead className="text-right">مدين</TableHead>
-                    <TableHead className="text-right">المرجع</TableHead>
-                    <TableHead className="text-right">الوصف</TableHead>
-                    <TableHead className="text-right">رقم القيد</TableHead>
-                    <TableHead className="text-right">التاريخ</TableHead>
+                  <TableRow className="bg-muted">
+                    <TableHead className="text-center font-bold">الرصيد المتراكم</TableHead>
+                    <TableHead className="text-center font-bold">دائن</TableHead>
+                    <TableHead className="text-center font-bold">مدين</TableHead>
+                    <TableHead className="text-center font-bold">البيان</TableHead>
+                    <TableHead className="text-center font-bold">رقم القيد</TableHead>
+                    <TableHead className="text-center font-bold">التاريخ</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {ledgerEntries.map((entry) => (
-                    <TableRow key={entry.id}>
-                      <TableCell className={`text-right font-medium ${entry.running_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatBalance(entry.running_balance)}
+                    <TableRow key={entry.id} className="hover:bg-muted/50">
+                      <TableCell className="text-center font-medium">
+                        <span className={entry.running_balance >= 0 ? 'text-green-600' : 'text-red-600'}>
+                          د.ك {formatAmount(Math.abs(entry.running_balance))}
+                        </span>
                       </TableCell>
-                      <TableCell className="text-right text-red-600">
-                        {entry.credit_amount > 0 ? formatBalance(entry.credit_amount) : '-'}
+                      <TableCell className="text-center">
+                        {entry.credit_amount > 0 && (
+                          <span className="text-blue-600">د.ك {formatAmount(entry.credit_amount)}</span>
+                        )}
                       </TableCell>
-                      <TableCell className="text-right text-green-600">
-                        {entry.debit_amount > 0 ? formatBalance(entry.debit_amount) : '-'}
+                      <TableCell className="text-center">
+                        {entry.debit_amount > 0 && (
+                          <span className="text-green-600">د.ك {formatAmount(entry.debit_amount)}</span>
+                        )}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant="outline" className="text-xs">
-                          {getReferenceTypeLabel(entry.reference_type)}
-                        </Badge>
+                      <TableCell className="text-right max-w-xs">
+                        <div className="truncate" title={entry.description}>
+                          {entry.description}
+                        </div>
+                        {entry.reference_type && (
+                          <div className="text-xs text-muted-foreground">
+                            {entry.reference_type}
+                          </div>
+                        )}
                       </TableCell>
-                      <TableCell className="text-right max-w-xs truncate" title={entry.description}>
-                        {entry.description}
+                      <TableCell className="text-center font-mono">
+                        {entry.entry_number}
                       </TableCell>
-                      <TableCell className="text-right font-medium">{entry.entry_number}</TableCell>
-                      <TableCell className="text-right">
-                        {new Date(entry.date).toLocaleDateString('ar-KW')}
+                      <TableCell className="text-center">
+                        {formatDate(entry.entry_date)}
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </div>
-
-            {/* إجماليات */}
-            <Card className="bg-muted/50">
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
-                  <div>
-                    <div className="text-lg font-bold text-green-600">{formatBalance(totals.totalDebits)}</div>
-                    <div className="text-sm text-muted-foreground">إجمالي المدين</div>
-                  </div>
-                  <div>
-                    <div className="text-lg font-bold text-red-600">{formatBalance(totals.totalCredits)}</div>
-                    <div className="text-sm text-muted-foreground">إجمالي الدائن</div>
-                  </div>
-                  <div>
-                    <div className={`text-lg font-bold ${totals.netMovement >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatBalance(totals.netMovement)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">صافي الحركة</div>
-                  </div>
-                  <div>
-                    <div className={`text-lg font-bold ${selectedAccount?.current_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatBalance(selectedAccount?.current_balance || 0)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">الرصيد النهائي</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : filters.account_id ? (
-          <div className="text-center py-8 text-muted-foreground">
-            لا توجد قيود للحساب المحدد في الفترة المختارة
-          </div>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            يرجى اختيار حساب لعرض دفتر الأستاذ العام
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
