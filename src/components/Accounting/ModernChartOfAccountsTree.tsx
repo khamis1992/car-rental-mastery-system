@@ -171,63 +171,7 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
           className={`flex items-center gap-3 p-4 rounded-lg border transition-all duration-200 hover:shadow-md hover:border-primary/30 ${config.borderColor} ${config.bgColor} mb-2`}
           style={{ marginRight: `${depth * 24}px` }}
         >
-          {/* Expand/Collapse Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0"
-            onClick={() => hasChildren && toggleNode(account.id)}
-            disabled={!hasChildren}
-          >
-            {hasChildren ? (
-              isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
-            ) : (
-              <div className="h-4 w-4" />
-            )}
-          </Button>
-
-          {/* Account Icon */}
-          <div className="p-2 rounded-lg bg-background border border-border">
-            <IconComponent className={`h-5 w-5 ${config.color}`} />
-          </div>
-
-          {/* Balance - moved to left */}
-          <div className="text-right min-w-[120px]">
-            <p className="text-sm font-semibold text-foreground">
-              {formatCurrencyKWD(account.current_balance)}
-            </p>
-            {account.allow_posting && (
-              <Badge variant="secondary" className="text-xs mt-1 bg-primary/10 text-primary border-primary/20">
-                قابل للترحيل
-              </Badge>
-            )}
-          </div>
-
-          {/* Account Info - moved to right */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-1 justify-end">
-              <Badge variant="outline" className="text-xs font-normal bg-background">
-                {config.label}
-              </Badge>
-              {!account.is_active && (
-                <Badge variant="destructive" className="text-xs">
-                  غير نشط
-                </Badge>
-              )}
-              <span className="font-semibold text-foreground text-sm">
-                {account.account_code}
-              </span>
-            </div>
-            <p 
-              className="text-sm text-muted-foreground truncate cursor-pointer hover:text-primary transition-colors text-right"
-              onClick={() => onViewLedger?.(account)}
-              title="انقر لعرض دفتر الأستاذ"
-            >
-              {account.account_name}
-            </p>
-          </div>
-
-          {/* Actions Menu */}
+          {/* Actions Menu - moved to far left */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -251,6 +195,65 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Expand/Collapse Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
+            onClick={() => hasChildren && toggleNode(account.id)}
+            disabled={!hasChildren}
+          >
+            {hasChildren ? (
+              isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
+            ) : (
+              <div className="h-4 w-4" />
+            )}
+          </Button>
+
+          {/* Account Icon */}
+          <div className="p-2 rounded-lg bg-background border border-border">
+            <IconComponent className={`h-5 w-5 ${config.color}`} />
+          </div>
+
+          {/* Balance */}
+          <div className="text-right min-w-[120px]">
+            <p className="text-sm font-semibold text-foreground">
+              {formatCurrencyKWD(account.current_balance)}
+            </p>
+            {account.allow_posting && (
+              <Badge variant="secondary" className="text-xs mt-1 bg-primary/10 text-primary border-primary/20">
+                قابل للترحيل
+              </Badge>
+            )}
+          </div>
+
+          {/* Account Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-1 justify-end">
+              <Badge variant="outline" className="text-xs font-normal bg-background">
+                {config.label}
+              </Badge>
+              {!account.is_active && (
+                <Badge variant="destructive" className="text-xs">
+                  غير نشط
+                </Badge>
+              )}
+              <span className="font-semibold text-foreground text-sm">
+                {account.account_code}
+              </span>
+            </div>
+            <div className="flex items-center justify-end gap-3">
+              <p 
+                className="text-sm text-muted-foreground truncate cursor-pointer hover:text-primary transition-colors text-right"
+                onClick={() => onViewLedger?.(account)}
+                title="انقر لعرض دفتر الأستاذ"
+              >
+                {account.account_name}
+              </p>
+            </div>
+          </div>
+
         </div>
 
         {/* Children */}
