@@ -51,37 +51,37 @@ const accountTypeConfig = {
   asset: {
     label: 'الأصول',
     icon: Building,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200'
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted/30',
+    borderColor: 'border-muted-foreground/20'
   },
   liability: {
     label: 'الخصوم',
     icon: CreditCard,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50',
-    borderColor: 'border-red-200'
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted/30',
+    borderColor: 'border-muted-foreground/20'
   },
   equity: {
     label: 'حقوق الملكية',
     icon: BarChart3,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200'
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted/30',
+    borderColor: 'border-muted-foreground/20'
   },
   revenue: {
     label: 'الإيرادات',
     icon: TrendingUp,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    borderColor: 'border-purple-200'
+    color: 'text-primary',
+    bgColor: 'bg-primary/5',
+    borderColor: 'border-primary/20'
   },
   expense: {
     label: 'المصروفات',
     icon: DollarSign,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-    borderColor: 'border-orange-200'
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted/30',
+    borderColor: 'border-muted-foreground/20'
   }
 };
 
@@ -168,7 +168,7 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
     return (
       <div className="select-none">
         <div 
-          className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 hover:shadow-sm ${config.borderColor} ${config.bgColor} mb-2`}
+          className={`flex items-center gap-3 p-4 rounded-lg border transition-all duration-200 hover:shadow-md hover:border-primary/30 ${config.borderColor} ${config.bgColor} mb-2`}
           style={{ marginRight: `${depth * 24}px` }}
         >
           {/* Expand/Collapse Button */}
@@ -187,21 +187,21 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
           </Button>
 
           {/* Account Icon */}
-          <div className={`p-1.5 rounded ${config.bgColor}`}>
-            <IconComponent className={`h-4 w-4 ${config.color}`} />
+          <div className="p-2 rounded-lg bg-background border border-border">
+            <IconComponent className={`h-5 w-5 ${config.color}`} />
           </div>
 
           {/* Account Info */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-medium text-foreground">
+            <div className="flex items-center gap-3 mb-1">
+              <span className="font-semibold text-foreground text-sm">
                 {account.account_code}
               </span>
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs font-normal bg-background">
                 {config.label}
               </Badge>
               {!account.is_active && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="destructive" className="text-xs">
                   غير نشط
                 </Badge>
               )}
@@ -212,12 +212,12 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
           </div>
 
           {/* Balance */}
-          <div className="text-left">
-            <p className="text-sm font-medium">
+          <div className="text-left min-w-[120px]">
+            <p className="text-sm font-semibold text-foreground">
               {formatCurrencyKWD(account.current_balance)}
             </p>
             {account.allow_posting && (
-              <Badge variant="outline" className="text-xs mt-1">
+              <Badge variant="secondary" className="text-xs mt-1 bg-primary/10 text-primary border-primary/20">
                 قابل للترحيل
               </Badge>
             )}
