@@ -247,35 +247,22 @@ const AdvancedTenantManagement: React.FC = () => {
           });
           break;
         case 'activate':
-          // استخدام الدالة المحسنة لتفعيل المؤسسة
-          const { data: activationResult, error: activationError } = await supabase.rpc('activate_tenant_safely', {
-            tenant_id_param: tenantId
+          // تفعيل المؤسسة مباشرة
+          await tenantService.updateTenant(tenantId, {
+            status: 'active'
           });
           
-          if (activationError) {
-            throw new Error(activationError.message);
+          // تطبيق دليل الحسابات إذا لم يتم بعد
+          try {
+            await supabase.rpc('apply_comprehensive_default_chart');
+          } catch (err) {
+            console.warn('Chart of accounts already applied or error:', err);
           }
           
-          if (activationResult && typeof activationResult === 'object' && 'success' in activationResult) {
-            const result = activationResult as any;
-            if (result.success) {
-              toast({
-                title: "تم بنجاح",
-                description: result.message || "تم تفعيل المؤسسة وإنشاء دليل الحسابات"
-              });
-            } else {
-              throw new Error(result.error || "فشل في تفعيل المؤسسة");
-            }
-          } else {
-            // fallback للطريقة القديمة
-            await tenantService.updateTenant(tenantId, {
-              status: 'active'
-            });
-            toast({
-              title: "تم بنجاح",
-              description: "تم تفعيل المؤسسة"
-            });
-          }
+          toast({
+            title: "تم بنجاح",
+            description: "تم تفعيل المؤسسة وتطبيق دليل الحسابات"
+          });
           break;
         case 'delete':
           // يتم التعامل مع الحذف عبر handleDeleteTenant

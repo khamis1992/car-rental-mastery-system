@@ -67,10 +67,8 @@ export const TestChartOfAccountsIntegration = () => {
     setTestResult(null);
 
     try {
-      // استدعاء الدالة الموحدة لإضافة جميع الحسابات الناقصة (بدون المساس بالحسابات الحالية)
-      const { data, error } = await supabase.rpc('add_all_missing_accounts_unified', {
-        tenant_id_param: await getCurrentTenantId()
-      });
+      // استدعاء الدالة الموجودة لإضافة الحسابات
+      const { data, error } = await supabase.rpc('apply_comprehensive_default_chart');
 
       if (error) throw error;
 

@@ -324,7 +324,7 @@ export class CustomerAccountingService {
   }) {
     try {
       const customers = await this.getCustomersWithBalances({
-        customerType: filters?.customerType,
+        customerType: filters?.customerType as 'individual' | 'company' | undefined,
         balanceStatus: filters?.includeZeroBalance ? 'all' : 'with_balance'
       });
 

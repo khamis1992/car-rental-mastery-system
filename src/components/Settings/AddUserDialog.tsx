@@ -47,36 +47,36 @@ const AddUserDialog: React.FC<AddUserDialogProps> = ({ open, onOpenChange, onUse
     try {
       console.log('Creating user with email:', formData.email);
       
-      // 1. التحقق من صحة البيانات قبل الإنشاء
-      const { data: validationResult } = await supabase.rpc('validate_employee_creation', {
-        tenant_id_param: currentTenant.id,
-        email_param: formData.email,
-        phone_param: formData.phone || null
-      });
+      // 1. التحقق من وجود المستخدم بنفس البريد الإلكتروني
+      const { data: existingUser } = await supabase
+        .from('employees')
+        .select('email')
+        .eq('email', formData.email)
+        .eq('tenant_id', currentTenant.id)
+        .single();
 
-      if (validationResult && typeof validationResult === 'object' && 'valid' in validationResult && !(validationResult as any).valid) {
+      if (existingUser) {
         toast({
-          title: "خطأ في التحقق من البيانات",
-          description: (validationResult as any).error || "البيانات المدخلة غير صحيحة",
+          title: "خطأ في البيانات",
+          description: "يوجد موظف بنفس البريد الإلكتروني",
           variant: "destructive",
         });
         return;
       }
 
-      // 2. توليد رقم الموظف باستخدام الدالة المحسنة
-      const { data: employeeNumber, error: numberError } = await supabase.rpc('generate_employee_number', {
-        tenant_id_param: currentTenant.id
-      });
+      // 2. توليد رقم الموظف
+      const { data: employees } = await supabase
+        .from('employees')
+        .select('employee_number')
+        .eq('tenant_id', currentTenant.id)
+        .order('employee_number', { ascending: false })
+        .limit(1);
 
-      if (numberError || !employeeNumber) {
-        console.error('Error generating employee number:', numberError);
-        toast({
-          title: "خطأ في توليد رقم الموظف",
-          description: numberError?.message || "فشل في توليد رقم موظف فريد",
-          variant: "destructive",
-        });
-        return;
-      }
+      const lastNumber = employees && employees.length > 0 
+        ? parseInt(employees[0].employee_number.replace(/\D/g, '')) || 0
+        : 0;
+      
+      const employeeNumber = `EMP${(lastNumber + 1).toString().padStart(4, '0')}`;
 
       console.log('Generated employee number:', employeeNumber);
       
