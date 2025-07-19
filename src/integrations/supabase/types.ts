@@ -59,13 +59,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "account_audit_log_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "chart_of_accounts"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "account_audit_log_modification_request_id_fkey"
             columns: ["modification_request_id"]
             isOneToOne: false
