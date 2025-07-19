@@ -67,7 +67,7 @@ export class CostCenterSettingsService {
     try {
       const { error } = await supabase.rpc('update_cost_center_setting', {
         setting_key_param: settingKey,
-        new_value: JSON.stringify(value)
+        new_value: value
       });
 
       if (error) {
@@ -78,6 +78,23 @@ export class CostCenterSettingsService {
       return true;
     } catch (error) {
       console.error('Error in updateSetting:', error);
+      throw error;
+    }
+  }
+
+  async getMetrics(): Promise<any> {
+    try {
+      const { data, error } = await supabase
+        .rpc('get_cost_center_metrics' as any);
+
+      if (error) {
+        console.error('Error getting cost center metrics:', error);
+        throw new Error('فشل في جلب مؤشرات الأداء');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getMetrics:', error);
       throw error;
     }
   }
