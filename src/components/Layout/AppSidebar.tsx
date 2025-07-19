@@ -82,14 +82,19 @@ const financialItems = [
     icon: Calculator 
   },
   { 
+    title: "مراكز التكلفة", 
+    url: "/cost-centers", 
+    icon: Building2 
+  },
+  { 
+    title: "الأصول الثابتة", 
+    url: "/fixed-assets", 
+    icon: Building 
+  },
+  { 
     title: "القيود المحاسبية", 
     url: "/journal-entries", 
     icon: FileText 
-  },
-  { 
-    title: "التقارير المالية", 
-    url: "/financial-reports", 
-    icon: BarChart3 
   },
   { 
     title: "إدارة الميزانية", 
@@ -102,19 +107,14 @@ const financialItems = [
     icon: Zap 
   },
   { 
-    title: "التحقق والمراجعة", 
+    title: "التدقيق والمراجعة", 
     url: "/accounting-validation", 
     icon: Shield 
   },
   { 
-    title: "مراكز التكلفة", 
-    url: "/cost-centers", 
-    icon: Building2 
-  },
-  { 
-    title: "الأصول الثابتة", 
-    url: "/fixed-assets", 
-    icon: Building 
+    title: "التقارير المالية", 
+    url: "/financial-reports", 
+    icon: BarChart3 
   },
 ];
 
