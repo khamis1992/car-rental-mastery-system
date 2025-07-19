@@ -206,7 +206,11 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
                 </Badge>
               )}
             </div>
-            <p className="text-sm text-muted-foreground truncate">
+            <p 
+              className="text-sm text-muted-foreground truncate cursor-pointer hover:text-primary transition-colors"
+              onClick={() => onViewLedger?.(account)}
+              title="انقر لعرض دفتر الأستاذ"
+            >
               {account.account_name}
             </p>
           </div>

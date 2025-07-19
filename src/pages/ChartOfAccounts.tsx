@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
 import { ChartOfAccountsSetup } from '@/components/Accounting/ChartOfAccountsSetup';
 import { GeneralLedgerReport } from '@/components/Accounting/GeneralLedgerReport';
@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const ChartOfAccounts = () => {
+  const [activeTab, setActiveTab] = useState('tree');
   // Mock data with comprehensive account structure
   const mockAccounts = [
     {
@@ -530,7 +531,8 @@ const ChartOfAccounts = () => {
 
   const handleViewLedger = (account: any) => {
     console.log('View ledger', account);
-    // Navigate to ledger view
+    setActiveTab('ledger');
+    // يمكن إضافة logic لتمرير معرف الحساب لمكون دفتر الأستاذ
   };
 
   return (
@@ -629,7 +631,7 @@ const ChartOfAccounts = () => {
         </Card>
       </div>
 
-      <Tabs defaultValue="tree" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="tree">عرض شجري حديث</TabsTrigger>
           <TabsTrigger value="dashboard">لوحة المعلومات</TabsTrigger>
