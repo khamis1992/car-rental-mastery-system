@@ -294,7 +294,8 @@ const CostCenterTreeView = ({ costCenters, onRefresh, isLoading }: CostCenterTre
         collectIds(node.children);
       });
     };
-    collectIds(treeData);
+    // جمع المعرفات من البيانات المفلترة الحالية
+    collectIds(filteredTreeData.length > 0 ? filteredTreeData : treeData);
     setExpandedNodes(allIds);
   };
 
