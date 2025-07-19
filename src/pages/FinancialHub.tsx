@@ -1,16 +1,16 @@
 
 import React from 'react';
 import { Layout } from '@/components/Layout/Layout';
-import { AdvancedReports } from '@/components/accounting/AdvancedReports';
+import { FinancialNavigationHub } from '@/components/Financial/FinancialNavigationHub';
 
-const FinancialReports = () => {
+const FinancialHub = () => {
   return (
     <Layout>
       <div className="p-6 max-w-7xl mx-auto">
-        <AdvancedReports />
+        <FinancialNavigationHub />
       </div>
     </Layout>
   );
 };
 
-export default FinancialReports;
+export default FinancialHub;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Layout } from '@/components/Layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -341,79 +342,79 @@ const JournalEntries = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const refreshData = () => {
-    // Trigger refresh for current tab
     window.location.reload();
   };
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Enhanced Navigation */}
-      <FinancialBreadcrumb />
-      
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground rtl-title">إدارة القيود المحاسبية</h1>
-          <p className="text-muted-foreground">
-            مركز شامل لإدارة جميع القيود المحاسبية اليدوية والتلقائية
-          </p>
-        </div>
+    <Layout>
+      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+        <FinancialBreadcrumb />
         
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={refreshData} className="rtl-flex">
-            <RefreshCw className="w-4 h-4" />
-            تحديث
-          </Button>
-          <Button variant="outline" className="rtl-flex">
-            <Filter className="w-4 h-4" />
-            فلترة
-          </Button>
-          <Button variant="outline" className="rtl-flex">
-            <Calendar className="w-4 h-4" />
-            تقارير
-          </Button>
-        </div>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="reports">التقارير</TabsTrigger>
-          <TabsTrigger value="sources">المصادر المرتبطة</TabsTrigger>
-          <TabsTrigger value="cost-centers">مراكز التكلفة</TabsTrigger>
-          <TabsTrigger value="automated">القيود التلقائية</TabsTrigger>
-          <TabsTrigger value="manual">القيود اليدوية</TabsTrigger>
-          <TabsTrigger value="dashboard">لوحة المعلومات</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="dashboard" className="space-y-6">
-          <JournalEntriesDashboard />
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <CostCenterBudgetAlerts showOnlyUnread={true} maxAlerts={5} />
-            <SourceLinks />
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground rtl-title">إدارة القيود المحاسبية</h1>
+            <p className="text-muted-foreground">
+              مركز شامل لإدارة جميع القيود المحاسبية اليدوية والتلقائية
+            </p>
           </div>
-        </TabsContent>
+          
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={refreshData} className="rtl-flex">
+              <RefreshCw className="w-4 h-4" />
+              تحديث
+            </Button>
+            <Button variant="outline" className="rtl-flex">
+              <Filter className="w-4 h-4" />
+              فلترة
+            </Button>
+            <Button variant="outline" className="rtl-flex">
+              <Calendar className="w-4 h-4" />
+              تقارير
+            </Button>
+          </div>
+        </div>
 
-        <TabsContent value="manual" className="space-y-4">
-          <EnhancedJournalEntriesTab />
-        </TabsContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="reports">التقارير</TabsTrigger>
+            <TabsTrigger value="sources">المصادر المرتبطة</TabsTrigger>
+            <TabsTrigger value="cost-centers">مراكز التكلفة</TabsTrigger>
+            <TabsTrigger value="automated">القيود التلقائية</TabsTrigger>
+            <TabsTrigger value="manual">القيود اليدوية</TabsTrigger>
+            <TabsTrigger value="dashboard">لوحة المعلومات</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="automated" className="space-y-4">
-          <AutomatedJournalEntries />
-        </TabsContent>
+          <TabsContent value="dashboard" className="space-y-6">
+            <JournalEntriesDashboard />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <CostCenterBudgetAlerts showOnlyUnread={true} maxAlerts={5} />
+              <SourceLinks />
+            </div>
+          </TabsContent>
 
-        <TabsContent value="cost-centers" className="space-y-4">
-          <CostCenterManagement />
-        </TabsContent>
+          <TabsContent value="manual" className="space-y-4">
+            <EnhancedJournalEntriesTab />
+          </TabsContent>
 
-        <TabsContent value="sources" className="space-y-4">
-          <SourceLinks />
-        </TabsContent>
+          <TabsContent value="automated" className="space-y-4">
+            <AutomatedJournalEntries />
+          </TabsContent>
 
-        <TabsContent value="reports" className="space-y-4">
-          <JournalReports />
-        </TabsContent>
-      </Tabs>
-    </div>
+          <TabsContent value="cost-centers" className="space-y-4">
+            <CostCenterManagement />
+          </TabsContent>
+
+          <TabsContent value="sources" className="space-y-4">
+            <SourceLinks />
+          </TabsContent>
+
+          <TabsContent value="reports" className="space-y-4">
+            <JournalReports />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </Layout>
   );
 };
 
