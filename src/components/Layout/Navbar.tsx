@@ -61,9 +61,43 @@ const Navbar = () => {
 
   return (
     <header className="bg-card border-b border-border shadow-elegant px-6 py-3">
-      <div className="rtl-header">
-        {/* منطقة المستخدم والإشعارات */}
+      <div className="flex items-center justify-between w-full">
+        
+        {/* الجانب الأيمن - التاريخ والعناوين الرئيسية */}
         <div className="flex items-center gap-4">
+          <p className="text-muted-foreground text-sm rtl-flex">
+            <span>{currentDate}</span>
+            <Calendar className="w-4 h-4" />
+          </p>
+        </div>
+
+        {/* الوسط - شريط البحث وساعة الحضور ومحدد المؤسسة */}
+        <div className="flex items-center gap-4 flex-1 max-w-2xl mx-8">
+          <div className="flex-1 max-w-md">
+            <Button
+              variant="outline"
+              className="w-full justify-start text-muted-foreground h-10 px-3"
+              onClick={() => setIsOpen(true)}
+            >
+              <Search className="w-4 h-4 ml-2" />
+              البحث في النظام...
+              <div className="ml-auto text-xs text-muted-foreground">
+                Ctrl+K
+              </div>
+            </Button>
+          </div>
+          
+          {/* محدد المؤسسة */}
+          <TenantSwitcher />
+          
+          {/* ساعة الحضور */}
+          <AttendanceClock />
+        </div>
+
+        {/* الجانب الأيسر - أوامر التحكم والإشعارات والمستخدم */}
+        <div className="flex items-center gap-4">
+          <SidebarTrigger />
+          
           {/* أيقونة مهام اليوم */}
           <DailyTasksButton />
           
@@ -133,38 +167,6 @@ const Navbar = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-
-        {/* شريط البحث وساعة الحضور ومحدد المؤسسة */}
-        <div className="flex items-center gap-4 flex-1 max-w-2xl mx-8">
-          <div className="flex-1 max-w-md">
-            <Button
-              variant="outline"
-              className="w-full justify-start text-muted-foreground h-10 px-3"
-              onClick={() => setIsOpen(true)}
-            >
-              <Search className="w-4 h-4 ml-2" />
-              البحث في النظام...
-              <div className="ml-auto text-xs text-muted-foreground">
-                Ctrl+K
-              </div>
-            </Button>
-          </div>
-          
-          {/* محدد المؤسسة */}
-          <TenantSwitcher />
-          
-          {/* ساعة الحضور */}
-          <AttendanceClock />
-        </div>
-
-        {/* زر الشريط الجانبي والتاريخ */}
-        <div className="rtl-flex gap-4">
-          <p className="text-muted-foreground text-sm rtl-flex">
-            <span>{currentDate}</span>
-            <Calendar className="w-4 h-4" />
-          </p>
-          <SidebarTrigger />
         </div>
 
       </div>
