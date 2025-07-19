@@ -115,8 +115,59 @@ export function useSecureTenantData() {
     });
   };
 
+  /**
+   * جلب المواقع المكتبية الخاصة بالمؤسسة الحالية فقط
+   */
+  const useSecureOfficeLocations = () => {
+    return useQuery({
+      queryKey: ['secure-office-locations', currentTenant?.id],
+      queryFn: async () => {
+        if (!currentTenant?.id) {
+          console.warn('⚠️ useSecureOfficeLocations: لا توجد مؤسسة حالية - تم إرجاع قائمة فارغة');
+          return [];
+        }
+
+        console.log('🔍 useSecureOfficeLocations: جلب مواقع مكتبية للمؤسسة:', currentTenant.name, 'ID:', currentTenant.id);
+
+        try {
+          const { data, error } = await supabase
+            .from('office_locations')
+            .select('id, name, address, is_active, tenant_id')
+            .eq('tenant_id', currentTenant.id)
+            .eq('is_active', true)
+            .order('name');
+
+          if (error) {
+            console.error('❌ useSecureOfficeLocations: خطأ في جلب المواقع المكتبية:', error);
+            throw new Error(`فشل في جلب المواقع المكتبية: ${error.message}`);
+          }
+
+          // التحقق من سلامة البيانات
+          const validLocations = (data || []).filter(location => {
+            if (location.tenant_id !== currentTenant.id) {
+              console.warn('⚠️ useSecureOfficeLocations: تم العثور على موقع من مؤسسة أخرى:', location.name);
+              return false;
+            }
+            return true;
+          });
+
+          console.log(`✅ useSecureOfficeLocations: تم جلب ${validLocations.length} موقع مكتبي من المؤسسة الحالية`);
+          return validLocations;
+        } catch (error) {
+          console.error('❌ useSecureOfficeLocations: خطأ عام:', error);
+          throw error;
+        }
+      },
+      enabled: !!currentTenant?.id,
+      staleTime: 5 * 60 * 1000,
+      retry: 2,
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    });
+  };
+
   return {
     useSecureEmployees,
     useSecureDepartments,
+    useSecureOfficeLocations,
   };
 }
