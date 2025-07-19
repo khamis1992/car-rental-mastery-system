@@ -251,8 +251,8 @@ const Customers = () => {
             
             <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
               <DialogTrigger asChild>
-                <Button className="btn-primary flex items-center gap-2">
-                  <UserPlus className="w-4 h-4" />
+                <Button className="rtl-flex">
+                  <UserPlus className="w-5 h-5" />
                   إضافة عميل جديد
                 </Button>
               </DialogTrigger>

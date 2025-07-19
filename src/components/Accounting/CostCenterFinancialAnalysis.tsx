@@ -24,13 +24,63 @@ export const CostCenterFinancialAnalysis: React.FC<CostCenterFinancialAnalysisPr
   const loadCostCenterData = async () => {
     try {
       setLoading(true);
-      const [costCenterData, allocationData] = await Promise.all([
-        costCenterService.getCostCenterById(costCenterId),
-        costCenterService.getAllocationsByCostCenter(costCenterId)
-      ]);
       
-      setCostCenter(costCenterData);
-      setAllocations(allocationData);
+      // Mock cost center data
+      const mockCostCenter: CostCenter = {
+        id: costCenterId,
+        cost_center_code: 'CC-001',
+        cost_center_name: 'قسم العمليات',
+        cost_center_type: 'operational',
+        description: 'مركز تكلفة العمليات الرئيسية',
+        budget_amount: 45000,
+        actual_spent: 38500,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        manager_id: 'manager-1',
+        department_id: 'dept-1',
+        level: 1,
+        hierarchy_path: '001'
+      };
+
+      // Mock allocation data
+      const mockAllocations = [
+        {
+          id: 'alloc-1',
+          reference_type: 'contract',
+          allocation_amount: 15000,
+          allocation_percentage: 35,
+          allocation_date: '2024-01-15',
+          notes: 'تخصيص عقد تأجير سيارات'
+        },
+        {
+          id: 'alloc-2',
+          reference_type: 'employee',
+          allocation_amount: 12500,
+          allocation_percentage: 30,
+          allocation_date: '2024-01-20',
+          notes: 'رواتب الموظفين'
+        },
+        {
+          id: 'alloc-3',
+          reference_type: 'vehicle',
+          allocation_amount: 8000,
+          allocation_percentage: 20,
+          allocation_date: '2024-01-25',
+          notes: 'صيانة المركبات'
+        },
+        {
+          id: 'alloc-4',
+          reference_type: 'expense',
+          allocation_amount: 3000,
+          allocation_percentage: 15,
+          allocation_date: '2024-01-30',
+          notes: 'مصروفات متنوعة'
+        }
+      ];
+      
+      setCostCenter(mockCostCenter);
+      setAllocations(mockAllocations);
     } catch (error) {
       console.error('Error loading cost center data:', error);
     } finally {

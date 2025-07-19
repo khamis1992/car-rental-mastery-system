@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, Home } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
@@ -58,27 +58,24 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
-        {/* Return to Home Link */}
-        <div className="flex justify-end mb-6">
-          <button 
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 text-sm"
-          >
-            <span>العودة للرئيسية</span>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-          </button>
-        </div>
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg border border-border p-8 relative">
+        {/* Back to Home Button */}
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate('/')}
+          className="absolute top-4 right-4 flex items-center gap-2 text-muted-foreground hover:text-foreground"
+        >
+          <Home className="w-4 h-4" />
+          <span className="text-sm">العودة للرئيسية</span>
+        </Button>
 
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-[#1B73E8] mb-3">
+        <div className="text-center mb-8 mt-8">
+          <h1 className="text-3xl font-bold text-[#0066CC] mb-2">
             Fleetify
           </h1>
-          <p className="text-gray-600 text-base">
+          <p className="text-muted-foreground text-sm">
             تسجيل الدخول إلى حسابك
           </p>
         </div>
@@ -92,8 +89,8 @@ const Auth = () => {
           )}
 
           {/* Email Field */}
-          <div className="space-y-3">
-            <Label htmlFor="email" className="text-right block text-gray-800 font-medium text-sm">
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-right block text-foreground font-medium">
               البريد الإلكتروني
             </Label>
             <Input
@@ -102,14 +99,14 @@ const Auth = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full h-12 text-right bg-gray-50 border border-gray-300 rounded-lg px-4 focus:bg-white focus:border-[#1B73E8] focus:ring-1 focus:ring-[#1B73E8] transition-all"
+              className="w-full h-12 text-right bg-gray-50 border border-input rounded-lg px-4 focus:bg-white focus:border-primary transition-colors"
               placeholder="admin@example.com"
             />
           </div>
 
           {/* Password Field */}
-          <div className="space-y-3">
-            <Label htmlFor="password" className="text-right block text-gray-800 font-medium text-sm">
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-right block text-foreground font-medium">
               كلمة المرور
             </Label>
             <div className="relative">
@@ -119,7 +116,7 @@ const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full h-12 text-right bg-gray-50 border border-gray-300 rounded-lg px-4 pr-12 focus:bg-white focus:border-[#1B73E8] focus:ring-1 focus:ring-[#1B73E8] transition-all"
+                className="w-full h-12 text-right bg-gray-50 border border-input rounded-lg px-4 pr-12 focus:bg-white focus:border-primary transition-colors"
                 placeholder="أدخل كلمة المرور"
               />
               <Button
@@ -130,9 +127,9 @@ const Auth = () => {
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
-                  <EyeOff className="w-5 h-5 text-gray-500" />
+                  <EyeOff className="w-4 h-4 text-muted-foreground" />
                 ) : (
-                  <Eye className="w-5 h-5 text-gray-500" />
+                  <Eye className="w-4 h-4 text-muted-foreground" />
                 )}
               </Button>
             </div>
@@ -141,7 +138,7 @@ const Auth = () => {
           {/* Login Button */}
           <Button
             type="submit"
-            className="w-full h-12 bg-[#1B73E8] hover:bg-[#1557B0] text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-all mt-8 shadow-lg"
+            className="w-full h-12 bg-[#0066CC] hover:bg-[#0052A3] text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors mt-8"
             disabled={loading}
           >
             <ArrowLeft className="w-4 h-4" />
@@ -149,11 +146,21 @@ const Auth = () => {
           </Button>
         </form>
 
-        {/* Contact Link */}
+        {/* Help Link */}
         <div className="text-center mt-6">
-          <button className="text-[#1B73E8] hover:text-[#1557B0] text-sm font-medium">
-            تواصل معنا <span className="text-gray-500">تحتاج مساعدة؟</span>
-          </button>
+          <p className="text-sm text-muted-foreground">
+            تحتاج مساعدة؟{' '}
+            <button 
+              type="button"
+              className="text-[#0066CC] hover:underline font-medium"
+              onClick={() => {
+                // يمكن إضافة صفحة المساعدة أو نافذة محادثة هنا
+                alert('يمكنك التواصل معنا عبر البريد الإلكتروني: support@fleetify.com');
+              }}
+            >
+              تواصل معنا
+            </button>
+          </p>
         </div>
 
       </div>

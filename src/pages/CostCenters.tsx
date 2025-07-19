@@ -21,6 +21,7 @@ import { CostCenterService, type CostCenter, type CostCenterReport } from '@/ser
 import { toast } from 'sonner';
 import CostCenterForm from '@/components/CostCenters/CostCenterForm';
 import CostCenterList from '@/components/CostCenters/CostCenterList';
+import CostCenterTreeView from '@/components/CostCenters/CostCenterTreeView';
 import CostCenterReports from '@/components/CostCenters/CostCenterReports';
 import CostCenterAllocations from '@/components/CostCenters/CostCenterAllocations';
 import CostCenterSettings from '@/components/CostCenters/CostCenterSettings';
@@ -137,10 +138,11 @@ const CostCenters = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="settings">الإعدادات</TabsTrigger>
           <TabsTrigger value="reports">التقارير</TabsTrigger>
           <TabsTrigger value="allocations">توزيع التكاليف</TabsTrigger>
+          <TabsTrigger value="tree">العرض الشجري</TabsTrigger>
           <TabsTrigger value="centers">إدارة المراكز</TabsTrigger>
           <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
         </TabsList>
@@ -259,6 +261,14 @@ const CostCenters = () => {
 
         <TabsContent value="centers">
           <CostCenterList 
+            costCenters={costCenters || []}
+            onRefresh={refetchCostCenters}
+            isLoading={loadingCostCenters}
+          />
+        </TabsContent>
+
+        <TabsContent value="tree">
+          <CostCenterTreeView 
             costCenters={costCenters || []}
             onRefresh={refetchCostCenters}
             isLoading={loadingCostCenters}
