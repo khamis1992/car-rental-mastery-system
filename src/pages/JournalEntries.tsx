@@ -347,7 +347,7 @@ const JournalEntries = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" style={{ direction: 'ltr' }}>
         <Button onClick={refreshData} variant="outline">
           <RefreshCw className="w-4 h-4 mr-2" />
           تحديث البيانات
