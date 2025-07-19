@@ -49,7 +49,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 const coreBusinessItems = [
   { 
     title: "الرئيسية", 
-    url: "/", 
+    url: "/dashboard", 
     icon: Home 
   },
   { 
@@ -263,8 +263,8 @@ export function AppSidebar() {
   });
 
   const isActive = (path: string) => {
-    if (path === "/") {
-      return currentPath === "/";
+    if (path === "/dashboard") {
+      return currentPath === "/dashboard";
     }
     return currentPath.startsWith(path);
   };
@@ -353,7 +353,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <NavLink 
                         to={item.url} 
-                        end={item.url === "/"}
+                        end={item.url === "/dashboard"}
                         className={getNavClassName(item.url)}
                       >
                         <item.icon className="w-4 h-4" />

@@ -12,6 +12,7 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import { SearchDialog } from "@/components/Search/SearchDialog";
 import { Layout } from "@/components/Layout/Layout";
 import Index from "./pages/Index";
+import LandingPage from "./pages/LandingPage";
 import Auth from "./pages/Auth";
 import Customers from "./pages/Customers";
 import Fleet from "./pages/Fleet";
@@ -60,9 +61,9 @@ function AppRoutes() {
   if (!isAuthenticated) {
     return (
       <Routes>
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/auth" element={<Auth />} />
-        <Route path="*" element={<Navigate to="/auth" />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     );
   }
@@ -91,7 +92,6 @@ function AppRoutes() {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<Index />} />
         <Route path="/dashboard" element={<Index />} />
         <Route path="/customers" element={<Customers />} />
         <Route path="/fleet" element={<Fleet />} />
@@ -128,7 +128,7 @@ function AppRoutes() {
         <Route path="/super-admin/landing-editor" element={<SuperAdminLandingEditor />} />
         <Route path="/super-admin/global-settings" element={<SuperAdminGlobalSettings />} />
         
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </Layout>
   );
