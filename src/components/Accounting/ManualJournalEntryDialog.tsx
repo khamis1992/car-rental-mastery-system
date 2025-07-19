@@ -302,7 +302,7 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
                     />
                   </div>
 
-                  <div className="col-span-2">
+                  <div className="col-span-3">
                     <Label className="rtl-label text-sm">الوصف</Label>
                     <Input
                       value={line.description}
@@ -336,14 +336,13 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
                   <div className="col-span-2">
                     <Label className="rtl-label text-sm">مركز التكلفة</Label>
                     <Select
-                      value={line.costCenterId || ''}
-                      onValueChange={(value) => updateLine(line.id, 'costCenterId', value || undefined)}
+                      value={line.costCenterId}
+                      onValueChange={(value) => updateLine(line.id, 'costCenterId', value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="اختر مركز التكلفة" />
+                        <SelectValue placeholder="اختياري" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">بدون مركز تكلفة</SelectItem>
                         {costCenters.map((center) => (
                           <SelectItem key={center.id} value={center.id}>
                             {center.cost_center_code} - {center.cost_center_name}
