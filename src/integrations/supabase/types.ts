@@ -1996,9 +1996,11 @@ export type Database = {
           allow_posting: boolean | null
           auto_reconcile: boolean | null
           consolidation_account_id: string | null
+          cost_center_id: string | null
           created_at: string
           created_by: string | null
           current_balance: number | null
+          default_cost_center_id: string | null
           first_transaction_date: string | null
           id: string
           is_active: boolean | null
@@ -2016,6 +2018,7 @@ export type Database = {
           regulatory_code: string | null
           report_position: number | null
           required_documentation: string[] | null
+          requires_cost_center: boolean | null
           tenant_id: string
           updated_at: string
           zakat_applicable: boolean | null
@@ -2031,9 +2034,11 @@ export type Database = {
           allow_posting?: boolean | null
           auto_reconcile?: boolean | null
           consolidation_account_id?: string | null
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           current_balance?: number | null
+          default_cost_center_id?: string | null
           first_transaction_date?: string | null
           id?: string
           is_active?: boolean | null
@@ -2051,6 +2056,7 @@ export type Database = {
           regulatory_code?: string | null
           report_position?: number | null
           required_documentation?: string[] | null
+          requires_cost_center?: boolean | null
           tenant_id: string
           updated_at?: string
           zakat_applicable?: boolean | null
@@ -2066,9 +2072,11 @@ export type Database = {
           allow_posting?: boolean | null
           auto_reconcile?: boolean | null
           consolidation_account_id?: string | null
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           current_balance?: number | null
+          default_cost_center_id?: string | null
           first_transaction_date?: string | null
           id?: string
           is_active?: boolean | null
@@ -2086,6 +2094,7 @@ export type Database = {
           regulatory_code?: string | null
           report_position?: number | null
           required_documentation?: string[] | null
+          requires_cost_center?: boolean | null
           tenant_id?: string
           updated_at?: string
           zakat_applicable?: boolean | null
@@ -2096,6 +2105,34 @@ export type Database = {
             columns: ["consolidation_account_id"]
             isOneToOne: false
             referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chart_of_accounts_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chart_of_accounts_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chart_of_accounts_default_cost_center_id_fkey"
+            columns: ["default_cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_center_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chart_of_accounts_default_cost_center_id_fkey"
+            columns: ["default_cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
             referencedColumns: ["id"]
           },
           {
@@ -10854,6 +10891,10 @@ export type Database = {
       }
     }
     Functions: {
+      add_specialized_rental_accounts: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
       analyze_deferred_revenue_account: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -11524,6 +11565,10 @@ export type Database = {
       has_tenant_role: {
         Args: { _role: string }
         Returns: boolean
+      }
+      implement_comprehensive_chart_improvements: {
+        Args: { tenant_id_param: string }
+        Returns: Json
       }
       initiate_domain_verification: {
         Args: {
