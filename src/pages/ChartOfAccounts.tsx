@@ -5,7 +5,7 @@ import { GeneralLedgerReport } from '@/components/Accounting/GeneralLedgerReport
 import { SimplifiedAccountingDashboard } from '@/components/Accounting/SimplifiedAccountingDashboard';
 import { FinancialBreadcrumb } from '@/components/Financial/FinancialBreadcrumb';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Plus, Upload, Download, BarChart3, Settings, FileText } from 'lucide-react';
+import { RefreshCw, Plus, Upload, Download, BarChart3, Settings, FileText, Search, Eye, Edit } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
