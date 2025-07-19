@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { TenantProvider } from "@/contexts/TenantContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
+import { SearchProvider } from "@/contexts/SearchContext";
+import { SearchDialog } from "@/components/Search/SearchDialog";
 import { Layout } from "@/components/Layout/Layout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -137,11 +139,14 @@ function App() {
         <AuthProvider>
           <TenantProvider>
             <SettingsProvider>
-              <BrowserRouter>
-                <AppRoutes />
-                <Toaster />
-                <Sonner />
-              </BrowserRouter>
+              <SearchProvider>
+                <BrowserRouter>
+                  <AppRoutes />
+                  <SearchDialog />
+                  <Toaster />
+                  <Sonner />
+                </BrowserRouter>
+              </SearchProvider>
             </SettingsProvider>
           </TenantProvider>
         </AuthProvider>
