@@ -200,6 +200,19 @@ const JournalEntriesDashboard = () => {
 
 // Cost Center Management Component  
 const CostCenterManagement = () => {
+  const { toast } = useToast();
+
+  const handleDistributionReport = () => {
+    toast({
+      title: 'تقرير التوزيع',
+      description: 'جاري تحضير تقرير توزيع القيود المحاسبية على مراكز التكلفة...',
+      variant: 'default',
+    });
+    
+    // TODO: إضافة منطق تحضير التقرير هنا
+    console.log('🔄 بدء تحضير تقرير التوزيع...');
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -214,7 +227,7 @@ const CostCenterManagement = () => {
             عرض وإدارة توزيع القيود المحاسبية على مراكز التكلفة المختلفة
           </p>
           <div className="flex gap-2">
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleDistributionReport}>
               <BarChart3 className="w-4 h-4" />
               تقرير التوزيع
             </Button>
