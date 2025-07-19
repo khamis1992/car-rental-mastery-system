@@ -29,7 +29,7 @@ export const AddSubAccountDialog: React.FC<AddSubAccountDialogProps> = ({
 }) => {
   const [accountName, setAccountName] = useState('');
   const [accountNameEn, setAccountNameEn] = useState('');
-  const [accountType, setAccountType] = useState<AccountType>('');
+  const [accountType, setAccountType] = useState<AccountType | ''>('');
   const [isActive, setIsActive] = useState(true);
   const [allowPosting, setAllowPosting] = useState(true);
   const [openingBalance, setOpeningBalance] = useState('0');
@@ -41,7 +41,7 @@ export const AddSubAccountDialog: React.FC<AddSubAccountDialogProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!parentAccount || !accountName.trim() || !accountType) {
+    if (!parentAccount || !accountName.trim() || accountType === '') {
       return;
     }
 
@@ -49,7 +49,7 @@ export const AddSubAccountDialog: React.FC<AddSubAccountDialogProps> = ({
       await createSubAccount({
         account_name: accountName.trim(),
         account_name_en: accountNameEn.trim() || null,
-        account_type: accountType,
+        account_type: accountType as AccountType,
         account_category: parentAccount.account_category,
         parent_account_id: parentAccount.id,
         is_active: isActive,
@@ -248,7 +248,7 @@ export const AddSubAccountDialog: React.FC<AddSubAccountDialogProps> = ({
             </Button>
             <Button 
               type="submit" 
-              disabled={loading || !accountName.trim() || !accountType || previewError}
+              disabled={loading || !accountName.trim() || accountType === '' || !!previewError}
               className="rtl-flex"
             >
               {loading ? (

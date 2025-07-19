@@ -1,9 +1,11 @@
+export type AccountType = 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
+
 export interface ChartOfAccount {
   id: string;
   account_code: string;
   account_name: string;
   account_name_en?: string;
-  account_type: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
+  account_type: AccountType;
   account_category: 'current_asset' | 'fixed_asset' | 'current_liability' | 'long_term_liability' | 'capital' | 'operating_revenue' | 'other_revenue' | 'operating_expense' | 'other_expense';
   parent_account_id?: string;
   level: number;
