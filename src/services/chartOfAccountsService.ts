@@ -1,7 +1,7 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { 
   ChartOfAccountsSettings, 
-  AccountTemplate, 
   ChartOfAccountNode, 
   AccountValidationResult, 
   AccountFormData,
@@ -11,6 +11,19 @@ import {
   AccountSearchFilters,
   AccountTreeViewConfig
 } from '@/types/chartOfAccounts';
+
+// استخدام الواجهات المحلية بدلاً من AccountTemplate المفقودة
+interface LocalAccountTemplate {
+  id: string;
+  template_name: string;
+  template_name_en?: string;
+  business_type: string;
+  template_structure: any;
+  description?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 export class ChartOfAccountsService {
   
@@ -22,7 +35,7 @@ export class ChartOfAccountsService {
       .eq('is_active', true)
       .single();
     
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
     return data as ChartOfAccountsSettings;
   }
 
@@ -39,7 +52,7 @@ export class ChartOfAccountsService {
   }
 
   // قوالب الحسابات
-  async getAccountTemplates(businessType?: string): Promise<AccountTemplate[]> {
+  async getAccountTemplates(businessType?: string): Promise<LocalAccountTemplate[]> {
     let query = supabase
       .from('account_templates')
       .select('*')
@@ -52,11 +65,10 @@ export class ChartOfAccountsService {
     const { data, error } = await query.order('template_name');
     
     if (error) throw error;
-    return (data || []) as AccountTemplate[];
+    return (data || []) as LocalAccountTemplate[];
   }
 
   async applyAccountTemplate(templateId: string): Promise<{ success: boolean; accounts_created: number }> {
-    // تطبيق مبسط لقالب الحسابات
     const template = await supabase
       .from('account_templates')
       .select('*')
@@ -65,14 +77,13 @@ export class ChartOfAccountsService {
     
     if (template.error) throw template.error;
     
-    // يمكن تطوير منطق تطبيق القالب هنا
     return { success: true, accounts_created: 0 };
   }
 
   // توليد رقم حساب تلقائي
   async generateAccountCode(parentAccountId?: string, accountType?: string): Promise<string> {
     const { data, error } = await supabase.rpc('generate_account_code', {
-      p_tenant_id: null, // سيتم تحديده تلقائياً من السياق
+      p_tenant_id: null,
       p_parent_account_id: parentAccountId || null,
       p_account_type: accountType || null
     });
@@ -88,7 +99,7 @@ export class ChartOfAccountsService {
     level: number = 1
   ): Promise<AccountValidationResult> {
     const { data, error } = await supabase.rpc('validate_account_structure', {
-      p_tenant_id: null, // سيتم تحديده تلقائياً من السياق
+      p_tenant_id: null,
       p_account_code: accountCode,
       p_parent_account_id: parentAccountId || null,
       p_level: level
@@ -110,7 +121,6 @@ export class ChartOfAccountsService {
     
     if (error) throw error;
     
-    // تحويل البيانات إلى هيكل شجري
     return this.buildAccountTree((data || []) as any[], config);
   }
 
@@ -119,7 +129,6 @@ export class ChartOfAccountsService {
     const accountMap = new Map<string, ChartOfAccountNode>();
     const rootAccounts: ChartOfAccountNode[] = [];
 
-    // إنشاء map للحسابات
     accounts.forEach(account => {
       accountMap.set(account.id, {
         ...account,
@@ -129,7 +138,6 @@ export class ChartOfAccountsService {
       });
     });
 
-    // بناء الشجرة
     accounts.forEach(account => {
       const node = accountMap.get(account.id)!;
       
@@ -145,7 +153,6 @@ export class ChartOfAccountsService {
       }
     });
 
-    // تطبيق الفلاتر والتكوين
     return this.applyTreeConfig(rootAccounts, config);
   }
 
@@ -167,7 +174,6 @@ export class ChartOfAccountsService {
       .from('chart_of_accounts')
       .select('*');
 
-    // تطبيق الفلاتر
     if (filters.search_term) {
       query = query.or(`account_name.ilike.%${filters.search_term}%,account_code.ilike.%${filters.search_term}%`);
     }
@@ -227,10 +233,8 @@ export class ChartOfAccountsService {
     accountName: string, 
     accountType: string
   ): Promise<SmartAccountSuggestion[]> {
-    // يمكن تحسين هذا باستخدام AI في المستقبل
     const suggestions: SmartAccountSuggestion[] = [];
     
-    // اقتراحات أساسية بناء على النوع والاسم
     const { data: similarAccounts } = await supabase
       .from('chart_of_accounts')
       .select('*')
@@ -239,7 +243,6 @@ export class ChartOfAccountsService {
       .limit(5);
 
     if (similarAccounts && similarAccounts.length > 0) {
-      // توليد رقم حساب مقترح
       const suggestedCode = await this.generateAccountCode(undefined, accountType);
       
       suggestions.push({
@@ -290,13 +293,11 @@ export class ChartOfAccountsService {
       }
     }
 
-    // افتراضي
     return `${accountType === 'asset' ? 'current' : accountType === 'liability' ? 'current' : ''}${accountType === 'asset' || accountType === 'liability' ? '_' : ''}${accountType}`;
   }
 
   // تحليلات الحسابات
   async getAccountAnalytics(accountId: string): Promise<AccountAnalytics | null> {
-    // تطبيق مبسط لتحليل الحسابات
     const { data: account } = await supabase
       .from('chart_of_accounts')
       .select('*')
@@ -330,7 +331,6 @@ export class ChartOfAccountsService {
 
     for (const account of accounts) {
       try {
-        // التحقق من صحة الحساب
         const validation = await this.validateAccountStructure(
           account.account_code || '',
           account.parent_account_id
@@ -339,12 +339,11 @@ export class ChartOfAccountsService {
         operation.validation_results!.push(validation);
 
         if (validation.valid) {
-          // إنشاء الحساب
           const { error } = await supabase
             .from('chart_of_accounts')
             .insert({
               ...account,
-              level: account.parent_account_id ? 2 : 1, // سيتم حسابه تلقائياً
+              level: account.parent_account_id ? 2 : 1,
               is_active: true,
               current_balance: account.opening_balance
             });
@@ -373,8 +372,6 @@ export class ChartOfAccountsService {
   // تصدير دليل الحسابات
   async exportAccounts(format: 'excel' | 'csv' | 'pdf' = 'excel'): Promise<Blob> {
     const accounts = await this.getAccountsTree();
-    
-    // تحويل إلى تنسيق مسطح للتصدير
     const flatAccounts = this.flattenAccountTree(accounts);
     
     switch (format) {
@@ -424,12 +421,10 @@ export class ChartOfAccountsService {
   }
 
   private async exportToExcel(accounts: ChartOfAccountNode[]): Promise<Blob> {
-    // تطبيق مبسط - يمكن تحسينه باستخدام مكتبة مثل xlsx
     return this.exportToCSV(accounts);
   }
 
   private async exportToPDF(accounts: ChartOfAccountNode[]): Promise<Blob> {
-    // تطبيق مبسط - يمكن تحسينه باستخدام مكتبة مثل jsPDF
     const content = accounts.map(acc => 
       `${acc.account_code} - ${acc.account_name} (${acc.account_type})`
     ).join('\n');

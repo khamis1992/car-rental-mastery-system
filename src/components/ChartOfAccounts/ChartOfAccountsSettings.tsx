@@ -1,33 +1,20 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Settings, Save, RotateCcw, Info } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+import { Settings, Save, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { ChartOfAccountsSettings } from '@/types/chartOfAccounts';
 
-interface AccountSettings {
-  id: string;
-  tenant_id: string;
-  max_account_levels: number;
-  account_code_format: any;
-  auto_code_generation: boolean;
-  require_parent_for_level: any;
-  level_naming: any;
-  allow_posting_levels: any;
-  is_active: boolean;
-}
-
-export const ChartOfAccountsSettings: React.FC = () => {
-  const [settings, setSettings] = useState<AccountSettings | null>(null);
+export function ChartOfAccountsSettingsPage() {
+  const [settings, setSettings] = useState<ChartOfAccountsSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     loadSettings();
@@ -35,6 +22,7 @@ export const ChartOfAccountsSettings: React.FC = () => {
 
   const loadSettings = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('chart_of_accounts_settings')
         .select('*')
@@ -46,63 +34,66 @@ export const ChartOfAccountsSettings: React.FC = () => {
       }
 
       if (data) {
-        setSettings(data);
+        setSettings(data as ChartOfAccountsSettings);
       } else {
         // إنشاء إعدادات افتراضية
         await createDefaultSettings();
       }
     } catch (error) {
-      toast({
-        title: 'خطأ',
-        description: 'فشل في تحميل إعدادات دليل الحسابات',
-        variant: 'destructive',
-      });
+      console.error('Error loading settings:', error);
+      toast.error('حدث خطأ في تحميل الإعدادات');
     } finally {
       setLoading(false);
     }
   };
 
   const createDefaultSettings = async () => {
-    const defaultSettings = {
-      max_account_levels: 5,
-      account_code_format: {
-        pattern: 'hierarchical',
-        separator: '.',
-        length_per_level: [2, 2, 2, 2, 2]
-      },
-      auto_code_generation: true,
-      require_parent_for_level: {
-        level_1: false,
-        level_2: true,
-        level_3: true,
-        level_4: true,
-        level_5: true
-      },
-      level_naming: {
-        level_1: 'حساب رئيسي',
-        level_2: 'حساب فرعي',
-        level_3: 'حساب تفصيلي',
-        level_4: 'حساب فرعي متقدم',
-        level_5: 'حساب نهائي'
-      },
-      allow_posting_levels: {
-        level_1: false,
-        level_2: false,
-        level_3: true,
-        level_4: true,
-        level_5: true
-      },
-      is_active: true
-    };
+    try {
+      const defaultSettings = {
+        tenant_id: '00000000-0000-0000-0000-000000000000', // سيتم تحديده من RLS
+        max_account_levels: 5,
+        account_code_format: {
+          pattern: 'hierarchical',
+          separator: '.',
+          length_per_level: [2, 2, 2, 2, 2]
+        },
+        auto_code_generation: true,
+        require_parent_for_level: {
+          level_1: false,
+          level_2: true,
+          level_3: true,
+          level_4: true,
+          level_5: true
+        },
+        level_naming: {
+          level_1: 'حساب رئيسي',
+          level_2: 'حساب فرعي',
+          level_3: 'حساب تفصيلي',
+          level_4: 'حساب فرعي متقدم',
+          level_5: 'حساب نهائي'
+        },
+        allow_posting_levels: {
+          level_1: false,
+          level_2: false,
+          level_3: true,
+          level_4: true,
+          level_5: true
+        },
+        is_active: true
+      };
 
-    const { data, error } = await supabase
-      .from('chart_of_accounts_settings')
-      .insert(defaultSettings)
-      .select()
-      .single();
+      const { data, error } = await supabase
+        .from('chart_of_accounts_settings')
+        .insert(defaultSettings)
+        .select()
+        .single();
 
-    if (error) throw error;
-    setSettings(data);
+      if (error) throw error;
+      setSettings(data as ChartOfAccountsSettings);
+    } catch (error) {
+      console.error('Error creating default settings:', error);
+      toast.error('حدث خطأ في إنشاء الإعدادات الافتراضية');
+    }
   };
 
   const saveSettings = async () => {
@@ -110,305 +101,190 @@ export const ChartOfAccountsSettings: React.FC = () => {
 
     try {
       setSaving(true);
-      
       const { error } = await supabase
         .from('chart_of_accounts_settings')
         .update({
-          ...settings,
+          max_account_levels: settings.max_account_levels,
+          account_code_format: settings.account_code_format,
+          auto_code_generation: settings.auto_code_generation,
+          require_parent_for_level: settings.require_parent_for_level,
+          level_naming: settings.level_naming,
+          allow_posting_levels: settings.allow_posting_levels,
           updated_at: new Date().toISOString()
         })
         .eq('id', settings.id);
 
       if (error) throw error;
-
-      toast({
-        title: 'تم بنجاح',
-        description: 'تم حفظ إعدادات دليل الحسابات بنجاح',
-      });
+      toast.success('تم حفظ الإعدادات بنجاح');
     } catch (error) {
-      toast({
-        title: 'خطأ',
-        description: 'فشل في حفظ الإعدادات',
-        variant: 'destructive',
-      });
+      console.error('Error saving settings:', error);
+      toast.error('حدث خطأ في حفظ الإعدادات');
     } finally {
       setSaving(false);
     }
   };
 
-  const resetToDefaults = async () => {
-    if (!settings) return;
-
-    const defaultSettings = {
-      ...settings,
-      max_account_levels: 5,
-      account_code_format: {
-        pattern: 'hierarchical',
-        separator: '.',
-        length_per_level: [2, 2, 2, 2, 2]
-      },
-      auto_code_generation: true,
-      require_parent_for_level: {
-        level_1: false,
-        level_2: true,
-        level_3: true,
-        level_4: true,
-        level_5: true
-      },
-      level_naming: {
-        level_1: 'حساب رئيسي',
-        level_2: 'حساب فرعي',
-        level_3: 'حساب تفصيلي',
-        level_4: 'حساب فرعي متقدم',
-        level_5: 'حساب نهائي'
-      },
-      allow_posting_levels: {
-        level_1: false,
-        level_2: false,
-        level_3: true,
-        level_4: true,
-        level_5: true
-      }
-    };
-
-    setSettings(defaultSettings);
-  };
-
-  const updateSettings = (key: string, value: any) => {
-    if (!settings) return;
-    setSettings({ ...settings, [key]: value });
-  };
-
-  const updateNestedSettings = (parentKey: string, childKey: string, value: any) => {
-    if (!settings) return;
-    setSettings({
-      ...settings,
-      [parentKey]: {
-        ...settings[parentKey as keyof AccountSettings] as any,
-        [childKey]: value
-      }
-    });
-  };
-
   if (loading) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <Settings className="w-8 h-8 animate-spin mx-auto mb-2" />
-            <p>جاري تحميل الإعدادات...</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>جاري تحميل الإعدادات...</p>
+        </div>
+      </div>
     );
   }
 
   if (!settings) {
     return (
       <Card>
-        <CardContent className="text-center p-8">
-          <p>لم يتم العثور على إعدادات دليل الحسابات</p>
+        <CardContent className="text-center py-8">
+          <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">لا توجد إعدادات</h3>
+          <p className="text-muted-foreground mb-4">حدث خطأ في تحميل إعدادات دليل الحسابات</p>
+          <Button onClick={loadSettings}>
+            <RefreshCw className="h-4 w-4 ml-2" />
+            إعادة المحاولة
+          </Button>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto p-6 space-y-6 rtl">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold rtl-title">إعدادات دليل الحسابات</h1>
+        <p className="text-muted-foreground mt-2">
+          تخصيص إعدادات دليل الحسابات والمستويات المسموحة
+        </p>
+      </div>
+
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5" />
-              إعدادات دليل الحسابات
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={resetToDefaults}>
-                <RotateCcw className="w-4 h-4 ml-2" />
-                إعادة تعيين
-              </Button>
-              <Button onClick={saveSettings} disabled={saving}>
-                <Save className="w-4 h-4 ml-2" />
-                {saving ? 'جاري الحفظ...' : 'حفظ'}
-              </Button>
-            </div>
-          </div>
+          <CardTitle className="rtl-title flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            الإعدادات العامة
+          </CardTitle>
         </CardHeader>
-
         <CardContent className="space-y-6">
-          {/* إعدادات عامة */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">الإعدادات العامة</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="max-levels">الحد الأقصى لمستويات الحسابات</Label>
-                <Select
-                  value={settings.max_account_levels.toString()}
-                  onValueChange={(value) => updateSettings('max_account_levels', parseInt(value))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="3">3 مستويات</SelectItem>
-                    <SelectItem value="4">4 مستويات</SelectItem>
-                    <SelectItem value="5">5 مستويات</SelectItem>
-                    <SelectItem value="6">6 مستويات</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center space-x-2 space-x-reverse">
-                <Switch
-                  id="auto-generation"
-                  checked={settings.auto_code_generation}
-                  onCheckedChange={(checked) => updateSettings('auto_code_generation', checked)}
-                />
-                <Label htmlFor="auto-generation">توليد أرقام الحسابات تلقائياً</Label>
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="max-levels">الحد الأقصى لمستويات الحسابات</Label>
+              <Input
+                id="max-levels"
+                type="number"
+                min="1"
+                max="10"
+                value={settings.max_account_levels}
+                onChange={(e) => setSettings({
+                  ...settings,
+                  max_account_levels: parseInt(e.target.value) || 5
+                })}
+              />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="separator">فاصل أرقام الحسابات</Label>
+              <Input
+                id="separator"
+                value={settings.account_code_format.separator}
+                onChange={(e) => setSettings({
+                  ...settings,
+                  account_code_format: {
+                    ...settings.account_code_format,
+                    separator: e.target.value
+                  }
+                })}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <Switch
+              id="auto-generation"
+              checked={settings.auto_code_generation}
+              onCheckedChange={(checked) => setSettings({
+                ...settings,
+                auto_code_generation: checked
+              })}
+            />
+            <Label htmlFor="auto-generation">توليد أرقام الحسابات تلقائياً</Label>
           </div>
 
           <Separator />
 
-          {/* تنسيق رقم الحساب */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">تنسيق رقم الحساب</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label>نمط الترقيم</Label>
-                <Select
-                  value={settings.account_code_format?.pattern || 'hierarchical'}
-                  onValueChange={(value) => updateNestedSettings('account_code_format', 'pattern', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="hierarchical">هرمي</SelectItem>
-                    <SelectItem value="sequential">تسلسلي</SelectItem>
-                    <SelectItem value="custom">مخصص</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="separator">الفاصل</Label>
-                <Input
-                  id="separator"
-                  value={settings.account_code_format?.separator || '.'}
-                  onChange={(e) => updateNestedSettings('account_code_format', 'separator', e.target.value)}
-                  placeholder="."
-                  maxLength={1}
-                />
-              </div>
-
-              <div>
-                <Label>مثال على التنسيق</Label>
-                <div className="p-2 bg-muted rounded-md">
-                  <code className="text-sm">
-                    {settings.account_code_format?.pattern === 'hierarchical' 
-                      ? `01${settings.account_code_format?.separator || '.'}01${settings.account_code_format?.separator || '.'}01`
-                      : '001002003'
-                    }
-                  </code>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* تسمية المستويات */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">تسمية المستويات</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Array.from({ length: settings.max_account_levels }, (_, i) => (
-                <div key={i}>
-                  <Label htmlFor={`level-${i + 1}`}>المستوى {i + 1}</Label>
-                  <Input
-                    id={`level-${i + 1}`}
-                    value={settings.level_naming?.[`level_${i + 1}`] || ''}
-                    onChange={(e) => updateNestedSettings('level_naming', `level_${i + 1}`, e.target.value)}
-                    placeholder={`اسم المستوى ${i + 1}`}
-                  />
+          <div>
+            <h3 className="text-lg font-medium mb-4 rtl-title">مستويات الحسابات</h3>
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].slice(0, settings.max_account_levels).map((level) => (
+                <div key={level} className="flex items-center justify-between p-3 border rounded">
+                  <div className="flex-1">
+                    <Label htmlFor={`level-${level}-name`}>المستوى {level}</Label>
+                    <Input
+                      id={`level-${level}-name`}
+                      value={settings.level_naming[`level_${level}` as keyof typeof settings.level_naming]}
+                      onChange={(e) => setSettings({
+                        ...settings,
+                        level_naming: {
+                          ...settings.level_naming,
+                          [`level_${level}`]: e.target.value
+                        }
+                      })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-4 space-x-reverse mr-4">
+                    <div className="flex items-center space-x-2 space-x-reverse">
+                      <Switch
+                        id={`level-${level}-parent`}
+                        checked={settings.require_parent_for_level[`level_${level}` as keyof typeof settings.require_parent_for_level]}
+                        onCheckedChange={(checked) => setSettings({
+                          ...settings,
+                          require_parent_for_level: {
+                            ...settings.require_parent_for_level,
+                            [`level_${level}`]: checked
+                          }
+                        })}
+                      />
+                      <Label htmlFor={`level-${level}-parent`}>يتطلب حساب أب</Label>
+                    </div>
+                    <div className="flex items-center space-x-2 space-x-reverse">
+                      <Switch
+                        id={`level-${level}-posting`}
+                        checked={settings.allow_posting_levels[`level_${level}` as keyof typeof settings.allow_posting_levels]}
+                        onCheckedChange={(checked) => setSettings({
+                          ...settings,
+                          allow_posting_levels: {
+                            ...settings.allow_posting_levels,
+                            [`level_${level}`]: checked
+                          }
+                        })}
+                      />
+                      <Label htmlFor={`level-${level}-posting`}>يسمح بالقيد عليه</Label>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <Separator />
-
-          {/* قواعد المستويات */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">قواعد المستويات</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-medium mb-2">المستويات المسموح بالترحيل إليها</h4>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  {Array.from({ length: settings.max_account_levels }, (_, i) => (
-                    <div key={i} className="flex items-center space-x-2 space-x-reverse">
-                      <Switch
-                        id={`posting-${i + 1}`}
-                        checked={settings.allow_posting_levels?.[`level_${i + 1}`] || false}
-                        onCheckedChange={(checked) => 
-                          updateNestedSettings('allow_posting_levels', `level_${i + 1}`, checked)
-                        }
-                      />
-                      <Label htmlFor={`posting-${i + 1}`} className="text-sm">
-                        المستوى {i + 1}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-medium mb-2">المستويات التي تتطلب حساب أب</h4>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  {Array.from({ length: settings.max_account_levels }, (_, i) => (
-                    <div key={i} className="flex items-center space-x-2 space-x-reverse">
-                      <Switch
-                        id={`parent-${i + 1}`}
-                        checked={settings.require_parent_for_level?.[`level_${i + 1}`] || false}
-                        onCheckedChange={(checked) => 
-                          updateNestedSettings('require_parent_for_level', `level_${i + 1}`, checked)
-                        }
-                        disabled={i === 0} // المستوى الأول لا يحتاج لحساب أب
-                      />
-                      <Label htmlFor={`parent-${i + 1}`} className="text-sm">
-                        المستوى {i + 1}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* معلومات إضافية */}
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <div className="flex items-start gap-2">
-              <Info className="w-5 h-5 text-blue-600 mt-0.5" />
-              <div className="text-sm text-blue-800">
-                <p className="font-medium mb-1">ملاحظات مهمة:</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>تغيير هذه الإعدادات قد يؤثر على الحسابات الموجودة</li>
-                  <li>يُنصح بعمل نسخة احتياطية قبل تطبيق التغييرات</li>
-                  <li>المستوى الأول لا يحتاج إلى حساب أب دائماً</li>
-                  <li>الحسابات التي لا تسمح بالترحيل تُستخدم للتجميع فقط</li>
-                </ul>
-              </div>
-            </div>
+          <div className="flex justify-end pt-6">
+            <Button onClick={saveSettings} disabled={saving} className="min-w-32">
+              {saving ? (
+                <>
+                  <RefreshCw className="h-4 w-4 ml-2 animate-spin" />
+                  جاري الحفظ...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 ml-2" />
+                  حفظ الإعدادات
+                </>
+              )}
+            </Button>
           </div>
         </CardContent>
       </Card>
     </div>
   );
-};
+}
