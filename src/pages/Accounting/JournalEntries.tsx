@@ -2,23 +2,23 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-const Customers: React.FC = () => {
+const JournalEntries: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">إدارة العملاء</h1>
+        <h1 className="text-3xl font-bold">القيود اليومية</h1>
         <p className="text-muted-foreground">
-          إدارة بيانات العملاء والمستأجرين
+          إدارة وتسجيل القيود المحاسبية اليومية
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>قائمة العملاء</CardTitle>
+          <CardTitle>سجل القيود</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            لا يوجد عملاء مسجلون حالياً
+            لا توجد قيود محاسبية مسجلة حالياً
           </p>
         </CardContent>
       </Card>
@@ -26,4 +26,4 @@ const Customers: React.FC = () => {
   );
 };
 
-export default Customers;
+export default JournalEntries;

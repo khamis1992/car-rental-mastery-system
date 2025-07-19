@@ -2,23 +2,23 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-const Customers: React.FC = () => {
+const ChartOfAccounts: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">إدارة العملاء</h1>
+        <h1 className="text-3xl font-bold">دليل الحسابات</h1>
         <p className="text-muted-foreground">
-          إدارة بيانات العملاء والمستأجرين
+          إدارة وتنظيم الحسابات المحاسبية
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>قائمة العملاء</CardTitle>
+          <CardTitle>شجرة الحسابات</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            لا يوجد عملاء مسجلون حالياً
+            لا توجد حسابات محاسبية مسجلة حالياً
           </p>
         </CardContent>
       </Card>
@@ -26,4 +26,4 @@ const Customers: React.FC = () => {
   );
 };
 
-export default Customers;
+export default ChartOfAccounts;

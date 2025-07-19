@@ -2,28 +2,25 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-const Contracts: React.FC = () => {
+const Branches: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">إدارة العقود</h1>
+        <h1 className="text-3xl font-bold">إدارة الفروع</h1>
         <p className="text-muted-foreground">
-          إدارة وتتبع عقود التأجير
+          إدارة فروع الشركة ومراكز التكلفة
         </p>
       </div>
-
       <Card>
         <CardHeader>
-          <CardTitle>قائمة العقود</CardTitle>
+          <CardTitle>قائمة الفروع</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">
-            لا توجد عقود مسجلة حالياً
-          </p>
+          <p className="text-muted-foreground">لا توجد فروع مسجلة حالياً</p>
         </CardContent>
       </Card>
     </div>
   );
 };
 
-export default Contracts;
+export default Branches;

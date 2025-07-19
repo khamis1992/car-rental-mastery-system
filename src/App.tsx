@@ -5,40 +5,40 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/Layout/Header';
 import { Sidebar } from '@/components/Layout/Sidebar';
-import { Auth } from '@/pages/Auth';
-import { Dashboard } from '@/pages/Dashboard';
-import { Contracts } from '@/pages/Contracts';
-import { Customers } from '@/pages/Customers';
-import { Vehicles } from '@/pages/Vehicles';
-import { Employees } from '@/pages/Employees';
-import { Invoices } from '@/pages/Invoices';
-import { Payments } from '@/pages/Payments';
-import { ChartOfAccounts } from '@/pages/Accounting/ChartOfAccounts';
-import { JournalEntries } from '@/pages/Accounting/JournalEntries';
-import { Branches } from '@/pages/Accounting/Branches';
-import { FinancialPeriods } from '@/pages/Accounting/FinancialPeriods';
-import { TrialBalanceReport } from '@/pages/Accounting/TrialBalanceReport';
-import { IncomeStatementReport } from '@/pages/Accounting/IncomeStatementReport';
-import { BalanceSheetReport } from '@/pages/Accounting/BalanceSheetReport';
-import { FixedAssets } from '@/pages/Accounting/FixedAssets';
-import { AssetDepreciation } from '@/pages/Accounting/AssetDepreciation';
-import { AssetCategories } from '@/pages/Accounting/AssetCategories';
-import { BankTransactions } from '@/pages/Accounting/BankTransactions';
-import { Budgets } from '@/pages/Accounting/Budgets';
-import { CostCenters } from '@/pages/Accounting/CostCenters';
-import { JournalEntryReviews } from '@/pages/Accounting/JournalEntryReviews';
-import { AdvancedKPIs } from '@/pages/Accounting/AdvancedKPIs';
-import { AccountingWorkflows } from '@/pages/Accounting/AccountingWorkflows';
-import { CashFlowStatementReport } from '@/pages/Accounting/CashFlowStatementReport';
-import { FinancialSummariesReport } from '@/pages/Accounting/FinancialSummariesReport';
-import { LiquidityAnalysisReport } from '@/pages/Accounting/LiquidityAnalysisReport';
-import { AutomatedEntryRules } from '@/pages/Accounting/AutomatedEntryRules';
-import { AdditionalCharges } from '@/pages/AdditionalCharges';
-import { ContractExtensions } from '@/pages/ContractExtensions';
-import { ContractIncidents } from '@/pages/ContractIncidents';
-import { CustomerEvaluations } from '@/pages/CustomerEvaluations';
-import { Departments } from '@/pages/Departments';
-import { Quotations } from '@/pages/Quotations';
+import Auth from '@/pages/Auth';
+import Dashboard from '@/pages/Dashboard';
+import Contracts from '@/pages/Contracts';
+import Customers from '@/pages/Customers';
+import Vehicles from '@/pages/Vehicles';
+import Employees from '@/pages/Employees';
+import Invoices from '@/pages/Invoices';
+import Payments from '@/pages/Payments';
+import ChartOfAccounts from '@/pages/Accounting/ChartOfAccounts';
+import JournalEntries from '@/pages/Accounting/JournalEntries';
+import Branches from '@/pages/Accounting/Branches';
+import FinancialPeriods from '@/pages/Accounting/FinancialPeriods';
+import TrialBalanceReport from '@/pages/Accounting/TrialBalanceReport';
+import IncomeStatementReport from '@/pages/Accounting/IncomeStatementReport';
+import BalanceSheetReport from '@/pages/Accounting/BalanceSheetReport';
+import FixedAssets from '@/pages/Accounting/FixedAssets';
+import AssetDepreciation from '@/pages/Accounting/AssetDepreciation';
+import AssetCategories from '@/pages/Accounting/AssetCategories';
+import BankTransactions from '@/pages/Accounting/BankTransactions';
+import Budgets from '@/pages/Accounting/Budgets';
+import CostCenters from '@/pages/Accounting/CostCenters';
+import JournalEntryReviews from '@/pages/Accounting/JournalEntryReviews';
+import AdvancedKPIs from '@/pages/Accounting/AdvancedKPIs';
+import AccountingWorkflows from '@/pages/Accounting/AccountingWorkflows';
+import CashFlowStatementReport from '@/pages/Accounting/CashFlowStatementReport';
+import FinancialSummariesReport from '@/pages/Accounting/FinancialSummariesReport';
+import LiquidityAnalysisReport from '@/pages/Accounting/LiquidityAnalysisReport';
+import AutomatedEntryRules from '@/pages/Accounting/AutomatedEntryRules';
+import AdditionalCharges from '@/pages/AdditionalCharges';
+import ContractExtensions from '@/pages/ContractExtensions';
+import ContractIncidents from '@/pages/ContractIncidents';
+import CustomerEvaluations from '@/pages/CustomerEvaluations';
+import Departments from '@/pages/Departments';
+import Quotations from '@/pages/Quotations';
 import { AdvancedAccountingHub } from '@/components/Accounting/AdvancedAccountingHub';
 
 function App() {
@@ -47,13 +47,20 @@ function App() {
   const { isLoggedIn, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">جاري التحميل...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background" dir="rtl">
           {!isLoggedIn ? (
             <Auth />
           ) : (

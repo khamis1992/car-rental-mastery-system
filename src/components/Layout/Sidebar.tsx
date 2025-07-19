@@ -46,12 +46,13 @@ import {
   Percent,
   Landmark,
   File,
-  Zap
+  Zap,
+  Shield
 } from "lucide-react"
 
 interface SidebarProps {
   isOpen: boolean;
-  onToggle: () => void;
+  onToggle: (value: boolean) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
@@ -154,37 +155,37 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
         {
           key: 'chart-of-accounts',
           label: 'دليل الحسابات',
-          path: '/chart-of-accounts',
+          path: '/accounting/chart-of-accounts',
           icon: <FileText className="w-4 h-4" />
         },
         {
           key: 'journal-entries',
           label: 'القيود اليومية',
-          path: '/journal-entries',
+          path: '/accounting/journal-entries',
           icon: <FileText className="w-4 h-4" />
         },
         {
           key: 'trial-balance',
           label: 'ميزان المراجعة',
-          path: '/trial-balance',
+          path: '/accounting/trial-balance-report',
           icon: <FileText className="w-4 h-4" />
         },
         {
           key: 'income-statement',
           label: 'قائمة الدخل',
-          path: '/income-statement',
+          path: '/accounting/income-statement-report',
           icon: <FileText className="w-4 h-4" />
         },
         {
           key: 'balance-sheet',
           label: 'الميزانية العمومية',
-          path: '/balance-sheet',
+          path: '/accounting/balance-sheet-report',
           icon: <FileText className="w-4 h-4" />
         },
         {
           key: 'fixed-assets',
           label: 'الأصول الثابتة',
-          path: '/fixed-assets',
+          path: '/accounting/fixed-assets',
           icon: <Landmark className="w-4 h-4" />
         },
         {
