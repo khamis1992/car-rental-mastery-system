@@ -171,7 +171,7 @@ export class AutomatedJournalEntryService {
 
       return journalEntry.id;
     } catch (error) {
-      await this.recordExecution(ruleId, triggerData, null, 'failed', error.message, Date.now() - startTime);
+      await this.recordExecution(ruleId, triggerData, null, 'failed', error instanceof Error ? error.message : 'Unknown error', Date.now() - startTime);
       await this.updateRuleStats(ruleId, false);
       throw error;
     }

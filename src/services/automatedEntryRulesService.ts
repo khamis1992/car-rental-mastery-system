@@ -29,7 +29,7 @@ export const automatedEntryRulesService = {
     const tenantId = await accountingService.getCurrentTenantId();
     
     const { data: rule, error } = await supabase
-      .from('automated_entry_rules')
+      .from('journal_automation_rules')
       .insert({
         tenant_id: tenantId,
         rule_name: data.rule_name,
@@ -48,7 +48,7 @@ export const automatedEntryRulesService = {
 
   async getRules(): Promise<AutomatedEntryRule[]> {
     const { data, error } = await supabase
-      .from('automated_entry_rules')
+      .from('journal_automation_rules')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -58,7 +58,7 @@ export const automatedEntryRulesService = {
 
   async getActiveRules(triggerEvent?: string): Promise<AutomatedEntryRule[]> {
     let query = supabase
-      .from('automated_entry_rules')
+      .from('journal_automation_rules')
       .select('*')
       .eq('is_active', true);
 
@@ -74,7 +74,7 @@ export const automatedEntryRulesService = {
 
   async updateRule(id: string, data: Partial<CreateRuleData>): Promise<AutomatedEntryRule> {
     const { data: rule, error } = await supabase
-      .from('automated_entry_rules')
+      .from('journal_automation_rules')
       .update({
         ...data,
         updated_at: new Date().toISOString()
@@ -90,7 +90,7 @@ export const automatedEntryRulesService = {
   async toggleRuleStatus(id: string): Promise<AutomatedEntryRule> {
     // جلب الحالة الحالية
     const { data: currentRule, error: fetchError } = await supabase
-      .from('automated_entry_rules')
+      .from('journal_automation_rules')
       .select('is_active')
       .eq('id', id)
       .single();
@@ -99,7 +99,7 @@ export const automatedEntryRulesService = {
 
     // تغيير الحالة
     const { data: rule, error } = await supabase
-      .from('automated_entry_rules')
+      .from('journal_automation_rules')
       .update({
         is_active: !currentRule.is_active,
         updated_at: new Date().toISOString()
@@ -114,7 +114,7 @@ export const automatedEntryRulesService = {
 
   async deleteRule(id: string): Promise<void> {
     const { error } = await supabase
-      .from('automated_entry_rules')
+      .from('journal_automation_rules')
       .delete()
       .eq('id', id);
 
