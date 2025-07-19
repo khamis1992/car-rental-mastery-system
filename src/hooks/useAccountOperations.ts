@@ -239,10 +239,24 @@ export const useAccountOperations = () => {
     try {
       console.log('🗑️ بدء عملية حذف الحساب:', accountId);
 
+      // Get account details before deletion for better error messages
+      const { data: accountToDelete, error: fetchError } = await supabase
+        .from('chart_of_accounts')
+        .select('account_name, account_code, id')
+        .eq('id', accountId)
+        .single();
+
+      if (fetchError || !accountToDelete) {
+        console.error('❌ خطأ في جلب بيانات الحساب:', fetchError);
+        throw new Error('الحساب غير موجود');
+      }
+
+      console.log('📋 بيانات الحساب المراد حذفه:', accountToDelete);
+
       // Check for sub-accounts
       const { data: childAccounts, error: childError } = await supabase
         .from('chart_of_accounts')
-        .select('id')
+        .select('id, account_name, account_code')
         .eq('parent_account_id', accountId);
 
       if (childError) {
@@ -251,23 +265,52 @@ export const useAccountOperations = () => {
       }
 
       if (childAccounts && childAccounts.length > 0) {
-        throw new Error('لا يمكن حذف الحساب لوجود حسابات فرعية');
+        console.log('⚠️ يوجد حسابات فرعية:', childAccounts);
+        throw new Error(`لا يمكن حذف الحساب "${accountToDelete.account_name}" لوجود ${childAccounts.length} حساب فرعي`);
       }
 
-      // Delete the account
-      const { error } = await supabase
+      // Check for journal entries
+      const { data: journalEntryLines, error: journalError } = await supabase
+        .from('journal_entry_lines')
+        .select('id')
+        .eq('account_id', accountId)
+        .limit(1);
+
+      if (journalError) {
+        console.error('❌ خطأ في التحقق من القيود المحاسبية:', journalError);
+        throw new Error('خطأ في التحقق من القيود المحاسبية');
+      }
+
+      if (journalEntryLines && journalEntryLines.length > 0) {
+        throw new Error(`لا يمكن حذف الحساب "${accountToDelete.account_name}" لوجود قيود محاسبية مرتبطة به`);
+      }
+
+      console.log('✅ التحقق من الشروط مكتمل، يمكن حذف الحساب');
+
+      // Delete the account - the trigger should handle the audit log correctly now
+      const { error: deleteError } = await supabase
         .from('chart_of_accounts')
         .delete()
         .eq('id', accountId);
 
-      if (error) {
-        console.error('❌ خطأ في حذف الحساب:', error);
-        throw new Error('فشل في حذف الحساب: ' + error.message);
+      if (deleteError) {
+        console.error('❌ خطأ في حذف الحساب:', deleteError);
+        
+        // Enhanced error handling
+        if (deleteError.code === '23503') {
+          throw new Error('لا يمكن حذف الحساب لوجود بيانات مرتبطة به');
+        } else if (deleteError.message.includes('violates foreign key constraint')) {
+          throw new Error('لا يمكن حذف الحساب لوجود بيانات مرتبطة به في النظام');
+        } else {
+          throw new Error(`فشل في حذف الحساب: ${deleteError.message}`);
+        }
       }
+
+      console.log('✅ تم حذف الحساب بنجاح');
 
       toast({
         title: "تم الحذف بنجاح",
-        description: "تم حذف الحساب بنجاح",
+        description: `تم حذف الحساب "${accountToDelete.account_name}" (${accountToDelete.account_code}) بنجاح`,
       });
 
     } catch (error) {
