@@ -3,19 +3,16 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ChartOfAccount } from '@/types/accounting';
+import { generateNextSubAccountCode, validateAccountCode } from '@/utils/accountNumberGenerator';
 
 export const useAccountOperations = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Helper function to generate sub-account codes
-  const generateSubAccountCode = async (parentAccount: ChartOfAccount): Promise<string> => {
-    console.log('🔧 بدء توليد رقم الحساب الفرعي للحساب الأب:', parentAccount.account_code);
+  // Helper function to get existing sub-account codes
+  const getExistingSubAccountCodes = async (parentAccount: ChartOfAccount): Promise<string[]> => {
+    console.log('🔍 جلب الحسابات الفرعية الموجودة للحساب الأب:', parentAccount.account_code);
     
-    const parentCode = parentAccount.account_code;
-    const parentLevel = parentAccount.level;
-    
-    // Get existing sub-accounts for this parent
     const { data: existingSubAccounts, error } = await supabase
       .from('chart_of_accounts')
       .select('account_code')
@@ -27,71 +24,13 @@ export const useAccountOperations = () => {
       throw new Error('فشل في جلب الحسابات الفرعية الموجودة');
     }
 
-    console.log('📊 الحسابات الفرعية الموجودة:', existingSubAccounts);
-
-    // Generate next available code based on parent level and existing codes
-    let nextCode: string;
-    
-    if (parentLevel === 1) {
-      // For main accounts (level 1), sub-accounts should be 2-digit (11, 12, 13, etc.)
-      const existingNumbers = existingSubAccounts
-        ?.map(acc => parseInt(acc.account_code))
-        .filter(num => !isNaN(num) && num.toString().length === 2)
-        .sort((a, b) => a - b) || [];
-      
-      let nextNumber = parseInt(parentCode) + 1;
-      while (existingNumbers.includes(nextNumber)) {
-        nextNumber++;
-      }
-      nextCode = nextNumber.toString().padStart(2, '0');
-      
-    } else if (parentLevel === 2) {
-      // For level 2 accounts, sub-accounts should be 3-digit (111, 112, 113, etc.)
-      const parentPrefix = parentCode;
-      const existingNumbers = existingSubAccounts
-        ?.map(acc => {
-          if (acc.account_code.startsWith(parentPrefix)) {
-            const suffix = acc.account_code.substring(parentPrefix.length);
-            return parseInt(suffix);
-          }
-          return NaN;
-        })
-        .filter(num => !isNaN(num))
-        .sort((a, b) => a - b) || [];
-      
-      let nextNumber = 1;
-      while (existingNumbers.includes(nextNumber)) {
-        nextNumber++;
-      }
-      nextCode = parentPrefix + nextNumber.toString();
-      
-    } else {
-      // For deeper levels, append incremental numbers
-      const parentPrefix = parentCode;
-      const existingNumbers = existingSubAccounts
-        ?.map(acc => {
-          if (acc.account_code.startsWith(parentPrefix)) {
-            const suffix = acc.account_code.substring(parentPrefix.length);
-            return parseInt(suffix);
-          }
-          return NaN;
-        })
-        .filter(num => !isNaN(num))
-        .sort((a, b) => a - b) || [];
-      
-      let nextNumber = 1;
-      while (existingNumbers.includes(nextNumber)) {
-        nextNumber++;
-      }
-      nextCode = parentPrefix + nextNumber.toString().padStart(2, '0');
-    }
-
-    console.log('✅ تم توليد رقم الحساب الفرعي:', nextCode);
-    return nextCode;
+    const codes = existingSubAccounts?.map(acc => acc.account_code) || [];
+    console.log('📊 الحسابات الفرعية الموجودة:', codes);
+    return codes;
   };
 
   // Enhanced validation function
-  const validateAccountData = (accountData: Partial<ChartOfAccount>, parentAccount: ChartOfAccount) => {
+  const validateAccountData = (accountData: Partial<ChartOfAccount>, parentAccount: ChartOfAccount, existingCodes: string[]) => {
     const errors: string[] = [];
 
     if (!accountData.account_name?.trim()) {
@@ -102,19 +41,11 @@ export const useAccountOperations = () => {
       errors.push('نوع الحساب مطلوب');
     }
 
-    // Validate account code format
+    // Validate account code if provided
     if (accountData.account_code) {
-      const code = accountData.account_code.trim();
-      if (!/^\d+$/.test(code)) {
-        errors.push('رقم الحساب يجب أن يحتوي على أرقام فقط');
-      }
-      
-      // Check code length based on level
-      const expectedLevel = parentAccount.level + 1;
-      if (expectedLevel === 2 && code.length !== 2) {
-        errors.push('رقم الحساب للمستوى الثاني يجب أن يكون من رقمين');
-      } else if (expectedLevel === 3 && (code.length < 3 || code.length > 4)) {
-        errors.push('رقم الحساب للمستوى الثالث يجب أن يكون من 3-4 أرقام');
+      const validation = validateAccountCode(accountData.account_code, parentAccount, existingCodes);
+      if (!validation.isValid) {
+        errors.push(...validation.errors);
       }
     }
 
@@ -148,10 +79,13 @@ export const useAccountOperations = () => {
 
       console.log('📋 بيانات الحساب الأب:', parentAccount);
 
+      // Get existing sub-account codes
+      const existingCodes = await getExistingSubAccountCodes(parentAccount as ChartOfAccount);
+
       // Generate account code if not provided
       let accountCode = accountData.account_code?.trim();
       if (!accountCode) {
-        accountCode = await generateSubAccountCode(parentAccount as ChartOfAccount);
+        accountCode = generateNextSubAccountCode(parentAccount as ChartOfAccount, existingCodes);
         console.log('🔢 تم توليد رقم الحساب تلقائياً:', accountCode);
       }
 
@@ -161,9 +95,9 @@ export const useAccountOperations = () => {
         account_code: accountCode,
         account_type: accountData.account_type as ChartOfAccount['account_type']
       };
-      validateAccountData(validatedData as ChartOfAccount, parentAccount as ChartOfAccount);
+      validateAccountData(validatedData as ChartOfAccount, parentAccount as ChartOfAccount, existingCodes);
 
-      // Check for duplicate account code
+      // Check for duplicate account code in database
       const { data: existingAccount, error: checkError } = await supabase
         .from('chart_of_accounts')
         .select('id')
