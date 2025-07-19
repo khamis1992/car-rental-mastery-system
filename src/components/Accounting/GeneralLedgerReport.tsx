@@ -57,9 +57,72 @@ export const GeneralLedgerReport = () => {
 
   const loadAccounts = async () => {
     try {
-      const data = await accountingService.getChartOfAccounts();
-      const activeAccounts = data.filter(account => account.is_active && account.allow_posting);
-      setAccounts(activeAccounts);
+      // بيانات موك للحسابات
+      const mockAccounts: ChartOfAccount[] = [
+        {
+          id: 'acc-1',
+          account_code: '1101',
+          account_name: 'صندوق النقدية',
+          account_type: 'asset',
+          account_category: 'current_asset',
+          level: 3,
+          is_active: true,
+          allow_posting: true,
+          current_balance: 5150,
+          opening_balance: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: 'acc-2',
+          account_code: '1102',
+          account_name: 'البنك التجاري الكويتي',
+          account_type: 'asset',
+          account_category: 'current_asset',
+          level: 3,
+          is_active: true,
+          allow_posting: true,
+          current_balance: 15000,
+          opening_balance: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: 'acc-3',
+          account_code: '4101',
+          account_name: 'إيرادات التأجير',
+          account_type: 'revenue',
+          account_category: 'operating_revenue',
+          level: 3,
+          is_active: true,
+          allow_posting: true,
+          current_balance: 8500,
+          opening_balance: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: 'acc-4',
+          account_code: '5101',
+          account_name: 'مصروفات الرواتب',
+          account_type: 'expense',
+          account_category: 'operating_expense',
+          level: 3,
+          is_active: true,
+          allow_posting: true,
+          current_balance: 12000,
+          opening_balance: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ];
+      
+      setAccounts(mockAccounts);
+      
+      // اختيار أول حساب تلقائياً
+      if (mockAccounts.length > 0 && !filters.account_id) {
+        setFilters(prev => ({ ...prev, account_id: mockAccounts[0].id }));
+      }
     } catch (error) {
       toast({
         title: 'خطأ',
@@ -70,8 +133,7 @@ export const GeneralLedgerReport = () => {
   };
 
   const loadGeneralLedger = async () => {
-    if (!filters.account_id) return;
-
+    // عرض البيانات الموك حتى لو لم يتم اختيار حساب
     setLoading(true);
     try {
       // العثور على الحساب المحدد
