@@ -13,6 +13,7 @@ import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { AccountSelector } from './AccountSelector';
 
 interface JournalEntryLine {
   id: string;
@@ -60,6 +61,7 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
     }
   ]);
   const [loading, setLoading] = useState(false);
+  const [recentAccounts, setRecentAccounts] = useState<string[]>([]);
 
   const addLine = () => {
     const newLine: JournalEntryLine = {
@@ -83,6 +85,14 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
     setLines(lines.map(line => 
       line.id === id ? { ...line, [field]: value } : line
     ));
+
+    // Track recent accounts
+    if (field === 'accountId' && value) {
+      setRecentAccounts(prev => {
+        const updated = [value, ...prev.filter(id => id !== value)];
+        return updated.slice(0, 10); // Keep only last 10
+      });
+    }
   };
 
   const calculateTotals = () => {
@@ -282,21 +292,14 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
                 <div key={line.id} className="grid grid-cols-12 gap-2 p-3 border rounded-lg">
                   <div className="col-span-3">
                     <Label className="rtl-label text-sm">الحساب</Label>
-                    <Select
+                    <AccountSelector
+                      accounts={accounts}
                       value={line.accountId}
                       onValueChange={(value) => updateLine(line.id, 'accountId', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="اختر الحساب" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {accounts.map((account) => (
-                          <SelectItem key={account.id} value={account.id}>
-                            {account.account_code} - {account.account_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      placeholder="اختر الحساب"
+                      showBalance={true}
+                      recentAccounts={recentAccounts}
+                    />
                   </div>
 
                   <div className="col-span-3">
