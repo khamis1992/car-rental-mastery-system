@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAccountStats } from '@/hooks/useAccountStats';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const ChartOfAccounts = () => {
   const { stats, loading, error, refetch } = useAccountStats();
@@ -21,6 +22,7 @@ const ChartOfAccounts = () => {
         description: "تم تحديث إحصائيات الحسابات بنجاح",
       });
     } catch (err) {
+      console.error('خطأ في تحديث الإحصائيات:', err);
       toast({
         title: "خطأ في التحديث",
         description: "فشل في تحديث إحصائيات الحسابات",
@@ -29,7 +31,8 @@ const ChartOfAccounts = () => {
     }
   };
 
-  return <div className="p-6 space-y-6">
+  return (
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground rtl-title">دليل الحسابات</h1>
@@ -46,9 +49,22 @@ const ChartOfAccounts = () => {
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             تحديث
           </Button>
-          <ChartOfAccountsImportDialog isOpen={false} onClose={() => {}} onImportComplete={() => window.location.reload()} />
+          <ChartOfAccountsImportDialog 
+            isOpen={false} 
+            onClose={() => {}} 
+            onImportComplete={() => window.location.reload()} 
+          />
         </div>
       </div>
+
+      {/* عرض رسالة خطأ إذا وجدت */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>
+            حدث خطأ في تحميل البيانات: {error.message}
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Quick Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -60,7 +76,7 @@ const ChartOfAccounts = () => {
             {loading ? (
               <Skeleton className="h-8 w-16 mb-1" />
             ) : (
-              <div className="text-2xl font-bold text-primary">{stats.assets}</div>
+              <div className="text-2xl font-bold text-primary">{stats?.assets || 0}</div>
             )}
             <p className="text-xs text-muted-foreground">حساب نشط</p>
           </CardContent>
@@ -74,7 +90,7 @@ const ChartOfAccounts = () => {
             {loading ? (
               <Skeleton className="h-8 w-16 mb-1" />
             ) : (
-              <div className="text-2xl font-bold text-primary">{stats.liabilities}</div>
+              <div className="text-2xl font-bold text-primary">{stats?.liabilities || 0}</div>
             )}
             <p className="text-xs text-muted-foreground">حساب نشط</p>
           </CardContent>
@@ -88,7 +104,7 @@ const ChartOfAccounts = () => {
             {loading ? (
               <Skeleton className="h-8 w-16 mb-1" />
             ) : (
-              <div className="text-2xl font-bold text-primary">{stats.revenues}</div>
+              <div className="text-2xl font-bold text-primary">{stats?.revenues || 0}</div>
             )}
             <p className="text-xs text-muted-foreground">حساب نشط</p>
           </CardContent>
@@ -102,7 +118,7 @@ const ChartOfAccounts = () => {
             {loading ? (
               <Skeleton className="h-8 w-16 mb-1" />
             ) : (
-              <div className="text-2xl font-bold text-primary">{stats.expenses}</div>
+              <div className="text-2xl font-bold text-primary">{stats?.expenses || 0}</div>
             )}
             <p className="text-xs text-muted-foreground">حساب نشط</p>
           </CardContent>
@@ -111,7 +127,8 @@ const ChartOfAccounts = () => {
 
       {/* Main Chart of Accounts Table */}
       <ChartOfAccountsTab />
-    </div>;
+    </div>
+  );
 };
 
 export default ChartOfAccounts;
