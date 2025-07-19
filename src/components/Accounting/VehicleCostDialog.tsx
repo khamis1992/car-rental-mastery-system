@@ -276,14 +276,14 @@ export const VehicleCostDialog: React.FC<VehicleCostDialogProps> = ({
             <div className="space-y-2">
               <Label htmlFor="supplier_id">المورد</Label>
               <Select
-                value={watch('supplier_id') || ''}
-                onValueChange={(value) => setValue('supplier_id', value || undefined)}
+                value={watch('supplier_id') || 'none'}
+                onValueChange={(value) => setValue('supplier_id', value === 'none' ? undefined : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="اختر المورد (اختياري)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">بدون مورد</SelectItem>
+                  <SelectItem value="none">بدون مورد</SelectItem>
                   {suppliers?.map((supplier) => (
                     <SelectItem key={supplier.id} value={supplier.id}>
                       {supplier.supplier_name}

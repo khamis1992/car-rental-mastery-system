@@ -258,12 +258,12 @@ export function AssetMaintenanceDialog({ assetId, assetName, trigger }: AssetMai
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="performed_by" className="text-right">المسؤول عن الصيانة</Label>
-                    <Select value={formData.performed_by || ""} onValueChange={(value) => setFormData(prev => ({ ...prev, performed_by: value || undefined }))}>
+                    <Select value={formData.performed_by || "unassigned"} onValueChange={(value) => setFormData(prev => ({ ...prev, performed_by: value === "unassigned" ? undefined : value }))}>
                       <SelectTrigger className="text-right">
                         <SelectValue placeholder="اختر الموظف" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">غير محدد</SelectItem>
+                        <SelectItem value="unassigned">غير محدد</SelectItem>
                         {employees?.map((employee) => (
                           <SelectItem key={employee.id} value={employee.id}>
                             {employee.full_name}

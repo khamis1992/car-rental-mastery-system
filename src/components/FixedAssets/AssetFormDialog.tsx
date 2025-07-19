@@ -375,12 +375,12 @@ export function AssetFormDialog({ asset, trigger }: AssetFormDialogProps) {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="assigned_employee" className="text-right">الموظف المعين</Label>
-                      <Select value={formData.assigned_employee_id} onValueChange={(value) => setFormData(prev => ({ ...prev, assigned_employee_id: value }))}>
+                      <Select value={formData.assigned_employee_id || "unassigned"} onValueChange={(value) => setFormData(prev => ({ ...prev, assigned_employee_id: value === "unassigned" ? undefined : value }))}>
                         <SelectTrigger className="text-right">
                           <SelectValue placeholder="اختر الموظف" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">غير معين</SelectItem>
+                          <SelectItem value="unassigned">غير معين</SelectItem>
                           {employees?.map((employee) => (
                             <SelectItem key={employee.id} value={employee.id}>
                               {employee.full_name}

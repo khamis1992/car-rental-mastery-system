@@ -272,14 +272,14 @@ export const InventoryMovementDialog: React.FC<InventoryMovementDialogProps> = (
                 <div className="space-y-2">
                   <Label htmlFor="reference_type">نوع المرجع</Label>
                   <Select
-                    value={watch('reference_type') || ''}
-                    onValueChange={(value) => setValue('reference_type', value || undefined)}
+                    value={watch('reference_type') || 'none'}
+                    onValueChange={(value) => setValue('reference_type', value === 'none' ? undefined : value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="اختر نوع المرجع (اختياري)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">بدون مرجع</SelectItem>
+                      <SelectItem value="none">بدون مرجع</SelectItem>
                       <SelectItem value="invoice">فاتورة</SelectItem>
                       <SelectItem value="contract">عقد</SelectItem>
                       <SelectItem value="maintenance">صيانة</SelectItem>

@@ -301,14 +301,14 @@ export const InventoryItemDialog: React.FC<InventoryItemDialogProps> = ({
             <div className="space-y-2">
               <Label htmlFor="account_id">الحساب المحاسبي</Label>
               <Select
-                value={watch('account_id') || ''}
-                onValueChange={(value) => setValue('account_id', value || undefined)}
+                value={watch('account_id') || 'none'}
+                onValueChange={(value) => setValue('account_id', value === 'none' ? undefined : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="اختر الحساب المحاسبي" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">بدون حساب</SelectItem>
+                  <SelectItem value="none">بدون حساب</SelectItem>
                   {accounts?.map((account) => (
                     <SelectItem key={account.id} value={account.id}>
                       {account.account_code} - {account.account_name}
@@ -322,14 +322,14 @@ export const InventoryItemDialog: React.FC<InventoryItemDialogProps> = ({
             <div className="space-y-2">
               <Label htmlFor="supplier_id">المورد الافتراضي</Label>
               <Select
-                value={watch('supplier_id') || ''}
-                onValueChange={(value) => setValue('supplier_id', value || undefined)}
+                value={watch('supplier_id') || 'none'}
+                onValueChange={(value) => setValue('supplier_id', value === 'none' ? undefined : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="اختر المورد" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">بدون مورد</SelectItem>
+                  <SelectItem value="none">بدون مورد</SelectItem>
                   {suppliers?.map((supplier) => (
                     <SelectItem key={supplier.id} value={supplier.id}>
                       {supplier.supplier_name}
