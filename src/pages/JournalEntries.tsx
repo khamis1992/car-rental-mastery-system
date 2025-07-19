@@ -3,24 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  BookOpen, 
-  Zap, 
-  TrendingUp, 
-  Users, 
-  AlertTriangle, 
-  CheckCircle,
-  Plus,
-  RefreshCw,
-  Filter,
-  Calendar,
-  BarChart3,
-  Settings,
-  Link,
-  Target
-} from 'lucide-react';
-import { JournalEntriesWrapper } from '@/components/Accounting/JournalEntriesWrapper';
-import { ReportsContainer } from '@/components/Accounting/Reports/ReportsContainer';
+import { BookOpen, Zap, TrendingUp, Users, AlertTriangle, CheckCircle, Plus, RefreshCw, Filter, Calendar, BarChart3, Settings, Link, Target } from 'lucide-react';
+import { EnhancedJournalEntriesTab } from '@/components/Accounting/EnhancedJournalEntriesTab';
 import { AutomatedJournalEntries } from '@/components/Accounting/AutomatedJournalEntries';
 import { CostCenterBudgetAlerts } from '@/components/Accounting/CostCenterBudgetAlerts';
 import { accountingService } from '@/services/accountingService';
@@ -39,24 +23,22 @@ const JournalEntriesDashboard = () => {
     balanceIssues: 0
   });
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     loadDashboardStats();
   }, []);
-
   const loadDashboardStats = async () => {
     try {
       setLoading(true);
       const entries = await accountingService.getJournalEntries();
-      
       const draftEntries = entries.filter(e => e.status === 'draft').length;
       const postedEntries = entries.filter(e => e.status === 'posted').length;
       const automatedEntries = entries.filter(e => e.reference_type !== 'manual').length;
       const totalDebit = entries.reduce((sum, e) => sum + e.total_debit, 0);
       const totalCredit = entries.reduce((sum, e) => sum + e.total_credit, 0);
       const balanceIssues = entries.filter(e => Math.abs(e.total_debit - e.total_credit) > 0.01).length;
-
       setStats({
         totalEntries: entries.length,
         draftEntries,
@@ -71,29 +53,24 @@ const JournalEntriesDashboard = () => {
       toast({
         title: 'خطأ',
         description: 'فشل في تحميل إحصائيات لوحة المعلومات',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
     }
   };
-
   if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <Card key={i} className="animate-pulse">
+    return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({
+        length: 8
+      }).map((_, i) => <Card key={i} className="animate-pulse">
             <CardContent className="p-6">
               <div className="h-16 bg-muted rounded"></div>
             </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
+          </Card>)}
+      </div>;
   }
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+  return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <Card className="hover:shadow-md transition-shadow">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
@@ -186,22 +163,18 @@ const JournalEntriesDashboard = () => {
             <div>
               <p className="text-sm text-muted-foreground">قيود غير متوازنة</p>
               <p className="text-2xl font-bold text-red-600">{stats.balanceIssues}</p>
-              {stats.balanceIssues === 0 && (
-                <Badge variant="default" className="mt-1">متوازن</Badge>
-              )}
+              {stats.balanceIssues === 0 && <Badge variant="default" className="mt-1">متوازن</Badge>}
             </div>
             <Target className="h-8 w-8 text-red-500" />
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
 
 // Cost Center Management Component  
 const CostCenterManagement = () => {
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="rtl-title flex items-center gap-2">
@@ -215,7 +188,7 @@ const CostCenterManagement = () => {
           </p>
           <div className="flex gap-2">
             <Button variant="outline">
-              <Settings className="w-4 h-4" />
+              
               إعدادات مراكز التكلفة
             </Button>
             <Button variant="outline">
@@ -227,19 +200,16 @@ const CostCenterManagement = () => {
       </Card>
       
       <CostCenterBudgetAlerts showOnlyUnread={false} maxAlerts={20} />
-    </div>
-  );
+    </div>;
 };
 
 // Source Links Component
 const SourceLinks = () => {
   const [linkedEntries, setLinkedEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     loadLinkedEntries();
   }, []);
-
   const loadLinkedEntries = async () => {
     try {
       const entries = await accountingService.getJournalEntries();
@@ -251,7 +221,6 @@ const SourceLinks = () => {
       setLoading(false);
     }
   };
-
   const getSourceLabel = (referenceType: string) => {
     const labels = {
       invoice: 'فاتورة',
@@ -261,9 +230,7 @@ const SourceLinks = () => {
     };
     return labels[referenceType as keyof typeof labels] || referenceType;
   };
-
-  return (
-    <Card>
+  return <Card>
       <CardHeader>
         <CardTitle className="rtl-title flex items-center gap-2">
           <Link className="w-5 h-5" />
@@ -271,12 +238,8 @@ const SourceLinks = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {loading ? (
-          <div className="text-center py-4">جاري التحميل...</div>
-        ) : (
-          <div className="space-y-3">
-            {linkedEntries.slice(0, 10).map((entry) => (
-              <div key={entry.id} className="flex items-center justify-between p-3 border rounded-lg">
+        {loading ? <div className="text-center py-4">جاري التحميل...</div> : <div className="space-y-3">
+            {linkedEntries.slice(0, 10).map(entry => <div key={entry.id} className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <p className="font-medium">{entry.entry_number}</p>
                   <p className="text-sm text-muted-foreground">{entry.description}</p>
@@ -289,24 +252,18 @@ const SourceLinks = () => {
                     <Link className="w-4 h-4" />
                   </Button>
                 </div>
-              </div>
-            ))}
-            {linkedEntries.length === 0 && (
-              <p className="text-center text-muted-foreground py-4">
+              </div>)}
+            {linkedEntries.length === 0 && <p className="text-center text-muted-foreground py-4">
                 لا توجد قيود مرتبطة بمصادر
-              </p>
-            )}
-          </div>
-        )}
+              </p>}
+          </div>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
 
 // Reports Component
 const JournalReports = () => {
-  return (
-    <Card>
+  return <Card>
       <CardHeader>
         <CardTitle className="rtl-title flex items-center gap-2">
           <BarChart3 className="w-5 h-5" />
@@ -333,45 +290,60 @@ const JournalReports = () => {
           </Button>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 const JournalEntries = () => {
-  const [activeTab, setActiveTab] = useState('manual');
-
+  const [activeTab, setActiveTab] = useState('dashboard');
   const refreshData = () => {
     // Trigger refresh for current tab
     window.location.reload();
   };
-
-  return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between" style={{ direction: 'ltr' }}>
-        <Button onClick={refreshData} variant="outline">
-          <RefreshCw className="w-4 h-4 mr-2" />
-          تحديث البيانات
-        </Button>
-        <div style={{ direction: 'rtl' }}>
+  return <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
           <h1 className="text-3xl font-bold text-foreground rtl-title">إدارة القيود المحاسبية</h1>
           <p className="text-muted-foreground">
             مركز شامل لإدارة جميع القيود المحاسبية اليدوية والتلقائية
           </p>
         </div>
+        
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={refreshData} className="rtl-flex">
+            <RefreshCw className="w-4 h-4" />
+            تحديث
+          </Button>
+          <Button variant="outline" className="rtl-flex">
+            <Filter className="w-4 h-4" />
+            فلترة
+          </Button>
+          <Button variant="outline" className="rtl-flex">
+            <Calendar className="w-4 h-4" />
+            تقارير
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="reports">التقارير</TabsTrigger>
-          <TabsTrigger value="sources">المصادر المرتبطة</TabsTrigger>
-          <TabsTrigger value="cost-centers">مراكز التكلفة</TabsTrigger>
-          <TabsTrigger value="automated">القيود التلقائية</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="dashboard">لوحة المعلومات</TabsTrigger>
           <TabsTrigger value="manual">القيود اليدوية</TabsTrigger>
+          <TabsTrigger value="automated">القيود التلقائية</TabsTrigger>
+          <TabsTrigger value="cost-centers">مراكز التكلفة</TabsTrigger>
+          <TabsTrigger value="sources">المصادر المرتبطة</TabsTrigger>
+          <TabsTrigger value="reports">التقارير</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="dashboard" className="space-y-6">
+          <JournalEntriesDashboard />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <CostCenterBudgetAlerts showOnlyUnread={true} maxAlerts={5} />
+            <SourceLinks />
+          </div>
+        </TabsContent>
 
         <TabsContent value="manual" className="space-y-4">
-          <JournalEntriesWrapper />
+          <EnhancedJournalEntriesTab />
         </TabsContent>
 
         <TabsContent value="automated" className="space-y-4">
@@ -387,11 +359,9 @@ const JournalEntries = () => {
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-4">
-          <ReportsContainer />
+          <JournalReports />
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default JournalEntries;
