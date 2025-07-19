@@ -17,11 +17,13 @@ import {
   BarChart3,
   Settings,
   Link,
-  Target
+  Target,
+  RotateCcw
 } from 'lucide-react';
 import { EnhancedJournalEntriesTab } from '@/components/Accounting/EnhancedJournalEntriesTab';
 import { AutomatedJournalEntries } from '@/components/Accounting/AutomatedJournalEntries';
 import { CostCenterBudgetAlerts } from '@/components/Accounting/CostCenterBudgetAlerts';
+import AutoReverseScheduledEntries from '@/components/journal/AutoReverseScheduledEntries';
 import { FinancialBreadcrumb } from '@/components/Financial/FinancialBreadcrumb';
 import { accountingService } from '@/services/accountingService';
 import { JournalEntry } from '@/types/accounting';
@@ -375,10 +377,11 @@ const JournalEntries = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="dashboard">لوحة المعلومات</TabsTrigger>
           <TabsTrigger value="manual">القيود اليدوية</TabsTrigger>
           <TabsTrigger value="automated">القيود التلقائية</TabsTrigger>
+          <TabsTrigger value="auto-reverse">العكس التلقائي</TabsTrigger>
           <TabsTrigger value="cost-centers">مراكز التكلفة</TabsTrigger>
           <TabsTrigger value="sources">المصادر المرتبطة</TabsTrigger>
           <TabsTrigger value="reports">التقارير</TabsTrigger>
@@ -399,6 +402,10 @@ const JournalEntries = () => {
 
         <TabsContent value="automated" className="space-y-4">
           <AutomatedJournalEntries />
+        </TabsContent>
+
+        <TabsContent value="auto-reverse" className="space-y-4">
+          <AutoReverseScheduledEntries />
         </TabsContent>
 
         <TabsContent value="cost-centers" className="space-y-4">

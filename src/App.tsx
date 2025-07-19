@@ -167,6 +167,4 @@ function App() {
   );
 }
 
-import AccountModificationRequestsPage from '@/pages/AccountModificationRequests';
-
 export default App;
