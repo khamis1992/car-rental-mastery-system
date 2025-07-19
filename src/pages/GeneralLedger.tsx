@@ -123,25 +123,6 @@ const GeneralLedger = () => {
         </div>
       </div>
 
-      {/* Quick Actions Section */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {ledgerFeatures.map((feature, index) => (
-          <Card key={index} className="card-elegant hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg rtl-flex">
-                {feature.icon}
-                {feature.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4 text-right">{feature.description}</p>
-              <Button size="sm" className="w-full" onClick={feature.onClick}>
-                {feature.action}
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
 
       {/* Main Ledger Report */}
       <Card className="card-elegant" ref={reportRef}>
