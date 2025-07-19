@@ -95,7 +95,7 @@ const Contracts = () => {
             مزامنة شاملة
           </Button>
           <Button 
-            className="rtl-flex"
+            className="btn-primary flex items-center gap-2"
             onClick={() => setContractFormOpen(true)}
           >
             <Plus className="w-4 h-4" />

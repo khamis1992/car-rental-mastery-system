@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
-import { Eye, EyeOff, ArrowLeft, Home } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
@@ -59,19 +59,9 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg border border-border p-8 relative">
-        {/* Back to Home Button */}
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/')}
-          className="absolute top-4 right-4 flex items-center gap-2 text-muted-foreground hover:text-foreground"
-        >
-          <Home className="w-4 h-4" />
-          <span className="text-sm">العودة للرئيسية</span>
-        </Button>
-
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg border border-border p-8">
         {/* Header */}
-        <div className="text-center mb-8 mt-8">
+        <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-[#0066CC] mb-2">
             Fleetify
           </h1>
@@ -100,7 +90,7 @@ const Auth = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full h-12 text-right bg-gray-50 border border-input rounded-lg px-4 focus:bg-white focus:border-primary transition-colors"
-              placeholder="admin@example.com"
+              placeholder=""
             />
           </div>
 
@@ -141,27 +131,10 @@ const Auth = () => {
             className="w-full h-12 bg-[#0066CC] hover:bg-[#0052A3] text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors mt-8"
             disabled={loading}
           >
-            <ArrowLeft className="w-4 h-4" />
             {loading ? 'جاري التحميل...' : 'تسجيل الدخول'}
+            <ArrowLeft className="w-4 h-4" />
           </Button>
         </form>
-
-        {/* Help Link */}
-        <div className="text-center mt-6">
-          <p className="text-sm text-muted-foreground">
-            تحتاج مساعدة؟{' '}
-            <button 
-              type="button"
-              className="text-[#0066CC] hover:underline font-medium"
-              onClick={() => {
-                // يمكن إضافة صفحة المساعدة أو نافذة محادثة هنا
-                alert('يمكنك التواصل معنا عبر البريد الإلكتروني: support@fleetify.com');
-              }}
-            >
-              تواصل معنا
-            </button>
-          </p>
-        </div>
 
       </div>
     </div>

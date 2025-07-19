@@ -28,12 +28,9 @@ import Invoicing from "./pages/Invoicing";
 import ChartOfAccounts from "./pages/ChartOfAccounts";
 import JournalEntries from "./pages/JournalEntries";
 import FinancialReports from "./pages/FinancialReports";
-import FixedAssets from "./pages/FixedAssets";
-import ChecksPage from "./pages/ChecksPage";
 import BudgetManagement from "./pages/BudgetManagement";
 import AccountingAutomation from "./pages/AccountingAutomation";
 import AccountingValidation from "./pages/AccountingValidation";
-import ExpenseManagement from "./pages/ExpenseManagement";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 
@@ -193,18 +190,13 @@ const App = () => (
                         </Layout>
                       </ProtectedRoute>
                     } />
-                     <Route path="/accounting-validation" element={
-                       <ProtectedRoute>
-                         <Layout>
-                           <AccountingValidation />
-                         </Layout>
-                       </ProtectedRoute>
-                     } />
-                     <Route path="/expense-management" element={
-                       <ProtectedRoute>
-                         <ExpenseManagement />
-                       </ProtectedRoute>
-                     } />
+                    <Route path="/accounting-validation" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <AccountingValidation />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
                     <Route path="/settings" element={
                       <ProtectedRoute>
                         <Layout>
@@ -275,21 +267,7 @@ const App = () => (
                          </Layout>
                        </ProtectedRoute>
                      } />
-                     <Route path="/fixed-assets" element={
-                       <ProtectedRoute>
-                         <Layout>
-                           <FixedAssets />
-                         </Layout>
-                       </ProtectedRoute>
-                      } />
-                      <Route path="/checks" element={
-                        <ProtectedRoute>
-                          <Layout>
-                            <ChecksPage />
-                          </Layout>
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/tenants" element={
+                     <Route path="/tenants" element={
                         <ProtectedRoute requiredRole="super_admin">
                           <Layout>
                             <Tenants />

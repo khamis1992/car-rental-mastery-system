@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { ChartOfAccount } from '@/types/accounting';
 import { accountingService } from '@/services/accountingService';
 import { useToast } from '@/hooks/use-toast';
-import { AccountDetailsModal } from './AccountDetailsModal';
 
 export const ChartOfAccountsTab = () => {
   const [accounts, setAccounts] = useState<ChartOfAccount[]>([]);
@@ -21,8 +20,6 @@ export const ChartOfAccountsTab = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<ChartOfAccount | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedAccountForDetails, setSelectedAccountForDetails] = useState<ChartOfAccount | null>(null);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -137,11 +134,6 @@ export const ChartOfAccountsTab = () => {
       opening_balance: 0,
       notes: ''
     });
-  };
-
-  const handleViewDetails = (account: ChartOfAccount) => {
-    setSelectedAccountForDetails(account);
-    setIsDetailsModalOpen(true);
   };
 
   const getAccountTypeLabel = (type: string) => {
@@ -271,7 +263,6 @@ export const ChartOfAccountsTab = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-right">إجراءات</TableHead>
               <TableHead className="text-right">الحالة</TableHead>
               <TableHead className="text-right">الرصيد الحالي</TableHead>
               <TableHead className="text-right">النوع</TableHead>
@@ -282,26 +273,6 @@ export const ChartOfAccountsTab = () => {
           <TableBody>
             {filteredAccounts.map((account) => (
               <TableRow key={account.id}>
-                <TableCell className="text-right">
-                  <div className="flex items-center gap-1 flex-row-reverse">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleViewDetails(account)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleEdit(account)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end">
                     <Badge variant={account.is_active ? 'default' : 'secondary'}>
@@ -336,16 +307,6 @@ export const ChartOfAccountsTab = () => {
           </div>
         )}
       </CardContent>
-
-      {/* Modal تفاصيل الحساب */}
-      <AccountDetailsModal
-        account={selectedAccountForDetails}
-        isOpen={isDetailsModalOpen}
-        onClose={() => {
-          setIsDetailsModalOpen(false);
-          setSelectedAccountForDetails(null);
-        }}
-      />
     </Card>
   );
 };
