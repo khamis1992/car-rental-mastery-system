@@ -16,14 +16,23 @@ const ChartOfAccounts = () => {
         
         <div className="flex items-center gap-2 flex-row-reverse">
           
-          
-          
+          <Button variant="outline" onClick={() => navigate('/financial-reports')} className="rtl-flex">
+            <BarChart3 className="w-4 h-4" />
+            التقارير المالية
+          </Button>
+          <Button variant="outline" className="rtl-flex">
+            <RefreshCw className="w-4 h-4" />
+            تحديث
+          </Button>
           <ChartOfAccountsImportDialog isOpen={false} onClose={() => {}} onImportComplete={() => window.location.reload()} />
           <Button variant="outline" className="rtl-flex">
             <Download className="w-4 h-4" />
             تصدير
           </Button>
-          
+          <Button className="btn-primary rtl-flex">
+            <Plus className="w-4 h-4" />
+            حساب جديد
+          </Button>
         </div>
       </div>
 
