@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Eye, Upload, GitBranch } from 'lucide-react';
+import { Plus, Search, Edit, Eye, Upload, GitBranch, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,17 @@ import { useToast } from '@/hooks/use-toast';
 import { AccountDetailsModal } from './AccountDetailsModal';
 import { ChartOfAccountsImportDialog } from './ChartOfAccountsImportDialog';
 import { SubAccountCreator } from './SubAccountCreator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const ChartOfAccountsTab = () => {
   const [accounts, setAccounts] = useState<ChartOfAccount[]>([]);
@@ -26,6 +37,7 @@ export const ChartOfAccountsTab = () => {
   const [selectedAccountForDetails, setSelectedAccountForDetails] = useState<ChartOfAccount | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [accountToDelete, setAccountToDelete] = useState<ChartOfAccount | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -131,6 +143,50 @@ export const ChartOfAccountsTab = () => {
 
   const getSubAccountsCount = (parentId: string) => {
     return accounts.filter(acc => acc.parent_account_id === parentId).length;
+  };
+
+  const handleDeleteAccount = async (account: ChartOfAccount) => {
+    try {
+      // التحقق من وجود حسابات فرعية
+      const subAccountsCount = getSubAccountsCount(account.id);
+      if (subAccountsCount > 0) {
+        toast({
+          title: 'لا يمكن الحذف',
+          description: `لا يمكن حذف هذا الحساب لأنه يحتوي على ${subAccountsCount} حساب فرعي`,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // التحقق من وجود معاملات في الحساب
+      if (account.current_balance !== 0) {
+        toast({
+          title: 'تحذير',
+          description: 'لا يمكن حذف حساب له رصيد. يجب أن يكون الرصيد صفر قبل الحذف',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // حذف الحساب
+      await accountingService.deleteAccount(account.id);
+      
+      toast({
+        title: 'تم بنجاح',
+        description: 'تم حذف الحساب بنجاح',
+      });
+      
+      // إعادة تحميل البيانات
+      loadAccounts();
+      setAccountToDelete(null);
+    } catch (error) {
+      console.error('خطأ في حذف الحساب:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل في حذف الحساب. قد يكون الحساب مرتبط بمعاملات محاسبية',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (loading) {
@@ -256,8 +312,43 @@ export const ChartOfAccountsTab = () => {
                       </Badge>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right">
+                   <TableCell className="text-right">
                     <div className="flex items-center gap-1 flex-row-reverse">
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                            title="حذف الحساب"
+                            onClick={() => setAccountToDelete(account)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>تأكيد حذف الحساب</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              هل أنت متأكد من حذف الحساب "{account.account_name}" رقم {account.account_code}؟
+                              <br />
+                              <span className="text-destructive font-medium">
+                                هذا الإجراء لا يمكن التراجع عنه.
+                              </span>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="flex gap-2 flex-row-reverse">
+                            <AlertDialogAction
+                              onClick={() => handleDeleteAccount(account)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              حذف
+                            </AlertDialogAction>
+                            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                      
                       {account.level < 5 && (
                         <Button
                           size="sm"
