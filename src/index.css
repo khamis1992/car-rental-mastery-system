@@ -38,6 +38,20 @@
   --shadow-glow: 0 0 20px hsla(221, 83%, 53%, 0.3);
   --btn-primary: 221 83% 53%;
   --btn-primary-hover: 221 83% 48%;
+  
+  /* Action Button Colors */
+  --btn-royal: 262 83% 58%;
+  --btn-royal-hover: 262 83% 53%;
+  --btn-emerald: 142 76% 36%;
+  --btn-emerald-hover: 142 76% 31%;
+  --btn-orange: 25 95% 53%;
+  --btn-orange-hover: 25 95% 48%;
+  --btn-success: 134 61% 41%;
+  --btn-success-hover: 134 61% 36%;
+  --btn-warning: 48 96% 53%;
+  --btn-warning-hover: 48 96% 48%;
+  --btn-danger: 0 84% 60%;
+  --btn-danger-hover: 0 84% 55%;
 }
 
 .dark {
@@ -105,6 +119,79 @@ body {
 
 .shadow-glow {
   box-shadow: var(--shadow-glow);
+}
+
+/* Action Button Styles */
+.btn-royal {
+  background-color: hsl(var(--btn-royal));
+  color: hsl(var(--primary-foreground));
+  transition: all 0.3s ease;
+}
+
+.btn-royal:hover {
+  background-color: hsl(var(--btn-royal-hover));
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px hsla(var(--btn-royal), 0.3);
+}
+
+.btn-emerald {
+  background-color: hsl(var(--btn-emerald));
+  color: hsl(var(--primary-foreground));
+  transition: all 0.3s ease;
+}
+
+.btn-emerald:hover {
+  background-color: hsl(var(--btn-emerald-hover));
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px hsla(var(--btn-emerald), 0.3);
+}
+
+.btn-orange {
+  background-color: hsl(var(--btn-orange));
+  color: hsl(var(--primary-foreground));
+  transition: all 0.3s ease;
+}
+
+.btn-orange:hover {
+  background-color: hsl(var(--btn-orange-hover));
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px hsla(var(--btn-orange), 0.3);
+}
+
+.btn-success {
+  background-color: hsl(var(--btn-success));
+  color: hsl(var(--primary-foreground));
+  transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+  background-color: hsl(var(--btn-success-hover));
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px hsla(var(--btn-success), 0.3);
+}
+
+.btn-warning {
+  background-color: hsl(var(--btn-warning));
+  color: hsl(var(--foreground));
+  transition: all 0.3s ease;
+}
+
+.btn-warning:hover {
+  background-color: hsl(var(--btn-warning-hover));
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px hsla(var(--btn-warning), 0.3);
+}
+
+.btn-danger {
+  background-color: hsl(var(--btn-danger));
+  color: hsl(var(--primary-foreground));
+  transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+  background-color: hsl(var(--btn-danger-hover));
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px hsla(var(--btn-danger), 0.3);
 }
 
 /* Responsive design improvements */

@@ -38,21 +38,40 @@ const QuickActions = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
-        <div className="space-y-4">
+        <div className="grid gap-6">
           {actions.map((action, index) => (
-            <button
+            <div
               key={index}
-              className={`w-full p-6 rounded-2xl text-white hover:scale-[1.02] transition-all duration-200 flex flex-col items-center gap-3 shadow-lg ${action.className}`}
+              className={`group relative overflow-hidden rounded-2xl border border-border/50 transition-all duration-300 hover:border-border cursor-pointer ${action.className}`}
               onClick={action.onClick}
             >
-              <div className="text-2xl">
-                {action.icon}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <div className="relative p-6 flex items-center gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-xl group-hover:scale-110 transition-transform duration-300">
+                    {action.icon}
+                  </div>
+                </div>
+                
+                <div className="flex-1 text-right">
+                  <div className="font-bold text-lg text-white mb-1 group-hover:translate-x-1 transition-transform duration-300">
+                    {action.title}
+                  </div>
+                  <div className="text-sm text-white/80 group-hover:text-white transition-colors duration-300">
+                    {action.description}
+                  </div>
+                </div>
+                
+                <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
-              <div className="text-center">
-                <div className="font-bold text-lg mb-1">{action.title}</div>
-                <div className="text-sm opacity-90">{action.description}</div>
-              </div>
-            </button>
+            </div>
           ))}
         </div>
       </CardContent>
