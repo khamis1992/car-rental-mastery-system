@@ -17,26 +17,37 @@ interface ParentAccountSelectorProps {
 }
 
 export const ParentAccountSelector: React.FC<ParentAccountSelectorProps> = ({
-  accounts = [], // إضافة قيمة افتراضية
+  accounts = [],
   selectedParentId,
   onParentSelect,
   disabled = false
 }) => {
   const [open, setOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
 
   // تصفية الحسابات التي يُسمح لها بأن تكون حسابات أب (مستوى أقل من 5)
   const eligibleParentAccounts = useMemo(() => {
     if (!Array.isArray(accounts)) return [];
     
-    return accounts.filter(account => 
+    let filtered = accounts.filter(account => 
       account && 
       account.level < 5 && 
       account.is_active
-    ).sort((a, b) => {
+    );
+
+    // تصفية حسب البحث إذا وجد
+    if (searchValue.trim()) {
+      filtered = filtered.filter(account =>
+        account.account_name.toLowerCase().includes(searchValue.toLowerCase()) ||
+        account.account_code.includes(searchValue)
+      );
+    }
+
+    return filtered.sort((a, b) => {
       if (!a?.account_code || !b?.account_code) return 0;
       return a.account_code.localeCompare(b.account_code);
     });
-  }, [accounts]);
+  }, [accounts, searchValue]);
 
   const selectedParent = Array.isArray(accounts) ? accounts.find(acc => acc?.id === selectedParentId) : null;
 
@@ -56,6 +67,7 @@ export const ParentAccountSelector: React.FC<ParentAccountSelectorProps> = ({
     if (account) {
       onParentSelect(accountId, account.level + 1);
       setOpen(false);
+      setSearchValue('');
     }
   };
 
@@ -73,9 +85,9 @@ export const ParentAccountSelector: React.FC<ParentAccountSelectorProps> = ({
             disabled={disabled}
           >
             {selectedParent ? (
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2 flex-row-reverse">
                 <Building2 className="w-4 h-4" />
-                {selectedParent.account_code} - {selectedParent.account_name}
+                <span>{selectedParent.account_code} - {selectedParent.account_name}</span>
               </span>
             ) : (
               <span className="text-muted-foreground">اختر الحساب الأب...</span>
@@ -86,13 +98,11 @@ export const ParentAccountSelector: React.FC<ParentAccountSelectorProps> = ({
         
         <PopoverContent className="w-[400px] p-0" align="start">
           <Command shouldFilter={false}>
-            <div className="flex items-center border-b px-3">
-              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-              <input 
-                placeholder="البحث في الحسابات..." 
-                className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-              />
-            </div>
+            <CommandInput 
+              placeholder="البحث في الحسابات..." 
+              value={searchValue}
+              onValueChange={setSearchValue}
+            />
             <CommandList className="max-h-[300px] overflow-y-auto">
               <CommandEmpty>لا توجد حسابات مطابقة</CommandEmpty>
               <CommandGroup>
@@ -101,9 +111,9 @@ export const ParentAccountSelector: React.FC<ParentAccountSelectorProps> = ({
                     key={account.id}
                     value={account.id}
                     onSelect={() => handleSelect(account.id)}
-                    className="flex flex-col items-start gap-1 p-3"
+                    className="flex flex-col items-start gap-1 p-3 cursor-pointer"
                   >
-                    <div className="flex items-center gap-2 w-full">
+                    <div className="flex items-center gap-2 w-full flex-row-reverse">
                       <Building2 className="w-4 h-4" />
                       <span className="font-medium">
                         {account.account_code} - {account.account_name}
@@ -112,7 +122,7 @@ export const ParentAccountSelector: React.FC<ParentAccountSelectorProps> = ({
                         مستوى {account.level}
                       </span>
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-muted-foreground text-right w-full">
                       نوع: {getAccountTypeLabel(account.account_type)} | 
                       المستوى التالي سيكون: {account.level + 1}
                     </div>

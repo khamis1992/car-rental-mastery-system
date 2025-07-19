@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { ChartOfAccount } from '@/types/accounting';
 
 interface AccountHierarchyDisplayProps {
@@ -32,14 +32,14 @@ export const AccountHierarchyDisplay: React.FC<AccountHierarchyDisplayProps> = (
   const accountPath = getAccountPath(account);
 
   return (
-    <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-2 rounded-md">
+    <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-2 rounded-md flex-row-reverse">
       {accountPath.map((pathAccount, index) => (
-        <React.Fragment key={pathAccount.id}>
-          {index > 0 && <ChevronRight className="w-3 h-3" />}
+        <div key={pathAccount.id} className="flex items-center gap-2">
+          {index > 0 && <ChevronLeft className="w-3 h-3" />}
           <span className={index === accountPath.length - 1 ? 'font-medium text-foreground' : ''}>
             {pathAccount.account_code} - {pathAccount.account_name}
           </span>
-        </React.Fragment>
+        </div>
       ))}
     </div>
   );
