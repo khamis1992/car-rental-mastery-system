@@ -7,9 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { EmployeeFormDialog } from '@/components/HR/EmployeeFormDialog';
-import { EmployeeDetails } from '@/components/HR/EmployeeDetails';
-import { BulkEmployeeImport } from '@/components/HR/BulkEmployeeImport';
+import { AddEmployeeForm } from '@/components/Employees/AddEmployeeForm';
+import { EmployeeDetailsDialog } from '@/components/Employees/EmployeeDetailsDialog';
+import { EditEmployeeForm } from '@/components/Employees/EditEmployeeForm';
 import { useSecureTenantData } from '@/hooks/useSecureTenantData';
 
 const Employees = () => {
@@ -34,8 +34,7 @@ const Employees = () => {
     
     const matchesStatus = statusFilter === 'all' || employee.status === statusFilter;
     
-    const matchesDepartment = departmentFilter === 'all' || 
-      (employee.department_id && employee.department_id.toString() === departmentFilter);
+    const matchesDepartment = departmentFilter === 'all';
     
     return matchesSearch && matchesStatus && matchesDepartment;
   });
@@ -224,7 +223,6 @@ const Employees = () => {
                 </thead>
                 <tbody>
                   {filteredEmployees.map((employee) => {
-                    const department = departments.find(d => d.id === employee.department_id);
                     return (
                       <tr key={employee.id} className="border-b hover:bg-muted/50">
                         <td className="py-3 px-4 text-right">{employee.employee_number}</td>
@@ -233,7 +231,7 @@ const Employees = () => {
                         </td>
                         <td className="py-3 px-4 text-right">{employee.position}</td>
                         <td className="py-3 px-4 text-right">
-                          {department ? department.department_name : 'غير محدد'}
+                          غير محدد
                         </td>
                         <td className="py-3 px-4 text-right">
                           <Badge 
@@ -266,18 +264,14 @@ const Employees = () => {
       </Card>
 
       {/* Dialogs */}
-      <EmployeeFormDialog
+      <AddEmployeeForm
         open={showAddEmployee}
         onOpenChange={setShowAddEmployee}
-      />
-
-      <BulkEmployeeImport
-        open={showBulkImport}
-        onOpenChange={setShowBulkImport}
+        onEmployeeAdded={() => window.location.reload()}
       />
 
       {selectedEmployee && (
-        <EmployeeDetails
+        <EmployeeDetailsDialog
           employee={selectedEmployee}
           open={!!selectedEmployee}
           onOpenChange={() => setSelectedEmployee(null)}
