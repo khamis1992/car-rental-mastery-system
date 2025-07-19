@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   Home, 
@@ -48,7 +49,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 const coreBusinessItems = [
   { 
     title: "الرئيسية", 
-    url: "/dashboard", 
+    url: "/", 
     icon: Home 
   },
   { 

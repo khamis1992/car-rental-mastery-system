@@ -91,6 +91,8 @@ function AppRoutes() {
   return (
     <Layout>
       <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/dashboard" element={<Index />} />
         <Route path="/customers" element={<Customers />} />
         <Route path="/fleet" element={<Fleet />} />
         <Route path="/quotations" element={<Quotations />} />
@@ -126,8 +128,7 @@ function AppRoutes() {
         <Route path="/super-admin/landing-editor" element={<SuperAdminLandingEditor />} />
         <Route path="/super-admin/global-settings" element={<SuperAdminGlobalSettings />} />
         
-        <Route path="/" element={<Navigate to="/customers" />} />
-        <Route path="*" element={<Navigate to="/customers" />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Layout>
   );
