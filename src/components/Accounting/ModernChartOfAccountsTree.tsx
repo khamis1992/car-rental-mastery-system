@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronRight, ChevronDown, Search, Plus, Edit, BarChart3, DollarSign, Building, CreditCard, TrendingUp, Eye, MoreHorizontal } from 'lucide-react';
 import { formatCurrencyKWD } from '@/lib/currency';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+
 interface Account {
   id: string;
   account_code: string;
@@ -18,6 +19,7 @@ interface Account {
   is_active: boolean;
   children?: Account[];
 }
+
 interface ModernChartOfAccountsTreeProps {
   accounts: Account[];
   loading?: boolean;
@@ -25,6 +27,7 @@ interface ModernChartOfAccountsTreeProps {
   onEditAccount?: (account: Account) => void;
   onViewLedger?: (account: Account) => void;
 }
+
 const accountTypeConfig = {
   asset: {
     label: 'الأصول',
@@ -62,6 +65,7 @@ const accountTypeConfig = {
     borderColor: 'border-muted-foreground/20'
   }
 };
+
 export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps> = ({
   accounts,
   loading = false,
@@ -79,7 +83,6 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
     const accountMap = new Map();
     const rootAccounts: Account[] = [];
 
-    // First pass: create map
     accounts.forEach(account => {
       accountMap.set(account.id, {
         ...account,
@@ -87,7 +90,6 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
       });
     });
 
-    // Second pass: build tree
     accounts.forEach(account => {
       const accountNode = accountMap.get(account.id);
       if (account.parent_account_id) {
@@ -124,6 +126,7 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
     };
     return accountTree.map(filterAccount).filter(Boolean) as Account[];
   }, [accountTree, searchTerm, selectedType]);
+
   const toggleNode = (accountId: string) => {
     const newExpanded = new Set(expandedNodes);
     if (newExpanded.has(accountId)) {
@@ -133,6 +136,19 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
     }
     setExpandedNodes(newExpanded);
   };
+
+  const handleAccountCardClick = (account: Account, event: React.MouseEvent) => {
+    // Only trigger if the account allows posting and we're not clicking on buttons
+    const target = event.target as HTMLElement;
+    if (target.closest('button') || target.closest('[role="button"]')) {
+      return;
+    }
+    
+    if (account.allow_posting && onViewLedger) {
+      onViewLedger(account);
+    }
+  };
+
   const AccountNode: React.FC<{
     account: Account;
     depth: number;
@@ -144,10 +160,19 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
     const isExpanded = expandedNodes.has(account.id);
     const config = accountTypeConfig[account.account_type];
     const IconComponent = config.icon;
-    return <div className="select-none">
-        <div className={`flex items-center gap-3 p-4 rounded-lg border transition-all duration-200 hover:shadow-md hover:border-primary/30 ${config.borderColor} ${config.bgColor} mb-2`} style={{
-        marginRight: `${depth * 24}px`
-      }}>
+    const canViewLedger = account.allow_posting;
+
+    return (
+      <div className="select-none">
+        <div 
+          className={`flex items-center gap-3 p-4 rounded-lg border transition-all duration-200 ${config.borderColor} ${config.bgColor} mb-2 ${
+            canViewLedger ? 'hover:shadow-md hover:border-primary/30 cursor-pointer' : 'hover:shadow-sm'
+          }`} 
+          style={{
+            marginRight: `${depth * 24}px`
+          }}
+          onClick={(e) => handleAccountCardClick(account, e)}
+        >
           {/* Actions Menu - far left */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -156,24 +181,41 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onViewLedger?.(account)}>
-                <Eye className="h-4 w-4 ml-2" />
-                عرض دفتر الأستاذ
-              </DropdownMenuItem>
+              {canViewLedger && (
+                <DropdownMenuItem onClick={() => onViewLedger?.(account)}>
+                  <Eye className="h-4 w-4 ml-2" />
+                  عرض دفتر الأستاذ
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => onEditAccount?.(account)}>
                 <Edit className="h-4 w-4 ml-2" />
                 تعديل الحساب
               </DropdownMenuItem>
-              {hasChildren && <DropdownMenuItem onClick={() => onAddAccount?.(account.id)}>
+              {hasChildren && (
+                <DropdownMenuItem onClick={() => onAddAccount?.(account.id)}>
                   <Plus className="h-4 w-4 ml-2" />
                   إضافة حساب فرعي
-                </DropdownMenuItem>}
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
 
           {/* Expand/Collapse Button */}
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => hasChildren && toggleNode(account.id)} disabled={!hasChildren}>
-            {hasChildren ? isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" /> : <div className="h-4 w-4" />}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-6 w-6 p-0" 
+            onClick={(e) => {
+              e.stopPropagation();
+              if (hasChildren) toggleNode(account.id);
+            }} 
+            disabled={!hasChildren}
+          >
+            {hasChildren ? (
+              isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
+            ) : (
+              <div className="h-4 w-4" />
+            )}
           </Button>
 
           {/* Balance */}
@@ -181,15 +223,22 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
             <p className="text-sm font-semibold text-foreground">
               {formatCurrencyKWD(account.current_balance)}
             </p>
-            {account.allow_posting && <Badge variant="secondary" className="text-xs mt-1 bg-primary/10 text-primary border-primary/20">
+            {account.allow_posting && (
+              <Badge variant="secondary" className="text-xs mt-1 bg-primary/10 text-primary border-primary/20">
                 قابل للترحيل
-              </Badge>}
+              </Badge>
+            )}
           </div>
 
           {/* Account Name - middle */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-end gap-3">
-              
+              <p className="text-sm font-medium text-foreground truncate">
+                {account.account_name}
+              </p>
+              {canViewLedger && (
+                <Eye className="h-4 w-4 text-muted-foreground opacity-60" />
+              )}
             </div>
           </div>
 
@@ -199,9 +248,11 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
               <Badge variant="outline" className="text-xs font-normal bg-background">
                 {config.label}
               </Badge>
-              {!account.is_active && <Badge variant="destructive" className="text-xs">
+              {!account.is_active && (
+                <Badge variant="destructive" className="text-xs">
                   غير نشط
-                </Badge>}
+                </Badge>
+              )}
               <span className="font-semibold text-foreground text-sm">
                 {account.account_code}
               </span>
@@ -210,28 +261,39 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
               <IconComponent className={`h-5 w-5 ${config.color}`} />
             </div>
           </div>
-
         </div>
 
         {/* Children */}
-        {hasChildren && isExpanded && <div className="space-y-1">
-            {account.children?.map(child => <AccountNode key={child.id} account={child} depth={depth + 1} />)}
-          </div>}
-      </div>;
+        {hasChildren && isExpanded && (
+          <div className="space-y-1">
+            {account.children?.map(child => (
+              <AccountNode key={child.id} account={child} depth={depth + 1} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
+
   if (loading) {
-    return <Card>
+    return (
+      <Card>
         <CardHeader>
           <div className="h-6 bg-gray-200 rounded animate-pulse w-1/3"></div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-16 bg-gray-200 rounded animate-pulse"></div>)}
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="h-16 bg-gray-200 rounded animate-pulse"></div>
+            ))}
           </div>
         </CardContent>
-      </Card>;
+      </Card>
+    );
   }
-  return <Card>
+
+  return (
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <Button onClick={() => onAddAccount?.()}>
@@ -245,23 +307,41 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
         <div className="flex gap-4 mt-4">
           <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="البحث في الحسابات..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pr-10" />
+            <Input 
+              placeholder="البحث في الحسابات..." 
+              value={searchTerm} 
+              onChange={e => setSearchTerm(e.target.value)} 
+              className="pr-10" 
+            />
           </div>
           
-          <select value={selectedType} onChange={e => setSelectedType(e.target.value)} className="px-3 py-2 border rounded-md bg-background">
+          <select 
+            value={selectedType} 
+            onChange={e => setSelectedType(e.target.value)} 
+            className="px-3 py-2 border rounded-md bg-background"
+          >
             <option value="all">جميع الأنواع</option>
-            {Object.entries(accountTypeConfig).map(([type, config]) => <option key={type} value={type}>{config.label}</option>)}
+            {Object.entries(accountTypeConfig).map(([type, config]) => (
+              <option key={type} value={type}>{config.label}</option>
+            ))}
           </select>
         </div>
       </CardHeader>
       
       <CardContent>
         <div className="space-y-2 max-h-[600px] overflow-y-auto">
-          {filteredAccounts.length > 0 ? filteredAccounts.map(account => <AccountNode key={account.id} account={account} depth={0} />) : <div className="text-center py-8 text-muted-foreground">
+          {filteredAccounts.length > 0 ? (
+            filteredAccounts.map(account => (
+              <AccountNode key={account.id} account={account} depth={0} />
+            ))
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
               <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>لا توجد حسابات تطابق البحث</p>
-            </div>}
+            </div>
+          )}
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
