@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { TenantProvider } from '@/contexts/TenantContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
+import { SearchProvider } from '@/contexts/SearchContext';
 
 // Pages
 import Dashboard from '@/pages/Dashboard';
@@ -39,7 +40,8 @@ function App() {
         <AuthProvider>
           <TenantProvider>
             <NotificationProvider>
-              <Router>
+              <SearchProvider>
+                <Router>
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/" element={<Dashboard />} />
@@ -58,8 +60,9 @@ function App() {
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </Router>
-              <Toaster />
+                </Router>
+                <Toaster />
+              </SearchProvider>
             </NotificationProvider>
           </TenantProvider>
         </AuthProvider>
