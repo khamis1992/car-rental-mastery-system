@@ -27,11 +27,6 @@ export interface JournalEntry {
   total_debit: number;
   total_credit: number;
   status: 'draft' | 'posted' | 'reversed';
-  auto_reverse_date?: string;
-  reversal_entry_id?: string;
-  reversed_by_entry_id?: string;
-  is_reversed?: boolean;
-  is_reversal?: boolean;
   branch_id?: string;
   financial_period_id?: string;
   posted_at?: string;

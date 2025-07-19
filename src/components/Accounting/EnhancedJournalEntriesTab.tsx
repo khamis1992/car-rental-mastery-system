@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, Check, X, FileText, Settings, Link, AlertTriangle, RotateCcw } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Check, X, FileText, Settings, Link, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,8 +17,6 @@ import { DiagnosticsPanel } from './DiagnosticsPanel';
 import { JournalEntryAttachments } from './JournalEntryAttachments';
 import { CostCenterAllocation } from './CostCenterAllocation';
 import { CostCenterService, CostCenter } from '@/services/BusinessServices/CostCenterService';
-import AutoReverseDialog from '@/components/journal/AutoReverseDialog';
-import { autoReverseService } from '@/services/autoReverseService';
 
 interface JournalEntryAttachment {
   id: string;
@@ -51,7 +49,6 @@ export const EnhancedJournalEntriesTab = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<JournalEntryAttachment[]>([]);
-  const [autoReverseDialog, setAutoReverseDialog] = useState({ isOpen: false, entry: null as JournalEntry | null });
   const { toast } = useToast();
   const costCenterService = new CostCenterService();
 
@@ -357,31 +354,6 @@ export const EnhancedJournalEntriesTab = () => {
 
   const formatAmount = (amount: number) => {
     return `د.ك ${amount.toFixed(3)}`;
-  };
-
-  const handleAutoReverse = async (date: Date, reason: string) => {
-    if (!autoReverseDialog.entry) return;
-
-    try {
-      await autoReverseService.setAutoReverse({
-        entryId: autoReverseDialog.entry.id,
-        reverseDate: date,
-        reason
-      });
-
-      toast({
-        title: 'تم بنجاح',
-        description: `تم جدولة عكس القيد رقم ${autoReverseDialog.entry.entry_number} في تاريخ ${date.toLocaleDateString('ar-SA')}`,
-      });
-
-      loadData(); // إعادة تحميل البيانات لإظهار التحديث
-    } catch (error: any) {
-      toast({
-        title: 'خطأ',
-        description: error.message || 'فشل في جدولة العكس التلقائي',
-        variant: 'destructive',
-      });
-    }
   };
 
   if (loading) {
@@ -728,24 +700,14 @@ export const EnhancedJournalEntriesTab = () => {
                           >
                             <Check className="w-4 h-4 text-green-600" />
                           </Button>
-                         )}
-                         {entry.status === 'posted' && !entry.is_reversed && (
-                           <Button
-                             variant="ghost"
-                             size="sm"
-                             onClick={() => setAutoReverseDialog({ isOpen: true, entry })}
-                             title="عكس تلقائي"
-                           >
-                             <RotateCcw className="w-4 h-4 text-blue-600" />
-                           </Button>
-                         )}
-                         <Button
-                           variant="ghost"
-                           size="sm"
-                           onClick={() => {/* handleEdit(entry) */}}
-                         >
-                           <Edit className="w-4 h-4" />
-                         </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {/* handleEdit(entry) */}}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
@@ -788,13 +750,6 @@ export const EnhancedJournalEntriesTab = () => {
           )}
         </CardContent>
       </Card>
-
-      <AutoReverseDialog
-        isOpen={autoReverseDialog.isOpen}
-        onClose={() => setAutoReverseDialog({ isOpen: false, entry: null })}
-        onConfirm={handleAutoReverse}
-        entryNumber={autoReverseDialog.entry?.entry_number || ''}
-      />
     </div>
   );
 };
