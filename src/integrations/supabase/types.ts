@@ -5343,6 +5343,45 @@ export type Database = {
           },
         ]
       }
+      export_history: {
+        Row: {
+          export_format: string
+          exported_at: string | null
+          exported_by: string | null
+          file_path: string | null
+          file_size: number | null
+          id: string
+          parameters: Json | null
+          report_id: string | null
+          report_type: string
+          tenant_id: string
+        }
+        Insert: {
+          export_format: string
+          exported_at?: string | null
+          exported_by?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          parameters?: Json | null
+          report_id?: string | null
+          report_type: string
+          tenant_id: string
+        }
+        Update: {
+          export_format?: string
+          exported_at?: string | null
+          exported_by?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          parameters?: Json | null
+          report_id?: string | null
+          report_type?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       external_integrations: {
         Row: {
           api_key_name: string | null
@@ -5401,6 +5440,56 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_comparisons: {
+        Row: {
+          base_period_end: string
+          base_period_start: string
+          comparison_data: Json | null
+          comparison_name: string
+          comparison_period_end: string
+          comparison_period_start: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          base_period_end: string
+          base_period_start: string
+          comparison_data?: Json | null
+          comparison_name: string
+          comparison_period_end: string
+          comparison_period_start: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          base_period_end?: string
+          base_period_start?: string
+          comparison_data?: Json | null
+          comparison_name?: string
+          comparison_period_end?: string
+          comparison_period_start?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_comparisons_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -8907,6 +8996,50 @@ export type Database = {
           },
         ]
       }
+      saved_financial_reports: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          parameters: Json | null
+          report_data: Json | null
+          report_name: string
+          report_type: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          parameters?: Json | null
+          report_data?: Json | null
+          report_name: string
+          report_type: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          parameters?: Json | null
+          report_data?: Json | null
+          report_name?: string
+          report_type?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_financial_reports_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_events: {
         Row: {
           event_type: string
@@ -11273,6 +11406,16 @@ export type Database = {
         Args: { start_date?: string; end_date?: string }
         Returns: Json
       }
+      calculate_financial_variance: {
+        Args: {
+          tenant_id_param: string
+          base_start_date: string
+          base_end_date: string
+          comparison_start_date: string
+          comparison_end_date: string
+        }
+        Returns: Json
+      }
       calculate_forecast_accuracy: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -12006,6 +12149,18 @@ export type Database = {
           comparison_start_date: string
           comparison_end_date: string
           created_by_param?: string
+        }
+        Returns: string
+      }
+      save_financial_comparison: {
+        Args: {
+          tenant_id_param: string
+          comparison_name_param: string
+          base_start: string
+          base_end: string
+          comp_start: string
+          comp_end: string
+          created_by_param: string
         }
         Returns: string
       }

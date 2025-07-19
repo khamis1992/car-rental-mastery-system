@@ -12,6 +12,8 @@ import {
 import { AdvancedKPIsDashboard } from '@/components/Accounting/AdvancedKPIsDashboard';
 import { AIFinancialAnalytics } from '@/components/Accounting/AIFinancialAnalytics';
 import { CashFlowManagement } from '@/components/Accounting/CashFlowManagement';
+import FinancialComparison from '@/components/accounting/FinancialComparison';
+import EnhancedReportExport from '@/components/accounting/EnhancedReportExport';
 import { cn } from '@/lib/utils';
 
 const AdvancedFinancialReports = () => {
@@ -244,104 +246,125 @@ const AdvancedFinancialReports = () => {
         </TabsContent>
 
         <TabsContent value="comprehensive" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>التقارير المالية الشاملة</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Income Statement */}
-                <Card className="border-2 border-dashed border-gray-200 hover:border-primary transition-colors">
-                  <CardContent className="p-6 text-center">
-                    <BarChart3 className="w-12 h-12 text-primary mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">قائمة الدخل</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      تحليل شامل للإيرادات والمصروفات
-                    </p>
-                    <Button variant="outline" className="w-full">
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      عرض التقرير
-                    </Button>
-                  </CardContent>
-                </Card>
+          <Tabs defaultValue="reports" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="reports">التقارير الشاملة</TabsTrigger>
+              <TabsTrigger value="comparison">المقارنة والتباين</TabsTrigger>
+              <TabsTrigger value="export">تصدير محسن</TabsTrigger>
+            </TabsList>
 
-                {/* Balance Sheet */}
-                <Card className="border-2 border-dashed border-gray-200 hover:border-primary transition-colors">
-                  <CardContent className="p-6 text-center">
-                    <PieChart className="w-12 h-12 text-primary mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">الميزانية العمومية</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      عرض الأصول والخصوم وحقوق الملكية
-                    </p>
-                    <Button variant="outline" className="w-full">
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      عرض التقرير
-                    </Button>
-                  </CardContent>
-                </Card>
+            <TabsContent value="reports" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>التقارير المالية الشاملة</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Income Statement */}
+                    <Card className="border-2 border-dashed border-gray-200 hover:border-primary transition-colors">
+                      <CardContent className="p-6 text-center">
+                        <BarChart3 className="w-12 h-12 text-primary mx-auto mb-4" />
+                        <h3 className="text-lg font-medium mb-2">قائمة الدخل</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          تحليل شامل للإيرادات والمصروفات
+                        </p>
+                        <Button variant="outline" className="w-full">
+                          <ArrowRight className="w-4 h-4 mr-2" />
+                          عرض التقرير
+                        </Button>
+                      </CardContent>
+                    </Card>
 
-                {/* Cash Flow Statement */}
-                <Card className="border-2 border-dashed border-gray-200 hover:border-primary transition-colors">
-                  <CardContent className="p-6 text-center">
-                    <TrendingUp className="w-12 h-12 text-primary mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">قائمة التدفق النقدي</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      تحليل التدفقات النقدية التشغيلية والاستثمارية
-                    </p>
-                    <Button variant="outline" className="w-full">
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      عرض التقرير
-                    </Button>
-                  </CardContent>
-                </Card>
+                    {/* Balance Sheet */}
+                    <Card className="border-2 border-dashed border-gray-200 hover:border-primary transition-colors">
+                      <CardContent className="p-6 text-center">
+                        <PieChart className="w-12 h-12 text-primary mx-auto mb-4" />
+                        <h3 className="text-lg font-medium mb-2">الميزانية العمومية</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          عرض الأصول والخصوم وحقوق الملكية
+                        </p>
+                        <Button variant="outline" className="w-full">
+                          <ArrowRight className="w-4 h-4 mr-2" />
+                          عرض التقرير
+                        </Button>
+                      </CardContent>
+                    </Card>
 
-                {/* Trial Balance */}
-                <Card className="border-2 border-dashed border-gray-200 hover:border-primary transition-colors">
-                  <CardContent className="p-6 text-center">
-                    <Building2 className="w-12 h-12 text-primary mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">ميزان المراجعة</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      عرض أرصدة جميع الحسابات
-                    </p>
-                    <Button variant="outline" className="w-full">
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      عرض التقرير
-                    </Button>
-                  </CardContent>
-                </Card>
+                    {/* Cash Flow Statement */}
+                    <Card className="border-2 border-dashed border-gray-200 hover:border-primary transition-colors">
+                      <CardContent className="p-6 text-center">
+                        <TrendingUp className="w-12 h-12 text-primary mx-auto mb-4" />
+                        <h3 className="text-lg font-medium mb-2">قائمة التدفق النقدي</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          تحليل التدفقات النقدية التشغيلية والاستثمارية
+                        </p>
+                        <Button variant="outline" className="w-full">
+                          <ArrowRight className="w-4 h-4 mr-2" />
+                          عرض التقرير
+                        </Button>
+                      </CardContent>
+                    </Card>
 
-                {/* Cost Centers Report */}
-                <Card className="border-2 border-dashed border-gray-200 hover:border-primary transition-colors">
-                  <CardContent className="p-6 text-center">
-                    <Target className="w-12 h-12 text-primary mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">تقرير مراكز التكلفة</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      تحليل أداء مراكز التكلفة والميزانيات
-                    </p>
-                    <Button variant="outline" className="w-full">
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      عرض التقرير
-                    </Button>
-                  </CardContent>
-                </Card>
+                    {/* Trial Balance */}
+                    <Card className="border-2 border-dashed border-gray-200 hover:border-primary transition-colors">
+                      <CardContent className="p-6 text-center">
+                        <Building2 className="w-12 h-12 text-primary mx-auto mb-4" />
+                        <h3 className="text-lg font-medium mb-2">ميزان المراجعة</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          عرض أرصدة جميع الحسابات
+                        </p>
+                        <Button variant="outline" className="w-full">
+                          <ArrowRight className="w-4 h-4 mr-2" />
+                          عرض التقرير
+                        </Button>
+                      </CardContent>
+                    </Card>
 
-                {/* Financial Ratios */}
-                <Card className="border-2 border-dashed border-gray-200 hover:border-primary transition-colors">
-                  <CardContent className="p-6 text-center">
-                    <Activity className="w-12 h-12 text-primary mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">النسب المالية</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      تحليل السيولة والربحية والكفاءة
-                    </p>
-                    <Button variant="outline" className="w-full">
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      عرض التقرير
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </CardContent>
-          </Card>
+                    {/* Cost Centers Report */}
+                    <Card className="border-2 border-dashed border-gray-200 hover:border-primary transition-colors">
+                      <CardContent className="p-6 text-center">
+                        <Target className="w-12 h-12 text-primary mx-auto mb-4" />
+                        <h3 className="text-lg font-medium mb-2">تقرير مراكز التكلفة</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          تحليل أداء مراكز التكلفة والميزانيات
+                        </p>
+                        <Button variant="outline" className="w-full">
+                          <ArrowRight className="w-4 h-4 mr-2" />
+                          عرض التقرير
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Financial Ratios */}
+                    <Card className="border-2 border-dashed border-gray-200 hover:border-primary transition-colors">
+                      <CardContent className="p-6 text-center">
+                        <Activity className="w-12 h-12 text-primary mx-auto mb-4" />
+                        <h3 className="text-lg font-medium mb-2">النسب المالية</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          تحليل السيولة والربحية والكفاءة
+                        </p>
+                        <Button variant="outline" className="w-full">
+                          <ArrowRight className="w-4 h-4 mr-2" />
+                          عرض التقرير
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="comparison" className="space-y-4">
+              <FinancialComparison />
+            </TabsContent>
+
+            <TabsContent value="export" className="space-y-4">
+              <EnhancedReportExport 
+                reportType="comprehensive_report"
+                reportData={{}}
+              />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
     </div>
