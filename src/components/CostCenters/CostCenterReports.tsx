@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BarChart3, TrendingUp, TrendingDown, Download, FileText, AlertTriangle } from 'lucide-react';
 import { CostCenterReport } from '@/services/BusinessServices/CostCenterService';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface CostCenterReportsProps {
   report: CostCenterReport[];
@@ -42,8 +44,62 @@ const CostCenterReports = ({ report, isLoading }: CostCenterReportsProps) => {
   const totalVariance = totalBudget - totalSpent;
   const overBudgetCount = report.filter(item => item.actual_spent > item.budget_amount).length;
 
+  const exportToPDF = async () => {
+    try {
+      const element = document.getElementById('cost-center-report');
+      if (!element) return;
+
+      // إخفاء زر التصدير مؤقتاً
+      const exportButton = document.querySelector('[data-export-button]') as HTMLElement;
+      if (exportButton) {
+        exportButton.style.display = 'none';
+      }
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        scrollX: 0,
+        scrollY: 0,
+        width: element.scrollWidth,
+        height: element.scrollHeight
+      });
+
+      // إظهار زر التصدير مرة أخرى
+      if (exportButton) {
+        exportButton.style.display = '';
+      }
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('l', 'mm', 'a4'); // landscape orientation
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 20;
+
+      // إضافة العنوان
+      pdf.setFontSize(16);
+      pdf.text('تقرير مراكز التكلفة التفصيلي', pdfWidth / 2, 15, { align: 'center' });
+      
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      
+      // حفظ الملف
+      const today = new Date().toISOString().split('T')[0];
+      pdf.save(`تقرير-مراكز-التكلفة-${today}.pdf`);
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('حدث خطأ أثناء تصدير التقرير');
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div id="cost-center-report" className="space-y-6">
       {/* إحصائيات سريعة */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
@@ -109,7 +165,12 @@ const CostCenterReports = ({ report, isLoading }: CostCenterReportsProps) => {
               <FileText className="h-5 w-5" />
               تقرير مراكز التكلفة التفصيلي
             </CardTitle>
-            <Button variant="outline" className="gap-2 rtl-flex">
+            <Button 
+              variant="outline" 
+              className="gap-2 rtl-flex"
+              onClick={exportToPDF}
+              data-export-button
+            >
               <Download className="h-4 w-4" />
               تصدير التقرير
             </Button>
