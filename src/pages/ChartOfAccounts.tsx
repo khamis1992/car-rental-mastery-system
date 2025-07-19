@@ -1,25 +1,41 @@
+
 import React from 'react';
 import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
 import { ChartOfAccountsImportDialog } from '@/components/Accounting/ChartOfAccountsImportDialog';
-import { ChartOfAccountsSetup } from '@/components/Accounting/ChartOfAccountsSetup';
-import { GeneralLedgerReport } from '@/components/Accounting/GeneralLedgerReport';
-import { AccountingDashboard } from '@/components/Accounting/AccountingDashboard';
-import { TestChartOfAccountsIntegration } from '@/components/Accounting/TestChartOfAccountsIntegration';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Plus, Upload, Download } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RefreshCw, Plus, Upload, Download, Settings, BarChart3 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const ChartOfAccounts = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">دليل الحسابات</h1>
+          <h1 className="text-3xl font-bold text-foreground rtl-title">دليل الحسابات</h1>
           <p className="text-muted-foreground">إدارة وتنظيم دليل الحسابات المحاسبي</p>
         </div>
         
-        <div className="flex items-center gap-2">
-          <Button variant="outline" className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-row-reverse">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/chart-of-accounts-setup')}
+            className="rtl-flex"
+          >
+            <Settings className="w-4 h-4" />
+            إعداد النظام
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/financial-reports')}
+            className="rtl-flex"
+          >
+            <BarChart3 className="w-4 h-4" />
+            التقارير المالية
+          </Button>
+          <Button variant="outline" className="rtl-flex">
             <RefreshCw className="w-4 h-4" />
             تحديث
           </Button>
@@ -28,46 +44,62 @@ const ChartOfAccounts = () => {
             onClose={() => {}} 
             onImportComplete={() => window.location.reload()}
           />
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button variant="outline" className="rtl-flex">
             <Download className="w-4 h-4" />
             تصدير
           </Button>
-          <Button className="btn-primary flex items-center gap-2">
+          <Button className="btn-primary rtl-flex">
             <Plus className="w-4 h-4" />
             حساب جديد
           </Button>
         </div>
       </div>
 
-      <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="dashboard">لوحة المعلومات</TabsTrigger>
-          <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
-          <TabsTrigger value="ledger">دفتر الأستاذ</TabsTrigger>
-          <TabsTrigger value="setup">إعداد الحسابات</TabsTrigger>
-          <TabsTrigger value="integration">اختبار التكامل</TabsTrigger>
-        </TabsList>
+      {/* Quick Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="card-elegant">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">الأصول</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">12</div>
+            <p className="text-xs text-muted-foreground">حساب نشط</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="card-elegant">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">الخصوم</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">8</div>
+            <p className="text-xs text-muted-foreground">حساب نشط</p>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="dashboard" className="space-y-4">
-          <AccountingDashboard />
-        </TabsContent>
+        <Card className="card-elegant">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">الإيرادات</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">6</div>
+            <p className="text-xs text-muted-foreground">حساب نشط</p>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="accounts" className="space-y-4">
-          <ChartOfAccountsTab />
-        </TabsContent>
+        <Card className="card-elegant">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">المصروفات</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">15</div>
+            <p className="text-xs text-muted-foreground">حساب نشط</p>
+          </CardContent>
+        </Card>
+      </div>
 
-        <TabsContent value="ledger" className="space-y-4">
-          <GeneralLedgerReport />
-        </TabsContent>
-
-        <TabsContent value="setup" className="space-y-4">
-          <ChartOfAccountsSetup />
-        </TabsContent>
-
-        <TabsContent value="integration" className="space-y-4">
-          <TestChartOfAccountsIntegration />
-        </TabsContent>
-      </Tabs>
+      {/* Main Chart of Accounts Table */}
+      <ChartOfAccountsTab />
     </div>
   );
 };

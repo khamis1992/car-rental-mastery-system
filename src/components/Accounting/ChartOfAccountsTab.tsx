@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, Eye, Upload } from 'lucide-react';
+import { Plus, Search, Edit, Eye, Upload } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -169,75 +170,76 @@ export const ChartOfAccountsTab = () => {
     <Card className="card-elegant">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { resetForm(); setEditingAccount(null); }}>
-                <Plus className="w-4 h-4 ml-2" />
-                إضافة حساب جديد
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingAccount ? 'تعديل الحساب' : 'إضافة حساب جديد'}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="account_code">رقم الحساب</Label>
-                  <Input
-                    id="account_code"
-                    value={formData.account_code}
-                    onChange={(e) => setFormData({...formData, account_code: e.target.value})}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="account_name">اسم الحساب</Label>
-                  <Input
-                    id="account_name"
-                    value={formData.account_name}
-                    onChange={(e) => setFormData({...formData, account_name: e.target.value})}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="account_type">نوع الحساب</Label>
-                  <Select value={formData.account_type} onValueChange={(value) => setFormData({...formData, account_type: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر نوع الحساب" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="asset">أصول</SelectItem>
-                      <SelectItem value="liability">خصوم</SelectItem>
-                      <SelectItem value="equity">حقوق ملكية</SelectItem>
-                      <SelectItem value="revenue">إيرادات</SelectItem>
-                      <SelectItem value="expense">مصروفات</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="opening_balance">الرصيد الافتتاحي</Label>
-                  <Input
-                    id="opening_balance"
-                    type="number"
-                    step="0.001"
-                    value={formData.opening_balance}
-                    onChange={(e) => setFormData({...formData, opening_balance: parseFloat(e.target.value) || 0})}
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    إلغاء
-                  </Button>
-                  <Button type="submit">
-                    {editingAccount ? 'تحديث' : 'إضافة'}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-          <div className="flex gap-2">
+          <CardTitle className="rtl-title">قائمة الحسابات</CardTitle>
+          <div className="flex gap-2 flex-row-reverse">
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={() => { resetForm(); setEditingAccount(null); }} className="rtl-flex">
+                  <Plus className="w-4 h-4" />
+                  إضافة حساب جديد
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="rtl-title">
+                    {editingAccount ? 'تعديل الحساب' : 'إضافة حساب جديد'}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="account_code" className="rtl-label">رقم الحساب</Label>
+                    <Input
+                      id="account_code"
+                      value={formData.account_code}
+                      onChange={(e) => setFormData({...formData, account_code: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="account_name" className="rtl-label">اسم الحساب</Label>
+                    <Input
+                      id="account_name"
+                      value={formData.account_name}
+                      onChange={(e) => setFormData({...formData, account_name: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="account_type" className="rtl-label">نوع الحساب</Label>
+                    <Select value={formData.account_type} onValueChange={(value) => setFormData({...formData, account_type: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر نوع الحساب" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="asset">أصول</SelectItem>
+                        <SelectItem value="liability">خصوم</SelectItem>
+                        <SelectItem value="equity">حقوق ملكية</SelectItem>
+                        <SelectItem value="revenue">إيرادات</SelectItem>
+                        <SelectItem value="expense">مصروفات</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="opening_balance" className="rtl-label">الرصيد الافتتاحي</Label>
+                    <Input
+                      id="opening_balance"
+                      type="number"
+                      step="0.001"
+                      value={formData.opening_balance}
+                      onChange={(e) => setFormData({...formData, opening_balance: parseFloat(e.target.value) || 0})}
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2 flex-row-reverse">
+                    <Button type="submit">
+                      {editingAccount ? 'تحديث' : 'إضافة'}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      إلغاء
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
             <Button 
               variant="outline" 
               onClick={() => setIsImportDialogOpen(true)}
@@ -246,24 +248,12 @@ export const ChartOfAccountsTab = () => {
               <Upload className="w-4 h-4" />
               استيراد CSV
             </Button>
-            <CardTitle>دليل الحسابات</CardTitle>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         {/* فلاتر البحث */}
-        <div className="flex gap-4 mb-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="البحث برقم أو اسم الحساب..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
+        <div className="flex gap-4 mb-4 flex-row-reverse">
           <Select value={selectedType} onValueChange={setSelectedType}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="نوع الحساب" />
@@ -277,23 +267,57 @@ export const ChartOfAccountsTab = () => {
               <SelectItem value="expense">مصروفات</SelectItem>
             </SelectContent>
           </Select>
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="البحث برقم أو اسم الحساب..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pr-10"
+              />
+            </div>
+          </div>
         </div>
 
         {/* جدول الحسابات */}
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-right">إجراءات</TableHead>
-              <TableHead className="text-right">الحالة</TableHead>
-              <TableHead className="text-right">الرصيد الحالي</TableHead>
-              <TableHead className="text-right">النوع</TableHead>
-              <TableHead className="text-right">اسم الحساب</TableHead>
               <TableHead className="text-right">رقم الحساب</TableHead>
+              <TableHead className="text-right">اسم الحساب</TableHead>
+              <TableHead className="text-right">النوع</TableHead>
+              <TableHead className="text-right">الرصيد الحالي</TableHead>
+              <TableHead className="text-right">الحالة</TableHead>
+              <TableHead className="text-right">إجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredAccounts.map((account) => (
               <TableRow key={account.id}>
+                <TableCell className="text-right font-medium">{account.account_code}</TableCell>
+                <TableCell className="text-right">
+                  <div style={{ paddingRight: `${(account.level - 1) * 20}px` }}>
+                    {account.account_name}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end">
+                    <Badge variant="outline">
+                      {getAccountTypeLabel(account.account_type)}
+                    </Badge>
+                  </div>
+                </TableCell>
+                <TableCell className={`text-right font-medium ${account.current_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {formatBalance(account.current_balance)}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end">
+                    <Badge variant={account.is_active ? 'default' : 'secondary'}>
+                      {account.is_active ? 'نشط' : 'غير نشط'}
+                    </Badge>
+                  </div>
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center gap-1 flex-row-reverse">
                     <Button
@@ -314,29 +338,6 @@ export const ChartOfAccountsTab = () => {
                     </Button>
                   </div>
                 </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end">
-                    <Badge variant={account.is_active ? 'default' : 'secondary'}>
-                      {account.is_active ? 'نشط' : 'غير نشط'}
-                    </Badge>
-                  </div>
-                </TableCell>
-                <TableCell className={`text-right font-medium ${account.current_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatBalance(account.current_balance)}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end">
-                    <Badge variant="outline">
-                      {getAccountTypeLabel(account.account_type)}
-                    </Badge>
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div style={{ paddingRight: `${(account.level - 1) * 20}px` }}>
-                    {account.account_name}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right font-medium">{account.account_code}</TableCell>
               </TableRow>
             ))}
           </TableBody>
