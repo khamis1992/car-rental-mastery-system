@@ -247,9 +247,6 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
                   غير نشط
                 </Badge>
               )}
-              <span className="font-semibold text-foreground text-sm">
-                {account.account_code}
-              </span>
             </div>
             <div className="p-2 rounded-lg bg-background border border-border">
               <IconComponent className={`h-5 w-5 ${config.color}`} />
