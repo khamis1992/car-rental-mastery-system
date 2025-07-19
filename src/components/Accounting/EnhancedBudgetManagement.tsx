@@ -1,524 +1,448 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PieChart, BarChart3, TrendingUp, TrendingDown, AlertTriangle, Plus, Download, Calculator } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Edit, Trash2, Copy, BarChart3, FileText, AlertTriangle } from 'lucide-react';
+import { BudgetService, BudgetWithItems, BudgetSummary } from '@/services/BudgetService';
+import { BudgetItemManager } from '@/components/Budget/BudgetItemManager';
+import { BudgetVarianceReport } from '@/components/Budget/BudgetVarianceReport';
 import { formatCurrencyKWD } from '@/lib/currency';
+import { toast } from 'sonner';
 
-interface BudgetItem {
-  id: string;
-  account_id: string;
-  account_name: string;
-  account_code: string;
-  category: string;
-  budgeted_amount: number;
-  actual_amount: number;
-  variance_amount: number;
-  variance_percentage: number;
-  period: string;
-}
-
-interface BudgetSummary {
-  total_budgeted: number;
-  total_actual: number;
-  total_variance: number;
-  variance_percentage: number;
-  categories: Array<{
-    name: string;
-    budgeted: number;
-    actual: number;
-    variance: number;
-  }>;
-}
-
-export const EnhancedBudgetManagement = () => {
-  const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
+export const EnhancedBudgetManagement: React.FC = () => {
+  const [budgets, setBudgets] = useState<BudgetWithItems[]>([]);
+  const [selectedBudget, setSelectedBudget] = useState<BudgetWithItems | null>(null);
   const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
-  const [selectedPeriod, setSelectedPeriod] = useState('2024');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const { toast } = useToast();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingBudget, setEditingBudget] = useState<BudgetWithItems | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [currentTab, setCurrentTab] = useState('overview');
+  const budgetService = new BudgetService();
+
+  const [formData, setFormData] = useState({
+    budget_name: '',
+    fiscal_year: new Date().getFullYear(),
+    start_date: '',
+    end_date: '',
+    description: '',
+    cost_center_id: ''
+  });
 
   useEffect(() => {
-    loadBudgetData();
-  }, [selectedPeriod, selectedCategory]);
+    loadBudgets();
+  }, []);
 
-  const loadBudgetData = async () => {
+  useEffect(() => {
+    if (selectedBudget) {
+      loadBudgetSummary(selectedBudget.id);
+    }
+  }, [selectedBudget]);
+
+  const loadBudgets = async () => {
+    setLoading(true);
     try {
-      // Mock data for demonstration
-      const mockBudgetItems: BudgetItem[] = [
-        {
-          id: '1',
-          account_id: '4110101',
-          account_name: 'إيرادات تأجير السيارات - شركات',
-          account_code: '4110101',
-          category: 'إيرادات',
-          budgeted_amount: 50000,
-          actual_amount: 45200,
-          variance_amount: -4800,
-          variance_percentage: -9.6,
-          period: '2024-Q1'
-        },
-        {
-          id: '2',
-          account_id: '4110301',
-          account_name: 'إيرادات تأجير السيارات - أفراد',
-          account_code: '4110301',
-          category: 'إيرادات',
-          budgeted_amount: 30000,
-          actual_amount: 32500,
-          variance_amount: 2500,
-          variance_percentage: 8.3,
-          period: '2024-Q1'
-        },
-        {
-          id: '3',
-          account_id: '5101',
-          account_name: 'الوقود والزيوت',
-          account_code: '5101',
-          category: 'مصروفات التشغيل',
-          budgeted_amount: 8000,
-          actual_amount: 8500,
-          variance_amount: 500,
-          variance_percentage: 6.25,
-          period: '2024-Q1'
-        },
-        {
-          id: '4',
-          account_id: '5102',
-          account_name: 'صيانة المركبات',
-          account_code: '5102',
-          category: 'مصروفات التشغيل',
-          budgeted_amount: 12000,
-          actual_amount: 10200,
-          variance_amount: -1800,
-          variance_percentage: -15,
-          period: '2024-Q1'
-        },
-        {
-          id: '5',
-          account_id: '5201',
-          account_name: 'الرواتب والأجور',
-          account_code: '5201',
-          category: 'مصروفات إدارية',
-          budgeted_amount: 25000,
-          actual_amount: 25000,
-          variance_amount: 0,
-          variance_percentage: 0,
-          period: '2024-Q1'
-        }
-      ];
-
-      setBudgetItems(mockBudgetItems);
-
-      // Calculate summary
-      const totalBudgeted = mockBudgetItems.reduce((sum, item) => sum + item.budgeted_amount, 0);
-      const totalActual = mockBudgetItems.reduce((sum, item) => sum + item.actual_amount, 0);
-      const totalVariance = totalActual - totalBudgeted;
-      const variancePercentage = totalBudgeted > 0 ? (totalVariance / totalBudgeted) * 100 : 0;
-
-      // Group by category
-      const categoryMap = new Map();
-      mockBudgetItems.forEach(item => {
-        if (!categoryMap.has(item.category)) {
-          categoryMap.set(item.category, { budgeted: 0, actual: 0 });
-        }
-        const cat = categoryMap.get(item.category);
-        cat.budgeted += item.budgeted_amount;
-        cat.actual += item.actual_amount;
-      });
-
-      const categories = Array.from(categoryMap.entries()).map(([name, data]) => ({
-        name,
-        budgeted: data.budgeted,
-        actual: data.actual,
-        variance: data.actual - data.budgeted
-      }));
-
-      setBudgetSummary({
-        total_budgeted: totalBudgeted,
-        total_actual: totalActual,
-        total_variance: totalVariance,
-        variance_percentage: variancePercentage,
-        categories
-      });
-
+      const data = await budgetService.getAllBudgets();
+      setBudgets(data);
+      if (data.length > 0 && !selectedBudget) {
+        setSelectedBudget(data[0]);
+      }
     } catch (error) {
-      toast({
-        title: 'خطأ',
-        description: 'فشل في تحميل بيانات الميزانية',
-        variant: 'destructive',
-      });
+      console.error('Error loading budgets:', error);
+      toast.error('فشل في تحميل الميزانيات');
     } finally {
       setLoading(false);
     }
   };
 
-  const getVarianceColor = (percentage: number) => {
-    if (Math.abs(percentage) <= 5) return 'text-green-600';
-    if (Math.abs(percentage) <= 15) return 'text-yellow-600';
-    return 'text-red-600';
+  const loadBudgetSummary = async (budgetId: string) => {
+    try {
+      const summary = await budgetService.getBudgetSummary(budgetId);
+      setBudgetSummary(summary);
+    } catch (error) {
+      console.error('Error loading budget summary:', error);
+    }
   };
 
-  const getVarianceIcon = (percentage: number) => {
-    if (percentage > 0) return <TrendingUp className="h-4 w-4 text-red-500" />;
-    if (percentage < 0) return <TrendingDown className="h-4 w-4 text-green-500" />;
-    return <Calculator className="h-4 w-4 text-gray-500" />;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.budget_name || !formData.start_date || !formData.end_date) {
+      toast.error('يرجى ملء جميع الحقول المطلوبة');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (editingBudget) {
+        await budgetService.updateBudget(editingBudget.id, {
+          budget_name: formData.budget_name,
+          fiscal_year: formData.fiscal_year,
+          start_date: formData.start_date,
+          end_date: formData.end_date,
+          description: formData.description
+        });
+        toast.success('تم تحديث الميزانية بنجاح');
+      } else {
+        await budgetService.createBudget({
+          budget_name: formData.budget_name,
+          fiscal_year: formData.fiscal_year,
+          start_date: formData.start_date,
+          end_date: formData.end_date,
+          description: formData.description,
+          status: 'draft'
+        });
+        toast.success('تم إنشاء الميزانية بنجاح');
+      }
+
+      setIsDialogOpen(false);
+      resetForm();
+      loadBudgets();
+    } catch (error) {
+      console.error('Error saving budget:', error);
+      toast.error('فشل في حفظ الميزانية');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getProgressValue = (actual: number, budgeted: number) => {
-    if (budgeted === 0) return 0;
-    return Math.min((actual / budgeted) * 100, 100);
-  };
-
-  const exportBudgetReport = () => {
-    toast({
-      title: 'قريباً',
-      description: 'سيتم إضافة تصدير تقرير الميزانية قريباً',
+  const handleEdit = (budget: BudgetWithItems) => {
+    setEditingBudget(budget);
+    setFormData({
+      budget_name: budget.budget_name,
+      fiscal_year: budget.fiscal_year,
+      start_date: budget.start_date,
+      end_date: budget.end_date,
+      description: budget.description || '',
+      cost_center_id: budget.cost_center_id || ''
     });
+    setIsDialogOpen(true);
   };
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-64">جاري التحميل...</div>;
-  }
+  const handleCopy = async (budget: BudgetWithItems) => {
+    const newYear = budget.fiscal_year + 1;
+    try {
+      await budgetService.copyBudget(budget.id, {
+        budget_name: `${budget.budget_name} - ${newYear}`,
+        fiscal_year: newYear,
+        start_date: `${newYear}-01-01`,
+        end_date: `${newYear}-12-31`
+      });
+      toast.success('تم نسخ الميزانية بنجاح');
+      loadBudgets();
+    } catch (error) {
+      console.error('Error copying budget:', error);
+      toast.error('فشل في نسخ الميزانية');
+    }
+  };
+
+  const handleDelete = async (budgetId: string) => {
+    if (!confirm('هل أنت متأكد من حذف هذه الميزانية؟')) return;
+
+    try {
+      await budgetService.deleteBudget(budgetId);
+      toast.success('تم حذف الميزانية بنجاح');
+      
+      if (selectedBudget?.id === budgetId) {
+        setSelectedBudget(null);
+        setBudgetSummary(null);
+      }
+      
+      loadBudgets();
+    } catch (error) {
+      console.error('Error deleting budget:', error);
+      toast.error('فشل في حذف الميزانية');
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      budget_name: '',
+      fiscal_year: new Date().getFullYear(),
+      start_date: '',
+      end_date: '',
+      description: '',
+      cost_center_id: ''
+    });
+    setEditingBudget(null);
+  };
+
+  const getBudgetStatusBadge = (status: string) => {
+    const statusMap = {
+      draft: { label: 'مسودة', variant: 'secondary' as const },
+      active: { label: 'نشطة', variant: 'default' as const },
+      approved: { label: 'معتمدة', variant: 'default' as const },
+      closed: { label: 'مغلقة', variant: 'outline' as const }
+    };
+    return statusMap[status as keyof typeof statusMap] || { label: status, variant: 'outline' as const };
+  };
 
   return (
     <div className="space-y-6">
-      {/* عناصر التحكم */}
-      <Card className="card-elegant">
+      {/* قائمة الميزانيات */}
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 justify-end rtl-flex">
-            <BarChart3 className="w-5 h-5" />
-            إدارة الميزانية المتقدمة
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>الميزانيات</CardTitle>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={resetForm} className="rtl-flex">
+                  <Plus className="w-4 h-4" />
+                  ميزانية جديدة
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingBudget ? 'تعديل الميزانية' : 'إنشاء ميزانية جديدة'}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="budget_name">اسم الميزانية</Label>
+                    <Input
+                      id="budget_name"
+                      value={formData.budget_name}
+                      onChange={(e) => setFormData({...formData, budget_name: e.target.value})}
+                      placeholder="اسم الميزانية"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="fiscal_year">السنة المالية</Label>
+                    <Input
+                      id="fiscal_year"
+                      type="number"
+                      value={formData.fiscal_year}
+                      onChange={(e) => setFormData({...formData, fiscal_year: parseInt(e.target.value)})}
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="start_date">تاريخ البداية</Label>
+                      <Input
+                        id="start_date"
+                        type="date"
+                        value={formData.start_date}
+                        onChange={(e) => setFormData({...formData, start_date: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="end_date">تاريخ النهاية</Label>
+                      <Input
+                        id="end_date"
+                        type="date"
+                        value={formData.end_date}
+                        onChange={(e) => setFormData({...formData, end_date: e.target.value})}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="description">الوصف</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      placeholder="وصف الميزانية..."
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsDialogOpen(false)}
+                    >
+                      إلغاء
+                    </Button>
+                    <Button type="submit" disabled={loading}>
+                      {loading ? 'جاري الحفظ...' : 'حفظ'}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <div>
-              <Label htmlFor="period">الفترة</Label>
-              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر الفترة" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2024-Q1">الربع الأول 2024</SelectItem>
-                  <SelectItem value="2024-Q2">الربع الثاني 2024</SelectItem>
-                  <SelectItem value="2024-Q3">الربع الثالث 2024</SelectItem>
-                  <SelectItem value="2024-Q4">الربع الرابع 2024</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="category">الفئة</Label>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="جميع الفئات" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">جميع الفئات</SelectItem>
-                  <SelectItem value="إيرادات">الإيرادات</SelectItem>
-                  <SelectItem value="مصروفات التشغيل">مصروفات التشغيل</SelectItem>
-                  <SelectItem value="مصروفات إدارية">مصروفات إدارية</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="w-4 h-4 ml-2" />
-                    إضافة بند ميزانية
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>إضافة بند ميزانية جديد</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <p className="text-muted-foreground">سيتم إضافة هذه الميزة قريباً</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {budgets.map((budget) => (
+              <Card 
+                key={budget.id} 
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  selectedBudget?.id === budget.id ? 'ring-2 ring-primary' : ''
+                }`}
+                onClick={() => setSelectedBudget(budget)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold">{budget.budget_name}</h3>
+                    <Badge {...getBudgetStatusBadge(budget.status)}>
+                      {getBudgetStatusBadge(budget.status).label}
+                    </Badge>
                   </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-            
-            <div>
-              <Button variant="outline" onClick={exportBudgetReport} className="w-full">
-                <Download className="w-4 h-4 ml-2" />
-                تصدير التقرير
-              </Button>
-            </div>
+                  <div className="text-sm text-muted-foreground mb-2">
+                    السنة المالية: {budget.fiscal_year}
+                  </div>
+                  <div className="text-sm text-muted-foreground mb-3">
+                    {budget.start_date} إلى {budget.end_date}
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="text-xs text-muted-foreground">
+                      {budget.budget_items?.length || 0} بند
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(budget);
+                        }}
+                      >
+                        <Edit className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopy(budget);
+                        }}
+                      >
+                        <Copy className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(budget.id);
+                        }}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* ملخص الميزانية */}
-      {budgetSummary && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">الميزانية المخططة</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {formatCurrencyKWD(budgetSummary.total_budgeted)}
-                  </p>
-                </div>
-                <Calculator className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">الفعلي المحقق</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {formatCurrencyKWD(budgetSummary.total_actual)}
-                  </p>
-                </div>
-                <TrendingUp className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">الانحراف</p>
-                  <p className={`text-2xl font-bold ${getVarianceColor(budgetSummary.variance_percentage)}`}>
-                    {formatCurrencyKWD(Math.abs(budgetSummary.total_variance))}
-                  </p>
-                </div>
-                {budgetSummary.total_variance >= 0 ? (
-                  <TrendingUp className="h-8 w-8 text-red-500" />
-                ) : (
-                  <TrendingDown className="h-8 w-8 text-green-500" />
+      {/* تفاصيل الميزانية المحددة */}
+      {selectedBudget && (
+        <Tabs value={currentTab} onValueChange={setCurrentTab}>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
+            <TabsTrigger value="items">البنود</TabsTrigger>
+            <TabsTrigger value="variance">تقرير التباين</TabsTrigger>
+            <TabsTrigger value="reports">التقارير</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>{selectedBudget.budget_name} - نظرة عامة</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {budgetSummary && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {formatCurrencyKWD(budgetSummary.total_budget)}
+                      </div>
+                      <div className="text-sm text-muted-foreground">إجمالي الميزانية</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-orange-600">
+                        {formatCurrencyKWD(budgetSummary.total_spent)}
+                      </div>
+                      <div className="text-sm text-muted-foreground">إجمالي المنفق</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">
+                        {formatCurrencyKWD(budgetSummary.remaining_budget)}
+                      </div>
+                      <div className="text-sm text-muted-foreground">المتبقي</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {budgetSummary.utilization_percentage.toFixed(1)}%
+                      </div>
+                      <div className="text-sm text-muted-foreground">معدل الاستخدام</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-red-600">
+                        {budgetSummary.overbudget_items}
+                      </div>
+                      <div className="text-sm text-muted-foreground">بنود متجاوزة</div>
+                    </div>
+                  </div>
                 )}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">نسبة الانحراف</p>
-                  <p className={`text-2xl font-bold ${getVarianceColor(budgetSummary.variance_percentage)}`}>
-                    {budgetSummary.variance_percentage.toFixed(1)}%
-                  </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="items">
+            <BudgetItemManager
+              budgetId={selectedBudget.id}
+              items={selectedBudget.budget_items || []}
+              onItemsChange={() => {
+                loadBudgets();
+                if (selectedBudget) {
+                  loadBudgetSummary(selectedBudget.id);
+                }
+              }}
+            />
+          </TabsContent>
+
+          <TabsContent value="variance">
+            <BudgetVarianceReport
+              budgetId={selectedBudget.id}
+              budgetName={selectedBudget.budget_name}
+            />
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <Card>
+              <CardHeader>
+                <CardTitle>التقارير المتخصصة</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <Button variant="outline" className="h-20 rtl-flex flex-col">
+                    <BarChart3 className="w-6 h-6 mb-2" />
+                    تقرير الأداء
+                  </Button>
+                  <Button variant="outline" className="h-20 rtl-flex flex-col">
+                    <FileText className="w-6 h-6 mb-2" />
+                    تقرير التنفيذ
+                  </Button>
+                  <Button variant="outline" className="h-20 rtl-flex flex-col">
+                    <AlertTriangle className="w-6 h-6 mb-2" />
+                    تقرير المخاطر
+                  </Button>
                 </div>
-                <AlertTriangle className="h-8 w-8 text-yellow-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       )}
-
-      {/* التبويبات */}
-      <Tabs defaultValue="items" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="analysis">التحليل التفصيلي</TabsTrigger>
-          <TabsTrigger value="categories">التحليل بالفئات</TabsTrigger>
-          <TabsTrigger value="items">بنود الميزانية</TabsTrigger>
-        </TabsList>
-
-        {/* بنود الميزانية */}
-        <TabsContent value="items">
-          <Card className="card-elegant">
-            <CardHeader>
-              <CardTitle className="text-right">تفاصيل بنود الميزانية</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-right">نسبة التنفيذ</TableHead>
-                    <TableHead className="text-right">الانحراف</TableHead>
-                    <TableHead className="text-right">الفعلي</TableHead>
-                    <TableHead className="text-right">المخطط</TableHead>
-                    <TableHead className="text-right">الفئة</TableHead>
-                    <TableHead className="text-right">اسم الحساب</TableHead>
-                    <TableHead className="text-right">رقم الحساب</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {budgetItems
-                    .filter(item => selectedCategory === 'all' || item.category === selectedCategory)
-                    .map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="text-right">
-                        <div className="space-y-2">
-                          <Progress 
-                            value={getProgressValue(item.actual_amount, item.budgeted_amount)} 
-                            className="w-20 h-2" 
-                          />
-                          <span className="text-xs text-muted-foreground">
-                            {getProgressValue(item.actual_amount, item.budgeted_amount).toFixed(0)}%
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center gap-2 flex-row-reverse">
-                          {getVarianceIcon(item.variance_percentage)}
-                          <div>
-                            <div className={`font-medium ${getVarianceColor(item.variance_percentage)}`}>
-                              {formatCurrencyKWD(Math.abs(item.variance_amount))}
-                            </div>
-                            <div className={`text-xs ${getVarianceColor(item.variance_percentage)}`}>
-                              {item.variance_percentage > 0 ? '+' : ''}{item.variance_percentage.toFixed(1)}%
-                            </div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {formatCurrencyKWD(item.actual_amount)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrencyKWD(item.budgeted_amount)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant="outline">{item.category}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">{item.account_name}</TableCell>
-                      <TableCell className="text-right font-mono text-sm">
-                        {item.account_code}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* التحليل بالفئات */}
-        <TabsContent value="categories">
-          <Card className="card-elegant">
-            <CardHeader>
-              <CardTitle className="text-right">التحليل بالفئات</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {budgetSummary && (
-                <div className="space-y-4">
-                  {budgetSummary.categories.map((category, index) => (
-                    <div key={index} className="p-4 border rounded-lg">
-                      <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center gap-2">
-                          <Badge variant={category.variance >= 0 ? 'destructive' : 'default'}>
-                            {category.variance >= 0 ? '+' : ''}{((category.variance / category.budgeted) * 100).toFixed(1)}%
-                          </Badge>
-                          <span className={getVarianceColor((category.variance / category.budgeted) * 100)}>
-                            {formatCurrencyKWD(Math.abs(category.variance))}
-                          </span>
-                        </div>
-                        <h3 className="font-medium">{category.name}</h3>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 mb-2">
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">المخطط: </span>
-                          <span className="font-medium">{formatCurrencyKWD(category.budgeted)}</span>
-                        </div>
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">الفعلي: </span>
-                          <span className="font-medium">{formatCurrencyKWD(category.actual)}</span>
-                        </div>
-                      </div>
-                      <Progress 
-                        value={getProgressValue(category.actual, category.budgeted)} 
-                        className="h-2" 
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* التحليل التفصيلي */}
-        <TabsContent value="analysis">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="card-elegant">
-              <CardHeader>
-                <CardTitle className="text-right">أكبر الانحرافات</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {budgetItems
-                    .sort((a, b) => Math.abs(b.variance_percentage) - Math.abs(a.variance_percentage))
-                    .slice(0, 5)
-                    .map((item) => (
-                    <div key={item.id} className="flex justify-between items-center p-3 border rounded">
-                      <div className="flex items-center gap-2">
-                        {getVarianceIcon(item.variance_percentage)}
-                        <span className={`font-medium ${getVarianceColor(item.variance_percentage)}`}>
-                          {item.variance_percentage > 0 ? '+' : ''}{item.variance_percentage.toFixed(1)}%
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium">{item.account_name}</div>
-                        <div className="text-sm text-muted-foreground">{item.account_code}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-elegant">
-              <CardHeader>
-                <CardTitle className="text-right">الأداء العام</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold mb-2">
-                      {budgetSummary ? getProgressValue(budgetSummary.total_actual, budgetSummary.total_budgeted).toFixed(1) : 0}%
-                    </div>
-                    <div className="text-muted-foreground">نسبة تنفيذ الميزانية</div>
-                  </div>
-                  
-                  {budgetSummary && (
-                    <Progress 
-                      value={getProgressValue(budgetSummary.total_actual, budgetSummary.total_budgeted)}
-                      className="h-4"
-                    />
-                  )}
-                  
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <div className="text-muted-foreground">بنود في الحدود المقبولة</div>
-                      <div className="font-medium text-green-600">
-                        {budgetItems.filter(item => Math.abs(item.variance_percentage) <= 5).length}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-muted-foreground">بنود تحتاج مراجعة</div>
-                      <div className="font-medium text-red-600">
-                        {budgetItems.filter(item => Math.abs(item.variance_percentage) > 15).length}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };
