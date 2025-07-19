@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, Home } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
@@ -58,14 +58,20 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg border border-border p-8">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+        {/* Back to Home */}
+        <div className="flex items-center justify-center gap-2 mb-6 text-blue-600 hover:text-blue-700 cursor-pointer transition-colors">
+          <Home className="w-4 h-4" />
+          <span className="text-sm font-medium">العودة للرئيسية</span>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[#0066CC] mb-2">
+          <h1 className="text-4xl font-bold text-[#1976D2] mb-2">
             Fleetify
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-gray-500 text-base">
             تسجيل الدخول إلى حسابك
           </p>
         </div>
@@ -80,7 +86,7 @@ const Auth = () => {
 
           {/* Email Field */}
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-right block text-foreground font-medium">
+            <Label htmlFor="email" className="text-right block text-gray-700 font-medium text-base">
               البريد الإلكتروني
             </Label>
             <Input
@@ -89,14 +95,14 @@ const Auth = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full h-12 text-right bg-gray-50 border border-input rounded-lg px-4 focus:bg-white focus:border-primary transition-colors"
-              placeholder=""
+              className="w-full h-14 text-right bg-gray-50 border border-gray-200 rounded-xl px-4 focus:bg-white focus:border-blue-400 transition-colors text-gray-600"
+              placeholder="admin@example.com"
             />
           </div>
 
           {/* Password Field */}
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-right block text-foreground font-medium">
+            <Label htmlFor="password" className="text-right block text-gray-700 font-medium text-base">
               كلمة المرور
             </Label>
             <div className="relative">
@@ -106,20 +112,20 @@ const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full h-12 text-right bg-gray-50 border border-input rounded-lg px-4 pr-12 focus:bg-white focus:border-primary transition-colors"
+                className="w-full h-14 text-right bg-gray-50 border border-gray-200 rounded-xl px-4 pr-12 focus:bg-white focus:border-blue-400 transition-colors text-gray-600"
                 placeholder="أدخل كلمة المرور"
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-auto p-1 hover:bg-transparent"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 h-auto p-1 hover:bg-transparent"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
-                  <EyeOff className="w-4 h-4 text-muted-foreground" />
+                  <EyeOff className="w-5 h-5 text-gray-400" />
                 ) : (
-                  <Eye className="w-4 h-4 text-muted-foreground" />
+                  <Eye className="w-5 h-5 text-gray-400" />
                 )}
               </Button>
             </div>
@@ -128,14 +134,23 @@ const Auth = () => {
           {/* Login Button */}
           <Button
             type="submit"
-            className="w-full h-12 bg-[#0066CC] hover:bg-[#0052A3] text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors mt-8"
+            className="w-full h-14 bg-[#1976D2] hover:bg-[#1565C0] text-white font-semibold rounded-xl flex items-center justify-center gap-3 transition-colors mt-8 text-base"
             disabled={loading}
           >
+            <ArrowLeft className="w-5 h-5" />
             {loading ? 'جاري التحميل...' : 'تسجيل الدخول'}
-            <ArrowLeft className="w-4 h-4" />
           </Button>
         </form>
 
+        {/* Contact Us Link */}
+        <div className="text-center mt-8">
+          <span className="text-gray-500 text-sm">
+            تحتاج مساعدة؟{' '}
+            <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
+              تواصل معنا
+            </a>
+          </span>
+        </div>
       </div>
     </div>
   );
