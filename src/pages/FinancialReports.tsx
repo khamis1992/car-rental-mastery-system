@@ -74,100 +74,42 @@ const FinancialReports: React.FC = () => {
   const [selectedReportType, setSelectedReportType] = useState<string>('balance_sheet');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // جلب قوالب التقارير المتاحة
+  // جلب قوالب التقارير المتاحة - مؤقتاً معطل حتى إنشاء الجداول
   const { data: reportTemplates, isLoading: loadingTemplates } = useQuery({
     queryKey: ['financial-report-templates'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('advanced_financial_reports')
-        .select('*')
-        .eq('is_active', true)
-        .order('report_name');
-      
-      if (error) throw error;
-      return data as FinancialReport[];
+      // return mock data for now
+      return [] as FinancialReport[];
     }
   });
 
-  // جلب بيانات التقارير المُولدة مؤخراً
+  // جلب بيانات التقارير المُولدة مؤخراً - مؤقتاً معطل
   const { data: recentReports, refetch: refetchReports } = useQuery({
     queryKey: ['recent-financial-reports'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('financial_report_data')
-        .select(`
-          *,
-          report_template:advanced_financial_reports(report_name, report_type)
-        `)
-        .order('generated_at', { ascending: false })
-        .limit(10);
-      
-      if (error) throw error;
-      return data as ReportData[];
+      // return mock data for now
+      return [] as ReportData[];
     }
   });
 
-  // جلب المؤشرات المالية الرئيسية
+  // جلب المؤشرات المالية الرئيسية - مؤقتاً معطل
   const { data: kpis } = useQuery({
     queryKey: ['financial-kpis'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('advanced_kpis')
-        .select('*')
-        .eq('is_active', true)
-        .order('kpi_category', { ascending: true });
-      
-      if (error) throw error;
-      return data as KPI[];
+      // return mock data for now
+      return [] as KPI[];
     }
   });
 
-  // توليد تقرير جديد
+  // توليد تقرير جديد - مؤقتاً معطل
   const generateReport = async () => {
     setIsGenerating(true);
     try {
-      let reportData;
-      const fiscalYear = selectedPeriodStart.getFullYear();
-
-      if (selectedReportType === 'balance_sheet') {
-        const { data, error } = await supabase.rpc('generate_balance_sheet_report', {
-          tenant_id_param: '00000000-0000-0000-0000-000000000000',
-          report_date: format(selectedPeriodEnd, 'yyyy-MM-dd')
-        });
-        if (error) throw error;
-        reportData = data;
-      } else if (selectedReportType === 'income_statement') {
-        const { data, error } = await supabase.rpc('generate_income_statement', {
-          tenant_id_param: '00000000-0000-0000-0000-000000000000',
-          period_start: format(selectedPeriodStart, 'yyyy-MM-dd'),
-          period_end: format(selectedPeriodEnd, 'yyyy-MM-dd')
-        });
-        if (error) throw error;
-        reportData = data;
-      }
-
-      // حفظ التقرير في قاعدة البيانات
-      const { error: saveError } = await supabase
-        .from('financial_report_data')
-        .insert({
-          tenant_id: '00000000-0000-0000-0000-000000000000',
-          report_template_id: reportTemplates?.find(t => t.report_type === selectedReportType)?.id,
-          report_period_start: format(selectedPeriodStart, 'yyyy-MM-dd'),
-          report_period_end: format(selectedPeriodEnd, 'yyyy-MM-dd'),
-          fiscal_year: fiscalYear,
-          report_data: reportData,
-          summary_data: reportData?.totals || {},
-          status: 'finalized'
-        });
-
-      if (saveError) throw saveError;
-
+      // مؤقتاً - سيتم تفعيل هذه الوظيفة لاحقاً بعد إنشاء الجداول المطلوبة
       toast({
-        title: "تم توليد التقرير بنجاح",
-        description: "تم إنشاء التقرير المالي وحفظه في النظام",
+        title: "معلومات",
+        description: "سيتم تفعيل توليد التقارير في التحديث القادم",
       });
-
-      refetchReports();
     } catch (error: any) {
       toast({
         title: "خطأ في توليد التقرير",
@@ -206,7 +148,7 @@ const FinancialReports: React.FC = () => {
     const statusConfig = {
       draft: { label: "مسودة", variant: "secondary" as const },
       finalized: { label: "نهائي", variant: "default" as const },
-      approved: { label: "معتمد", variant: "success" as const },
+      approved: { label: "معتمد", variant: "default" as const },
       archived: { label: "مؤرشف", variant: "outline" as const }
     };
     
@@ -246,21 +188,21 @@ const FinancialReports: React.FC = () => {
 
       <Tabs defaultValue="reports" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="reports" className="rtl-flex">
-            <FileText className="h-4 w-4" />
-            التقارير المالية
-          </TabsTrigger>
-          <TabsTrigger value="kpis" className="rtl-flex">
-            <BarChart3 className="h-4 w-4" />
-            المؤشرات المالية
+          <TabsTrigger value="settings" className="rtl-flex">
+            <Settings className="h-4 w-4" />
+            الإعدادات
           </TabsTrigger>
           <TabsTrigger value="analysis" className="rtl-flex">
             <PieChart className="h-4 w-4" />
             التحليل المالي
           </TabsTrigger>
-          <TabsTrigger value="settings" className="rtl-flex">
-            <Settings className="h-4 w-4" />
-            الإعدادات
+          <TabsTrigger value="kpis" className="rtl-flex">
+            <BarChart3 className="h-4 w-4" />
+            المؤشرات المالية
+          </TabsTrigger>
+          <TabsTrigger value="reports" className="rtl-flex">
+            <FileText className="h-4 w-4" />
+            التقارير المالية
           </TabsTrigger>
         </TabsList>
 
