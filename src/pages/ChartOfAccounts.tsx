@@ -61,7 +61,7 @@ const ChartOfAccounts = () => {
       {error && (
         <Alert variant="destructive">
           <AlertDescription>
-            حدث خطأ في تحميل البيانات: {error.message}
+            حدث خطأ في تحميل البيانات: {error}
           </AlertDescription>
         </Alert>
       )}

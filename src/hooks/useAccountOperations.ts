@@ -73,6 +73,7 @@ export const useAccountOperations = () => {
         opening_balance: accountData.opening_balance || 0,
         current_balance: accountData.current_balance || accountData.opening_balance || 0,
         notes: accountData.notes?.trim() || null,
+        tenant_id: parentAccount.tenant_id, // إضافة معرف المؤسسة
       };
 
       console.log('بيانات الإدراج:', insertData);
