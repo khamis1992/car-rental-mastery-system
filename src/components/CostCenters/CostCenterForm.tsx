@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { CostCenterService, type CostCenter, type CreateCostCenterData } from '@/services/BusinessServices/CostCenterService';
-import { supabase } from '@/integrations/supabase/client';
+import { useSecureTenantData } from '@/hooks/useSecureTenantData';
+import { useTenant } from '@/contexts/TenantContext';
 
 interface CostCenterFormProps {
   costCenter?: CostCenter;
@@ -32,41 +34,20 @@ const CostCenterForm = ({ costCenter, parentId, onClose, onSuccess }: CostCenter
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const costCenterService = new CostCenterService();
+  const { currentTenant } = useTenant();
+  const { useSecureEmployees, useSecureDepartments } = useSecureTenantData();
 
-  // جلب الأقسام
-  const { data: departments } = useQuery({
-    queryKey: ['departments'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('departments')
-        .select('id, department_name')
-        .eq('is_active', true)
-        .order('department_name');
-      
-      if (error) throw error;
-      return data;
-    }
-  });
+  // جلب الأقسام بشكل آمن
+  const { data: departments, isLoading: loadingDepartments } = useSecureDepartments();
 
-  // جلب الموظفين
-  const { data: employees } = useQuery({
-    queryKey: ['employees'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('employees')
-        .select('id, first_name, last_name')
-        .eq('status', 'active')
-        .order('first_name');
-      
-      if (error) throw error;
-      return data;
-    }
-  });
+  // جلب الموظفين بشكل آمن
+  const { data: employees, isLoading: loadingEmployees } = useSecureEmployees();
 
   // جلب مراكز التكلفة للمراكز الأب
   const { data: parentCostCenters } = useQuery({
-    queryKey: ['parent-cost-centers'],
-    queryFn: () => costCenterService.getAllCostCenters()
+    queryKey: ['parent-cost-centers', currentTenant?.id],
+    queryFn: () => costCenterService.getAllCostCenters(),
+    enabled: !!currentTenant?.id
   });
 
   useEffect(() => {
@@ -83,7 +64,6 @@ const CostCenterForm = ({ costCenter, parentId, onClose, onSuccess }: CostCenter
         parent_id: costCenter.parent_id || ''
       });
     } else if (parentId) {
-      // إذا كان هناك مركز تكلفة أب محدد، قم بتعيينه
       setFormData(prev => ({
         ...prev,
         parent_id: parentId
@@ -93,6 +73,12 @@ const CostCenterForm = ({ costCenter, parentId, onClose, onSuccess }: CostCenter
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!currentTenant?.id) {
+      toast.error('خطأ: لا توجد مؤسسة نشطة');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -113,13 +99,29 @@ const CostCenterForm = ({ costCenter, parentId, onClose, onSuccess }: CostCenter
   };
 
   const handleInputChange = (field: keyof CreateCostCenterData, value: any) => {
-    // Convert "none" back to empty string for optional fields
     const processedValue = value === 'none' ? '' : value;
     setFormData(prev => ({
       ...prev,
       [field]: processedValue
     }));
   };
+
+  // عرض رسالة تحميل إذا لم تكن هناك مؤسسة حالية
+  if (!currentTenant?.id) {
+    return (
+      <Dialog open onOpenChange={onClose}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="rtl-title">خطأ في التحميل</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 text-center">
+            <p>لا يمكن تحميل النموذج - لا توجد مؤسسة نشطة</p>
+            <Button onClick={onClose} className="mt-4">إغلاق</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -158,61 +160,61 @@ const CostCenterForm = ({ costCenter, parentId, onClose, onSuccess }: CostCenter
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label className="rtl-label">نوع مركز التكلفة</Label>
-            <Select 
-              value={formData.cost_center_type} 
-              onValueChange={(value) => handleInputChange('cost_center_type', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="اختر النوع" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="operational">تشغيلي</SelectItem>
-                <SelectItem value="administrative">إداري</SelectItem>
-                <SelectItem value="revenue">إيرادات</SelectItem>
-                <SelectItem value="support">دعم</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              <Select 
+                value={formData.cost_center_type} 
+                onValueChange={(value) => handleInputChange('cost_center_type', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر النوع" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="operational">تشغيلي</SelectItem>
+                  <SelectItem value="administrative">إداري</SelectItem>
+                  <SelectItem value="revenue">إيرادات</SelectItem>
+                  <SelectItem value="support">دعم</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div className="space-y-2">
-            <Label className="rtl-label">فئة مركز التكلفة</Label>
-            <Select 
-              value={formData.cost_center_category || ''} 
-              onValueChange={(value) => handleInputChange('cost_center_category', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="اختر الفئة" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="management">إدارة عامة</SelectItem>
-                <SelectItem value="operations">عمليات</SelectItem>
-                <SelectItem value="sales">مبيعات</SelectItem>
-                <SelectItem value="hr">موارد بشرية</SelectItem>
-                <SelectItem value="fleet">أسطول</SelectItem>
-                <SelectItem value="maintenance">صيانة</SelectItem>
-                <SelectItem value="insurance">تأمين</SelectItem>
-                <SelectItem value="fuel">وقود</SelectItem>
-                <SelectItem value="customer_service">خدمة عملاء</SelectItem>
-                <SelectItem value="marketing">تسويق</SelectItem>
-                <SelectItem value="contracts">عقود</SelectItem>
-                <SelectItem value="accounting">محاسبة</SelectItem>
-                <SelectItem value="audit">مراجعة</SelectItem>
-                <SelectItem value="treasury">خزينة</SelectItem>
-                <SelectItem value="reporting">تقارير</SelectItem>
-                <SelectItem value="it">تقنية معلومات</SelectItem>
-                <SelectItem value="it_support">دعم فني</SelectItem>
-                <SelectItem value="development">تطوير</SelectItem>
-                <SelectItem value="security">أمن</SelectItem>
-                <SelectItem value="daily_ops">عمليات يومية</SelectItem>
-                <SelectItem value="warehouse">مخازن</SelectItem>
-                <SelectItem value="delivery">توصيل</SelectItem>
-                <SelectItem value="quality">جودة</SelectItem>
-                <SelectItem value="general">خدمات عامة</SelectItem>
-                <SelectItem value="facilities">مرافق</SelectItem>
-                <SelectItem value="legal">قانونية</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+            <div className="space-y-2">
+              <Label className="rtl-label">فئة مركز التكلفة</Label>
+              <Select 
+                value={formData.cost_center_category || ''} 
+                onValueChange={(value) => handleInputChange('cost_center_category', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر الفئة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="management">إدارة عامة</SelectItem>
+                  <SelectItem value="operations">عمليات</SelectItem>
+                  <SelectItem value="sales">مبيعات</SelectItem>
+                  <SelectItem value="hr">موارد بشرية</SelectItem>
+                  <SelectItem value="fleet">أسطول</SelectItem>
+                  <SelectItem value="maintenance">صيانة</SelectItem>
+                  <SelectItem value="insurance">تأمين</SelectItem>
+                  <SelectItem value="fuel">وقود</SelectItem>
+                  <SelectItem value="customer_service">خدمة عملاء</SelectItem>
+                  <SelectItem value="marketing">تسويق</SelectItem>
+                  <SelectItem value="contracts">عقود</SelectItem>
+                  <SelectItem value="accounting">محاسبة</SelectItem>
+                  <SelectItem value="audit">مراجعة</SelectItem>
+                  <SelectItem value="treasury">خزينة</SelectItem>
+                  <SelectItem value="reporting">تقارير</SelectItem>
+                  <SelectItem value="it">تقنية معلومات</SelectItem>
+                  <SelectItem value="it_support">دعم فني</SelectItem>
+                  <SelectItem value="development">تطوير</SelectItem>
+                  <SelectItem value="security">أمن</SelectItem>
+                  <SelectItem value="daily_ops">عمليات يومية</SelectItem>
+                  <SelectItem value="warehouse">مخازن</SelectItem>
+                  <SelectItem value="delivery">توصيل</SelectItem>
+                  <SelectItem value="quality">جودة</SelectItem>
+                  <SelectItem value="general">خدمات عامة</SelectItem>
+                  <SelectItem value="facilities">مرافق</SelectItem>
+                  <SelectItem value="legal">قانونية</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="space-y-2">
               <Label className="rtl-label">الميزانية المخصصة</Label>
@@ -233,9 +235,10 @@ const CostCenterForm = ({ costCenter, parentId, onClose, onSuccess }: CostCenter
               <Select 
                 value={formData.department_id} 
                 onValueChange={(value) => handleInputChange('department_id', value)}
+                disabled={loadingDepartments}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="اختر القسم" />
+                  <SelectValue placeholder={loadingDepartments ? "جاري التحميل..." : "اختر القسم"} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">بدون قسم</SelectItem>
@@ -253,15 +256,16 @@ const CostCenterForm = ({ costCenter, parentId, onClose, onSuccess }: CostCenter
               <Select 
                 value={formData.manager_id} 
                 onValueChange={(value) => handleInputChange('manager_id', value)}
+                disabled={loadingEmployees}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="اختر المدير" />
+                  <SelectValue placeholder={loadingEmployees ? "جاري التحميل..." : "اختر المدير"} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">بدون مدير</SelectItem>
                   {employees?.map((emp) => (
                     <SelectItem key={emp.id} value={emp.id}>
-                      {emp.first_name} {emp.last_name}
+                      {emp.first_name} {emp.last_name} ({emp.employee_number})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -278,8 +282,8 @@ const CostCenterForm = ({ costCenter, parentId, onClose, onSuccess }: CostCenter
               <SelectTrigger>
                 <SelectValue placeholder="اختر مركز التكلفة الأب" />
               </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">مركز تكلفة رئيسي</SelectItem>
+              <SelectContent>
+                <SelectItem value="none">مركز تكلفة رئيسي</SelectItem>
                 {parentCostCenters?.filter(cc => cc.id !== costCenter?.id).map((cc) => (
                   <SelectItem key={cc.id} value={cc.id}>
                     {cc.cost_center_name} ({cc.cost_center_code})

@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -32,27 +33,48 @@ export class TenantIsolationMiddleware {
       'additional_charges',
       'contract_extensions',
       'contract_incidents',
-      'customer_evaluations'
+      'customer_evaluations',
+      'departments',
+      'cost_centers'
     ]);
   }
 
   /**
-   * تحديد المؤسسة الحالية
+   * تحديد المؤسسة الحالية مع التحقق المحسن
    */
   async setCurrentTenant(tenantId: string): Promise<void> {
-    // التحقق من صحة معرف المؤسسة
-    const { data: tenant, error } = await supabase
-      .from('tenants')
-      .select('id, status')
-      .eq('id', tenantId)
-      .eq('status', 'active')
-      .single();
+    console.log('🔧 تحديد المؤسسة الحالية:', tenantId);
+    
+    try {
+      // التحقق من صحة معرف المؤسسة
+      const { data: tenant, error } = await supabase
+        .from('tenants')
+        .select('id, name, status')
+        .eq('id', tenantId)
+        .single();
 
-    if (error || !tenant) {
-      throw new Error('معرف المؤسسة غير صحيح أو غير نشط');
+      if (error) {
+        console.error('❌ خطأ في التحقق من المؤسسة:', error);
+        throw new Error('معرف المؤسسة غير صحيح أو غير موجود');
+      }
+
+      if (!tenant) {
+        throw new Error('المؤسسة غير موجودة');
+      }
+
+      // التحقق من حالة المؤسسة
+      if (tenant.status !== 'active' && tenant.status !== 'trial') {
+        throw new Error(`المؤسسة غير نشطة - الحالة: ${tenant.status}`);
+      }
+
+      this.currentTenantId = tenantId;
+      console.log('✅ تم تحديد المؤسسة بنجاح:', tenant.name);
+      
+    } catch (error: any) {
+      console.error('❌ فشل في تحديد المؤسسة:', error);
+      this.currentTenantId = null;
+      throw error;
     }
-
-    this.currentTenantId = tenantId;
   }
 
   /**
@@ -113,19 +135,16 @@ export class TenantIsolationMiddleware {
     try {
       const { data: user } = await supabase.auth.getUser();
       
-      await supabase.rpc('log_tenant_access_attempt', {
-        attempted_tenant_id: this.currentTenantId || '00000000-0000-0000-0000-000000000000',
-        table_name: table,
-        action: operation,
-        success: false
-      });
-
-      console.warn(`نشاط مشبوه: ${reason}`, {
+      console.warn(`🚨 نشاط مشبوه: ${reason}`, {
         table,
         operation,
         user: user.user?.id,
-        tenant: this.currentTenantId
+        tenant: this.currentTenantId,
+        timestamp: new Date().toISOString()
       });
+
+      // يمكن إضافة تسجيل في قاعدة البيانات هنا إذا لزم الأمر
+      
     } catch (error) {
       console.error('خطأ في تسجيل النشاط المشبوه:', error);
     }
@@ -140,6 +159,7 @@ export class TenantIsolationMiddleware {
     }
 
     if (this.allowedTables.has(table)) {
+      console.log(`🔍 تطبيق فلتر المؤسسة على جدول: ${table}`);
       return query.eq('tenant_id', this.currentTenantId);
     }
     
@@ -155,6 +175,7 @@ export class TenantIsolationMiddleware {
     }
 
     if (this.allowedTables.has(table)) {
+      console.log(`📝 إضافة معرف المؤسسة للبيانات في جدول: ${table}`);
       return {
         ...data,
         tenant_id: this.currentTenantId
@@ -179,6 +200,7 @@ export class TenantIsolationMiddleware {
     const filteredData = data.filter(item => {
       if (item.tenant_id !== this.currentTenantId) {
         violations++;
+        console.warn(`⚠️ انتهاك أمني: بيانات من مؤسسة أخرى في جدول ${table}:`, item.tenant_id);
         this.logSuspiciousActivity(table, 'select', 'بيانات مؤسسة أخرى في الاستجابة');
         return false;
       }
@@ -196,6 +218,7 @@ export class TenantIsolationMiddleware {
    * إعادة تعيين الحالة
    */
   reset(): void {
+    console.log('🔄 إعادة تعيين middleware العزل');
     this.currentTenantId = null;
   }
 }

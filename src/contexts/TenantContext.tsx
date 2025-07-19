@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Tenant, TenantUser } from '@/types/tenant';
 import { TenantService } from '@/services/tenantService';
@@ -38,7 +39,6 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
     }
     
     if (tenant.status === 'trial') {
-      // التحقق من انتهاء الفترة التجريبية
       if (tenant.trial_ends_at) {
         const trialEndDate = new Date(tenant.trial_ends_at);
         const now = new Date();
@@ -75,18 +75,21 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
 
   const loadTenant = async () => {
     if (!user || !session) {
+      console.log('🔍 لا يوجد مستخدم مسجل - إعادة تعيين البيانات');
       setCurrentTenant(null);
       setCurrentUserRole(null);
       setLoading(false);
+      tenantIsolationMiddleware.reset();
       return;
     }
 
     // منع admin@admin.com من تحميل بيانات المؤسسات
     if (user.email === 'admin@admin.com') {
+      console.log('🔧 SaaS Admin detected - tenant data loading skipped');
       setCurrentTenant(null);
       setCurrentUserRole('super_admin');
       setLoading(false);
-      console.log('🔧 SaaS Admin detected - tenant data loading skipped');
+      tenantIsolationMiddleware.reset();
       return;
     }
 
@@ -96,7 +99,7 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
 
       console.log('🔄 بدء تحميل بيانات المؤسسة للمستخدم:', user.email);
 
-      // Get current tenant and user role
+      // الحصول على بيانات المؤسسة والدور
       const { data: tenantUser, error: tenantUserError } = await supabase
         .from('tenant_users')
         .select(`
@@ -125,9 +128,9 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
 
       if (tenantUser && tenantUser.tenant) {
         const tenant = tenantUser.tenant as Tenant;
-        console.log('✅ تم العثور على المؤسسة:', tenant.name);
+        console.log('✅ تم العثور على المؤسسة:', tenant.name, '- ID:', tenant.id);
         
-        // التحقق من صلاحية المؤسسة (نشطة أو تجريبية صالحة)
+        // التحقق من صلاحية المؤسسة
         const isValidTenant = isOrganizationValid(tenant);
         if (!isValidTenant.valid) {
           console.warn('⚠️ المؤسسة غير صالحة:', isValidTenant.reason);
@@ -138,14 +141,17 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
           return;
         }
         
+        // تحديث حالة المؤسسة
         setCurrentTenant(tenant);
         setCurrentUserRole(tenantUser.role as TenantUser['role']);
         
         // تفعيل middleware العزل للمؤسسة
         await tenantIsolationMiddleware.setCurrentTenant(tenant.id);
-        console.log('✅ تم تحميل بيانات المؤسسة بنجاح');
+        console.log('✅ تم تحميل بيانات المؤسسة بنجاح - المؤسسة الحالية:', tenant.name);
+        
+        // تنظيف أي أخطاء سابقة
+        setError(null);
       } else {
-        // User is not associated with any tenant
         console.warn('⚠️ المستخدم غير مرتبط بأي مؤسسة');
         setCurrentTenant(null);
         setCurrentUserRole(null);
@@ -153,8 +159,11 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
         tenantIsolationMiddleware.reset();
       }
     } catch (err: any) {
-      console.error('Error loading tenant:', err);
+      console.error('❌ خطأ في تحميل بيانات المؤسسة:', err);
       setError(err.message || 'فشل في تحميل بيانات المؤسسة');
+      setCurrentTenant(null);
+      setCurrentUserRole(null);
+      tenantIsolationMiddleware.reset();
     } finally {
       setLoading(false);
     }
@@ -199,9 +208,11 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
         
         // Store selected tenant in localStorage for persistence
         localStorage.setItem('selectedTenantId', tenantId);
+        
+        console.log('✅ تم تبديل المؤسسة بنجاح إلى:', tenant.name);
       }
     } catch (err: any) {
-      console.error('Error switching tenant:', err);
+      console.error('❌ خطأ في تبديل المؤسسة:', err);
       setError(err.message || 'فشل في تبديل المؤسسة');
     } finally {
       setLoading(false);
@@ -209,18 +220,17 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
   };
 
   const refreshTenant = async () => {
+    console.log('🔄 إعادة تحميل بيانات المؤسسة...');
     await loadTenant();
   };
 
   const isWithinLimits = (resource: 'users' | 'vehicles' | 'contracts'): boolean => {
     if (!currentTenant) return false;
-    
-    // For now, we'll do a simple check. In a real app, you'd want to
-    // cache the current counts and check against limits
     return true; // TODO: Implement proper limit checking
   };
 
   useEffect(() => {
+    console.log('🔄 تغيير في حالة المصادقة - إعادة تحميل بيانات المؤسسة');
     loadTenant();
   }, [user, session]);
 
