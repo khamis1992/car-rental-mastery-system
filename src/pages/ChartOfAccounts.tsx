@@ -1,12 +1,12 @@
+
 import React from 'react';
 import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
 import { ChartOfAccountsImportDialog } from '@/components/Accounting/ChartOfAccountsImportDialog';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Plus, Upload, Download, Settings, BarChart3 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 const ChartOfAccounts = () => {
-  const navigate = useNavigate();
   return <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -15,24 +15,11 @@ const ChartOfAccounts = () => {
         </div>
         
         <div className="flex items-center gap-2 flex-row-reverse">
-          
-          <Button variant="outline" onClick={() => navigate('/financial-reports')} className="rtl-flex">
-            <BarChart3 className="w-4 h-4" />
-            التقارير المالية
-          </Button>
           <Button variant="outline" className="rtl-flex">
             <RefreshCw className="w-4 h-4" />
             تحديث
           </Button>
           <ChartOfAccountsImportDialog isOpen={false} onClose={() => {}} onImportComplete={() => window.location.reload()} />
-          <Button variant="outline" className="rtl-flex">
-            <Download className="w-4 h-4" />
-            تصدير
-          </Button>
-          <Button className="btn-primary rtl-flex">
-            <Plus className="w-4 h-4" />
-            حساب جديد
-          </Button>
         </div>
       </div>
 
@@ -83,4 +70,5 @@ const ChartOfAccounts = () => {
       <ChartOfAccountsTab />
     </div>;
 };
+
 export default ChartOfAccounts;
