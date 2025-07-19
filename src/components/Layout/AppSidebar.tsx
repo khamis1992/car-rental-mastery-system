@@ -24,7 +24,8 @@ import {
   CreditCard,
   Activity,
   Zap,
-  Shield
+  Shield,
+  BookOpen
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -95,6 +96,11 @@ const financialItems = [
     title: "القيود المحاسبية", 
     url: "/journal-entries", 
     icon: FileText 
+  },
+  { 
+    title: "دفتر الأستاذ العام", 
+    url: "/general-ledger", 
+    icon: BookOpen 
   },
   { 
     title: "إدارة الميزانية", 

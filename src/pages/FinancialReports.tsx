@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { FinancialReportsTab } from '@/components/Accounting/FinancialReportsTab';
-import { GeneralLedgerReport } from '@/components/Accounting/GeneralLedgerReport';
 import { AccountingDashboard } from '@/components/Accounting/AccountingDashboard';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Download, Calendar, TrendingUp, FileText, ArrowRight } from 'lucide-react';
@@ -36,6 +35,13 @@ const FinancialReports = () => {
       description: "الأصول والخصوم وحقوق الملكية",
       icon: <FileText className="w-5 h-5" />,
       action: "إنشاء التقرير"
+    },
+    {
+      title: "دفتر الأستاذ العام",
+      description: "عرض وإدارة حركة الحسابات المحاسبية",
+      icon: <FileText className="w-5 h-5" />,
+      action: "عرض دفتر الأستاذ",
+      path: "/general-ledger"
     },
     {
       title: "قائمة التدفقات النقدية",
@@ -89,7 +95,11 @@ const FinancialReports = () => {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4 text-right">{report.description}</p>
-              <Button size="sm" className="w-full">
+              <Button 
+                size="sm" 
+                className="w-full"
+                onClick={() => report.path ? navigate(report.path) : undefined}
+              >
                 {report.action}
               </Button>
             </CardContent>
@@ -99,10 +109,9 @@ const FinancialReports = () => {
 
       {/* Reports Tabs */}
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="dashboard">لوحة المعلومات</TabsTrigger>
           <TabsTrigger value="reports">التقارير المحاسبية</TabsTrigger>
-          <TabsTrigger value="ledger">دفتر الأستاذ</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-4">
@@ -111,10 +120,6 @@ const FinancialReports = () => {
 
         <TabsContent value="reports" className="space-y-4">
           <FinancialReportsTab />
-        </TabsContent>
-
-        <TabsContent value="ledger" className="space-y-4">
-          <GeneralLedgerReport />
         </TabsContent>
       </Tabs>
     </div>
