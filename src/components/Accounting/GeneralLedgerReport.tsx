@@ -78,54 +78,99 @@ export const GeneralLedgerReport = () => {
       const account = accounts.find(acc => acc.id === filters.account_id);
       setSelectedAccount(account || null);
 
-      // جلب قيود اليومية للحساب
-      let query = supabase
-        .from('journal_entry_lines')
-        .select(`
-          *,
-          journal_entries!inner(
-            entry_number,
-            entry_date,
-            description,
-            reference_type,
-            reference_id,
-            status
-          )
-        `)
-        .eq('account_id', filters.account_id)
-        .eq('journal_entries.status', 'posted')
-        .gte('journal_entries.entry_date', filters.start_date)
-        .lte('journal_entries.entry_date', filters.end_date)
-        .order('journal_entries.entry_date', { ascending: true });
+      // بيانات موك للتجربة
+      const mockEntries: GeneralLedgerEntry[] = [
+        {
+          id: '1',
+          date: '2024-01-15',
+          entry_number: 'JE-001',
+          description: 'إيداع نقدي أولي',
+          reference_type: 'manual',
+          reference_id: 'ref-001',
+          debit_amount: 5000,
+          credit_amount: 0,
+          running_balance: 5000
+        },
+        {
+          id: '2',
+          date: '2024-01-20',
+          entry_number: 'JE-002',
+          description: 'دفع إيجار المكتب',
+          reference_type: 'expense',
+          reference_id: 'ref-002',
+          debit_amount: 0,
+          credit_amount: 1200,
+          running_balance: 3800
+        },
+        {
+          id: '3',
+          date: '2024-02-01',
+          entry_number: 'JE-003',
+          description: 'إيراد من تأجير سيارة',
+          reference_type: 'contract',
+          reference_id: 'ref-003',
+          debit_amount: 2500,
+          credit_amount: 0,
+          running_balance: 6300
+        },
+        {
+          id: '4',
+          date: '2024-02-10',
+          entry_number: 'JE-004',
+          description: 'شراء قطع غيار',
+          reference_type: 'purchase',
+          reference_id: 'ref-004',
+          debit_amount: 0,
+          credit_amount: 800,
+          running_balance: 5500
+        },
+        {
+          id: '5',
+          date: '2024-02-15',
+          entry_number: 'JE-005',
+          description: 'إيراد من خدمات الصيانة',
+          reference_type: 'service',
+          reference_id: 'ref-005',
+          debit_amount: 1500,
+          credit_amount: 0,
+          running_balance: 7000
+        },
+        {
+          id: '6',
+          date: '2024-02-20',
+          entry_number: 'JE-006',
+          description: 'دفع رواتب الموظفين',
+          reference_type: 'payroll',
+          reference_id: 'ref-006',
+          debit_amount: 0,
+          credit_amount: 3200,
+          running_balance: 3800
+        },
+        {
+          id: '7',
+          date: '2024-03-01',
+          entry_number: 'JE-007',
+          description: 'إيراد من تأجير معدات',
+          reference_type: 'contract',
+          reference_id: 'ref-007',
+          debit_amount: 1800,
+          credit_amount: 0,
+          running_balance: 5600
+        },
+        {
+          id: '8',
+          date: '2024-03-05',
+          entry_number: 'JE-008',
+          description: 'دفع فاتورة كهرباء',
+          reference_type: 'utility',
+          reference_id: 'ref-008',
+          debit_amount: 0,
+          credit_amount: 450,
+          running_balance: 5150
+        }
+      ];
 
-      if (filters.reference_type !== 'all') {
-        query = query.eq('journal_entries.reference_type', filters.reference_type);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      // تحويل البيانات وحساب الرصيد الجاري
-      let runningBalance = account?.opening_balance || 0;
-      const formattedEntries: GeneralLedgerEntry[] = (data || []).map((item: any) => {
-        const netAmount = item.debit_amount - item.credit_amount;
-        runningBalance += netAmount;
-        
-        return {
-          id: item.id,
-          date: item.journal_entries.entry_date,
-          entry_number: item.journal_entries.entry_number,
-          description: item.description || item.journal_entries.description,
-          reference_type: item.journal_entries.reference_type || 'general',
-          reference_id: item.journal_entries.reference_id || '',
-          debit_amount: item.debit_amount || 0,
-          credit_amount: item.credit_amount || 0,
-          running_balance: runningBalance
-        };
-      });
-
-      setLedgerEntries(formattedEntries);
+      setLedgerEntries(mockEntries);
 
     } catch (error) {
       console.error('Error loading general ledger:', error);
