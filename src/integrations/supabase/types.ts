@@ -10686,6 +10686,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      batch_post_journal_entries: {
+        Args: { entry_ids: string[]; posted_by?: string }
+        Returns: {
+          success_count: number
+          failed_count: number
+          failed_entries: Json
+          total_debit: number
+          total_credit: number
+        }[]
+      }
       calculate_advanced_depreciation: {
         Args: { asset_id_param: string; calculation_date?: string }
         Returns: {
