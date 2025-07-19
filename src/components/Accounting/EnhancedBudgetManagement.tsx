@@ -6,10 +6,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Copy, BarChart3, FileText, AlertTriangle } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Eye, 
+  Copy, 
+  TrendingUp, 
+  TrendingDown, 
+  AlertTriangle,
+  Calendar,
+  DollarSign,
+  BarChart3,
+  FileText
+} from 'lucide-react';
 import { BudgetService, BudgetWithItems, BudgetSummary } from '@/services/BudgetService';
 import { BudgetItemManager } from '@/components/Budget/BudgetItemManager';
 import { BudgetVarianceReport } from '@/components/Budget/BudgetVarianceReport';
@@ -19,54 +34,48 @@ import { toast } from 'sonner';
 export const EnhancedBudgetManagement: React.FC = () => {
   const [budgets, setBudgets] = useState<BudgetWithItems[]>([]);
   const [selectedBudget, setSelectedBudget] = useState<BudgetWithItems | null>(null);
-  const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
+  const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<BudgetWithItems | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [currentTab, setCurrentTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('list');
+  const [budgetSummaries, setBudgetSummaries] = useState<Map<string, BudgetSummary>>(new Map());
+
   const budgetService = new BudgetService();
 
   const [formData, setFormData] = useState({
     budget_name: '',
-    fiscal_year: new Date().getFullYear(),
+    budget_year: new Date().getFullYear(),
     start_date: '',
     end_date: '',
-    description: '',
-    cost_center_id: ''
+    notes: ''
   });
 
   useEffect(() => {
     loadBudgets();
   }, []);
 
-  useEffect(() => {
-    if (selectedBudget) {
-      loadBudgetSummary(selectedBudget.id);
-    }
-  }, [selectedBudget]);
-
   const loadBudgets = async () => {
     setLoading(true);
     try {
       const data = await budgetService.getAllBudgets();
       setBudgets(data);
-      if (data.length > 0 && !selectedBudget) {
-        setSelectedBudget(data[0]);
+      
+      // تحميل ملخصات الميزانيات
+      const summaries = new Map();
+      for (const budget of data) {
+        try {
+          const summary = await budgetService.getBudgetSummary(budget.id);
+          summaries.set(budget.id, summary);
+        } catch (error) {
+          console.error(`Error loading summary for budget ${budget.id}:`, error);
+        }
       }
+      setBudgetSummaries(summaries);
     } catch (error) {
       console.error('Error loading budgets:', error);
       toast.error('فشل في تحميل الميزانيات');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadBudgetSummary = async (budgetId: string) => {
-    try {
-      const summary = await budgetService.getBudgetSummary(budgetId);
-      setBudgetSummary(summary);
-    } catch (error) {
-      console.error('Error loading budget summary:', error);
     }
   };
 
@@ -82,24 +91,24 @@ export const EnhancedBudgetManagement: React.FC = () => {
       if (editingBudget) {
         await budgetService.updateBudget(editingBudget.id, {
           budget_name: formData.budget_name,
-          fiscal_year: formData.fiscal_year,
+          budget_year: formData.budget_year,
           start_date: formData.start_date,
           end_date: formData.end_date,
-          description: formData.description
+          notes: formData.notes
         });
         toast.success('تم تحديث الميزانية بنجاح');
       } else {
         await budgetService.createBudget({
           budget_name: formData.budget_name,
-          fiscal_year: formData.fiscal_year,
+          budget_year: formData.budget_year,
           start_date: formData.start_date,
           end_date: formData.end_date,
-          description: formData.description,
+          notes: formData.notes,
           status: 'draft'
         });
         toast.success('تم إنشاء الميزانية بنجاح');
       }
-
+      
       setIsDialogOpen(false);
       resetForm();
       loadBudgets();
@@ -115,23 +124,24 @@ export const EnhancedBudgetManagement: React.FC = () => {
     setEditingBudget(budget);
     setFormData({
       budget_name: budget.budget_name,
-      fiscal_year: budget.fiscal_year,
+      budget_year: budget.budget_year,
       start_date: budget.start_date,
       end_date: budget.end_date,
-      description: budget.description || '',
-      cost_center_id: budget.cost_center_id || ''
+      notes: budget.notes || ''
     });
     setIsDialogOpen(true);
   };
 
+  const handleView = (budget: BudgetWithItems) => {
+    setSelectedBudget(budget);
+    setActiveTab('details');
+  };
+
   const handleCopy = async (budget: BudgetWithItems) => {
-    const newYear = budget.fiscal_year + 1;
     try {
       await budgetService.copyBudget(budget.id, {
-        budget_name: `${budget.budget_name} - ${newYear}`,
-        fiscal_year: newYear,
-        start_date: `${newYear}-01-01`,
-        end_date: `${newYear}-12-31`
+        budget_name: `نسخة من ${budget.budget_name}`,
+        budget_year: budget.budget_year + 1
       });
       toast.success('تم نسخ الميزانية بنجاح');
       loadBudgets();
@@ -147,12 +157,10 @@ export const EnhancedBudgetManagement: React.FC = () => {
     try {
       await budgetService.deleteBudget(budgetId);
       toast.success('تم حذف الميزانية بنجاح');
-      
       if (selectedBudget?.id === budgetId) {
         setSelectedBudget(null);
-        setBudgetSummary(null);
+        setActiveTab('list');
       }
-      
       loadBudgets();
     } catch (error) {
       console.error('Error deleting budget:', error);
@@ -163,48 +171,65 @@ export const EnhancedBudgetManagement: React.FC = () => {
   const resetForm = () => {
     setFormData({
       budget_name: '',
-      fiscal_year: new Date().getFullYear(),
+      budget_year: new Date().getFullYear(),
       start_date: '',
       end_date: '',
-      description: '',
-      cost_center_id: ''
+      notes: ''
     });
     setEditingBudget(null);
   };
 
-  const getBudgetStatusBadge = (status: string) => {
-    const statusMap = {
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
       draft: { label: 'مسودة', variant: 'secondary' as const },
-      active: { label: 'نشطة', variant: 'default' as const },
-      approved: { label: 'معتمدة', variant: 'default' as const },
-      closed: { label: 'مغلقة', variant: 'outline' as const }
+      approved: { label: 'معتمد', variant: 'default' as const },
+      active: { label: 'نشط', variant: 'default' as const },
+      closed: { label: 'مقفل', variant: 'destructive' as const }
     };
-    return statusMap[status as keyof typeof statusMap] || { label: status, variant: 'outline' as const };
+    
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
+    return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
+
+  const calculateBudgetProgress = (summary: BudgetSummary) => {
+    return summary.total_budget > 0 ? (summary.total_spent / summary.total_budget) * 100 : 0;
   };
 
   return (
     <div className="space-y-6">
-      {/* قائمة الميزانيات */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>الميزانيات</CardTitle>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="list">قائمة الميزانيات</TabsTrigger>
+          <TabsTrigger value="details" disabled={!selectedBudget}>
+            تفاصيل الميزانية
+          </TabsTrigger>
+          <TabsTrigger value="variance" disabled={!selectedBudget}>
+            تقرير التباين
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="list" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold rtl-title">الميزانيات</h2>
+              <p className="text-muted-foreground">إدارة ومتابعة الميزانيات المالية</p>
+            </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button onClick={resetForm} className="rtl-flex">
+                <Button onClick={() => resetForm()} className="rtl-flex">
                   <Plus className="w-4 h-4" />
                   ميزانية جديدة
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-md">
                 <DialogHeader>
-                  <DialogTitle>
+                  <DialogTitle className="rtl-title">
                     {editingBudget ? 'تعديل الميزانية' : 'إنشاء ميزانية جديدة'}
                   </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="budget_name">اسم الميزانية</Label>
+                    <Label htmlFor="budget_name" className="rtl-label">اسم الميزانية</Label>
                     <Input
                       id="budget_name"
                       value={formData.budget_name}
@@ -215,19 +240,19 @@ export const EnhancedBudgetManagement: React.FC = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="fiscal_year">السنة المالية</Label>
+                    <Label htmlFor="budget_year" className="rtl-label">السنة المالية</Label>
                     <Input
-                      id="fiscal_year"
+                      id="budget_year"
                       type="number"
-                      value={formData.fiscal_year}
-                      onChange={(e) => setFormData({...formData, fiscal_year: parseInt(e.target.value)})}
+                      value={formData.budget_year}
+                      onChange={(e) => setFormData({...formData, budget_year: parseInt(e.target.value)})}
                       required
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="start_date">تاريخ البداية</Label>
+                      <Label htmlFor="start_date" className="rtl-label">تاريخ البداية</Label>
                       <Input
                         id="start_date"
                         type="date"
@@ -237,7 +262,7 @@ export const EnhancedBudgetManagement: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="end_date">تاريخ النهاية</Label>
+                      <Label htmlFor="end_date" className="rtl-label">تاريخ النهاية</Label>
                       <Input
                         id="end_date"
                         type="date"
@@ -249,12 +274,12 @@ export const EnhancedBudgetManagement: React.FC = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="description">الوصف</Label>
+                    <Label htmlFor="notes" className="rtl-label">ملاحظات</Label>
                     <Textarea
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) => setFormData({...formData, description: e.target.value})}
-                      placeholder="وصف الميزانية..."
+                      id="notes"
+                      value={formData.notes}
+                      onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                      placeholder="ملاحظات الميزانية..."
                       rows={3}
                     />
                   </div>
@@ -275,174 +300,150 @@ export const EnhancedBudgetManagement: React.FC = () => {
               </DialogContent>
             </Dialog>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {budgets.map((budget) => (
-              <Card 
-                key={budget.id} 
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  selectedBudget?.id === budget.id ? 'ring-2 ring-primary' : ''
-                }`}
-                onClick={() => setSelectedBudget(budget)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold">{budget.budget_name}</h3>
-                    <Badge {...getBudgetStatusBadge(budget.status)}>
-                      {getBudgetStatusBadge(budget.status).label}
-                    </Badge>
-                  </div>
-                  <div className="text-sm text-muted-foreground mb-2">
-                    السنة المالية: {budget.fiscal_year}
-                  </div>
-                  <div className="text-sm text-muted-foreground mb-3">
-                    {budget.start_date} إلى {budget.end_date}
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="text-xs text-muted-foreground">
-                      {budget.budget_items?.length || 0} بند
-                    </div>
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(budget);
-                        }}
-                      >
-                        <Edit className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCopy(budget);
-                        }}
-                      >
-                        <Copy className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(budget.id);
-                        }}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* تفاصيل الميزانية المحددة */}
-      {selectedBudget && (
-        <Tabs value={currentTab} onValueChange={setCurrentTab}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-            <TabsTrigger value="items">البنود</TabsTrigger>
-            <TabsTrigger value="variance">تقرير التباين</TabsTrigger>
-            <TabsTrigger value="reports">التقارير</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-4">
+          {/* قائمة الميزانيات */}
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+              <p>جاري تحميل الميزانيات...</p>
+            </div>
+          ) : budgets.length === 0 ? (
             <Card>
-              <CardHeader>
-                <CardTitle>{selectedBudget.budget_name} - نظرة عامة</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {budgetSummary && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">
-                        {formatCurrencyKWD(budgetSummary.total_budget)}
-                      </div>
-                      <div className="text-sm text-muted-foreground">إجمالي الميزانية</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-orange-600">
-                        {formatCurrencyKWD(budgetSummary.total_spent)}
-                      </div>
-                      <div className="text-sm text-muted-foreground">إجمالي المنفق</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">
-                        {formatCurrencyKWD(budgetSummary.remaining_budget)}
-                      </div>
-                      <div className="text-sm text-muted-foreground">المتبقي</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-purple-600">
-                        {budgetSummary.utilization_percentage.toFixed(1)}%
-                      </div>
-                      <div className="text-sm text-muted-foreground">معدل الاستخدام</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-red-600">
-                        {budgetSummary.overbudget_items}
-                      </div>
-                      <div className="text-sm text-muted-foreground">بنود متجاوزة</div>
-                    </div>
-                  </div>
-                )}
+              <CardContent className="p-8 text-center">
+                <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2">لا توجد ميزانيات</h3>
+                <p className="text-muted-foreground mb-4">
+                  ابدأ بإنشاء ميزانية جديدة لتتبع وإدارة أموالك
+                </p>
               </CardContent>
             </Card>
-          </TabsContent>
+          ) : (
+            <div className="grid gap-4">
+              {budgets.map((budget) => {
+                const summary = budgetSummaries.get(budget.id);
+                const progress = summary ? calculateBudgetProgress(summary) : 0;
+                
+                return (
+                  <Card key={budget.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-semibold">{budget.budget_name}</h3>
+                            {getStatusBadge(budget.status)}
+                          </div>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">
+                                السنة المالية: {budget.budget_year}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">
+                                الميزانية: {formatCurrencyKWD(summary?.total_budget || 0)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">
+                                المنفق: {formatCurrencyKWD(summary?.total_spent || 0)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <BarChart3 className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">
+                                البنود: {summary?.items_count || 0}
+                              </span>
+                            </div>
+                          </div>
 
-          <TabsContent value="items">
-            <BudgetItemManager
-              budgetId={selectedBudget.id}
-              items={selectedBudget.budget_items || []}
-              onItemsChange={() => {
-                loadBudgets();
-                if (selectedBudget) {
-                  loadBudgetSummary(selectedBudget.id);
-                }
-              }}
-            />
-          </TabsContent>
+                          {summary && (
+                            <div className="mb-4">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm font-medium">نسبة الاستخدام</span>
+                                <span className="text-sm text-muted-foreground">
+                                  {progress.toFixed(1)}%
+                                </span>
+                              </div>
+                              <Progress value={progress} className="w-full" />
+                            </div>
+                          )}
+                        </div>
 
-          <TabsContent value="variance">
+                        <div className="flex gap-2 ml-4">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleView(budget)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEdit(budget)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleCopy(budget)}
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDelete(budget.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="details" className="space-y-4">
+          {selectedBudget && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold rtl-title">{selectedBudget.budget_name}</h2>
+                  <p className="text-muted-foreground">
+                    السنة المالية {selectedBudget.budget_year} | {selectedBudget.start_date} إلى {selectedBudget.end_date}
+                  </p>
+                </div>
+                {getStatusBadge(selectedBudget.status)}
+              </div>
+
+              <BudgetItemManager
+                budgetId={selectedBudget.id}
+                items={selectedBudget.budget_items || []}
+                onItemsChange={loadBudgets}
+              />
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="variance" className="space-y-4">
+          {selectedBudget && (
             <BudgetVarianceReport
               budgetId={selectedBudget.id}
               budgetName={selectedBudget.budget_name}
             />
-          </TabsContent>
-
-          <TabsContent value="reports">
-            <Card>
-              <CardHeader>
-                <CardTitle>التقارير المتخصصة</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <Button variant="outline" className="h-20 rtl-flex flex-col">
-                    <BarChart3 className="w-6 h-6 mb-2" />
-                    تقرير الأداء
-                  </Button>
-                  <Button variant="outline" className="h-20 rtl-flex flex-col">
-                    <FileText className="w-6 h-6 mb-2" />
-                    تقرير التنفيذ
-                  </Button>
-                  <Button variant="outline" className="h-20 rtl-flex flex-col">
-                    <AlertTriangle className="w-6 h-6 mb-2" />
-                    تقرير المخاطر
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      )}
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

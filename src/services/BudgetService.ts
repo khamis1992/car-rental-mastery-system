@@ -245,19 +245,6 @@ export class BudgetService {
     };
   }
 
-  // ربط الميزانية بمركز التكلفة
-  async linkBudgetToCostCenter(budgetId: string, costCenterId: string): Promise<void> {
-    const { error } = await supabase
-      .from('budgets')
-      .update({ cost_center_id: costCenterId })
-      .eq('id', budgetId);
-
-    if (error) {
-      console.error('Error linking budget to cost center:', error);
-      throw new Error(`فشل في ربط الميزانية بمركز التكلفة: ${error.message}`);
-    }
-  }
-
   // حذف الميزانية
   async deleteBudget(budgetId: string): Promise<void> {
     const { error } = await supabase
@@ -282,11 +269,10 @@ export class BudgetService {
     // إنشاء الميزانية الجديدة
     const newBudget = await this.createBudget({
       budget_name: newBudgetData.budget_name || `نسخة من ${originalBudget.budget_name}`,
-      fiscal_year: newBudgetData.fiscal_year || originalBudget.fiscal_year,
+      budget_year: newBudgetData.budget_year || originalBudget.budget_year,
       start_date: newBudgetData.start_date || originalBudget.start_date,
       end_date: newBudgetData.end_date || originalBudget.end_date,
-      description: newBudgetData.description || originalBudget.description,
-      cost_center_id: newBudgetData.cost_center_id || originalBudget.cost_center_id,
+      notes: newBudgetData.notes || originalBudget.notes,
       status: 'draft'
     });
 
@@ -297,7 +283,7 @@ export class BudgetService {
           budget_id: newBudget.id,
           account_id: item.account_id,
           budgeted_amount: item.budgeted_amount,
-          description: item.description
+          notes: item.notes
         });
       }
     }

@@ -27,7 +27,7 @@ interface BudgetItem {
   actual_amount?: number;
   variance_amount?: number;
   variance_percentage?: number;
-  description?: string;
+  notes?: string;
   account?: Account;
 }
 
@@ -51,7 +51,7 @@ export const BudgetItemManager: React.FC<BudgetItemManagerProps> = ({
   const [formData, setFormData] = useState({
     account_id: '',
     budgeted_amount: '',
-    description: ''
+    notes: ''
   });
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export const BudgetItemManager: React.FC<BudgetItemManagerProps> = ({
         await budgetService.updateBudgetItem(editingItem.id, {
           account_id: formData.account_id,
           budgeted_amount: parseFloat(formData.budgeted_amount),
-          description: formData.description
+          notes: formData.notes
         });
         toast.success('تم تحديث بند الميزانية بنجاح');
       } else {
@@ -96,7 +96,7 @@ export const BudgetItemManager: React.FC<BudgetItemManagerProps> = ({
           budget_id: budgetId,
           account_id: formData.account_id,
           budgeted_amount: parseFloat(formData.budgeted_amount),
-          description: formData.description
+          notes: formData.notes
         });
         toast.success('تم إضافة بند الميزانية بنجاح');
       }
@@ -117,7 +117,7 @@ export const BudgetItemManager: React.FC<BudgetItemManagerProps> = ({
     setFormData({
       account_id: item.account_id,
       budgeted_amount: item.budgeted_amount.toString(),
-      description: item.description || ''
+      notes: item.notes || ''
     });
     setIsDialogOpen(true);
   };
@@ -139,7 +139,7 @@ export const BudgetItemManager: React.FC<BudgetItemManagerProps> = ({
     setFormData({
       account_id: '',
       budgeted_amount: '',
-      description: ''
+      notes: ''
     });
     setEditingItem(null);
   };
@@ -154,7 +154,7 @@ export const BudgetItemManager: React.FC<BudgetItemManagerProps> = ({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>بنود الميزانية</CardTitle>
+          <CardTitle className="rtl-title">بنود الميزانية</CardTitle>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => resetForm()} className="rtl-flex">
@@ -164,13 +164,13 @@ export const BudgetItemManager: React.FC<BudgetItemManagerProps> = ({
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>
+                <DialogTitle className="rtl-title">
                   {editingItem ? 'تعديل بند الميزانية' : 'إضافة بند جديد'}
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="account">الحساب</Label>
+                  <Label htmlFor="account" className="rtl-label">الحساب</Label>
                   <Select 
                     value={formData.account_id} 
                     onValueChange={(value) => setFormData({...formData, account_id: value})}
@@ -189,7 +189,7 @@ export const BudgetItemManager: React.FC<BudgetItemManagerProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="amount">المبلغ المخطط (د.ك)</Label>
+                  <Label htmlFor="amount" className="rtl-label">المبلغ المخطط (د.ك)</Label>
                   <Input
                     id="amount"
                     type="number"
@@ -202,12 +202,12 @@ export const BudgetItemManager: React.FC<BudgetItemManagerProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="description">الوصف</Label>
+                  <Label htmlFor="notes" className="rtl-label">ملاحظات</Label>
                   <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    placeholder="وصف البند..."
+                    id="notes"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                    placeholder="ملاحظات البند..."
                     rows={3}
                   />
                 </div>
