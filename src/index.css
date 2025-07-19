@@ -1,4 +1,5 @@
 
+
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
@@ -35,8 +36,8 @@
   /* Brand Colors */
   --gradient-primary: linear-gradient(135deg, hsl(221 83% 53%) 0%, hsl(262 83% 58%) 100%);
   --shadow-glow: 0 0 20px hsla(221, 83%, 53%, 0.3);
-  --btn-primary: hsl(221 83% 53%);
-  --btn-primary-hover: hsl(221 83% 48%);
+  --btn-primary: 221 83% 53%;
+  --btn-primary-hover: 221 83% 48%;
 }
 
 .dark {
@@ -90,7 +91,12 @@ body {
 }
 
 .btn-primary {
-  @apply bg-btn-primary hover:bg-btn-primary-hover text-white;
+  background-color: hsl(var(--btn-primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.btn-primary:hover {
+  background-color: hsl(var(--btn-primary-hover));
 }
 
 .bg-gradient-primary {
@@ -138,3 +144,4 @@ body {
     opacity: 1;
   }
 }
+
