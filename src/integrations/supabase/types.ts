@@ -230,6 +230,47 @@ export type Database = {
         }
         Relationships: []
       }
+      accounting_entry_locks: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          journal_entry_id: string | null
+          lock_type: string
+          reference_id: string
+          reference_type: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          lock_type: string
+          reference_id: string
+          reference_type: string
+          tenant_id?: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          lock_type?: string
+          reference_id?: string
+          reference_type?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_entry_locks_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accounting_event_monitor: {
         Row: {
           created_at: string
@@ -1538,6 +1579,63 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      automated_entry_executions: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          execution_status: string
+          execution_time_ms: number | null
+          id: string
+          journal_entry_id: string | null
+          processed_at: string | null
+          reference_id: string
+          reference_type: string
+          rule_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          execution_status?: string
+          execution_time_ms?: number | null
+          id?: string
+          journal_entry_id?: string | null
+          processed_at?: string | null
+          reference_id: string
+          reference_type: string
+          rule_id?: string | null
+          tenant_id?: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          execution_status?: string
+          execution_time_ms?: number | null
+          id?: string
+          journal_entry_id?: string | null
+          processed_at?: string | null
+          reference_id?: string
+          reference_type?: string
+          rule_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automated_entry_executions_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automated_entry_executions_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "automated_entry_rules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       automated_entry_rules: {
         Row: {
@@ -11702,6 +11800,15 @@ export type Database = {
         Args: { account_code_param: string }
         Returns: Json
       }
+      create_accounting_lock: {
+        Args: {
+          p_reference_type: string
+          p_reference_id: string
+          p_journal_entry_id: string
+          p_lock_type: string
+        }
+        Returns: string
+      }
       create_approval_request: {
         Args: {
           p_approval_type: string
@@ -11893,6 +12000,15 @@ export type Database = {
       execute_analytics_query: {
         Args: { query_text: string }
         Returns: Json
+      }
+      execute_automation_rule: {
+        Args: {
+          p_rule_id: string
+          p_reference_type: string
+          p_reference_id: string
+          p_event_data: Json
+        }
+        Returns: string
       }
       extract_transaction_features: {
         Args: { description: string; amount: number; transaction_date?: string }
@@ -12142,6 +12258,14 @@ export type Database = {
         Args: { _roles: string[] }
         Returns: boolean
       }
+      has_existing_accounting_entry: {
+        Args: {
+          p_reference_type: string
+          p_reference_id: string
+          p_lock_type: string
+        }
+        Returns: boolean
+      }
       has_financial_transactions: {
         Args: { account_id_param: string }
         Returns: boolean
@@ -12246,6 +12370,15 @@ export type Database = {
       }
       periodic_accounting_maintenance: {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      process_automated_accounting_event: {
+        Args: {
+          p_event_type: string
+          p_reference_type: string
+          p_reference_id: string
+          p_event_data: Json
+        }
         Returns: Json
       }
       reopen_financial_period: {
