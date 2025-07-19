@@ -11250,6 +11250,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      debug_user_tenant_status: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       execute_analytics_query: {
         Args: { query_text: string }
         Returns: Json

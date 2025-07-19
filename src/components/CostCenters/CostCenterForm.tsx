@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import { CostCenterService, type CostCenter, type CreateCostCenterData } from '@/services/BusinessServices/CostCenterService';
 import { useSecureTenantData } from '@/hooks/useSecureTenantData';
 import { useTenant } from '@/contexts/TenantContext';
@@ -74,25 +75,58 @@ const CostCenterForm = ({ costCenter, parentId, onClose, onSuccess }: CostCenter
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('🚀 CostCenterForm: بدء عملية الحفظ');
+    console.log('📋 CostCenterForm: بيانات النموذج:', formData);
+    console.log('🏢 CostCenterForm: المؤسسة الحالية:', currentTenant);
+    
     if (!currentTenant?.id) {
-      toast.error('خطأ: لا توجد مؤسسة نشطة');
+      console.error('❌ CostCenterForm: لا توجد مؤسسة نشطة');
+      toast.error('خطأ: لا توجد مؤسسة نشطة - يرجى إعادة تسجيل الدخول');
+      return;
+    }
+
+    // التحقق من البيانات الأساسية
+    if (!formData.cost_center_code?.trim()) {
+      toast.error('كود مركز التكلفة مطلوب');
+      return;
+    }
+
+    if (!formData.cost_center_name?.trim()) {
+      toast.error('اسم مركز التكلفة مطلوب');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
+      // طباعة معلومات التشخيص قبل الحفظ
+      const { data: debugInfo } = await supabase.rpc('debug_user_tenant_status');
+      console.log('🔧 CostCenterForm: معلومات التشخيص قبل الحفظ:', debugInfo);
+
       if (costCenter) {
+        console.log('✏️ CostCenterForm: تحديث مركز التكلفة:', costCenter.id);
         await costCenterService.updateCostCenter(costCenter.id, formData);
         toast.success('تم تحديث مركز التكلفة بنجاح');
       } else {
-        await costCenterService.createCostCenter(formData);
+        console.log('➕ CostCenterForm: إنشاء مركز تكلفة جديد');
+        const result = await costCenterService.createCostCenter(formData);
+        console.log('✅ CostCenterForm: تم إنشاء مركز التكلفة:', result);
         toast.success('تم إنشاء مركز التكلفة بنجاح');
       }
       onSuccess();
     } catch (error: any) {
-      console.error('Error saving cost center:', error);
-      toast.error(error.message || 'حدث خطأ أثناء حفظ مركز التكلفة');
+      console.error('❌ CostCenterForm: خطأ في حفظ مركز التكلفة:', error);
+      
+      // معالجة أخطاء محددة
+      if (error.message?.includes('tenant_id')) {
+        toast.error('خطأ في تحديد المؤسسة - يرجى إعادة تسجيل الدخول');
+      } else if (error.message?.includes('duplicate')) {
+        toast.error('كود مركز التكلفة مستخدم بالفعل');
+      } else if (error.message?.includes('foreign key')) {
+        toast.error('خطأ في الربط - تأكد من صحة البيانات المرجعية');
+      } else {
+        toast.error(error.message || 'حدث خطأ أثناء حفظ مركز التكلفة');
+      }
     } finally {
       setIsSubmitting(false);
     }
