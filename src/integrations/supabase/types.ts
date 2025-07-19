@@ -1008,69 +1008,6 @@ export type Database = {
           },
         ]
       }
-      asset_disposal_reasons: {
-        Row: {
-          created_at: string
-          id: string
-          is_active: boolean | null
-          reason_code: string
-          reason_name: string
-          requires_approval: boolean | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_active?: boolean | null
-          reason_code: string
-          reason_name: string
-          requires_approval?: boolean | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_active?: boolean | null
-          reason_code?: string
-          reason_name?: string
-          requires_approval?: boolean | null
-        }
-        Relationships: []
-      }
-      asset_locations: {
-        Row: {
-          address: string | null
-          created_at: string
-          id: string
-          is_active: boolean | null
-          location_code: string
-          location_name: string
-          phone: string | null
-          responsible_person: string | null
-          updated_at: string
-        }
-        Insert: {
-          address?: string | null
-          created_at?: string
-          id?: string
-          is_active?: boolean | null
-          location_code: string
-          location_name: string
-          phone?: string | null
-          responsible_person?: string | null
-          updated_at?: string
-        }
-        Update: {
-          address?: string | null
-          created_at?: string
-          id?: string
-          is_active?: boolean | null
-          location_code?: string
-          location_name?: string
-          phone?: string | null
-          responsible_person?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       asset_maintenance: {
         Row: {
           asset_id: string
@@ -1168,67 +1105,6 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      asset_movement_history: {
-        Row: {
-          approved_by: string | null
-          asset_id: string
-          created_at: string
-          created_by: string | null
-          from_location_id: string | null
-          id: string
-          movement_date: string
-          movement_reason: string | null
-          notes: string | null
-          to_location_id: string | null
-        }
-        Insert: {
-          approved_by?: string | null
-          asset_id: string
-          created_at?: string
-          created_by?: string | null
-          from_location_id?: string | null
-          id?: string
-          movement_date?: string
-          movement_reason?: string | null
-          notes?: string | null
-          to_location_id?: string | null
-        }
-        Update: {
-          approved_by?: string | null
-          asset_id?: string
-          created_at?: string
-          created_by?: string | null
-          from_location_id?: string | null
-          id?: string
-          movement_date?: string
-          movement_reason?: string | null
-          notes?: string | null
-          to_location_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "asset_movement_history_asset_id_fkey"
-            columns: ["asset_id"]
-            isOneToOne: false
-            referencedRelation: "fixed_assets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "asset_movement_history_from_location_id_fkey"
-            columns: ["from_location_id"]
-            isOneToOne: false
-            referencedRelation: "asset_locations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "asset_movement_history_to_location_id_fkey"
-            columns: ["to_location_id"]
-            isOneToOne: false
-            referencedRelation: "asset_locations"
             referencedColumns: ["id"]
           },
         ]
@@ -7635,39 +7511,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      maintenance_categories: {
-        Row: {
-          category_name: string
-          created_at: string
-          default_frequency_months: number | null
-          description: string | null
-          estimated_cost: number | null
-          id: string
-          is_active: boolean | null
-          is_critical: boolean | null
-        }
-        Insert: {
-          category_name: string
-          created_at?: string
-          default_frequency_months?: number | null
-          description?: string | null
-          estimated_cost?: number | null
-          id?: string
-          is_active?: boolean | null
-          is_critical?: boolean | null
-        }
-        Update: {
-          category_name?: string
-          created_at?: string
-          default_frequency_months?: number | null
-          description?: string | null
-          estimated_cost?: number | null
-          id?: string
-          is_active?: boolean | null
-          is_critical?: boolean | null
-        }
-        Relationships: []
       }
       ml_models: {
         Row: {

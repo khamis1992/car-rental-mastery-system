@@ -1,121 +1,160 @@
 
-import { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { Header } from '@/components/Layout/Header';
-import { Sidebar } from '@/components/Layout/Sidebar';
-import Auth from '@/pages/Auth';
-import Dashboard from '@/pages/Dashboard';
-import Contracts from '@/pages/Contracts';
-import Customers from '@/pages/Customers';
-import Vehicles from '@/pages/Vehicles';
-import Employees from '@/pages/Employees';
-import Invoices from '@/pages/Invoices';
-import Payments from '@/pages/Payments';
-import ChartOfAccounts from '@/pages/Accounting/ChartOfAccounts';
-import JournalEntries from '@/pages/Accounting/JournalEntries';
-import Branches from '@/pages/Accounting/Branches';
-import FinancialPeriods from '@/pages/Accounting/FinancialPeriods';
-import TrialBalanceReport from '@/pages/Accounting/TrialBalanceReport';
-import IncomeStatementReport from '@/pages/Accounting/IncomeStatementReport';
-import BalanceSheetReport from '@/pages/Accounting/BalanceSheetReport';
-import FixedAssets from '@/pages/Accounting/FixedAssets';
-import AssetDepreciation from '@/pages/Accounting/AssetDepreciation';
-import AssetCategories from '@/pages/Accounting/AssetCategories';
-import BankTransactions from '@/pages/Accounting/BankTransactions';
-import Budgets from '@/pages/Accounting/Budgets';
-import CostCenters from '@/pages/Accounting/CostCenters';
-import JournalEntryReviews from '@/pages/Accounting/JournalEntryReviews';
-import AdvancedKPIs from '@/pages/Accounting/AdvancedKPIs';
-import AccountingWorkflows from '@/pages/Accounting/AccountingWorkflows';
-import CashFlowStatementReport from '@/pages/Accounting/CashFlowStatementReport';
-import FinancialSummariesReport from '@/pages/Accounting/FinancialSummariesReport';
-import LiquidityAnalysisReport from '@/pages/Accounting/LiquidityAnalysisReport';
-import AutomatedEntryRules from '@/pages/Accounting/AutomatedEntryRules';
-import AdditionalCharges from '@/pages/AdditionalCharges';
-import ContractExtensions from '@/pages/ContractExtensions';
-import ContractIncidents from '@/pages/ContractIncidents';
-import CustomerEvaluations from '@/pages/CustomerEvaluations';
-import Departments from '@/pages/Departments';
-import Quotations from '@/pages/Quotations';
-import { AdvancedAccountingHub } from '@/components/Accounting/AdvancedAccountingHub';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { TenantProvider } from "@/contexts/TenantContext";
+import { SettingsProvider } from "@/contexts/SettingsContext";
+import { SearchProvider } from "@/contexts/SearchContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
+import { SearchDialog } from "@/components/Search/SearchDialog";
+import { Layout } from "@/components/Layout/Layout";
+import Index from "./pages/Index";
+import LandingPage from "./pages/LandingPage";
+import Auth from "./pages/Auth";
+import Customers from "./pages/Customers";
+import Fleet from "./pages/Fleet";
+import Quotations from "./pages/Quotations";
+import Contracts from "./pages/Contracts";
+import ChartOfAccounts from "./pages/ChartOfAccounts";
+import ChartOfAccountsSetupPage from "./pages/ChartOfAccountsSetup";
+import JournalEntries from "./pages/JournalEntries";
+import FinancialReports from "./pages/FinancialReports";
+import BudgetManagement from "./pages/BudgetManagement";
+import AccountingAutomation from "./pages/AccountingAutomation";
+import AccountingValidation from "./pages/AccountingValidation";
+import CostCenters from "./pages/CostCenters";
+import FixedAssets from "./pages/FixedAssets";
+import Maintenance from "./pages/Maintenance";
+import TrafficViolations from "./pages/TrafficViolations";
+import Employees from "./pages/Employees";
+import Attendance from "./pages/Attendance";
+import Leaves from "./pages/Leaves";
+import Payroll from "./pages/Payroll";
+import Communications from "./pages/Communications";
+import Notifications from "./pages/Notifications";
+import Settings from "./pages/Settings";
 
-function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const queryClient = new QueryClient();
-  const { isLoggedIn, isLoading } = useAuth();
+// Super Admin Pages
+import SuperAdminMainDashboard from "./pages/super-admin/MainDashboard";
+import SuperAdminTenantManagement from "./pages/super-admin/TenantManagement";
+import SuperAdminUsersPermissions from "./pages/super-admin/UsersAndPermissions";
+import SuperAdminBillingSubscriptions from "./pages/super-admin/BillingAndSubscriptions";
+import SuperAdminSadadPayments from "./pages/super-admin/SadadPayments";
+import SuperAdminSystemMonitoring from "./pages/super-admin/SystemMonitoring";
+import SuperAdminMaintenanceTools from "./pages/super-admin/MaintenanceTools";
+import SuperAdminTechnicalSupport from "./pages/super-admin/TechnicalSupport";
+import SuperAdminLandingEditor from "./pages/super-admin/LandingPageEditor";
+import SuperAdminGlobalSettings from "./pages/super-admin/GlobalSettings";
 
-  if (isLoading) {
+const queryClient = new QueryClient();
+
+function AppRoutes() {
+  const { isAuthenticated, loading, isSaasAdmin } = useAuth();
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">جاري التحميل...</div>;
+  }
+
+  if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">جاري التحميل...</p>
-        </div>
-      </div>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    );
+  }
+
+  // If user is SAAS admin, show only super admin routes
+  if (isSaasAdmin) {
+    return (
+      <Layout>
+        <Routes>
+          <Route path="/super-admin/main-dashboard" element={<SuperAdminMainDashboard />} />
+          <Route path="/super-admin/tenant-management" element={<SuperAdminTenantManagement />} />
+          <Route path="/super-admin/users-permissions" element={<SuperAdminUsersPermissions />} />
+          <Route path="/super-admin/billing-subscriptions" element={<SuperAdminBillingSubscriptions />} />
+          <Route path="/super-admin/sadad-payments" element={<SuperAdminSadadPayments />} />
+          <Route path="/super-admin/system-monitoring" element={<SuperAdminSystemMonitoring />} />
+          <Route path="/super-admin/maintenance-tools" element={<SuperAdminMaintenanceTools />} />
+          <Route path="/super-admin/technical-support" element={<SuperAdminTechnicalSupport />} />
+          <Route path="/super-admin/landing-editor" element={<SuperAdminLandingEditor />} />
+          <Route path="/super-admin/global-settings" element={<SuperAdminGlobalSettings />} />
+          <Route path="*" element={<Navigate to="/super-admin/main-dashboard" />} />
+        </Routes>
+      </Layout>
     );
   }
 
   return (
+    <Layout>
+      <Routes>
+        <Route path="/dashboard" element={<Index />} />
+        <Route path="/customers" element={<Customers />} />
+        <Route path="/fleet" element={<Fleet />} />
+        <Route path="/quotations" element={<Quotations />} />
+        <Route path="/contracts" element={<Contracts />} />
+        <Route path="/chart-of-accounts" element={<ChartOfAccounts />} />
+        <Route path="/chart-of-accounts-setup" element={<ChartOfAccountsSetupPage />} />
+        <Route path="/journal-entries" element={<JournalEntries />} />
+        <Route path="/financial-reports" element={<FinancialReports />} />
+        <Route path="/budget-management" element={<BudgetManagement />} />
+        <Route path="/accounting-automation" element={<AccountingAutomation />} />
+        <Route path="/accounting-validation" element={<AccountingValidation />} />
+        <Route path="/cost-centers" element={<CostCenters />} />
+        <Route path="/fixed-assets" element={<FixedAssets />} />
+        <Route path="/maintenance" element={<Maintenance />} />
+        <Route path="/violations" element={<TrafficViolations />} />
+        <Route path="/employees" element={<Employees />} />
+        <Route path="/attendance" element={<Attendance />} />
+        <Route path="/leaves" element={<Leaves />} />
+        <Route path="/payroll" element={<Payroll />} />
+        <Route path="/communications" element={<Communications />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/settings" element={<Settings />} />
+        
+        {/* Super Admin Routes for eligible users */}
+        <Route path="/super-admin/main-dashboard" element={<SuperAdminMainDashboard />} />
+        <Route path="/super-admin/tenant-management" element={<SuperAdminTenantManagement />} />
+        <Route path="/super-admin/users-permissions" element={<SuperAdminUsersPermissions />} />
+        <Route path="/super-admin/billing-subscriptions" element={<SuperAdminBillingSubscriptions />} />
+        <Route path="/super-admin/sadad-payments" element={<SuperAdminSadadPayments />} />
+        <Route path="/super-admin/system-monitoring" element={<SuperAdminSystemMonitoring />} />
+        <Route path="/super-admin/maintenance-tools" element={<SuperAdminMaintenanceTools />} />
+        <Route path="/super-admin/technical-support" element={<SuperAdminTechnicalSupport />} />
+        <Route path="/super-admin/landing-editor" element={<SuperAdminLandingEditor />} />
+        <Route path="/super-admin/global-settings" element={<SuperAdminGlobalSettings />} />
+        
+        <Route path="*" element={<Navigate to="/dashboard" />} />
+      </Routes>
+    </Layout>
+  );
+}
+
+function App() {
+  return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <div className="min-h-screen bg-background" dir="rtl">
-          {!isLoggedIn ? (
-            <Auth />
-          ) : (
-            <div className="flex h-screen">
-              <Sidebar isOpen={sidebarOpen} onToggle={setSidebarOpen} />
-              
-              <div className="flex-1 flex flex-col overflow-hidden">
-                <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
-                
-                <main className="flex-1 overflow-x-hidden overflow-y-auto p-6">
-                  <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/contracts" element={<Contracts />} />
-                    <Route path="/customers" element={<Customers />} />
-                    <Route path="/vehicles" element={<Vehicles />} />
-                    <Route path="/employees" element={<Employees />} />
-                    <Route path="/invoices" element={<Invoices />} />
-                    <Route path="/payments" element={<Payments />} />
-                    <Route path="/quotations" element={<Quotations />} />
-                    <Route path="/additional-charges" element={<AdditionalCharges />} />
-                    <Route path="/contract-extensions" element={<ContractExtensions />} />
-                    <Route path="/contract-incidents" element={<ContractIncidents />} />
-                    <Route path="/customer-evaluations" element={<CustomerEvaluations />} />
-                    <Route path="/departments" element={<Departments />} />
-                    
-                    {/* Accounting Routes */}
-                    <Route path="/accounting/chart-of-accounts" element={<ChartOfAccounts />} />
-                    <Route path="/accounting/journal-entries" element={<JournalEntries />} />
-                    <Route path="/accounting/branches" element={<Branches />} />
-                    <Route path="/accounting/financial-periods" element={<FinancialPeriods />} />
-                    <Route path="/accounting/trial-balance-report" element={<TrialBalanceReport />} />
-                    <Route path="/accounting/income-statement-report" element={<IncomeStatementReport />} />
-                    <Route path="/accounting/balance-sheet-report" element={<BalanceSheetReport />} />
-                    <Route path="/accounting/cash-flow-statement-report" element={<CashFlowStatementReport />} />
-                    <Route path="/accounting/financial-summaries-report" element={<FinancialSummariesReport />} />
-                    <Route path="/accounting/liquidity-analysis-report" element={<LiquidityAnalysisReport />} />
-                    <Route path="/accounting/fixed-assets" element={<FixedAssets />} />
-                    <Route path="/accounting/asset-depreciation" element={<AssetDepreciation />} />
-                    <Route path="/accounting/asset-categories" element={<AssetCategories />} />
-                    <Route path="/accounting/bank-transactions" element={<BankTransactions />} />
-                    <Route path="/accounting/budgets" element={<Budgets />} />
-                    <Route path="/accounting/cost-centers" element={<CostCenters />} />
-                    <Route path="/accounting/journal-entry-reviews" element={<JournalEntryReviews />} />
-                    <Route path="/accounting/advanced-kpis" element={<AdvancedKPIs />} />
-                    <Route path="/accounting/accounting-workflows" element={<AccountingWorkflows />} />
-                    <Route path="/accounting/automated-entry-rules" element={<AutomatedEntryRules />} />
-                    <Route path="/advanced-accounting" element={<AdvancedAccountingHub />} />
-                  </Routes>
-                </main>
-              </div>
-            </div>
-          )}
-        </div>
-      </BrowserRouter>
+      <TooltipProvider>
+        <AuthProvider>
+          <TenantProvider>
+            <SettingsProvider>
+              <SearchProvider>
+                <NotificationProvider>
+                  <BrowserRouter>
+                    <AppRoutes />
+                    <SearchDialog />
+                    <Toaster />
+                    <Sonner />
+                  </BrowserRouter>
+                </NotificationProvider>
+              </SearchProvider>
+            </SettingsProvider>
+          </TenantProvider>
+        </AuthProvider>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }
