@@ -171,7 +171,7 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
           className={`flex items-center gap-3 p-4 rounded-lg border transition-all duration-200 hover:shadow-md hover:border-primary/30 ${config.borderColor} ${config.bgColor} mb-2`}
           style={{ marginRight: `${depth * 24}px` }}
         >
-          {/* Actions Menu - moved to far left */}
+          {/* Actions Menu - far left */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -211,11 +211,6 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
             )}
           </Button>
 
-          {/* Account Icon */}
-          <div className="p-2 rounded-lg bg-background border border-border">
-            <IconComponent className={`h-5 w-5 ${config.color}`} />
-          </div>
-
           {/* Balance */}
           <div className="text-right min-w-[120px]">
             <p className="text-sm font-semibold text-foreground">
@@ -228,9 +223,22 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
             )}
           </div>
 
-          {/* Account Info */}
+          {/* Account Name - middle */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-1 justify-end">
+            <div className="flex items-center justify-end gap-3">
+              <p 
+                className="text-sm text-muted-foreground truncate cursor-pointer hover:text-primary transition-colors text-right"
+                onClick={() => onViewLedger?.(account)}
+                title="انقر لعرض دفتر الأستاذ"
+              >
+                {account.account_name}
+              </p>
+            </div>
+          </div>
+
+          {/* Account Code and Icon - far right */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-1">
               <Badge variant="outline" className="text-xs font-normal bg-background">
                 {config.label}
               </Badge>
@@ -243,14 +251,8 @@ export const ModernChartOfAccountsTree: React.FC<ModernChartOfAccountsTreeProps>
                 {account.account_code}
               </span>
             </div>
-            <div className="flex items-center justify-end gap-3">
-              <p 
-                className="text-sm text-muted-foreground truncate cursor-pointer hover:text-primary transition-colors text-right"
-                onClick={() => onViewLedger?.(account)}
-                title="انقر لعرض دفتر الأستاذ"
-              >
-                {account.account_name}
-              </p>
+            <div className="p-2 rounded-lg bg-background border border-border">
+              <IconComponent className={`h-5 w-5 ${config.color}`} />
             </div>
           </div>
 
