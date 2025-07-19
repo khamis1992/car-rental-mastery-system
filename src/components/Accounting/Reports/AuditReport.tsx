@@ -218,18 +218,476 @@ export const AuditReport: React.FC = () => {
       printWindow?.document.write(`
         <html>
           <head>
-            <title>تقرير المراجعة</title>
+            <title>تقرير المراجعة الداخلية - نظام المحاسبة المتقدم</title>
+            <meta charset="utf-8">
             <style>
-              body { font-family: Arial, sans-serif; direction: rtl; }
-              .report-header { text-align: center; margin-bottom: 20px; }
-              .report-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; }
-              .report-table { width: 100%; border-collapse: collapse; }
-              .report-table th, .report-table td { border: 1px solid #ddd; padding: 8px; text-align: right; }
-              .report-table th { background-color: #f5f5f5; }
-              @media print { .no-print { display: none; } }
+              @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+              
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
+
+              body {
+                font-family: 'Tajawal', 'Arial', sans-serif;
+                direction: rtl;
+                background: #ffffff;
+                color: #1a1a1a;
+                line-height: 1.6;
+                font-size: 14px;
+              }
+
+              .report-container {
+                max-width: 210mm;
+                margin: 0 auto;
+                background: white;
+                box-shadow: 0 0 20px rgba(0,0,0,0.1);
+              }
+
+              /* Header Design */
+              .report-header {
+                background: linear-gradient(135deg, #1e40af, #3b82f6);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+              }
+
+              .report-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+                opacity: 0.3;
+              }
+
+              .header-content {
+                position: relative;
+                z-index: 2;
+              }
+
+              .company-logo {
+                width: 80px;
+                height: 80px;
+                background: rgba(255,255,255,0.15);
+                border-radius: 50%;
+                margin: 0 auto 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 32px;
+                font-weight: 800;
+                color: white;
+                border: 3px solid rgba(255,255,255,0.3);
+              }
+
+              .report-title {
+                font-size: 32px;
+                font-weight: 800;
+                margin-bottom: 10px;
+                text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+              }
+
+              .report-subtitle {
+                font-size: 18px;
+                font-weight: 500;
+                opacity: 0.9;
+                margin-bottom: 30px;
+              }
+
+              .report-meta {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                background: rgba(255,255,255,0.1);
+                padding: 20px;
+                border-radius: 15px;
+                border: 1px solid rgba(255,255,255,0.2);
+              }
+
+              .meta-item {
+                text-align: center;
+              }
+
+              .meta-label {
+                font-size: 12px;
+                opacity: 0.8;
+                margin-bottom: 5px;
+              }
+
+              .meta-value {
+                font-size: 16px;
+                font-weight: 700;
+              }
+
+              /* Content Sections */
+              .report-content {
+                padding: 40px 30px;
+              }
+
+              .section {
+                margin-bottom: 40px;
+                background: #ffffff;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                overflow: hidden;
+                border: 1px solid #e5e7eb;
+              }
+
+              .section-header {
+                background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+                padding: 20px 25px;
+                border-bottom: 2px solid #e5e7eb;
+              }
+
+              .section-title {
+                font-size: 20px;
+                font-weight: 700;
+                color: #1e40af;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+              }
+
+              .section-body {
+                padding: 25px;
+              }
+
+              /* Score Display */
+              .score-display {
+                text-align: center;
+                padding: 30px;
+                background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+                border-radius: 20px;
+                margin-bottom: 30px;
+                border: 2px solid #0ea5e9;
+              }
+
+              .score-number {
+                font-size: 72px;
+                font-weight: 800;
+                margin-bottom: 10px;
+                background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+              }
+
+              .score-label {
+                font-size: 16px;
+                color: #64748b;
+                font-weight: 500;
+              }
+
+              /* Statistics Grid */
+              .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                margin-top: 30px;
+              }
+
+              .stat-card {
+                background: white;
+                border-radius: 12px;
+                padding: 25px 20px;
+                text-align: center;
+                border: 2px solid #e5e7eb;
+                transition: all 0.3s ease;
+              }
+
+              .stat-card.critical {
+                border-color: #ef4444;
+                background: linear-gradient(135deg, #fef2f2, #fee2e2);
+              }
+
+              .stat-card.warning {
+                border-color: #f59e0b;
+                background: linear-gradient(135deg, #fffbeb, #fef3c7);
+              }
+
+              .stat-card.info {
+                border-color: #3b82f6;
+                background: linear-gradient(135deg, #eff6ff, #dbeafe);
+              }
+
+              .stat-number {
+                font-size: 36px;
+                font-weight: 800;
+                margin-bottom: 8px;
+              }
+
+              .stat-number.critical { color: #dc2626; }
+              .stat-number.warning { color: #d97706; }
+              .stat-number.info { color: #2563eb; }
+
+              .stat-label {
+                font-size: 14px;
+                font-weight: 600;
+                opacity: 0.8;
+              }
+
+              /* Professional Table */
+              .professional-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+                background: white;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+              }
+
+              .professional-table thead {
+                background: linear-gradient(135deg, #1e40af, #3b82f6);
+                color: white;
+              }
+
+              .professional-table th {
+                padding: 18px 15px;
+                text-align: right;
+                font-weight: 600;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+              }
+
+              .professional-table td {
+                padding: 15px;
+                text-align: right;
+                border-bottom: 1px solid #e5e7eb;
+                font-size: 13px;
+              }
+
+              .professional-table tbody tr:hover {
+                background-color: #f8fafc;
+              }
+
+              .professional-table tbody tr:nth-child(even) {
+                background-color: #fafbfc;
+              }
+
+              /* Badges */
+              .badge {
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+              }
+
+              .badge.critical {
+                background: #fecaca;
+                color: #dc2626;
+                border: 1px solid #f87171;
+              }
+
+              .badge.warning {
+                background: #fed7aa;
+                color: #ea580c;
+                border: 1px solid #fb923c;
+              }
+
+              .badge.info {
+                background: #bfdbfe;
+                color: #1d4ed8;
+                border: 1px solid #60a5fa;
+              }
+
+              .badge.success {
+                background: #bbf7d0;
+                color: #059669;
+                border: 1px solid #34d399;
+              }
+
+              /* Recommendations */
+              .recommendation-card {
+                background: white;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 15px;
+                border-left: 5px solid #3b82f6;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+              }
+
+              .recommendation-card.critical {
+                border-left-color: #ef4444;
+                background: linear-gradient(135deg, #fef2f2, #ffffff);
+              }
+
+              .recommendation-card.warning {
+                border-left-color: #f59e0b;
+                background: linear-gradient(135deg, #fffbeb, #ffffff);
+              }
+
+              .recommendation-card.success {
+                border-left-color: #10b981;
+                background: linear-gradient(135deg, #f0fdf4, #ffffff);
+              }
+
+              .recommendation-title {
+                font-size: 16px;
+                font-weight: 700;
+                margin-bottom: 8px;
+                color: #1f2937;
+              }
+
+              .recommendation-desc {
+                font-size: 14px;
+                color: #6b7280;
+                margin-bottom: 12px;
+                line-height: 1.5;
+              }
+
+              /* Footer */
+              .report-footer {
+                background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+                padding: 30px;
+                text-align: center;
+                border-top: 3px solid #e5e7eb;
+                margin-top: 40px;
+              }
+
+              .footer-content {
+                max-width: 600px;
+                margin: 0 auto;
+              }
+
+              .footer-title {
+                font-size: 18px;
+                font-weight: 700;
+                color: #1e40af;
+                margin-bottom: 15px;
+              }
+
+              .footer-text {
+                font-size: 14px;
+                color: #64748b;
+                line-height: 1.6;
+              }
+
+              .confidentiality-notice {
+                background: #fef3c7;
+                border: 2px solid #f59e0b;
+                border-radius: 8px;
+                padding: 15px;
+                margin-top: 20px;
+                font-size: 12px;
+                color: #92400e;
+                font-weight: 600;
+              }
+
+              /* Check Items */
+              .check-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 20px;
+                background: white;
+                border-radius: 10px;
+                margin-bottom: 12px;
+                border: 1px solid #e5e7eb;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+              }
+
+              .check-info {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+              }
+
+              .check-status {
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                flex-shrink: 0;
+              }
+
+              .check-status.success { background: #10b981; }
+              .check-status.error { background: #ef4444; }
+
+              .check-details h4 {
+                font-size: 16px;
+                font-weight: 600;
+                color: #1f2937;
+                margin-bottom: 4px;
+              }
+
+              .check-details p {
+                font-size: 13px;
+                color: #6b7280;
+              }
+
+              .check-score {
+                text-align: left;
+                font-size: 24px;
+                font-weight: 800;
+                color: #1e40af;
+              }
+
+              @media print {
+                .no-print { display: none !important; }
+                .report-container { box-shadow: none; }
+                body { background: white !important; }
+                .section { break-inside: avoid; }
+                .professional-table { break-inside: avoid; }
+              }
+
+              @page {
+                margin: 15mm;
+                size: A4;
+              }
             </style>
           </head>
-          <body>${content.innerHTML}</body>
+          <body>
+            <div class="report-container">
+              <div class="report-header">
+                <div class="header-content">
+                  <div class="company-logo">🛡️</div>
+                  <h1 class="report-title">تقرير المراجعة الداخلية</h1>
+                  <p class="report-subtitle">تحليل شامل لسلامة وصحة النظام المحاسبي</p>
+                  <div class="report-meta">
+                    <div class="meta-item">
+                      <div class="meta-label">تاريخ التقرير</div>
+                      <div class="meta-value">${new Date().toLocaleDateString('ar-KW')}</div>
+                    </div>
+                    <div class="meta-item">
+                      <div class="meta-label">نوع المراجعة</div>
+                      <div class="meta-value">مراجعة شاملة</div>
+                    </div>
+                    <div class="meta-item">
+                      <div class="meta-label">حالة النظام</div>
+                      <div class="meta-value">${reportData?.overallScore >= 95 ? 'ممتاز' : reportData?.overallScore >= 80 ? 'جيد' : 'يحتاج تحسين'}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="report-content">
+                ${content.innerHTML}
+              </div>
+              
+              <div class="report-footer">
+                <div class="footer-content">
+                  <h3 class="footer-title">نظام المحاسبة المتقدم</h3>
+                  <p class="footer-text">
+                    هذا التقرير تم إنشاؤه تلقائياً بواسطة نظام المراجعة الداخلية المتقدم.
+                    يُنصح بمراجعة دورية شهرية للحفاظ على أعلى معايير الجودة والامتثال.
+                  </p>
+                  <div class="confidentiality-notice">
+                    <strong>إشعار السرية:</strong> هذا المستند سري ومخصص للاستخدام الداخلي فقط. 
+                    يُمنع نشره أو توزيعه خارج نطاق الجهات المخولة.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </body>
         </html>
       `);
       printWindow?.document.close();
