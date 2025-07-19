@@ -71,7 +71,7 @@ class AccountingService {
       console.log('Getting ledger entries for:', { accountId, startDate, endDate });
 
       const { data, error } = await supabase
-        .from('journal_entry_details')
+        .from('journal_entry_lines')
         .select(`
           id,
           debit_amount,

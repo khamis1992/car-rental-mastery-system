@@ -105,9 +105,9 @@ export const GeneralLedgerReport: React.FC = () => {
       console.log('Loading ledger entries for account:', selectedAccountId);
       console.log('Date range:', dateRange);
 
-      // Fixed query without problematic ordering
+      // Fixed query with correct table name and join
       const { data, error: ledgerError } = await supabase
-        .from('journal_entry_details')
+        .from('journal_entry_lines')
         .select(`
           id,
           debit_amount,
@@ -115,6 +115,7 @@ export const GeneralLedgerReport: React.FC = () => {
           description,
           reference_id,
           reference_type,
+          created_at,
           journal_entries!inner (
             id,
             entry_number,
