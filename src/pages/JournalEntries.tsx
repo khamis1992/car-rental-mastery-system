@@ -337,7 +337,7 @@ const JournalReports = () => {
 };
 
 const JournalEntries = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('manual');
 
   const refreshData = () => {
     // Trigger refresh for current tab
@@ -356,8 +356,7 @@ const JournalEntries = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="dashboard">لوحة المعلومات</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="manual">القيود اليدوية</TabsTrigger>
           <TabsTrigger value="automated">القيود التلقائية</TabsTrigger>
           <TabsTrigger value="cost-centers">مراكز التكلفة</TabsTrigger>
@@ -365,14 +364,6 @@ const JournalEntries = () => {
           <TabsTrigger value="reports">التقارير</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="dashboard" className="space-y-6">
-          <JournalEntriesDashboard />
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <CostCenterBudgetAlerts showOnlyUnread={true} maxAlerts={5} />
-            <SourceLinks />
-          </div>
-        </TabsContent>
 
         <TabsContent value="manual" className="space-y-4">
           <EnhancedJournalEntriesTab />
