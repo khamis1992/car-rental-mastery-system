@@ -357,11 +357,11 @@ const JournalEntries = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="manual">القيود اليدوية</TabsTrigger>
-          <TabsTrigger value="automated">القيود التلقائية</TabsTrigger>
-          <TabsTrigger value="cost-centers">مراكز التكلفة</TabsTrigger>
-          <TabsTrigger value="sources">المصادر المرتبطة</TabsTrigger>
           <TabsTrigger value="reports">التقارير</TabsTrigger>
+          <TabsTrigger value="sources">المصادر المرتبطة</TabsTrigger>
+          <TabsTrigger value="cost-centers">مراكز التكلفة</TabsTrigger>
+          <TabsTrigger value="automated">القيود التلقائية</TabsTrigger>
+          <TabsTrigger value="manual">القيود اليدوية</TabsTrigger>
         </TabsList>
 
 
