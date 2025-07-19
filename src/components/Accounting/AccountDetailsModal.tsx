@@ -221,10 +221,10 @@ export const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({
 
           {/* التفاصيل والتحليلات */}
           <Tabs defaultValue="transactions" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="transactions">المعاملات</TabsTrigger>
-              <TabsTrigger value="analytics">التحليلات</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 flex-row-reverse">
               <TabsTrigger value="settings">الإعدادات</TabsTrigger>
+              <TabsTrigger value="analytics">التحليلات</TabsTrigger>
+              <TabsTrigger value="transactions">المعاملات</TabsTrigger>
             </TabsList>
 
             <TabsContent value="transactions" className="space-y-4">
