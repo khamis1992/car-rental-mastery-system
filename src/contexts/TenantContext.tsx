@@ -110,20 +110,20 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
         `)
         .eq('user_id', user.id)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
       if (tenantUserError) {
-        if (tenantUserError.code === 'PGRST116') {
-          console.warn('⚠️ لم يتم العثور على مؤسسة للمستخدم');
-          setError('لم يتم العثور على مؤسسة مرتبطة بهذا المستخدم');
-          setCurrentTenant(null);
-          setCurrentUserRole(null);
-          tenantIsolationMiddleware.reset();
-          return;
-        } else {
-          console.error('❌ خطأ في البحث عن المؤسسة:', tenantUserError);
-          throw tenantUserError;
-        }
+        console.error('❌ خطأ في البحث عن المؤسسة:', tenantUserError);
+        throw tenantUserError;
+      }
+
+      if (!tenantUser) {
+        console.warn('⚠️ لم يتم العثور على مؤسسة للمستخدم');
+        setError('لم يتم العثور على مؤسسة مرتبطة بهذا المستخدم');
+        setCurrentTenant(null);
+        setCurrentUserRole(null);
+        tenantIsolationMiddleware.reset();
+        return;
       }
 
       if (tenantUser && tenantUser.tenant) {
@@ -184,7 +184,7 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
         .eq('user_id', user?.id)
         .eq('tenant_id', tenantId)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
       const success = !error && !!tenantUser && !!tenantUser.tenant;
 
