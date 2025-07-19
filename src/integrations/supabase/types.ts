@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_templates: {
+        Row: {
+          business_type: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          template_name: string
+          template_name_en: string | null
+          template_structure: Json
+          updated_at: string
+        }
+        Insert: {
+          business_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          template_name: string
+          template_name_en?: string | null
+          template_structure: Json
+          updated_at?: string
+        }
+        Update: {
+          business_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          template_name?: string
+          template_name_en?: string | null
+          template_structure?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       accounting_audit_trail: {
         Row: {
           action: string
@@ -1911,6 +1947,59 @@ export type Database = {
           },
           {
             foreignKeyName: "chart_of_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chart_of_accounts_settings: {
+        Row: {
+          account_code_format: Json
+          allow_posting_levels: Json
+          auto_code_generation: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          level_naming: Json
+          max_account_levels: number
+          require_parent_for_level: Json
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          account_code_format?: Json
+          allow_posting_levels?: Json
+          auto_code_generation?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          level_naming?: Json
+          max_account_levels?: number
+          require_parent_for_level?: Json
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          account_code_format?: Json
+          allow_posting_levels?: Json
+          auto_code_generation?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          level_naming?: Json
+          max_account_levels?: number
+          require_parent_for_level?: Json
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_chart_settings_tenant"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -10794,6 +10883,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      generate_account_code: {
+        Args: {
+          p_tenant_id: string
+          p_parent_account_id?: string
+          p_account_type?: string
+        }
+        Returns: string
+      }
       generate_asset_code: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -11162,6 +11259,15 @@ export type Database = {
           updated_by_param?: string
         }
         Returns: boolean
+      }
+      validate_account_structure: {
+        Args: {
+          p_tenant_id: string
+          p_account_code: string
+          p_parent_account_id?: string
+          p_level?: number
+        }
+        Returns: Json
       }
       validate_accounting_access: {
         Args: { target_tenant_id: string }
