@@ -3,7 +3,7 @@ import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
 import { ChartOfAccountsSetup } from '@/components/Accounting/ChartOfAccountsSetup';
 import { GeneralLedgerReport } from '@/components/Accounting/GeneralLedgerReport';
 import { AccountingDashboard } from '@/components/Accounting/AccountingDashboard';
-import { ModernChartOfAccountsTree } from '@/components/Accounting/ModernChartOfAccountsTree';
+
 import { FinancialBreadcrumb } from '@/components/Financial/FinancialBreadcrumb';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Plus, Upload, Download, BarChart3, Settings, FileText } from 'lucide-react';
@@ -561,17 +561,13 @@ const ChartOfAccounts = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="setup">إعداد الحسابات</TabsTrigger>
           <TabsTrigger value="ledger">دفتر الأستاذ</TabsTrigger>
           <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
           <TabsTrigger value="dashboard">لوحة المعلومات</TabsTrigger>
-          <TabsTrigger value="tree">عرض شجري حديث</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="tree" className="space-y-4">
-          <ModernChartOfAccountsTree accounts={mockAccounts} onAddAccount={handleAddAccount} onEditAccount={handleEditAccount} onViewLedger={handleViewLedger} />
-        </TabsContent>
 
         <TabsContent value="dashboard" className="space-y-4">
           <AccountingDashboard />
