@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { TenantProvider } from "@/contexts/TenantContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import { SearchProvider } from "@/contexts/SearchContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import { SearchDialog } from "@/components/Search/SearchDialog";
 import { Layout } from "@/components/Layout/Layout";
 import Index from "./pages/Index";
@@ -140,12 +141,14 @@ function App() {
           <TenantProvider>
             <SettingsProvider>
               <SearchProvider>
-                <BrowserRouter>
-                  <AppRoutes />
-                  <SearchDialog />
-                  <Toaster />
-                  <Sonner />
-                </BrowserRouter>
+                <NotificationProvider>
+                  <BrowserRouter>
+                    <AppRoutes />
+                    <SearchDialog />
+                    <Toaster />
+                    <Sonner />
+                  </BrowserRouter>
+                </NotificationProvider>
               </SearchProvider>
             </SettingsProvider>
           </TenantProvider>
