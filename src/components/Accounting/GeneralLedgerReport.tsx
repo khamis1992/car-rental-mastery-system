@@ -170,7 +170,11 @@ export const GeneralLedgerReport = () => {
       return;
     }
 
-    const totals = calculateTotals();
+    // حساب الإجماليات محلياً
+    const totalDebits = ledgerEntries.reduce((sum, entry) => sum + entry.debit_amount, 0);
+    const totalCredits = ledgerEntries.reduce((sum, entry) => sum + entry.credit_amount, 0);
+    const netMovement = totalDebits - totalCredits;
+
     const htmlContent = `
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
@@ -255,16 +259,16 @@ export const GeneralLedgerReport = () => {
         <h3>الإجماليات</h3>
         <div class="total-row">
             <strong>إجمالي المدين:</strong>
-            <span class="debit">${formatBalance(totals.totalDebits)}</span>
+            <span class="debit">${formatBalance(totalDebits)}</span>
         </div>
         <div class="total-row">
             <strong>إجمالي الدائن:</strong>
-            <span class="credit">${formatBalance(totals.totalCredits)}</span>
+            <span class="credit">${formatBalance(totalCredits)}</span>
         </div>
         <div class="total-row">
             <strong>صافي الحركة:</strong>
-            <span class="${totals.netMovement >= 0 ? 'balance-positive' : 'balance-negative'}">
-                ${formatBalance(totals.netMovement)}
+            <span class="${netMovement >= 0 ? 'balance-positive' : 'balance-negative'}">
+                ${formatBalance(netMovement)}
             </span>
         </div>
         <div class="total-row">
