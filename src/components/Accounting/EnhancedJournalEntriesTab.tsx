@@ -413,10 +413,10 @@ export const EnhancedJournalEntriesTab = () => {
                   <form onSubmit={handleSubmit} className="space-y-6 p-1">
                     <Tabs defaultValue="basic" className="w-full">
                       <TabsList className="grid w-full grid-cols-4">
-                        <TabsTrigger value="basic">المعلومات الأساسية</TabsTrigger>
-                        <TabsTrigger value="lines">سطور القيد</TabsTrigger>
-                        <TabsTrigger value="cost-centers">مراكز التكلفة</TabsTrigger>
                         <TabsTrigger value="attachments">المرفقات</TabsTrigger>
+                        <TabsTrigger value="cost-centers">مراكز التكلفة</TabsTrigger>
+                        <TabsTrigger value="lines">سطور القيد</TabsTrigger>
+                        <TabsTrigger value="basic">المعلومات الأساسية</TabsTrigger>
                       </TabsList>
 
                       <TabsContent value="basic" className="space-y-4">
