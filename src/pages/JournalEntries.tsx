@@ -215,10 +215,6 @@ const CostCenterManagement = () => {
           </p>
           <div className="flex gap-2">
             <Button variant="outline">
-              <Settings className="w-4 h-4" />
-              إعدادات مراكز التكلفة
-            </Button>
-            <Button variant="outline">
               <BarChart3 className="w-4 h-4" />
               تقرير التوزيع
             </Button>
