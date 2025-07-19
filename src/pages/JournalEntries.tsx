@@ -1,10 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   BookOpen, 
   Zap, 
@@ -19,14 +17,11 @@ import {
   BarChart3,
   Settings,
   Link,
-  Target,
-  Building2,
-  Info
+  Target
 } from 'lucide-react';
 import { EnhancedJournalEntriesTab } from '@/components/Accounting/EnhancedJournalEntriesTab';
 import { AutomatedJournalEntries } from '@/components/Accounting/AutomatedJournalEntries';
-import { CostCenterDistribution } from '@/components/Accounting/CostCenterDistribution';
-import { CostCenterManagement } from '@/components/Accounting/CostCenterManagement';
+import { CostCenterBudgetAlerts } from '@/components/Accounting/CostCenterBudgetAlerts';
 import { accountingService } from '@/services/accountingService';
 import { JournalEntry } from '@/types/accounting';
 import { useToast } from '@/hooks/use-toast';
@@ -202,6 +197,39 @@ const JournalEntriesDashboard = () => {
   );
 };
 
+// Cost Center Management Component  
+const CostCenterManagement = () => {
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="rtl-title flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            إدارة مراكز التكلفة
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-4">
+            عرض وإدارة توزيع القيود المحاسبية على مراكز التكلفة المختلفة
+          </p>
+          <div className="flex gap-2">
+            <Button variant="outline">
+              <Settings className="w-4 h-4" />
+              إعدادات مراكز التكلفة
+            </Button>
+            <Button variant="outline">
+              <BarChart3 className="w-4 h-4" />
+              تقرير التوزيع
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <CostCenterBudgetAlerts showOnlyUnread={false} maxAlerts={20} />
+    </div>
+  );
+};
+
 // Source Links Component
 const SourceLinks = () => {
   const [linkedEntries, setLinkedEntries] = useState<JournalEntry[]>([]);
@@ -347,12 +375,7 @@ const JournalEntries = () => {
           <TabsTrigger value="dashboard">لوحة المعلومات</TabsTrigger>
           <TabsTrigger value="manual">القيود اليدوية</TabsTrigger>
           <TabsTrigger value="automated">القيود التلقائية</TabsTrigger>
-          <TabsTrigger value="cost-distribution">
-            <div className="flex items-center gap-2">
-              <Target className="w-4 h-4" />
-              توزيع التكاليف
-            </div>
-          </TabsTrigger>
+          <TabsTrigger value="cost-centers">مراكز التكلفة</TabsTrigger>
           <TabsTrigger value="sources">المصادر المرتبطة</TabsTrigger>
           <TabsTrigger value="reports">التقارير</TabsTrigger>
         </TabsList>
@@ -361,7 +384,7 @@ const JournalEntries = () => {
           <JournalEntriesDashboard />
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <CostCenterDistribution showOnlyAlerts={true} maxItems={3} />
+            <CostCenterBudgetAlerts showOnlyUnread={true} maxAlerts={5} />
             <SourceLinks />
           </div>
         </TabsContent>
@@ -374,16 +397,8 @@ const JournalEntries = () => {
           <AutomatedJournalEntries />
         </TabsContent>
 
-        <TabsContent value="cost-distribution" className="space-y-4">
-          <Alert className="mb-4">
-            <Info className="h-4 w-4" />
-            <AlertDescription className="rtl-title">
-              <strong>توزيع التكاليف على مراكز التكلفة:</strong> هذا القسم مخصص لإدارة توزيع القيود المحاسبية على مراكز التكلفة المختلفة، 
-              مراقبة دقة التوزيع، وعرض التنبيهات المتعلقة بالميزانيات.
-              للإدارة الشاملة لمراكز التكلفة نفسها، يرجى زيارة قسم "مراكز التكلفة" الرئيسي.
-            </AlertDescription>
-          </Alert>
-          <CostCenterDistribution />
+        <TabsContent value="cost-centers" className="space-y-4">
+          <CostCenterManagement />
         </TabsContent>
 
         <TabsContent value="sources" className="space-y-4">
