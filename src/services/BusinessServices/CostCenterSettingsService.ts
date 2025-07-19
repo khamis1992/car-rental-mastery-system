@@ -21,6 +21,20 @@ export interface SettingGroup {
 }
 
 export class CostCenterSettingsService {
+  private async getCurrentTenantId(): Promise<string | null> {
+    try {
+      const { data, error } = await supabase.rpc('get_current_tenant_id');
+      if (error) {
+        console.error('Error getting current tenant ID:', error);
+        return null;
+      }
+      return data;
+    } catch (error) {
+      console.error('Error calling get_current_tenant_id:', error);
+      return null;
+    }
+  }
+
   async getAllSettings(): Promise<CostCenterSetting[]> {
     try {
       const { data, error } = await supabase
