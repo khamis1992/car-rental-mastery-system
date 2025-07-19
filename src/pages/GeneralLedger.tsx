@@ -1,37 +1,97 @@
-import React from 'react';
+
+import React, { useRef } from 'react';
 import { GeneralLedgerReport } from '@/components/Accounting/GeneralLedgerReport';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, BookOpen, FileText, Download, Calculator, Search, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 const GeneralLedger = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const reportRef = useRef<HTMLDivElement>(null);
+
+  const handleViewAccounts = () => {
+    if (reportRef.current) {
+      reportRef.current.scrollIntoView({ behavior: 'smooth' });
+      toast({
+        title: "عرض الحسابات",
+        description: "تم التمرير إلى تقرير دفتر الأستاذ العام",
+      });
+    }
+  };
+
+  const handleGenerateReport = () => {
+    const content = document.getElementById('general-ledger-report');
+    if (content) {
+      window.print();
+      toast({
+        title: "إنشاء التقرير",
+        description: "تم فتح نافذة الطباعة لطباعة التقرير",
+      });
+    } else {
+      toast({
+        title: "خطأ",
+        description: "لم يتم العثور على محتوى التقرير",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleOpenSearch = () => {
+    // Focus on search functionality within the report
+    const searchInput = document.querySelector('input[type="search"]');
+    if (searchInput) {
+      (searchInput as HTMLInputElement).focus();
+      toast({
+        title: "فتح البحث",
+        description: "تم تفعيل خاصية البحث",
+      });
+    } else {
+      toast({
+        title: "البحث والفلترة",
+        description: "استخدم خيارات الفلترة المتاحة في التقرير أدناه",
+      });
+    }
+  };
+
+  const handleAnalyzeBalances = () => {
+    navigate('/financial-reports');
+    toast({
+      title: "تحليل الأرصدة",
+      description: "تم التنقل إلى صفحة التقارير المالية لتحليل الأرصدة",
+    });
+  };
 
   const ledgerFeatures = [
     {
       title: "استعراض الحسابات",
       description: "عرض تفصيلي لحركة جميع الحسابات المحاسبية",
       icon: <BookOpen className="w-5 h-5" />,
-      action: "عرض الحسابات"
+      action: "عرض الحسابات",
+      onClick: handleViewAccounts
     },
     {
       title: "تقارير دفتر الأستاذ",
       description: "طباعة وتصدير تقارير دفتر الأستاذ بصيغ مختلفة",
       icon: <FileText className="w-5 h-5" />,
-      action: "إنشاء التقرير"
+      action: "إنشاء التقرير",
+      onClick: handleGenerateReport
     },
     {
       title: "البحث والفلترة",
       description: "البحث في الحسابات وفلترة النتائج حسب الفترة والنوع",
       icon: <Search className="w-5 h-5" />,
-      action: "فتح البحث"
+      action: "فتح البحث",
+      onClick: handleOpenSearch
     },
     {
       title: "تحليل الأرصدة",
       description: "تحليل أرصدة الحسابات وحركتها خلال فترة محددة",
       icon: <Calculator className="w-5 h-5" />,
-      action: "تحليل الأرصدة"
+      action: "تحليل الأرصدة",
+      onClick: handleAnalyzeBalances
     }
   ];
 
@@ -75,7 +135,7 @@ const GeneralLedger = () => {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4 text-right">{feature.description}</p>
-              <Button size="sm" className="w-full">
+              <Button size="sm" className="w-full" onClick={feature.onClick}>
                 {feature.action}
               </Button>
             </CardContent>
@@ -84,7 +144,7 @@ const GeneralLedger = () => {
       </div>
 
       {/* Main Ledger Report */}
-      <Card className="card-elegant">
+      <Card className="card-elegant" ref={reportRef}>
         <CardHeader>
           <CardTitle className="rtl-title flex items-center gap-2">
             <BookOpen className="w-6 h-6" />
@@ -92,7 +152,9 @@ const GeneralLedger = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <GeneralLedgerReport />
+          <div id="general-ledger-report">
+            <GeneralLedgerReport />
+          </div>
         </CardContent>
       </Card>
     </div>
