@@ -28,6 +28,7 @@ export class InvoiceBusinessService {
       try {
         const customerName = await this.getCustomerName(invoice.customer_id);
         const journalEntryId = await this.accountingService.createInvoiceAccountingEntry(invoice.id, {
+          customer_id: invoice.customer_id,
           customer_name: customerName,
           invoice_number: invoice.invoice_number,
           total_amount: invoice.total_amount || 0,

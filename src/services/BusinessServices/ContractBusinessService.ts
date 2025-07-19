@@ -1,6 +1,7 @@
 import { IContractRepository } from '@/repositories/interfaces/IContractRepository';
 import { ContractWithDetails } from '@/services/contractService';
 import { contractAccountingService, ContractAccountingData } from '@/services/contractAccountingService';
+import { AccountingIntegrationService } from './AccountingIntegrationService';
 
 export class ContractBusinessService {
   constructor(private contractRepository: IContractRepository) {}
@@ -138,8 +139,11 @@ export class ContractBusinessService {
   // طرق تكامل المحاسبة
   async createAccountingEntry(contract: any): Promise<string | null> {
     try {
-      const contractAccountingData: ContractAccountingData = {
-        contract_id: contract.id,
+      // استخدام نظام محاسبة العملاء الجديد المتطور
+      const accountingService = new AccountingIntegrationService();
+      
+      return await accountingService.createContractAccountingEntry(contract.id, {
+        customer_id: contract.customer_id,
         customer_name: contract.customers?.name || 'غير محدد',
         vehicle_info: contract.vehicles ? 
           `${contract.vehicles.make} ${contract.vehicles.model} - ${contract.vehicles.vehicle_number}` : 'غير محدد',
@@ -148,12 +152,8 @@ export class ContractBusinessService {
         security_deposit: contract.security_deposit || 0,
         insurance_amount: contract.insurance_amount || 0,
         tax_amount: contract.tax_amount || 0,
-        discount_amount: contract.discount_amount || 0,
-        start_date: contract.start_date,
-        end_date: contract.end_date
-      };
-
-      return await contractAccountingService.createContractAccountingEntry(contractAccountingData);
+        discount_amount: contract.discount_amount || 0
+      });
     } catch (error) {
       console.error('خطأ في إنشاء القيد المحاسبي للعقد:', error);
       throw error;

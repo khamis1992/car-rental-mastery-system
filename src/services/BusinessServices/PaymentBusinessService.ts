@@ -25,17 +25,19 @@ export class PaymentBusinessService {
       const payment = await this.paymentRepository.createPayment(paymentData);
       
       // Create revenue recognition entry for the payment (revenue is recorded when payment is received)
-      try {
-        const invoice = await this.invoiceRepository.getInvoiceById(paymentData.invoice_id);
-        if (invoice) {
-          const customerName = await this.getCustomerName(invoice.customer_id);
-          const journalEntryId = await this.accountingService.createPaymentAccountingEntry(payment.id, {
-            customer_name: customerName,
-            invoice_number: invoice.invoice_number,
-            payment_amount: payment.amount,
-            payment_method: payment.payment_method,
-            payment_date: payment.payment_date
-          });
+        try {
+          const invoice = await this.invoiceRepository.getInvoiceById(paymentData.invoice_id);
+          if (invoice) {
+            const customerName = await this.getCustomerName(invoice.customer_id);
+            const journalEntryId = await this.accountingService.createPaymentAccountingEntry(payment.id, {
+              customer_id: invoice.customer_id,
+              customer_name: customerName,
+              invoice_id: paymentData.invoice_id,
+              invoice_number: invoice.invoice_number,
+              payment_amount: payment.amount,
+              payment_method: payment.payment_method,
+              payment_date: payment.payment_date
+            });
           
           if (journalEntryId) {
             console.log(`✅ Payment revenue recognition entry created successfully: ${journalEntryId} for payment ${payment.id}`);

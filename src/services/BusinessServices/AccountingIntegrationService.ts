@@ -7,11 +7,13 @@ import { supabase } from '@/integrations/supabase/client';
 export class AccountingIntegrationService {
   
   /**
-   * إنشاء قيد محاسبي للعقد (مديونية + إيرادات مؤجلة)
+   * إنشاء قيد محاسبي للعقد مع نظام محاسبة العملاء المتطور
    */
   async createContractAccountingEntry(contractId: string, contractData: {
+    customer_id: string;
     customer_name: string;
     vehicle_info: string;
+    contract_number: string;
     total_amount: number;
     security_deposit?: number;
     insurance_amount?: number;
@@ -19,7 +21,7 @@ export class AccountingIntegrationService {
     discount_amount?: number;
   }): Promise<string | null> {
     try {
-      console.log(`🔄 Creating deferred revenue entry for contract ${contractId} with amount ${contractData.total_amount}`);
+      console.log(`🔄 Creating customer-integrated contract entry for contract ${contractId} with amount ${contractData.total_amount}`);
       
       // Validate input data
       if (!contractData.total_amount || contractData.total_amount <= 0) {
@@ -27,11 +29,18 @@ export class AccountingIntegrationService {
         throw new Error('مبلغ العقد يجب أن يكون أكبر من صفر');
       }
 
-      const { data, error } = await supabase.rpc('create_contract_accounting_entry' as any, {
-        contract_id: contractId,  
+      if (!contractData.customer_id) {
+        console.error('❌ Customer ID is required for contract accounting');
+        throw new Error('معرف العميل مطلوب للمحاسبة');
+      }
+
+      const { data, error } = await supabase.rpc('create_contract_customer_accounting_entry' as any, {
+        contract_id_param: contractId,
+        customer_id_param: contractData.customer_id,
         contract_data: {
           customer_name: contractData.customer_name,
           vehicle_info: contractData.vehicle_info,
+          contract_number: contractData.contract_number,
           total_amount: contractData.total_amount,
           security_deposit: contractData.security_deposit || 0,
           insurance_amount: contractData.insurance_amount || 0,
@@ -41,27 +50,28 @@ export class AccountingIntegrationService {
       });
 
       if (error) {
-        console.error('❌ Failed to create contract deferred revenue entry:', error);
-        throw new Error(`فشل في إنشاء قيد الإيرادات المؤجلة للعقد: ${error.message}`);
+        console.error('❌ Failed to create contract customer accounting entry:', error);
+        throw new Error(`فشل في إنشاء قيد محاسبة العقد والعميل: ${error.message}`);
       }
 
       if (!data) {
-        console.error('❌ No journal entry ID returned from contract deferred revenue function');
-        throw new Error('لم يتم إرجاع معرف قيد الإيرادات المؤجلة');
+        console.error('❌ No journal entry ID returned from contract customer accounting function');
+        throw new Error('لم يتم إرجاع معرف قيد محاسبة العقد');
       }
 
-      console.log(`✅ Contract deferred revenue entry created successfully: ${data}`);
+      console.log(`✅ Contract customer accounting entry created successfully: ${data}`);
       return data as string;
     } catch (error) {
-      console.error('❌ Contract deferred revenue integration error:', error);
+      console.error('❌ Contract customer accounting integration error:', error);
       throw error; // Re-throw to let business service handle it
     }
   }
 
   /**
-   * إنشاء قيد محاسبي للفاتورة (مديونية + إيرادات مؤجلة)
+   * إنشاء قيد محاسبي للفاتورة مع نظام محاسبة العملاء المتطور
    */
   async createInvoiceAccountingEntry(invoiceId: string, invoiceData: {
+    customer_id: string;
     customer_name: string;
     invoice_number: string;
     total_amount: number;
@@ -69,7 +79,7 @@ export class AccountingIntegrationService {
     discount_amount?: number;
   }): Promise<string | null> {
     try {
-      console.log(`🔄 Creating deferred revenue entry for invoice ${invoiceData.invoice_number} with amount ${invoiceData.total_amount}`);
+      console.log(`🔄 Creating customer-integrated invoice entry for invoice ${invoiceData.invoice_number} with amount ${invoiceData.total_amount}`);
       
       // Validate input data
       if (!invoiceData.total_amount || invoiceData.total_amount <= 0) {
@@ -77,8 +87,14 @@ export class AccountingIntegrationService {
         throw new Error('مبلغ الفاتورة يجب أن يكون أكبر من صفر');
       }
 
-      const { data, error } = await supabase.rpc('create_invoice_receivable_entry' as any, {
-        invoice_id: invoiceId,  
+      if (!invoiceData.customer_id) {
+        console.error('❌ Customer ID is required for invoice accounting');
+        throw new Error('معرف العميل مطلوب للمحاسبة');
+      }
+
+      const { data, error } = await supabase.rpc('create_invoice_customer_accounting_entry' as any, {
+        invoice_id_param: invoiceId,
+        customer_id_param: invoiceData.customer_id,
         invoice_data: {
           customer_name: invoiceData.customer_name,
           invoice_number: invoiceData.invoice_number,
@@ -89,35 +105,37 @@ export class AccountingIntegrationService {
       });
 
       if (error) {
-        console.error('❌ Failed to create invoice deferred revenue entry:', error);
-        throw new Error(`فشل في إنشاء قيد الإيرادات المؤجلة للفاتورة: ${error.message}`);
+        console.error('❌ Failed to create invoice customer accounting entry:', error);
+        throw new Error(`فشل في إنشاء قيد محاسبة الفاتورة والعميل: ${error.message}`);
       }
 
       if (!data) {
-        console.error('❌ No journal entry ID returned from deferred revenue function');
-        throw new Error('لم يتم إرجاع معرف قيد الإيرادات المؤجلة');
+        console.error('❌ No journal entry ID returned from invoice customer accounting function');
+        throw new Error('لم يتم إرجاع معرف قيد محاسبة الفاتورة');
       }
 
-      console.log(`✅ Invoice deferred revenue entry created successfully: ${data}`);
+      console.log(`✅ Invoice customer accounting entry created successfully: ${data}`);
       return data as string;
     } catch (error) {
-      console.error('❌ Invoice deferred revenue integration error:', error);
+      console.error('❌ Invoice customer accounting integration error:', error);
       throw error; // Re-throw to let business service handle it
     }
   }
 
   /**
-   * إنشاء قيد محاسبي للدفعة (تسجيل الإيراد عند الدفع)
+   * إنشاء قيد محاسبي للدفعة مع نظام محاسبة العملاء المتطور
    */
   async createPaymentAccountingEntry(paymentId: string, paymentData: {
+    customer_id: string;
     customer_name: string;
+    invoice_id: string;
     invoice_number: string;
     payment_amount: number;
     payment_method: string;
     payment_date: string;
   }): Promise<string | null> {
     try {
-      console.log(`🔄 Creating revenue entry for payment ${paymentData.invoice_number} with amount ${paymentData.payment_amount}`);
+      console.log(`🔄 Creating customer-integrated payment entry for payment ${paymentData.invoice_number} with amount ${paymentData.payment_amount}`);
       
       // Validate input data
       if (!paymentData.payment_amount || paymentData.payment_amount <= 0) {
@@ -125,8 +143,15 @@ export class AccountingIntegrationService {
         throw new Error('مبلغ الدفعة يجب أن يكون أكبر من صفر');
       }
 
-      const { data, error } = await supabase.rpc('create_payment_revenue_entry' as any, {
-        payment_id: paymentId,
+      if (!paymentData.customer_id) {
+        console.error('❌ Customer ID is required for payment accounting');
+        throw new Error('معرف العميل مطلوب للمحاسبة');
+      }
+
+      const { data, error } = await supabase.rpc('create_payment_customer_accounting_entry' as any, {
+        payment_id_param: paymentId,
+        customer_id_param: paymentData.customer_id,
+        invoice_id_param: paymentData.invoice_id,
         payment_data: {
           customer_name: paymentData.customer_name,
           invoice_number: paymentData.invoice_number,
@@ -137,19 +162,19 @@ export class AccountingIntegrationService {
       });
 
       if (error) {
-        console.error('❌ Failed to create payment revenue entry:', error);
-        throw new Error(`فشل في إنشاء قيد الإيراد للدفعة: ${error.message}`);
+        console.error('❌ Failed to create payment customer accounting entry:', error);
+        throw new Error(`فشل في إنشاء قيد محاسبة الدفعة والعميل: ${error.message}`);
       }
 
       if (!data) {
-        console.error('❌ No journal entry ID returned from payment revenue function');
-        throw new Error('لم يتم إرجاع معرف قيد الإيراد للدفعة');
+        console.error('❌ No journal entry ID returned from payment customer accounting function');
+        throw new Error('لم يتم إرجاع معرف قيد محاسبة الدفعة');
       }
 
-      console.log(`✅ Payment revenue entry created successfully: ${data}`);
+      console.log(`✅ Payment customer accounting entry created successfully: ${data}`);
       return data as string;
     } catch (error) {
-      console.error('❌ Payment revenue integration error:', error);
+      console.error('❌ Payment customer accounting integration error:', error);
       throw error; // Re-throw to let business service handle it
     }
   }

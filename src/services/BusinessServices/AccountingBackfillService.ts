@@ -218,6 +218,7 @@ export class AccountingBackfillService {
           if (!existingEntries || existingEntries.length === 0) {
             // إنشاء القيد المحاسبي للفاتورة
             const journalEntryId = await this.accountingService.createInvoiceAccountingEntry(invoice.id, {
+              customer_id: invoice.customer_id,
               customer_name: invoice.customers?.name || 'غير محدد',
               invoice_number: invoice.invoice_number,
               total_amount: invoice.total_amount,
@@ -271,7 +272,12 @@ export class AccountingBackfillService {
           amount,
           payment_date,
           payment_method,
-          invoices(invoice_number, customers(name))
+          invoice_id,
+          invoices(
+            invoice_number, 
+            customer_id,
+            customers(name)
+          )
         `)
         .eq('status', 'completed');
 
@@ -296,7 +302,9 @@ export class AccountingBackfillService {
           if (!existingEntries || existingEntries.length === 0) {
             // إنشاء القيد المحاسبي للمدفوعة
             const journalEntryId = await this.accountingService.createPaymentAccountingEntry(payment.id, {
+              customer_id: payment.invoices?.customer_id || '',
               customer_name: payment.invoices?.customers?.name || 'غير محدد',
+              invoice_id: payment.invoice_id,
               invoice_number: payment.invoices?.invoice_number || 'غير محدد',
               payment_amount: payment.amount,
               payment_method: payment.payment_method,

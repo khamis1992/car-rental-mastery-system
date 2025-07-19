@@ -11120,6 +11120,14 @@ export type Database = {
         Args: { contract_id: string; contract_data: Json }
         Returns: string
       }
+      create_contract_customer_accounting_entry: {
+        Args: {
+          contract_id_param: string
+          customer_id_param: string
+          contract_data: Json
+        }
+        Returns: string
+      }
       create_correct_chart_of_accounts: {
         Args: { tenant_id_param: string }
         Returns: number
@@ -11144,6 +11152,14 @@ export type Database = {
         Args: { invoice_id: string; invoice_data: Json }
         Returns: string
       }
+      create_invoice_customer_accounting_entry: {
+        Args: {
+          invoice_id_param: string
+          customer_id_param: string
+          invoice_data: Json
+        }
+        Returns: string
+      }
       create_invoice_receivable_entry: {
         Args: { invoice_id: string; invoice_data: Json }
         Returns: string
@@ -11166,6 +11182,15 @@ export type Database = {
       }
       create_payment_accounting_entry: {
         Args: { payment_id: string; payment_data: Json }
+        Returns: string
+      }
+      create_payment_customer_accounting_entry: {
+        Args: {
+          payment_id_param: string
+          customer_id_param: string
+          invoice_id_param: string
+          payment_data: Json
+        }
         Returns: string
       }
       create_payment_revenue_entry: {
@@ -11421,6 +11446,18 @@ export type Database = {
       get_current_tenant_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_customer_accounting_summary: {
+        Args: {
+          customer_id_param?: string
+          date_from?: string
+          date_to?: string
+        }
+        Returns: Json
+      }
+      get_customer_current_balance: {
+        Args: { customer_id_param: string }
+        Returns: number
       }
       get_grouped_system_settings: {
         Args: Record<PropertyKey, never>
