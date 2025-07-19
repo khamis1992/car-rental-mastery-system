@@ -38,8 +38,49 @@ export const FinancialReportsTab = () => {
 
   const loadCostCenters = async () => {
     try {
-      const data = await costCenterService.getAllCostCenters();
-      setCostCenters(data);
+      // Mock cost centers data
+      const mockCostCenters: CostCenter[] = [
+        {
+          id: 'cc-1',
+          cost_center_code: 'CC-001',
+          cost_center_name: 'قسم العمليات',
+          cost_center_type: 'operational',
+          budget_amount: 45000,
+          actual_spent: 38500,
+          is_active: true,
+          level: 1,
+          hierarchy_path: '001',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: 'cc-2',
+          cost_center_code: 'CC-002',
+          cost_center_name: 'القسم الإداري',
+          cost_center_type: 'administrative',
+          budget_amount: 35000,
+          actual_spent: 32000,
+          is_active: true,
+          level: 1,
+          hierarchy_path: '002',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: 'cc-3',
+          cost_center_code: 'CC-003',
+          cost_center_name: 'قسم الصيانة',
+          cost_center_type: 'support',
+          budget_amount: 25000,
+          actual_spent: 28500,
+          is_active: true,
+          level: 1,
+          hierarchy_path: '003',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ];
+      setCostCenters(mockCostCenters);
     } catch (error) {
       console.error('Error loading cost centers:', error);
     }
@@ -48,15 +89,60 @@ export const FinancialReportsTab = () => {
   const loadReports = async () => {
     setLoading(true);
     try {
-      const [trialBalanceData, incomeStatementData, balanceSheetData] = await Promise.all([
-        accountingService.getTrialBalance(),
-        accountingService.getIncomeStatement(dateRange.startDate, dateRange.endDate),
-        accountingService.getBalanceSheet()
-      ]);
+      // Mock data for Financial Reports Tab
+      const mockTrialBalance: TrialBalance[] = [
+        { account_code: '1101', account_name: 'صندوق النقدية', debit_balance: 15250, credit_balance: 0 },
+        { account_code: '1102', account_name: 'البنك التجاري الكويتي', debit_balance: 45000, credit_balance: 0 },
+        { account_code: '1201', account_name: 'العملاء', debit_balance: 28500, credit_balance: 0 },
+        { account_code: '1301', account_name: 'المركبات', debit_balance: 180000, credit_balance: 0 },
+        { account_code: '1302', account_name: 'مجمع إهلاك المركبات', debit_balance: 0, credit_balance: 25000 },
+        { account_code: '2101', account_name: 'الموردين', debit_balance: 0, credit_balance: 12800 },
+        { account_code: '2201', account_name: 'قروض قصيرة الأجل', debit_balance: 0, credit_balance: 35000 },
+        { account_code: '3101', account_name: 'رأس المال', debit_balance: 0, credit_balance: 150000 },
+        { account_code: '3201', account_name: 'الأرباح المحتجزة', debit_balance: 0, credit_balance: 22450 },
+        { account_code: '4101', account_name: 'إيرادات التأجير', debit_balance: 0, credit_balance: 85000 },
+        { account_code: '4201', account_name: 'إيرادات الصيانة', debit_balance: 0, credit_balance: 18500 },
+        { account_code: '5101', account_name: 'مصروفات الوقود', debit_balance: 12000, credit_balance: 0 },
+        { account_code: '5102', account_name: 'مصروفات الصيانة', debit_balance: 8500, credit_balance: 0 },
+        { account_code: '5201', account_name: 'الرواتب والأجور', debit_balance: 35000, credit_balance: 0 },
+        { account_code: '5301', account_name: 'إهلاك المركبات', debit_balance: 5000, credit_balance: 0 }
+      ];
+
+      const mockIncomeStatement: IncomeStatement = {
+        revenue: {
+          operating_revenue: 85000,
+          other_revenue: 18500,
+          total_revenue: 103500
+        },
+        expenses: {
+          operating_expense: 60500,
+          other_expense: 0,
+          total_expense: 60500
+        },
+        net_income: 43000
+      };
+
+      const mockBalanceSheet: BalanceSheet = {
+        assets: {
+          current_assets: 88750,
+          fixed_assets: 155000,
+          total_assets: 243750
+        },
+        liabilities: {
+          current_liabilities: 47800,
+          long_term_liabilities: 0,
+          total_liabilities: 47800
+        },
+        equity: {
+          capital: 150000,
+          retained_earnings: 45950,
+          total_equity: 195950
+        }
+      };
       
-      setTrialBalance(trialBalanceData);
-      setIncomeStatement(incomeStatementData);
-      setBalanceSheet(balanceSheetData);
+      setTrialBalance(mockTrialBalance);
+      setIncomeStatement(mockIncomeStatement);
+      setBalanceSheet(mockBalanceSheet);
     } catch (error) {
       toast({
         title: 'خطأ',

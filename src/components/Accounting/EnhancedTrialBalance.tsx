@@ -39,23 +39,176 @@ export const EnhancedTrialBalance = () => {
   const loadEnhancedTrialBalance = async () => {
     setLoading(true);
     try {
-      // استخدام دالة ميزان المراجعة الموجودة وتحسينها
-      const trialBalanceData = await accountingService.getTrialBalance();
-      
-      // تحويل البيانات للشكل المحسن
-      const enhancedData: EnhancedTrialBalanceData[] = trialBalanceData.map(account => ({
-        account_code: account.account_code,
-        account_name: account.account_name,
-        account_type: getAccountTypeInArabic(account.account_code),
-        opening_debit: 0, // سيتم حسابها من قاعدة البيانات
-        opening_credit: 0, // سيتم حسابها من قاعدة البيانات
-        period_debit: account.debit_balance,
-        period_credit: account.credit_balance,
-        closing_debit: account.debit_balance,
-        closing_credit: account.credit_balance
-      }));
+      // Mock enhanced trial balance data
+      const mockEnhancedData: EnhancedTrialBalanceData[] = [
+        {
+          account_code: '1101',
+          account_name: 'صندوق النقدية',
+          account_type: 'أصل',
+          opening_debit: 10000,
+          opening_credit: 0,
+          period_debit: 25000,
+          period_credit: 19750,
+          closing_debit: 15250,
+          closing_credit: 0
+        },
+        {
+          account_code: '1102',
+          account_name: 'البنك التجاري الكويتي',
+          account_type: 'أصل',
+          opening_debit: 30000,
+          opening_credit: 0,
+          period_debit: 45000,
+          period_credit: 30000,
+          closing_debit: 45000,
+          closing_credit: 0
+        },
+        {
+          account_code: '1201',
+          account_name: 'العملاء',
+          account_type: 'أصل',
+          opening_debit: 15000,
+          opening_credit: 0,
+          period_debit: 35000,
+          period_credit: 21500,
+          closing_debit: 28500,
+          closing_credit: 0
+        },
+        {
+          account_code: '1301',
+          account_name: 'المركبات',
+          account_type: 'أصل',
+          opening_debit: 160000,
+          opening_credit: 0,
+          period_debit: 20000,
+          period_credit: 0,
+          closing_debit: 180000,
+          closing_credit: 0
+        },
+        {
+          account_code: '1302',
+          account_name: 'مجمع إهلاك المركبات',
+          account_type: 'أصل',
+          opening_debit: 0,
+          opening_credit: 20000,
+          period_debit: 0,
+          period_credit: 5000,
+          closing_debit: 0,
+          closing_credit: 25000
+        },
+        {
+          account_code: '2101',
+          account_name: 'الموردين',
+          account_type: 'خصم',
+          opening_debit: 0,
+          opening_credit: 8000,
+          period_debit: 5000,
+          period_credit: 9800,
+          closing_debit: 0,
+          closing_credit: 12800
+        },
+        {
+          account_code: '2201',
+          account_name: 'قروض قصيرة الأجل',
+          account_type: 'خصم',
+          opening_debit: 0,
+          opening_credit: 30000,
+          period_debit: 0,
+          period_credit: 5000,
+          closing_debit: 0,
+          closing_credit: 35000
+        },
+        {
+          account_code: '3101',
+          account_name: 'رأس المال',
+          account_type: 'حقوق ملكية',
+          opening_debit: 0,
+          opening_credit: 150000,
+          period_debit: 0,
+          period_credit: 0,
+          closing_debit: 0,
+          closing_credit: 150000
+        },
+        {
+          account_code: '3201',
+          account_name: 'الأرباح المحتجزة',
+          account_type: 'حقوق ملكية',
+          opening_debit: 0,
+          opening_credit: 15000,
+          period_debit: 0,
+          period_credit: 7450,
+          closing_debit: 0,
+          closing_credit: 22450
+        },
+        {
+          account_code: '4101',
+          account_name: 'إيرادات التأجير',
+          account_type: 'إيراد',
+          opening_debit: 0,
+          opening_credit: 65000,
+          period_debit: 0,
+          period_credit: 20000,
+          closing_debit: 0,
+          closing_credit: 85000
+        },
+        {
+          account_code: '4201',
+          account_name: 'إيرادات الصيانة',
+          account_type: 'إيراد',
+          opening_debit: 0,
+          opening_credit: 12000,
+          period_debit: 0,
+          period_credit: 6500,
+          closing_debit: 0,
+          closing_credit: 18500
+        },
+        {
+          account_code: '5101',
+          account_name: 'مصروفات الوقود',
+          account_type: 'مصروف',
+          opening_debit: 8000,
+          opening_credit: 0,
+          period_debit: 4000,
+          period_credit: 0,
+          closing_debit: 12000,
+          closing_credit: 0
+        },
+        {
+          account_code: '5102',
+          account_name: 'مصروفات الصيانة',
+          account_type: 'مصروف',
+          opening_debit: 5000,
+          opening_credit: 0,
+          period_debit: 3500,
+          period_credit: 0,
+          closing_debit: 8500,
+          closing_credit: 0
+        },
+        {
+          account_code: '5201',
+          account_name: 'الرواتب والأجور',
+          account_type: 'مصروف',
+          opening_debit: 25000,
+          opening_credit: 0,
+          period_debit: 10000,
+          period_credit: 0,
+          closing_debit: 35000,
+          closing_credit: 0
+        },
+        {
+          account_code: '5301',
+          account_name: 'إهلاك المركبات',
+          account_type: 'مصروف',
+          opening_debit: 0,
+          opening_credit: 0,
+          period_debit: 5000,
+          period_credit: 0,
+          closing_debit: 5000,
+          closing_credit: 0
+        }
+      ];
 
-      setAccountsData(enhancedData);
+      setAccountsData(mockEnhancedData);
     } catch (error) {
       toast({
         title: 'خطأ',
