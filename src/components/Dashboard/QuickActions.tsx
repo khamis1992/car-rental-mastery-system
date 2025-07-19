@@ -37,21 +37,22 @@ const QuickActions = () => {
           إجراءات سريعة
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 gap-3">
+      <CardContent className="p-6">
+        <div className="space-y-4">
           {actions.map((action, index) => (
-            <Button
+            <button
               key={index}
-              variant="ghost"
-              className={`h-auto p-4 flex flex-col items-center gap-2 hover:scale-105 transition-all border-0 ${action.className}`}
+              className={`w-full p-6 rounded-2xl text-white hover:scale-[1.02] transition-all duration-200 flex flex-col items-center gap-3 shadow-lg ${action.className}`}
               onClick={action.onClick}
             >
-              {action.icon}
-              <div className="text-center">
-                <div className="font-medium text-sm">{action.title}</div>
-                <div className="text-xs opacity-80">{action.description}</div>
+              <div className="text-2xl">
+                {action.icon}
               </div>
-            </Button>
+              <div className="text-center">
+                <div className="font-bold text-lg mb-1">{action.title}</div>
+                <div className="text-sm opacity-90">{action.description}</div>
+              </div>
+            </button>
           ))}
         </div>
       </CardContent>
