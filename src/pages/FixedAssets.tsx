@@ -382,9 +382,9 @@ const FixedAssets = () => {
         <TabsContent value="assignments" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-right flex items-center gap-2">
-                <Users className="h-5 w-5" />
+              <CardTitle className="text-right flex items-center gap-2 flex-row-reverse">
                 تعيينات الأصول
+                <Users className="h-5 w-5" />
               </CardTitle>
               <CardDescription className="text-right">
                 إدارة تعيين الأصول للموظفين ومتابعة المواقع
