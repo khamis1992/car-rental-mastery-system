@@ -9,9 +9,7 @@ import { TenantProvider } from "@/contexts/TenantContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import { Layout } from "@/components/Layout/Layout";
 import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
+import Auth from "./pages/Auth";
 import Customers from "./pages/Customers";
 import Fleet from "./pages/Fleet";
 import Quotations from "./pages/Quotations";
@@ -26,7 +24,7 @@ import AccountingValidation from "./pages/AccountingValidation";
 import CostCenters from "./pages/CostCenters";
 import FixedAssets from "./pages/FixedAssets";
 import Maintenance from "./pages/Maintenance";
-import Violations from "./pages/Violations";
+import TrafficViolations from "./pages/TrafficViolations";
 import Employees from "./pages/Employees";
 import Attendance from "./pages/Attendance";
 import Leaves from "./pages/Leaves";
@@ -36,16 +34,16 @@ import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 
 // Super Admin Pages
-import SuperAdminMainDashboard from "./pages/SuperAdmin/MainDashboard";
-import SuperAdminTenantManagement from "./pages/SuperAdmin/TenantManagement";
-import SuperAdminUsersPermissions from "./pages/SuperAdmin/UsersPermissions";
-import SuperAdminBillingSubscriptions from "./pages/SuperAdmin/BillingSubscriptions";
-import SuperAdminSadadPayments from "./pages/SuperAdmin/SadadPayments";
-import SuperAdminSystemMonitoring from "./pages/SuperAdmin/SystemMonitoring";
-import SuperAdminMaintenanceTools from "./pages/SuperAdmin/MaintenanceTools";
-import SuperAdminTechnicalSupport from "./pages/SuperAdmin/TechnicalSupport";
-import SuperAdminLandingEditor from "./pages/SuperAdmin/LandingEditor";
-import SuperAdminGlobalSettings from "./pages/SuperAdmin/GlobalSettings";
+import SuperAdminMainDashboard from "./pages/super-admin/MainDashboard";
+import SuperAdminTenantManagement from "./pages/super-admin/TenantManagement";
+import SuperAdminUsersPermissions from "./pages/super-admin/UsersAndPermissions";
+import SuperAdminBillingSubscriptions from "./pages/super-admin/BillingAndSubscriptions";
+import SuperAdminSadadPayments from "./pages/super-admin/SadadPayments";
+import SuperAdminSystemMonitoring from "./pages/super-admin/SystemMonitoring";
+import SuperAdminMaintenanceTools from "./pages/super-admin/MaintenanceTools";
+import SuperAdminTechnicalSupport from "./pages/super-admin/TechnicalSupport";
+import SuperAdminLandingEditor from "./pages/super-admin/LandingPageEditor";
+import SuperAdminGlobalSettings from "./pages/super-admin/GlobalSettings";
 
 const queryClient = new QueryClient();
 
@@ -60,9 +58,8 @@ function AppRoutes() {
     return (
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="*" element={<Navigate to="/auth" />} />
       </Routes>
     );
   }
@@ -91,7 +88,6 @@ function AppRoutes() {
   return (
     <Layout>
       <Routes>
-        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/customers" element={<Customers />} />
         <Route path="/fleet" element={<Fleet />} />
         <Route path="/quotations" element={<Quotations />} />
@@ -106,7 +102,7 @@ function AppRoutes() {
         <Route path="/cost-centers" element={<CostCenters />} />
         <Route path="/fixed-assets" element={<FixedAssets />} />
         <Route path="/maintenance" element={<Maintenance />} />
-        <Route path="/violations" element={<Violations />} />
+        <Route path="/violations" element={<TrafficViolations />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/leaves" element={<Leaves />} />
@@ -127,8 +123,8 @@ function AppRoutes() {
         <Route path="/super-admin/landing-editor" element={<SuperAdminLandingEditor />} />
         <Route path="/super-admin/global-settings" element={<SuperAdminGlobalSettings />} />
         
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        <Route path="/" element={<Navigate to="/customers" />} />
+        <Route path="*" element={<Navigate to="/customers" />} />
       </Routes>
     </Layout>
   );
