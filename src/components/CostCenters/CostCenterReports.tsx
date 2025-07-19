@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BarChart3, TrendingUp, TrendingDown, Download, FileText, AlertTriangle } from 'lucide-react';
 import { CostCenterReport } from '@/services/BusinessServices/CostCenterService';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 interface CostCenterReportsProps {
   report: CostCenterReport[];
@@ -44,56 +42,221 @@ const CostCenterReports = ({ report, isLoading }: CostCenterReportsProps) => {
   const totalVariance = totalBudget - totalSpent;
   const overBudgetCount = report.filter(item => item.actual_spent > item.budget_amount).length;
 
-  const exportToPDF = async () => {
+  const exportToHTML = () => {
     try {
       const element = document.getElementById('cost-center-report');
       if (!element) return;
 
-      // إخفاء زر التصدير مؤقتاً
-      const exportButton = document.querySelector('[data-export-button]') as HTMLElement;
-      if (exportButton) {
-        exportButton.style.display = 'none';
+      // إنشاء محتوى HTML للتقرير
+      const reportHTML = element.innerHTML;
+      
+      // فتح نافذة جديدة للطباعة
+      const printWindow = window.open('', '_blank', 'width=1200,height=800');
+      
+      if (!printWindow) {
+        alert('فشل في فتح نافذة الطباعة. تأكد من السماح بالنوافذ المنبثقة.');
+        return;
       }
 
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        scrollX: 0,
-        scrollY: 0,
-        width: element.scrollWidth,
-        height: element.scrollHeight
+      // كتابة محتوى HTML في النافذة الجديدة
+      const today = new Date().toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       });
 
-      // إظهار زر التصدير مرة أخرى
-      if (exportButton) {
-        exportButton.style.display = '';
-      }
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html dir="rtl" lang="ar">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>تقرير مراكز التكلفة التفصيلي - ${today}</title>
+          <style>
+            /* إعدادات الطباعة */
+            @media print {
+              @page {
+                size: A4 landscape;
+                margin: 10mm;
+              }
+              
+              body {
+                margin: 0;
+                padding: 0;
+                font-size: 10px;
+                line-height: 1.3;
+              }
+              
+              .no-print {
+                display: none !important;
+              }
+              
+              .print-break {
+                page-break-before: always;
+              }
+            }
+            
+            /* الخطوط والتنسيق العام */
+            body {
+              font-family: 'Cairo', 'Tahoma', Arial, sans-serif;
+              direction: rtl;
+              text-align: right;
+              background: white;
+              color: #000;
+              margin: 0;
+              padding: 15px;
+              line-height: 1.4;
+            }
+            
+            /* العناوين */
+            h1, h2, h3 {
+              color: #1f2937;
+              margin-bottom: 15px;
+            }
+            
+            /* البطاقات */
+            .space-y-6 > div {
+              margin-bottom: 20px;
+            }
+            
+            /* الجداول */
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 15px 0;
+              font-size: 11px;
+            }
+            
+            th, td {
+              border: 1px solid #d1d5db;
+              padding: 8px 6px;
+              text-align: right;
+              vertical-align: top;
+            }
+            
+            th {
+              background-color: #f3f4f6;
+              font-weight: bold;
+              font-size: 12px;
+            }
+            
+            /* الإحصائيات */
+            .grid {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 15px;
+              margin-bottom: 25px;
+            }
+            
+            .grid > div {
+              border: 1px solid #e5e7eb;
+              padding: 15px;
+              border-radius: 8px;
+              background: #fafafa;
+            }
+            
+            /* الشارات والمؤشرات */
+            .progress {
+              background: #e5e7eb;
+              height: 8px;
+              border-radius: 4px;
+              overflow: hidden;
+            }
+            
+            .progress > div {
+              height: 100%;
+              background: #3b82f6;
+            }
+            
+            /* الألوان */
+            .text-green-600 { color: #059669; }
+            .text-red-600 { color: #dc2626; }
+            .text-gray-600 { color: #4b5563; }
+            .text-blue-600 { color: #2563eb; }
+            .text-orange-600 { color: #ea580c; }
+            
+            /* أزرار التحكم */
+            .print-controls {
+              position: fixed;
+              top: 10px;
+              left: 10px;
+              background: white;
+              padding: 10px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+              box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+              z-index: 1000;
+            }
+            
+            .print-btn {
+              background: #3b82f6;
+              color: white;
+              border: none;
+              padding: 8px 16px;
+              margin: 0 5px;
+              border-radius: 4px;
+              cursor: pointer;
+              font-family: 'Tahoma', Arial, sans-serif;
+            }
+            
+            .print-btn:hover {
+              background: #2563eb;
+            }
+            
+            /* إخفاء العناصر غير المرغوب فيها */
+            [data-export-button] {
+              display: none !important;
+            }
+            
+            /* تحسين عرض العملة */
+            .currency {
+              font-weight: bold;
+              white-space: nowrap;
+            }
+          </style>
+        </head>
+        <body>
+          <!-- أزرار التحكم -->
+          <div class="print-controls no-print">
+            <button class="print-btn" onclick="window.print()">طباعة</button>
+            <button class="print-btn" onclick="window.close()">إغلاق</button>
+          </div>
+          
+          <!-- رأس التقرير -->
+          <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #1f2937; padding-bottom: 20px;">
+            <h1 style="font-size: 24px; margin: 0;">تقرير مراكز التكلفة التفصيلي</h1>
+            <p style="font-size: 14px; color: #6b7280; margin: 10px 0 0 0;">تاريخ التقرير: ${today}</p>
+          </div>
+          
+          <!-- محتوى التقرير -->
+          <div>
+            ${reportHTML}
+          </div>
+          
+          <script>
+            // طباعة تلقائية بعد تحميل المحتوى
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 500);
+            };
+            
+            // إغلاق النافذة بعد الطباعة أو الإلغاء
+            window.onafterprint = function() {
+              setTimeout(function() {
+                window.close();
+              }, 1000);
+            };
+          </script>
+        </body>
+        </html>
+      `);
 
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('l', 'mm', 'a4'); // landscape orientation
-      
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
-      const imgY = 20;
-
-      // إضافة العنوان
-      pdf.setFontSize(16);
-      pdf.text('تقرير مراكز التكلفة التفصيلي', pdfWidth / 2, 15, { align: 'center' });
-      
-      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-      
-      // حفظ الملف
-      const today = new Date().toISOString().split('T')[0];
-      pdf.save(`تقرير-مراكز-التكلفة-${today}.pdf`);
+      printWindow.document.close();
+      printWindow.focus();
       
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('Error generating HTML report:', error);
       alert('حدث خطأ أثناء تصدير التقرير');
     }
   };
@@ -168,7 +331,7 @@ const CostCenterReports = ({ report, isLoading }: CostCenterReportsProps) => {
             <Button 
               variant="outline" 
               className="gap-2 rtl-flex"
-              onClick={exportToPDF}
+              onClick={exportToHTML}
               data-export-button
             >
               <Download className="h-4 w-4" />
