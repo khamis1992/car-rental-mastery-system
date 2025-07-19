@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { TenantService } from '@/services/TenantService';
+import { TenantService } from '@/services/tenantService';
 import { useTenant } from '@/contexts/TenantContext';
 
 /**
