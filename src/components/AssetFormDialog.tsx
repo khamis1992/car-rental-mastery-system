@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
   const { currentTenant } = useTenant();
   const { useSecureEmployees } = useSecureTenantData();
   
-  // Use secure employees hook instead of direct query
+  // استخدام الـ hook الآمن لجلب الموظفين
   const { data: employees = [], isLoading: employeesLoading } = useSecureEmployees();
   
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
@@ -63,7 +62,6 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
     enabled: !!currentTenant?.id,
   });
 
-  // Asset form state
   const [formData, setFormData] = useState({
     asset_name: '',
     asset_code: '',
@@ -165,7 +163,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rtl-content">
         <DialogHeader>
-          <DialogTitle className="text-right text-xl font-bold">
+          <DialogTitle className="text-right text-xl font-bold rtl-title">
             إضافة أصل ثابت جديد
           </DialogTitle>
         </DialogHeader>
@@ -173,7 +171,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="asset_name" className="text-right block font-medium">
+              <Label htmlFor="asset_name" className="text-right block font-medium rtl-label">
                 اسم الأصل *
               </Label>
               <Input
@@ -187,7 +185,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="asset_code" className="text-right block font-medium">
+              <Label htmlFor="asset_code" className="text-right block font-medium rtl-label">
                 رمز الأصل *
               </Label>
               <Input
@@ -201,7 +199,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category_id" className="text-right block font-medium">
+              <Label htmlFor="category_id" className="text-right block font-medium rtl-label">
                 الفئة
               </Label>
               <Select
@@ -223,7 +221,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="manufacturer" className="text-right block font-medium">
+              <Label htmlFor="manufacturer" className="text-right block font-medium rtl-label">
                 الشركة المصنعة
               </Label>
               <Input
@@ -236,7 +234,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="model" className="text-right block font-medium">
+              <Label htmlFor="model" className="text-right block font-medium rtl-label">
                 الموديل
               </Label>
               <Input
@@ -249,7 +247,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="serial_number" className="text-right block font-medium">
+              <Label htmlFor="serial_number" className="text-right block font-medium rtl-label">
                 الرقم التسلسلي
               </Label>
               <Input
@@ -262,7 +260,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="purchase_cost" className="text-right block font-medium">
+              <Label htmlFor="purchase_cost" className="text-right block font-medium rtl-label">
                 تكلفة الشراء (د.ك) *
               </Label>
               <Input
@@ -279,7 +277,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="purchase_date" className="text-right block font-medium">
+              <Label htmlFor="purchase_date" className="text-right block font-medium rtl-label">
                 تاريخ الشراء *
               </Label>
               <Input
@@ -293,7 +291,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="vendor" className="text-right block font-medium">
+              <Label htmlFor="vendor" className="text-right block font-medium rtl-label">
                 المورد
               </Label>
               <Input
@@ -306,7 +304,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="warranty_expiry" className="text-right block font-medium">
+              <Label htmlFor="warranty_expiry" className="text-right block font-medium rtl-label">
                 انتهاء الضمان
               </Label>
               <Input
@@ -319,7 +317,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location_id" className="text-right block font-medium">
+              <Label htmlFor="location_id" className="text-right block font-medium rtl-label">
                 الموقع
               </Label>
               <Select
@@ -341,7 +339,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="assigned_to" className="text-right block font-medium">
+              <Label htmlFor="assigned_to" className="text-right block font-medium rtl-label">
                 مُخصص لـ
               </Label>
               <Select
@@ -364,7 +362,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-right block font-medium">
+            <Label htmlFor="description" className="text-right block font-medium rtl-label">
               الوصف
             </Label>
             <Textarea
@@ -377,7 +375,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
+          <div className="flex justify-end gap-2 pt-4 rtl-flex">
             <Button
               type="button"
               variant="outline"
