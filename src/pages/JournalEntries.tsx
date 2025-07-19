@@ -353,21 +353,6 @@ const JournalEntries = () => {
             مركز شامل لإدارة جميع القيود المحاسبية اليدوية والتلقائية
           </p>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={refreshData} className="rtl-flex">
-            <RefreshCw className="w-4 h-4" />
-            تحديث
-          </Button>
-          <Button variant="outline" className="rtl-flex">
-            <Filter className="w-4 h-4" />
-            فلترة
-          </Button>
-          <Button variant="outline" className="rtl-flex">
-            <Calendar className="w-4 h-4" />
-            تقارير
-          </Button>
-        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
