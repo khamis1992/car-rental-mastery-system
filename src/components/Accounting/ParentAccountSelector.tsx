@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { ChartOfAccount } from '@/types/accounting';
 import { AccountHierarchyDisplay } from './AccountHierarchyDisplay';
 
@@ -17,25 +17,28 @@ interface ParentAccountSelectorProps {
 }
 
 export const ParentAccountSelector: React.FC<ParentAccountSelectorProps> = ({
-  accounts,
+  accounts = [], // إضافة قيمة افتراضية
   selectedParentId,
   onParentSelect,
   disabled = false
 }) => {
   const [open, setOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
 
   // تصفية الحسابات التي يُسمح لها بأن تكون حسابات أب (مستوى أقل من 5)
   const eligibleParentAccounts = useMemo(() => {
+    if (!Array.isArray(accounts)) return [];
+    
     return accounts.filter(account => 
+      account && 
       account.level < 5 && 
-      account.is_active &&
-      (account.account_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       account.account_code.includes(searchTerm))
-    ).sort((a, b) => a.account_code.localeCompare(b.account_code));
-  }, [accounts, searchTerm]);
+      account.is_active
+    ).sort((a, b) => {
+      if (!a?.account_code || !b?.account_code) return 0;
+      return a.account_code.localeCompare(b.account_code);
+    });
+  }, [accounts]);
 
-  const selectedParent = accounts.find(acc => acc.id === selectedParentId);
+  const selectedParent = Array.isArray(accounts) ? accounts.find(acc => acc?.id === selectedParentId) : null;
 
   const getAccountTypeLabel = (type: string) => {
     const labels = {
@@ -46,6 +49,14 @@ export const ParentAccountSelector: React.FC<ParentAccountSelectorProps> = ({
       expense: 'مصروفات'
     };
     return labels[type as keyof typeof labels] || type;
+  };
+
+  const handleSelect = (accountId: string) => {
+    const account = accounts.find(acc => acc?.id === accountId);
+    if (account) {
+      onParentSelect(accountId, account.level + 1);
+      setOpen(false);
+    }
   };
 
   return (
@@ -74,43 +85,41 @@ export const ParentAccountSelector: React.FC<ParentAccountSelectorProps> = ({
         </PopoverTrigger>
         
         <PopoverContent className="w-[400px] p-0" align="start">
-          <Command>
+          <Command shouldFilter={false}>
             <div className="flex items-center border-b px-3">
               <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-              <CommandInput 
+              <input 
                 placeholder="البحث في الحسابات..." 
-                value={searchTerm}
-                onValueChange={setSearchTerm}
+                className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
-            <CommandEmpty>لا توجد حسابات مطابقة</CommandEmpty>
-            <CommandGroup className="max-h-[300px] overflow-y-auto">
-              {eligibleParentAccounts.map((account) => (
-                <CommandItem
-                  key={account.id}
-                  value={account.id}
-                  onSelect={() => {
-                    onParentSelect(account.id, account.level + 1);
-                    setOpen(false);
-                  }}
-                  className="flex flex-col items-start gap-1 p-3"
-                >
-                  <div className="flex items-center gap-2 w-full">
-                    <Building2 className="w-4 h-4" />
-                    <span className="font-medium">
-                      {account.account_code} - {account.account_name}
-                    </span>
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                      مستوى {account.level}
-                    </span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    نوع: {getAccountTypeLabel(account.account_type)} | 
-                    المستوى التالي سيكون: {account.level + 1}
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            <CommandList className="max-h-[300px] overflow-y-auto">
+              <CommandEmpty>لا توجد حسابات مطابقة</CommandEmpty>
+              <CommandGroup>
+                {eligibleParentAccounts.map((account) => (
+                  <CommandItem
+                    key={account.id}
+                    value={account.id}
+                    onSelect={() => handleSelect(account.id)}
+                    className="flex flex-col items-start gap-1 p-3"
+                  >
+                    <div className="flex items-center gap-2 w-full">
+                      <Building2 className="w-4 h-4" />
+                      <span className="font-medium">
+                        {account.account_code} - {account.account_name}
+                      </span>
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                        مستوى {account.level}
+                      </span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      نوع: {getAccountTypeLabel(account.account_type)} | 
+                      المستوى التالي سيكون: {account.level + 1}
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
           </Command>
         </PopoverContent>
       </Popover>
