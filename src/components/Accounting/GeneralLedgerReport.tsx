@@ -160,35 +160,136 @@ export const GeneralLedgerReport = () => {
     return labels[type as keyof typeof labels] || type;
   };
 
-  const exportToCSV = () => {
+  const downloadHTML = () => {
     if (ledgerEntries.length === 0) {
       toast({
         title: 'تنبيه',
-        description: 'لا توجد بيانات للتصدير',
+        description: 'لا توجد بيانات للتحميل',
         variant: 'destructive',
       });
       return;
     }
 
-    const headers = ['التاريخ', 'رقم القيد', 'الوصف', 'المرجع', 'مدين', 'دائن', 'الرصيد الجاري'];
-    const csvContent = [
-      headers.join(','),
-      ...ledgerEntries.map(entry => [
-        entry.date,
-        entry.entry_number,
-        `"${entry.description}"`,
-        getReferenceTypeLabel(entry.reference_type),
-        entry.debit_amount.toFixed(3),
-        entry.credit_amount.toFixed(3),
-        entry.running_balance.toFixed(3)
-      ].join(','))
-    ].join('\n');
+    const totals = calculateTotals();
+    const htmlContent = `
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دفتر الأستاذ العام - ${selectedAccount?.account_name}</title>
+    <style>
+        body { font-family: Arial, sans-serif; direction: rtl; margin: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .account-info { background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
+        th { background-color: #f8f9fa; font-weight: bold; }
+        .debit { color: #16a34a; }
+        .credit { color: #dc2626; }
+        .balance-positive { color: #16a34a; font-weight: bold; }
+        .balance-negative { color: #dc2626; font-weight: bold; }
+        .totals { background: #f8f9fa; padding: 15px; border-radius: 5px; }
+        .total-row { display: flex; justify-content: space-between; margin: 5px 0; }
+        .print-date { text-align: left; margin-top: 20px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>دفتر الأستاذ العام</h1>
+        <h2>${selectedAccount?.account_name} (${selectedAccount?.account_code})</h2>
+        <p>من ${filters.start_date} إلى ${filters.end_date}</p>
+    </div>
+    
+    <div class="account-info">
+        <div class="total-row">
+            <strong>اسم الحساب:</strong>
+            <span>${selectedAccount?.account_name}</span>
+        </div>
+        <div class="total-row">
+            <strong>رقم الحساب:</strong>
+            <span>${selectedAccount?.account_code}</span>
+        </div>
+        <div class="total-row">
+            <strong>نوع الحساب:</strong>
+            <span>${selectedAccount?.account_type}</span>
+        </div>
+        <div class="total-row">
+            <strong>الرصيد الحالي:</strong>
+            <span class="${selectedAccount?.current_balance >= 0 ? 'balance-positive' : 'balance-negative'}">
+                ${formatBalance(selectedAccount?.current_balance || 0)}
+            </span>
+        </div>
+    </div>
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    <table>
+        <thead>
+            <tr>
+                <th>التاريخ</th>
+                <th>رقم القيد</th>
+                <th>الوصف</th>
+                <th>المرجع</th>
+                <th>مدين</th>
+                <th>دائن</th>
+                <th>الرصيد الجاري</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${ledgerEntries.map(entry => `
+                <tr>
+                    <td>${new Date(entry.date).toLocaleDateString('ar-KW')}</td>
+                    <td>${entry.entry_number}</td>
+                    <td>${entry.description}</td>
+                    <td>${getReferenceTypeLabel(entry.reference_type)}</td>
+                    <td class="debit">${entry.debit_amount > 0 ? formatBalance(entry.debit_amount) : '-'}</td>
+                    <td class="credit">${entry.credit_amount > 0 ? formatBalance(entry.credit_amount) : '-'}</td>
+                    <td class="${entry.running_balance >= 0 ? 'balance-positive' : 'balance-negative'}">
+                        ${formatBalance(entry.running_balance)}
+                    </td>
+                </tr>
+            `).join('')}
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <h3>الإجماليات</h3>
+        <div class="total-row">
+            <strong>إجمالي المدين:</strong>
+            <span class="debit">${formatBalance(totals.totalDebits)}</span>
+        </div>
+        <div class="total-row">
+            <strong>إجمالي الدائن:</strong>
+            <span class="credit">${formatBalance(totals.totalCredits)}</span>
+        </div>
+        <div class="total-row">
+            <strong>صافي الحركة:</strong>
+            <span class="${totals.netMovement >= 0 ? 'balance-positive' : 'balance-negative'}">
+                ${formatBalance(totals.netMovement)}
+            </span>
+        </div>
+        <div class="total-row">
+            <strong>عدد القيود:</strong>
+            <span>${ledgerEntries.length}</span>
+        </div>
+    </div>
+
+    <div class="print-date">
+        تاريخ الطباعة: ${new Date().toLocaleDateString('ar-KW')} ${new Date().toLocaleTimeString('ar-KW')}
+    </div>
+</body>
+</html>
+    `;
+
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `دفتر_الأستاذ_العام_${selectedAccount?.account_name}_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `دفتر_الأستاذ_العام_${selectedAccount?.account_name}_${new Date().toISOString().split('T')[0]}.html`;
     link.click();
+    
+    toast({
+      title: 'تم التحميل',
+      description: 'تم تحميل تقرير دفتر الأستاذ العام بصيغة HTML',
+    });
   };
 
   const calculateTotals = () => {
@@ -315,13 +416,13 @@ export const GeneralLedgerReport = () => {
         <div className="flex justify-between items-center">
           <div className="flex gap-2">
             <Button
-              onClick={exportToCSV}
+              onClick={downloadHTML}
               disabled={ledgerEntries.length === 0}
               variant="outline"
               className="flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
-              تصدير CSV
+              تحميل
             </Button>
           </div>
           
