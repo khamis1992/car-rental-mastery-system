@@ -1,283 +1,294 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Settings, Play, Pause, RefreshCw, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { Progress } from '@/components/ui/progress';
+import { 
+  Zap, 
+  CheckCircle, 
+  Clock, 
+  AlertCircle,
+  Play,
+  Settings,
+  BarChart3
+} from 'lucide-react';
 
-interface AutomationRule {
+interface ServiceStats {
+  total_executions: number;
+  successful_executions: number;
+  failed_executions: number;
+  average_processing_time: number;
+  success_rate: number;
+}
+
+interface ExecutionLog {
   id: string;
-  name: string;
-  source: string;
-  enabled: boolean;
-  lastRun: string | null;
-  status: 'running' | 'stopped' | 'error';
-  description: string;
-  generatedCount: number;
+  rule_name: string;
+  execution_date: string;
+  status: 'success' | 'failed' | 'pending';
+  processing_time_ms: number;
+  journal_entry_id?: string;
+  error_message?: string;
 }
 
 export const AutomatedJournalEntryService: React.FC = () => {
-  const [rules, setRules] = useState<AutomationRule[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState<ServiceStats>({
+    total_executions: 0,
+    successful_executions: 0,
+    failed_executions: 0,
+    average_processing_time: 0,
+    success_rate: 0
+  });
+  
+  const [executionLog, setExecutionLog] = useState<ExecutionLog[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadAutomationRules();
+    loadServiceData();
   }, []);
 
-  const loadAutomationRules = async () => {
-    // Mock data for demonstration
-    const mockRules: AutomationRule[] = [
-      {
-        id: '1',
-        name: 'قيود العقود اليومية',
-        source: 'contracts',
-        enabled: true,
-        lastRun: '2024-01-15T10:30:00Z',
-        status: 'running',
-        description: 'توليد قيود محاسبية تلقائية للعقود الجديدة والمحدثة',
-        generatedCount: 45
-      },
-      {
-        id: '2',
-        name: 'قيود الإيجار الشهرية',
-        source: 'rental_invoices',
-        enabled: true,
-        lastRun: '2024-01-15T09:15:00Z',
-        status: 'running',
-        description: 'توليد قيود إيرادات الإيجار الشهرية تلقائياً',
-        generatedCount: 128
-      },
-      {
-        id: '3',
-        name: 'قيود الإهلاك',
-        source: 'depreciation',
-        enabled: false,
-        lastRun: '2024-01-10T08:00:00Z',
-        status: 'stopped',
-        description: 'حساب وتسجيل قيود الإهلاك الشهرية للأصول الثابتة',
-        generatedCount: 24
-      },
-      {
-        id: '4',
-        name: 'قيود المصروفات التشغيلية',
-        source: 'expenses',
-        enabled: true,
-        lastRun: '2024-01-15T11:45:00Z',
-        status: 'error',
-        description: 'توليد قيود المصروفات التشغيلية من سندات المصروفات',
-        generatedCount: 67
-      }
-    ];
-
-    setRules(mockRules);
-  };
-
-  const toggleRule = async (ruleId: string, enabled: boolean) => {
-    setLoading(true);
+  const loadServiceData = async () => {
     try {
-      // Update rule status
-      setRules(prev => prev.map(rule => 
-        rule.id === ruleId 
-          ? { ...rule, enabled, status: enabled ? 'running' : 'stopped' }
-          : rule
-      ));
+      setLoading(true);
+      
+      // محاكاة تحميل البيانات
+      const mockStats: ServiceStats = {
+        total_executions: 1247,
+        successful_executions: 1198,
+        failed_executions: 49,
+        average_processing_time: 145,
+        success_rate: 96.1
+      };
 
-      toast.success(enabled ? 'تم تفعيل القاعدة' : 'تم إيقاف القاعدة');
+      const mockLog: ExecutionLog[] = [
+        {
+          id: '1',
+          rule_name: 'قيود الفواتير التلقائية',
+          execution_date: new Date().toISOString(),
+          status: 'success',
+          processing_time_ms: 120,
+          journal_entry_id: 'JE-2024-001'
+        },
+        {
+          id: '2',
+          rule_name: 'قيود المدفوعات النقدية',
+          execution_date: new Date(Date.now() - 3600000).toISOString(),
+          status: 'success',
+          processing_time_ms: 95,
+          journal_entry_id: 'JE-2024-002'
+        },
+        {
+          id: '3',
+          rule_name: 'قيود صيانة المركبات',
+          execution_date: new Date(Date.now() - 7200000).toISOString(),
+          status: 'failed',
+          processing_time_ms: 200,
+          error_message: 'فشل في تحديد الحساب المدين'
+        }
+      ];
+
+      setStats(mockStats);
+      setExecutionLog(mockLog);
     } catch (error) {
-      toast.error('حدث خطأ في تحديث القاعدة');
+      console.error('Error loading service data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const runRule = async (ruleId: string) => {
-    setLoading(true);
-    try {
-      const rule = rules.find(r => r.id === ruleId);
-      if (!rule) return;
-
-      // Simulate running the rule
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Update rule status
-      setRules(prev => prev.map(r => 
-        r.id === ruleId 
-          ? { 
-              ...r, 
-              lastRun: new Date().toISOString(),
-              status: 'running',
-              generatedCount: r.generatedCount + Math.floor(Math.random() * 5) + 1
-            }
-          : r
-      ));
-
-      toast.success('تم تشغيل القاعدة بنجاح');
-    } catch (error) {
-      toast.error('حدث خطأ في تشغيل القاعدة');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: ExecutionLog['status']) => {
     switch (status) {
-      case 'running':
-        return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'stopped':
-        return <Pause className="w-4 h-4 text-gray-600" />;
-      case 'error':
-        return <XCircle className="w-4 h-4 text-red-600" />;
+      case 'success':
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'failed':
+        return <AlertCircle className="w-4 h-4 text-red-500" />;
+      case 'pending':
+        return <Clock className="w-4 h-4 text-yellow-500" />;
       default:
-        return <AlertCircle className="w-4 h-4 text-yellow-600" />;
+        return <Clock className="w-4 h-4 text-gray-500" />;
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: ExecutionLog['status']) => {
     switch (status) {
-      case 'running':
-        return 'bg-green-100 text-green-800';
-      case 'stopped':
-        return 'bg-gray-100 text-gray-800';
-      case 'error':
-        return 'bg-red-100 text-red-800';
+      case 'success':
+        return 'default';
+      case 'failed':
+        return 'destructive';
+      case 'pending':
+        return 'secondary';
       default:
-        return 'bg-yellow-100 text-yellow-800';
+        return 'outline';
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'running':
-        return 'نشط';
-      case 'stopped':
-        return 'متوقف';
-      case 'error':
-        return 'خطأ';
-      default:
-        return 'غير معروف';
-    }
+  const statusLabels = {
+    success: 'نجح',
+    failed: 'فشل',
+    pending: 'معلق'
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">خدمة القيود التلقائية</h2>
-          <p className="text-muted-foreground">إدارة ومراقبة قواعد توليد القيود المحاسبية التلقائية</p>
-        </div>
-        <Button variant="outline" className="rtl-flex">
-          <Settings className="w-4 h-4" />
-          إعدادات متقدمة
-        </Button>
+      {/* إحصائيات الخدمة */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium rtl-title">إجمالي التنفيذات</CardTitle>
+            <BarChart3 className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total_executions.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">منذ بداية الشهر</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium rtl-title">معدل النجاح</CardTitle>
+            <CheckCircle className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{stats.success_rate}%</div>
+            <div className="flex items-center gap-2 mt-2">
+              <Progress value={stats.success_rate} className="flex-1" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium rtl-title">متوسط وقت المعالجة</CardTitle>
+            <Clock className="h-4 w-4 text-purple-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-purple-600">{stats.average_processing_time}ms</div>
+            <p className="text-xs text-muted-foreground">أسرع من المتوقع</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium rtl-title">التنفيذات الفاشلة</CardTitle>
+            <AlertCircle className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{stats.failed_executions}</div>
+            <p className="text-xs text-muted-foreground">تحتاج مراجعة</p>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid gap-4">
-        {rules.map((rule) => (
-          <Card key={rule.id} className="relative">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {getStatusIcon(rule.status)}
-                  <div>
-                    <CardTitle className="text-lg">{rule.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{rule.description}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge className={getStatusColor(rule.status)}>
-                    {getStatusLabel(rule.status)}
-                  </Badge>
-                  <Switch
-                    checked={rule.enabled}
-                    onCheckedChange={(checked) => toggleRule(rule.id, checked)}
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-4 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-muted-foreground">المصدر</Label>
-                  <p className="text-sm font-medium">{rule.source}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-muted-foreground">آخر تشغيل</Label>
-                  <p className="text-sm font-medium">
-                    {rule.lastRun 
-                      ? new Date(rule.lastRun).toLocaleDateString('ar-SA', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })
-                      : 'لم يتم التشغيل'
-                    }
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-muted-foreground">القيود المُولدة</Label>
-                  <p className="text-sm font-medium">{rule.generatedCount}</p>
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => runRule(rule.id)}
-                    disabled={loading || !rule.enabled}
-                    className="rtl-flex"
-                  >
-                    {loading ? (
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Play className="w-4 h-4" />
-                    )}
-                    تشغيل الآن
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <Separator />
-
+      {/* أدوات التحكم */}
       <Card>
         <CardHeader>
-          <CardTitle>إحصائيات الخدمة</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="rtl-title">إدارة الخدمات الآلية</CardTitle>
+            <div className="flex gap-2">
+              <Button variant="outline" className="rtl-flex">
+                <Settings className="w-4 h-4" />
+                الإعدادات
+              </Button>
+              <Button className="rtl-flex">
+                <Play className="w-4 h-4" />
+                تشغيل يدوي
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {rules.filter(r => r.enabled).length}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className="w-5 h-5 text-blue-500" />
+                <h4 className="font-medium">خدمة القيود التلقائية</h4>
               </div>
-              <div className="text-sm text-muted-foreground">قواعد نشطة</div>
+              <p className="text-sm text-muted-foreground mb-3">
+                تولد القيود المحاسبية تلقائياً عند حدوث المعاملات
+              </p>
+              <Badge variant="default">نشط</Badge>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {rules.reduce((sum, r) => sum + r.generatedCount, 0)}
+
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle className="w-5 h-5 text-green-500" />
+                <h4 className="font-medium">خدمة التحقق التلقائي</h4>
               </div>
-              <div className="text-sm text-muted-foreground">إجمالي القيود المُولدة</div>
+              <p className="text-sm text-muted-foreground mb-3">
+                تتحقق من توازن القيود وصحة البيانات
+              </p>
+              <Badge variant="default">نشط</Badge>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">
-                {rules.filter(r => r.status === 'error').length}
+
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <BarChart3 className="w-5 h-5 text-purple-500" />
+                <h4 className="font-medium">خدمة التقارير الآلية</h4>
               </div>
-              <div className="text-sm text-muted-foreground">قواعد بها أخطاء</div>
+              <p className="text-sm text-muted-foreground mb-3">
+                تولد التقارير المالية بشكل دوري
+              </p>
+              <Badge variant="secondary">قيد التطوير</Badge>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">
-                {rules.filter(r => r.status === 'running').length}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* سجل التنفيذ */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="rtl-title">سجل التنفيذ الأخير</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {executionLog.length > 0 ? (
+              executionLog.map((log) => (
+                <div key={log.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    {getStatusIcon(log.status)}
+                    <div>
+                      <h4 className="font-medium">{log.rule_name}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(log.execution_date).toLocaleString('ar-SA')}
+                      </p>
+                      {log.error_message && (
+                        <p className="text-sm text-red-600 mt-1">{log.error_message}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">
+                      {log.processing_time_ms}ms
+                    </span>
+                    <Badge variant={getStatusColor(log.status) as any}>
+                      {statusLabels[log.status]}
+                    </Badge>
+                    {log.journal_entry_id && (
+                      <Button variant="ghost" size="sm">
+                        عرض القيد
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <Clock className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">لا توجد تنفيذات</h3>
+                <p className="text-muted-foreground">
+                  لم يتم تنفيذ أي قواعد أتمتة حتى الآن
+                </p>
               </div>
-              <div className="text-sm text-muted-foreground">قواعد قيد التشغيل</div>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>

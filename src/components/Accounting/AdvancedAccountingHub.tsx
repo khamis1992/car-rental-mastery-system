@@ -61,7 +61,7 @@ export const AdvancedAccountingHub: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">مركز المحاسبة المتقدم</h1>
+          <h1 className="text-3xl font-bold rtl-title">مركز المحاسبة المتقدم</h1>
           <p className="text-muted-foreground mt-1">
             نظام الأتمتة والتصحيح الذكي للمعاملات المحاسبية
           </p>
@@ -90,7 +90,7 @@ export const AdvancedAccountingHub: React.FC = () => {
                   {feature.icon}
                 </div>
                 <div>
-                  <h3 className="font-semibold">{feature.title}</h3>
+                  <h3 className="font-semibold rtl-title">{feature.title}</h3>
                   <p className="text-sm text-muted-foreground">
                     {feature.description}
                   </p>
@@ -129,7 +129,7 @@ export const AdvancedAccountingHub: React.FC = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="rtl-flex">
+                <CardTitle className="rtl-flex rtl-title">
                   <Settings className="w-5 h-5" />
                   إدارة قواعد الأتمتة
                 </CardTitle>
