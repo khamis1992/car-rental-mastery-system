@@ -24,7 +24,7 @@ import CostCenterList from '@/components/CostCenters/CostCenterList';
 import CostCenterTreeView from '@/components/CostCenters/CostCenterTreeView';
 import CostCenterReports from '@/components/CostCenters/CostCenterReports';
 import CostCenterAllocations from '@/components/CostCenters/CostCenterAllocations';
-import CostCenterSettings from '@/components/CostCenters/CostCenterSettings';
+
 
 const CostCenters = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -138,8 +138,7 @@ const CostCenters = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="settings">الإعدادات</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="reports">التقارير</TabsTrigger>
           <TabsTrigger value="allocations">توزيع التكاليف</TabsTrigger>
           <TabsTrigger value="tree">العرض الشجري</TabsTrigger>
@@ -286,9 +285,6 @@ const CostCenters = () => {
           />
         </TabsContent>
 
-        <TabsContent value="settings">
-          <CostCenterSettings />
-        </TabsContent>
       </Tabs>
 
       {/* نموذج إضافة مركز تكلفة */}
