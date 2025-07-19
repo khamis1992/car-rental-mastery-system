@@ -3,7 +3,7 @@ import React from 'react';
 import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
 import { ChartOfAccountsImportDialog } from '@/components/Accounting/ChartOfAccountsImportDialog';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAccountStats } from '@/hooks/useAccountStats';
@@ -57,11 +57,12 @@ const ChartOfAccounts = () => {
         </div>
       </div>
 
-      {/* عرض رسالة خطأ إذا وجدت */}
+      {/* Error Display */}
       {error && (
         <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            حدث خطأ في تحميل البيانات: {error}
+            حدث خطأ في تحميل البيانات: {typeof error === 'string' ? error : error.message || 'خطأ غير معروف'}
           </AlertDescription>
         </Alert>
       )}
