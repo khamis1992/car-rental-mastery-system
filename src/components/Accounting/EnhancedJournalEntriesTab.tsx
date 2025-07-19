@@ -30,7 +30,6 @@ interface JournalEntry {
   status: 'draft' | 'posted' | 'archived';
   reference_type: string;
   reference_id: string | null;
-  notes: string | null;
   tenant_id: string;
   created_at: string;
   updated_at: string;
@@ -106,7 +105,6 @@ export const EnhancedJournalEntriesTab: React.FC = () => {
     status: 'draft',
     reference_type: 'manual',
     reference_id: null,
-    notes: null,
     tenant_id: '',
     lines: [
       {
@@ -132,28 +130,37 @@ export const EnhancedJournalEntriesTab: React.FC = () => {
 
   const [recentAccounts, setRecentAccounts] = useState<string[]>([]);
 
-  const { data: journalEntries, isLoading: isLoadingEntries, refetch: refetchEntries } = useQuery<JournalEntry[]>(
-    ['journalEntries'],
-    async () => {
+  const { data: journalEntries, isLoading: isLoadingEntries, refetch: refetchEntries } = useQuery({
+    queryKey: ['journalEntries'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('journal_entries')
-        .select('*')
+        .select(`
+          id, entry_number, entry_date, description, 
+          total_debit, total_credit, status, reference_type, 
+          reference_id, tenant_id, created_at, updated_at
+        `)
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching journal entries:', error);
         throw error;
       }
-      return data;
+      return data as JournalEntry[];
     }
-  );
+  });
 
-  const { data: accounts, isLoading: isLoadingAccounts } = useQuery<Account[]>(
-    ['accounts'],
-    async () => {
+  const { data: accounts, isLoading: isLoadingAccounts } = useQuery({
+    queryKey: ['accounts'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('chart_of_accounts')
-        .select('*')
+        .select(`
+          id, account_code, account_name, account_type, account_category,
+          parent_account_id, level, allow_posting, is_active, 
+          opening_balance, current_balance, ksaap_compliant,
+          tenant_id, created_at, updated_at
+        `)
         .eq('allow_posting', true)
         .order('account_code', { ascending: true });
 
@@ -161,16 +168,19 @@ export const EnhancedJournalEntriesTab: React.FC = () => {
         console.error('Error fetching accounts:', error);
         throw error;
       }
-      return data;
+      return data as Account[];
     }
-  );
+  });
 
-  const { data: costCenters, isLoading: isLoadingCostCenters } = useQuery<CostCenter[]>(
-    ['costCenters'],
-    async () => {
+  const { data: costCenters, isLoading: isLoadingCostCenters } = useQuery({
+    queryKey: ['costCenters'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('cost_centers')
-        .select('*')
+        .select(`
+          id, cost_center_code, cost_center_name, 
+          description, is_active, tenant_id, created_at, updated_at
+        `)
         .eq('is_active', true)
         .order('cost_center_code', { ascending: true });
 
@@ -178,9 +188,9 @@ export const EnhancedJournalEntriesTab: React.FC = () => {
         console.error('Error fetching cost centers:', error);
         throw error;
       }
-      return data;
+      return data as CostCenter[];
     }
-  );
+  });
 
   useEffect(() => {
     const fetchTenantId = async () => {
@@ -231,7 +241,7 @@ export const EnhancedJournalEntriesTab: React.FC = () => {
     setNewEntry(prev => ({
       ...prev,
       lines: prev.lines.map(line => 
-        line.id === lineId ? { ...line, accountId } : line
+        line.id === lineId ? { ...line, account_id: accountId } : line
       )
     }));
 
@@ -281,7 +291,6 @@ export const EnhancedJournalEntriesTab: React.FC = () => {
           total_credit: calculateTotals().totalCredits,
           status: newEntry.status,
           reference_type: newEntry.reference_type,
-          notes: newEntry.notes || null,
           tenant_id: newEntry.tenant_id
         })
         .select()
@@ -308,7 +317,7 @@ export const EnhancedJournalEntriesTab: React.FC = () => {
 
       toast.success('تم إنشاء القيد المحاسبي بنجاح');
       setShowAddDialog(false);
-      await queryClient.invalidateQueries(['journalEntries']);
+      await queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
       
       // Reset form
       setNewEntry({
@@ -320,7 +329,6 @@ export const EnhancedJournalEntriesTab: React.FC = () => {
         status: 'draft',
         reference_type: 'manual',
         reference_id: null,
-        notes: null,
         tenant_id: newEntry.tenant_id,
         lines: [
           {
@@ -475,7 +483,7 @@ export const EnhancedJournalEntriesTab: React.FC = () => {
                       <Input
                         type="date"
                         value={newEntry.entry_date}
-                        onChange={(e) => updateEntryLine('entry_date', 'entry_date', e.target.value)}
+                        onChange={(e) => setNewEntry(prev => ({ ...prev, entry_date: e.target.value }))}
                       />
                     </div>
 
@@ -486,7 +494,7 @@ export const EnhancedJournalEntriesTab: React.FC = () => {
                         type="text"
                         placeholder="أدخل رقم المرجع"
                         value={newEntry.reference_id || ''}
-                        onChange={(e) => updateEntryLine('reference_id', 'reference_id', e.target.value)}
+                        onChange={(e) => setNewEntry(prev => ({ ...prev, reference_id: e.target.value }))}
                       />
                     </div>
                   </div>
@@ -497,19 +505,10 @@ export const EnhancedJournalEntriesTab: React.FC = () => {
                     <Textarea
                       placeholder="أدخل وصف القيد"
                       value={newEntry.description}
-                      onChange={(e) => updateEntryLine('description', 'description', e.target.value)}
+                      onChange={(e) => setNewEntry(prev => ({ ...prev, description: e.target.value }))}
                     />
                   </div>
 
-                  {/* Notes */}
-                  <div>
-                    <Label className="rtl-label">ملاحظات</Label>
-                    <Textarea
-                      placeholder="أدخل ملاحظات إضافية"
-                      value={newEntry.notes || ''}
-                      onChange={(e) => updateEntryLine('notes', 'notes', e.target.value)}
-                    />
-                  </div>
                 </TabsContent>
 
                 <TabsContent value="lines" className="space-y-4">
