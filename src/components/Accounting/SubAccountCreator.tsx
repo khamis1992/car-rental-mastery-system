@@ -3,7 +3,7 @@ import { Plus, Eye, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ChartOfAccount } from '@/types/accounting';
 import { ParentAccountSelector } from './ParentAccountSelector';
@@ -142,6 +142,9 @@ export const SubAccountCreator: React.FC<SubAccountCreatorProps> = ({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="rtl-title">إضافة حساب فرعي جديد</DialogTitle>
+          <DialogDescription>
+            قم بإنشاء حساب فرعي جديد في دليل الحسابات المحاسبي
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">

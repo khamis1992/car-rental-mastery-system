@@ -112,9 +112,13 @@ export const accountingService = {
   },
 
   async createAccount(account: Omit<ChartOfAccount, 'id' | 'created_at' | 'updated_at'>): Promise<ChartOfAccount> {
+    const tenantId = await this.getCurrentTenantId();
     const { data, error } = await supabase
       .from('chart_of_accounts')
-      .insert(account as any)
+      .insert({
+        ...account,
+        tenant_id: tenantId
+      } as any)
       .select()
       .single();
     
