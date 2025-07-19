@@ -164,7 +164,7 @@ export const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-right flex items-center gap-2 flex-row-reverse">
+          <DialogTitle className="text-right flex items-center justify-end gap-2">
             <Eye className="w-5 h-5" />
             تفاصيل الحساب: {account.account_name}
           </DialogTitle>
