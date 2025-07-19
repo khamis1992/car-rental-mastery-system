@@ -2429,6 +2429,101 @@ export type Database = {
           },
         ]
       }
+      comparison_report_items: {
+        Row: {
+          account_code: string
+          account_id: string
+          account_name: string
+          analysis_notes: string | null
+          comparison_period_amount: number | null
+          created_at: string | null
+          id: string
+          primary_period_amount: number | null
+          report_id: string
+          variance_amount: number | null
+          variance_percentage: number | null
+        }
+        Insert: {
+          account_code: string
+          account_id: string
+          account_name: string
+          analysis_notes?: string | null
+          comparison_period_amount?: number | null
+          created_at?: string | null
+          id?: string
+          primary_period_amount?: number | null
+          report_id: string
+          variance_amount?: number | null
+          variance_percentage?: number | null
+        }
+        Update: {
+          account_code?: string
+          account_id?: string
+          account_name?: string
+          analysis_notes?: string | null
+          comparison_period_amount?: number | null
+          created_at?: string | null
+          id?: string
+          primary_period_amount?: number | null
+          report_id?: string
+          variance_amount?: number | null
+          variance_percentage?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comparison_report_items_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "comparison_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comparison_reports: {
+        Row: {
+          comparison_period_end: string
+          comparison_period_start: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          primary_period_end: string
+          primary_period_start: string
+          report_data: Json
+          report_name: string
+          report_type: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          comparison_period_end: string
+          comparison_period_start: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          primary_period_end: string
+          primary_period_start: string
+          report_data?: Json
+          report_name: string
+          report_type: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          comparison_period_end?: string
+          comparison_period_start?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          primary_period_end?: string
+          primary_period_start?: string
+          report_data?: Json
+          report_name?: string
+          report_type?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       contract_accounting_entries: {
         Row: {
           amount: number
@@ -11271,6 +11366,26 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_period_comparison: {
+        Args: {
+          tenant_id_param: string
+          primary_start_date: string
+          primary_end_date: string
+          comparison_start_date: string
+          comparison_end_date: string
+          account_types?: string[]
+        }
+        Returns: {
+          account_id: string
+          account_code: string
+          account_name: string
+          account_type: string
+          primary_amount: number
+          comparison_amount: number
+          variance_amount: number
+          variance_percentage: number
+        }[]
+      }
       generate_public_quotation_link: {
         Args: { quotation_id: string; expires_in_days?: number }
         Returns: string
@@ -11492,6 +11607,19 @@ export type Database = {
       safe_delete_tenant: {
         Args: { tenant_id_param: string; deletion_reason?: string }
         Returns: Json
+      }
+      save_comparison_report: {
+        Args: {
+          tenant_id_param: string
+          report_name_param: string
+          report_type_param: string
+          primary_start_date: string
+          primary_end_date: string
+          comparison_start_date: string
+          comparison_end_date: string
+          created_by_param?: string
+        }
+        Returns: string
       }
       setup_complete_chart_of_accounts: {
         Args: { tenant_id_param: string }
