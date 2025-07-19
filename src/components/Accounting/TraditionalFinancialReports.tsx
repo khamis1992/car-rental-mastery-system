@@ -40,146 +40,21 @@ export const TraditionalFinancialReports: React.FC<TraditionalReportProps> = ({ 
   const loadTraditionalReport = async () => {
     setLoading(true);
     try {
-      // Mock data for traditional financial reports
-      const mockTraditionalData: TraditionalAccountData[] = [
-        {
-          account_code: '1101',
-          account_name: 'صندوق النقدية',
-          account_type: 'أصل متداول',
-          opening_balance: 10000,
-          debit_total: 25000,
-          credit_total: 19750,
-          closing_balance: 15250
-        },
-        {
-          account_code: '1102',
-          account_name: 'البنك التجاري الكويتي',
-          account_type: 'أصل متداول',
-          opening_balance: 30000,
-          debit_total: 45000,
-          credit_total: 30000,
-          closing_balance: 45000
-        },
-        {
-          account_code: '1201',
-          account_name: 'العملاء',
-          account_type: 'أصل متداول',
-          opening_balance: 15000,
-          debit_total: 35000,
-          credit_total: 21500,
-          closing_balance: 28500
-        },
-        {
-          account_code: '1301',
-          account_name: 'المركبات',
-          account_type: 'أصل ثابت',
-          opening_balance: 160000,
-          debit_total: 20000,
-          credit_total: 0,
-          closing_balance: 180000
-        },
-        {
-          account_code: '1302',
-          account_name: 'مجمع إهلاك المركبات',
-          account_type: 'أصل ثابت (مقابل)',
-          opening_balance: -20000,
-          debit_total: 0,
-          credit_total: 5000,
-          closing_balance: -25000
-        },
-        {
-          account_code: '2101',
-          account_name: 'الموردين',
-          account_type: 'خصم متداول',
-          opening_balance: -8000,
-          debit_total: 5000,
-          credit_total: 9800,
-          closing_balance: -12800
-        },
-        {
-          account_code: '2201',
-          account_name: 'قروض قصيرة الأجل',
-          account_type: 'خصم متداول',
-          opening_balance: -30000,
-          debit_total: 0,
-          credit_total: 5000,
-          closing_balance: -35000
-        },
-        {
-          account_code: '3101',
-          account_name: 'رأس المال',
-          account_type: 'حقوق ملكية',
-          opening_balance: -150000,
-          debit_total: 0,
-          credit_total: 0,
-          closing_balance: -150000
-        },
-        {
-          account_code: '3201',
-          account_name: 'الأرباح المحتجزة',
-          account_type: 'حقوق ملكية',
-          opening_balance: -15000,
-          debit_total: 0,
-          credit_total: 7450,
-          closing_balance: -22450
-        },
-        {
-          account_code: '4101',
-          account_name: 'إيرادات التأجير',
-          account_type: 'إيراد تشغيلي',
-          opening_balance: -65000,
-          debit_total: 0,
-          credit_total: 20000,
-          closing_balance: -85000
-        },
-        {
-          account_code: '4201',
-          account_name: 'إيرادات الصيانة',
-          account_type: 'إيراد تشغيلي',
-          opening_balance: -12000,
-          debit_total: 0,
-          credit_total: 6500,
-          closing_balance: -18500
-        },
-        {
-          account_code: '5101',
-          account_name: 'مصروفات الوقود',
-          account_type: 'مصروف تشغيلي',
-          opening_balance: 8000,
-          debit_total: 4000,
-          credit_total: 0,
-          closing_balance: 12000
-        },
-        {
-          account_code: '5102',
-          account_name: 'مصروفات الصيانة',
-          account_type: 'مصروف تشغيلي',
-          opening_balance: 5000,
-          debit_total: 3500,
-          credit_total: 0,
-          closing_balance: 8500
-        },
-        {
-          account_code: '5201',
-          account_name: 'الرواتب والأجور',
-          account_type: 'مصروف إداري',
-          opening_balance: 25000,
-          debit_total: 10000,
-          credit_total: 0,
-          closing_balance: 35000
-        },
-        {
-          account_code: '5301',
-          account_name: 'إهلاك المركبات',
-          account_type: 'مصروف إهلاك',
-          opening_balance: 0,
-          debit_total: 5000,
-          credit_total: 0,
-          closing_balance: 5000
-        }
-      ];
+      // استخدام دالة ميزان المراجعة الموجودة وتحسينها
+      const trialBalanceData = await accountingService.getTrialBalance();
+      
+      // تحويل البيانات للشكل التقليدي
+      const traditionalData: TraditionalAccountData[] = trialBalanceData.map(account => ({
+        account_code: account.account_code,
+        account_name: account.account_name,
+        account_type: 'تشغيلي', // يمكن تحسينها لاحقاً
+        opening_balance: 0, // سيتم حسابها من قاعدة البيانات
+        debit_total: account.debit_balance,
+        credit_total: account.credit_balance,
+        closing_balance: account.debit_balance - account.credit_balance
+      }));
 
-      setAccountsData(mockTraditionalData);
+      setAccountsData(traditionalData);
     } catch (error) {
       toast({
         title: 'خطأ',

@@ -164,7 +164,7 @@ const Settings = () => {
         </div>
         
         <div className="flex items-center gap-2">
-          <Button className="rtl-flex" onClick={handleSaveSettings}>
+          <Button className="btn-primary flex items-center gap-2" onClick={handleSaveSettings}>
             <SettingsIcon className="w-4 h-4" />
             حفظ الإعدادات
           </Button>
@@ -289,7 +289,7 @@ const Settings = () => {
           <Card className="card-elegant">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <Button className="rtl-flex" onClick={() => setIsAddUserDialogOpen(true)}>
+                <Button className="btn-primary rtl-flex" onClick={() => setIsAddUserDialogOpen(true)}>
                   <Users className="w-4 h-4" />
                   إضافة مستخدم
                 </Button>
@@ -382,7 +382,7 @@ const Settings = () => {
                       دليل شامل يغطي جميع أدوار المستخدمين، الواجهات، والعمليات الأساسية في النظام
                     </p>
                     
-                    <Button className="w-full rtl-flex" onClick={() => handleDownloadGuide('user-manual', 'دليل_المستخدم')}>
+                    <Button className="w-full btn-primary flex items-center gap-2 flex-row-reverse" onClick={() => handleDownloadGuide('user-manual', 'دليل_المستخدم')}>
                       <Download className="w-4 h-4" />
                       تحميل/طباعة
                     </Button>
@@ -405,7 +405,7 @@ const Settings = () => {
                       شرح مفصل لجميع مراحل العقد من الإنشاء حتى الإكمال، تسليم واستقبال المركبات
                     </p>
                     
-                    <Button className="w-full rtl-flex" onClick={() => handleDownloadGuide('contracts-guide', 'دليل_إدارة_العقود')}>
+                    <Button className="w-full btn-primary flex items-center gap-2 flex-row-reverse" onClick={() => handleDownloadGuide('contracts-guide', 'دليل_إدارة_العقود')}>
                       <Download className="w-4 h-4" />
                       تحميل/طباعة
                     </Button>
@@ -428,7 +428,7 @@ const Settings = () => {
                       دليل شامل للنظام المحاسبي، دليل الحسابات، القيود المحاسبية والتقارير المالية
                     </p>
                     
-                    <Button className="w-full rtl-flex" onClick={() => handleDownloadGuide('accounting-guide', 'دليل_النظام_المحاسبي')}>
+                    <Button className="w-full btn-primary flex items-center gap-2 flex-row-reverse" onClick={() => handleDownloadGuide('accounting-guide', 'دليل_النظام_المحاسبي')}>
                       <Download className="w-4 h-4" />
                       تحميل/طباعة
                     </Button>
@@ -451,7 +451,7 @@ const Settings = () => {
                       دليل شامل لحل جميع المشاكل الشائعة في النظام وإجراءات الطوارئ
                     </p>
                     
-                    <Button className="w-full rtl-flex" onClick={() => handleDownloadGuide('troubleshooting-guide', 'دليل_استكشاف_الأخطاء')}>
+                    <Button className="w-full btn-primary flex items-center gap-2 flex-row-reverse" onClick={() => handleDownloadGuide('troubleshooting-guide', 'دليل_استكشاف_الأخطاء')}>
                       <Download className="w-4 h-4" />
                       تحميل/طباعة
                     </Button>
@@ -474,7 +474,7 @@ const Settings = () => {
                       دليل شامل لإعداد النظام، تكوين الشركة، المستخدمين والإعدادات الأولية
                     </p>
                     
-                    <Button className="w-full rtl-flex" onClick={() => handleDownloadGuide('setup-guide', 'دليل_الإعداد_والتكوين')}>
+                    <Button className="w-full btn-primary flex items-center gap-2 flex-row-reverse" onClick={() => handleDownloadGuide('setup-guide', 'دليل_الإعداد_والتكوين')}>
                       <Download className="w-4 h-4" />
                       تحميل/طباعة
                     </Button>

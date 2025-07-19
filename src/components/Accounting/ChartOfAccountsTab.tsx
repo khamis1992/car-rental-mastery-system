@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, Upload } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import { ChartOfAccount } from '@/types/accounting';
 import { accountingService } from '@/services/accountingService';
 import { useToast } from '@/hooks/use-toast';
 import { AccountDetailsModal } from './AccountDetailsModal';
+import { ChartOfAccountsImportDialog } from './ChartOfAccountsImportDialog';
 
 export const ChartOfAccountsTab = () => {
   const [accounts, setAccounts] = useState<ChartOfAccount[]>([]);
@@ -23,6 +24,7 @@ export const ChartOfAccountsTab = () => {
   const [loading, setLoading] = useState(true);
   const [selectedAccountForDetails, setSelectedAccountForDetails] = useState<ChartOfAccount | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -235,7 +237,17 @@ export const ChartOfAccountsTab = () => {
               </form>
             </DialogContent>
           </Dialog>
-          <CardTitle>دليل الحسابات</CardTitle>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsImportDialogOpen(true)}
+              className="rtl-flex"
+            >
+              <Upload className="w-4 h-4" />
+              استيراد CSV
+            </Button>
+            <CardTitle>دليل الحسابات</CardTitle>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -344,6 +356,16 @@ export const ChartOfAccountsTab = () => {
         onClose={() => {
           setIsDetailsModalOpen(false);
           setSelectedAccountForDetails(null);
+        }}
+      />
+
+      {/* CSV Import Dialog */}
+      <ChartOfAccountsImportDialog
+        isOpen={isImportDialogOpen}
+        onClose={() => setIsImportDialogOpen(false)}
+        onImportComplete={() => {
+          setIsImportDialogOpen(false);
+          loadAccounts();
         }}
       />
     </Card>

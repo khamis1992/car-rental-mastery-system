@@ -247,13 +247,35 @@ const AdvancedTenantManagement: React.FC = () => {
           });
           break;
         case 'activate':
-          await tenantService.updateTenant(tenantId, {
-            status: 'active'
+          // استخدام الدالة المحسنة لتفعيل المؤسسة
+          const { data: activationResult, error: activationError } = await supabase.rpc('activate_tenant_safely', {
+            tenant_id_param: tenantId
           });
-          toast({
-            title: "تم بنجاح",
-            description: "تم تفعيل المؤسسة"
-          });
+          
+          if (activationError) {
+            throw new Error(activationError.message);
+          }
+          
+          if (activationResult && typeof activationResult === 'object' && 'success' in activationResult) {
+            const result = activationResult as any;
+            if (result.success) {
+              toast({
+                title: "تم بنجاح",
+                description: result.message || "تم تفعيل المؤسسة وإنشاء دليل الحسابات"
+              });
+            } else {
+              throw new Error(result.error || "فشل في تفعيل المؤسسة");
+            }
+          } else {
+            // fallback للطريقة القديمة
+            await tenantService.updateTenant(tenantId, {
+              status: 'active'
+            });
+            toast({
+              title: "تم بنجاح",
+              description: "تم تفعيل المؤسسة"
+            });
+          }
           break;
         case 'delete':
           // يتم التعامل مع الحذف عبر handleDeleteTenant
@@ -832,18 +854,16 @@ const AdvancedTenantManagement: React.FC = () => {
                            </DropdownMenuItem>
                          )}
                          
-                         {tenant.status === 'cancelled' && (
-                           <DropdownMenuItem 
-                             className="text-red-600"
-                             onClick={() => {
-                               setTenantToDelete(tenant);
-                               setShowHardDeleteDialog(true);
-                             }}
-                           >
-                             <Trash2 className="w-4 h-4 ml-2" />
-                             حذف نهائي
-                           </DropdownMenuItem>
-                         )}
+                          <DropdownMenuItem 
+                            className="text-red-600"
+                            onClick={() => {
+                              setTenantToDelete(tenant);
+                              setShowHardDeleteDialog(true);
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4 ml-2" />
+                            حذف نهائي
+                          </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
