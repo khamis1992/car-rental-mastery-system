@@ -633,11 +633,11 @@ const ChartOfAccounts = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="tree">عرض شجري حديث</TabsTrigger>
-          <TabsTrigger value="dashboard">لوحة المعلومات</TabsTrigger>
-          <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
-          <TabsTrigger value="ledger">دفتر الأستاذ</TabsTrigger>
           <TabsTrigger value="setup">إعداد الحسابات</TabsTrigger>
+          <TabsTrigger value="ledger">دفتر الأستاذ</TabsTrigger>
+          <TabsTrigger value="accounts">دليل الحسابات</TabsTrigger>
+          <TabsTrigger value="dashboard">لوحة المعلومات</TabsTrigger>
+          <TabsTrigger value="tree">عرض شجري حديث</TabsTrigger>
         </TabsList>
 
         <TabsContent value="tree" className="space-y-4">
