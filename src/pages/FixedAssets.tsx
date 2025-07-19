@@ -146,14 +146,14 @@ const FixedAssets = () => {
   return (
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
       {/* Header */}
-      <div className="flex flex-row-reverse items-center justify-between">
+      <div className="flex items-center justify-between">
+        <AssetFormDialog />
         <div>
           <h1 className="text-3xl font-bold text-right">الأصول الثابتة</h1>
           <p className="text-muted-foreground text-right mt-2">
             إدارة ومتابعة الأصول الثابتة والإهلاك
           </p>
         </div>
-        <AssetFormDialog />
       </div>
 
       {/* Summary Cards */}
