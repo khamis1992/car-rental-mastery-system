@@ -73,8 +73,8 @@ export function AccountLockStatus({
             <TooltipContent>
               <p>يحتوي على معاملات مالية</p>
             </TooltipContent>
-          </TooltipProvider>
-        </Tooltip>
+          </Tooltip>
+        </TooltipProvider>
       )}
 
       <div className="flex items-center gap-1">
