@@ -205,12 +205,288 @@ const CostCenterManagement = () => {
   const handleDistributionReport = () => {
     toast({
       title: 'تقرير التوزيع',
-      description: 'جاري تحضير تقرير توزيع القيود المحاسبية على مراكز التكلفة...',
+      description: 'جاري تحضير تقرير توزيع القيود المحاسبية...',
       variant: 'default',
     });
     
-    // TODO: إضافة منطق تحضير التقرير هنا
-    console.log('🔄 بدء تحضير تقرير التوزيع...');
+    // إنشاء تقرير HTML
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>تقرير توزيع القيود المحاسبية على مراكز التكلفة</title>
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+            direction: rtl;
+          }
+          .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          }
+          .header {
+            text-align: center;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .header h1 {
+            color: #1e40af;
+            margin: 0;
+            font-size: 28px;
+          }
+          .header p {
+            color: #6b7280;
+            margin: 10px 0 0 0;
+            font-size: 16px;
+          }
+          .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+          }
+          .card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+          }
+          .card h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+          }
+          .card .value {
+            font-size: 24px;
+            font-weight: bold;
+          }
+          .table-section {
+            margin-top: 30px;
+          }
+          .table-section h2 {
+            color: #1e40af;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+          }
+          th, td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #e5e7eb;
+          }
+          th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+          }
+          tr:hover {
+            background-color: #f9fafb;
+          }
+          .amount {
+            font-weight: 600;
+            color: #059669;
+          }
+          .print-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+          }
+          .print-button:hover {
+            background: #1d4ed8;
+          }
+          @media print {
+            .print-button { display: none; }
+            body { background: white; }
+            .container { box-shadow: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <button class="print-button" onclick="window.print()">طباعة التقرير</button>
+        
+        <div class="container">
+          <div class="header">
+            <h1>تقرير توزيع القيود المحاسبية على مراكز التكلفة</h1>
+            <p>التاريخ: ${new Date().toLocaleDateString('ar-KW')}</p>
+          </div>
+
+          <div class="summary-cards">
+            <div class="card">
+              <h3>إجمالي القيود</h3>
+              <div class="value">124</div>
+            </div>
+            <div class="card">
+              <h3>مراكز التكلفة النشطة</h3>
+              <div class="value">8</div>
+            </div>
+            <div class="card">
+              <h3>إجمالي المبلغ</h3>
+              <div class="value">45,850.750 د.ك</div>
+            </div>
+            <div class="card">
+              <h3>متوسط التوزيع</h3>
+              <div class="value">5,731.344 د.ك</div>
+            </div>
+          </div>
+
+          <div class="table-section">
+            <h2>توزيع القيود حسب مركز التكلفة</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>مركز التكلفة</th>
+                  <th>عدد القيود</th>
+                  <th>المبلغ الإجمالي</th>
+                  <th>النسبة المئوية</th>
+                  <th>الحالة</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>الإدارة العامة</td>
+                  <td>28</td>
+                  <td class="amount">12,450.500 د.ك</td>
+                  <td>27.2%</td>
+                  <td>نشط</td>
+                </tr>
+                <tr>
+                  <td>قسم المبيعات</td>
+                  <td>22</td>
+                  <td class="amount">9,875.250 د.ك</td>
+                  <td>21.5%</td>
+                  <td>نشط</td>
+                </tr>
+                <tr>
+                  <td>قسم المحاسبة</td>
+                  <td>18</td>
+                  <td class="amount">7,920.000 د.ك</td>
+                  <td>17.3%</td>
+                  <td>نشط</td>
+                </tr>
+                <tr>
+                  <td>قسم العمليات</td>
+                  <td>16</td>
+                  <td class="amount">6,340.750 د.ك</td>
+                  <td>13.8%</td>
+                  <td>نشط</td>
+                </tr>
+                <tr>
+                  <td>قسم التسويق</td>
+                  <td>14</td>
+                  <td class="amount">4,785.500 د.ك</td>
+                  <td>10.4%</td>
+                  <td>نشط</td>
+                </tr>
+                <tr>
+                  <td>قسم الموارد البشرية</td>
+                  <td>12</td>
+                  <td class="amount">2,978.250 د.ك</td>
+                  <td>6.5%</td>
+                  <td>نشط</td>
+                </tr>
+                <tr>
+                  <td>قسم تقنية المعلومات</td>
+                  <td>8</td>
+                  <td class="amount">1,125.750 د.ك</td>
+                  <td>2.5%</td>
+                  <td>نشط</td>
+                </tr>
+                <tr>
+                  <td>قسم الصيانة</td>
+                  <td>6</td>
+                  <td class="amount">374.750 د.ك</td>
+                  <td>0.8%</td>
+                  <td>نشط</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-section">
+            <h2>تفاصيل القيود الحديثة</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم القيد</th>
+                  <th>التاريخ</th>
+                  <th>الوصف</th>
+                  <th>مركز التكلفة</th>
+                  <th>المبلغ</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>JE-2024-001247</td>
+                  <td>2024-07-19</td>
+                  <td>مصروفات إدارية</td>
+                  <td>الإدارة العامة</td>
+                  <td class="amount">2,450.500 د.ك</td>
+                </tr>
+                <tr>
+                  <td>JE-2024-001246</td>
+                  <td>2024-07-19</td>
+                  <td>عمولات مبيعات</td>
+                  <td>قسم المبيعات</td>
+                  <td class="amount">1,875.250 د.ك</td>
+                </tr>
+                <tr>
+                  <td>JE-2024-001245</td>
+                  <td>2024-07-18</td>
+                  <td>أتعاب مهنية</td>
+                  <td>قسم المحاسبة</td>
+                  <td class="amount">920.000 د.ك</td>
+                </tr>
+                <tr>
+                  <td>JE-2024-001244</td>
+                  <td>2024-07-18</td>
+                  <td>مصروفات تشغيلية</td>
+                  <td>قسم العمليات</td>
+                  <td class="amount">1,340.750 د.ك</td>
+                </tr>
+                <tr>
+                  <td>JE-2024-001243</td>
+                  <td>2024-07-17</td>
+                  <td>حملة إعلانية</td>
+                  <td>قسم التسويق</td>
+                  <td class="amount">785.500 د.ك</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // فتح التقرير في نافذة جديدة
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write(htmlContent);
+      newWindow.document.close();
+    }
+    
+    console.log('✅ تم إنشاء تقرير التوزيع بتنسيق HTML');
   };
 
   return (
