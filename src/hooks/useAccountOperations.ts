@@ -82,14 +82,11 @@ export const useAccountOperations = () => {
       // Get existing sub-account codes
       const existingCodes = await getExistingSubAccountCodes(parentAccount as ChartOfAccount);
 
-      // Generate account code if not provided
-      let accountCode = accountData.account_code?.trim();
-      if (!accountCode) {
-        accountCode = generateNextSubAccountCode(parentAccount as ChartOfAccount, existingCodes);
-        console.log('🔢 تم توليد رقم الحساب تلقائياً:', accountCode);
-      }
+      // Always generate account code automatically (no manual input)
+      const accountCode = generateNextSubAccountCode(parentAccount as ChartOfAccount, existingCodes);
+      console.log('🔢 تم توليد رقم الحساب تلقائياً:', accountCode);
 
-      // Validate account data
+      // Validate account data (without account_code since it's auto-generated)
       const validatedData = { 
         ...accountData, 
         account_code: accountCode,
@@ -97,7 +94,7 @@ export const useAccountOperations = () => {
       };
       validateAccountData(validatedData as ChartOfAccount, parentAccount as ChartOfAccount, existingCodes);
 
-      // Check for duplicate account code in database
+      // Check for duplicate account code in database (double-check)
       const { data: existingAccount, error: checkError } = await supabase
         .from('chart_of_accounts')
         .select('id')

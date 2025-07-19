@@ -4,16 +4,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Check, AlertCircle } from 'lucide-react';
+import { ChartOfAccount, AccountType } from '@/types/accounting';
 import { useAccountOperations } from '@/hooks/useAccountOperations';
 import { useAccountPreview } from '@/hooks/useAccountPreview';
-import { ChartOfAccount } from '@/types/accounting';
-import { Loader2, AlertCircle, Info, Eye, Hash } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 interface AddSubAccountDialogProps {
   isOpen: boolean;
@@ -22,440 +21,247 @@ interface AddSubAccountDialogProps {
   onAccountCreated: () => void;
 }
 
-interface AccountTypeOption {
-  value: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
-  label: string;
-  isRecommended?: boolean;
-}
-
 export const AddSubAccountDialog: React.FC<AddSubAccountDialogProps> = ({
   isOpen,
   onClose,
   parentAccount,
   onAccountCreated
 }) => {
+  const [accountName, setAccountName] = useState('');
+  const [accountNameEn, setAccountNameEn] = useState('');
+  const [accountType, setAccountType] = useState<AccountType>('');
+  const [isActive, setIsActive] = useState(true);
+  const [allowPosting, setAllowPosting] = useState(true);
+  const [openingBalance, setOpeningBalance] = useState('0');
+  const [notes, setNotes] = useState('');
+
   const { createSubAccount, loading } = useAccountOperations();
-  const accountPreview = useAccountPreview(parentAccount);
-  
-  const [formData, setFormData] = useState<{
-    account_code: string;
-    account_name: string;
-    account_name_en: string;
-    account_type: ChartOfAccount['account_type'] | '';
-    account_category: ChartOfAccount['account_category'] | '';
-    is_active: boolean;
-    allow_posting: boolean;
-    opening_balance: number;
-    notes: string;
-  }>({
-    account_code: '',
-    account_name: '',
-    account_name_en: '',
-    account_type: '',
-    account_category: '',
-    is_active: true,
-    allow_posting: true,
-    opening_balance: 0,
-    notes: ''
-  });
-  const [errors, setErrors] = useState<string[]>([]);
-  const [useCustomCode, setUseCustomCode] = useState(false);
-
-  const resetForm = () => {
-    setFormData({
-      account_code: '',
-      account_name: '',
-      account_name_en: '',
-      account_type: parentAccount?.account_type || '',
-      account_category: parentAccount?.account_category || '',
-      is_active: true,
-      allow_posting: true,
-      opening_balance: 0,
-      notes: ''
-    });
-    setErrors([]);
-    setUseCustomCode(false);
-  };
-
-  const validateForm = () => {
-    const newErrors: string[] = [];
-
-    if (!formData.account_name.trim()) {
-      newErrors.push('اسم الحساب مطلوب');
-    }
-
-    if (!formData.account_type) {
-      newErrors.push('نوع الحساب مطلوب');
-    }
-
-    if (useCustomCode && formData.account_code && !/^\d+$/.test(formData.account_code.trim())) {
-      newErrors.push('رقم الحساب يجب أن يحتوي على أرقام فقط');
-    }
-
-    setErrors(newErrors);
-    return newErrors.length === 0;
-  };
+  const { nextCode, pattern, loading: previewLoading, error: previewError } = useAccountPreview(parentAccount);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm() || !parentAccount) {
+    if (!parentAccount || !accountName.trim() || !accountType) {
       return;
     }
 
     try {
-      const submitData = {
-        ...formData,
+      await createSubAccount({
+        account_name: accountName.trim(),
+        account_name_en: accountNameEn.trim() || null,
+        account_type: accountType,
+        account_category: parentAccount.account_category,
         parent_account_id: parentAccount.id,
-        account_code: useCustomCode ? formData.account_code.trim() : undefined,
-        account_type: formData.account_type as ChartOfAccount['account_type'],
-        account_category: formData.account_category as ChartOfAccount['account_category']
-      };
+        is_active: isActive,
+        allow_posting: allowPosting,
+        opening_balance: parseFloat(openingBalance) || 0,
+        current_balance: parseFloat(openingBalance) || 0,
+        notes: notes.trim() || null
+      });
 
-      await createSubAccount(submitData);
+      // Reset form
+      setAccountName('');
+      setAccountNameEn('');
+      setAccountType('');
+      setIsActive(true);
+      setAllowPosting(true);
+      setOpeningBalance('0');
+      setNotes('');
       
-      resetForm();
       onAccountCreated();
       onClose();
     } catch (error) {
-      console.error('Error creating sub-account:', error);
-      // Error is already handled by the hook
+      console.error('خطأ في إنشاء الحساب الفرعي:', error);
     }
   };
 
   const handleClose = () => {
-    resetForm();
+    setAccountName('');
+    setAccountNameEn('');
+    setAccountType('');
+    setIsActive(true);
+    setAllowPosting(true);
+    setOpeningBalance('0');
+    setNotes('');
     onClose();
   };
 
-  const getAccountTypeOptions = (): AccountTypeOption[] => {
-    const baseOptions: AccountTypeOption[] = [
-      { value: 'asset', label: 'أصول' },
-      { value: 'liability', label: 'خصوم' },
-      { value: 'equity', label: 'حقوق الملكية' },
-      { value: 'revenue', label: 'إيرادات' },
-      { value: 'expense', label: 'مصروفات' }
-    ];
+  if (!parentAccount) return null;
 
-    // If parent has a type, suggest it as default
-    if (parentAccount?.account_type) {
-      return baseOptions.map(option => ({
-        ...option,
-        isRecommended: option.value === parentAccount.account_type
-      }));
+  // Set account type to match parent if not already set
+  React.useEffect(() => {
+    if (parentAccount && !accountType) {
+      setAccountType(parentAccount.account_type);
     }
-
-    return baseOptions;
-  };
+  }, [parentAccount, accountType]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold rtl-title">
+          <DialogTitle className="text-lg font-bold rtl-title">
             إضافة حساب فرعي
           </DialogTitle>
-          {parentAccount && (
-            <div className="text-sm text-muted-foreground">
-              <p>الحساب الأب: {parentAccount.account_name}</p>
-              <p>رقم الحساب الأب: {parentAccount.account_code}</p>
-            </div>
-          )}
+          <div className="text-sm text-muted-foreground space-y-1">
+            <p><strong>الحساب الأب:</strong> {parentAccount.account_name}</p>
+            <p><strong>رقم الحساب الأب:</strong> {parentAccount.account_code}</p>
+            <p><strong>المستوى:</strong> {parentAccount.level + 1}</p>
+          </div>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Form */}
-          <div className="lg:col-span-2 space-y-6">
-            {errors.length > 0 && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  <ul className="list-disc list-inside">
-                    {errors.map((error, index) => (
-                      <li key={index}>{error}</li>
-                    ))}
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Account Code Section */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg rtl-title flex items-center gap-2">
-                    <Hash className="w-5 h-5" />
-                    رقم الحساب
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-2 space-x-reverse">
-                    <Switch
-                      id="use-custom-code"
-                      checked={useCustomCode}
-                      onCheckedChange={setUseCustomCode}
-                    />
-                    <Label htmlFor="use-custom-code" className="rtl-label">
-                      أريد تحديد رقم الحساب بنفسي
-                    </Label>
-                  </div>
-                  
-                  {useCustomCode ? (
-                    <div className="space-y-2">
-                      <Label htmlFor="account_code" className="rtl-label">
-                        رقم الحساب المخصص
-                      </Label>
-                      <Input
-                        id="account_code"
-                        value={formData.account_code}
-                        onChange={(e) => setFormData(prev => ({ ...prev, account_code: e.target.value }))}
-                        placeholder="أدخل رقم الحساب"
-                        dir="ltr"
-                        className="text-left font-mono"
-                      />
-                    </div>
-                  ) : (
-                    <Alert>
-                      <Info className="h-4 w-4" />
-                      <AlertDescription>
-                        سيتم توليد رقم الحساب تلقائياً بناءً على النظام الهرمي
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Basic Information */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg rtl-title">المعلومات الأساسية</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="account_name" className="rtl-label">
-                      اسم الحساب *
-                    </Label>
-                    <Input
-                      id="account_name"
-                      value={formData.account_name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, account_name: e.target.value }))}
-                      placeholder="أدخل اسم الحساب"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="account_name_en" className="rtl-label">
-                      اسم الحساب بالإنجليزية
-                    </Label>
-                    <Input
-                      id="account_name_en"
-                      value={formData.account_name_en}
-                      onChange={(e) => setFormData(prev => ({ ...prev, account_name_en: e.target.value }))}
-                      placeholder="Account name in English"
-                      dir="ltr"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="account_type" className="rtl-label">
-                        نوع الحساب *
-                      </Label>
-                      <Select
-                        value={formData.account_type}
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, account_type: value as ChartOfAccount['account_type'] }))}
-                        required
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر نوع الحساب" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {getAccountTypeOptions().map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              <div className="flex items-center gap-2">
-                                {option.label}
-                                {option.isRecommended && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    مُوصى
-                                  </Badge>
-                                )}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="opening_balance" className="rtl-label">
-                        الرصيد الافتتاحي
-                      </Label>
-                      <Input
-                        id="opening_balance"
-                        type="number"
-                        step="0.001"
-                        value={formData.opening_balance}
-                        onChange={(e) => setFormData(prev => ({ ...prev, opening_balance: parseFloat(e.target.value) || 0 }))}
-                        placeholder="0.000"
-                        dir="ltr"
-                        className="text-right"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Settings */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg rtl-title">الإعدادات</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="is_active" className="rtl-label">
-                      حساب نشط
-                    </Label>
-                    <Switch
-                      id="is_active"
-                      checked={formData.is_active}
-                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="allow_posting" className="rtl-label">
-                      يسمح بالترحيل
-                    </Label>
-                    <Switch
-                      id="allow_posting"
-                      checked={formData.allow_posting}
-                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allow_posting: checked }))}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="notes" className="rtl-label">
-                      ملاحظات
-                    </Label>
-                    <Textarea
-                      id="notes"
-                      value={formData.notes}
-                      onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                      placeholder="أدخل أي ملاحظات إضافية"
-                      rows={3}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="flex gap-3 justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleClose}
-                  disabled={loading}
-                >
-                  إلغاء
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="rtl-flex"
-                >
-                  {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  إنشاء الحساب
-                </Button>
-              </div>
-            </form>
-          </div>
-
-          {/* Preview Sidebar */}
-          <div className="space-y-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg rtl-title flex items-center gap-2">
-                  <Eye className="w-5 h-5" />
-                  معاينة الحساب
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {parentAccount && (
-                  <>
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-muted-foreground">الحساب الأب</p>
-                      <div className="p-3 bg-muted/50 rounded-lg">
-                        <p className="font-medium">{parentAccount.account_name}</p>
-                        <p className="text-sm text-muted-foreground font-mono">{parentAccount.account_code}</p>
-                        <Badge variant="outline" className="mt-1">
-                          المستوى {parentAccount.level}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {!useCustomCode && (
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-muted-foreground">الرقم المتوقع</p>
-                        {accountPreview.loading ? (
-                          <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span className="text-sm">جاري التحقق...</span>
-                          </div>
-                        ) : accountPreview.error ? (
-                          <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                            <p className="text-sm text-destructive">{accountPreview.error}</p>
-                          </div>
-                        ) : accountPreview.nextCode ? (
-                          <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
-                            <p className="font-mono text-lg font-bold text-primary">
-                              {accountPreview.nextCode}
-                            </p>
-                            {accountPreview.pattern && (
-                              <div className="mt-2 space-y-1">
-                                <p className="text-sm text-muted-foreground">
-                                  {accountPreview.pattern.description}
-                                </p>
-                                <Badge variant="secondary">
-                                  المستوى {accountPreview.pattern.level}
-                                </Badge>
-                              </div>
-                            )}
-                          </div>
-                        ) : null}
-                      </div>
-                    )}
-
-                    {formData.account_name && (
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-muted-foreground">اسم الحساب الجديد</p>
-                        <div className="p-3 bg-muted/50 rounded-lg">
-                          <p className="font-medium">{formData.account_name}</p>
-                          {formData.account_name_en && (
-                            <p className="text-sm text-muted-foreground">{formData.account_name_en}</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </>
+        {/* Account Code Preview */}
+        <Card className="mb-4">
+          <CardContent className="p-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 rtl-flex">
+                <Label className="text-sm font-medium rtl-label">رقم الحساب المتوقع:</Label>
+                {previewLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : previewError ? (
+                  <Badge variant="destructive" className="rtl-flex">
+                    <AlertCircle className="w-3 h-3" />
+                    خطأ في التوليد
+                  </Badge>
+                ) : nextCode ? (
+                  <Badge variant="default" className="rtl-flex font-mono">
+                    <Check className="w-3 h-3" />
+                    {nextCode}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline">غير محدد</Badge>
                 )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg rtl-title">نصائح</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="text-sm space-y-2">
-                  <p>• استخدم أسماء واضحة ومفهومة للحسابات</p>
-                  <p>• تأكد من اختيار النوع الصحيح للحساب</p>
-                  <p>• النظام سيقترح نوع الحساب بناءً على الحساب الأب</p>
-                  <p>• يمكنك ترك رقم الحساب فارغاً ليتم توليده تلقائياً</p>
+              </div>
+              
+              {pattern && (
+                <div className="text-xs text-muted-foreground">
+                  <p><strong>النمط:</strong> {pattern.description}</p>
+                  <p><strong>مثال:</strong> {pattern.example}</p>
                 </div>
-              </CardContent>
-            </Card>
+              )}
+              
+              {previewError && (
+                <div className="text-xs text-destructive bg-destructive/10 p-2 rounded">
+                  {previewError}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Account Name (Arabic) */}
+          <div className="space-y-2">
+            <Label htmlFor="accountName" className="rtl-label">
+              اسم الحساب (عربي) <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="accountName"
+              value={accountName}
+              onChange={(e) => setAccountName(e.target.value)}
+              placeholder="أدخل اسم الحساب بالعربية"
+              required
+            />
           </div>
-        </div>
+
+          {/* Account Name (English) */}
+          <div className="space-y-2">
+            <Label htmlFor="accountNameEn" className="rtl-label">اسم الحساب (إنجليزي)</Label>
+            <Input
+              id="accountNameEn"
+              value={accountNameEn}
+              onChange={(e) => setAccountNameEn(e.target.value)}
+              placeholder="Enter account name in English"
+            />
+          </div>
+
+          {/* Account Type */}
+          <div className="space-y-2">
+            <Label className="rtl-label">
+              نوع الحساب <span className="text-destructive">*</span>
+            </Label>
+            <Select value={accountType} onValueChange={(value: AccountType) => setAccountType(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="اختر نوع الحساب" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="asset">أصول</SelectItem>
+                <SelectItem value="liability">خصوم</SelectItem>
+                <SelectItem value="equity">حقوق الملكية</SelectItem>
+                <SelectItem value="revenue">إيرادات</SelectItem>
+                <SelectItem value="expense">مصروفات</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Opening Balance */}
+          <div className="space-y-2">
+            <Label htmlFor="openingBalance" className="rtl-label">الرصيد الافتتاحي (د.ك)</Label>
+            <Input
+              id="openingBalance"
+              type="number"
+              step="0.001"
+              value={openingBalance}
+              onChange={(e) => setOpeningBalance(e.target.value)}
+              placeholder="0.000"
+            />
+          </div>
+
+          {/* Account Settings */}
+          <div className="space-y-4 border rounded-lg p-4">
+            <h4 className="font-medium rtl-title">إعدادات الحساب</h4>
+            
+            <div className="flex items-center justify-between">
+              <Label htmlFor="isActive" className="rtl-label">حساب نشط</Label>
+              <Switch
+                id="isActive"
+                checked={isActive}
+                onCheckedChange={setIsActive}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <Label htmlFor="allowPosting" className="rtl-label">السماح بالترحيل</Label>
+              <Switch
+                id="allowPosting"
+                checked={allowPosting}
+                onCheckedChange={setAllowPosting}
+              />
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-2">
+            <Label htmlFor="notes" className="rtl-label">ملاحظات</Label>
+            <Textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="أدخل أي ملاحظات إضافية..."
+              rows={3}
+            />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={handleClose}>
+              إلغاء
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={loading || !accountName.trim() || !accountType || previewError}
+              className="rtl-flex"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  جاري الإنشاء...
+                </>
+              ) : (
+                'إنشاء الحساب'
+              )}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
