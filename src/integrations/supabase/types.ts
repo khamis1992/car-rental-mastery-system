@@ -10447,7 +10447,9 @@ export type Database = {
         }[]
       }
       calculate_advanced_kpi: {
-        Args: { kpi_code_param: string }
+        Args:
+          | { kpi_code_param: string }
+          | { kpi_code_param: string; tenant_id_param: string }
         Returns: number
       }
       calculate_all_kpis: {
@@ -10516,7 +10518,7 @@ export type Database = {
         Returns: Json
       }
       calculate_liquidity_ratios: {
-        Args: Record<PropertyKey, never>
+        Args: Record<PropertyKey, never> | { tenant_id_param: string }
         Returns: Json
       }
       calculate_monthly_depreciation: {
@@ -10535,6 +10537,14 @@ export type Database = {
       calculate_monthly_vehicle_depreciation: {
         Args: { target_month?: string }
         Returns: number
+      }
+      calculate_profitability_ratios: {
+        Args: {
+          tenant_id_param: string
+          period_start: string
+          period_end: string
+        }
+        Returns: Json
       }
       check_budget_overruns: {
         Args: Record<PropertyKey, never>
@@ -10807,6 +10817,10 @@ export type Database = {
           depreciation_rate_percent: number
         }[]
       }
+      generate_balance_sheet_report: {
+        Args: { tenant_id_param: string; report_date: string }
+        Returns: Json
+      }
       generate_basic_financial_report: {
         Args: {
           p_tenant_id: string
@@ -10855,6 +10869,14 @@ export type Database = {
       generate_hierarchical_asset_code: {
         Args: { vehicle_type: string; make: string; model: string }
         Returns: string
+      }
+      generate_income_statement: {
+        Args: {
+          tenant_id_param: string
+          period_start: string
+          period_end: string
+        }
+        Returns: Json
       }
       generate_installment_plan_number: {
         Args: Record<PropertyKey, never>
