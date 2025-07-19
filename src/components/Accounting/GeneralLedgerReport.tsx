@@ -316,7 +316,7 @@ export const GeneralLedgerReport: React.FC = () => {
               </span>
             )}
           </CardTitle>
-        </CardContent>
+        </CardHeader>
         <CardContent className="p-0">
           {loading ? (
             <div className="p-6">
