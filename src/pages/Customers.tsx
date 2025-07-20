@@ -82,10 +82,6 @@ const Customers = () => {
           </div>
           <div className="flex items-center gap-2 flex-row-reverse">
             <AddCustomerDialog />
-            <Button variant="outline" className="rtl-flex">
-              <Filter className="w-4 h-4" />
-              فلترة
-            </Button>
           </div>
         </div>
 
