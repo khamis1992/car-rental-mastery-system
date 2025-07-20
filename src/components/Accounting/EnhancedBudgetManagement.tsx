@@ -1,22 +1,23 @@
+
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Edit, Trash2, BarChart3, Calendar, Download, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Plus, Edit, Trash2, BarChart3, Calendar, Download, RefreshCw, AlertTriangle, Eye } from 'lucide-react';
 import { BudgetService, BudgetWithItems } from '@/services/BudgetService';
 import { BudgetVarianceReport } from '@/components/Budget/BudgetVarianceReport';
 import { formatCurrencyKWD } from '@/lib/currency';
 import { toast } from 'sonner';
 
 export const EnhancedBudgetManagement: React.FC = () => {
+  const navigate = useNavigate();
   const [budgets, setBudgets] = useState<BudgetWithItems[]>([]);
   const [selectedBudget, setSelectedBudget] = useState<BudgetWithItems | null>(null);
   const [showNewBudgetDialog, setShowNewBudgetDialog] = useState(false);
@@ -181,6 +182,14 @@ export const EnhancedBudgetManagement: React.FC = () => {
 
                         <div className="rtl-flex justify-between">
                           <div className="rtl-flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => navigate(`/budget-management/${budget.id}`)}
+                            >
+                              <Eye className="w-4 h-4" />
+                              عرض التفاصيل
+                            </Button>
                             <Button
                               variant="outline"
                               size="sm"

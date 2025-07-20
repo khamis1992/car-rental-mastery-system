@@ -1,4 +1,5 @@
 
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,7 +12,7 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222.2 84% 4.9%;
@@ -23,7 +24,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -39,8 +40,8 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
@@ -51,7 +52,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 224.3 76.3% 94.1%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -67,121 +68,61 @@
   body {
     @apply bg-background text-foreground;
     direction: rtl;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
+    text-align: right;
   }
 }
 
-/* كلاسات مخصصة للتخطيط العربي */
-@layer utilities {
-  .rtl-flex {
-    @apply flex items-center gap-2 flex-row-reverse;
-  }
-  
-  .rtl-title {
-    @apply text-right;
-  }
-  
-  .rtl-label {
-    @apply text-right;
-  }
-
-  /* تحسين التباعد للنصوص العربية */
-  .arabic-text {
-    line-height: 1.6;
-    letter-spacing: 0.02em;
-  }
-
-  /* محاذاة الأيقونات مع النص العربي */
-  .icon-with-arabic {
-    @apply flex items-center gap-2 flex-row-reverse;
-  }
-
-  /* كلاسات للتعامل مع الحالات المختلطة */
-  .mixed-content {
-    @apply flex items-center justify-between;
-  }
-  
-  .mixed-content .arabic {
-    @apply text-right;
-  }
-  
-  .mixed-content .english {
-    @apply text-left;
-  }
+/* RTL Utility Classes */
+.rtl-flex {
+  @apply flex items-center gap-2 flex-row-reverse;
 }
 
-/* تحسينات للمكونات المحددة */
+.rtl-title {
+  @apply text-right;
+}
+
+.rtl-label {
+  @apply text-right block;
+}
+
+/* Card styling */
+.card-elegant {
+  @apply bg-card border border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200;
+}
+
+/* Button styling */
+.btn-primary {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 border-0;
+}
+
+/* Table responsive */
+.table-responsive {
+  @apply overflow-x-auto;
+}
+
+/* Ensure proper RTL support for forms */
+input, textarea, select {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Dialog content RTL */
 .dialog-content {
   direction: rtl;
 }
 
-.card-content {
-  direction: rtl;
+/* Progress bar RTL */
+.progress-rtl {
+  direction: ltr;
 }
 
-/* تحسين عرض النماذج */
-.form-field {
-  @apply text-right;
+/* Animation for loading states */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.form-field input,
-.form-field textarea,
-.form-field select {
-  @apply text-right;
-}
-
-/* تحسين عرض الجداول */
-.table-rtl {
-  direction: rtl;
-}
-
-.table-rtl th,
-.table-rtl td {
-  @apply text-right;
-}
-
-/* تحسين القوائم المنسدلة */
-.dropdown-menu {
-  direction: rtl;
-}
-
-/* تحسين التنبيهات والرسائل */
-.alert-rtl {
-  direction: rtl;
-  @apply text-right;
-}
-
-/* تحسين أزرار التنقل */
-.nav-button {
-  @apply rtl-flex;
-}
-
-/* تحسينات للعناوين والتسميات */
-h1, h2, h3, h4, h5, h6 {
-  @apply rtl-title;
-}
-
-label {
-  @apply rtl-label;
-}
-
-/* تحسين التخطيط للبطاقات */
-.card-header {
-  @apply text-right;
-}
-
-.card-title {
-  @apply rtl-title;
-}
-
-/* تحسين عرض الحالات والشارات */
-.status-badge {
-  @apply rtl-flex;
-}
-
-/* تحسين الأزرار */
-.button-with-icon {
-  @apply rtl-flex;
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
