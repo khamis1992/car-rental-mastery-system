@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Layout } from '@/components/Layout/Layout';
 import { MaintenanceOverview } from '@/components/Maintenance/MaintenanceOverview';
@@ -7,9 +7,18 @@ import { MaintenanceScheduler } from '@/components/Maintenance/MaintenanceSchedu
 import { MaintenanceHistory } from '@/components/Maintenance/MaintenanceHistory';
 import { MaintenanceAlerts } from '@/components/Maintenance/MaintenanceAlerts';
 import { MaintenanceCostTracker } from '@/components/Maintenance/MaintenanceCostTracker';
+import { useSearchParams } from 'react-router-dom';
 
 const Maintenance = () => {
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('overview');
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['overview', 'scheduler', 'history', 'alerts', 'costs'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   return (
     <Layout>

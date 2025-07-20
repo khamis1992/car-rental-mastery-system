@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, Clock, AlertTriangle, Wrench, DollarSign, TrendingUp } from 'lucide-react';
+import { Calendar, Clock, AlertTriangle, Wrench, DollarSign, TrendingUp, Plus, Car, FileText, Bell } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 
 interface MaintenanceStats {
   totalVehicles: number;
@@ -42,6 +43,7 @@ export const MaintenanceOverview = () => {
   const [upcomingMaintenance, setUpcomingMaintenance] = useState<UpcomingMaintenance[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const fetchMaintenanceStats = async () => {
     try {
@@ -184,6 +186,69 @@ export const MaintenanceOverview = () => {
 
   return (
     <div className="space-y-6">
+      {/* إجراءات سريعة */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-right">إجراءات سريعة</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Button
+              className="h-auto p-4 flex flex-col items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => navigate('/maintenance?tab=scheduler')}
+            >
+              <Plus className="h-6 w-6" />
+              <div className="text-center">
+                <div className="font-semibold">جدولة صيانة جديدة</div>
+                <div className="text-xs opacity-80">إضافة موعد صيانة جديد</div>
+              </div>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="h-auto p-4 flex flex-col items-center gap-3 border-green-600 text-green-600 hover:bg-green-50"
+              onClick={() => navigate('/fleet')}
+            >
+              <Car className="h-6 w-6" />
+              <div className="text-center">
+                <div className="font-semibold">إضافة مركبة جديدة</div>
+                <div className="text-xs opacity-70">تسجيل مركبة في الأسطول</div>
+              </div>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="h-auto p-4 flex flex-col items-center gap-3 border-orange-600 text-orange-600 hover:bg-orange-50"
+              onClick={() => {
+                // يمكن إضافة وظيفة تصدير التقارير لاحقاً
+                toast({
+                  title: 'تصدير التقارير',
+                  description: 'سيتم إضافة هذه الميزة قريباً',
+                });
+              }}
+            >
+              <FileText className="h-6 w-6" />
+              <div className="text-center">
+                <div className="font-semibold">تصدير التقارير</div>
+                <div className="text-xs opacity-70">تحميل تقارير الصيانة</div>
+              </div>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="h-auto p-4 flex flex-col items-center gap-3 border-red-600 text-red-600 hover:bg-red-50"
+              onClick={() => navigate('/maintenance?tab=alerts')}
+            >
+              <Bell className="h-6 w-6" />
+              <div className="text-center">
+                <div className="font-semibold">عرض جميع التنبيهات</div>
+                <div className="text-xs opacity-70">مراجعة التنبيهات العاجلة</div>
+              </div>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* إحصائيات سريعة */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
