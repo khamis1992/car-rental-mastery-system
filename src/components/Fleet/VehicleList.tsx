@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Car, Search, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +15,7 @@ interface VehicleListProps {
   onAddVehicle: () => void;
   onEditVehicle: (vehicle: Vehicle) => void;
   onViewVehicle: (vehicle: Vehicle) => void;
+  onDeleteVehicle: (vehicle: Vehicle) => void;
 }
 
 export const VehicleList: React.FC<VehicleListProps> = ({
@@ -23,7 +25,8 @@ export const VehicleList: React.FC<VehicleListProps> = ({
   loading,
   onAddVehicle,
   onEditVehicle,
-  onViewVehicle
+  onViewVehicle,
+  onDeleteVehicle
 }) => {
   const filteredVehicles = vehicles.filter(vehicle =>
     vehicle.make.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -36,8 +39,8 @@ export const VehicleList: React.FC<VehicleListProps> = ({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>قائمة المركبات</CardTitle>
-          <div className="flex items-center gap-2">
+          <CardTitle className="rtl-title">قائمة المركبات</CardTitle>
+          <div className="flex items-center gap-2 rtl-flex">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
@@ -67,10 +70,10 @@ export const VehicleList: React.FC<VehicleListProps> = ({
             </p>
             {!searchTerm && (
               <Button 
-                className="btn-primary"
+                className="btn-primary rtl-flex"
                 onClick={onAddVehicle}
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4" />
                 إضافة أول مركبة
               </Button>
             )}
@@ -83,6 +86,7 @@ export const VehicleList: React.FC<VehicleListProps> = ({
                 vehicle={vehicle}
                 onEdit={onEditVehicle}
                 onView={onViewVehicle}
+                onDelete={onDeleteVehicle}
               />
             ))}
           </div>
