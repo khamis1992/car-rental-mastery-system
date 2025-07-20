@@ -71,21 +71,8 @@ const Navbar = () => {
           </p>
         </div>
 
-        {/* الوسط - شريط البحث وساعة الحضور ومحدد المؤسسة */}
+        {/* الوسط - ساعة الحضور ومحدد المؤسسة */}
         <div className="flex items-center gap-4 flex-1 max-w-2xl mx-8">
-          <div className="flex-1 max-w-md">
-            <Button
-              variant="outline"
-              className="w-full justify-start text-muted-foreground h-10 px-3"
-              onClick={() => setIsOpen(true)}
-            >
-              <Search className="w-4 h-4 ml-2" />
-              البحث في النظام...
-              <div className="ml-auto text-xs text-muted-foreground">
-                Ctrl+K
-              </div>
-            </Button>
-          </div>
           
           {/* محدد المؤسسة */}
           <TenantSwitcher />
