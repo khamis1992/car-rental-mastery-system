@@ -116,45 +116,53 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
-        <Command className="max-h-96">
-          <div className="flex items-center border-b px-3">
-            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-            <CommandInput 
-              placeholder="ابحث بالكود أو الاسم..." 
-              className="h-9"
-            />
+        {accounts.length > 0 ? (
+          <Command className="max-h-96">
+            <div className="flex items-center border-b px-3">
+              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+              <CommandInput 
+                placeholder="ابحث بالكود أو الاسم..." 
+                className="h-9"
+              />
+            </div>
+            <CommandEmpty>لا توجد نتائج</CommandEmpty>
+            <CommandGroup className="max-h-64 overflow-auto">
+              {sortedAccounts.length > 0 && sortedAccounts.map((account) => (
+                account && account.id ? (
+                  <CommandItem
+                    key={account.id}
+                    value={`${account.account_code || ''} ${account.account_name || ''}`}
+                    onSelect={() => {
+                      onValueChange(account.id === value ? "" : account.id);
+                      setOpen(false);
+                    }}
+                    className="flex items-center justify-between py-3"
+                  >
+                    <div className="flex-1 text-right">
+                      <div className="font-medium">
+                        {account.account_code} - {account.account_name}
+                      </div>
+                      <div className="text-xs text-muted-foreground flex justify-between">
+                        {showBalance && <span>الرصيد: {formatCurrency(account.current_balance || 0)}</span>}
+                        <span>{account.account_type}</span>
+                      </div>
+                    </div>
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === account.id ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  </CommandItem>
+                ) : null
+              ))}
+            </CommandGroup>
+          </Command>
+        ) : (
+          <div className="p-4 text-center text-sm text-muted-foreground">
+            لا توجد حسابات متاحة
           </div>
-          <CommandEmpty>لا توجد نتائج</CommandEmpty>
-          <CommandGroup className="max-h-64 overflow-auto">
-            {sortedAccounts.map((account) => (
-              <CommandItem
-                key={account.id}
-                value={`${account.account_code} ${account.account_name}`}
-                onSelect={() => {
-                  onValueChange(account.id === value ? "" : account.id);
-                  setOpen(false);
-                }}
-                className="flex items-center justify-between py-3"
-              >
-                <div className="flex-1 text-right">
-                  <div className="font-medium">
-                    {account.account_code} - {account.account_name}
-                  </div>
-                  <div className="text-xs text-muted-foreground flex justify-between">
-                    {showBalance && <span>الرصيد: {formatCurrency(account.current_balance)}</span>}
-                    <span>{account.account_type}</span>
-                  </div>
-                </div>
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === account.id ? "opacity-100" : "opacity-0"
-                  )}
-                />
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
+        )}
       </PopoverContent>
     </Popover>
   );
