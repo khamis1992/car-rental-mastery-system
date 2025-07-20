@@ -10769,6 +10769,87 @@ export type Database = {
           },
         ]
       }
+      user_activity_logs: {
+        Row: {
+          action_description: string | null
+          action_type: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          session_id: string | null
+          tenant_id: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_description?: string | null
+          action_type: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          session_id?: string | null
+          tenant_id: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_description?: string | null
+          action_type?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          session_id?: string | null
+          tenant_id?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invitation_token: string
+          invited_at: string
+          invited_by: string | null
+          role: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invitation_token: string
+          invited_at?: string
+          invited_by?: string | null
+          role: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invitation_token?: string
+          invited_at?: string
+          invited_by?: string | null
+          role?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_permissions: {
         Row: {
           conditions: Json | null
@@ -10843,6 +10924,48 @@ export type Database = {
           granted_by?: string | null
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          created_at: string
+          device_info: string | null
+          expires_at: string
+          id: string
+          ip_address: string | null
+          is_active: boolean
+          last_activity: string
+          location: string | null
+          session_token: string
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_info?: string | null
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean
+          last_activity?: string
+          location?: string | null
+          session_token: string
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_info?: string | null
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean
+          last_activity?: string
+          location?: string | null
+          session_token?: string
+          tenant_id?: string
           user_id?: string
         }
         Relationships: []
@@ -12008,6 +12131,10 @@ export type Database = {
         }
         Returns: Json
       }
+      create_user_invitation: {
+        Args: { email_param: string; role_param: string }
+        Returns: Json
+      }
       create_vehicle_asset: {
         Args: { vehicle_id: string; vehicle_data: Json }
         Returns: string
@@ -12420,6 +12547,15 @@ export type Database = {
               p_details?: Json
             }
         Returns: string
+      }
+      log_user_activity: {
+        Args: {
+          action_type_param: string
+          action_description_param?: string
+          ip_address_param?: string
+          user_agent_param?: string
+        }
+        Returns: undefined
       }
       mark_contract_deleted: {
         Args: { contract_id_param: string; reason?: string }
