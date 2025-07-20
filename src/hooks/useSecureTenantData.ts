@@ -32,7 +32,33 @@ export function useSecureTenantData() {
 
           const { data, error } = await supabase
             .from('employees')
-            .select('id, first_name, last_name, employee_number, position, status, tenant_id')
+            .select(`
+              id, 
+              first_name, 
+              last_name, 
+              employee_number, 
+              position, 
+              status, 
+              tenant_id,
+              email,
+              phone,
+              national_id,
+              department,
+              department_id,
+              hire_date,
+              salary,
+              manager_id,
+              work_location_id,
+              emergency_contact_name,
+              emergency_contact_phone,
+              bank_account_number,
+              bank_name,
+              address,
+              created_at,
+              updated_at,
+              created_by,
+              user_id
+            `)
             .eq('tenant_id', currentTenant.id)
             .eq('status', 'active')
             .order('first_name', { ascending: true });
