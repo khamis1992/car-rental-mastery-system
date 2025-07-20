@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { accountingService, GeneralLedgerEntry } from '@/services/accountingService';
 import { handleError } from '@/utils/errorHandling';
 
@@ -266,7 +266,7 @@ export const useSafeGeneralLedger = (): UseSafeGeneralLedgerReturn => {
   }, [loadAccounts]);
 
   // فلترة البيانات بناءً على مصطلح البحث مع طبقة حماية
-  const filteredEntries = React.useMemo(() => {
+  const filteredEntries = useMemo(() => {
     try {
       if (!Array.isArray(entries)) {
         console.warn('⚠️ Entries is not an array in filtering');
@@ -294,7 +294,7 @@ export const useSafeGeneralLedger = (): UseSafeGeneralLedgerReturn => {
   }, [entries, searchTerm]);
 
   // حساب الملخص مع طبقة حماية
-  const summary = React.useMemo(() => {
+  const summary = useMemo(() => {
     try {
       if (!Array.isArray(filteredEntries)) {
         return {
