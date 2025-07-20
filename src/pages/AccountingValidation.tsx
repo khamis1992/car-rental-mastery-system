@@ -1,8 +1,5 @@
-
 import React from 'react';
-import { Layout } from '@/components/Layout/Layout';
 import { AccountingValidation as AccountingValidationComponent } from '@/components/Accounting/AccountingValidation';
-import { AccountingDashboard } from '@/components/Accounting/AccountingDashboard';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Shield, AlertTriangle, CheckCircle, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -64,89 +61,82 @@ const AccountingValidation = () => {
   ];
 
   return (
-    <Layout>
-      <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="rtl-title">
-            <h1 className="text-3xl font-bold text-foreground">التحقق والمراجعة</h1>
-            <p className="text-muted-foreground">مراجعة وتدقيق القيود المحاسبية وضمان الدقة</p>
-          </div>
-          
-          <div className="rtl-flex gap-2">
-            <Button variant="outline" className="rtl-flex">
-              <RefreshCw className="w-4 h-4" />
-              تحديث
-            </Button>
-            <Button variant="outline" className="rtl-flex">
-              <Search className="w-4 h-4" />
-              بحث متقدم
-            </Button>
-            <Button className="btn-primary rtl-flex">
-              <Shield className="w-4 h-4" />
-              بدء المراجعة
-            </Button>
-          </div>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">التحقق والمراجعة</h1>
+          <p className="text-muted-foreground">مراجعة وتدقيق القيود المحاسبية وضمان الدقة</p>
         </div>
-
-        {/* Validation Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {validationStats.map((stat, index) => (
-            <Card key={index} className="card-elegant">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="rtl-content">
-                    <p className="text-sm text-muted-foreground rtl-label">{stat.title}</p>
-                    <p className="text-2xl font-bold">{stat.value}</p>
-                    <p className="text-sm text-muted-foreground">{stat.status}</p>
-                  </div>
-                  {stat.icon}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Recent Validations */}
-        <Card className="card-elegant">
-          <CardHeader>
-            <CardTitle className="rtl-title">آخر عمليات المراجعة</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentValidations.map((validation) => (
-                <div key={validation.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="rtl-content">
-                    <div className="flex items-center gap-4 rtl-flex">
-                      <Badge variant="outline">{validation.id}</Badge>
-                      <div className="text-right">
-                        <p className="font-medium">{validation.description}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {validation.type} • {validation.date} • {validation.reviewer}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <Badge 
-                    variant={
-                      validation.status === 'مُوافق عليه' ? 'default' :
-                      validation.status === 'معلق' ? 'secondary' : 'destructive'
-                    }
-                  >
-                    {validation.status}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* لوحة القيادة المحاسبية */}
-        <AccountingDashboard />
         
-        {/* واجهة التحقق الرئيسية */}
-        <AccountingValidationComponent />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" className="flex items-center gap-2">
+            <RefreshCw className="w-4 h-4" />
+            تحديث
+          </Button>
+          <Button variant="outline" className="flex items-center gap-2">
+            <Search className="w-4 h-4" />
+            بحث متقدم
+          </Button>
+          <Button className="btn-primary flex items-center gap-2">
+            <Shield className="w-4 h-4" />
+            بدء المراجعة
+          </Button>
+        </div>
       </div>
-    </Layout>
+
+      {/* Validation Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {validationStats.map((stat, index) => (
+          <Card key={index} className="card-elegant">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">{stat.title}</p>
+                  <p className="text-2xl font-bold">{stat.value}</p>
+                  <p className="text-sm text-muted-foreground">{stat.status}</p>
+                </div>
+                {stat.icon}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Recent Validations */}
+      <Card className="card-elegant">
+        <CardHeader>
+          <CardTitle>آخر عمليات المراجعة</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {recentValidations.map((validation) => (
+              <div key={validation.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center gap-4">
+                  <Badge variant="outline">{validation.id}</Badge>
+                  <div>
+                    <p className="font-medium">{validation.description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {validation.type} • {validation.date} • {validation.reviewer}
+                    </p>
+                  </div>
+                </div>
+                <Badge 
+                  variant={
+                    validation.status === 'مُوافق عليه' ? 'default' :
+                    validation.status === 'معلق' ? 'secondary' : 'destructive'
+                  }
+                >
+                  {validation.status}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Main Validation Interface */}
+      <AccountingValidationComponent />
+    </div>
   );
 };
 

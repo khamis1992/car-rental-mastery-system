@@ -1,8 +1,6 @@
-
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import Navbar from "./Navbar";
-import { SearchDialog } from "@/components/Search/SearchDialog";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,7 +17,6 @@ export function Layout({ children }: LayoutProps) {
             {children}
           </main>
         </SidebarInset>
-        <SearchDialog />
       </div>
     </SidebarProvider>
   );

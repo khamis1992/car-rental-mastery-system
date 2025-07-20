@@ -1,43 +1,35 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "next-themes";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { TenantProvider } from "@/contexts/TenantContext";
+import { SettingsProvider } from "@/contexts/SettingsContext";
 import { SearchProvider } from "@/contexts/SearchContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
-import { SettingsProvider } from "@/contexts/SettingsContext";
+import { SearchDialog } from "@/components/Search/SearchDialog";
+import { Layout } from "@/components/Layout/Layout";
 import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
-import NotFound from "./pages/NotFound";
-import TenantIsolationDashboard from "./pages/TenantIsolationDashboard";
-import Maintenance from "./pages/Maintenance";
-import SuperAdminDashboard from "./pages/SuperAdminDashboard";
-import PaymentCancel from "./pages/PaymentCancel";
+import Auth from "./pages/Auth";
+import Customers from "./pages/Customers";
 import Fleet from "./pages/Fleet";
-import SadadSimulation from "./pages/SadadSimulation";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import TrafficViolations from "./pages/TrafficViolations";
-import GeneralLedger from "./pages/GeneralLedger";
-import Contracts from "./pages/Contracts";
-import Tenants from "./pages/Tenants";
 import Quotations from "./pages/Quotations";
-import CostCenters from "./pages/CostCenters";
+import Contracts from "./pages/Contracts";
+import ChartOfAccounts from "./pages/ChartOfAccounts";
+import ChartOfAccountsSetupPage from "./pages/ChartOfAccountsSetup";
+import JournalEntries from "./pages/JournalEntries";
+import FinancialReports from "./pages/FinancialReports";
+import GeneralLedger from "./pages/GeneralLedger";
 import BudgetManagement from "./pages/BudgetManagement";
 import AccountingAutomation from "./pages/AccountingAutomation";
 import AccountingValidation from "./pages/AccountingValidation";
-import ChartOfAccountsSetup from "./pages/ChartOfAccountsSetup";
-
-// New pages being added
-import Dashboard from "./pages/Dashboard";
-import Customers from "./pages/Customers";
-import ChartOfAccounts from "./pages/ChartOfAccounts";
+import CostCenters from "./pages/CostCenters";
 import FixedAssets from "./pages/FixedAssets";
-import JournalEntries from "./pages/JournalEntries";
-import FinancialReports from "./pages/FinancialReports";
-import Violations from "./pages/Violations";
+import Maintenance from "./pages/Maintenance";
+import TrafficViolations from "./pages/TrafficViolations";
 import Employees from "./pages/Employees";
 import Attendance from "./pages/Attendance";
 import Leaves from "./pages/Leaves";
@@ -46,67 +38,124 @@ import Communications from "./pages/Communications";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 
-import "./App.css";
+// Super Admin Pages
+import SuperAdminMainDashboard from "./pages/super-admin/MainDashboard";
+import SuperAdminTenantManagement from "./pages/super-admin/TenantManagement";
+import SuperAdminUsersPermissions from "./pages/super-admin/UsersAndPermissions";
+import SuperAdminBillingSubscriptions from "./pages/super-admin/BillingAndSubscriptions";
+import SuperAdminSadadPayments from "./pages/super-admin/SadadPayments";
+import SuperAdminSystemMonitoring from "./pages/super-admin/SystemMonitoring";
+import SuperAdminMaintenanceTools from "./pages/super-admin/MaintenanceTools";
+import SuperAdminTechnicalSupport from "./pages/super-admin/TechnicalSupport";
+import SuperAdminLandingEditor from "./pages/super-admin/LandingPageEditor";
+import SuperAdminGlobalSettings from "./pages/super-admin/GlobalSettings";
 
 const queryClient = new QueryClient();
+
+function AppRoutes() {
+  const { isAuthenticated, loading, isSaasAdmin } = useAuth();
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">جاري التحميل...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    );
+  }
+
+  // If user is SAAS admin, show only super admin routes
+  if (isSaasAdmin) {
+    return (
+      <Layout>
+        <Routes>
+          <Route path="/super-admin/main-dashboard" element={<SuperAdminMainDashboard />} />
+          <Route path="/super-admin/tenant-management" element={<SuperAdminTenantManagement />} />
+          <Route path="/super-admin/users-permissions" element={<SuperAdminUsersPermissions />} />
+          <Route path="/super-admin/billing-subscriptions" element={<SuperAdminBillingSubscriptions />} />
+          <Route path="/super-admin/sadad-payments" element={<SuperAdminSadadPayments />} />
+          <Route path="/super-admin/system-monitoring" element={<SuperAdminSystemMonitoring />} />
+          <Route path="/super-admin/maintenance-tools" element={<SuperAdminMaintenanceTools />} />
+          <Route path="/super-admin/technical-support" element={<SuperAdminTechnicalSupport />} />
+          <Route path="/super-admin/landing-editor" element={<SuperAdminLandingEditor />} />
+          <Route path="/super-admin/global-settings" element={<SuperAdminGlobalSettings />} />
+          <Route path="*" element={<Navigate to="/super-admin/main-dashboard" />} />
+        </Routes>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <Routes>
+        <Route path="/dashboard" element={<Index />} />
+        <Route path="/customers" element={<Customers />} />
+        <Route path="/fleet" element={<Fleet />} />
+        <Route path="/quotations" element={<Quotations />} />
+        <Route path="/contracts" element={<Contracts />} />
+        <Route path="/chart-of-accounts" element={<ChartOfAccounts />} />
+        <Route path="/chart-of-accounts-setup" element={<ChartOfAccountsSetupPage />} />
+        <Route path="/journal-entries" element={<JournalEntries />} />
+        <Route path="/general-ledger" element={<GeneralLedger />} />
+        <Route path="/budget-management" element={<BudgetManagement />} />
+        <Route path="/accounting-automation" element={<AccountingAutomation />} />
+        <Route path="/accounting-validation" element={<AccountingValidation />} />
+        <Route path="/cost-centers" element={<CostCenters />} />
+        <Route path="/fixed-assets" element={<FixedAssets />} />
+        <Route path="/maintenance" element={<Maintenance />} />
+        <Route path="/violations" element={<TrafficViolations />} />
+        <Route path="/employees" element={<Employees />} />
+        <Route path="/attendance" element={<Attendance />} />
+        <Route path="/leaves" element={<Leaves />} />
+        <Route path="/payroll" element={<Payroll />} />
+        <Route path="/communications" element={<Communications />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/settings" element={<Settings />} />
+        
+        {/* Super Admin Routes for eligible users */}
+        <Route path="/super-admin/main-dashboard" element={<SuperAdminMainDashboard />} />
+        <Route path="/super-admin/tenant-management" element={<SuperAdminTenantManagement />} />
+        <Route path="/super-admin/users-permissions" element={<SuperAdminUsersPermissions />} />
+        <Route path="/super-admin/billing-subscriptions" element={<SuperAdminBillingSubscriptions />} />
+        <Route path="/super-admin/sadad-payments" element={<SuperAdminSadadPayments />} />
+        <Route path="/super-admin/system-monitoring" element={<SuperAdminSystemMonitoring />} />
+        <Route path="/super-admin/maintenance-tools" element={<SuperAdminMaintenanceTools />} />
+        <Route path="/super-admin/technical-support" element={<SuperAdminTechnicalSupport />} />
+        <Route path="/super-admin/landing-editor" element={<SuperAdminLandingEditor />} />
+        <Route path="/super-admin/global-settings" element={<SuperAdminGlobalSettings />} />
+        
+        <Route path="*" element={<Navigate to="/dashboard" />} />
+      </Routes>
+    </Layout>
+  );
+}
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <TooltipProvider>
         <AuthProvider>
           <TenantProvider>
-            <SearchProvider>
-              <NotificationProvider>
-                <SettingsProvider>
-                  <TooltipProvider>
+            <SettingsProvider>
+              <SearchProvider>
+                <NotificationProvider>
+                  <BrowserRouter>
+                    <AppRoutes />
+                    <SearchDialog />
                     <Toaster />
                     <Sonner />
-                    <BrowserRouter>
-                      <Routes>
-                        <Route path="/" element={<Index />} />
-                        <Route path="/landing" element={<LandingPage />} />
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/customers" element={<Customers />} />
-                        <Route path="/fleet" element={<Fleet />} />
-                        <Route path="/quotations" element={<Quotations />} />
-                        <Route path="/contracts" element={<Contracts />} />
-                        <Route path="/chart-of-accounts" element={<ChartOfAccounts />} />
-                        <Route path="/chart-of-accounts-setup" element={<ChartOfAccountsSetup />} />
-                        <Route path="/cost-centers" element={<CostCenters />} />
-                        <Route path="/fixed-assets" element={<FixedAssets />} />
-                        <Route path="/journal-entries" element={<JournalEntries />} />
-                        <Route path="/general-ledger" element={<GeneralLedger />} />
-                        <Route path="/budget-management" element={<BudgetManagement />} />
-                        <Route path="/accounting-automation" element={<AccountingAutomation />} />
-                        <Route path="/accounting-validation" element={<AccountingValidation />} />
-                        <Route path="/financial-reports" element={<FinancialReports />} />
-                        <Route path="/maintenance" element={<Maintenance />} />
-                        <Route path="/violations" element={<Violations />} />
-                        <Route path="/traffic-violations" element={<TrafficViolations />} />
-                        <Route path="/employees" element={<Employees />} />
-                        <Route path="/attendance" element={<Attendance />} />
-                        <Route path="/leaves" element={<Leaves />} />
-                        <Route path="/payroll" element={<Payroll />} />
-                        <Route path="/communications" element={<Communications />} />
-                        <Route path="/notifications" element={<Notifications />} />
-                        <Route path="/settings" element={<Settings />} />
-                        <Route path="/tenants" element={<Tenants />} />
-                        <Route path="/super-admin" element={<SuperAdminDashboard />} />
-                        <Route path="/tenant-isolation" element={<TenantIsolationDashboard />} />
-                        <Route path="/payment-success" element={<PaymentSuccess />} />
-                        <Route path="/payment-cancel" element={<PaymentCancel />} />
-                        <Route path="/sadad-simulation" element={<SadadSimulation />} />
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </BrowserRouter>
-                  </TooltipProvider>
-                </SettingsProvider>
-              </NotificationProvider>
-            </SearchProvider>
+                  </BrowserRouter>
+                </NotificationProvider>
+              </SearchProvider>
+            </SettingsProvider>
           </TenantProvider>
         </AuthProvider>
-      </ThemeProvider>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }

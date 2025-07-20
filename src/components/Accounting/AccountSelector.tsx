@@ -45,7 +45,7 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
 }) => {
   const [open, setOpen] = React.useState(false);
 
-  const selectedAccount = accounts?.find(account => account.id === value);
+  const selectedAccount = accounts.find(account => account.id === value);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ar-KW', {
@@ -57,8 +57,7 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
   };
 
   // Sort accounts with recent accounts first, then by account code
-  // Add safety check to handle undefined/null accounts
-  const sortedAccounts = [...(accounts || [])].sort((a, b) => {
+  const sortedAccounts = [...accounts].sort((a, b) => {
     const aIsRecent = recentAccounts.includes(a.id);
     const bIsRecent = recentAccounts.includes(b.id);
     

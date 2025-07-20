@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, DollarSign, TrendingUp, Clock, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +9,6 @@ import { QuotationForm } from '@/components/Contracts/QuotationForm';
 import { QuotationsList } from '@/components/Contracts/QuotationsList';
 import { QuotationEditDialog } from '@/components/Contracts/QuotationEditDialog';
 import { quotationService } from '@/services/quotationService';
-import { Layout } from '@/components/Layout/Layout';
 
 const Quotations = () => {
   const [quotationFormOpen, setQuotationFormOpen] = useState(false);
@@ -149,144 +147,140 @@ const Quotations = () => {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="p-6 space-y-6">
-          <div className="animate-pulse">
-            <div className="h-8 bg-muted rounded w-1/3 mb-2"></div>
-            <div className="h-4 bg-muted rounded w-1/2"></div>
-          </div>
+      <div className="p-6 space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-muted rounded w-1/3 mb-2"></div>
+          <div className="h-4 bg-muted rounded w-1/2"></div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="p-6 space-y-6 rtl-content">
-        <div className="flex items-center justify-between">
-          <div className="text-right">
-            <h1 className="text-3xl font-bold text-foreground rtl-title">إدارة عروض الأسعار</h1>
-            <p className="text-muted-foreground">إنشاء وإدارة عروض أسعار تأجير المركبات</p>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button 
-              className="btn-primary rtl-flex"
-              onClick={() => setQuotationFormOpen(true)}
-            >
-              <Plus className="w-4 h-4" />
-              عرض سعر جديد
-            </Button>
-          </div>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="text-right">
+          <h1 className="text-3xl font-bold text-foreground">إدارة عروض الأسعار</h1>
+          <p className="text-muted-foreground">إنشاء وإدارة عروض أسعار تأجير المركبات</p>
         </div>
-
-        {/* إحصائيات شاملة */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="rtl-flex gap-2">
-                <FileText className="w-8 h-8 text-primary" />
-                <div>
-                  <p className="text-2xl font-bold">{quotationStats.total}</p>
-                  <p className="text-sm text-muted-foreground">إجمالي العروض</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="rtl-flex gap-2">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                  <FileText className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{quotationStats.active}</p>
-                  <p className="text-sm text-muted-foreground">عروض نشطة</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="rtl-flex gap-2">
-                <Clock className="w-8 h-8 text-red-500" />
-                <div>
-                  <p className="text-2xl font-bold">{quotationStats.expired}</p>
-                  <p className="text-sm text-muted-foreground">منتهية الصلاحية</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="rtl-flex gap-2">
-                <DollarSign className="w-8 h-8 text-green-600" />
-                <div>
-                  <p className="text-2xl font-bold">{quotationStats.totalValue.toFixed(3)} د.ك</p>
-                  <p className="text-sm text-muted-foreground">إجمالي قيمة العروض</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="rtl-flex gap-2">
-                <Users className="w-8 h-8 text-purple-600" />
-                <div>
-                  <p className="text-2xl font-bold">{quotationStats.avgValue.toFixed(3)} د.ك</p>
-                  <p className="text-sm text-muted-foreground">متوسط قيمة العرض</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="rtl-flex gap-2">
-                <TrendingUp className="w-8 h-8 text-orange-600" />
-                <div>
-                  <p className="text-2xl font-bold">{quotationStats.conversionRate.toFixed(1)}%</p>
-                  <p className="text-sm text-muted-foreground">معدل التحويل لعقود</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        
+        <div className="flex items-center gap-2">
+          <Button 
+            className="btn-primary flex items-center gap-2"
+            onClick={() => setQuotationFormOpen(true)}
+          >
+            <Plus className="w-4 h-4" />
+            عرض سعر جديد
+          </Button>
         </div>
-
-        {/* قائمة عروض الأسعار */}
-        <QuotationsList
-          quotations={quotations}
-          customers={customers}
-          vehicles={vehicles}
-          onView={handleView}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onConvertToContract={handleConvertToContract}
-          onGetQuotationDetails={quotationService.getQuotationById}
-        />
-
-        {/* نموذج إنشاء عرض سعر */}
-        <QuotationForm
-          open={quotationFormOpen}
-          onOpenChange={setQuotationFormOpen}
-          customers={customers}
-          vehicles={vehicles}
-          onSuccess={handleFormSuccess}
-        />
-
-        {/* نموذج تعديل عرض السعر */}
-        <QuotationEditDialog
-          open={editDialogOpen}
-          onOpenChange={setEditDialogOpen}
-          quotationId={selectedQuotationId}
-          onSuccess={handleFormSuccess}
-        />
       </div>
-    </Layout>
+
+      {/* إحصائيات شاملة */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <FileText className="w-8 h-8 text-primary" />
+              <div>
+                <p className="text-2xl font-bold">{quotationStats.total}</p>
+                <p className="text-sm text-muted-foreground">إجمالي العروض</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <FileText className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{quotationStats.active}</p>
+                <p className="text-sm text-muted-foreground">عروض نشطة</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Clock className="w-8 h-8 text-red-500" />
+              <div>
+                <p className="text-2xl font-bold">{quotationStats.expired}</p>
+                <p className="text-sm text-muted-foreground">منتهية الصلاحية</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <DollarSign className="w-8 h-8 text-green-600" />
+              <div>
+                <p className="text-2xl font-bold">{quotationStats.totalValue.toFixed(3)} د.ك</p>
+                <p className="text-sm text-muted-foreground">إجمالي قيمة العروض</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Users className="w-8 h-8 text-purple-600" />
+              <div>
+                <p className="text-2xl font-bold">{quotationStats.avgValue.toFixed(3)} د.ك</p>
+                <p className="text-sm text-muted-foreground">متوسط قيمة العرض</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-8 h-8 text-orange-600" />
+              <div>
+                <p className="text-2xl font-bold">{quotationStats.conversionRate.toFixed(1)}%</p>
+                <p className="text-sm text-muted-foreground">معدل التحويل لعقود</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* قائمة عروض الأسعار */}
+      <QuotationsList
+        quotations={quotations}
+        customers={customers}
+        vehicles={vehicles}
+        onView={handleView}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onConvertToContract={handleConvertToContract}
+        onGetQuotationDetails={quotationService.getQuotationById}
+      />
+
+      {/* نموذج إنشاء عرض سعر */}
+      <QuotationForm
+        open={quotationFormOpen}
+        onOpenChange={setQuotationFormOpen}
+        customers={customers}
+        vehicles={vehicles}
+        onSuccess={handleFormSuccess}
+      />
+
+      {/* نموذج تعديل عرض السعر */}
+      <QuotationEditDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        quotationId={selectedQuotationId}
+        onSuccess={handleFormSuccess}
+      />
+    </div>
   );
 };
 

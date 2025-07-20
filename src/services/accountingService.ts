@@ -1,6 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
 import { handleError } from '@/utils/errorHandling';
-import { financialReportsService } from './financialReportsService';
 
 export interface TrialBalanceItem {
   account_id: string;
@@ -445,26 +444,7 @@ class AccountingService {
 
   async getFinancialSummary() {
     try {
-      // استخدام خدمة التقارير المالية بدلاً من البيانات الوهمية
-      const balanceSheet = await financialReportsService.generateBalanceSheet({
-        asOfDate: new Date().toISOString().split('T')[0]
-      });
-      
-      const incomeStatement = await financialReportsService.generateIncomeStatement({
-        startDate: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0],
-        endDate: new Date().toISOString().split('T')[0]
-      });
-
-      return {
-        totalRevenue: incomeStatement.revenue.total_revenue,
-        totalExpenses: incomeStatement.expenses.total_expense,
-        netIncome: incomeStatement.net_income,
-        totalAssets: balanceSheet.assets.total_assets,
-        totalLiabilities: balanceSheet.liabilities.total_liabilities,
-        equity: balanceSheet.equity.total_equity
-      };
-    } catch (error) {
-      console.error('Error fetching financial summary:', error);
+      // Return mock financial summary data
       return {
         totalRevenue: 0,
         totalExpenses: 0,
@@ -473,31 +453,23 @@ class AccountingService {
         totalLiabilities: 0,
         equity: 0
       };
+    } catch (error) {
+      console.error('Error fetching financial summary:', error);
+      return null;
     }
   }
 
   async getLiquidityRatios() {
     try {
-      // استخدام خدمة التقارير المالية
-      const balanceSheet = await financialReportsService.generateBalanceSheet({
-        asOfDate: new Date().toISOString().split('T')[0]
-      });
-
-      const currentAssets = balanceSheet.assets.current_assets;
-      const currentLiabilities = balanceSheet.liabilities.current_liabilities;
-
-      return {
-        currentRatio: currentLiabilities > 0 ? currentAssets / currentLiabilities : 0,
-        quickRatio: currentLiabilities > 0 ? (currentAssets * 0.8) / currentLiabilities : 0, // تقريبي
-        cashRatio: currentLiabilities > 0 ? (currentAssets * 0.2) / currentLiabilities : 0 // تقريبي
-      };
-    } catch (error) {
-      console.error('Error fetching liquidity ratios:', error);
+      // Return mock liquidity ratios
       return {
         currentRatio: 0,
         quickRatio: 0,
         cashRatio: 0
       };
+    } catch (error) {
+      console.error('Error fetching liquidity ratios:', error);
+      return null;
     }
   }
 
@@ -523,34 +495,29 @@ class AccountingService {
 
   async getIncomeStatement() {
     try {
-      // استخدام خدمة التقارير المالية بدلاً من البيانات الوهمية
-      return await financialReportsService.generateIncomeStatement({
-        startDate: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0],
-        endDate: new Date().toISOString().split('T')[0]
-      });
-    } catch (error) {
-      console.error('Error fetching income statement:', error);
+      // Return mock income statement data
       return {
         revenue: [],
         expenses: [],
         netIncome: 0
       };
+    } catch (error) {
+      console.error('Error fetching income statement:', error);
+      return null;
     }
   }
 
   async getBalanceSheet() {
     try {
-      // استخدام خدمة التقارير المالية بدلاً من البيانات الوهمية
-      return await financialReportsService.generateBalanceSheet({
-        asOfDate: new Date().toISOString().split('T')[0]
-      });
-    } catch (error) {
-      console.error('Error fetching balance sheet:', error);
+      // Return mock balance sheet data
       return {
         assets: [],
         liabilities: [],
         equity: []
       };
+    } catch (error) {
+      console.error('Error fetching balance sheet:', error);
+      return null;
     }
   }
 

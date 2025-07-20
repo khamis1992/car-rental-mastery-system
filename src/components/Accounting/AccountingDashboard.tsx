@@ -2,216 +2,267 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { 
-  DollarSign, 
+  Building2, 
   TrendingUp, 
   TrendingDown, 
-  Calculator, 
+  DollarSign, 
+  PieChart, 
+  BarChart3, 
   FileText,
-  AlertCircle,
+  AlertTriangle,
   CheckCircle,
-  Clock,
-  PieChart,
-  BarChart3,
-  Shield
+  Eye,
+  Calculator,
+  BookOpen
 } from 'lucide-react';
-import { formatCurrencyKWD } from '@/lib/currency';
-import { useNavigate } from 'react-router-dom';
+import { accountingService } from '@/services/accountingService';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
-interface FinancialMetric {
-  title: string;
+interface DashboardData {
+  totalAssets: number;
+  totalLiabilities: number;
+  totalEquity: number;
+  totalRevenue: number;
+  totalExpenses: number;
+  netIncome: number;
+  accountsCount: number;
+  activeAccountsCount: number;
+  recentTransactions: any[];
+  pendingEntries: number;
+  monthlyTrends: { month: string; revenue: number; expenses: number }[];
+  topAccounts: { account_name: string; account_code: string; balance: number; type: string }[];
+}
+
+interface KPI {
+  label: string;
   value: number;
-  previousValue: number;
-  change: number;
-  changeType: 'up' | 'down' | 'neutral';
-  icon: React.ReactNode;
-  color: string;
+  trend: 'up' | 'down' | 'stable';
+  percentage: number;
+  format: 'currency' | 'number' | 'percentage';
 }
 
-interface AccountingTask {
-  id: string;
-  title: string;
-  description: string;
-  priority: 'high' | 'medium' | 'low';
-  dueDate: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  assignee?: string;
-}
-
-interface ValidationAlert {
-  id: string;
-  type: 'error' | 'warning' | 'info';
-  title: string;
-  description: string;
-  count: number;
-  urgency: 'critical' | 'medium' | 'low';
-}
-
-export const AccountingDashboard: React.FC = () => {
-  const navigate = useNavigate();
-  const [metrics, setMetrics] = useState<FinancialMetric[]>([]);
-  const [tasks, setTasks] = useState<AccountingTask[]>([]);
-  const [validationAlerts, setValidationAlerts] = useState<ValidationAlert[]>([]);
+export const AccountingDashboard = () => {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [kpis, setKpis] = useState<KPI[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     loadDashboardData();
   }, []);
 
   const loadDashboardData = async () => {
+    setLoading(true);
     try {
-      // Mock data - في التطبيق الحقيقي سيتم جلب البيانات من الـ API
-      setMetrics([
-        {
-          title: 'إجمالي الإيرادات',
-          value: 125000,
-          previousValue: 110000,
-          change: 13.6,
-          changeType: 'up',
-          icon: <DollarSign className="w-6 h-6" />,
-          color: 'text-green-600'
-        },
-        {
-          title: 'إجمالي المصروفات',
-          value: 85000,
-          previousValue: 90000,
-          change: -5.6,
-          changeType: 'down',
-          icon: <TrendingDown className="w-6 h-6" />,
-          color: 'text-red-600'
-        },
-        {
-          title: 'صافي الربح',
-          value: 40000,
-          previousValue: 20000,
-          change: 100,
-          changeType: 'up',
-          icon: <TrendingUp className="w-6 h-6" />,
-          color: 'text-blue-600'
-        },
-        {
-          title: 'القيود المعلقة',
-          value: 15,
-          previousValue: 25,
-          change: -40,
-          changeType: 'down',
-          icon: <FileText className="w-6 h-6" />,
-          color: 'text-orange-600'
-        }
+      // جلب البيانات المالية الأساسية
+      const [
+        assets,
+        liabilities,
+        equity,
+        revenue,
+        expenses,
+        accounts,
+        recentTransactions,
+        pendingEntries
+      ] = await Promise.all([
+        getAccountTypeTotal('asset'),
+        getAccountTypeTotal('liability'),
+        getAccountTypeTotal('equity'),
+        getAccountTypeTotal('revenue'),
+        getAccountTypeTotal('expense'),
+        accountingService.getChartOfAccounts(),
+        getRecentTransactions(),
+        getPendingEntries()
       ]);
 
-      setTasks([
-        {
-          id: '1',
-          title: 'مراجعة قيود شهر يناير',
-          description: 'مراجعة وإقفال جميع قيود شهر يناير 2024',
-          priority: 'high',
-          dueDate: '2024-02-05',
-          status: 'pending',
-          assignee: 'أحمد المحاسب'
-        },
-        {
-          id: '2',
-          title: 'إعداد التقرير الشهري',
-          description: 'إعداد التقرير المالي الشهري للإدارة',
-          priority: 'medium',
-          dueDate: '2024-02-10',
-          status: 'in_progress',
-          assignee: 'فاطمة المالية'
-        },
-        {
-          id: '3',
-          title: 'تحديث دليل الحسابات',
-          description: 'إضافة حسابات جديدة للقسم الجديد',
-          priority: 'low',
-          dueDate: '2024-02-15',
-          status: 'pending'
-        },
-        {
-          id: '4',
-          title: 'مطابقة حسابات البنك',
-          description: 'مطابقة كشوف الحساب البنكي مع السجلات',
-          priority: 'high',
-          dueDate: '2024-02-03',
-          status: 'completed',
-          assignee: 'سارة المراجعة'
-        }
-      ]);
+      const netIncome = revenue - expenses;
+      const activeAccounts = accounts.filter(acc => acc.is_active);
 
-      setValidationAlerts([
+      // حساب الاتجاهات الشهرية
+      const monthlyTrends = await getMonthlyTrends();
+      
+      // أهم الحسابات
+      const topAccounts = await getTopAccounts();
+
+      const dashboardData: DashboardData = {
+        totalAssets: assets,
+        totalLiabilities: liabilities,
+        totalEquity: equity,
+        totalRevenue: revenue,
+        totalExpenses: expenses,
+        netIncome,
+        accountsCount: accounts.length,
+        activeAccountsCount: activeAccounts.length,
+        recentTransactions,
+        pendingEntries,
+        monthlyTrends,
+        topAccounts
+      };
+
+      setData(dashboardData);
+
+      // حساب المؤشرات الرئيسية
+      const calculatedKPIs: KPI[] = [
         {
-          id: '1',
-          type: 'error',
-          title: 'عدم توازن في القيود',
-          description: 'يوجد 3 قيود محاسبية غير متوازنة تحتاج مراجعة فورية',
-          count: 3,
-          urgency: 'critical'
+          label: 'هامش الربح',
+          value: revenue > 0 ? (netIncome / revenue) * 100 : 0,
+          trend: netIncome >= 0 ? 'up' : 'down',
+          percentage: 0, // يمكن حسابه مقارنة بالشهر السابق
+          format: 'percentage'
         },
         {
-          id: '2',
-          type: 'warning',
-          title: 'حسابات غير مستخدمة',
-          description: 'يوجد 12 حساب في دليل الحسابات لم يتم استخدامها مؤخراً',
-          count: 12,
-          urgency: 'medium'
+          label: 'نسبة السيولة',
+          value: liabilities > 0 ? assets / liabilities : 0,
+          trend: assets > liabilities ? 'up' : 'down',
+          percentage: 0,
+          format: 'number'
         },
         {
-          id: '3',
-          type: 'info',
-          title: 'تحديثات النظام',
-          description: 'يوجد تحديثات جديدة للنظام المحاسبي',
-          count: 1,
-          urgency: 'low'
+          label: 'العائد على الأصول',
+          value: assets > 0 ? (netIncome / assets) * 100 : 0,
+          trend: netIncome >= 0 ? 'up' : 'down',
+          percentage: 0,
+          format: 'percentage'
+        },
+        {
+          label: 'نسبة المصروفات',
+          value: revenue > 0 ? (expenses / revenue) * 100 : 0,
+          trend: expenses < revenue * 0.7 ? 'up' : 'down',
+          percentage: 0,
+          format: 'percentage'
         }
-      ]);
+      ];
+
+      setKpis(calculatedKPIs);
+
     } catch (error) {
       console.error('Error loading dashboard data:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل في تحميل بيانات لوحة المعلومات',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
+  const getAccountTypeTotal = async (accountType: string): Promise<number> => {
+    const { data, error } = await supabase
+      .from('chart_of_accounts')
+      .select('current_balance')
+      .eq('account_type', accountType)
+      .eq('is_active', true);
+
+    if (error) throw error;
+    return data?.reduce((sum, account) => sum + (account.current_balance || 0), 0) || 0;
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed': return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'in_progress': return <Clock className="w-4 h-4 text-blue-600" />;
-      case 'pending': return <AlertCircle className="w-4 h-4 text-orange-600" />;
-      default: return <Clock className="w-4 h-4 text-gray-600" />;
-    }
+  const getRecentTransactions = async () => {
+    const { data, error } = await supabase
+      .from('journal_entry_lines')
+      .select(`
+        *,
+        journal_entries!inner(
+          entry_number,
+          entry_date,
+          description,
+          status
+        ),
+        chart_of_accounts!inner(
+          account_name,
+          account_code
+        )
+      `)
+      .eq('journal_entries.status', 'posted')
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (error) throw error;
+    return data || [];
   };
 
-  const getAlertIcon = (type: string) => {
-    switch (type) {
-      case 'error': return <AlertCircle className="w-5 h-5 text-red-600" />;
-      case 'warning': return <AlertCircle className="w-5 h-5 text-yellow-600" />;
-      case 'info': return <CheckCircle className="w-5 h-5 text-blue-600" />;
-      default: return <AlertCircle className="w-5 h-5 text-gray-600" />;
-    }
+  const getPendingEntries = async (): Promise<number> => {
+    const { data, error } = await supabase
+      .from('journal_entries')
+      .select('id')
+      .eq('status', 'draft');
+
+    if (error) throw error;
+    return data?.length || 0;
   };
 
-  const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case 'critical': return 'bg-red-50 border-red-200';
-      case 'medium': return 'bg-yellow-50 border-yellow-200';
-      case 'low': return 'bg-blue-50 border-blue-200';
-      default: return 'bg-gray-50 border-gray-200';
-    }
+  const getMonthlyTrends = async () => {
+    // إنشاء بيانات وهمية للاتجاهات الشهرية
+    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'];
+    
+    return months.map(month => ({
+      month,
+      revenue: Math.random() * 10000,
+      expenses: Math.random() * 8000
+    }));
+  };
+
+  const getTopAccounts = async () => {
+    const { data, error } = await supabase
+      .from('chart_of_accounts')
+      .select('account_name, account_code, current_balance, account_type')
+      .eq('is_active', true)
+      .eq('allow_posting', true)
+      .order('current_balance', { ascending: false })
+      .limit(10);
+
+    if (error) throw error;
+    return data?.map(account => ({
+      account_name: account.account_name,
+      account_code: account.account_code,
+      balance: account.current_balance || 0,
+      type: account.account_type
+    })) || [];
+  };
+
+  const formatCurrency = (amount: number) => {
+    return `د.ك ${amount.toLocaleString('ar-KW', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}`;
+  };
+
+  const formatNumber = (num: number) => {
+    return num.toLocaleString('ar-KW');
+  };
+
+  const formatPercentage = (num: number) => {
+    return `${num.toFixed(1)}%`;
+  };
+
+  const getAccountTypeColor = (type: string) => {
+    const colors = {
+      asset: 'text-blue-600',
+      liability: 'text-red-600',
+      equity: 'text-green-600',
+      revenue: 'text-emerald-600',
+      expense: 'text-orange-600'
+    };
+    return colors[type as keyof typeof colors] || 'text-gray-600';
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-lg text-muted-foreground">جاري تحميل لوحة القيادة المحاسبية...</div>
+        <div className="text-lg">جاري تحميل لوحة المعلومات...</div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="text-center py-8">
+        <AlertTriangle className="w-16 h-16 mx-auto text-destructive mb-4" />
+        <h3 className="text-lg font-semibold mb-2">خطأ في تحميل البيانات</h3>
+        <p className="text-muted-foreground">لم نتمكن من تحميل بيانات لوحة المعلومات</p>
+        <Button onClick={loadDashboardData} className="mt-4">إعادة المحاولة</Button>
       </div>
     );
   }
@@ -219,209 +270,251 @@ export const AccountingDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* المؤشرات المالية الرئيسية */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {metrics.map((metric, index) => (
-          <Card key={index} className="card-elegant">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">{metric.title}</p>
-                  <p className="text-2xl font-bold">
-                    {metric.title.includes('الربح') || metric.title.includes('الإيرادات') || metric.title.includes('المصروفات') 
-                      ? formatCurrencyKWD(metric.value) 
-                      : metric.value.toLocaleString()
-                    }
-                  </p>
-                  <div className="flex items-center gap-1">
-                    <span className={`text-sm font-medium ${
-                      metric.changeType === 'up' ? 'text-green-600' : 
-                      metric.changeType === 'down' ? 'text-red-600' : 'text-gray-600'
-                    }`}>
-                      {metric.changeType === 'up' ? '+' : ''}{metric.change.toFixed(1)}%
-                    </span>
-                    <span className="text-xs text-muted-foreground">من الشهر السابق</span>
-                  </div>
-                </div>
-                <div className={`p-3 rounded-full bg-gradient-to-br ${
-                  metric.changeType === 'up' ? 'from-green-100 to-green-200' : 
-                  metric.changeType === 'down' ? 'from-red-100 to-red-200' : 'from-gray-100 to-gray-200'
-                }`}>
-                  <div className={metric.color}>{metric.icon}</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <Card className="card-elegant">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">إجمالي الأصول</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">{formatCurrency(data.totalAssets)}</div>
+            <p className="text-xs text-muted-foreground">القيمة الدفترية للأصول</p>
+          </CardContent>
+        </Card>
+
+        <Card className="card-elegant">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">إجمالي الخصوم</CardTitle>
+            <TrendingDown className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{formatCurrency(data.totalLiabilities)}</div>
+            <p className="text-xs text-muted-foreground">الالتزامات المالية</p>
+          </CardContent>
+        </Card>
+
+        <Card className="card-elegant">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">حقوق الملكية</CardTitle>
+            <PieChart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{formatCurrency(data.totalEquity)}</div>
+            <p className="text-xs text-muted-foreground">رأس المال والاحتياطيات</p>
+          </CardContent>
+        </Card>
+
+        <Card className="card-elegant">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-emerald-600">{formatCurrency(data.totalRevenue)}</div>
+            <p className="text-xs text-muted-foreground">الإيرادات المحققة</p>
+          </CardContent>
+        </Card>
+
+        <Card className="card-elegant">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">صافي الربح</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${data.netIncome >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+              {formatCurrency(data.netIncome)}
+            </div>
+            <p className="text-xs text-muted-foreground">الربح بعد المصروفات</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* إنذارات التحقق */}
-      <Card className="card-elegant">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 rtl-flex">
-            <Shield className="w-5 h-5" />
-            تنبيهات النظام المحاسبي
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {validationAlerts.map((alert) => (
-              <div 
-                key={alert.id} 
-                className={`p-4 rounded-lg border ${getUrgencyColor(alert.urgency)}`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3">
-                    {getAlertIcon(alert.type)}
-                    <div>
-                      <h4 className="font-medium text-foreground">{alert.title}</h4>
-                      <p className="text-sm text-muted-foreground mt-1">{alert.description}</p>
-                      <Badge variant="outline" className="mt-2">
-                        {alert.count} عنصر
-                      </Badge>
-                    </div>
+      {/* المؤشرات الأداء والتحليلات */}
+      <Tabs defaultValue="kpis" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="kpis">مؤشرات الأداء</TabsTrigger>
+          <TabsTrigger value="accounts">الحسابات</TabsTrigger>
+          <TabsTrigger value="transactions">المعاملات الأخيرة</TabsTrigger>
+          <TabsTrigger value="trends">الاتجاهات</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="kpis" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {kpis.map((kpi, index) => (
+              <Card key={index} className="card-elegant">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">{kpi.label}</CardTitle>
+                  {kpi.trend === 'up' ? (
+                    <TrendingUp className="h-4 w-4 text-green-500" />
+                  ) : kpi.trend === 'down' ? (
+                    <TrendingDown className="h-4 w-4 text-red-500" />
+                  ) : (
+                    <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {kpi.format === 'currency' && formatCurrency(kpi.value)}
+                    {kpi.format === 'number' && formatNumber(kpi.value)}
+                    {kpi.format === 'percentage' && formatPercentage(kpi.value)}
                   </div>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => navigate('/accounting-validation')}
-                  >
-                    عرض التفاصيل
-                  </Button>
-                </div>
-              </div>
+                  <Progress 
+                    value={Math.min(Math.abs(kpi.value), 100)} 
+                    className="mt-2" 
+                  />
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* المهام المحاسبية */}
-        <Card className="card-elegant">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 rtl-flex">
-              <Calculator className="w-5 h-5" />
-              المهام المحاسبية
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {tasks.slice(0, 4).map((task) => (
-                <div key={task.id} className="p-4 border rounded-lg">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        {getStatusIcon(task.status)}
-                        <h4 className="font-medium">{task.title}</h4>
-                        <Badge 
-                          variant="outline" 
-                          className={getPriorityColor(task.priority)}
-                        >
-                          {task.priority === 'high' ? 'عالية' : 
-                           task.priority === 'medium' ? 'متوسطة' : 'منخفضة'}
+        <TabsContent value="accounts" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="card-elegant">
+              <CardHeader>
+                <CardTitle className="text-right flex items-center gap-2 flex-row-reverse">
+                  <BookOpen className="w-5 h-5" />
+                  إحصائيات الحسابات
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span>إجمالي الحسابات:</span>
+                  <Badge variant="default">{data.accountsCount}</Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>الحسابات النشطة:</span>
+                  <Badge variant="default">{data.activeAccountsCount}</Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>القيود المعلقة:</span>
+                  <Badge variant={data.pendingEntries > 0 ? "destructive" : "default"}>
+                    {data.pendingEntries}
+                  </Badge>
+                </div>
+                <Progress 
+                  value={(data.activeAccountsCount / data.accountsCount) * 100} 
+                  className="mt-2" 
+                />
+                <p className="text-xs text-muted-foreground">
+                  نسبة الحسابات النشطة: {((data.activeAccountsCount / data.accountsCount) * 100).toFixed(1)}%
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="card-elegant">
+              <CardHeader>
+                <CardTitle className="text-right">أهم الحسابات بالرصيد</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {data.topAccounts.slice(0, 8).map((account, index) => (
+                    <div key={index} className="flex justify-between items-center">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">
+                          {account.account_code} - {account.account_name}
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          {account.type}
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>تاريخ الانتهاء: {new Date(task.dueDate).toLocaleDateString('ar-SA')}</span>
-                        {task.assignee && <span>المسؤول: {task.assignee}</span>}
+                      <div className={`text-sm font-bold ${getAccountTypeColor(account.type)}`}>
+                        {formatCurrency(Math.abs(account.balance))}
                       </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <Button 
-              variant="outline" 
-              className="w-full mt-4"
-              onClick={() => navigate('/journal-entries')}
-            >
-              عرض جميع المهام
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* الإجراءات السريعة */}
-        <Card className="card-elegant">
-          <CardHeader>
-            <CardTitle>الإجراءات السريعة</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <Button 
-                variant="outline" 
-                className="h-20 flex flex-col items-center gap-2"
-                onClick={() => navigate('/journal-entries')}
-              >
-                <FileText className="w-6 h-6" />
-                <span className="text-sm">قيد جديد</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                className="h-20 flex flex-col items-center gap-2"
-                onClick={() => navigate('/chart-of-accounts')}
-              >
-                <Calculator className="w-6 h-6" />
-                <span className="text-sm">دليل الحسابات</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                className="h-20 flex flex-col items-center gap-2"
-                onClick={() => navigate('/financial-reports')}
-              >
-                <BarChart3 className="w-6 h-6" />
-                <span className="text-sm">التقارير</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                className="h-20 flex flex-col items-center gap-2"
-                onClick={() => navigate('/accounting-validation')}
-              >
-                <Shield className="w-6 h-6" />
-                <span className="text-sm">التدقيق</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* تقدم المهام الشهرية */}
-      <Card className="card-elegant">
-        <CardHeader>
-          <CardTitle>تقدم المهام الشهرية</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium">إقفال القيود</span>
-                <span className="text-sm text-muted-foreground">85%</span>
-              </div>
-              <Progress value={85} className="h-2" />
-            </div>
-            <div>
-              <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium">المطابقات البنكية</span>
-                <span className="text-sm text-muted-foreground">92%</span>
-              </div>
-              <Progress value={92} className="h-2" />
-            </div>
-            <div>
-              <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium">إعداد التقارير</span>
-                <span className="text-sm text-muted-foreground">67%</span>
-              </div>
-              <Progress value={67} className="h-2" />
-            </div>
-            <div>
-              <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium">المراجعة النهائية</span>
-                <span className="text-sm text-muted-foreground">45%</span>
-              </div>
-              <Progress value={45} className="h-2" />
-            </div>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
+
+        <TabsContent value="transactions" className="space-y-4">
+          <Card className="card-elegant">
+            <CardHeader>
+              <CardTitle className="text-right flex items-center gap-2 flex-row-reverse">
+                <FileText className="w-5 h-5" />
+                آخر المعاملات المالية
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {data.recentTransactions.length > 0 ? (
+                <div className="space-y-3">
+                  {data.recentTransactions.map((transaction: any) => (
+                    <div key={transaction.id} className="flex justify-between items-center p-3 bg-muted rounded-lg">
+                      <div className="flex-1">
+                        <div className="text-sm font-medium">
+                          {transaction.chart_of_accounts.account_name}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {transaction.journal_entries.entry_number} - {new Date(transaction.journal_entries.entry_date).toLocaleDateString('ar-KW')}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {transaction.description || transaction.journal_entries.description}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        {transaction.debit_amount > 0 && (
+                          <div className="text-sm font-bold text-green-600">
+                            +{formatCurrency(transaction.debit_amount)}
+                          </div>
+                        )}
+                        {transaction.credit_amount > 0 && (
+                          <div className="text-sm font-bold text-red-600">
+                            -{formatCurrency(transaction.credit_amount)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  لا توجد معاملات حديثة
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="trends" className="space-y-4">
+          <Card className="card-elegant">
+            <CardHeader>
+              <CardTitle className="text-right flex items-center gap-2 flex-row-reverse">
+                <BarChart3 className="w-5 h-5" />
+                الاتجاهات الشهرية
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {data.monthlyTrends.length > 0 ? (
+                <div className="space-y-4">
+                  {data.monthlyTrends.map((trend, index) => (
+                    <div key={index} className="grid grid-cols-3 gap-4 items-center">
+                      <div className="text-sm font-medium">{trend.month}</div>
+                      <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground">الإيرادات</div>
+                        <div className="text-sm font-bold text-emerald-600">
+                          {formatCurrency(trend.revenue)}
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground">المصروفات</div>
+                        <div className="text-sm font-bold text-red-600">
+                          {formatCurrency(trend.expenses)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  لا توجد بيانات كافية لعرض الاتجاهات
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

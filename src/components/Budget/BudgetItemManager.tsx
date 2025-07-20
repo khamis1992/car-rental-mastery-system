@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -232,62 +231,59 @@ export const BudgetItemManager: React.FC<BudgetItemManagerProps> = ({
       <CardContent>
         {items.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            <p className="text-lg mb-2">لا توجد بنود في الميزانية</p>
-            <p className="text-sm">ابدأ بإضافة بند جديد لبناء ميزانيتك</p>
+            لا توجد بنود في الميزانية
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-right">كود الحساب</TableHead>
-                  <TableHead className="text-right">اسم الحساب</TableHead>
-                  <TableHead className="text-right">المبلغ المخطط</TableHead>
-                  <TableHead className="text-right">المبلغ الفعلي</TableHead>
-                  <TableHead className="text-right">التباين</TableHead>
-                  <TableHead className="text-right">التباين %</TableHead>
-                  <TableHead className="text-right">الإجراءات</TableHead>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>كود الحساب</TableHead>
+                <TableHead>اسم الحساب</TableHead>
+                <TableHead>المبلغ المخطط</TableHead>
+                <TableHead>المبلغ الفعلي</TableHead>
+                <TableHead>التباين</TableHead>
+                <TableHead>التباين %</TableHead>
+                <TableHead>الإجراءات</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-mono">
+                    {item.account?.account_code}
+                  </TableCell>
+                  <TableCell>{item.account?.account_name}</TableCell>
+                  <TableCell>{formatCurrencyKWD(item.budgeted_amount)}</TableCell>
+                  <TableCell>{formatCurrencyKWD(item.actual_amount || 0)}</TableCell>
+                  <TableCell className={getVarianceColor(item.variance_amount || 0)}>
+                    {formatCurrencyKWD(item.variance_amount || 0)}
+                  </TableCell>
+                  <TableCell className={getVarianceColor(item.variance_amount || 0)}>
+                    {item.variance_percentage?.toFixed(1) || '0.0'}%
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(item)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDelete(item.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-mono text-right">
-                      {item.account?.account_code}
-                    </TableCell>
-                    <TableCell className="text-right">{item.account?.account_name}</TableCell>
-                    <TableCell className="text-right">{formatCurrencyKWD(item.budgeted_amount)}</TableCell>
-                    <TableCell className="text-right">{formatCurrencyKWD(item.actual_amount || 0)}</TableCell>
-                    <TableCell className={`text-right ${getVarianceColor(item.variance_amount || 0)}`}>
-                      {formatCurrencyKWD(item.variance_amount || 0)}
-                    </TableCell>
-                    <TableCell className={`text-right ${getVarianceColor(item.variance_amount || 0)}`}>
-                      {item.variance_percentage?.toFixed(1) || '0.0'}%
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-2 justify-end">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEdit(item)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDelete(item.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </CardContent>
     </Card>

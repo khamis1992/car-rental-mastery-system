@@ -1,31 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Edit, Trash2, BarChart3, Calendar, Download, RefreshCw, AlertTriangle, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, BarChart3, Calendar, Download, RefreshCw, AlertTriangle } from 'lucide-react';
 import { BudgetService, BudgetWithItems } from '@/services/BudgetService';
 import { BudgetVarianceReport } from '@/components/Budget/BudgetVarianceReport';
 import { formatCurrencyKWD } from '@/lib/currency';
 import { toast } from 'sonner';
+
 export const EnhancedBudgetManagement: React.FC = () => {
-  const navigate = useNavigate();
   const [budgets, setBudgets] = useState<BudgetWithItems[]>([]);
   const [selectedBudget, setSelectedBudget] = useState<BudgetWithItems | null>(null);
   const [showNewBudgetDialog, setShowNewBudgetDialog] = useState(false);
   const [showVarianceReport, setShowVarianceReport] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('budgets');
+
   const budgetService = new BudgetService();
+
   useEffect(() => {
     loadBudgets();
   }, []);
+
   const loadBudgets = async () => {
     setLoading(true);
     try {
@@ -38,6 +42,7 @@ export const EnhancedBudgetManagement: React.FC = () => {
       setLoading(false);
     }
   };
+
   const handleCreateBudget = async (budgetData: any) => {
     try {
       await budgetService.createBudget({
@@ -56,8 +61,10 @@ export const EnhancedBudgetManagement: React.FC = () => {
       toast.error('فشل في إنشاء الميزانية');
     }
   };
+
   const handleDeleteBudget = async (budgetId: string) => {
     if (!confirm('هل أنت متأكد من حذف هذه الميزانية؟')) return;
+    
     try {
       await budgetService.deleteBudget(budgetId);
       toast.success('تم حذف الميزانية بنجاح');
@@ -67,28 +74,38 @@ export const EnhancedBudgetManagement: React.FC = () => {
       toast.error('فشل في حذف الميزانية');
     }
   };
+
   const getBudgetUtilization = (budget: BudgetWithItems): number => {
     if (!budget.budget_items?.length) return 0;
     const totalBudgeted = budget.budget_items.reduce((sum, item) => sum + (item.budgeted_amount || 0), 0);
     const totalActual = budget.budget_items.reduce((sum, item) => sum + (item.actual_amount || 0), 0);
-    return totalBudgeted > 0 ? totalActual / totalBudgeted * 100 : 0;
+    return totalBudgeted > 0 ? (totalActual / totalBudgeted) * 100 : 0;
   };
+
   const getBudgetStatus = (utilization: number) => {
-    if (utilization <= 75) return {
-      label: 'جيد',
-      color: 'bg-green-500'
-    };
-    if (utilization <= 90) return {
-      label: 'تحذير',
-      color: 'bg-yellow-500'
-    };
-    return {
-      label: 'خطر',
-      color: 'bg-red-500'
-    };
+    if (utilization <= 75) return { label: 'جيد', color: 'bg-green-500' };
+    if (utilization <= 90) return { label: 'تحذير', color: 'bg-yellow-500' };
+    return { label: 'خطر', color: 'bg-red-500' };
   };
-  return <div className="space-y-6">
-      
+
+  return (
+    <div className="space-y-6">
+      <div className="rtl-flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold rtl-title">إدارة الميزانيات</h2>
+          <p className="text-muted-foreground">تخطيط ومراقبة الميزانيات والتحكم في الإنفاق</p>
+        </div>
+        <div className="rtl-flex gap-2">
+          <Button variant="outline" onClick={loadBudgets}>
+            <RefreshCw className="w-4 h-4" />
+            تحديث
+          </Button>
+          <Button onClick={() => setShowNewBudgetDialog(true)}>
+            <Plus className="w-4 h-4" />
+            ميزانية جديدة
+          </Button>
+        </div>
+      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
@@ -100,16 +117,21 @@ export const EnhancedBudgetManagement: React.FC = () => {
         </TabsList>
 
         <TabsContent value="budgets" className="space-y-4">
-          {loading ? <div className="text-center py-8">
+          {loading ? (
+            <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
               <p>جاري تحميل الميزانيات...</p>
-            </div> : <div className="grid gap-4">
-              {budgets.map(budget => {
-            const utilization = getBudgetUtilization(budget);
-            const status = getBudgetStatus(utilization);
-            const totalBudgeted = budget.budget_items?.reduce((sum, item) => sum + (item.budgeted_amount || 0), 0) || 0;
-            const totalActual = budget.budget_items?.reduce((sum, item) => sum + (item.actual_amount || 0), 0) || 0;
-            return <Card key={budget.id} className="cursor-pointer hover:shadow-md transition-shadow">
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {budgets.map((budget) => {
+                const utilization = getBudgetUtilization(budget);
+                const status = getBudgetStatus(utilization);
+                const totalBudgeted = budget.budget_items?.reduce((sum, item) => sum + (item.budgeted_amount || 0), 0) || 0;
+                const totalActual = budget.budget_items?.reduce((sum, item) => sum + (item.actual_amount || 0), 0) || 0;
+
+                return (
+                  <Card key={budget.id} className="cursor-pointer hover:shadow-md transition-shadow">
                     <CardHeader>
                       <div className="rtl-flex justify-between items-start">
                         <div>
@@ -159,24 +181,31 @@ export const EnhancedBudgetManagement: React.FC = () => {
 
                         <div className="rtl-flex justify-between">
                           <div className="rtl-flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => navigate(`/budget-management/${budget.id}`)}>
-                              <Eye className="w-4 h-4" />
-                              عرض التفاصيل
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => {
-                        setSelectedBudget(budget);
-                        setActiveTab('variance');
-                      }}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedBudget(budget);
+                                setActiveTab('variance');
+                              }}
+                            >
                               <BarChart3 className="w-4 h-4" />
                               تقرير التباين
                             </Button>
                           </div>
                           <div className="rtl-flex gap-2">
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                            >
                               <Edit className="w-4 h-4" />
                               تعديل
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => handleDeleteBudget(budget.id)}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteBudget(budget.id)}
+                            >
                               <Trash2 className="w-4 h-4" />
                               حذف
                             </Button>
@@ -184,9 +213,11 @@ export const EnhancedBudgetManagement: React.FC = () => {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>;
-          })}
-            </div>}
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="analysis" className="space-y-4">
@@ -203,13 +234,20 @@ export const EnhancedBudgetManagement: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="variance" className="space-y-4">
-          {selectedBudget ? <BudgetVarianceReport budgetId={selectedBudget.id} budgetName={selectedBudget.budget_name} /> : <Card>
+          {selectedBudget ? (
+            <BudgetVarianceReport 
+              budgetId={selectedBudget.id} 
+              budgetName={selectedBudget.budget_name}
+            />
+          ) : (
+            <Card>
               <CardContent className="p-6">
                 <div className="text-center text-muted-foreground">
                   يرجى اختيار ميزانية لعرض تقرير التباين
                 </div>
               </CardContent>
-            </Card>}
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
 
@@ -222,17 +260,15 @@ export const EnhancedBudgetManagement: React.FC = () => {
           <NewBudgetForm onSubmit={handleCreateBudget} onCancel={() => setShowNewBudgetDialog(false)} />
         </DialogContent>
       </Dialog>
-    </div>;
+    </div>
+  );
 };
 
 // Helper component for creating new budget
 const NewBudgetForm: React.FC<{
   onSubmit: (data: any) => void;
   onCancel: () => void;
-}> = ({
-  onSubmit,
-  onCancel
-}) => {
+}> = ({ onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
     budget_name: '',
     budget_year: new Date().getFullYear(),
@@ -240,50 +276,67 @@ const NewBudgetForm: React.FC<{
     end_date: '',
     notes: ''
   });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
   };
-  return <form onSubmit={handleSubmit} className="space-y-4">
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <Label htmlFor="budget_name" className="rtl-label">اسم الميزانية</Label>
-        <Input id="budget_name" value={formData.budget_name} onChange={e => setFormData(prev => ({
-        ...prev,
-        budget_name: e.target.value
-      }))} placeholder="أدخل اسم الميزانية" required />
+        <Input
+          id="budget_name"
+          value={formData.budget_name}
+          onChange={(e) => setFormData(prev => ({ ...prev, budget_name: e.target.value }))}
+          placeholder="أدخل اسم الميزانية"
+          required
+        />
       </div>
 
       <div>
         <Label htmlFor="budget_year" className="rtl-label">السنة المالية</Label>
-        <Input id="budget_year" type="number" value={formData.budget_year} onChange={e => setFormData(prev => ({
-        ...prev,
-        budget_year: parseInt(e.target.value)
-      }))} required />
+        <Input
+          id="budget_year"
+          type="number"
+          value={formData.budget_year}
+          onChange={(e) => setFormData(prev => ({ ...prev, budget_year: parseInt(e.target.value) }))}
+          required
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="start_date" className="rtl-label">تاريخ البداية</Label>
-          <Input id="start_date" type="date" value={formData.start_date} onChange={e => setFormData(prev => ({
-          ...prev,
-          start_date: e.target.value
-        }))} required />
+          <Input
+            id="start_date"
+            type="date"
+            value={formData.start_date}
+            onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
+            required
+          />
         </div>
         <div>
           <Label htmlFor="end_date" className="rtl-label">تاريخ النهاية</Label>
-          <Input id="end_date" type="date" value={formData.end_date} onChange={e => setFormData(prev => ({
-          ...prev,
-          end_date: e.target.value
-        }))} required />
+          <Input
+            id="end_date"
+            type="date"
+            value={formData.end_date}
+            onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
+            required
+          />
         </div>
       </div>
 
       <div>
         <Label htmlFor="notes" className="rtl-label">ملاحظات</Label>
-        <Textarea id="notes" value={formData.notes} onChange={e => setFormData(prev => ({
-        ...prev,
-        notes: e.target.value
-      }))} placeholder="ملاحظات إضافية (اختياري)" />
+        <Textarea
+          id="notes"
+          value={formData.notes}
+          onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+          placeholder="ملاحظات إضافية (اختياري)"
+        />
       </div>
 
       <div className="rtl-flex gap-2 justify-end">
@@ -294,5 +347,6 @@ const NewBudgetForm: React.FC<{
           إنشاء الميزانية
         </Button>
       </div>
-    </form>;
+    </form>
+  );
 };
