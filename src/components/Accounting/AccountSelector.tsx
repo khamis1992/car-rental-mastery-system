@@ -170,7 +170,7 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      {safeAccounts.length > 0 && (
+      {Array.isArray(safeAccounts) && safeAccounts.length > 0 && Array.isArray(sortedAccounts) && sortedAccounts.length > 0 && (
         <PopoverContent className="w-full p-0" align="start">
           <Command className="max-h-96">
             <div className="flex items-center border-b px-3">
@@ -182,7 +182,7 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
             </div>
             <CommandEmpty>لا توجد نتائج</CommandEmpty>
             <CommandGroup className="max-h-64 overflow-auto">
-              {sortedAccounts.map((account) => (
+              {sortedAccounts.filter(account => account && account.id && account.account_code && account.account_name).map((account) => (
                 <CommandItem
                   key={account.id}
                   value={`${account.account_code} ${account.account_name}`}
