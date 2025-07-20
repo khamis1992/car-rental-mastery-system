@@ -79,7 +79,8 @@
   }
   
   .rtl-flex {
-    @apply flex flex-row-reverse;
+    display: flex;
+    flex-direction: row-reverse;
   }
   
   .rtl-title {
@@ -103,7 +104,10 @@
   
   /* محاذاة الأزرار */
   .rtl-content .dialog-footer {
-    @apply flex flex-row-reverse gap-2 justify-start;
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 0.5rem;
+    justify-content: flex-start;
   }
   
   /* محاذاة القوائم المنسدلة */
@@ -127,6 +131,9 @@
   
   /* تحسين الأيقونات مع النص */
   .rtl-content .icon-with-text {
-    @apply flex flex-row-reverse items-center gap-2;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 0.5rem;
   }
 }
