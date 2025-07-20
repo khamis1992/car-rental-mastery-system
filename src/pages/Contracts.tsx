@@ -67,24 +67,24 @@ const Contracts = () => {
   return (
     <Layout>
       <AbortErrorBoundary>
-        <div className="p-6 space-y-6">
-          <div className="flex items-center justify-between flex-row-reverse">
+        <div className="p-6 space-y-6 rtl-content">
+          <div className="rtl-flex justify-between">
             <div className="text-right">
               <h1 className="text-3xl font-bold text-foreground rtl-title">إدارة العقود</h1>
-              <p className="text-muted-foreground">إدارة عقود الإيجار وعروض الأسعار</p>
+              <p className="text-muted-foreground text-right">إدارة عقود الإيجار وعروض الأسعار</p>
             </div>
             
-            <div className="flex items-center gap-2 flex-row-reverse">
+            <div className="rtl-flex gap-2">
               {!isConnected && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground bg-yellow-50 px-2 py-1 rounded flex-row-reverse">
+                <div className="rtl-flex gap-1 text-sm text-muted-foreground bg-yellow-50 px-2 py-1 rounded">
                   <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                  غير متصل
+                  <span className="text-right">غير متصل</span>
                 </div>
               )}
               {isConnected && (
-                <div className="flex items-center gap-1 text-sm text-green-600 bg-green-50 px-2 py-1 rounded flex-row-reverse">
+                <div className="rtl-flex gap-1 text-sm text-green-600 bg-green-50 px-2 py-1 rounded">
                   <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  متصل
+                  <span className="text-right">متصل</span>
                 </div>
               )}
               <Button 
@@ -92,17 +92,17 @@ const Contracts = () => {
                 size="sm"
                 onClick={syncAllContracts}
                 disabled={loading}
-                className="flex items-center gap-2 flex-row-reverse"
+                className="rtl-flex gap-2"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                مزامنة شاملة
+                <span>مزامنة شاملة</span>
               </Button>
               <Button 
-                className="btn-primary flex items-center gap-2 flex-row-reverse"
+                className="btn-primary rtl-flex gap-2"
                 onClick={() => setContractFormOpen(true)}
               >
                 <Plus className="w-4 h-4" />
-                عقد جديد
+                <span>عقد جديد</span>
               </Button>
             </div>
           </div>
@@ -111,14 +111,14 @@ const Contracts = () => {
           {Object.entries(errors).map(([key, error]) => 
             error && (
               <Alert key={key} variant="destructive">
-                <AlertDescription>
+                <AlertDescription className="text-right">
                   {error}
                   {key === 'general' && (
                     <Button 
                       variant="link" 
                       size="sm" 
                       onClick={() => navigate('/auth')}
-                      className="pr-2 h-auto p-0 text-destructive underline"
+                      className="pr-2 h-auto p-0 text-destructive underline text-right"
                     >
                       تسجيل الدخول
                     </Button>
