@@ -245,7 +245,7 @@ const EmployeesPage: React.FC = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleViewDetails(employee)}
+                      onClick={() => handleViewDetails(employee as Employee)}
                       className="flex-1 rtl-flex"
                     >
                       <Eye className="w-4 h-4" />
@@ -254,7 +254,7 @@ const EmployeesPage: React.FC = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleEditEmployee(employee)}
+                      onClick={() => handleEditEmployee(employee as Employee)}
                       className="flex-1 rtl-flex"
                     >
                       <Edit className="w-4 h-4" />
@@ -263,7 +263,7 @@ const EmployeesPage: React.FC = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleDeleteEmployee(employee)}
+                      onClick={() => handleDeleteEmployee(employee as Employee)}
                       className="text-destructive hover:text-destructive rtl-flex"
                     >
                       <Trash2 className="w-4 h-4" />
