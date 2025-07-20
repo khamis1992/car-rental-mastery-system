@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Layout } from '@/components/Layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import { 
   Car, 
   Users, 
@@ -16,6 +16,8 @@ import {
 import QuickActions from '@/components/Dashboard/QuickActions';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+
   const stats = [
     {
       title: "إجمالي المركبات",
@@ -75,7 +77,10 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold text-foreground rtl-title">لوحة التحكم</h1>
             <p className="text-muted-foreground">نظرة عامة على أنشطة الشركة</p>
           </div>
-          <Button className="btn-primary">
+          <Button 
+            className="btn-primary"
+            onClick={() => navigate('/financial-reports')}
+          >
             تقرير شامل
           </Button>
         </div>

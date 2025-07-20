@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Layout } from '@/components/Layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import AddCustomerDialog from '@/components/Customers/AddCustomerDialog';
 
 const Customers = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -81,10 +81,7 @@ const Customers = () => {
             <p className="text-muted-foreground">عرض وإدارة بيانات العملاء</p>
           </div>
           <div className="flex items-center gap-2 flex-row-reverse">
-            <Button className="btn-primary rtl-flex">
-              <Plus className="w-4 h-4" />
-              عميل جديد
-            </Button>
+            <AddCustomerDialog />
             <Button variant="outline" className="rtl-flex">
               <Filter className="w-4 h-4" />
               فلترة
