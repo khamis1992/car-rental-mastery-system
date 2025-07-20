@@ -1,7 +1,5 @@
-
-import { useState, useEffect, useCallback } from 'react';
-import { accountingService } from '@/services/accountingService';
-import { handleError } from '@/utils/errorHandling';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AccountStats {
   assets: number;
@@ -12,96 +10,78 @@ interface AccountStats {
   total: number;
 }
 
-interface UseAccountStatsReturn {
-  stats: AccountStats | null;
-  loading: boolean;
-  error: Error | string | null;
-  refetch: () => Promise<void>;
-}
-
-export const useAccountStats = (): UseAccountStatsReturn => {
-  const [stats, setStats] = useState<AccountStats | null>(null);
+export const useAccountStats = () => {
+  const [stats, setStats] = useState<AccountStats>({
+    assets: 0,
+    liabilities: 0,
+    equity: 0,
+    revenues: 0,
+    expenses: 0,
+    total: 0
+  });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchStats = useCallback(async () => {
+  const fetchStats = async () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('🔄 Loading account statistics...');
-      
-      const accounts = await accountingService.getChartOfAccounts();
-      console.log('📊 Raw accounts for stats:', accounts.length);
-      
-      if (!Array.isArray(accounts)) {
-        throw new Error('Invalid accounts data format');
-      }
-      
-      const accountStats = accounts.reduce((acc, account) => {
-        if (!account || !account.account_type || !account.is_active) {
-          return acc;
-        }
-        
-        switch (account.account_type) {
-          case 'asset':
-            acc.assets++;
-            break;
-          case 'liability':
-            acc.liabilities++;
-            break;
-          case 'equity':
-            acc.equity++;
-            break;
-          case 'revenue':
-            acc.revenues++;
-            break;
-          case 'expense':
-            acc.expenses++;
-            break;
-          default:
-            console.warn('Unknown account type:', account.account_type);
-        }
-        
-        acc.total++;
-        return acc;
-      }, {
+
+      // جلب إحصائيات الحسابات النشطة حسب النوع
+      const { data, error } = await supabase
+        .from('chart_of_accounts')
+        .select('account_type')
+        .eq('is_active', true);
+
+      if (error) throw error;
+
+      // حساب الإحصائيات
+      const statsCount = {
         assets: 0,
         liabilities: 0,
         equity: 0,
         revenues: 0,
         expenses: 0,
-        total: 0
+        total: data?.length || 0
+      };
+
+      data?.forEach((account) => {
+        switch (account.account_type) {
+          case 'asset':
+            statsCount.assets++;
+            break;
+          case 'liability':
+            statsCount.liabilities++;
+            break;
+          case 'equity':
+            statsCount.equity++;
+            break;
+          case 'revenue':
+            statsCount.revenues++;
+            break;
+          case 'expense':
+            statsCount.expenses++;
+            break;
+        }
       });
-      
-      setStats(accountStats);
-      console.log('✅ Account statistics loaded:', accountStats);
-      
-    } catch (error) {
-      console.error('❌ Error loading account statistics:', error);
-      const errorInstance = error instanceof Error ? error : new Error('فشل في تحميل إحصائيات الحسابات');
-      setError(errorInstance);
-      
-      const result = handleError(errorInstance, 'fetchAccountStats');
-      if (result.shouldLog) {
-        console.error('Account stats error details:', errorInstance);
-      }
+
+      setStats(statsCount);
+    } catch (err: any) {
+      console.error('خطأ في جلب إحصائيات الحسابات:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  const refetch = useCallback(async () => {
-    await fetchStats();
-  }, [fetchStats]);
+  };
 
   useEffect(() => {
     fetchStats();
-  }, [fetchStats]);
+  }, []);
 
   return {
     stats,
     loading,
     error,
-    refetch
+    refetch: fetchStats
   };
 };

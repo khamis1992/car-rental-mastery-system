@@ -1,27 +1,17 @@
 
 import React, { useRef } from 'react';
 import { GeneralLedgerReport } from '@/components/Accounting/GeneralLedgerReport';
-import { ManualJournalEntryDialog } from '@/components/Accounting/ManualJournalEntryDialog';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BookOpen, FileText, Download, Calculator, Search, Filter, Plus } from 'lucide-react';
+import { ArrowRight, BookOpen, FileText, Download, Calculator, Search, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { AccountingErrorBoundary } from '@/components/Accounting/AccountingErrorBoundary';
-import { useGeneralLedger } from '@/hooks/useGeneralLedger';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const GeneralLedger = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const reportRef = useRef<HTMLDivElement>(null);
-  
-  // استخدام الـ hook للحصول على بيانات الحسابات
-  const { 
-    accounts, 
-    loading: accountsLoading, 
-    error: accountsError,
-    loadAccounts 
-  } = useGeneralLedger();
 
   const handleViewAccounts = () => {
     if (reportRef.current) {
@@ -51,6 +41,7 @@ const GeneralLedger = () => {
   };
 
   const handleOpenSearch = () => {
+    // Focus on search functionality within the report
     const searchInput = document.querySelector('input[type="search"]');
     if (searchInput) {
       (searchInput as HTMLInputElement).focus();
@@ -72,15 +63,6 @@ const GeneralLedger = () => {
       title: "تحليل الأرصدة",
       description: "تم التنقل إلى صفحة التقارير المالية لتحليل الأرصدة",
     });
-  };
-
-  const handleEntryCreated = () => {
-    toast({
-      title: "تم إنشاء القيد",
-      description: "تم إنشاء القيد المحاسبي بنجاح",
-    });
-    // إعادة تحميل البيانات إذا لزم الأمر
-    loadAccounts();
   };
 
   const ledgerFeatures = [
@@ -115,7 +97,7 @@ const GeneralLedger = () => {
   ];
 
   return (
-    <AccountingErrorBoundary>
+    <ErrorBoundary>
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -124,14 +106,6 @@ const GeneralLedger = () => {
           </div>
           
           <div className="flex items-center gap-2 flex-row-reverse">
-            <ManualJournalEntryDialog
-              accounts={accounts}
-              costCenters={[]}
-              onEntryCreated={handleEntryCreated}
-              loading={accountsLoading}
-              error={accountsError}
-              onRetryLoadAccounts={loadAccounts}
-            />
             <Button 
               variant="outline" 
               onClick={() => navigate('/financial-reports')}
@@ -151,9 +125,9 @@ const GeneralLedger = () => {
           </div>
         </div>
 
-        {/* الشبكة الرئيسية للمحتوى */}
+        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* تقرير دفتر الأستاذ الرئيسي */}
+          {/* Main Ledger Report */}
           <div className="lg:col-span-2">
             <Card className="card-elegant" ref={reportRef}>
               <CardHeader>
@@ -164,17 +138,17 @@ const GeneralLedger = () => {
               </CardHeader>
               <CardContent>
                 <div id="general-ledger-report">
-                  <AccountingErrorBoundary>
+                  <ErrorBoundary>
                     <GeneralLedgerReport />
-                  </AccountingErrorBoundary>
+                  </ErrorBoundary>
                 </div>
               </CardContent>
             </Card>
           </div>
           
-          {/* الشريط الجانبي */}
+          {/* Sidebar */}
           <div className="space-y-6">
-            {/* الإجراءات السريعة */}
+            {/* Quick Actions */}
             <Card className="card-elegant">
               <CardHeader>
                 <CardTitle className="rtl-title">الإجراءات السريعة</CardTitle>
@@ -201,7 +175,7 @@ const GeneralLedger = () => {
               </CardContent>
             </Card>
             
-            {/* إحصائيات سريعة */}
+            {/* Quick Stats */}
             <Card className="card-elegant">
               <CardHeader>
                 <CardTitle className="rtl-title">إحصائيات سريعة</CardTitle>
@@ -209,10 +183,8 @@ const GeneralLedger = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-primary">
-                      {accounts?.length || 0}
-                    </div>
-                    <div className="text-sm text-muted-foreground">الحسابات النشطة</div>
+                    <div className="text-2xl font-bold text-primary">0</div>
+                    <div className="text-sm text-muted-foreground">القيود اليوم</div>
                   </div>
                   <div className="text-center p-4 bg-muted rounded-lg">
                     <div className="text-2xl font-bold text-green-600">0</div>
@@ -224,7 +196,7 @@ const GeneralLedger = () => {
           </div>
         </div>
       </div>
-    </AccountingErrorBoundary>
+    </ErrorBoundary>
   );
 };
 
