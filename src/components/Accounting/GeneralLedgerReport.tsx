@@ -30,6 +30,10 @@ interface GeneralLedgerEntry {
   running_balance: number;
   reference_id?: string;
   reference_type?: string;
+  detailed_description?: string;
+  contract_reference?: string;
+  invoice_reference?: string;
+  asset_reference?: string;
 }
 
 export const GeneralLedgerReport: React.FC = () => {
@@ -115,6 +119,10 @@ export const GeneralLedgerReport: React.FC = () => {
           description,
           reference_id,
           reference_type,
+          detailed_description,
+          contract_reference,
+          invoice_reference,
+          asset_reference,
           created_at,
           journal_entries!inner (
             id,
@@ -151,7 +159,11 @@ export const GeneralLedgerReport: React.FC = () => {
           credit_amount: creditAmount,
           running_balance: runningBalance,
           reference_id: entry.reference_id,
-          reference_type: entry.reference_type
+          reference_type: entry.reference_type,
+          detailed_description: entry.detailed_description,
+          contract_reference: entry.contract_reference,
+          invoice_reference: entry.invoice_reference,
+          asset_reference: entry.asset_reference
         };
       });
 
@@ -346,6 +358,7 @@ export const GeneralLedgerReport: React.FC = () => {
                     <TableHead className="text-center font-bold">الرصيد المتراكم</TableHead>
                     <TableHead className="text-center font-bold">دائن</TableHead>
                     <TableHead className="text-center font-bold">مدين</TableHead>
+                    <TableHead className="text-center font-bold">المرجع</TableHead>
                     <TableHead className="text-center font-bold">البيان</TableHead>
                     <TableHead className="text-center font-bold">رقم القيد</TableHead>
                     <TableHead className="text-center font-bold">التاريخ</TableHead>
@@ -369,13 +382,40 @@ export const GeneralLedgerReport: React.FC = () => {
                           <span className="text-green-600">د.ك {formatAmount(entry.debit_amount)}</span>
                         )}
                       </TableCell>
+                      <TableCell className="text-center max-w-xs">
+                        <div className="space-y-1">
+                          {entry.contract_reference && (
+                            <div className="flex items-center justify-center gap-1">
+                              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">عقد</span>
+                              <span className="text-xs">{entry.contract_reference}</span>
+                            </div>
+                          )}
+                          {entry.invoice_reference && (
+                            <div className="flex items-center justify-center gap-1">
+                              <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">فاتورة</span>
+                              <span className="text-xs">{entry.invoice_reference}</span>
+                            </div>
+                          )}
+                          {entry.asset_reference && (
+                            <div className="flex items-center justify-center gap-1">
+                              <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs">أصل</span>
+                              <span className="text-xs">{entry.asset_reference}</span>
+                            </div>
+                          )}
+                          {entry.reference_type && !entry.contract_reference && !entry.invoice_reference && !entry.asset_reference && (
+                            <div className="flex items-center justify-center gap-1">
+                              <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">{entry.reference_type}</span>
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-right max-w-xs">
                         <div className="truncate" title={entry.description}>
                           {entry.description}
                         </div>
-                        {entry.reference_type && (
-                          <div className="text-xs text-muted-foreground">
-                            {entry.reference_type}
+                        {entry.detailed_description && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {entry.detailed_description}
                           </div>
                         )}
                       </TableCell>

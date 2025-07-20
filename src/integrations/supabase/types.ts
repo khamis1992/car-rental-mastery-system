@@ -7369,13 +7369,17 @@ export type Database = {
         Row: {
           account_id: string
           allocation_percentage: number | null
+          asset_reference: string | null
+          contract_reference: string | null
           cost_center_id: string | null
           created_at: string
           credit_amount: number | null
           debit_amount: number | null
           description: string | null
+          detailed_description: string | null
           exchange_rate: number | null
           id: string
+          invoice_reference: string | null
           is_reversible: boolean | null
           journal_entry_id: string
           line_notes: string | null
@@ -7383,6 +7387,8 @@ export type Database = {
           line_type: string | null
           original_amount: number | null
           original_currency: string | null
+          reference_id: string | null
+          reference_type: string | null
           supporting_reference: string | null
           tenant_id: string | null
           vat_amount: number | null
@@ -7391,13 +7397,17 @@ export type Database = {
         Insert: {
           account_id: string
           allocation_percentage?: number | null
+          asset_reference?: string | null
+          contract_reference?: string | null
           cost_center_id?: string | null
           created_at?: string
           credit_amount?: number | null
           debit_amount?: number | null
           description?: string | null
+          detailed_description?: string | null
           exchange_rate?: number | null
           id?: string
+          invoice_reference?: string | null
           is_reversible?: boolean | null
           journal_entry_id: string
           line_notes?: string | null
@@ -7405,6 +7415,8 @@ export type Database = {
           line_type?: string | null
           original_amount?: number | null
           original_currency?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
           supporting_reference?: string | null
           tenant_id?: string | null
           vat_amount?: number | null
@@ -7413,13 +7425,17 @@ export type Database = {
         Update: {
           account_id?: string
           allocation_percentage?: number | null
+          asset_reference?: string | null
+          contract_reference?: string | null
           cost_center_id?: string | null
           created_at?: string
           credit_amount?: number | null
           debit_amount?: number | null
           description?: string | null
+          detailed_description?: string | null
           exchange_rate?: number | null
           id?: string
+          invoice_reference?: string | null
           is_reversible?: boolean | null
           journal_entry_id?: string
           line_notes?: string | null
@@ -7427,6 +7443,8 @@ export type Database = {
           line_type?: string | null
           original_amount?: number | null
           original_currency?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
           supporting_reference?: string | null
           tenant_id?: string | null
           vat_amount?: number | null
@@ -7799,6 +7817,48 @@ export type Database = {
           model_version?: string
           training_data_count?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      module_cross_references: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          relationship_type: string
+          source_id: string
+          source_module: string
+          target_id: string
+          target_module: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          relationship_type: string
+          source_id: string
+          source_module: string
+          target_id: string
+          target_module: string
+          tenant_id?: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          relationship_type?: string
+          source_id?: string
+          source_module?: string
+          target_id?: string
+          target_module?: string
+          tenant_id?: string
         }
         Relationships: []
       }
@@ -12226,6 +12286,15 @@ export type Database = {
           p_branch_id?: string
         }
         Returns: string
+      }
+      get_related_modules: {
+        Args: { module_name: string; entity_id: string }
+        Returns: {
+          related_module: string
+          related_id: string
+          relationship_type: string
+          notes: string
+        }[]
       }
       get_system_setting: {
         Args: { setting_key_param: string }
