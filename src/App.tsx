@@ -8,6 +8,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TenantProvider } from "@/contexts/TenantContext";
 import { SearchProvider } from "@/contexts/SearchContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
@@ -56,6 +57,7 @@ function App() {
         <AuthProvider>
           <TenantProvider>
             <SearchProvider>
+              <NotificationProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
@@ -96,8 +98,9 @@ function App() {
                   <Route path="/sadad-simulation" element={<SadadSimulation />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
+                </BrowserRouter>
+              </TooltipProvider>
+              </NotificationProvider>
             </SearchProvider>
           </TenantProvider>
         </AuthProvider>
