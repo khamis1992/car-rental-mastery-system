@@ -33,7 +33,7 @@ export const SimpleChartOfAccountsTable: React.FC<SimpleChartOfAccountsTableProp
       console.log('📊 Loaded accounts:', data.length);
       
       if (Array.isArray(data)) {
-        setAccounts(data);
+        setAccounts(data as ChartOfAccount[]);
       } else {
         console.error('Invalid accounts data:', data);
         setAccounts([]);
