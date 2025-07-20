@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, FileText, Car, Receipt } from 'lucide-react';
+import { ExternalLink, FileText, Car, Receipt, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -49,6 +50,11 @@ const getModuleLabel = (moduleType: string) => {
   }
 };
 
+const isValidUUID = (uuid: string): boolean => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+};
+
 const ModuleCrossReference: React.FC<ModuleCrossReferenceProps> = ({
   moduleType,
   entityId,
@@ -56,15 +62,32 @@ const ModuleCrossReference: React.FC<ModuleCrossReferenceProps> = ({
 }) => {
   const [references, setReferences] = useState<CrossReference[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
+    // Validate inputs before making the API call
+    if (!moduleType || !entityId) {
+      setError("معرف الوحدة أو نوع الوحدة غير محدد");
+      setLoading(false);
+      return;
+    }
+
+    if (!isValidUUID(entityId)) {
+      setError("معرف الوحدة غير صالح");
+      setLoading(false);
+      return;
+    }
+
     loadCrossReferences();
   }, [moduleType, entityId]);
 
   const loadCrossReferences = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
+      console.log('Loading cross references for:', { moduleType, entityId });
       
       const { data, error } = await supabase
         .rpc('get_related_modules', {
@@ -73,21 +96,42 @@ const ModuleCrossReference: React.FC<ModuleCrossReferenceProps> = ({
         });
 
       if (error) {
-        throw error;
+        console.error('Supabase error:', error);
+        throw new Error(`فشل في تحميل المراجع المرتبطة: ${error.message}`);
       }
 
       setReferences(data || []);
+      console.log('Cross references loaded successfully:', data?.length || 0);
     } catch (error) {
       console.error('Error loading cross references:', error);
+      const errorMessage = error instanceof Error ? error.message : 'فشل في تحميل المراجع المرتبطة';
+      setError(errorMessage);
+      
       toast({
         title: "خطأ",
-        description: "فشل في تحميل المراجع المرتبطة",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
+
+  if (error) {
+    return (
+      <Card className={className}>
+        <CardHeader>
+          <CardTitle className="text-right">المراجع المرتبطة</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2 text-destructive">
+            <AlertCircle className="w-4 h-4" />
+            <span className="text-sm">{error}</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (loading) {
     return (

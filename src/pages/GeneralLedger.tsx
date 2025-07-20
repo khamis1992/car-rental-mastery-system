@@ -1,7 +1,6 @@
 
 import React, { useRef } from 'react';
 import { GeneralLedgerReport } from '@/components/Accounting/GeneralLedgerReport';
-import ModuleCrossReference from '@/components/Accounting/ModuleCrossReference';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, BookOpen, FileText, Download, Calculator, Search, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -175,15 +174,6 @@ const GeneralLedger = () => {
                 </div>
               </CardContent>
             </Card>
-            
-            {/* Cross Module References */}
-            <ErrorBoundary>
-              <ModuleCrossReference 
-                moduleType="journal_entries" 
-                entityId="sample-id" 
-                className="card-elegant"
-              />
-            </ErrorBoundary>
             
             {/* Quick Stats */}
             <Card className="card-elegant">
