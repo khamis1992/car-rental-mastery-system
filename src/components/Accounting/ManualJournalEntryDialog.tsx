@@ -7,13 +7,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus, Trash2 } from 'lucide-react';
+import { CalendarIcon, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { AccountSelector } from './AccountSelector';
+import { ErrorDisplay } from './ErrorDisplay';
 
 interface JournalEntryLine {
   id: string;
@@ -25,15 +26,21 @@ interface JournalEntryLine {
 }
 
 interface ManualJournalEntryDialogProps {
-  accounts: any[];
-  costCenters: any[];
+  accounts?: any[] | null;
+  costCenters?: any[] | null;
   onEntryCreated: () => void;
+  loading?: boolean;
+  error?: Error | string | null;
+  onRetryLoadAccounts?: () => void;
 }
 
 export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> = ({
   accounts,
-  costCenters,
-  onEntryCreated
+  costCenters = [],
+  onEntryCreated,
+  loading = false,
+  error = null,
+  onRetryLoadAccounts
 }) => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -60,8 +67,13 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
       costCenterId: ''
     }
   ]);
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [recentAccounts, setRecentAccounts] = useState<string[]>([]);
+
+  // التأكد من أن البيانات صالحة
+  const safeAccounts = Array.isArray(accounts) ? accounts : [];
+  const safeCostCenters = Array.isArray(costCenters) ? costCenters : [];
+  const hasAccountsError = error || (!loading && safeAccounts.length === 0);
 
   const addLine = () => {
     const newLine: JournalEntryLine = {
@@ -86,11 +98,11 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
       line.id === id ? { ...line, [field]: value } : line
     ));
 
-    // Track recent accounts
+    // تتبع الحسابات المستخدمة حديثاً
     if (field === 'accountId' && value) {
       setRecentAccounts(prev => {
-        const updated = [value, ...prev.filter(id => id !== value)];
-        return updated.slice(0, 10); // Keep only last 10
+        const updated = [value, ...prev.filter(accountId => accountId !== value)];
+        return updated.slice(0, 10);
       });
     }
   };
@@ -104,7 +116,7 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
   const validateEntry = () => {
     const { totalDebits, totalCredits } = calculateTotals();
     
-    if (totalDebits !== totalCredits) {
+    if (Math.abs(totalDebits - totalCredits) > 0.001) {
       toast.error('إجمالي المدين يجب أن يساوي إجمالي الدائن');
       return false;
     }
@@ -127,18 +139,14 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
   const handleSubmit = async () => {
     if (!validateEntry()) return;
 
-    setLoading(true);
+    setSaving(true);
     try {
-      // Get current tenant ID
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Generate entry number
       const entryNumber = `JE-${format(new Date(), 'yyyy-MM')}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-      
       const { totalDebits } = calculateTotals();
 
-      // Create journal entry
       const { data: journalEntry, error: entryError } = await supabase
         .from('journal_entries')
         .insert({
@@ -157,7 +165,6 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
 
       if (entryError) throw entryError;
 
-      // Create journal entry lines
       const entryLines = lines.map((line, index) => ({
         journal_entry_id: journalEntry.id,
         account_id: line.accountId,
@@ -178,7 +185,7 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
       setOpen(false);
       onEntryCreated();
       
-      // Reset form
+      // إعادة تعيين النموذج
       setFormData({
         entryDate: new Date(),
         description: '',
@@ -207,17 +214,17 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
       console.error('Error creating journal entry:', error);
       toast.error('حدث خطأ أثناء إنشاء القيد المحاسبي');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
   const { totalDebits, totalCredits } = calculateTotals();
-  const isBalanced = totalDebits === totalCredits && totalDebits > 0;
+  const isBalanced = Math.abs(totalDebits - totalCredits) < 0.001 && totalDebits > 0;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="rtl-flex">
+        <Button className="rtl-flex" disabled={hasAccountsError}>
           <Plus className="w-4 h-4" />
           قيد يدوي جديد
         </Button>
@@ -226,6 +233,15 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
         <DialogHeader>
           <DialogTitle className="rtl-title">إنشاء قيد محاسبي يدوي</DialogTitle>
         </DialogHeader>
+        
+        {hasAccountsError && (
+          <ErrorDisplay
+            error={error || 'لا توجد حسابات متاحة'}
+            title="خطأ في تحميل الحسابات"
+            onRetry={onRetryLoadAccounts}
+            className="mb-4"
+          />
+        )}
         
         <div className="space-y-6">
           {/* Entry Header */}
@@ -281,7 +297,13 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">بنود القيد</h3>
-              <Button onClick={addLine} variant="outline" size="sm" className="rtl-flex">
+              <Button 
+                onClick={addLine} 
+                variant="outline" 
+                size="sm" 
+                className="rtl-flex"
+                disabled={hasAccountsError}
+              >
                 <Plus className="w-4 h-4" />
                 إضافة بند
               </Button>
@@ -293,12 +315,15 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
                   <div className="col-span-3">
                     <Label className="rtl-label text-sm">الحساب</Label>
                     <AccountSelector
-                      accounts={accounts}
+                      accounts={safeAccounts}
                       value={line.accountId}
                       onValueChange={(value) => updateLine(line.id, 'accountId', value)}
                       placeholder="اختر الحساب"
                       showBalance={true}
                       recentAccounts={recentAccounts}
+                      loading={loading}
+                      error={error}
+                      onRetry={onRetryLoadAccounts}
                     />
                   </div>
 
@@ -333,7 +358,7 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
                     />
                   </div>
 
-                  <div className="col-span-2">
+                  <div className="col-span-1">
                     <Label className="rtl-label text-sm">مركز التكلفة</Label>
                     <Select
                       value={line.costCenterId}
@@ -343,7 +368,7 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
                         <SelectValue placeholder="اختياري" />
                       </SelectTrigger>
                       <SelectContent>
-                        {costCenters.map((center) => (
+                        {safeCostCenters.map((center) => (
                           <SelectItem key={center.id} value={center.id}>
                             {center.cost_center_code} - {center.cost_center_name}
                           </SelectItem>
@@ -402,8 +427,11 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
             <Button variant="outline" onClick={() => setOpen(false)}>
               إلغاء
             </Button>
-            <Button onClick={handleSubmit} disabled={!isBalanced || loading}>
-              {loading ? 'جاري الحفظ...' : 'حفظ القيد'}
+            <Button 
+              onClick={handleSubmit} 
+              disabled={!isBalanced || saving || hasAccountsError}
+            >
+              {saving ? 'جاري الحفظ...' : 'حفظ القيد'}
             </Button>
           </div>
         </div>
