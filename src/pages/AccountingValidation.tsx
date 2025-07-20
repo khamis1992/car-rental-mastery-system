@@ -1,5 +1,6 @@
 import React from 'react';
 import { AccountingValidation as AccountingValidationComponent } from '@/components/Accounting/AccountingValidation';
+import { AccountingDashboard } from '@/components/Accounting/AccountingDashboard';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Shield, AlertTriangle, CheckCircle, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -134,7 +135,10 @@ const AccountingValidation = () => {
         </CardContent>
       </Card>
 
-      {/* Main Validation Interface */}
+      {/* لوحة القيادة المحاسبية */}
+      <AccountingDashboard />
+      
+      {/* واجهة التحقق الرئيسية */}
       <AccountingValidationComponent />
     </div>
   );
