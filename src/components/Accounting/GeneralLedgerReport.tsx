@@ -4,13 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { CalendarIcon, Search, Filter, ExternalLink } from 'lucide-react';
+import { CalendarIcon, BookOpen, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useGeneralLedger } from '@/hooks/useGeneralLedger';
 import { ErrorDisplay } from './ErrorDisplay';
 import { AccountSelector } from './AccountSelector';
-import type { GeneralLedgerEntry } from '@/services/accountingService';
+import { EnhancedGeneralLedgerTable } from './EnhancedGeneralLedgerTable';
 
 export const GeneralLedgerReport: React.FC = () => {
   const {
@@ -20,11 +19,9 @@ export const GeneralLedgerReport: React.FC = () => {
     selectedAccountId,
     startDate,
     endDate,
-    searchTerm,
     setSelectedAccountId,
     setStartDate,
     setEndDate,
-    setSearchTerm,
     loadLedgerEntries,
     clearError,
     filteredEntries,
@@ -64,30 +61,6 @@ export const GeneralLedgerReport: React.FC = () => {
     }).format(amount);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-KW');
-  };
-
-  const getReferenceDisplay = (entry: GeneralLedgerEntry) => {
-    if (!entry.reference_id || !entry.reference_type) return null;
-    
-    const getTypeLabel = (type: string) => {
-      switch (type) {
-        case 'contracts': return 'عقد';
-        case 'invoices': return 'فاتورة';
-        case 'assets': return 'أصل';
-        default: return type;
-      }
-    };
-
-    return (
-      <Badge variant="outline" className="text-xs">
-        <ExternalLink className="w-3 h-3 ml-1" />
-        {getTypeLabel(entry.reference_type)}
-      </Badge>
-    );
-  };
-
   if (error) {
     return (
       <ErrorDisplay 
@@ -110,12 +83,12 @@ export const GeneralLedgerReport: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="rtl-title flex items-center gap-2">
-            <Filter className="w-5 h-5" />
+            <BookOpen className="w-5 h-5" />
             فلترة البيانات
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label className="rtl-label">الحساب</Label>
               <AccountSelector
@@ -144,7 +117,6 @@ export const GeneralLedgerReport: React.FC = () => {
                 onChange={(e) => setEndDate(e.target.value)}
               />
             </div>
-
           </div>
 
           <div className="flex justify-start mt-4">
@@ -192,60 +164,38 @@ export const GeneralLedgerReport: React.FC = () => {
         </Card>
       )}
 
-      {/* Ledger Entries Table */}
+      {/* Enhanced Ledger Entries Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="rtl-title">
-            حركة الحساب
+          <CardTitle className="rtl-title flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5" />
+              حركة الحساب
+            </div>
             {summary.entriesCount > 0 && (
-              <Badge variant="secondary" className="mr-2">
-                {summary.entriesCount} قيد
-              </Badge>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <AlertCircle className="w-4 h-4" />
+                {summary.entriesCount} قيد محاسبي
+              </div>
             )}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredEntries.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              {selectedAccountId ? 'لا توجد قيود محاسبية في الفترة المحددة' : 'يرجى اختيار حساب للعرض'}
+          {filteredEntries.length === 0 && !selectedAccountId ? (
+            <div className="text-center py-12">
+              <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                اختر حساباً للبدء
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                يرجى اختيار حساب من القائمة أعلاه لعرض حركة الحساب
+              </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-right p-3">التاريخ</th>
-                    <th className="text-right p-3">رقم القيد</th>
-                    <th className="text-right p-3">الوصف</th>
-                    <th className="text-right p-3">مدين</th>
-                    <th className="text-right p-3">دائن</th>
-                    <th className="text-right p-3">الرصيد</th>
-                    <th className="text-right p-3">المرجع</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredEntries.map((entry) => (
-                    <tr key={entry.id} className="border-b hover:bg-muted/50">
-                      <td className="p-3 text-sm">{formatDate(entry.entry_date)}</td>
-                      <td className="p-3 text-sm font-mono">{entry.entry_number}</td>
-                      <td className="p-3 text-sm">{entry.description}</td>
-                      <td className="p-3 text-sm text-green-600">
-                        {entry.debit_amount > 0 ? formatCurrency(entry.debit_amount) : '-'}
-                      </td>
-                      <td className="p-3 text-sm text-red-600">
-                        {entry.credit_amount > 0 ? formatCurrency(entry.credit_amount) : '-'}
-                      </td>
-                      <td className={`p-3 text-sm font-medium ${entry.running_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(entry.running_balance)}
-                      </td>
-                      <td className="p-3 text-sm">
-                        {getReferenceDisplay(entry)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <EnhancedGeneralLedgerTable 
+              entries={filteredEntries} 
+              loading={loading}
+            />
           )}
         </CardContent>
       </Card>
