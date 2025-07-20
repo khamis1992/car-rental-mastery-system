@@ -291,13 +291,13 @@ const Customers = () => {
         {/* Dialogs */}
         <CustomerDetailsDialog
           customer={selectedCustomer}
-          open={showDetailsDialog}
+          open={showDetailsDialog && selectedCustomer !== null}
           onOpenChange={setShowDetailsDialog}
         />
         
         <EditCustomerDialog
           customer={selectedCustomer}
-          open={showEditDialog}
+          open={showEditDialog && selectedCustomer !== null}
           onOpenChange={setShowEditDialog}
           onCustomerUpdated={refetch}
         />

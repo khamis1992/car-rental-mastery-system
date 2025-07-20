@@ -80,20 +80,20 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">الاسم</label>
-                  <div className="font-medium">{customer.name}</div>
+                  <div className="font-medium">{customer?.name || 'غير محدد'}</div>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">الرقم المدني</label>
-                  <div className="font-medium">{customer.national_id || 'غير محدد'}</div>
+                  <div className="font-medium">{customer?.national_id || 'غير محدد'}</div>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">نوع العميل</label>
-                  <Badge variant="outline">{getTypeText(customer.customer_type)}</Badge>
+                  <Badge variant="outline">{getTypeText(customer?.customer_type || 'individual')}</Badge>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">الحالة</label>
-                  <Badge variant={getStatusColor(customer.status)}>
-                    {getStatusText(customer.status)}
+                  <Badge variant={getStatusColor(customer?.status || 'active')}>
+                    {getStatusText(customer?.status || 'active')}
                   </Badge>
                 </div>
               </div>
@@ -106,25 +106,25 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
               <CardTitle className="rtl-title text-lg">معلومات الاتصال</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {customer.email && (
+              {customer?.email && (
                 <div className="flex items-center gap-3 flex-row-reverse">
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <span>{customer.email}</span>
                 </div>
               )}
-              {customer.phone && (
+              {customer?.phone && (
                 <div className="flex items-center gap-3 flex-row-reverse">
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   <span>{customer.phone}</span>
                 </div>
               )}
-              {customer.city && (
+              {customer?.city && (
                 <div className="flex items-center gap-3 flex-row-reverse">
                   <MapPin className="h-4 w-4 text-muted-foreground" />
                   <span>{customer.city}</span>
                 </div>
               )}
-              {customer.address && (
+              {customer?.address && (
                 <div className="flex items-center gap-3 flex-row-reverse">
                   <Building className="h-4 w-4 text-muted-foreground" />
                   <span>{customer.address}</span>
@@ -141,13 +141,13 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
             <CardContent className="space-y-3">
               <div className="flex items-center gap-3 flex-row-reverse">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>تاريخ التسجيل: {new Date(customer.created_at).toLocaleDateString('ar-KW')}</span>
+                <span>تاريخ التسجيل: {customer?.created_at ? new Date(customer.created_at).toLocaleDateString('ar-KW') : 'غير محدد'}</span>
               </div>
               <div className="flex items-center gap-3 flex-row-reverse">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>آخر تحديث: {new Date(customer.updated_at).toLocaleDateString('ar-KW')}</span>
+                <span>آخر تحديث: {customer?.updated_at ? new Date(customer.updated_at).toLocaleDateString('ar-KW') : 'غير محدد'}</span>
               </div>
-              {customer.notes && (
+              {customer?.notes && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-3 flex-row-reverse">
                     <FileText className="h-4 w-4 text-muted-foreground" />
@@ -169,7 +169,7 @@ const CustomerDetailsDialog: React.FC<CustomerDetailsDialogProps> = ({
             <CardContent>
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">
-                  {customer.contracts?.length || 0}
+                  {customer?.contracts?.length || 0}
                 </div>
                 <div className="text-sm text-muted-foreground">إجمالي العقود</div>
               </div>
