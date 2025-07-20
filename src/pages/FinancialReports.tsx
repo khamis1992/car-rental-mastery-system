@@ -28,13 +28,15 @@ const FinancialReports = () => {
       title: "قائمة الدخل",
       description: "تقرير الإيرادات والمصروفات",
       icon: <FileText className="w-5 h-5" />,
-      action: "إنشاء التقرير"
+      action: "عرض قائمة الدخل",
+      path: "/income-statement"
     },
     {
       title: "الميزانية العمومية",
       description: "الأصول والخصوم وحقوق الملكية",
       icon: <FileText className="w-5 h-5" />,
-      action: "إنشاء التقرير"
+      action: "عرض الميزانية العمومية",
+      path: "/balance-sheet"
     },
     {
       title: "دفتر الأستاذ العام",
@@ -47,7 +49,8 @@ const FinancialReports = () => {
       title: "قائمة التدفقات النقدية",
       description: "حركة النقد والنقد المعادل",
       icon: <TrendingUp className="w-5 h-5" />,
-      action: "إنشاء التقرير"
+      action: "عرض التدفقات النقدية",
+      path: "/cash-flow-statement"
     }
   ];
 
@@ -99,6 +102,7 @@ const FinancialReports = () => {
                 size="sm" 
                 className="w-full"
                 onClick={() => report.path ? navigate(report.path) : undefined}
+                disabled={!report.path}
               >
                 {report.action}
               </Button>

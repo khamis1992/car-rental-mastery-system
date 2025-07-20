@@ -23,6 +23,9 @@ import ChartOfAccountsSetupPage from "./pages/ChartOfAccountsSetup";
 import JournalEntries from "./pages/JournalEntries";
 import FinancialReports from "./pages/FinancialReports";
 import GeneralLedger from "./pages/GeneralLedger";
+import IncomeStatement from "./pages/IncomeStatement";
+import BalanceSheet from "./pages/BalanceSheet";
+import CashFlowStatement from "./pages/CashFlowStatement";
 import BudgetManagement from "./pages/BudgetManagement";
 import AccountingAutomation from "./pages/AccountingAutomation";
 import AccountingValidation from "./pages/AccountingValidation";
@@ -101,7 +104,11 @@ function AppRoutes() {
         <Route path="/chart-of-accounts" element={<ChartOfAccounts />} />
         <Route path="/chart-of-accounts-setup" element={<ChartOfAccountsSetupPage />} />
         <Route path="/journal-entries" element={<JournalEntries />} />
+        <Route path="/financial-reports" element={<FinancialReports />} />
         <Route path="/general-ledger" element={<GeneralLedger />} />
+        <Route path="/income-statement" element={<IncomeStatement />} />
+        <Route path="/balance-sheet" element={<BalanceSheet />} />
+        <Route path="/cash-flow-statement" element={<CashFlowStatement />} />
         <Route path="/budget-management" element={<BudgetManagement />} />
         <Route path="/accounting-automation" element={<AccountingAutomation />} />
         <Route path="/accounting-validation" element={<AccountingValidation />} />
