@@ -42,7 +42,7 @@ const Customers = () => {
       city: "الكويت",
       contractsCount: 3,
       status: "نشط",
-      joinDate: "2024-01-15"
+      customerType: "عميل"
     },
     {
       id: 2,
@@ -52,7 +52,7 @@ const Customers = () => {
       city: "الأحمدي",
       contractsCount: 1,
       status: "نشط",
-      joinDate: "2024-02-20"
+      customerType: "شركة"
     },
     {
       id: 3,
@@ -62,7 +62,7 @@ const Customers = () => {
       city: "الفروانية",
       contractsCount: 2,
       status: "معلق",
-      joinDate: "2024-01-08"
+      customerType: "عميل"
     }
   ];
 
@@ -122,7 +122,7 @@ const Customers = () => {
                   <TableHead className="text-right">المدينة</TableHead>
                   <TableHead className="text-right">العقود</TableHead>
                   <TableHead className="text-right">الحالة</TableHead>
-                  <TableHead className="text-right">تاريخ الانضمام</TableHead>
+                  <TableHead className="text-right">النوع</TableHead>
                   <TableHead className="text-right">إجراءات</TableHead>
                 </TableRow>
               </TableHeader>
@@ -170,7 +170,11 @@ const Customers = () => {
                         {customer.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>{customer.joinDate}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {customer.customerType}
+                      </Badge>
+                    </TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
