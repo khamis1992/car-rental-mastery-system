@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +9,7 @@ import { CalendarIcon, Search, Filter, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useGeneralLedger } from '@/hooks/useGeneralLedger';
 import { ErrorDisplay } from './ErrorDisplay';
+import { AccountSelector } from './AccountSelector';
 import type { GeneralLedgerEntry } from '@/services/accountingService';
 
 export const GeneralLedgerReport: React.FC = () => {
@@ -118,18 +118,13 @@ export const GeneralLedgerReport: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label className="rtl-label">الحساب</Label>
-              <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر الحساب" />
-                </SelectTrigger>
-                <SelectContent>
-                  {accounts.map((account) => (
-                    <SelectItem key={account.id} value={account.id}>
-                      {account.account_code} - {account.account_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <AccountSelector
+                accounts={accounts}
+                value={selectedAccountId}
+                onValueChange={setSelectedAccountId}
+                placeholder="اختر الحساب"
+                disabled={loading}
+              />
             </div>
 
             <div className="space-y-2">
