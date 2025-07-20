@@ -73,7 +73,7 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
   // التأكد من أن البيانات صالحة
   const safeAccounts = Array.isArray(accounts) ? accounts : [];
   const safeCostCenters = Array.isArray(costCenters) ? costCenters : [];
-  const hasAccountsError = error || (!loading && safeAccounts.length === 0);
+  const hasAccountsError = Boolean(error || (!loading && safeAccounts.length === 0));
 
   const addLine = () => {
     const newLine: JournalEntryLine = {
