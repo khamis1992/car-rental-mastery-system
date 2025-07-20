@@ -96,12 +96,12 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
 
   // Sort accounts with recent accounts first, then by account code
   const sortedAccounts = useMemo(() => {
-    if (!safeAccounts.length) return [];
+    if (!Array.isArray(safeAccounts) || !safeAccounts.length) return [];
     
     try {
       const safeRecentAccounts = Array.isArray(recentAccounts) ? recentAccounts : [];
       
-      return [...safeAccounts].sort((a, b) => {
+      const result = [...safeAccounts].sort((a, b) => {
         const aIsRecent = safeRecentAccounts.includes(a.id);
         const bIsRecent = safeRecentAccounts.includes(b.id);
         
@@ -111,9 +111,11 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
         // If both are recent or both are not recent, sort by account code
         return (a.account_code || '').localeCompare(b.account_code || '');
       });
+      
+      return Array.isArray(result) ? result : [];
     } catch (error) {
       console.error('AccountSelector: Error sorting accounts:', error);
-      return safeAccounts;
+      return Array.isArray(safeAccounts) ? safeAccounts : [];
     }
   }, [safeAccounts, recentAccounts]);
 
