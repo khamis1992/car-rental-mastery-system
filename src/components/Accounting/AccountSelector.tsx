@@ -75,35 +75,34 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between text-right"
+          className="w-full justify-between text-right rtl-flex"
           disabled={disabled}
         >
-          {selectedAccount ? (
-            <div className="flex flex-col items-end">
-              <span className="font-medium">
-                {selectedAccount.account_code} - {selectedAccount.account_name}
-              </span>
-              {showBalance && (
-                <span className="text-xs text-muted-foreground">
-                  الرصيد: {formatCurrency(selectedAccount.current_balance)}
+          <div className="flex items-center gap-2 flex-row-reverse">
+            {selectedAccount ? (
+              <div className="flex flex-col items-end text-right">
+                <span className="font-medium">
+                  {selectedAccount.account_code} - {selectedAccount.account_name}
                 </span>
-              )}
-            </div>
-          ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
-          )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                {showBalance && (
+                  <span className="text-xs text-muted-foreground">
+                    الرصيد: {formatCurrency(selectedAccount.current_balance)}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
+      <PopoverContent className="w-full p-0 z-50 bg-popover" align="start">
         <Command className="max-h-96">
-          <div className="flex items-center border-b px-3">
-            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-            <CommandInput 
-              placeholder="ابحث بالكود أو الاسم..." 
-              className="h-9"
-            />
-          </div>
+          <CommandInput 
+            placeholder="ابحث بالكود أو الاسم..." 
+            className="h-9"
+          />
           <CommandEmpty>لا توجد نتائج</CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto">
             {sortedAccounts.map((account) => (
@@ -114,7 +113,7 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
                   onValueChange(account.id === value ? "" : account.id);
                   setOpen(false);
                 }}
-                className="flex items-center justify-between py-3"
+                className="flex items-center justify-between py-3 rtl-flex text-right"
               >
                 <div className="flex-1 text-right">
                   <div className="font-medium">

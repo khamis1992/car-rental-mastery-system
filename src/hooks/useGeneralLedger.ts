@@ -65,16 +65,25 @@ export const useGeneralLedger = (): UseGeneralLedgerReturn => {
       console.log('🔄 Loading accounts...');
       
       const accountsData = await accountingService.getActiveAccounts();
-      setAccounts(accountsData);
-      console.log('✅ Accounts loaded successfully:', accountsData.length);
+      console.log('📊 Raw accounts data:', accountsData);
       
-      if (accountsData.length === 0) {
-        console.log('⚠️ No active accounts found');
+      if (Array.isArray(accountsData)) {
+        setAccounts(accountsData);
+        console.log('✅ Accounts loaded successfully:', accountsData.length);
+        
+        if (accountsData.length === 0) {
+          console.log('⚠️ No active accounts found');
+        }
+      } else {
+        console.error('❌ Invalid accounts data format:', accountsData);
+        setAccounts([]);
+        setError(new Error('تنسيق بيانات الحسابات غير صحيح'));
       }
     } catch (error) {
       console.error('❌ Error loading accounts:', error);
       const errorInstance = error instanceof Error ? error : new Error('فشل في تحميل الحسابات');
       setError(errorInstance);
+      setAccounts([]);
       
       const result = handleError(errorInstance, 'loadAccounts');
       if (result.shouldLog) {
@@ -111,11 +120,19 @@ export const useGeneralLedger = (): UseGeneralLedgerReturn => {
         endDate
       );
       
-      setEntries(entriesData);
-      console.log('✅ Ledger entries loaded successfully:', entriesData.length);
+      console.log('📊 Raw entries data:', entriesData);
       
-      if (entriesData.length === 0) {
-        console.log('📝 No entries found for the selected criteria');
+      if (Array.isArray(entriesData)) {
+        setEntries(entriesData);
+        console.log('✅ Ledger entries loaded successfully:', entriesData.length);
+        
+        if (entriesData.length === 0) {
+          console.log('📝 No entries found for the selected criteria');
+        }
+      } else {
+        console.error('❌ Invalid entries data format:', entriesData);
+        setEntries([]);
+        setError(new Error('تنسيق بيانات القيود غير صحيح'));
       }
     } catch (error) {
       console.error('❌ Error loading ledger entries:', error);
@@ -143,16 +160,20 @@ export const useGeneralLedger = (): UseGeneralLedgerReturn => {
   }, [loadAccounts]);
 
   // Filter entries based on search term
-  const filteredEntries = entries.filter(entry => 
-    entry.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    entry.entry_number.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredEntries = entries.filter(entry => {
+    if (!searchTerm.trim()) return true;
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      entry.description.toLowerCase().includes(searchLower) ||
+      entry.entry_number.toLowerCase().includes(searchLower)
+    );
+  });
 
   // Calculate summary
   const summary = {
-    totalDebit: filteredEntries.reduce((sum, entry) => sum + entry.debit_amount, 0),
-    totalCredit: filteredEntries.reduce((sum, entry) => sum + entry.credit_amount, 0),
-    finalBalance: filteredEntries.length > 0 ? filteredEntries[filteredEntries.length - 1].running_balance : 0,
+    totalDebit: filteredEntries.reduce((sum, entry) => sum + (entry.debit_amount || 0), 0),
+    totalCredit: filteredEntries.reduce((sum, entry) => sum + (entry.credit_amount || 0), 0),
+    finalBalance: filteredEntries.length > 0 ? filteredEntries[filteredEntries.length - 1].running_balance || 0 : 0,
     entriesCount: filteredEntries.length
   };
 

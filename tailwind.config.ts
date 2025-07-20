@@ -76,40 +76,6 @@ const config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-  future: {
-    hoverOnlyWhenSupported: true,
-  },
-  safelist: [
-    'rtl-flex',
-    'rtl-title', 
-    'rtl-label',
-    'flex-row-reverse'
-  ]
 } satisfies Config
-
-// Add RTL utility classes
-const plugin = require('tailwindcss/plugin')
-
-config.plugins?.push(
-  plugin(function({ addUtilities }: { addUtilities: any }) {
-    const rtlUtilities = {
-      '.rtl-flex': {
-        'display': 'flex',
-        'align-items': 'center',
-        'gap': '0.5rem',
-        'flex-direction': 'row-reverse',
-      },
-      '.rtl-title': {
-        'text-align': 'right',
-        'direction': 'rtl',
-      },
-      '.rtl-label': {
-        'text-align': 'right',
-        'direction': 'rtl',
-      },
-    }
-    addUtilities(rtlUtilities)
-  })
-)
 
 export default config
