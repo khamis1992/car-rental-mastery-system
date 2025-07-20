@@ -19,7 +19,7 @@ export const EnhancedGeneralLedgerTable: React.FC<EnhancedGeneralLedgerTableProp
   loading = false
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [sortField, setSortField] = useState<string>('entry_date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -32,10 +32,10 @@ export const EnhancedGeneralLedgerTable: React.FC<EnhancedGeneralLedgerTableProp
       entry.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       entry.entry_number.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = statusFilter === 'all' || entry.status === statusFilter;
+    // Since GeneralLedgerEntry doesn't have status, we'll filter by reference_type only
     const matchesSource = sourceFilter === 'all' || entry.reference_type === sourceFilter;
 
-    return matchesSearch && matchesStatus && matchesSource;
+    return matchesSearch && matchesSource;
   });
 
   // Enhanced sorting
@@ -126,17 +126,6 @@ export const EnhancedGeneralLedgerTable: React.FC<EnhancedGeneralLedgerTableProp
           </div>
         </div>
 
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="حالة القيد" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">جميع الحالات</SelectItem>
-            <SelectItem value="posted">مرحل</SelectItem>
-            <SelectItem value="draft">مسودة</SelectItem>
-            <SelectItem value="reversed">معكوس</SelectItem>
-          </SelectContent>
-        </Select>
 
         <Select value={sourceFilter} onValueChange={setSourceFilter}>
           <SelectTrigger className="w-40">
