@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { accountingService, GeneralLedgerEntry } from '@/services/accountingService';
 import { handleError } from '@/utils/errorHandling';
 
@@ -46,115 +46,64 @@ export const useGeneralLedger = (): UseGeneralLedgerReturn => {
   
   // Set default dates (last month to today)
   const [startDate, setStartDate] = useState<string>(() => {
-    try {
-      const date = new Date();
-      date.setMonth(date.getMonth() - 1);
-      return date.toISOString().split('T')[0];
-    } catch (error) {
-      console.error('useGeneralLedger: Error setting default start date:', error);
-      return new Date().toISOString().split('T')[0];
-    }
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1);
+    return date.toISOString().split('T')[0];
   });
   
   const [endDate, setEndDate] = useState<string>(() => {
-    try {
-      return new Date().toISOString().split('T')[0];
-    } catch (error) {
-      console.error('useGeneralLedger: Error setting default end date:', error);
-      return new Date().toISOString().split('T')[0];
-    }
+    return new Date().toISOString().split('T')[0];
   });
 
   const clearError = useCallback(() => {
-    console.log('useGeneralLedger: Clearing error');
     setError(null);
   }, []);
 
   const loadAccounts = useCallback(async () => {
     try {
       setError(null);
-      console.log('🔄 useGeneralLedger: Loading accounts...');
+      console.log('🔄 Loading accounts...');
       
       const accountsData = await accountingService.getActiveAccounts();
+      setAccounts(accountsData);
+      console.log('✅ Accounts loaded successfully:', accountsData.length);
       
-      // التحقق من صحة البيانات المستلمة
-      if (!Array.isArray(accountsData)) {
-        throw new Error('البيانات المستلمة ليست مصفوفة صحيحة');
-      }
-
-      // فلترة البيانات غير الصحيحة
-      const validAccounts = accountsData.filter(account => {
-        if (!account || typeof account !== 'object') {
-          console.warn('useGeneralLedger: Invalid account object:', account);
-          return false;
-        }
-        
-        const hasRequiredFields = account.id && account.account_code && account.account_name;
-        if (!hasRequiredFields) {
-          console.warn('useGeneralLedger: Account missing required fields:', account);
-          return false;
-        }
-        
-        return true;
-      });
-
-      setAccounts(validAccounts);
-      console.log('✅ useGeneralLedger: Accounts loaded successfully:', validAccounts.length);
-      
-      if (validAccounts.length === 0) {
-        console.log('⚠️ useGeneralLedger: No valid active accounts found');
+      if (accountsData.length === 0) {
+        console.log('⚠️ No active accounts found');
       }
     } catch (error) {
-      console.error('❌ useGeneralLedger: Error loading accounts:', error);
+      console.error('❌ Error loading accounts:', error);
       const errorInstance = error instanceof Error ? error : new Error('فشل في تحميل الحسابات');
       setError(errorInstance);
-      setAccounts([]); // التأكد من إعادة تعيين البيانات عند الخطأ
       
       const result = handleError(errorInstance, 'loadAccounts');
       if (result.shouldLog) {
-        console.error('useGeneralLedger: Account loading error details:', errorInstance);
+        console.error('Account loading error details:', errorInstance);
       }
     }
   }, []);
 
   const loadLedgerEntries = useCallback(async () => {
     if (!selectedAccountId) {
-      const errorMsg = 'يرجى اختيار حساب أولاً';
-      console.warn('useGeneralLedger:', errorMsg);
-      setError(new Error(errorMsg));
+      setError(new Error('يرجى اختيار حساب أولاً'));
       return;
     }
 
     if (!startDate || !endDate) {
-      const errorMsg = 'يرجى تحديد نطاق تاريخ صحيح';
-      console.warn('useGeneralLedger:', errorMsg);
-      setError(new Error(errorMsg));
+      setError(new Error('يرجى تحديد نطاق تاريخ صحيح'));
       return;
     }
 
-    try {
-      const startDateObj = new Date(startDate);
-      const endDateObj = new Date(endDate);
-      
-      if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
-        throw new Error('تواريخ غير صحيحة');
-      }
-      
-      if (startDateObj > endDateObj) {
-        throw new Error('تاريخ البداية يجب أن يكون قبل تاريخ النهاية');
-      }
-    } catch (error) {
-      const errorMsg = 'تواريخ غير صحيحة - يرجى التحقق من التواريخ المدخلة';
-      console.error('useGeneralLedger: Date validation error:', error);
-      setError(new Error(errorMsg));
+    if (new Date(startDate) > new Date(endDate)) {
+      setError(new Error('تاريخ البداية يجب أن يكون قبل تاريخ النهاية'));
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
-      console.log('🔄 useGeneralLedger: Loading ledger entries for account:', selectedAccountId);
-      console.log('📅 useGeneralLedger: Date range:', { startDate, endDate });
+      console.log('🔄 Loading ledger entries for account:', selectedAccountId);
+      console.log('📅 Date range:', { startDate, endDate });
       
       const entriesData = await accountingService.getGeneralLedgerEntries(
         selectedAccountId,
@@ -162,35 +111,21 @@ export const useGeneralLedger = (): UseGeneralLedgerReturn => {
         endDate
       );
       
-      // التحقق من صحة البيانات المستلمة
-      if (!Array.isArray(entriesData)) {
-        throw new Error('بيانات القيود المستلمة غير صحيحة');
-      }
-
-      // فلترة البيانات غير الصحيحة
-      const validEntries = entriesData.filter(entry => {
-        if (!entry || typeof entry !== 'object') {
-          console.warn('useGeneralLedger: Invalid entry object:', entry);
-          return false;
-        }
-        return true;
-      });
+      setEntries(entriesData);
+      console.log('✅ Ledger entries loaded successfully:', entriesData.length);
       
-      setEntries(validEntries);
-      console.log('✅ useGeneralLedger: Ledger entries loaded successfully:', validEntries.length);
-      
-      if (validEntries.length === 0) {
-        console.log('📝 useGeneralLedger: No entries found for the selected criteria');
+      if (entriesData.length === 0) {
+        console.log('📝 No entries found for the selected criteria');
       }
     } catch (error) {
-      console.error('❌ useGeneralLedger: Error loading ledger entries:', error);
+      console.error('❌ Error loading ledger entries:', error);
       const errorInstance = error instanceof Error ? error : new Error('فشل في تحميل بيانات دفتر الأستاذ');
       setError(errorInstance);
-      setEntries([]); // التأكد من إعادة تعيين البيانات عند الخطأ
+      setEntries([]);
       
       const result = handleError(errorInstance, 'loadLedgerEntries');
       if (result.shouldLog) {
-        console.error('useGeneralLedger: Ledger entries loading error details:', {
+        console.error('Ledger entries loading error details:', {
           selectedAccountId,
           startDate,
           endDate,
@@ -204,103 +139,22 @@ export const useGeneralLedger = (): UseGeneralLedgerReturn => {
 
   // Auto-load accounts on mount
   useEffect(() => {
-    console.log('useGeneralLedger: Mounting, loading accounts...');
     loadAccounts();
   }, [loadAccounts]);
 
-  // Safe account ID setter with validation
-  const safeSetSelectedAccountId = useCallback((id: string) => {
-    console.log('useGeneralLedger: Setting selected account ID:', id);
-    
-    if (id && accounts.length > 0) {
-      const accountExists = accounts.some(account => account.id === id);
-      if (!accountExists) {
-        console.warn('useGeneralLedger: Selected account ID not found in accounts list:', id);
-        setError(new Error('الحساب المحدد غير موجود في قائمة الحسابات'));
-        return;
-      }
-    }
-    
-    setSelectedAccountId(id);
-    setEntries([]); // Clear entries when account changes
-    clearError(); // Clear any previous errors
-  }, [accounts, clearError]);
+  // Filter entries based on search term
+  const filteredEntries = entries.filter(entry => 
+    entry.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    entry.entry_number.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  // Filter entries based on search term with error protection
-  const filteredEntries = useMemo(() => {
-    if (!Array.isArray(entries)) {
-      console.warn('useGeneralLedger: entries is not an array, returning empty array');
-      return [];
-    }
-
-    if (!searchTerm.trim()) {
-      return entries;
-    }
-
-    try {
-      const term = searchTerm.toLowerCase().trim();
-      
-      return entries.filter(entry => {
-        if (!entry || typeof entry !== 'object') {
-          return false;
-        }
-        
-        const description = (entry.description || '').toLowerCase();
-        const entryNumber = (entry.entry_number || '').toLowerCase();
-        
-        return description.includes(term) || entryNumber.includes(term);
-      });
-    } catch (error) {
-      console.error('useGeneralLedger: Error filtering entries:', error);
-      return entries; // Return unfiltered entries if filtering fails
-    }
-  }, [entries, searchTerm]);
-
-  // Calculate summary with error protection
-  const summary = useMemo(() => {
-    try {
-      if (!Array.isArray(filteredEntries) || filteredEntries.length === 0) {
-        return {
-          totalDebit: 0,
-          totalCredit: 0,
-          finalBalance: 0,
-          entriesCount: 0
-        };
-      }
-
-      const safeEntries = filteredEntries.filter(entry => entry && typeof entry === 'object');
-      
-      const totalDebit = safeEntries.reduce((sum, entry) => {
-        const debit = typeof entry.debit_amount === 'number' ? entry.debit_amount : 0;
-        return sum + debit;
-      }, 0);
-      
-      const totalCredit = safeEntries.reduce((sum, entry) => {
-        const credit = typeof entry.credit_amount === 'number' ? entry.credit_amount : 0;
-        return sum + credit;
-      }, 0);
-      
-      const finalEntry = safeEntries[safeEntries.length - 1];
-      const finalBalance = finalEntry && typeof finalEntry.running_balance === 'number' 
-        ? finalEntry.running_balance 
-        : 0;
-
-      return {
-        totalDebit,
-        totalCredit,
-        finalBalance,
-        entriesCount: safeEntries.length
-      };
-    } catch (error) {
-      console.error('useGeneralLedger: Error calculating summary:', error);
-      return {
-        totalDebit: 0,
-        totalCredit: 0,
-        finalBalance: 0,
-        entriesCount: 0
-      };
-    }
-  }, [filteredEntries]);
+  // Calculate summary
+  const summary = {
+    totalDebit: filteredEntries.reduce((sum, entry) => sum + entry.debit_amount, 0),
+    totalCredit: filteredEntries.reduce((sum, entry) => sum + entry.credit_amount, 0),
+    finalBalance: filteredEntries.length > 0 ? filteredEntries[filteredEntries.length - 1].running_balance : 0,
+    entriesCount: filteredEntries.length
+  };
 
   return {
     accounts,
@@ -311,7 +165,7 @@ export const useGeneralLedger = (): UseGeneralLedgerReturn => {
     startDate,
     endDate,
     searchTerm,
-    setSelectedAccountId: safeSetSelectedAccountId,
+    setSelectedAccountId,
     setStartDate,
     setEndDate,
     setSearchTerm,

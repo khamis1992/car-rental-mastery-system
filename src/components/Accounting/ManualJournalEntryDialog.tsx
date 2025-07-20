@@ -1,5 +1,4 @@
-
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,8 +31,8 @@ interface ManualJournalEntryDialogProps {
 }
 
 export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> = ({
-  accounts = [],
-  costCenters = [],
+  accounts,
+  costCenters,
   onEntryCreated
 }) => {
   const [open, setOpen] = useState(false);
@@ -64,25 +63,7 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
   const [loading, setLoading] = useState(false);
   const [recentAccounts, setRecentAccounts] = useState<string[]>([]);
 
-  // حماية البيانات
-  const safeAccounts = useMemo(() => {
-    if (!Array.isArray(accounts)) {
-      console.warn('ManualJournalEntryDialog: accounts prop is not an array');
-      return [];
-    }
-    return accounts.filter(account => account && account.id && account.account_code && account.account_name);
-  }, [accounts]);
-
-  const safeCostCenters = useMemo(() => {
-    if (!Array.isArray(costCenters)) {
-      console.warn('ManualJournalEntryDialog: costCenters prop is not an array');
-      return [];
-    }
-    return costCenters.filter(center => center && center.id);
-  }, [costCenters]);
-
-  const addLine = useCallback(() => {
-    console.log('ManualJournalEntryDialog: Adding new line');
+  const addLine = () => {
     const newLine: JournalEntryLine = {
       id: Date.now().toString(),
       accountId: '',
@@ -91,35 +72,19 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
       creditAmount: 0,
       costCenterId: ''
     };
-    setLines(prevLines => [...prevLines, newLine]);
-  }, []);
+    setLines([...lines, newLine]);
+  };
 
-  const removeLine = useCallback((id: string) => {
-    setLines(prevLines => {
-      if (prevLines.length <= 2) {
-        console.log('ManualJournalEntryDialog: Cannot remove line, minimum 2 lines required');
-        toast.error('يجب أن يحتوي القيد على بندين على الأقل');
-        return prevLines;
-      }
-      console.log('ManualJournalEntryDialog: Removing line:', id);
-      return prevLines.filter(line => line.id !== id);
-    });
-  }, []);
+  const removeLine = (id: string) => {
+    if (lines.length > 2) {
+      setLines(lines.filter(line => line.id !== id));
+    }
+  };
 
-  const updateLine = useCallback((id: string, field: keyof JournalEntryLine, value: any) => {
-    console.log('ManualJournalEntryDialog: Updating line:', id, field, value);
-    
-    setLines(prevLines => prevLines.map(line => {
-      if (line.id !== id) return line;
-      
-      // التحقق من صحة القيم المدخلة
-      let safeValue = value;
-      if (field === 'debitAmount' || field === 'creditAmount') {
-        safeValue = typeof value === 'number' && !isNaN(value) ? Math.max(0, value) : 0;
-      }
-      
-      return { ...line, [field]: safeValue };
-    }));
+  const updateLine = (id: string, field: keyof JournalEntryLine, value: any) => {
+    setLines(lines.map(line => 
+      line.id === id ? { ...line, [field]: value } : line
+    ));
 
     // Track recent accounts
     if (field === 'accountId' && value) {
@@ -128,95 +93,45 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
         return updated.slice(0, 10); // Keep only last 10
       });
     }
-  }, []);
+  };
 
-  const calculateTotals = useCallback(() => {
-    try {
-      const totalDebits = lines.reduce((sum, line) => {
-        const debit = typeof line.debitAmount === 'number' && !isNaN(line.debitAmount) 
-          ? line.debitAmount 
-          : 0;
-        return sum + debit;
-      }, 0);
-      
-      const totalCredits = lines.reduce((sum, line) => {
-        const credit = typeof line.creditAmount === 'number' && !isNaN(line.creditAmount) 
-          ? line.creditAmount 
-          : 0;
-        return sum + credit;
-      }, 0);
-      
-      return { totalDebits, totalCredits };
-    } catch (error) {
-      console.error('ManualJournalEntryDialog: Error calculating totals:', error);
-      return { totalDebits: 0, totalCredits: 0 };
-    }
-  }, [lines]);
+  const calculateTotals = () => {
+    const totalDebits = lines.reduce((sum, line) => sum + (line.debitAmount || 0), 0);
+    const totalCredits = lines.reduce((sum, line) => sum + (line.creditAmount || 0), 0);
+    return { totalDebits, totalCredits };
+  };
 
-  const validateEntry = useCallback(() => {
-    try {
-      console.log('ManualJournalEntryDialog: Validating entry...');
-      
-      const { totalDebits, totalCredits } = calculateTotals();
-      
-      if (Math.abs(totalDebits - totalCredits) > 0.001) {
-        toast.error('إجمالي المدين يجب أن يساوي إجمالي الدائن');
-        return false;
-      }
-
-      if (totalDebits === 0) {
-        toast.error('يجب إدخال مبالغ صحيحة');
-        return false;
-      }
-
-      if (!formData.description.trim()) {
-        toast.error('يجب إدخال وصف القيد المحاسبي');
-        return false;
-      }
-
-      for (const line of lines) {
-        if (!line.accountId) {
-          toast.error('يجب اختيار حساب لجميع البنود');
-          return false;
-        }
-        
-        if (!line.description.trim()) {
-          toast.error('يجب إدخال وصف لجميع البنود');
-          return false;
-        }
-        
-        if (line.debitAmount === 0 && line.creditAmount === 0) {
-          toast.error('يجب إدخال مبلغ مدين أو دائن لجميع البنود');
-          return false;
-        }
-        
-        if (line.debitAmount > 0 && line.creditAmount > 0) {
-          toast.error('لا يمكن أن يكون البند مدين ودائن في نفس الوقت');
-          return false;
-        }
-      }
-
-      console.log('ManualJournalEntryDialog: Entry validation passed');
-      return true;
-    } catch (error) {
-      console.error('ManualJournalEntryDialog: Error during validation:', error);
-      toast.error('حدث خطأ أثناء التحقق من البيانات');
+  const validateEntry = () => {
+    const { totalDebits, totalCredits } = calculateTotals();
+    
+    if (totalDebits !== totalCredits) {
+      toast.error('إجمالي المدين يجب أن يساوي إجمالي الدائن');
       return false;
     }
-  }, [formData.description, lines, calculateTotals]);
 
-  const handleSubmit = useCallback(async () => {
+    if (totalDebits === 0) {
+      toast.error('يجب إدخال مبالغ صحيحة');
+      return false;
+    }
+
+    for (const line of lines) {
+      if (!line.accountId || !line.description || (line.debitAmount === 0 && line.creditAmount === 0)) {
+        toast.error('يجب إكمال جميع الحقول المطلوبة');
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async () => {
     if (!validateEntry()) return;
 
     setLoading(true);
     try {
-      console.log('ManualJournalEntryDialog: Starting journal entry creation...');
-      
       // Get current tenant ID
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
+      if (!user) throw new Error('User not authenticated');
 
       // Generate entry number
       const entryNumber = `JE-${format(new Date(), 'yyyy-MM')}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
@@ -229,8 +144,8 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
         .insert({
           entry_number: entryNumber,
           entry_date: formData.entryDate.toISOString().split('T')[0],
-          description: formData.description.trim(),
-          reference_id: formData.referenceNumber.trim() || null,
+          description: formData.description,
+          reference_id: formData.referenceNumber || null,
           total_debit: totalDebits,
           total_credit: totalDebits,
           status: 'draft',
@@ -240,16 +155,13 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
         .select()
         .single();
 
-      if (entryError) {
-        console.error('ManualJournalEntryDialog: Error creating journal entry:', entryError);
-        throw entryError;
-      }
+      if (entryError) throw entryError;
 
       // Create journal entry lines
       const entryLines = lines.map((line, index) => ({
         journal_entry_id: journalEntry.id,
         account_id: line.accountId,
-        description: line.description.trim(),
+        description: line.description,
         debit_amount: line.debitAmount || 0,
         credit_amount: line.creditAmount || 0,
         cost_center_id: line.costCenterId || null,
@@ -260,12 +172,8 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
         .from('journal_entry_lines')
         .insert(entryLines);
 
-      if (linesError) {
-        console.error('ManualJournalEntryDialog: Error creating journal entry lines:', linesError);
-        throw linesError;
-      }
+      if (linesError) throw linesError;
 
-      console.log('ManualJournalEntryDialog: Journal entry created successfully');
       toast.success('تم إنشاء القيد المحاسبي بنجاح');
       setOpen(false);
       onEntryCreated();
@@ -296,40 +204,15 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
         }
       ]);
     } catch (error) {
-      console.error('ManualJournalEntryDialog: Error creating journal entry:', error);
-      toast.error('حدث خطأ أثناء إنشاء القيد المحاسبي: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'));
+      console.error('Error creating journal entry:', error);
+      toast.error('حدث خطأ أثناء إنشاء القيد المحاسبي');
     } finally {
       setLoading(false);
     }
-  }, [validateEntry, formData, lines, calculateTotals, onEntryCreated]);
+  };
 
   const { totalDebits, totalCredits } = calculateTotals();
-  const isBalanced = Math.abs(totalDebits - totalCredits) < 0.001 && totalDebits > 0;
-
-  // التحقق من وجود حسابات
-  if (safeAccounts.length === 0) {
-    return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button className="rtl-flex">
-            <Plus className="w-4 h-4" />
-            قيد يدوي جديد
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="rtl-title">تنبيه</DialogTitle>
-          </DialogHeader>
-          <div className="text-center py-4">
-            <p>لا توجد حسابات متاحة لإنشاء القيد المحاسبي</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              يرجى التأكد من وجود حسابات في دليل الحسابات أولاً
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
+  const isBalanced = totalDebits === totalCredits && totalDebits > 0;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -410,7 +293,7 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
                   <div className="col-span-3">
                     <Label className="rtl-label text-sm">الحساب</Label>
                     <AccountSelector
-                      accounts={safeAccounts}
+                      accounts={accounts}
                       value={line.accountId}
                       onValueChange={(value) => updateLine(line.id, 'accountId', value)}
                       placeholder="اختر الحساب"
@@ -436,7 +319,6 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
                       onChange={(e) => updateLine(line.id, 'debitAmount', parseFloat(e.target.value) || 0)}
                       placeholder="0.000"
                       step="0.001"
-                      min="0"
                     />
                   </div>
 
@@ -448,7 +330,6 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
                       onChange={(e) => updateLine(line.id, 'creditAmount', parseFloat(e.target.value) || 0)}
                       placeholder="0.000"
                       step="0.001"
-                      min="0"
                     />
                   </div>
 
@@ -462,7 +343,7 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
                         <SelectValue placeholder="اختياري" />
                       </SelectTrigger>
                       <SelectContent>
-                        {safeCostCenters.map((center) => (
+                        {costCenters.map((center) => (
                           <SelectItem key={center.id} value={center.id}>
                             {center.cost_center_code} - {center.cost_center_name}
                           </SelectItem>
@@ -518,7 +399,7 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+            <Button variant="outline" onClick={() => setOpen(false)}>
               إلغاء
             </Button>
             <Button onClick={handleSubmit} disabled={!isBalanced || loading}>
