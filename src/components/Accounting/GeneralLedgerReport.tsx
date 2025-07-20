@@ -61,7 +61,7 @@ export const GeneralLedgerReport: React.FC = () => {
       currency: 'KWD',
       minimumFractionDigits: 3,
       maximumFractionDigits: 3
-    }).format(amount);
+    }).format(amount || 0);
   };
 
   const formatDate = (dateString: string) => {
@@ -119,11 +119,12 @@ export const GeneralLedgerReport: React.FC = () => {
             <div className="space-y-2">
               <Label className="rtl-label">الحساب</Label>
               <AccountSelector
-                accounts={accounts}
+                accounts={accounts || []}
                 value={selectedAccountId}
                 onValueChange={setSelectedAccountId}
                 placeholder="اختر الحساب"
                 disabled={loading}
+                loading={loading}
               />
             </div>
 

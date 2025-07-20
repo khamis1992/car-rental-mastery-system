@@ -32,20 +32,24 @@ interface AccountSelectorProps {
   disabled?: boolean;
   showBalance?: boolean;
   recentAccounts?: string[];
+  loading?: boolean;
 }
 
 export const AccountSelector: React.FC<AccountSelectorProps> = ({
-  accounts,
+  accounts = [], // Default empty array
   value,
   onValueChange,
   placeholder = "اختر الحساب...",
   disabled = false,
   showBalance = true,
-  recentAccounts = []
+  recentAccounts = [],
+  loading = false
 }) => {
   const [open, setOpen] = React.useState(false);
 
-  const selectedAccount = accounts.find(account => account.id === value);
+  // Ensure accounts is always an array
+  const safeAccounts = Array.isArray(accounts) ? accounts : [];
+  const selectedAccount = safeAccounts.find(account => account.id === value);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ar-KW', {
@@ -53,20 +57,26 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
       currency: 'KWD',
       minimumFractionDigits: 3,
       maximumFractionDigits: 3
-    }).format(amount);
+    }).format(amount || 0);
   };
 
   // Sort accounts with recent accounts first, then by account code
-  const sortedAccounts = [...accounts].sort((a, b) => {
-    const aIsRecent = recentAccounts.includes(a.id);
-    const bIsRecent = recentAccounts.includes(b.id);
-    
-    if (aIsRecent && !bIsRecent) return -1;
-    if (!aIsRecent && bIsRecent) return 1;
-    
-    // If both are recent or both are not recent, sort by account code
-    return a.account_code.localeCompare(b.account_code);
-  });
+  const sortedAccounts = React.useMemo(() => {
+    if (!Array.isArray(safeAccounts) || safeAccounts.length === 0) {
+      return [];
+    }
+
+    return [...safeAccounts].sort((a, b) => {
+      const aIsRecent = recentAccounts.includes(a.id);
+      const bIsRecent = recentAccounts.includes(b.id);
+      
+      if (aIsRecent && !bIsRecent) return -1;
+      if (!aIsRecent && bIsRecent) return 1;
+      
+      // If both are recent or both are not recent, sort by account code
+      return a.account_code.localeCompare(b.account_code);
+    });
+  }, [safeAccounts, recentAccounts]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -76,7 +86,7 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
           role="combobox"
           aria-expanded={open}
           className="w-full justify-between text-right rtl-flex"
-          disabled={disabled}
+          disabled={disabled || loading}
         >
           <div className="flex items-center gap-2 flex-row-reverse">
             {selectedAccount ? (
@@ -91,49 +101,61 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
                 )}
               </div>
             ) : (
-              <span className="text-muted-foreground">{placeholder}</span>
+              <span className="text-muted-foreground">
+                {loading ? 'جاري التحميل...' : placeholder}
+              </span>
             )}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0 z-50 bg-popover" align="start">
-        <Command className="max-h-96">
-          <CommandInput 
-            placeholder="ابحث بالكود أو الاسم..." 
-            className="h-9"
-          />
-          <CommandEmpty>لا توجد نتائج</CommandEmpty>
-          <CommandGroup className="max-h-64 overflow-auto">
-            {sortedAccounts.map((account) => (
-              <CommandItem
-                key={account.id}
-                value={`${account.account_code} ${account.account_name}`}
-                onSelect={() => {
-                  onValueChange(account.id === value ? "" : account.id);
-                  setOpen(false);
-                }}
-                className="flex items-center justify-between py-3 rtl-flex text-right"
-              >
-                <div className="flex-1 text-right">
-                  <div className="font-medium">
-                    {account.account_code} - {account.account_name}
-                  </div>
-                  <div className="text-xs text-muted-foreground flex justify-between">
-                    {showBalance && <span>الرصيد: {formatCurrency(account.current_balance)}</span>}
-                    <span>{account.account_type}</span>
-                  </div>
-                </div>
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === account.id ? "opacity-100" : "opacity-0"
-                  )}
-                />
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
+        {loading ? (
+          <div className="p-4 text-center text-muted-foreground">
+            جاري تحميل الحسابات...
+          </div>
+        ) : (
+          <Command className="max-h-96">
+            <CommandInput 
+              placeholder="ابحث بالكود أو الاسم..." 
+              className="h-9"
+            />
+            <CommandEmpty>
+              {safeAccounts.length === 0 ? 'لا توجد حسابات متاحة' : 'لا توجد نتائج'}
+            </CommandEmpty>
+            {sortedAccounts.length > 0 && (
+              <CommandGroup className="max-h-64 overflow-auto">
+                {sortedAccounts.map((account) => (
+                  <CommandItem
+                    key={account.id}
+                    value={`${account.account_code} ${account.account_name}`}
+                    onSelect={() => {
+                      onValueChange(account.id === value ? "" : account.id);
+                      setOpen(false);
+                    }}
+                    className="flex items-center justify-between py-3 rtl-flex text-right"
+                  >
+                    <div className="flex-1 text-right">
+                      <div className="font-medium">
+                        {account.account_code} - {account.account_name}
+                      </div>
+                      <div className="text-xs text-muted-foreground flex justify-between">
+                        {showBalance && <span>الرصيد: {formatCurrency(account.current_balance)}</span>}
+                        <span>{account.account_type}</span>
+                      </div>
+                    </div>
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === account.id ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+          </Command>
+        )}
       </PopoverContent>
     </Popover>
   );

@@ -61,6 +61,7 @@ export const useGeneralLedger = (): UseGeneralLedgerReturn => {
 
   const loadAccounts = useCallback(async () => {
     try {
+      setLoading(true);
       setError(null);
       console.log('🔄 Loading accounts...');
       
@@ -83,12 +84,14 @@ export const useGeneralLedger = (): UseGeneralLedgerReturn => {
       console.error('❌ Error loading accounts:', error);
       const errorInstance = error instanceof Error ? error : new Error('فشل في تحميل الحسابات');
       setError(errorInstance);
-      setAccounts([]);
+      setAccounts([]); // Ensure accounts is always an array
       
       const result = handleError(errorInstance, 'loadAccounts');
       if (result.shouldLog) {
         console.error('Account loading error details:', errorInstance);
       }
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -178,7 +181,7 @@ export const useGeneralLedger = (): UseGeneralLedgerReturn => {
   };
 
   return {
-    accounts,
+    accounts: accounts || [], // Ensure accounts is never undefined
     entries,
     loading,
     error,
