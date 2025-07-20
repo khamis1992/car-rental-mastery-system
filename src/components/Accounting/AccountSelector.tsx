@@ -35,7 +35,7 @@ interface AccountSelectorProps {
 }
 
 export const AccountSelector: React.FC<AccountSelectorProps> = ({
-  accounts,
+  accounts = [],
   value,
   onValueChange,
   placeholder = "اختر الحساب...",
@@ -45,7 +45,27 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
 }) => {
   const [open, setOpen] = React.useState(false);
 
-  const selectedAccount = accounts.find(account => account.id === value);
+  // Add debugging and early return for invalid data
+  console.log('AccountSelector render:', { 
+    accounts: accounts?.length, 
+    accountsType: typeof accounts,
+    isArray: Array.isArray(accounts),
+    value,
+    recentAccounts: recentAccounts?.length 
+  });
+
+  // Early return if accounts is not a valid array
+  if (!Array.isArray(accounts)) {
+    console.error('AccountSelector: accounts prop is not an array:', accounts);
+    return (
+      <Button variant="outline" className="w-full justify-between text-right" disabled>
+        <span className="text-muted-foreground">خطأ: بيانات الحسابات غير صحيحة</span>
+        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+      </Button>
+    );
+  }
+
+  const selectedAccount = accounts.find(account => account?.id === value);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ar-KW', {

@@ -65,8 +65,14 @@ export const useGeneralLedger = (): UseGeneralLedgerReturn => {
       console.log('🔄 Loading accounts...');
       
       const accountsData = await accountingService.getActiveAccounts();
-      setAccounts(accountsData);
-      console.log('✅ Accounts loaded successfully:', accountsData.length);
+      console.log('📊 Raw accounts data:', { 
+        data: accountsData, 
+        type: typeof accountsData, 
+        isArray: Array.isArray(accountsData),
+        length: accountsData?.length 
+      });
+      setAccounts(accountsData || []);
+      console.log('✅ Accounts loaded successfully:', accountsData?.length || 0);
       
       if (accountsData.length === 0) {
         console.log('⚠️ No active accounts found');
