@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TenantProvider } from "@/contexts/TenantContext";
+import { SearchProvider } from "@/contexts/SearchContext";
 import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
@@ -54,6 +55,7 @@ function App() {
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <AuthProvider>
           <TenantProvider>
+            <SearchProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
@@ -96,6 +98,7 @@ function App() {
                 </Routes>
               </BrowserRouter>
             </TooltipProvider>
+            </SearchProvider>
           </TenantProvider>
         </AuthProvider>
       </ThemeProvider>
