@@ -11,18 +11,36 @@ import { AddEmployeeForm } from '@/components/Employees/AddEmployeeForm';
 import { EmployeeDetailsDialog } from '@/components/Employees/EmployeeDetailsDialog';
 import { EditEmployeeForm } from '@/components/Employees/EditEmployeeForm';
 import { useSecureTenantData } from '@/hooks/useSecureTenantData';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const Employees = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [editingEmployee, setEditingEmployee] = useState(null);
   const [showAddEmployee, setShowAddEmployee] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const { toast } = useToast();
 
   // استخدام الـ hooks الآمنة
   const { useSecureEmployees, useSecureDepartments } = useSecureTenantData();
-  const { data: employees = [], isLoading: employeesLoading, error: employeesError } = useSecureEmployees();
+  const { data: employees = [], isLoading: employeesLoading, error: employeesError, refetch: refetchEmployees } = useSecureEmployees();
   const { data: departments = [], isLoading: departmentsLoading } = useSecureDepartments();
 
   // فلترة الموظفين
@@ -45,6 +63,69 @@ const Employees = () => {
     active: employees.filter(emp => emp.status === 'active').length,
     inactive: employees.filter(emp => emp.status === 'inactive').length,
     onLeave: employees.filter(emp => emp.status === 'on_leave').length,
+  };
+
+  // وظائف إدارة الموظفين
+  const handleEditEmployee = (employee) => {
+    setEditingEmployee(employee);
+    setSelectedEmployee(null); // إغلاق نافذة التفاصيل
+  };
+
+  const handleDeleteEmployee = (employee) => {
+    setEmployeeToDelete(employee);
+    setShowDeleteConfirm(true);
+    setSelectedEmployee(null); // إغلاق نافذة التفاصيل
+  };
+
+  const confirmDeleteEmployee = async () => {
+    if (!employeeToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('employees')
+        .delete()
+        .eq('id', employeeToDelete.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "تم حذف الموظف بنجاح",
+        description: `تم حذف الموظف ${employeeToDelete.first_name} ${employeeToDelete.last_name}`,
+      });
+
+      // إعادة تحميل البيانات
+      refetchEmployees();
+    } catch (error) {
+      console.error('خطأ في حذف الموظف:', error);
+      toast({
+        title: "خطأ في حذف الموظف",
+        description: error.message || "حدث خطأ غير متوقع",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+      setEmployeeToDelete(null);
+    }
+  };
+
+  const handleEmployeeUpdated = () => {
+    setEditingEmployee(null);
+    refetchEmployees();
+    toast({
+      title: "تم تحديث الموظف بنجاح",
+      description: "تم حفظ التغييرات بنجاح",
+    });
+  };
+
+  const handleEmployeeAdded = () => {
+    setShowAddEmployee(false);
+    refetchEmployees();
+    toast({
+      title: "تم إضافة الموظف بنجاح",
+      description: "تم إضافة الموظف الجديد إلى النظام",
+    });
   };
 
   if (employeesLoading || departmentsLoading) {
@@ -78,21 +159,21 @@ const Employees = () => {
     <div className="container mx-auto px-4 py-8 space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-3">
-          <Users className="h-8 w-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold text-right">إدارة الموظفين</h1>
-            <p className="text-muted-foreground text-right">إدارة بيانات الموظفين والأقسام</p>
+        <div className="flex items-center gap-3 flex-row-reverse">
+          <div className="text-right">
+            <h1 className="text-3xl font-bold">إدارة الموظفين</h1>
+            <p className="text-muted-foreground">إدارة بيانات الموظفين والأقسام</p>
           </div>
+          <Users className="h-8 w-8 text-primary" />
         </div>
-        <div className="flex gap-2">
-          <Button onClick={() => setShowBulkImport(true)} variant="outline">
-            <Upload className="h-4 w-4 ml-2" />
-            استيراد موظفين
-          </Button>
+        <div className="flex gap-2 flex-row-reverse">
           <Button onClick={() => setShowAddEmployee(true)}>
             <Plus className="h-4 w-4 ml-2" />
             إضافة موظف
+          </Button>
+          <Button onClick={() => setShowBulkImport(true)} variant="outline">
+            <Upload className="h-4 w-4 ml-2" />
+            استيراد موظفين
           </Button>
         </div>
       </div>
@@ -101,7 +182,7 @@ const Employees = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-row-reverse">
               <div className="text-right">
                 <p className="text-sm font-medium text-muted-foreground">إجمالي الموظفين</p>
                 <p className="text-2xl font-bold">{employeeStats.total}</p>
@@ -113,7 +194,7 @@ const Employees = () => {
         
         <Card>
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-row-reverse">
               <div className="text-right">
                 <p className="text-sm font-medium text-muted-foreground">الموظفون النشطون</p>
                 <p className="text-2xl font-bold text-green-600">{employeeStats.active}</p>
@@ -125,7 +206,7 @@ const Employees = () => {
         
         <Card>
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-row-reverse">
               <div className="text-right">
                 <p className="text-sm font-medium text-muted-foreground">في إجازة</p>
                 <p className="text-2xl font-bold text-yellow-600">{employeeStats.onLeave}</p>
@@ -137,7 +218,7 @@ const Employees = () => {
         
         <Card>
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-row-reverse">
               <div className="text-right">
                 <p className="text-sm font-medium text-muted-foreground">غير نشط</p>
                 <p className="text-2xl font-bold text-red-600">{employeeStats.inactive}</p>
@@ -194,7 +275,7 @@ const Employees = () => {
       {/* Employees Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-right flex items-center justify-between">
+          <CardTitle className="text-right flex items-center justify-between flex-row-reverse">
             <span>قائمة الموظفين ({filteredEmployees.length})</span>
             <Button variant="outline" size="sm">
               <Download className="h-4 w-4 ml-2" />
@@ -267,7 +348,7 @@ const Employees = () => {
       <AddEmployeeForm
         open={showAddEmployee}
         onOpenChange={setShowAddEmployee}
-        onEmployeeAdded={() => window.location.reload()}
+        onEmployeeAdded={handleEmployeeAdded}
       />
 
       {selectedEmployee && (
@@ -275,8 +356,44 @@ const Employees = () => {
           employee={selectedEmployee}
           open={!!selectedEmployee}
           onOpenChange={() => setSelectedEmployee(null)}
+          onEditClick={handleEditEmployee}
+          onDeleteClick={handleDeleteEmployee}
         />
       )}
+
+      {editingEmployee && (
+        <EditEmployeeForm
+          employee={editingEmployee}
+          open={!!editingEmployee}
+          onOpenChange={() => setEditingEmployee(null)}
+          onEmployeeUpdated={handleEmployeeUpdated}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-right">تأكيد حذف الموظف</AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              هل أنت متأكد من رغبتك في حذف الموظف "{employeeToDelete?.first_name} {employeeToDelete?.last_name}"؟
+              هذا الإجراء لا يمكن التراجع عنه.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row-reverse">
+            <AlertDialogAction
+              onClick={confirmDeleteEmployee}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? 'جاري الحذف...' : 'حذف'}
+            </AlertDialogAction>
+            <AlertDialogCancel onClick={() => setShowDeleteConfirm(false)}>
+              إلغاء
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
