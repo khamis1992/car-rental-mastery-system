@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -35,7 +34,12 @@ export class TenantIsolationMiddleware {
       'contract_incidents',
       'customer_evaluations',
       'departments',
-      'cost_centers'
+      'cost_centers',
+      'chart_of_accounts',
+      'journal_entries',
+      'journal_entry_lines',
+      'automated_entry_rules',
+      'automated_entry_executions'
     ]);
   }
 
@@ -46,6 +50,11 @@ export class TenantIsolationMiddleware {
     console.log('🔧 تحديد المؤسسة الحالية:', tenantId);
     
     try {
+      // التحقق من أن المعرف هو UUID صحيح
+      if (!this.isValidUUID(tenantId)) {
+        throw new Error('معرف المؤسسة غير صحيح - يجب أن يكون UUID صالح');
+      }
+
       // التحقق من صحة معرف المؤسسة
       const { data: tenant, error } = await supabase
         .from('tenants')
@@ -78,10 +87,51 @@ export class TenantIsolationMiddleware {
   }
 
   /**
+   * التحقق من صحة UUID
+   */
+  private isValidUUID(uuid: string): boolean {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(uuid);
+  }
+
+  /**
    * الحصول على المؤسسة الحالية
    */
   getCurrentTenant(): string | null {
     return this.currentTenantId;
+  }
+
+  /**
+   * الحصول على معرف المؤسسة الحالية مع التحقق
+   */
+  async getCurrentTenantId(): Promise<string> {
+    if (this.currentTenantId && this.isValidUUID(this.currentTenantId)) {
+      return this.currentTenantId;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('لا يوجد مستخدم مسجل');
+      }
+
+      const { data: tenantUser, error } = await supabase
+        .from('tenant_users')
+        .select('tenant_id')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (error || !tenantUser?.tenant_id) {
+        throw new Error('فشل في جلب معرف المؤسسة');
+      }
+
+      await this.setCurrentTenant(tenantUser.tenant_id);
+      return tenantUser.tenant_id;
+    } catch (error) {
+      console.error('❌ خطأ في getCurrentTenantId:', error);
+      throw error;
+    }
   }
 
   /**

@@ -23,6 +23,36 @@ export interface GeneralLedgerEntry {
 }
 
 class AccountingService {
+  async getCurrentTenantId(): Promise<string> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('لا يوجد مستخدم مسجل');
+      }
+
+      const { data: tenantUser, error } = await supabase
+        .from('tenant_users')
+        .select('tenant_id')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (error) {
+        console.error('خطأ في جلب معرف المؤسسة:', error);
+        throw new Error('فشل في جلب معرف المؤسسة');
+      }
+
+      if (!tenantUser?.tenant_id) {
+        throw new Error('لم يتم العثور على مؤسسة للمستخدم');
+      }
+
+      return tenantUser.tenant_id;
+    } catch (error) {
+      console.error('خطأ في getCurrentTenantId:', error);
+      throw error;
+    }
+  }
+
   async getTrialBalance(): Promise<TrialBalanceItem[]> {
     try {
       const { data, error } = await supabase
@@ -478,11 +508,6 @@ class AccountingService {
       console.error('Error running diagnostics:', error);
       return null;
     }
-  }
-
-  getCurrentTenantId() {
-    // This would return the current tenant ID
-    return 'current-tenant-id';
   }
 }
 
