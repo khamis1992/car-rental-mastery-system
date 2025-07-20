@@ -131,10 +131,6 @@ const GeneralLedger = () => {
           <div className="lg:col-span-2">
             <Card className="card-elegant" ref={reportRef}>
               <CardHeader>
-                <CardTitle className="rtl-title flex items-center gap-2">
-                  <BookOpen className="w-6 h-6" />
-                  دفتر الأستاذ العام
-                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div id="general-ledger-report">
