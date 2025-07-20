@@ -104,7 +104,11 @@ class AccountingService {
         throw new Error('معاملات الاستعلام غير مكتملة');
       }
 
-      // استعلام محسن مع معالجة أفضل للأخطاء وفهرسة محسنة
+      if (!accountId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+        throw new Error('معرف الحساب غير صحيح');
+      }
+
+      // استعلام محسن مع فصل الترتيب عن الـ JOIN
       const { data: journalEntryLines, error } = await supabase
         .from('journal_entry_lines')
         .select(`
@@ -125,9 +129,7 @@ class AccountingService {
         .eq('account_id', accountId)
         .gte('journal_entries.entry_date', startDate)
         .lte('journal_entries.entry_date', endDate)
-        .eq('journal_entries.status', 'posted')
-        .order('journal_entries.entry_date', { ascending: true })
-        .order('created_at', { ascending: true });
+        .eq('journal_entries.status', 'posted');
 
       if (error) {
         console.error('❌ General ledger query error:', error);
@@ -141,9 +143,20 @@ class AccountingService {
         return [];
       }
 
-      // Process entries and calculate running balance
+      // ترتيب البيانات يدوياً بعد الحصول عليها
+      const sortedEntries = journalEntryLines.sort((a: any, b: any) => {
+        const dateA = new Date(a.journal_entries.entry_date);
+        const dateB = new Date(b.journal_entries.entry_date);
+        if (dateA.getTime() !== dateB.getTime()) {
+          return dateA.getTime() - dateB.getTime();
+        }
+        // إذا كان التاريخ متساوي، رتب حسب وقت الإنشاء
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      });
+
+      // معالجة البيانات وحساب الرصيد الجاري
       let runningBalance = 0;
-      const entries: GeneralLedgerEntry[] = journalEntryLines.map((line: any) => {
+      const entries: GeneralLedgerEntry[] = sortedEntries.map((line: any) => {
         const debitAmount = Number(line.debit_amount) || 0;
         const creditAmount = Number(line.credit_amount) || 0;
         runningBalance += (debitAmount - creditAmount);
@@ -164,6 +177,11 @@ class AccountingService {
       });
 
       console.log('✅ Processed entries successfully:', entries.length);
+      
+      if (entries.length === 0) {
+        console.log('⚠️ No entries found after processing');
+      }
+
       return entries;
 
     } catch (error) {

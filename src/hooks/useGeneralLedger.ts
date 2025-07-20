@@ -67,6 +67,10 @@ export const useGeneralLedger = (): UseGeneralLedgerReturn => {
       const accountsData = await accountingService.getActiveAccounts();
       setAccounts(accountsData);
       console.log('✅ Accounts loaded successfully:', accountsData.length);
+      
+      if (accountsData.length === 0) {
+        console.log('⚠️ No active accounts found');
+      }
     } catch (error) {
       console.error('❌ Error loading accounts:', error);
       const errorInstance = error instanceof Error ? error : new Error('فشل في تحميل الحسابات');
@@ -85,10 +89,21 @@ export const useGeneralLedger = (): UseGeneralLedgerReturn => {
       return;
     }
 
+    if (!startDate || !endDate) {
+      setError(new Error('يرجى تحديد نطاق تاريخ صحيح'));
+      return;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+      setError(new Error('تاريخ البداية يجب أن يكون قبل تاريخ النهاية'));
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       console.log('🔄 Loading ledger entries for account:', selectedAccountId);
+      console.log('📅 Date range:', { startDate, endDate });
       
       const entriesData = await accountingService.getGeneralLedgerEntries(
         selectedAccountId,
