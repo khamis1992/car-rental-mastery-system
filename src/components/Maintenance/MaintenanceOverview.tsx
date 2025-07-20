@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, Clock, AlertTriangle, Wrench, DollarSign, TrendingUp } from 'lucide-react';
+import { Calendar, Clock, AlertTriangle, Wrench, DollarSign, TrendingUp, Plus, Search, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
@@ -184,6 +184,48 @@ export const MaintenanceOverview = () => {
 
   return (
     <div className="space-y-6">
+      {/* إجراءات سريعة */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-right">إجراءات سريعة</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
+            <Button variant="outline" className="flex items-center gap-2 flex-row-reverse h-auto p-4 justify-start">
+              <Plus className="h-5 w-5 text-blue-600" />
+              <div className="text-right">
+                <div className="font-medium">جدولة صيانة</div>
+                <div className="text-sm text-muted-foreground">إضافة موعد صيانة جديد</div>
+              </div>
+            </Button>
+            
+            <Button variant="outline" className="flex items-center gap-2 flex-row-reverse h-auto p-4 justify-start">
+              <Search className="h-5 w-5 text-green-600" />
+              <div className="text-right">
+                <div className="font-medium">بحث عن صيانة</div>
+                <div className="text-sm text-muted-foreground">البحث في سجل الصيانة</div>
+              </div>
+            </Button>
+            
+            <Button variant="outline" className="flex items-center gap-2 flex-row-reverse h-auto p-4 justify-start">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <div className="text-right">
+                <div className="font-medium">الصيانة المتأخرة</div>
+                <div className="text-sm text-muted-foreground">عرض المهام المتأخرة</div>
+              </div>
+            </Button>
+            
+            <Button variant="outline" className="flex items-center gap-2 flex-row-reverse h-auto p-4 justify-start">
+              <FileText className="h-5 w-5 text-purple-600" />
+              <div className="text-right">
+                <div className="font-medium">تقارير الصيانة</div>
+                <div className="text-sm text-muted-foreground">عرض التقارير والإحصائيات</div>
+              </div>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* إحصائيات سريعة */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
