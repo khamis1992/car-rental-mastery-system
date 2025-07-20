@@ -8,82 +8,107 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { AccountingErrorBoundary } from '@/components/Accounting/AccountingErrorBoundary';
-import { useGeneralLedger } from '@/hooks/useGeneralLedger';
+import { useSafeGeneralLedger } from '@/hooks/useSafeGeneralLedger';
 
 const GeneralLedger = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const reportRef = useRef<HTMLDivElement>(null);
   
-  // استخدام الـ hook للحصول على بيانات الحسابات
+  // استخدام الـ hook الآمن للحصول على بيانات الحسابات
   const { 
     accounts, 
     loading: accountsLoading, 
     error: accountsError,
     loadAccounts 
-  } = useGeneralLedger();
+  } = useSafeGeneralLedger();
 
-  const handleViewAccounts = () => {
-    if (reportRef.current) {
-      reportRef.current.scrollIntoView({ behavior: 'smooth' });
-      toast({
-        title: "عرض الحسابات",
-        description: "تم التمرير إلى تقرير دفتر الأستاذ العام",
-      });
+  const handleViewAccounts = React.useCallback(() => {
+    try {
+      if (reportRef.current) {
+        reportRef.current.scrollIntoView({ behavior: 'smooth' });
+        toast({
+          title: "عرض الحسابات",
+          description: "تم التمرير إلى تقرير دفتر الأستاذ العام",
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error scrolling to report:', error);
     }
-  };
+  }, [toast]);
 
-  const handleGenerateReport = () => {
-    const content = document.getElementById('general-ledger-report');
-    if (content) {
-      window.print();
-      toast({
-        title: "إنشاء التقرير",
-        description: "تم فتح نافذة الطباعة لطباعة التقرير",
-      });
-    } else {
+  const handleGenerateReport = React.useCallback(() => {
+    try {
+      const content = document.getElementById('general-ledger-report');
+      if (content) {
+        window.print();
+        toast({
+          title: "إنشاء التقرير",
+          description: "تم فتح نافذة الطباعة لطباعة التقرير",
+        });
+      } else {
+        toast({
+          title: "خطأ",
+          description: "لم يتم العثور على محتوى التقرير",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error generating report:', error);
       toast({
         title: "خطأ",
-        description: "لم يتم العثور على محتوى التقرير",
+        description: "حدث خطأ أثناء إنشاء التقرير",
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
 
-  const handleOpenSearch = () => {
-    const searchInput = document.querySelector('input[type="search"]');
-    if (searchInput) {
-      (searchInput as HTMLInputElement).focus();
-      toast({
-        title: "فتح البحث",
-        description: "تم تفعيل خاصية البحث",
-      });
-    } else {
-      toast({
-        title: "البحث والفلترة",
-        description: "استخدم خيارات الفلترة المتاحة في التقرير أدناه",
-      });
+  const handleOpenSearch = React.useCallback(() => {
+    try {
+      const searchInput = document.querySelector('input[type="search"]');
+      if (searchInput) {
+        (searchInput as HTMLInputElement).focus();
+        toast({
+          title: "فتح البحث",
+          description: "تم تفعيل خاصية البحث",
+        });
+      } else {
+        toast({
+          title: "البحث والفلترة",
+          description: "استخدم خيارات الفلترة المتاحة في التقرير أدناه",
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error opening search:', error);
     }
-  };
+  }, [toast]);
 
-  const handleAnalyzeBalances = () => {
-    navigate('/financial-reports');
-    toast({
-      title: "تحليل الأرصدة",
-      description: "تم التنقل إلى صفحة التقارير المالية لتحليل الأرصدة",
-    });
-  };
+  const handleAnalyzeBalances = React.useCallback(() => {
+    try {
+      navigate('/financial-reports');
+      toast({
+        title: "تحليل الأرصدة",
+        description: "تم التنقل إلى صفحة التقارير المالية لتحليل الأرصدة",
+      });
+    } catch (error) {
+      console.error('❌ Error navigating to financial reports:', error);
+    }
+  }, [navigate, toast]);
 
-  const handleEntryCreated = () => {
-    toast({
-      title: "تم إنشاء القيد",
-      description: "تم إنشاء القيد المحاسبي بنجاح",
-    });
-    // إعادة تحميل البيانات إذا لزم الأمر
-    loadAccounts();
-  };
+  const handleEntryCreated = React.useCallback(() => {
+    try {
+      toast({
+        title: "تم إنشاء القيد",
+        description: "تم إنشاء القيد المحاسبي بنجاح",
+      });
+      // إعادة تحميل البيانات
+      loadAccounts();
+    } catch (error) {
+      console.error('❌ Error handling entry creation:', error);
+    }
+  }, [toast, loadAccounts]);
 
-  const ledgerFeatures = [
+  const ledgerFeatures = React.useMemo(() => [
     {
       title: "استعراض الحسابات",
       description: "عرض تفصيلي لحركة جميع الحسابات المحاسبية",
@@ -112,7 +137,17 @@ const GeneralLedger = () => {
       action: "تحليل الأرصدة",
       onClick: handleAnalyzeBalances
     }
-  ];
+  ], [handleViewAccounts, handleGenerateReport, handleOpenSearch, handleAnalyzeBalances]);
+
+  // حساب عدد الحسابات بطريقة آمنة
+  const accountsCount = React.useMemo(() => {
+    try {
+      return Array.isArray(accounts) ? accounts.length : 0;
+    } catch (error) {
+      console.error('❌ Error calculating accounts count:', error);
+      return 0;
+    }
+  }, [accounts]);
 
   return (
     <AccountingErrorBoundary>
@@ -210,7 +245,7 @@ const GeneralLedger = () => {
                 <div className="space-y-4">
                   <div className="text-center p-4 bg-muted rounded-lg">
                     <div className="text-2xl font-bold text-primary">
-                      {accounts?.length || 0}
+                      {accountsCount}
                     </div>
                     <div className="text-sm text-muted-foreground">الحسابات النشطة</div>
                   </div>
