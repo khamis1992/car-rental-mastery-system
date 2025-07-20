@@ -80,6 +80,8 @@
   
   .rtl-flex {
     display: flex;
+    align-items: center;
+    gap: 0.5rem;
     flex-direction: row-reverse;
   }
   
@@ -91,49 +93,32 @@
     @apply text-right font-medium block;
   }
   
+  /* تحسين تنسيق الأزرار والنصوص العربية */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  }
+  
+  .card-elegant {
+    @apply border bg-card text-card-foreground shadow-sm;
+  }
+  
   /* إصلاح محاذاة العناصر للعربية */
-  .rtl-content input,
-  .rtl-content textarea,
-  .rtl-content select {
+  [dir="rtl"] input,
+  [dir="rtl"] textarea,
+  [dir="rtl"] select {
     @apply text-right;
   }
   
-  .rtl-content .flex.items-center.gap-2 {
-    flex-direction: row-reverse;
-  }
-  
-  /* محاذاة الأزرار */
-  .rtl-content .dialog-footer {
-    display: flex;
-    flex-direction: row-reverse;
-    gap: 0.5rem;
-    justify-content: flex-start;
-  }
-  
-  /* محاذاة القوائم المنسدلة */
-  .rtl-content [role="combobox"] {
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] h4,
+  [dir="rtl"] h5,
+  [dir="rtl"] h6 {
     @apply text-right;
   }
   
-  /* تحسين المسافات للنصوص العربية */
-  .rtl-content h1,
-  .rtl-content h2,
-  .rtl-content h3,
-  .rtl-content h4,
-  .rtl-content h5,
-  .rtl-content h6 {
+  [dir="rtl"] p {
     @apply text-right;
-  }
-  
-  .rtl-content p {
-    @apply text-right;
-  }
-  
-  /* تحسين الأيقونات مع النص */
-  .rtl-content .icon-with-text {
-    display: flex;
-    flex-direction: row-reverse;
-    align-items: center;
-    gap: 0.5rem;
   }
 }
