@@ -148,33 +148,7 @@ const GeneralLedger = () => {
           
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick Actions */}
-            <Card className="card-elegant">
-              <CardHeader>
-                <CardTitle className="rtl-title">الإجراءات السريعة</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {ledgerFeatures.map((feature, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      className="w-full justify-start rtl-flex h-auto p-3"
-                      onClick={feature.onClick}
-                    >
-                      <div className="flex items-center gap-3 flex-row-reverse text-right">
-                        {feature.icon}
-                        <div>
-                          <div className="font-medium text-sm">{feature.title}</div>
-                          <div className="text-xs text-muted-foreground">{feature.description}</div>
-                        </div>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-            
+            {/* Quick Actions - تم حذفها */}
             {/* Quick Stats */}
             <Card className="card-elegant">
               <CardHeader>
