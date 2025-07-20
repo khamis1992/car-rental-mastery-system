@@ -114,7 +114,7 @@ class AccountingService {
             entry_date,
             description,
             reference_id,
-            reference_table
+            reference_type
           )
         `)
         .eq('account_id', accountId)
@@ -153,7 +153,7 @@ class AccountingService {
           credit_amount: creditAmount,
           running_balance: runningBalance,
           reference_id: journalEntry.reference_id || undefined,
-          reference_type: journalEntry.reference_table || undefined
+          reference_type: journalEntry.reference_type || undefined
         };
       });
 

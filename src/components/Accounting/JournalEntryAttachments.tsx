@@ -111,9 +111,18 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
 
         // If journal entry exists, save to database
         if (journalEntryId) {
-          // Get current tenant ID (you would implement this based on your tenant context)
+          // Get current tenant ID and session
           const { data: { session } } = await supabase.auth.getSession();
-          const tenantId = 'current-tenant-id'; // Replace with actual tenant ID from context
+          
+          // Get tenant ID from tenant_users table
+          const { data: tenantUser } = await supabase
+            .from('tenant_users')
+            .select('tenant_id')
+            .eq('user_id', session?.user?.id)
+            .eq('status', 'active')
+            .single();
+          
+          const tenantId = tenantUser?.tenant_id;
           
           const { data: attachmentData, error: dbError } = await supabase
             .from('journal_entry_attachments')
