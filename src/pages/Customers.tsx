@@ -33,6 +33,29 @@ import AddCustomerDialog from '@/components/Customers/AddCustomerDialog';
 const Customers = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
+  const handleViewDetails = (customerId: number) => {
+    console.log('عرض تفاصيل العميل:', customerId);
+    // يمكن إضافة منطق التنقل إلى صفحة تفاصيل العميل
+  };
+
+  const handleEditCustomer = (customerId: number) => {
+    console.log('تعديل العميل:', customerId);
+    // يمكن إضافة منطق فتح نموذج التعديل
+  };
+
+  const handleCreateContract = (customerId: number) => {
+    console.log('إنشاء عقد للعميل:', customerId);
+    // يمكن إضافة منطق التنقل إلى صفحة إنشاء العقد
+  };
+
+  const handleDeleteCustomer = (customerId: number) => {
+    console.log('حذف العميل:', customerId);
+    // يمكن إضافة منطق تأكيد الحذف
+    if (confirm('هل أنت متأكد من حذف هذا العميل؟')) {
+      // منطق الحذف
+    }
+  };
+
   const customers = [
     {
       id: 1,
@@ -183,10 +206,30 @@ const Customers = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>عرض التفاصيل</DropdownMenuItem>
-                          <DropdownMenuItem>تعديل</DropdownMenuItem>
-                          <DropdownMenuItem>إنشاء عقد</DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600">حذف</DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleViewDetails(customer.id)}
+                            className="cursor-pointer"
+                          >
+                            عرض التفاصيل
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleEditCustomer(customer.id)}
+                            className="cursor-pointer"
+                          >
+                            تعديل
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleCreateContract(customer.id)}
+                            className="cursor-pointer"
+                          >
+                            إنشاء عقد
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteCustomer(customer.id)}
+                            className="text-red-600 cursor-pointer"
+                          >
+                            حذف
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
