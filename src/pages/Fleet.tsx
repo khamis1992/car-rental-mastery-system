@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { Layout } from '@/components/Layout/Layout';
 import { AddVehicleForm } from '@/components/Fleet/AddVehicleForm';
 import { CSVImportDialog } from '@/components/Fleet/CSVImportDialog';
 import { FleetStats } from '@/components/Fleet/FleetStats';
@@ -89,78 +90,80 @@ const Fleet = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground rtl-title">إدارة الأسطول</h1>
-          <p className="text-muted-foreground">إدارة وتتبع جميع مركبات الأسطول</p>
+    <Layout>
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground rtl-title">إدارة الأسطول</h1>
+            <p className="text-muted-foreground">إدارة وتتبع جميع مركبات الأسطول</p>
+          </div>
+          
+          <div className="flex items-center gap-3 rtl-flex">
+            <Button 
+              variant="secondary"
+              onClick={() => setShowCSVImport(true)}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 rtl-flex"
+            >
+              <Upload className="w-4 h-4" />
+              استيراد CSV
+            </Button>
+            <Button 
+              className="btn-primary flex items-center gap-2 rtl-flex"
+              onClick={() => setShowAddForm(true)}
+            >
+              <Plus className="w-4 h-4" />
+              إضافة مركبة جديدة
+            </Button>
+          </div>
         </div>
-        
-        <div className="flex items-center gap-3 rtl-flex">
-          <Button 
-            variant="secondary"
-            onClick={() => setShowCSVImport(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 rtl-flex"
-          >
-            <Upload className="w-4 h-4" />
-            استيراد CSV
-          </Button>
-          <Button 
-            className="btn-primary flex items-center gap-2 rtl-flex"
-            onClick={() => setShowAddForm(true)}
-          >
-            <Plus className="w-4 h-4" />
-            إضافة مركبة جديدة
-          </Button>
-        </div>
+
+        <FleetStats vehicles={vehicles} />
+
+        <VehicleList
+          vehicles={vehicles}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          loading={loading}
+          onAddVehicle={() => setShowAddForm(true)}
+          onEditVehicle={handleEdit}
+          onViewVehicle={handleView}
+          onDeleteVehicle={handleDelete}
+        />
+
+        <AddVehicleForm
+          open={showAddForm}
+          onOpenChange={setShowAddForm}
+          onSuccess={fetchVehicles}
+        />
+
+        <CSVImportDialog
+          open={showCSVImport}
+          onOpenChange={setShowCSVImport}
+          onSuccess={fetchVehicles}
+        />
+
+        <VehicleDetailsDialog
+          vehicle={selectedVehicle}
+          open={showDetailsDialog}
+          onOpenChange={setShowDetailsDialog}
+        />
+
+        <EditVehicleForm
+          vehicle={selectedVehicle}
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          onSuccess={fetchVehicles}
+        />
+
+        <DeleteVehicleDialog
+          vehicle={selectedVehicle}
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          onConfirm={handleConfirmDelete}
+          isDeleting={isDeleting}
+        />
       </div>
-
-      <FleetStats vehicles={vehicles} />
-
-      <VehicleList
-        vehicles={vehicles}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        loading={loading}
-        onAddVehicle={() => setShowAddForm(true)}
-        onEditVehicle={handleEdit}
-        onViewVehicle={handleView}
-        onDeleteVehicle={handleDelete}
-      />
-
-      <AddVehicleForm
-        open={showAddForm}
-        onOpenChange={setShowAddForm}
-        onSuccess={fetchVehicles}
-      />
-
-      <CSVImportDialog
-        open={showCSVImport}
-        onOpenChange={setShowCSVImport}
-        onSuccess={fetchVehicles}
-      />
-
-      <VehicleDetailsDialog
-        vehicle={selectedVehicle}
-        open={showDetailsDialog}
-        onOpenChange={setShowDetailsDialog}
-      />
-
-      <EditVehicleForm
-        vehicle={selectedVehicle}
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-        onSuccess={fetchVehicles}
-      />
-
-      <DeleteVehicleDialog
-        vehicle={selectedVehicle}
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onConfirm={handleConfirmDelete}
-        isDeleting={isDeleting}
-      />
-    </div>
+    </Layout>
   );
 };
 
