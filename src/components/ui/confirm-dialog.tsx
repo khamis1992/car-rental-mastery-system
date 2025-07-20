@@ -61,7 +61,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleConfirm}
-            variant={variant === 'destructive' ? 'destructive' : 'default'}
+            className={variant === 'destructive' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
           >
             {confirmText}
           </AlertDialogAction>

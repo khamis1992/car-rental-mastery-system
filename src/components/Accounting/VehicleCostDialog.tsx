@@ -225,14 +225,6 @@ export const VehicleCostDialog: React.FC<VehicleCostDialogProps> = ({
       <Dialog 
         open={open} 
         onOpenChange={handleDialogOpenChange}
-        onEscapeKeyDown={(e) => {
-          e.preventDefault();
-          handleClose();
-        }}
-        onPointerDownOutside={(e) => {
-          e.preventDefault();
-          handleClose();
-        }}
       >
         <DialogContent className="max-w-2xl rtl-content">
           <DialogHeader>
