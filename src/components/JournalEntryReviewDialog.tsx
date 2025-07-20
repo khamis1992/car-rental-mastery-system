@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -132,10 +133,10 @@ export function JournalEntryReviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rtl-content">
         <DialogHeader>
-          <DialogTitle className="rtl-title">
-            <FileText className="h-5 w-5 ml-2" />
+          <DialogTitle className="rtl-title rtl-flex">
+            <FileText className="h-5 w-5" />
             مراجعة القيد المحاسبي
           </DialogTitle>
         </DialogHeader>
@@ -144,32 +145,32 @@ export function JournalEntryReviewDialog({
           {/* معلومات القيد */}
           <Card>
             <CardHeader>
-              <CardTitle>معلومات القيد</CardTitle>
+              <CardTitle className="rtl-title">معلومات القيد</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>رقم القيد</Label>
+                <div className="text-right">
+                  <Label className="rtl-label">رقم القيد</Label>
                   <p className="font-semibold">{review.journal_entry?.entry_number}</p>
                 </div>
-                <div>
-                  <Label>تاريخ القيد</Label>
+                <div className="text-right">
+                  <Label className="rtl-label">تاريخ القيد</Label>
                   <p>{review.journal_entry?.entry_date}</p>
                 </div>
               </div>
-              <div>
-                <Label>الوصف</Label>
+              <div className="text-right">
+                <Label className="rtl-label">الوصف</Label>
                 <p>{review.journal_entry?.description}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>إجمالي المدين</Label>
+                <div className="text-right">
+                  <Label className="rtl-label">إجمالي المدين</Label>
                   <p className="font-semibold text-green-600">
                     {review.journal_entry?.total_debit?.toLocaleString()} د.ك
                   </p>
                 </div>
-                <div>
-                  <Label>إجمالي الدائن</Label>
+                <div className="text-right">
+                  <Label className="rtl-label">إجمالي الدائن</Label>
                   <p className="font-semibold text-blue-600">
                     {review.journal_entry?.total_credit?.toLocaleString()} د.ك
                   </p>
@@ -181,12 +182,12 @@ export function JournalEntryReviewDialog({
           {/* قائمة المراجعة */}
           <Card>
             <CardHeader>
-              <CardTitle>قائمة المراجعة</CardTitle>
+              <CardTitle className="rtl-title">قائمة المراجعة</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {checklistItems.map((item, index) => (
-                  <div key={index} className="flex items-center space-x-2 space-x-reverse">
+                  <div key={index} className="flex items-center space-x-2 space-x-reverse rtl-flex">
                     <input
                       type="checkbox"
                       id={`checklist-${index}`}
@@ -194,7 +195,7 @@ export function JournalEntryReviewDialog({
                       onChange={(e) => handleChecklistChange(item, e.target.checked)}
                       className="rounded border-gray-300"
                     />
-                    <Label htmlFor={`checklist-${index}`} className="text-sm">
+                    <Label htmlFor={`checklist-${index}`} className="text-sm rtl-label">
                       {item}
                     </Label>
                   </div>
@@ -207,7 +208,7 @@ export function JournalEntryReviewDialog({
           {review.required_documents.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>المستندات المطلوبة</CardTitle>
+                <CardTitle className="rtl-title">المستندات المطلوبة</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -224,51 +225,49 @@ export function JournalEntryReviewDialog({
           {/* قرار المراجعة */}
           <Card>
             <CardHeader>
-              <CardTitle>قرار المراجعة</CardTitle>
+              <CardTitle className="rtl-title">قرار المراجعة</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <RadioGroup value={reviewStatus} onValueChange={setReviewStatus}>
-                <div className="flex items-center space-x-2 space-x-reverse">
+                <div className="flex items-center space-x-2 space-x-reverse rtl-flex">
                   <RadioGroupItem value="approved" id="approved" />
                   <Label htmlFor="approved" className="rtl-flex">
-                    <CheckCircle className="h-4 w-4 text-green-500 ml-2" />
+                    <CheckCircle className="h-4 w-4 text-green-500" />
                     موافق
                   </Label>
                 </div>
-                <div className="flex items-center space-x-2 space-x-reverse">
+                <div className="flex items-center space-x-2 space-x-reverse rtl-flex">
                   <RadioGroupItem value="needs_revision" id="needs_revision" />
                   <Label htmlFor="needs_revision" className="rtl-flex">
-                    <AlertCircle className="h-4 w-4 text-yellow-500 ml-2" />
+                    <AlertCircle className="h-4 w-4 text-yellow-500" />
                     يحتاج مراجعة
                   </Label>
                 </div>
-                <div className="flex items-center space-x-2 space-x-reverse">
+                <div className="flex items-center space-x-2 space-x-reverse rtl-flex">
                   <RadioGroupItem value="rejected" id="rejected" />
                   <Label htmlFor="rejected" className="rtl-flex">
-                    <XCircle className="h-4 w-4 text-red-500 ml-2" />
+                    <XCircle className="h-4 w-4 text-red-500" />
                     مرفوض
                   </Label>
                 </div>
               </RadioGroup>
 
-              <div>
-                <Label htmlFor="comments">تعليقات المراجعة</Label>
+              <div className="text-right">
+                <Label htmlFor="comments" className="rtl-label">تعليقات المراجعة</Label>
                 <Textarea
                   id="comments"
                   value={comments}
                   onChange={(e) => setComments(e.target.value)}
                   placeholder="أدخل تعليقاتك على المراجعة..."
                   rows={4}
+                  className="text-right"
                 />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <DialogFooter className="flex gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            إلغاء
-          </Button>
+        <DialogFooter className="flex gap-2 flex-row-reverse">
           <Button 
             onClick={handleSubmitReview}
             disabled={isSubmitting || !reviewStatus}
@@ -276,6 +275,9 @@ export function JournalEntryReviewDialog({
           >
             {getStatusIcon(reviewStatus)}
             {isSubmitting ? "جاري الحفظ..." : "حفظ المراجعة"}
+          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            إلغاء
           </Button>
         </DialogFooter>
       </DialogContent>
