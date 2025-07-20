@@ -1,547 +1,238 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Settings as SettingsIcon, Users, Building, Shield, Bell, Database, Palette, BookOpen, Download, FileText } from 'lucide-react';
+
+import React from 'react';
+import { Layout } from '@/components/Layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/contexts/AuthContext';
-import { useSettings } from '@/contexts/SettingsContext';
-import { useToast } from '@/hooks/use-toast';
-import OfficeLocationManager from '@/components/Settings/OfficeLocationManager';
-import AddUserDialog from '@/components/Settings/AddUserDialog';
-import UserManagementTabs from '@/components/Settings/UserManagementTabs';
-import CompanyBrandingManager from '@/components/Settings/CompanyBrandingManager';
-import { HTMLDocumentsService } from '@/lib/htmlDocumentsService';
-import { SystemFlowchartSection } from '@/components/Settings/SystemFlowchartSection';
+import { 
+  Settings as SettingsIcon, 
+  User, 
+  Bell, 
+  Shield, 
+  Database,
+  Palette,
+  Globe,
+  Save
+} from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 const Settings = () => {
-  const {
-    profile
-  } = useAuth();
-  const {
-    systemSettings: globalSystemSettings,
-    updateSystemSettings
-  } = useSettings();
-  const {
-    toast
-  } = useToast();
-  const [searchParams] = useSearchParams();
-  const activeTab = searchParams.get('tab') || 'company';
-  const [companySettings, setCompanySettings] = useState({
-    name: 'شركة النجوم لتأجير السيارات',
-    email: 'info@najoomrentals.com',
-    phone: '+966501234567',
-    address: 'الرياض، المملكة العربية السعودية',
-    taxNumber: '1234567890',
-    logo: ''
-  });
-  const [systemSettings, setSystemSettings] = useState(globalSystemSettings);
-  const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
-
-  // تحديث الحالة المحلية عند تغيير الإعدادات العامة
-  useEffect(() => {
-    setSystemSettings(globalSystemSettings);
-  }, [globalSystemSettings]);
-  const users = [{
-    id: '1',
-    name: 'أحمد محمد',
-    email: 'ahmed@company.com',
-    role: 'admin',
-    status: 'active',
-    lastLogin: '2025-01-01'
-  }, {
-    id: '2',
-    name: 'فاطمة علي',
-    email: 'fatima@company.com',
-    role: 'manager',
-    status: 'active',
-    lastLogin: '2024-12-31'
-  }, {
-    id: '3',
-    name: 'محمد سعد',
-    email: 'mohammed@company.com',
-    role: 'receptionist',
-    status: 'inactive',
-    lastLogin: '2024-12-28'
-  }];
-  const getRoleLabel = (role: string) => {
-    const roleLabels: Record<string, string> = {
-      admin: 'مدير النظام',
-      manager: 'مدير',
-      accountant: 'محاسب',
-      technician: 'فني',
-      receptionist: 'موظف استقبال'
-    };
-    return roleLabels[role] || role;
-  };
-  const getRoleColor = (role: string) => {
-    const roleColors: Record<string, string> = {
-      admin: 'bg-red-500',
-      manager: 'bg-blue-500',
-      accountant: 'bg-green-500',
-      technician: 'bg-orange-500',
-      receptionist: 'bg-gray-500'
-    };
-    return roleColors[role] || 'bg-gray-500';
-  };
-  const handleCompanySettingChange = (field: string, value: string) => {
-    setCompanySettings(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-  const handleSystemSettingChange = (field: string, value: any) => {
-    setSystemSettings(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-  const handleSaveSettings = () => {
-    try {
-      // حفظ إعدادات النظام في السياق العام
-      Object.keys(systemSettings).forEach(key => {
-        updateSystemSettings(key, systemSettings[key as keyof typeof systemSettings]);
-      });
-      toast({
-        title: "تم حفظ الإعدادات",
-        description: "تم حفظ جميع الإعدادات بنجاح"
-      });
-    } catch (error) {
-      toast({
-        title: "خطأ في حفظ الإعدادات",
-        description: "حدث خطأ أثناء حفظ الإعدادات",
-        variant: "destructive"
-      });
-    }
-  };
-  const handleUserAdded = () => {
-    // Refresh users list or show success message
-    toast({
-      title: "تم إضافة المستخدم",
-      description: "تم إضافة المستخدم الجديد بنجاح"
-    });
-  };
-  const handleDownloadGuide = async (guideType: string, guideName: string) => {
-    try {
-      const htmlService = new HTMLDocumentsService();
-
-      // فتح نافذة طباعة بتنسيق HTML
-      htmlService.openPrintWindow(guideType, guideName);
-      toast({
-        title: "تم فتح نافذة الطباعة",
-        description: `يمكنك الآن طباعة ${guideName} أو حفظه كـ PDF`
-      });
-    } catch (error) {
-      toast({
-        title: "خطأ في فتح الدليل",
-        description: "حدث خطأ أثناء فتح نافذة الطباعة",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Only allow admin and manager to access settings
-  if (!profile || profile.role !== 'admin' && profile.role !== 'manager') {
-    return <div className="p-6">
-        <Card className="card-elegant">
-          <CardContent className="p-8 text-center">
-            <Shield className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-muted-foreground mb-2">غير مصرح لك</h3>
-            <p className="text-sm text-muted-foreground">لا تملك الصلاحيات اللازمة للوصول إلى الإعدادات</p>
-          </CardContent>
-        </Card>
-      </div>;
-  }
-  return <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">إعدادات النظام</h1>
-          <p className="text-muted-foreground">إدارة إعدادات النظام والشركة والمستخدمين</p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button className="btn-primary flex items-center gap-2" onClick={handleSaveSettings}>
-            <SettingsIcon className="w-4 h-4" />
-            حفظ الإعدادات
+  return (
+    <Layout>
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground rtl-title">الإعدادات</h1>
+            <p className="text-muted-foreground">إدارة إعدادات النظام والحساب</p>
+          </div>
+          <Button className="btn-primary rtl-flex">
+            <Save className="w-4 h-4" />
+            حفظ التغييرات
           </Button>
         </div>
+
+        <Tabs defaultValue="profile" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="profile" className="flex items-center gap-2">
+              <User className="w-4 h-4" />
+              الملف الشخصي
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-2">
+              <Bell className="w-4 h-4" />
+              الإشعارات
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              الأمان
+            </TabsTrigger>
+            <TabsTrigger value="system" className="flex items-center gap-2">
+              <Database className="w-4 h-4" />
+              النظام
+            </TabsTrigger>
+            <TabsTrigger value="appearance" className="flex items-center gap-2">
+              <Palette className="w-4 h-4" />
+              المظهر
+            </TabsTrigger>
+            <TabsTrigger value="general" className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              عام
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="profile" className="space-y-4">
+            <Card className="card-elegant">
+              <CardHeader>
+                <CardTitle className="rtl-title">معلومات الملف الشخصي</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="fullName">الاسم الكامل</Label>
+                    <Input id="fullName" defaultValue="أحمد محمد السالم" />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">البريد الإلكتروني</Label>
+                    <Input id="email" type="email" defaultValue="ahmed@company.com" />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">رقم الهاتف</Label>
+                    <Input id="phone" defaultValue="+965 9999 8888" />
+                  </div>
+                  <div>
+                    <Label htmlFor="position">المنصب</Label>
+                    <Input id="position" defaultValue="مدير النظام" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="notifications" className="space-y-4">
+            <Card className="card-elegant">
+              <CardHeader>
+                <CardTitle className="rtl-title">إعدادات الإشعارات</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="email-notifications">إشعارات البريد الإلكتروني</Label>
+                    <p className="text-sm text-muted-foreground">استقبال الإشعارات عبر البريد الإلكتروني</p>
+                  </div>
+                  <Switch id="email-notifications" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="sms-notifications">الرسائل النصية</Label>
+                    <p className="text-sm text-muted-foreground">استقبال التنبيهات المهمة عبر الرسائل النصية</p>
+                  </div>
+                  <Switch id="sms-notifications" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="maintenance-alerts">تنبيهات الصيانة</Label>
+                    <p className="text-sm text-muted-foreground">إشعارات مواعيد الصيانة المجدولة</p>
+                  </div>
+                  <Switch id="maintenance-alerts" defaultChecked />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="security" className="space-y-4">
+            <Card className="card-elegant">
+              <CardHeader>
+                <CardTitle className="rtl-title">إعدادات الأمان</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="current-password">كلمة المرور الحالية</Label>
+                  <Input id="current-password" type="password" />
+                </div>
+                <div>
+                  <Label htmlFor="new-password">كلمة المرور الجديدة</Label>
+                  <Input id="new-password" type="password" />
+                </div>
+                <div>
+                  <Label htmlFor="confirm-password">تأكيد كلمة المرور</Label>
+                  <Input id="confirm-password" type="password" />
+                </div>
+                <div className="flex items-center justify-between mt-6">
+                  <div>
+                    <Label htmlFor="two-factor">المصادقة الثنائية</Label>
+                    <p className="text-sm text-muted-foreground">تفعيل المصادقة الثنائية لحماية إضافية</p>
+                  </div>
+                  <Switch id="two-factor" />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="system" className="space-y-4">
+            <Card className="card-elegant">
+              <CardHeader>
+                <CardTitle className="rtl-title">إعدادات النظام</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="auto-backup">النسخ الاحتياطي التلقائي</Label>
+                    <p className="text-sm text-muted-foreground">إنشاء نسخة احتياطية تلقائية يومياً</p>
+                  </div>
+                  <Switch id="auto-backup" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="maintenance-mode">وضع الصيانة</Label>
+                    <p className="text-sm text-muted-foreground">تفعيل وضع الصيانة للنظام</p>
+                  </div>
+                  <Switch id="maintenance-mode" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="debug-mode">وضع التشخيص</Label>
+                    <p className="text-sm text-muted-foreground">عرض معلومات إضافية للتشخيص</p>
+                  </div>
+                  <Switch id="debug-mode" />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="appearance" className="space-y-4">
+            <Card className="card-elegant">
+              <CardHeader>
+                <CardTitle className="rtl-title">إعدادات المظهر</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="dark-mode">الوضع الليلي</Label>
+                    <p className="text-sm text-muted-foreground">تفعيل المظهر الداكن</p>
+                  </div>
+                  <Switch id="dark-mode" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="compact-view">العرض المضغوط</Label>
+                    <p className="text-sm text-muted-foreground">عرض المزيد من المعلومات في مساحة أقل</p>
+                  </div>
+                  <Switch id="compact-view" />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="general" className="space-y-4">
+            <Card className="card-elegant">
+              <CardHeader>
+                <CardTitle className="rtl-title">الإعدادات العامة</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="company-name">اسم الشركة</Label>
+                  <Input id="company-name" defaultValue="شركة تأجير السيارات المتقدمة" />
+                </div>
+                <div>
+                  <Label htmlFor="currency">العملة الافتراضية</Label>
+                  <Input id="currency" defaultValue="الدينار الكويتي (د.ك)" />
+                </div>
+                <div>
+                  <Label htmlFor="timezone">المنطقة الزمنية</Label>
+                  <Input id="timezone" defaultValue="الكويت (GMT+3)" />
+                </div>
+                <div>
+                  <Label htmlFor="language">اللغة</Label>
+                  <Input id="language" defaultValue="العربية" />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
-
-      <Tabs defaultValue={activeTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="documentation">الأدلة والتوثيق</TabsTrigger>
-          <TabsTrigger value="notifications">الإشعارات</TabsTrigger>
-          <TabsTrigger value="branding">العلامة التجارية</TabsTrigger>
-          <TabsTrigger value="locations">مواقع المكاتب</TabsTrigger>
-          <TabsTrigger value="users">إدارة المستخدمين</TabsTrigger>
-          <TabsTrigger value="system">إعدادات النظام</TabsTrigger>
-          <TabsTrigger value="company">بيانات الشركة</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="company" className="space-y-4">
-          <Card className="card-elegant">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 rtl-flex rtl-title">
-                <Building className="w-5 h-5" />
-                معلومات الشركة
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="companyName" className="rtl-label text-right">اسم الشركة</Label>
-                  <Input id="companyName" value={companySettings.name} onChange={e => handleCompanySettingChange('name', e.target.value)} className="text-right" />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="companyEmail" className="rtl-label text-right">البريد الإلكتروني</Label>
-                  <Input id="companyEmail" type="email" value={companySettings.email} onChange={e => handleCompanySettingChange('email', e.target.value)} className="text-right" />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="companyPhone" className="rtl-label text-right">رقم الهاتف</Label>
-                  <Input id="companyPhone" value={companySettings.phone} onChange={e => handleCompanySettingChange('phone', e.target.value)} className="text-right" />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="taxNumber" className="rtl-label text-right">الرقم الضريبي</Label>
-                  <Input id="taxNumber" value={companySettings.taxNumber} onChange={e => handleCompanySettingChange('taxNumber', e.target.value)} className="text-right" />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="companyAddress" className="rtl-label text-right">العنوان</Label>
-                <Textarea id="companyAddress" value={companySettings.address} onChange={e => handleCompanySettingChange('address', e.target.value)} rows={3} className="text-right" />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="system" className="space-y-4">
-          <Card className="card-elegant">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 rtl-flex rtl-title">
-                <SettingsIcon className="w-5 h-5" />
-                إعدادات النظام العامة
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="currency" className="rtl-label text-right">العملة الافتراضية</Label>
-                  <Input id="currency" value={systemSettings.defaultCurrency} onChange={e => handleSystemSettingChange('defaultCurrency', e.target.value)} className="text-right" />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="timezone" className="rtl-label text-right">المنطقة الزمنية</Label>
-                  <Input id="timezone" value={systemSettings.timeZone} onChange={e => handleSystemSettingChange('timeZone', e.target.value)} className="text-right" />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="dateFormat" className="rtl-label text-right">تنسيق التاريخ</Label>
-                  <Input id="dateFormat" value={systemSettings.dateFormat} onChange={e => handleSystemSettingChange('dateFormat', e.target.value)} className="text-right" />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="language" className="rtl-label text-right">اللغة</Label>
-                  <Input id="language" value={systemSettings.language} onChange={e => handleSystemSettingChange('language', e.target.value)} className="text-right" />
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium rtl-title">إعدادات التنبيهات</h3>
-                
-                <div className="flex items-center justify-between">
-                  <Switch id="emailNotifications" checked={systemSettings.emailNotifications} onCheckedChange={checked => handleSystemSettingChange('emailNotifications', checked)} />
-                  <div className="text-right">
-                    <Label htmlFor="emailNotifications" className="rtl-label">إشعارات البريد الإلكتروني</Label>
-                    <p className="text-sm text-muted-foreground">تلقي إشعارات عبر البريد الإلكتروني</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Switch id="smsNotifications" checked={systemSettings.smsNotifications} onCheckedChange={checked => handleSystemSettingChange('smsNotifications', checked)} />
-                  <div className="text-right">
-                    <Label htmlFor="smsNotifications" className="rtl-label">إشعارات الرسائل النصية</Label>
-                    <p className="text-sm text-muted-foreground">تلقي إشعارات عبر الرسائل النصية</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Switch id="maintenanceMode" checked={systemSettings.maintenanceMode} onCheckedChange={checked => handleSystemSettingChange('maintenanceMode', checked)} />
-                  <div className="text-right">
-                    <Label htmlFor="maintenanceMode" className="rtl-label">وضع الصيانة</Label>
-                    <p className="text-sm text-muted-foreground">تعطيل النظام مؤقتاً للصيانة</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="users" className="space-y-4">
-          <Card className="card-elegant">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <Button className="btn-primary rtl-flex" onClick={() => setIsAddUserDialogOpen(true)}>
-                  <Users className="w-4 h-4" />
-                  دعوة مستخدم
-                </Button>
-                <CardTitle className="flex items-center gap-2 rtl-flex rtl-title">
-                  <Users className="w-5 h-5" />
-                  إدارة المستخدمين
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <UserManagementTabs />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="branding" className="space-y-4">
-          <CompanyBrandingManager />
-        </TabsContent>
-
-        <TabsContent value="locations" className="space-y-4">
-          <Card className="card-elegant">
-            <CardHeader>
-              
-            </CardHeader>
-            <CardContent>
-              <OfficeLocationManager />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="documentation" className="space-y-4">
-          <Card className="card-elegant">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 flex-row-reverse">
-                <BookOpen className="w-5 h-5" />
-                الأدلة والتوثيق
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="mb-6 text-right">
-                <h3 className="text-lg font-medium text-foreground mb-2">أدلة النظام</h3>
-                <p className="text-sm text-muted-foreground">
-                  تحميل الأدلة الشاملة لاستخدام النظام بصيغة PDF احترافية بحجم A4
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <SystemFlowchartSection />
-                
-                <Card className="border-2 hover:border-primary/50 transition-colors">
-                  <CardContent className="p-6 text-right">
-                    <div className="flex items-center gap-3 mb-4 rtl-flex">
-                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <FileText className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-foreground rtl-title">دليل المستخدم</h4>
-                        <p className="text-sm text-muted-foreground">الدليل الشامل للنظام</p>
-                      </div>
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-4 text-right">
-                      دليل شامل يغطي جميع أدوار المستخدمين، الواجهات، والعمليات الأساسية في النظام
-                    </p>
-                    
-                    <Button className="w-full btn-primary flex items-center gap-2 flex-row-reverse" onClick={() => handleDownloadGuide('user-manual', 'دليل_المستخدم')}>
-                      <Download className="w-4 h-4" />
-                      تحميل/طباعة
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-2 hover:border-primary/50 transition-colors">
-                  <CardContent className="p-6 text-right">
-                    <div className="flex items-center gap-3 mb-4 flex-row-reverse">
-                      <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
-                        <FileText className="w-6 h-6 text-green-500" />
-                      </div>
-                      <div className="text-right">
-                        <h4 className="font-medium text-foreground">دليل إدارة العقود</h4>
-                        <p className="text-sm text-muted-foreground">دورة حياة العقد كاملة</p>
-                      </div>
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-4 text-right">
-                      شرح مفصل لجميع مراحل العقد من الإنشاء حتى الإكمال، تسليم واستقبال المركبات
-                    </p>
-                    
-                    <Button className="w-full btn-primary flex items-center gap-2 flex-row-reverse" onClick={() => handleDownloadGuide('contracts-guide', 'دليل_إدارة_العقود')}>
-                      <Download className="w-4 h-4" />
-                      تحميل/طباعة
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-2 hover:border-primary/50 transition-colors">
-                  <CardContent className="p-6 text-right">
-                    <div className="flex items-center gap-3 mb-4 flex-row-reverse">
-                      <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                        <FileText className="w-6 h-6 text-blue-500" />
-                      </div>
-                      <div className="text-right">
-                        <h4 className="font-medium text-foreground">دليل النظام المحاسبي</h4>
-                        <p className="text-sm text-muted-foreground">المحاسبة والتقارير المالية</p>
-                      </div>
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-4 text-right">
-                      دليل شامل للنظام المحاسبي، دليل الحسابات، القيود المحاسبية والتقارير المالية
-                    </p>
-                    
-                    <Button className="w-full btn-primary flex items-center gap-2 flex-row-reverse" onClick={() => handleDownloadGuide('accounting-guide', 'دليل_النظام_المحاسبي')}>
-                      <Download className="w-4 h-4" />
-                      تحميل/طباعة
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-2 hover:border-primary/50 transition-colors">
-                  <CardContent className="p-6 text-right">
-                    <div className="flex items-center gap-3 mb-4 flex-row-reverse">
-                      <div className="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center">
-                        <FileText className="w-6 h-6 text-red-500" />
-                      </div>
-                      <div className="text-right">
-                        <h4 className="font-medium text-foreground">دليل استكشاف الأخطاء</h4>
-                        <p className="text-sm text-muted-foreground">حل المشاكل الشائعة</p>
-                      </div>
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-4 text-right">
-                      دليل شامل لحل جميع المشاكل الشائعة في النظام وإجراءات الطوارئ
-                    </p>
-                    
-                    <Button className="w-full btn-primary flex items-center gap-2 flex-row-reverse" onClick={() => handleDownloadGuide('troubleshooting-guide', 'دليل_استكشاف_الأخطاء')}>
-                      <Download className="w-4 h-4" />
-                      تحميل/طباعة
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-2 hover:border-primary/50 transition-colors">
-                  <CardContent className="p-6 text-right">
-                    <div className="flex items-center gap-3 mb-4 flex-row-reverse">
-                      <div className="w-12 h-12 bg-orange-500/10 rounded-lg flex items-center justify-center">
-                        <SettingsIcon className="w-6 h-6 text-orange-500" />
-                      </div>
-                      <div className="text-right">
-                        <h4 className="font-medium text-foreground">دليل الإعداد والتكوين</h4>
-                        <p className="text-sm text-muted-foreground">إعداد النظام الأولي</p>
-                      </div>
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-4 text-right">
-                      دليل شامل لإعداد النظام، تكوين الشركة، المستخدمين والإعدادات الأولية
-                    </p>
-                    
-                    <Button className="w-full btn-primary flex items-center gap-2 flex-row-reverse" onClick={() => handleDownloadGuide('setup-guide', 'دليل_الإعداد_والتكوين')}>
-                      <Download className="w-4 h-4" />
-                      تحميل/طباعة
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="bg-muted/30 p-6 rounded-lg border">
-                <div className="flex items-start gap-3 flex-row-reverse text-right">
-                  <div className="w-8 h-8 bg-blue-500/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <BookOpen className="w-4 h-4 text-blue-500" />
-                  </div>
-                  <div className="text-right">
-                    <h4 className="font-medium text-foreground mb-2">ملاحظات مهمة حول الأدلة</h4>
-                    <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside text-right">
-                      <li>جميع الأدلة محدثة ومتوافقة مع أحدث إصدار من النظام</li>
-                      <li>تنسيق HTML محسن للطباعة بحجم A4 مع إمكانية حفظ كـ PDF</li>
-                      <li>تدعم الخط العربي مع تخطيط RTL مناسب للغة العربية</li>
-                      <li>تحتوي على تنسيق احترافي مع ألوان وعناوين منظمة</li>
-                      <li>يمكن طباعتها مباشرة من المتصفح أو حفظها كـ PDF</li>
-                      <li>يتم تحديث الأدلة دورياً مع كل تحديث للنظام</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="notifications" className="space-y-4">
-          <Card className="card-elegant">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="w-5 h-5" />
-                إعدادات الإشعارات
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Switch defaultChecked />
-                  <div className="text-right">
-                    <Label>إشعارات العقود المنتهية</Label>
-                    <p className="text-sm text-muted-foreground">تنبيه عند انتهاء صلاحية العقود</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Switch defaultChecked />
-                  <div className="text-right">
-                    <Label>إشعارات الصيانة المجدولة</Label>
-                    <p className="text-sm text-muted-foreground">تنبيه قبل موعد الصيانة المجدولة</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Switch defaultChecked />
-                  <div className="text-right">
-                    <Label>إشعارات المدفوعات المتأخرة</Label>
-                    <p className="text-sm text-muted-foreground">تنبيه عند تأخر المدفوعات</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Switch />
-                  <div className="text-right">
-                    <Label>إشعارات العملاء الجدد</Label>
-                    <p className="text-sm text-muted-foreground">تنبيه عند تسجيل عميل جديد</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Switch defaultChecked />
-                  <div className="text-right">
-                    <Label>إشعارات انتهاء التأمين</Label>
-                    <p className="text-sm text-muted-foreground">تنبيه قبل انتهاء تأمين المركبات</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                   <Switch checked={systemSettings.attendanceEnabled} onCheckedChange={checked => handleSystemSettingChange('attendanceEnabled', checked)} />
-                  <div className="text-right">
-                    <Label>تفعيل نظام الحضور والغياب</Label>
-                    <p className="text-sm text-muted-foreground">إظهار أو إخفاء تبويبة الحضور والغياب من القائمة الرئيسية</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      <AddUserDialog open={isAddUserDialogOpen} onOpenChange={setIsAddUserDialogOpen} onUserAdded={handleUserAdded} />
-    </div>;
+    </Layout>
+  );
 };
+
 export default Settings;
