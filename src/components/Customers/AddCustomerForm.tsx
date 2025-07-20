@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { tenantIsolationMiddleware } from '@/middleware/TenantIsolationMiddleware';
 import { User, Building, Save, Loader } from 'lucide-react';
 
 interface AddCustomerFormProps {
@@ -95,6 +96,31 @@ const AddCustomerForm: React.FC<AddCustomerFormProps> = ({ onCustomerAdded }) =>
     setLoading(true);
     
     try {
+      // التحقق من صحة المؤسسة الحالية وجلب معرفها
+      let tenantId: string;
+      try {
+        tenantId = await tenantIsolationMiddleware.getCurrentTenantId();
+      } catch (tenantError) {
+        console.error('خطأ في جلب معرف المؤسسة:', tenantError);
+        toast({
+          title: "خطأ في الصلاحيات",
+          description: "لا يمكن تحديد المؤسسة الحالية. يرجى تسجيل الدخول مرة أخرى.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // التحقق من صحة العملية
+      const validation = await tenantIsolationMiddleware.validateOperation('customers', 'insert');
+      if (!validation.valid) {
+        toast({
+          title: "خطأ في الصلاحيات",
+          description: validation.error || "غير مصرح بهذه العملية",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // توليد رقم العميل
       const { data: customerNumber, error: numberError } = await supabase
         .rpc('generate_customer_number');
@@ -109,7 +135,7 @@ const AddCustomerForm: React.FC<AddCustomerFormProps> = ({ onCustomerAdded }) =>
         return;
       }
 
-      // إضافة العميل
+      // تحضير بيانات العميل مع معرف المؤسسة
       const customerData = {
         customer_number: customerNumber,
         customer_type: customerType,
@@ -124,34 +150,64 @@ const AddCustomerForm: React.FC<AddCustomerFormProps> = ({ onCustomerAdded }) =>
         company_registration_number: customerType === 'company' ? formData.company_registration_number.trim() || null : null,
         tax_number: customerType === 'company' ? formData.tax_number.trim() || null : null,
         notes: formData.notes.trim() || null,
-        created_by: user?.id
+        created_by: user?.id,
+        tenant_id: tenantId // إضافة معرف المؤسسة بشكل صحيح
       };
 
+      // إدراج العميل في قاعدة البيانات
       const { error } = await supabase
         .from('customers')
-        .insert([{
-          ...customerData,
-          tenant_id: null as any // Will be set by trigger
-        }]);
+        .insert([customerData]);
 
       if (error) {
         console.error('خطأ في إضافة العميل:', error);
         
+        // التعامل مع أنواع الأخطاء المختلفة
         if (error.code === '23505') {
+          // خطأ المفتاح المكرر (duplicate key)
+          if (error.message.includes('phone')) {
+            toast({
+              title: "خطأ",
+              description: "رقم الهاتف مستخدم مسبقاً لعميل آخر",
+              variant: "destructive",
+            });
+          } else if (error.message.includes('email')) {
+            toast({
+              title: "خطأ",
+              description: "البريد الإلكتروني مستخدم مسبقاً لعميل آخر",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "خطأ",
+              description: "البيانات مستخدمة مسبقاً",
+              variant: "destructive",
+            });
+          }
+        } else if (error.code === '42501') {
+          // خطأ في الصلاحيات
           toast({
-            title: "خطأ",
-            description: "رقم الهاتف أو البريد الإلكتروني مستخدم مسبقاً",
+            title: "خطأ في الصلاحيات",
+            description: "ليس لديك صلاحية لإضافة عملاء. يرجى التواصل مع المدير.",
             variant: "destructive",
           });
         } else {
+          // أخطاء أخرى
           toast({
             title: "خطأ",
-            description: "فشل في إضافة العميل",
+            description: `فشل في إضافة العميل: ${error.message || 'خطأ غير معروف'}`,
             variant: "destructive",
           });
         }
         return;
       }
+
+      // نجح الإدراج
+      toast({
+        title: "نجح الحفظ",
+        description: "تم إضافة العميل بنجاح",
+        variant: "default",
+      });
 
       // إعادة تعيين النموذج
       setFormData({
