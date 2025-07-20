@@ -1,235 +1,123 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { BookOpen, Calendar, Search, AlertTriangle, RefreshCw } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
+import { CalendarIcon, Search, Filter, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-interface ChartOfAccount {
-  id: string;
-  account_code: string;
-  account_name: string;
-  account_type: string;
-  current_balance: number;
-}
-
-interface GeneralLedgerEntry {
-  id: string;
-  entry_date: string;
-  entry_number: string;
-  description: string;
-  debit_amount: number;
-  credit_amount: number;
-  running_balance: number;
-  reference_id?: string;
-  reference_type?: string;
-  detailed_description?: string;
-  contract_reference?: string;
-  invoice_reference?: string;
-  asset_reference?: string;
-}
+import { useGeneralLedger } from '@/hooks/useGeneralLedger';
+import { ErrorDisplay } from './ErrorDisplay';
+import type { GeneralLedgerEntry } from '@/services/accountingService';
 
 export const GeneralLedgerReport: React.FC = () => {
-  const [accounts, setAccounts] = useState<ChartOfAccount[]>([]);
-  const [selectedAccountId, setSelectedAccountId] = useState<string>('');
-  const [ledgerEntries, setLedgerEntries] = useState<GeneralLedgerEntry[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [accountsLoading, setAccountsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [dateRange, setDateRange] = useState({
-    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0]
-  });
+  const {
+    accounts,
+    loading,
+    error,
+    selectedAccountId,
+    startDate,
+    endDate,
+    searchTerm,
+    setSelectedAccountId,
+    setStartDate,
+    setEndDate,
+    setSearchTerm,
+    loadLedgerEntries,
+    clearError,
+    filteredEntries,
+    summary
+  } = useGeneralLedger();
+  
   const { toast } = useToast();
 
-  // Load accounts on component mount
-  useEffect(() => {
-    loadAccounts();
-  }, []);
-
-  // Load ledger entries when account or date range changes
-  useEffect(() => {
-    if (selectedAccountId) {
-      loadLedgerEntries();
-    } else {
-      setLedgerEntries([]);
-    }
-  }, [selectedAccountId, dateRange]);
-
-  const loadAccounts = async () => {
-    try {
-      setAccountsLoading(true);
-      setError(null);
-      
-      console.log('Loading accounts...');
-      
-      const { data, error: accountsError } = await supabase
-        .from('chart_of_accounts')
-        .select('id, account_code, account_name, account_type, current_balance')
-        .eq('is_active', true)
-        .eq('allow_posting', true)
-        .order('account_code');
-
-      if (accountsError) {
-        console.error('Error loading accounts:', accountsError);
-        throw new Error(`فشل في تحميل الحسابات: ${accountsError.message}`);
-      }
-
-      console.log('Accounts loaded successfully:', data?.length || 0);
-      setAccounts(data || []);
-      
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف في تحميل الحسابات';
-      console.error('Load accounts error:', errorMessage);
-      setError(errorMessage);
+  const handleLoadEntries = async () => {
+    if (!selectedAccountId) {
       toast({
-        title: 'خطأ',
-        description: errorMessage,
-        variant: 'destructive',
+        title: "تنبيه",
+        description: "يرجى اختيار حساب أولاً",
+        variant: "destructive",
       });
-    } finally {
-      setAccountsLoading(false);
+      return;
+    }
+
+    await loadLedgerEntries();
+    
+    if (summary.entriesCount > 0) {
+      toast({
+        title: "نجح التحميل",
+        description: `تم تحميل ${summary.entriesCount} قيد محاسبي`,
+      });
     }
   };
 
-  const loadLedgerEntries = async () => {
-    if (!selectedAccountId) return;
+  const selectedAccount = accounts.find(acc => acc.id === selectedAccountId);
 
-    try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('Loading ledger entries for account:', selectedAccountId);
-      console.log('Date range:', dateRange);
-
-      // Fixed query with correct table name and join
-      const { data, error: ledgerError } = await supabase
-        .from('journal_entry_lines')
-        .select(`
-          id,
-          debit_amount,
-          credit_amount,
-          description,
-          reference_id,
-          reference_type,
-          detailed_description,
-          contract_reference,
-          invoice_reference,
-          asset_reference,
-          created_at,
-          journal_entries!inner (
-            id,
-            entry_number,
-            entry_date,
-            description
-          )
-        `)
-        .eq('account_id', selectedAccountId)
-        .gte('journal_entries.entry_date', dateRange.startDate)
-        .lte('journal_entries.entry_date', dateRange.endDate)
-        .order('created_at', { ascending: true });
-
-      if (ledgerError) {
-        console.error('Error loading ledger entries:', ledgerError);
-        throw new Error(`فشل في تحميل بيانات دفتر الأستاذ: ${ledgerError.message}`);
-      }
-
-      console.log('Raw ledger data:', data);
-
-      // Process and calculate running balance
-      let runningBalance = 0;
-      const processedEntries: GeneralLedgerEntry[] = (data || []).map((entry: any) => {
-        const debitAmount = entry.debit_amount || 0;
-        const creditAmount = entry.credit_amount || 0;
-        runningBalance += (debitAmount - creditAmount);
-
-        return {
-          id: entry.id,
-          entry_date: entry.journal_entries.entry_date,
-          entry_number: entry.journal_entries.entry_number,
-          description: entry.description || entry.journal_entries.description,
-          debit_amount: debitAmount,
-          credit_amount: creditAmount,
-          running_balance: runningBalance,
-          reference_id: entry.reference_id,
-          reference_type: entry.reference_type,
-          detailed_description: entry.detailed_description,
-          contract_reference: entry.contract_reference,
-          invoice_reference: entry.invoice_reference,
-          asset_reference: entry.asset_reference
-        };
-      });
-
-      console.log('Processed entries:', processedEntries.length);
-      setLedgerEntries(processedEntries);
-      
-      toast({
-        title: 'تم التحميل',
-        description: `تم تحميل ${processedEntries.length} قيد محاسبي`,
-      });
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف في تحميل دفتر الأستاذ';
-      console.error('Load ledger entries error:', errorMessage);
-      setError(errorMessage);
-      toast({
-        title: 'خطأ',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRefresh = () => {
-    if (selectedAccountId) {
-      loadLedgerEntries();
-    } else {
-      loadAccounts();
-    }
-  };
-
-  const formatAmount = (amount: number) => {
-    return amount.toFixed(3);
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('ar-KW', {
+      style: 'currency',
+      currency: 'KWD',
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3
+    }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ar-KW');
   };
 
-  const selectedAccount = accounts.find(acc => acc.id === selectedAccountId);
+  const getReferenceDisplay = (entry: GeneralLedgerEntry) => {
+    if (!entry.reference_id || !entry.reference_type) return null;
+    
+    const getTypeLabel = (type: string) => {
+      switch (type) {
+        case 'contracts': return 'عقد';
+        case 'invoices': return 'فاتورة';
+        case 'assets': return 'أصل';
+        default: return type;
+      }
+    };
 
-  if (accountsLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-40 w-full" />
-      </div>
+      <Badge variant="outline" className="text-xs">
+        <ExternalLink className="w-3 h-3 ml-1" />
+        {getTypeLabel(entry.reference_type)}
+      </Badge>
+    );
+  };
+
+  if (error) {
+    return (
+      <ErrorDisplay 
+        error={error} 
+        title="خطأ في دفتر الأستاذ العام"
+        onRetry={() => {
+          clearError();
+          if (selectedAccountId) {
+            loadLedgerEntries();
+          }
+        }}
+        showDetails={true}
+      />
     );
   }
 
   return (
     <div className="space-y-6">
       {/* Filters Section */}
-      <Card className="card-elegant">
+      <Card>
         <CardHeader>
           <CardTitle className="rtl-title flex items-center gap-2">
-            <Search className="w-5 h-5" />
-            فلاتر دفتر الأستاذ العام
+            <Filter className="w-5 h-5" />
+            فلترة البيانات
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <div>
-              <Label htmlFor="account">الحساب</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label className="rtl-label">الحساب</Label>
               <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
                 <SelectTrigger>
                   <SelectValue placeholder="اختر الحساب" />
@@ -244,71 +132,77 @@ export const GeneralLedgerReport: React.FC = () => {
               </Select>
             </div>
 
-            <div>
-              <Label htmlFor="start_date">من تاريخ</Label>
+            <div className="space-y-2">
+              <Label className="rtl-label">من تاريخ</Label>
               <Input
-                id="start_date"
                 type="date"
-                value={dateRange.startDate}
-                onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
               />
             </div>
 
-            <div>
-              <Label htmlFor="end_date">إلى تاريخ</Label>
+            <div className="space-y-2">
+              <Label className="rtl-label">إلى تاريخ</Label>
               <Input
-                id="end_date"
                 type="date"
-                value={dateRange.endDate}
-                onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
               />
             </div>
 
-            <div className="flex gap-2">
-              <Button 
-                onClick={handleRefresh} 
-                disabled={loading}
-                className="rtl-flex"
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                تحديث
-              </Button>
+            <div className="space-y-2">
+              <Label className="rtl-label">بحث</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="بحث في الوصف أو رقم القيد..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
+          </div>
+
+          <div className="flex justify-start mt-4">
+            <Button 
+              onClick={handleLoadEntries} 
+              disabled={loading || !selectedAccountId}
+              className="rtl-flex"
+            >
+              {loading ? 'جاري التحميل...' : 'عرض البيانات'}
+              <CalendarIcon className="w-4 h-4" />
+            </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Error Display */}
-      {error && (
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
       {/* Account Summary */}
       {selectedAccount && (
-        <Card className="card-elegant">
+        <Card>
           <CardHeader>
-            <CardTitle className="rtl-title">
-              معلومات الحساب - {selectedAccount.account_code}
-            </CardTitle>
+            <CardTitle className="rtl-title">ملخص الحساب</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">اسم الحساب</p>
-                <p className="font-semibold">{selectedAccount.account_name}</p>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-muted rounded-lg">
+                <div className="text-sm text-muted-foreground">اسم الحساب</div>
+                <div className="font-semibold">{selectedAccount.account_name}</div>
+                <div className="text-xs text-muted-foreground">{selectedAccount.account_code}</div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">نوع الحساب</p>
-                <p className="font-semibold">{selectedAccount.account_type}</p>
+              <div className="text-center p-4 bg-muted rounded-lg">
+                <div className="text-sm text-muted-foreground">إجمالي المدين</div>
+                <div className="font-semibold text-green-600">{formatCurrency(summary.totalDebit)}</div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">الرصيد الحالي</p>
-                <p className={`font-semibold text-lg ${selectedAccount.current_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  د.ك {formatAmount(selectedAccount.current_balance)}
-                </p>
+              <div className="text-center p-4 bg-muted rounded-lg">
+                <div className="text-sm text-muted-foreground">إجمالي الدائن</div>
+                <div className="font-semibold text-red-600">{formatCurrency(summary.totalCredit)}</div>
+              </div>
+              <div className="text-center p-4 bg-muted rounded-lg">
+                <div className="text-sm text-muted-foreground">الرصيد النهائي</div>
+                <div className={`font-semibold ${summary.finalBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {formatCurrency(summary.finalBalance)}
+                </div>
               </div>
             </div>
           </CardContent>
@@ -316,119 +210,58 @@ export const GeneralLedgerReport: React.FC = () => {
       )}
 
       {/* Ledger Entries Table */}
-      <Card className="card-elegant">
+      <Card>
         <CardHeader>
-          <CardTitle className="rtl-title flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-5 h-5" />
-              حركة الحساب
-            </div>
-            {selectedAccount && (
-              <span className="text-sm font-normal text-muted-foreground">
-                {ledgerEntries.length} قيد
-              </span>
+          <CardTitle className="rtl-title">
+            حركة الحساب
+            {summary.entriesCount > 0 && (
+              <Badge variant="secondary" className="mr-2">
+                {summary.entriesCount} قيد
+              </Badge>
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="p-6">
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
-                ))}
-              </div>
-            </div>
-          ) : !selectedAccountId ? (
-            <div className="text-center py-12">
-              <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-lg text-muted-foreground">يرجى اختيار حساب لعرض حركته</p>
-            </div>
-          ) : ledgerEntries.length === 0 ? (
-            <div className="text-center py-12">
-              <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-lg text-muted-foreground">لا توجد حركات للحساب في هذة الفترة</p>
-              <p className="text-sm text-muted-foreground mt-2">جرب تغيير نطاق التاريخ</p>
+        <CardContent>
+          {filteredEntries.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {selectedAccountId ? 'لا توجد قيود محاسبية في الفترة المحددة' : 'يرجى اختيار حساب للعرض'}
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted">
-                    <TableHead className="text-center font-bold">الرصيد المتراكم</TableHead>
-                    <TableHead className="text-center font-bold">دائن</TableHead>
-                    <TableHead className="text-center font-bold">مدين</TableHead>
-                    <TableHead className="text-center font-bold">المرجع</TableHead>
-                    <TableHead className="text-center font-bold">البيان</TableHead>
-                    <TableHead className="text-center font-bold">رقم القيد</TableHead>
-                    <TableHead className="text-center font-bold">التاريخ</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {ledgerEntries.map((entry) => (
-                    <TableRow key={entry.id} className="hover:bg-muted/50">
-                      <TableCell className="text-center font-medium">
-                        <span className={entry.running_balance >= 0 ? 'text-green-600' : 'text-red-600'}>
-                          د.ك {formatAmount(Math.abs(entry.running_balance))}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {entry.credit_amount > 0 && (
-                          <span className="text-blue-600">د.ك {formatAmount(entry.credit_amount)}</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {entry.debit_amount > 0 && (
-                          <span className="text-green-600">د.ك {formatAmount(entry.debit_amount)}</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-center max-w-xs">
-                        <div className="space-y-1">
-                          {entry.contract_reference && (
-                            <div className="flex items-center justify-center gap-1">
-                              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">عقد</span>
-                              <span className="text-xs">{entry.contract_reference}</span>
-                            </div>
-                          )}
-                          {entry.invoice_reference && (
-                            <div className="flex items-center justify-center gap-1">
-                              <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">فاتورة</span>
-                              <span className="text-xs">{entry.invoice_reference}</span>
-                            </div>
-                          )}
-                          {entry.asset_reference && (
-                            <div className="flex items-center justify-center gap-1">
-                              <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs">أصل</span>
-                              <span className="text-xs">{entry.asset_reference}</span>
-                            </div>
-                          )}
-                          {entry.reference_type && !entry.contract_reference && !entry.invoice_reference && !entry.asset_reference && (
-                            <div className="flex items-center justify-center gap-1">
-                              <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">{entry.reference_type}</span>
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right max-w-xs">
-                        <div className="truncate" title={entry.description}>
-                          {entry.description}
-                        </div>
-                        {entry.detailed_description && (
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {entry.detailed_description}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-center font-mono">
-                        {entry.entry_number}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {formatDate(entry.entry_date)}
-                      </TableCell>
-                    </TableRow>
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-right p-3">التاريخ</th>
+                    <th className="text-right p-3">رقم القيد</th>
+                    <th className="text-right p-3">الوصف</th>
+                    <th className="text-right p-3">مدين</th>
+                    <th className="text-right p-3">دائن</th>
+                    <th className="text-right p-3">الرصيد</th>
+                    <th className="text-right p-3">المرجع</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredEntries.map((entry) => (
+                    <tr key={entry.id} className="border-b hover:bg-muted/50">
+                      <td className="p-3 text-sm">{formatDate(entry.entry_date)}</td>
+                      <td className="p-3 text-sm font-mono">{entry.entry_number}</td>
+                      <td className="p-3 text-sm">{entry.description}</td>
+                      <td className="p-3 text-sm text-green-600">
+                        {entry.debit_amount > 0 ? formatCurrency(entry.debit_amount) : '-'}
+                      </td>
+                      <td className="p-3 text-sm text-red-600">
+                        {entry.credit_amount > 0 ? formatCurrency(entry.credit_amount) : '-'}
+                      </td>
+                      <td className={`p-3 text-sm font-medium ${entry.running_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatCurrency(entry.running_balance)}
+                      </td>
+                      <td className="p-3 text-sm">
+                        {getReferenceDisplay(entry)}
+                      </td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
+                </tbody>
+              </table>
             </div>
           )}
         </CardContent>

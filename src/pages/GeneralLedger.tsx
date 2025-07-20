@@ -7,6 +7,7 @@ import { ArrowRight, BookOpen, FileText, Download, Calculator, Search, Filter } 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const GeneralLedger = () => {
   const navigate = useNavigate();
@@ -97,110 +98,115 @@ const GeneralLedger = () => {
   ];
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground rtl-title">دفتر الأستاذ العام</h1>
-          <p className="text-muted-foreground">عرض وإدارة حركة الحسابات المحاسبية</p>
+    <ErrorBoundary>
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground rtl-title">دفتر الأستاذ العام</h1>
+            <p className="text-muted-foreground">عرض وإدارة حركة الحسابات المحاسبية</p>
+          </div>
+          
+          <div className="flex items-center gap-2 flex-row-reverse">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/financial-reports')}
+              className="rtl-flex"
+            >
+              <ArrowRight className="w-4 h-4" />
+              العودة للتقارير المالية
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/chart-of-accounts')}
+              className="rtl-flex"
+            >
+              <BookOpen className="w-4 h-4" />
+              دليل الحسابات
+            </Button>
+          </div>
         </div>
-        
-        <div className="flex items-center gap-2 flex-row-reverse">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/financial-reports')}
-            className="rtl-flex"
-          >
-            <ArrowRight className="w-4 h-4" />
-            العودة للتقارير المالية
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/chart-of-accounts')}
-            className="rtl-flex"
-          >
-            <BookOpen className="w-4 h-4" />
-            دليل الحسابات
-          </Button>
-        </div>
-      </div>
 
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Ledger Report */}
-        <div className="lg:col-span-2">
-          <Card className="card-elegant" ref={reportRef}>
-            <CardHeader>
-              <CardTitle className="rtl-title flex items-center gap-2">
-                <BookOpen className="w-6 h-6" />
-                دفتر الأستاذ العام
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div id="general-ledger-report">
-                <GeneralLedgerReport />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Quick Actions */}
-          <Card className="card-elegant">
-            <CardHeader>
-              <CardTitle className="rtl-title">الإجراءات السريعة</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {ledgerFeatures.map((feature, index) => (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    className="w-full justify-start rtl-flex h-auto p-3"
-                    onClick={feature.onClick}
-                  >
-                    <div className="flex items-center gap-3 flex-row-reverse text-right">
-                      {feature.icon}
-                      <div>
-                        <div className="font-medium text-sm">{feature.title}</div>
-                        <div className="text-xs text-muted-foreground">{feature.description}</div>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Ledger Report */}
+          <div className="lg:col-span-2">
+            <Card className="card-elegant" ref={reportRef}>
+              <CardHeader>
+                <CardTitle className="rtl-title flex items-center gap-2">
+                  <BookOpen className="w-6 h-6" />
+                  دفتر الأستاذ العام
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div id="general-ledger-report">
+                  <ErrorBoundary>
+                    <GeneralLedgerReport />
+                  </ErrorBoundary>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Quick Actions */}
+            <Card className="card-elegant">
+              <CardHeader>
+                <CardTitle className="rtl-title">الإجراءات السريعة</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {ledgerFeatures.map((feature, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      className="w-full justify-start rtl-flex h-auto p-3"
+                      onClick={feature.onClick}
+                    >
+                      <div className="flex items-center gap-3 flex-row-reverse text-right">
+                        {feature.icon}
+                        <div>
+                          <div className="font-medium text-sm">{feature.title}</div>
+                          <div className="text-xs text-muted-foreground">{feature.description}</div>
+                        </div>
                       </div>
-                    </div>
-                  </Button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* Cross Module References */}
-          <ModuleCrossReference 
-            moduleType="journal_entries" 
-            entityId="sample-id" 
-            className="card-elegant"
-          />
-          
-          {/* Quick Stats */}
-          <Card className="card-elegant">
-            <CardHeader>
-              <CardTitle className="rtl-title">إحصائيات سريعة</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="text-center p-4 bg-muted rounded-lg">
-                  <div className="text-2xl font-bold text-primary">0</div>
-                  <div className="text-sm text-muted-foreground">القيود اليوم</div>
+                    </Button>
+                  ))}
                 </div>
-                <div className="text-center p-4 bg-muted rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">0</div>
-                  <div className="text-sm text-muted-foreground">القيود هذا الشهر</div>
+              </CardContent>
+            </Card>
+            
+            {/* Cross Module References */}
+            <ErrorBoundary>
+              <ModuleCrossReference 
+                moduleType="journal_entries" 
+                entityId="sample-id" 
+                className="card-elegant"
+              />
+            </ErrorBoundary>
+            
+            {/* Quick Stats */}
+            <Card className="card-elegant">
+              <CardHeader>
+                <CardTitle className="rtl-title">إحصائيات سريعة</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="text-center p-4 bg-muted rounded-lg">
+                    <div className="text-2xl font-bold text-primary">0</div>
+                    <div className="text-sm text-muted-foreground">القيود اليوم</div>
+                  </div>
+                  <div className="text-center p-4 bg-muted rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">0</div>
+                    <div className="text-sm text-muted-foreground">القيود هذا الشهر</div>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 };
 
