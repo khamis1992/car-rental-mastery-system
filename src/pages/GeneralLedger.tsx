@@ -131,6 +131,10 @@ const GeneralLedger = () => {
           <div className="lg:col-span-2">
             <Card className="card-elegant" ref={reportRef}>
               <CardHeader>
+                <CardTitle className="rtl-title flex items-center gap-2">
+                  <BookOpen className="w-6 h-6" />
+                  تقرير دفتر الأستاذ العام
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div id="general-ledger-report">
@@ -148,17 +152,21 @@ const GeneralLedger = () => {
             {/* Quick Stats */}
             <Card className="card-elegant">
               <CardHeader>
-                <CardTitle className="rtl-title">إحصائيات سريعة</CardTitle>
+                <CardTitle className="rtl-title">دليل الاستخدام</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-primary">0</div>
-                    <div className="text-sm text-muted-foreground">القيود اليوم</div>
+                <div className="space-y-4 text-sm">
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="font-medium mb-2">1. اختيار الحساب</p>
+                    <p className="text-muted-foreground">اختر الحساب المراد عرض حركته من القائمة المنسدلة</p>
                   </div>
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">0</div>
-                    <div className="text-sm text-muted-foreground">القيود هذا الشهر</div>
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="font-medium mb-2">2. تحديد الفترة</p>
+                    <p className="text-muted-foreground">حدد تاريخ البداية والنهاية لعرض الحركات في الفترة المطلوبة</p>
+                  </div>
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="font-medium mb-2">3. عرض النتائج</p>
+                    <p className="text-muted-foreground">اضغط "عرض البيانات" لإظهار تفاصيل حركة الحساب</p>
                   </div>
                 </div>
               </CardContent>

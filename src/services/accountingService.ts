@@ -108,81 +108,42 @@ class AccountingService {
         throw new Error('معرف الحساب غير صحيح');
       }
 
-      // استعلام محسن مع فصل الترتيب عن الـ JOIN
-      const { data: journalEntryLines, error } = await supabase
-        .from('journal_entry_lines')
-        .select(`
-          id,
-          debit_amount,
-          credit_amount,
-          description,
-          created_at,
-          journal_entries!inner (
-            id,
-            entry_number,
-            entry_date,
-            description,
-            reference_id,
-            reference_type
-          )
-        `)
-        .eq('account_id', accountId)
-        .gte('journal_entries.entry_date', startDate)
-        .lte('journal_entries.entry_date', endDate)
-        .eq('journal_entries.status', 'posted');
+      // استخدام الدالة المحسنة في قاعدة البيانات
+      const { data: entries, error } = await supabase
+        .rpc('get_general_ledger_entries_enhanced', {
+          account_id_param: accountId,
+          start_date_param: startDate,
+          end_date_param: endDate
+        });
 
       if (error) {
         console.error('❌ General ledger query error:', error);
         throw new Error(`فشل في تحميل بيانات دفتر الأستاذ: ${error.message}`);
       }
 
-      console.log('✅ Raw ledger data received:', journalEntryLines?.length || 0, 'entries');
+      console.log('✅ Raw ledger data received:', entries?.length || 0, 'entries');
 
-      if (!journalEntryLines || journalEntryLines.length === 0) {
+      if (!entries || entries.length === 0) {
         console.log('📝 No journal entries found for the specified criteria');
         return [];
       }
 
-      // ترتيب البيانات يدوياً بعد الحصول عليها
-      const sortedEntries = journalEntryLines.sort((a: any, b: any) => {
-        const dateA = new Date(a.journal_entries.entry_date);
-        const dateB = new Date(b.journal_entries.entry_date);
-        if (dateA.getTime() !== dateB.getTime()) {
-          return dateA.getTime() - dateB.getTime();
-        }
-        // إذا كان التاريخ متساوي، رتب حسب وقت الإنشاء
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-      });
+      // تحويل البيانات إلى الصيغة المطلوبة
+      const formattedEntries: GeneralLedgerEntry[] = entries.map((entry: any) => ({
+        id: entry.id,
+        entry_date: entry.entry_date,
+        entry_number: entry.entry_number,
+        description: entry.description || 'قيد محاسبي',
+        debit_amount: Number(entry.debit_amount) || 0,
+        credit_amount: Number(entry.credit_amount) || 0,
+        running_balance: Number(entry.running_balance) || 0,
+        reference_id: entry.reference_id || undefined,
+        reference_type: entry.reference_type || undefined
+      }));
 
-      // معالجة البيانات وحساب الرصيد الجاري
-      let runningBalance = 0;
-      const entries: GeneralLedgerEntry[] = sortedEntries.map((line: any) => {
-        const debitAmount = Number(line.debit_amount) || 0;
-        const creditAmount = Number(line.credit_amount) || 0;
-        runningBalance += (debitAmount - creditAmount);
-
-        const journalEntry = line.journal_entries;
-
-        return {
-          id: line.id,
-          entry_date: journalEntry.entry_date,
-          entry_number: journalEntry.entry_number,
-          description: line.description || journalEntry.description || 'قيد محاسبي',
-          debit_amount: debitAmount,
-          credit_amount: creditAmount,
-          running_balance: runningBalance,
-          reference_id: journalEntry.reference_id || undefined,
-          reference_type: journalEntry.reference_type || undefined
-        };
-      });
-
-      console.log('✅ Processed entries successfully:', entries.length);
+      console.log('✅ Processed entries successfully:', formattedEntries.length);
       
-      if (entries.length === 0) {
-        console.log('⚠️ No entries found after processing');
-      }
-
-      return entries;
+      return formattedEntries;
 
     } catch (error) {
       console.error('❌ Error in getGeneralLedgerEntries:', error);
@@ -223,6 +184,63 @@ class AccountingService {
         throw error;
       }
       throw new Error('خطأ غير متوقع في تحميل الحسابات');
+    }
+  }
+
+  async getAccountSummary(
+    accountId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<{
+    totalDebit: number;
+    totalCredit: number;
+    finalBalance: number;
+    entriesCount: number;
+    openingBalance: number;
+  } | null> {
+    try {
+      console.log('🔍 Getting account summary for:', { accountId, startDate, endDate });
+
+      const { data: summary, error } = await supabase
+        .rpc('get_account_summary', {
+          account_id_param: accountId,
+          start_date_param: startDate,
+          end_date_param: endDate
+        });
+
+      if (error) {
+        console.error('❌ Account summary query error:', error);
+        throw new Error(`فشل في تحميل ملخص الحساب: ${error.message}`);
+      }
+
+      if (!summary || summary.length === 0) {
+        console.log('📝 No summary data found');
+        return null;
+      }
+
+      const result = summary[0];
+      return {
+        totalDebit: Number(result.total_debit) || 0,
+        totalCredit: Number(result.total_credit) || 0,
+        finalBalance: Number(result.final_balance) || 0,
+        entriesCount: Number(result.entries_count) || 0,
+        openingBalance: Number(result.opening_balance) || 0
+      };
+
+    } catch (error) {
+      console.error('❌ Error in getAccountSummary:', error);
+      const result = handleError(error, 'getAccountSummary');
+      
+      if (result.shouldLog) {
+        console.error('Account summary error details:', {
+          accountId,
+          startDate,
+          endDate,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+      
+      return null;
     }
   }
 

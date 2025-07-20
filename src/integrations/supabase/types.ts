@@ -12378,6 +12378,20 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_account_summary: {
+        Args: {
+          account_id_param: string
+          start_date_param: string
+          end_date_param: string
+        }
+        Returns: {
+          total_debit: number
+          total_credit: number
+          final_balance: number
+          entries_count: number
+          opening_balance: number
+        }[]
+      }
       get_accounting_entries_summary: {
         Args: { filters?: Json }
         Returns: Json
@@ -12401,6 +12415,24 @@ export type Database = {
       get_customer_current_balance: {
         Args: { customer_id_param: string }
         Returns: number
+      }
+      get_general_ledger_entries_enhanced: {
+        Args: {
+          account_id_param: string
+          start_date_param: string
+          end_date_param: string
+        }
+        Returns: {
+          id: string
+          entry_date: string
+          entry_number: string
+          description: string
+          debit_amount: number
+          credit_amount: number
+          running_balance: number
+          reference_id: string
+          reference_type: string
+        }[]
       }
       get_grouped_system_settings: {
         Args: Record<PropertyKey, never>
