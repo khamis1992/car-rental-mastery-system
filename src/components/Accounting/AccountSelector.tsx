@@ -30,6 +30,8 @@ interface AccountSelectorProps {
   onValueChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  showBalance?: boolean;
+  recentAccounts?: string[];
 }
 
 export const AccountSelector: React.FC<AccountSelectorProps> = ({
@@ -37,7 +39,9 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
   value,
   onValueChange,
   placeholder = "اختر الحساب...",
-  disabled = false
+  disabled = false,
+  showBalance = true,
+  recentAccounts = []
 }) => {
   const [open, setOpen] = React.useState(false);
 
@@ -52,10 +56,17 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
     }).format(amount);
   };
 
-  // Sort accounts by account code
-  const sortedAccounts = [...accounts].sort((a, b) => 
-    a.account_code.localeCompare(b.account_code)
-  );
+  // Sort accounts with recent accounts first, then by account code
+  const sortedAccounts = [...accounts].sort((a, b) => {
+    const aIsRecent = recentAccounts.includes(a.id);
+    const bIsRecent = recentAccounts.includes(b.id);
+    
+    if (aIsRecent && !bIsRecent) return -1;
+    if (!aIsRecent && bIsRecent) return 1;
+    
+    // If both are recent or both are not recent, sort by account code
+    return a.account_code.localeCompare(b.account_code);
+  });
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -72,9 +83,11 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
               <span className="font-medium">
                 {selectedAccount.account_code} - {selectedAccount.account_name}
               </span>
-              <span className="text-xs text-muted-foreground">
-                الرصيد: {formatCurrency(selectedAccount.current_balance)}
-              </span>
+              {showBalance && (
+                <span className="text-xs text-muted-foreground">
+                  الرصيد: {formatCurrency(selectedAccount.current_balance)}
+                </span>
+              )}
             </div>
           ) : (
             <span className="text-muted-foreground">{placeholder}</span>
@@ -108,7 +121,7 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
                     {account.account_code} - {account.account_name}
                   </div>
                   <div className="text-xs text-muted-foreground flex justify-between">
-                    <span>الرصيد: {formatCurrency(account.current_balance)}</span>
+                    {showBalance && <span>الرصيد: {formatCurrency(account.current_balance)}</span>}
                     <span>{account.account_type}</span>
                   </div>
                 </div>
