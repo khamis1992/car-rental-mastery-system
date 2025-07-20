@@ -68,23 +68,23 @@ const Contracts = () => {
     <Layout>
       <AbortErrorBoundary>
         <div className="p-6 space-y-6 rtl-content">
-          <div className="rtl-flex justify-between">
+          <div className="flex items-center justify-between">
             <div className="text-right">
               <h1 className="text-3xl font-bold text-foreground rtl-title">إدارة العقود</h1>
-              <p className="text-muted-foreground text-right">إدارة عقود الإيجار وعروض الأسعار</p>
+              <p className="text-muted-foreground">إدارة عقود الإيجار وعروض الأسعار</p>
             </div>
             
-            <div className="rtl-flex gap-2">
+            <div className="flex items-center gap-2">
               {!isConnected && (
                 <div className="rtl-flex gap-1 text-sm text-muted-foreground bg-yellow-50 px-2 py-1 rounded">
                   <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                  <span className="text-right">غير متصل</span>
+                  <span>غير متصل</span>
                 </div>
               )}
               {isConnected && (
                 <div className="rtl-flex gap-1 text-sm text-green-600 bg-green-50 px-2 py-1 rounded">
                   <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-right">متصل</span>
+                  <span>متصل</span>
                 </div>
               )}
               <Button 
