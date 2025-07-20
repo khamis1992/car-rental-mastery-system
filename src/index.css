@@ -98,7 +98,7 @@
   }
   
   .rtl-content .flex.items-center.gap-2 {
-    @apply flex-row-reverse;
+    flex-direction: row-reverse;
   }
   
   /* محاذاة الأزرار */
