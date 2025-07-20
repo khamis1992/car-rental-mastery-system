@@ -439,7 +439,7 @@ export const SmartJournalEntryDialog: React.FC<SmartJournalEntryDialogProps> = (
                     {lines.length > 2 && (
                       <div className="col-span-1 flex items-end">
                         <Button
-                          onClick={()={() => removeLine(line.id)}
+                          onClick={() => removeLine(line.id)}
                           variant="outline"
                           size="sm"
                           className="text-red-600 hover:text-red-700"
