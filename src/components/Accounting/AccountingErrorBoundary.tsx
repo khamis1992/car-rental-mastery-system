@@ -29,9 +29,7 @@ export const AccountingErrorBoundary: React.FC<AccountingErrorBoundaryProps> = (
   fallback: Fallback = DefaultErrorFallback 
 }) => {
   return (
-    <ErrorBoundary 
-      fallback={<Fallback error={new Error('Unknown error')} resetError={() => window.location.reload()} />}
-    >
+    <ErrorBoundary fallback={Fallback}>
       {children}
     </ErrorBoundary>
   );

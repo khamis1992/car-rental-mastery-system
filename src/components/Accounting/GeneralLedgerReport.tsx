@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { useSafeGeneralLedger } from '@/hooks/useSafeGeneralLedger';
-import { SafeAccountSelector } from './SafeAccountSelector';
+import { useGeneralLedger } from '@/hooks/useGeneralLedger';
+import { AccountSelector } from './AccountSelector';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,91 +37,53 @@ export const GeneralLedgerReport: React.FC = () => {
     clearEntriesError,
     filteredEntries,
     summary
-  } = useSafeGeneralLedger();
+  } = useGeneralLedger();
 
-  const formatCurrency = React.useCallback((amount: number) => {
-    try {
-      if (typeof amount !== 'number' || isNaN(amount)) return '0.000';
-      return new Intl.NumberFormat('ar-KW', {
-        minimumFractionDigits: 3,
-        maximumFractionDigits: 3
-      }).format(Math.abs(amount));
-    } catch (error) {
-      console.error('❌ Error formatting currency:', error);
-      return '0.000';
-    }
-  }, []);
+  const formatCurrency = (amount: number) => {
+    if (typeof amount !== 'number' || isNaN(amount)) return '0.000';
+    return new Intl.NumberFormat('ar-KW', {
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3
+    }).format(Math.abs(amount));
+  };
 
-  const formatDate = React.useCallback((dateString: string) => {
+  const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), 'dd/MM/yyyy', { locale: ar });
     } catch {
       return dateString;
     }
-  }, []);
+  };
 
-  const handleAccountChange = React.useCallback((accountId: string) => {
-    try {
-      console.log('🔄 Account changed to:', accountId);
-      setSelectedAccountId(accountId);
-      clearEntriesError();
-    } catch (error) {
-      console.error('❌ Error handling account change:', error);
-    }
-  }, [setSelectedAccountId, clearEntriesError]);
+  const handleAccountChange = (accountId: string) => {
+    setSelectedAccountId(accountId);
+    clearEntriesError();
+  };
 
-  const handleDateChange = React.useCallback((field: 'start' | 'end', value: string) => {
-    try {
-      if (field === 'start') {
-        setStartDate(value);
-      } else {
-        setEndDate(value);
-      }
-      clearEntriesError();
-    } catch (error) {
-      console.error('❌ Error handling date change:', error);
+  const handleDateChange = (field: 'start' | 'end', value: string) => {
+    if (field === 'start') {
+      setStartDate(value);
+    } else {
+      setEndDate(value);
     }
-  }, [setStartDate, setEndDate, clearEntriesError]);
+    clearEntriesError();
+  };
 
-  const handleLoadEntries = React.useCallback(() => {
-    try {
-      console.log('🔄 Loading entries triggered');
-      loadLedgerEntries();
-    } catch (error) {
-      console.error('❌ Error loading entries:', error);
-    }
-  }, [loadLedgerEntries]);
+  const handleLoadEntries = () => {
+    loadLedgerEntries();
+  };
 
-  const handleRetryLoadAccounts = React.useCallback(() => {
-    try {
-      console.log('🔄 Retrying accounts load');
-      clearAccountsError();
-      loadAccounts();
-    } catch (error) {
-      console.error('❌ Error retrying accounts load:', error);
-    }
-  }, [clearAccountsError, loadAccounts]);
+  const handleRetryLoadAccounts = () => {
+    clearAccountsError();
+    loadAccounts();
+  };
 
-  const handleRetryLoadEntries = React.useCallback(() => {
-    try {
-      console.log('🔄 Retrying entries load');
-      clearEntriesError();
-      loadLedgerEntries();
-    } catch (error) {
-      console.error('❌ Error retrying entries load:', error);
-    }
-  }, [clearEntriesError, loadLedgerEntries]);
+  const handleRetryLoadEntries = () => {
+    clearEntriesError();
+    loadLedgerEntries();
+  };
 
-  // البحث عن الحساب المحدد بطريقة آمنة
-  const selectedAccount = React.useMemo(() => {
-    try {
-      if (!selectedAccountId || !Array.isArray(accounts)) return null;
-      return accounts.find(acc => acc?.id === selectedAccountId) || null;
-    } catch (error) {
-      console.error('❌ Error finding selected account:', error);
-      return null;
-    }
-  }, [accounts, selectedAccountId]);
+  const selectedAccount = accounts.find(acc => acc.id === selectedAccountId);
 
   return (
     <AccountingErrorBoundary>
@@ -149,7 +111,7 @@ export const GeneralLedgerReport: React.FC = () => {
               {/* اختيار الحساب */}
               <div className="space-y-2">
                 <Label className="rtl-label">الحساب</Label>
-                <SafeAccountSelector
+                <AccountSelector
                   accounts={accounts}
                   value={selectedAccountId}
                   onValueChange={handleAccountChange}
