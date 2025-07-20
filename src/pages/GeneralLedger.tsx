@@ -1,12 +1,12 @@
 
 import React, { useRef } from 'react';
 import { GeneralLedgerReport } from '@/components/Accounting/GeneralLedgerReport';
+import { SafeErrorBoundary } from '@/components/Accounting/SafeErrorBoundary';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, BookOpen, FileText, Download, Calculator, Search, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const GeneralLedger = () => {
   const navigate = useNavigate();
@@ -97,7 +97,7 @@ const GeneralLedger = () => {
   ];
 
   return (
-    <ErrorBoundary>
+    <SafeErrorBoundary>
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -138,9 +138,9 @@ const GeneralLedger = () => {
               </CardHeader>
               <CardContent>
                 <div id="general-ledger-report">
-                  <ErrorBoundary>
+                  <SafeErrorBoundary fallbackTitle="خطأ في تحميل التقرير" showDetails={true}>
                     <GeneralLedgerReport />
-                  </ErrorBoundary>
+                  </SafeErrorBoundary>
                 </div>
               </CardContent>
             </Card>
@@ -196,7 +196,7 @@ const GeneralLedger = () => {
           </div>
         </div>
       </div>
-    </ErrorBoundary>
+    </SafeErrorBoundary>
   );
 };
 
