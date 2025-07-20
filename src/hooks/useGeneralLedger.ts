@@ -98,6 +98,10 @@ export const useGeneralLedger = (): UseGeneralLedgerReturn => {
       
       setEntries(entriesData);
       console.log('✅ Ledger entries loaded successfully:', entriesData.length);
+      
+      if (entriesData.length === 0) {
+        console.log('📝 No entries found for the selected criteria');
+      }
     } catch (error) {
       console.error('❌ Error loading ledger entries:', error);
       const errorInstance = error instanceof Error ? error : new Error('فشل في تحميل بيانات دفتر الأستاذ');

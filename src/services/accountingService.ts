@@ -99,7 +99,12 @@ class AccountingService {
     try {
       console.log('🔍 Getting ledger entries for:', { accountId, startDate, endDate });
 
-      // Simplified query with better error handling
+      // التحقق من صحة المعاملات
+      if (!accountId || !startDate || !endDate) {
+        throw new Error('معاملات الاستعلام غير مكتملة');
+      }
+
+      // استعلام محسن مع معالجة أفضل للأخطاء وفهرسة محسنة
       const { data: journalEntryLines, error } = await supabase
         .from('journal_entry_lines')
         .select(`
@@ -121,6 +126,7 @@ class AccountingService {
         .gte('journal_entries.entry_date', startDate)
         .lte('journal_entries.entry_date', endDate)
         .eq('journal_entries.status', 'posted')
+        .order('journal_entries.entry_date', { ascending: true })
         .order('created_at', { ascending: true });
 
       if (error) {
