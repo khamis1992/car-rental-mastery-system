@@ -77,12 +77,6 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold text-foreground rtl-title">لوحة التحكم</h1>
             <p className="text-muted-foreground">نظرة عامة على أنشطة الشركة</p>
           </div>
-          <Button 
-            className="btn-primary"
-            onClick={() => navigate('/financial-reports')}
-          >
-            تقرير شامل
-          </Button>
         </div>
 
         {/* Statistics Cards */}
