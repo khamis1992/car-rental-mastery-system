@@ -1,393 +1,377 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { 
-  Clock, 
-  Calendar, 
-  DollarSign, 
-  Settings,
-  Play,
-  Pause,
-  AlertTriangle,
-  CheckCircle,
-  RefreshCw
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
-interface BillingCycle {
-  id: string;
-  subscription_id: string;
-  tenant_name: string;
-  plan_name: string;
-  billing_cycle: 'monthly' | 'yearly';
-  next_billing_date: string;
-  amount: number;
-  auto_billing_enabled: boolean;
-  retry_count: number;
-  last_attempt?: string;
-  status: 'active' | 'failed' | 'paused';
-}
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DataTable } from '@/components/DataTable';
+import { Settings, Play, Pause, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { useAutoBillingSettings, useUpdateAutoBillingSettings, useAutoBillingLogs } from '@/hooks/useCollectiveInvoices';
+import { toast } from 'sonner';
 
 const AutoBillingManager: React.FC = () => {
-  const [billingCycles, setBillingCycles] = useState<BillingCycle[]>([
-    {
-      id: '1',
-      subscription_id: 'sub_1',
-      tenant_name: 'شركة البشائر الخليجية',
-      plan_name: 'خطة المؤسسة',
-      billing_cycle: 'monthly',
-      next_billing_date: '2024-02-15',
-      amount: 500,
-      auto_billing_enabled: true,
-      retry_count: 0,
-      status: 'active'
-    },
-    {
-      id: '2',
-      subscription_id: 'sub_2',
-      tenant_name: 'مؤسسة النقل الحديث',
-      plan_name: 'خطة المتقدمة',
-      billing_cycle: 'monthly',
-      next_billing_date: '2024-02-20',
-      amount: 300,
-      auto_billing_enabled: true,
-      retry_count: 2,
-      last_attempt: '2024-01-20',
-      status: 'failed'
-    },
-    {
-      id: '3',
-      subscription_id: 'sub_3',
-      tenant_name: 'شركة التوصيل السريع',
-      plan_name: 'خطة الأساسية',
-      billing_cycle: 'yearly',
-      next_billing_date: '2024-12-10',
-      amount: 1800,
-      auto_billing_enabled: false,
-      retry_count: 0,
-      status: 'paused'
-    }
-  ]);
+  const { data: settings, isLoading: settingsLoading } = useAutoBillingSettings();
+  const { data: logs = [], isLoading: logsLoading } = useAutoBillingLogs();
+  const updateSettings = useUpdateAutoBillingSettings();
 
-  const [refreshing, setRefreshing] = useState(false);
-  const { toast } = useToast();
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-success';
-      case 'failed':
-        return 'bg-destructive';
-      case 'paused':
-        return 'bg-warning';
-      default:
-        return 'bg-muted';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'نشط';
-      case 'failed':
-        return 'فشل';
-      case 'paused':
-        return 'معلق';
-      default:
-        return status;
-    }
-  };
-
-  const toggleAutoBilling = async (cycleId: string, enabled: boolean) => {
-    try {
-      setBillingCycles(prev => 
-        prev.map(cycle => 
-          cycle.id === cycleId 
-            ? { ...cycle, auto_billing_enabled: enabled, status: enabled ? 'active' : 'paused' }
-            : cycle
-        )
-      );
-      
-      toast({
-        title: enabled ? 'تم تفعيل الفوترة التلقائية' : 'تم إيقاف الفوترة التلقائية',
-        description: `تم ${enabled ? 'تفعيل' : 'إيقاف'} الفوترة التلقائية للاشتراك`,
-      });
-    } catch (error) {
-      toast({
-        title: 'خطأ',
-        description: 'حدث خطأ أثناء تغيير إعدادات الفوترة',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const retryBilling = async (cycleId: string) => {
-    try {
-      setRefreshing(true);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      setBillingCycles(prev => 
-        prev.map(cycle => 
-          cycle.id === cycleId 
-            ? { ...cycle, status: 'active', retry_count: 0, last_attempt: new Date().toISOString() }
-            : cycle
-        )
-      );
-      
-      toast({
-        title: 'تم إعادة المحاولة',
-        description: 'تم إعادة محاولة الفوترة بنجاح',
-      });
-    } catch (error) {
-      toast({
-        title: 'خطأ',
-        description: 'فشلت إعادة محاولة الفوترة',
-        variant: 'destructive',
-      });
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
-  const processUpcomingBilling = async () => {
-    try {
-      setRefreshing(true);
-      
-      // Simulate processing upcoming billing
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      toast({
-        title: 'تم معالجة الفوترة',
-        description: 'تم معالجة جميع الفواتير المقرر استحقاقها اليوم',
-      });
-    } catch (error) {
-      toast({
-        title: 'خطأ',
-        description: 'حدث خطأ أثناء معالجة الفوترة',
-        variant: 'destructive',
-      });
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
-  const upcomingBilling = billingCycles.filter(cycle => {
-    const nextBilling = new Date(cycle.next_billing_date);
-    const today = new Date();
-    const diffTime = nextBilling.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays <= 7 && diffDays >= 0;
+  const [formData, setFormData] = useState({
+    enabled: settings?.enabled || false,
+    billing_frequency: settings?.billing_frequency || 'monthly',
+    billing_day: settings?.billing_day || 1,
+    due_days: settings?.due_days || 30,
+    auto_send_invoices: settings?.auto_send_invoices || false,
+    auto_send_reminders: settings?.auto_send_reminders || false,
+    reminder_days_before: settings?.reminder_days_before || 7,
+    late_fee_enabled: settings?.late_fee_enabled || false,
+    late_fee_amount: settings?.late_fee_amount || 0,
+    late_fee_percentage: settings?.late_fee_percentage || 0,
+    tax_rate: settings?.tax_rate || 0,
   });
 
-  const failedBilling = billingCycles.filter(cycle => cycle.status === 'failed');
+  React.useEffect(() => {
+    if (settings) {
+      setFormData({
+        enabled: settings.enabled,
+        billing_frequency: settings.billing_frequency,
+        billing_day: settings.billing_day,
+        due_days: settings.due_days,
+        auto_send_invoices: settings.auto_send_invoices,
+        auto_send_reminders: settings.auto_send_reminders,
+        reminder_days_before: settings.reminder_days_before,
+        late_fee_enabled: settings.late_fee_enabled,
+        late_fee_amount: settings.late_fee_amount,
+        late_fee_percentage: settings.late_fee_percentage,
+        tax_rate: settings.tax_rate,
+      });
+    }
+  }, [settings]);
+
+  const handleSaveSettings = () => {
+    updateSettings.mutate(formData);
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      success: { label: 'نجح', variant: 'default' as const, icon: CheckCircle },
+      failed: { label: 'فشل', variant: 'destructive' as const, icon: XCircle },
+      partial: { label: 'جزئي', variant: 'secondary' as const, icon: AlertTriangle },
+    };
+    
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.success;
+    const Icon = config.icon;
+    
+    return (
+      <Badge variant={config.variant} className="flex items-center gap-1">
+        <Icon className="h-3 w-3" />
+        {config.label}
+      </Badge>
+    );
+  };
+
+  const logsColumns = [
+    {
+      header: 'تاريخ التشغيل',
+      accessorKey: 'created_at',
+      cell: ({ row }: any) => {
+        return new Date(row.getValue('created_at')).toLocaleDateString('ar-KW');
+      },
+    },
+    {
+      header: 'فترة الفوترة',
+      accessorKey: 'billing_period',
+      cell: ({ row }: any) => {
+        const log = row.original;
+        return `${log.billing_period_start} - ${log.billing_period_end}`;
+      },
+    },
+    {
+      header: 'عدد الفواتير',
+      accessorKey: 'total_invoices_generated',
+    },
+    {
+      header: 'المبلغ الإجمالي',
+      accessorKey: 'total_amount',
+      cell: ({ row }: any) => {
+        const amount = parseFloat(row.getValue('total_amount'));
+        return new Intl.NumberFormat('ar-KW', {
+          style: 'currency',
+          currency: 'KWD',
+          minimumFractionDigits: 3,
+          maximumFractionDigits: 3,
+        }).format(amount);
+      },
+    },
+    {
+      header: 'الحالة',
+      accessorKey: 'execution_status',
+      cell: ({ row }: any) => getStatusBadge(row.getValue('execution_status')),
+    },
+    {
+      header: 'وقت التنفيذ',
+      accessorKey: 'execution_time_ms',
+      cell: ({ row }: any) => {
+        const time = row.getValue('execution_time_ms');
+        return time ? `${time} مللي ثانية` : '-';
+      },
+    },
+  ];
+
+  if (settingsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">دورات الفوترة النشطة</p>
-                <p className="text-2xl font-bold">
-                  {billingCycles.filter(c => c.status === 'active').length}
-                </p>
-              </div>
-              <CheckCircle className="w-8 h-8 text-success" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">فوترة قادمة (7 أيام)</p>
-                <p className="text-2xl font-bold">{upcomingBilling.length}</p>
-              </div>
-              <Calendar className="w-8 h-8 text-info" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">فوترة فاشلة</p>
-                <p className="text-2xl font-bold">{failedBilling.length}</p>
-              </div>
-              <AlertTriangle className="w-8 h-8 text-destructive" />
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">إدارة الفوترة التلقائية</h2>
+          <p className="text-muted-foreground">
+            تكوين وإدارة نظام الفوترة التلقائية للعقود
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant={formData.enabled ? 'default' : 'secondary'}>
+            {formData.enabled ? 'مفعل' : 'معطل'}
+          </Badge>
+        </div>
       </div>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5" />
-              إجراءات سريعة
-            </CardTitle>
-            <Button 
-              onClick={processUpcomingBilling}
-              disabled={refreshing}
-            >
-              {refreshing ? (
-                <RefreshCw className="w-4 h-4 animate-spin ml-2" />
-              ) : (
-                <Play className="w-4 h-4 ml-2" />
-              )}
-              معالجة الفوترة اليوم
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-semibold mb-2">الفوترة القادمة</h4>
-              <p className="text-sm text-muted-foreground mb-3">
-                {upcomingBilling.length} اشتراك مقرر فوترته خلال الأسبوع القادم
-              </p>
-              <div className="space-y-2">
-                {upcomingBilling.slice(0, 3).map(cycle => (
-                  <div key={cycle.id} className="flex justify-between text-sm">
-                    <span>{cycle.tenant_name}</span>
-                    <span>{new Date(cycle.next_billing_date).toLocaleDateString('ar-KW')}</span>
-                  </div>
-                ))}
+      <Tabs defaultValue="settings" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Settings className="w-4 h-4" />
+            الإعدادات
+          </TabsTrigger>
+          <TabsTrigger value="logs" className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            سجل التشغيل
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="settings" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                الإعدادات العامة
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="enabled">تفعيل الفوترة التلقائية</Label>
+                  <p className="text-sm text-muted-foreground">
+                    تشغيل أو إيقاف نظام الفوترة التلقائية
+                  </p>
+                </div>
+                <Switch
+                  id="enabled"
+                  checked={formData.enabled}
+                  onCheckedChange={(checked) => 
+                    setFormData(prev => ({ ...prev, enabled: checked }))
+                  }
+                />
               </div>
-            </div>
 
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-semibold mb-2">الفوترة الفاشلة</h4>
-              <p className="text-sm text-muted-foreground mb-3">
-                {failedBilling.length} اشتراك يحتاج إعادة محاولة
-              </p>
-              <div className="space-y-2">
-                {failedBilling.slice(0, 3).map(cycle => (
-                  <div key={cycle.id} className="flex justify-between text-sm">
-                    <span>{cycle.tenant_name}</span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => retryBilling(cycle.id)}
-                    >
-                      إعادة المحاولة
-                    </Button>
-                  </div>
-                ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="billing_frequency">تكرار الفوترة</Label>
+                  <Select 
+                    value={formData.billing_frequency} 
+                    onValueChange={(value) => 
+                      setFormData(prev => ({ ...prev, billing_frequency: value as any }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر التكرار" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weekly">أسبوعي</SelectItem>
+                      <SelectItem value="monthly">شهري</SelectItem>
+                      <SelectItem value="quarterly">ربع سنوي</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="billing_day">يوم الفوترة</Label>
+                  <Input
+                    id="billing_day"
+                    type="number"
+                    min="1"
+                    max="31"
+                    value={formData.billing_day}
+                    onChange={(e) => 
+                      setFormData(prev => ({ ...prev, billing_day: parseInt(e.target.value) }))
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="due_days">أيام الاستحقاق</Label>
+                  <Input
+                    id="due_days"
+                    type="number"
+                    min="1"
+                    value={formData.due_days}
+                    onChange={(e) => 
+                      setFormData(prev => ({ ...prev, due_days: parseInt(e.target.value) }))
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="tax_rate">معدل الضريبة (%)</Label>
+                  <Input
+                    id="tax_rate"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={formData.tax_rate}
+                    onChange={(e) => 
+                      setFormData(prev => ({ ...prev, tax_rate: parseFloat(e.target.value) }))
+                    }
+                  />
+                </div>
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Billing Cycles Management */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="w-5 h-5" />
-            إدارة دورات الفوترة
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {billingCycles.map((cycle) => (
-              <Card key={cycle.id} className="border-muted">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="space-y-1">
-                        <h4 className="font-semibold">{cycle.tenant_name}</h4>
-                        <p className="text-sm text-muted-foreground">{cycle.plan_name}</p>
-                      </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="auto_send_invoices">إرسال تلقائي للفواتير</Label>
+                    <p className="text-sm text-muted-foreground">
+                      إرسال الفواتير تلقائياً عند الإنشاء
+                    </p>
+                  </div>
+                  <Switch
+                    id="auto_send_invoices"
+                    checked={formData.auto_send_invoices}
+                    onCheckedChange={(checked) => 
+                      setFormData(prev => ({ ...prev, auto_send_invoices: checked }))
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="auto_send_reminders">إرسال تذكيرات تلقائية</Label>
+                    <p className="text-sm text-muted-foreground">
+                      إرسال تذكيرات قبل تاريخ الاستحقاق
+                    </p>
+                  </div>
+                  <Switch
+                    id="auto_send_reminders"
+                    checked={formData.auto_send_reminders}
+                    onCheckedChange={(checked) => 
+                      setFormData(prev => ({ ...prev, auto_send_reminders: checked }))
+                    }
+                  />
+                </div>
+
+                {formData.auto_send_reminders && (
+                  <div className="space-y-2">
+                    <Label htmlFor="reminder_days_before">أيام التذكير قبل الاستحقاق</Label>
+                    <Input
+                      id="reminder_days_before"
+                      type="number"
+                      min="1"
+                      value={formData.reminder_days_before}
+                      onChange={(e) => 
+                        setFormData(prev => ({ ...prev, reminder_days_before: parseInt(e.target.value) }))
+                      }
+                    />
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="late_fee_enabled">تفعيل رسوم التأخير</Label>
+                    <p className="text-sm text-muted-foreground">
+                      فرض رسوم إضافية على الفواتير المتأخرة
+                    </p>
+                  </div>
+                  <Switch
+                    id="late_fee_enabled"
+                    checked={formData.late_fee_enabled}
+                    onCheckedChange={(checked) => 
+                      setFormData(prev => ({ ...prev, late_fee_enabled: checked }))
+                    }
+                  />
+                </div>
+
+                {formData.late_fee_enabled && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="late_fee_amount">مبلغ رسوم التأخير (د.ك)</Label>
+                      <Input
+                        id="late_fee_amount"
+                        type="number"
+                        min="0"
+                        step="0.001"
+                        value={formData.late_fee_amount}
+                        onChange={(e) => 
+                          setFormData(prev => ({ ...prev, late_fee_amount: parseFloat(e.target.value) }))
+                        }
+                      />
                     </div>
 
-                    <div className="flex items-center gap-6">
-                      <div className="text-center">
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <DollarSign className="w-4 h-4" />
-                          <span>المبلغ</span>
-                        </div>
-                        <p className="font-semibold">{cycle.amount} د.ك</p>
-                      </div>
-
-                      <div className="text-center">
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Calendar className="w-4 h-4" />
-                          <span>الفوترة التالية</span>
-                        </div>
-                        <p className="font-semibold">
-                          {new Date(cycle.next_billing_date).toLocaleDateString('ar-KW')}
-                        </p>
-                      </div>
-
-                      <div className="text-center">
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <span>الدورة</span>
-                        </div>
-                        <p className="font-semibold">
-                          {cycle.billing_cycle === 'monthly' ? 'شهرية' : 'سنوية'}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <Badge className={`text-white ${getStatusColor(cycle.status)}`}>
-                          {getStatusText(cycle.status)}
-                        </Badge>
-
-                        {cycle.retry_count > 0 && (
-                          <div className="text-center">
-                            <p className="text-xs text-muted-foreground">محاولات</p>
-                            <p className="text-sm font-semibold">{cycle.retry_count}</p>
-                          </div>
-                        )}
-
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={cycle.auto_billing_enabled}
-                            onCheckedChange={(checked) => toggleAutoBilling(cycle.id, checked)}
-                          />
-                          <Label className="text-sm">تلقائي</Label>
-                        </div>
-
-                        {cycle.status === 'failed' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => retryBilling(cycle.id)}
-                            disabled={refreshing}
-                          >
-                            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                          </Button>
-                        )}
-                      </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="late_fee_percentage">نسبة رسوم التأخير (%)</Label>
+                      <Input
+                        id="late_fee_percentage"
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        value={formData.late_fee_percentage}
+                        onChange={(e) => 
+                          setFormData(prev => ({ ...prev, late_fee_percentage: parseFloat(e.target.value) }))
+                        }
+                      />
                     </div>
                   </div>
+                )}
+              </div>
 
-                  {cycle.last_attempt && (
-                    <div className="mt-3 p-3 bg-muted rounded-lg">
-                      <p className="text-xs text-muted-foreground">
-                        آخر محاولة: {new Date(cycle.last_attempt).toLocaleString('ar-KW')}
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="flex justify-end">
+                <Button 
+                  onClick={handleSaveSettings}
+                  disabled={updateSettings.isPending}
+                >
+                  {updateSettings.isPending ? 'جاري الحفظ...' : 'حفظ الإعدادات'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="logs" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                سجل تشغيل الفوترة التلقائية
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DataTable
+                columns={logsColumns}
+                data={logs}
+                isLoading={logsLoading}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

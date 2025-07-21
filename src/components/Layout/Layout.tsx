@@ -1,3 +1,4 @@
+
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import Navbar from "./Navbar";
@@ -13,7 +14,7 @@ export function Layout({ children }: LayoutProps) {
         <AppSidebar />
         <SidebarInset className="flex-1">
           <Navbar />
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto p-4">
             {children}
           </main>
         </SidebarInset>
