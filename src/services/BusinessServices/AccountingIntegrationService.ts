@@ -180,6 +180,49 @@ export class AccountingIntegrationService {
   }
 
   /**
+   * إنشاء قيد محاسبي لمبيعات السيارات
+   */
+  async createVehicleSaleAccountingEntry(saleId: string, saleData: {
+    vehicle_info: string;
+    sale_price: number;
+    book_value: number;
+    gain_loss: number;
+    buyer_name: string;
+    payment_method: string;
+  }): Promise<string | null> {
+    try {
+      console.log(`🔄 Creating vehicle sale accounting entry for sale ${saleId}`);
+      
+      if (!saleData.sale_price || saleData.sale_price <= 0) {
+        throw new Error('سعر البيع يجب أن يكون أكبر من صفر');
+      }
+
+      const { data, error } = await supabase.rpc('create_vehicle_sale_accounting_entry' as any, {
+        sale_id: saleId,
+        sale_data: {
+          vehicle_info: saleData.vehicle_info,
+          sale_price: saleData.sale_price,
+          book_value: saleData.book_value,
+          gain_loss: saleData.gain_loss,
+          buyer_name: saleData.buyer_name,
+          payment_method: saleData.payment_method
+        }
+      });
+
+      if (error) {
+        console.error('❌ Failed to create vehicle sale accounting entry:', error);
+        throw new Error(`فشل في إنشاء قيد محاسبة مبيعات السيارة: ${error.message}`);
+      }
+
+      console.log(`✅ Vehicle sale accounting entry created successfully: ${data}`);
+      return data as string;
+    } catch (error) {
+      console.error('❌ Vehicle sale accounting integration error:', error);
+      throw error;
+    }
+  }
+
+  /**
    * إنشاء قيد محاسبي لمصروفات الصيانة
    */
   async createMaintenanceAccountingEntry(maintenanceId: string, maintenanceData: {
@@ -246,6 +289,78 @@ export class AccountingIntegrationService {
       return data as string;
     } catch (error) {
       console.warn('Failed to create attendance accounting entry:', error);
+      return null;
+    }
+  }
+
+  /**
+   * إنشاء قيد محاسبي للمخالفات المرورية
+   */
+  async createViolationAccountingEntry(violationId: string, violationData: {
+    vehicle_info: string;
+    violation_type: string;
+    fine_amount: number;
+    liability_determination: string;
+    customer_name?: string;
+  }): Promise<string | null> {
+    try {
+      const { data, error } = await supabase.rpc('create_violation_accounting_entry' as any, {
+        violation_id: violationId,
+        violation_data: {
+          vehicle_info: violationData.vehicle_info,
+          violation_type: violationData.violation_type,
+          fine_amount: violationData.fine_amount,
+          liability_determination: violationData.liability_determination,
+          customer_name: violationData.customer_name || 'غير محدد'
+        }
+      });
+
+      if (error) {
+        console.warn('Failed to create violation accounting entry:', error);
+        return null;
+      }
+
+      return data as string;
+    } catch (error) {
+      console.warn('Failed to create violation accounting entry:', error);
+      return null;
+    }
+  }
+
+  /**
+   * إنشاء قيد محاسبي لسندات الصرف
+   */
+  async createExpenseVoucherAccountingEntry(voucherId: string, voucherData: {
+    voucher_number: string;
+    beneficiary_name: string;
+    total_amount: number;
+    tax_amount: number;
+    net_amount: number;
+    payment_method: string;
+    description: string;
+  }): Promise<string | null> {
+    try {
+      const { data, error } = await supabase.rpc('create_expense_voucher_accounting_entry' as any, {
+        voucher_id: voucherId,
+        voucher_data: {
+          voucher_number: voucherData.voucher_number,
+          beneficiary_name: voucherData.beneficiary_name,
+          total_amount: voucherData.total_amount,
+          tax_amount: voucherData.tax_amount,
+          net_amount: voucherData.net_amount,
+          payment_method: voucherData.payment_method,
+          description: voucherData.description
+        }
+      });
+
+      if (error) {
+        console.warn('Failed to create expense voucher accounting entry:', error);
+        return null;
+      }
+
+      return data as string;
+    } catch (error) {
+      console.warn('Failed to create expense voucher accounting entry:', error);
       return null;
     }
   }
