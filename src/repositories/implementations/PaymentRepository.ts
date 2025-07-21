@@ -155,6 +155,43 @@ export class PaymentRepository extends BaseRepository<Payment> implements IPayme
     };
   }
 
+  async generatePaymentNumber(): Promise<string> {
+    try {
+      const { data, error } = await supabase.rpc('generate_payment_number');
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error generating payment number:', error);
+      throw new Error(`فشل في توليد رقم الدفعة: ${error.message}`);
+    }
+  }
+
+  async getPaymentsByContract(contractId: string): Promise<Payment[]> {
+    try {
+      // Get current user's tenant ID
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: tenantUser } = await supabase
+        .from('tenant_users')
+        .select('tenant_id')
+        .eq('user_id', user?.id)
+        .eq('status', 'active')
+        .single();
+
+      const { data, error } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('contract_id', contractId)
+        .eq('tenant_id', tenantUser?.tenant_id || '')
+        .order('payment_date', { ascending: false });
+
+      if (error) throw error;
+      return data as Payment[];
+    } catch (error) {
+      console.error('Error fetching payments by contract:', error);
+      throw new Error(`فشل في جلب دفعات العقد: ${error.message}`);
+    }
+  }
+
   async getRecentPayments(limit: number = 10) {
     // Get current user's tenant ID
     const { data: { user } } = await supabase.auth.getUser();

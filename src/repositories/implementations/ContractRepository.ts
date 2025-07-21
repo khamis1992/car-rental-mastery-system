@@ -215,11 +215,11 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
     return data;
   }
 
-  async markPaymentRegistered(id: string) {
+  async markPaymentRegistered(id: string, paymentRegisteredAt?: string) {
     const { data, error } = await supabase
       .from('contracts')
       .update({
-        payment_registered_at: new Date().toISOString(),
+        payment_registered_at: paymentRegisteredAt || new Date().toISOString(),
         status: 'active',
         updated_at: new Date().toISOString()
       })
@@ -229,6 +229,58 @@ export class ContractRepository extends BaseRepository<ContractWithDetails> impl
 
     if (error) throw error;
     return data;
+  }
+
+  async getContractsRequiringInvoices(): Promise<any[]> {
+    try {
+      // Get current user's tenant ID
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: tenantUser } = await supabase
+        .from('tenant_users')
+        .select('tenant_id')
+        .eq('user_id', user?.id)
+        .eq('status', 'active')
+        .single();
+
+      // Get contracts that are active and don't have invoices yet
+      const { data, error } = await supabase
+        .from('contracts')
+        .select(`
+          id,
+          contract_number,
+          customer_id,
+          total_amount,
+          start_date,
+          end_date,
+          status,
+          customers(name, phone),
+          vehicles(make, model, vehicle_number)
+        `)
+        .eq('tenant_id', tenantUser?.tenant_id || '')
+        .eq('status', 'active')
+        .is('payment_registered_at', null)
+        .order('start_date', { ascending: true });
+
+      if (error) throw error;
+
+      return (data || []).map((contract: any) => ({
+        id: contract.id,
+        contract_number: contract.contract_number,
+        customer_name: contract.customers?.name || '',
+        customer_phone: contract.customers?.phone || '',
+        vehicle_info: contract.vehicles 
+          ? `${contract.vehicles.make} ${contract.vehicles.model} - ${contract.vehicles.vehicle_number}`
+          : '',
+        total_amount: contract.total_amount,
+        start_date: contract.start_date,
+        end_date: contract.end_date,
+        status: contract.status,
+        customer_id: contract.customer_id
+      }));
+    } catch (error) {
+      console.error('Error fetching contracts requiring invoices:', error);
+      throw new Error(`فشل في جلب العقود المطلوبة للفوترة: ${error.message}`);
+    }
   }
 
   async activateContract(id: string, actualStartDate: string, pickupMileage?: number) {

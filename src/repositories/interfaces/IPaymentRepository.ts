@@ -6,6 +6,8 @@ export interface IPaymentRepository extends IRepositoryWithQuery<Payment> {
   createPayment(paymentData: PaymentFormData): Promise<Payment>;
   updatePaymentStatus(id: string, status: Payment['status']): Promise<void>;
   deletePayment(id: string): Promise<void>;
+  generatePaymentNumber(): Promise<string>;
+  getPaymentsByContract(contractId: string): Promise<Payment[]>;
   getPaymentStats(): Promise<{
     totalCount: number;
     totalAmount: number;

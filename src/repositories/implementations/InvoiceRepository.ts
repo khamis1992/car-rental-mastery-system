@@ -284,6 +284,43 @@ export class InvoiceRepository extends BaseRepository<Invoice> implements IInvoi
     };
   }
 
+  async generateInvoiceNumber(): Promise<string> {
+    try {
+      const { data, error } = await supabase.rpc('generate_invoice_number');
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error generating invoice number:', error);
+      throw new Error(`فشل في توليد رقم الفاتورة: ${error.message}`);
+    }
+  }
+
+  async getInvoicesByContract(contractId: string): Promise<Invoice[]> {
+    try {
+      // Get current user's tenant ID
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: tenantUser } = await supabase
+        .from('tenant_users')
+        .select('tenant_id')
+        .eq('user_id', user?.id)
+        .eq('status', 'active')
+        .single();
+
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('contract_id', contractId)
+        .eq('tenant_id', tenantUser?.tenant_id || '')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as Invoice[];
+    } catch (error) {
+      console.error('Error fetching invoices by contract:', error);
+      throw new Error(`فشل في جلب فواتير العقد: ${error.message}`);
+    }
+  }
+
   async getOverdueInvoices() {
     // Get current user's tenant ID
     const { data: { user } } = await supabase.auth.getUser();

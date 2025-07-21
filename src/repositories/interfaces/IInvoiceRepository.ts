@@ -9,6 +9,8 @@ export interface IInvoiceRepository extends IRepositoryWithQuery<Invoice> {
   updateInvoiceStatus(id: string, status: Invoice['status']): Promise<void>;
   deleteInvoice(id: string): Promise<void>;
   generateRentalInvoice(contractId: string): Promise<Invoice>;
+  generateInvoiceNumber(): Promise<string>;
+  getInvoicesByContract(contractId: string): Promise<Invoice[]>;
   getInvoiceStats(): Promise<{
     total: number;
     paid: number;
