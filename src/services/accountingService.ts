@@ -511,6 +511,48 @@ class AccountingService {
     }
   }
 
+  async getAccountBalancesByType(accountType: string) {
+    try {
+      const { data, error } = await supabase
+        .from('chart_of_accounts')
+        .select('*')
+        .eq('account_type', accountType)
+        .eq('is_active', true);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error(`Error fetching ${accountType} accounts:`, error);
+      return [];
+    }
+  }
+
+  async getCostCenters() {
+    try {
+      // Return mock cost centers data
+      return [];
+    } catch (error) {
+      console.error('Error fetching cost centers:', error);
+      return [];
+    }
+  }
+
+  async searchSimilarEntries(description: string) {
+    try {
+      const { data, error } = await supabase
+        .from('journal_entries')
+        .select('*')
+        .ilike('description', `%${description}%`)
+        .limit(5);
+
+      if (error) throw error;
+      return { data: data || [], error: null };
+    } catch (error) {
+      console.error('Error searching similar entries:', error);
+      return { data: [], error };
+    }
+  }
+
   async getIncomeStatement() {
     try {
       // Return mock income statement data
@@ -544,13 +586,37 @@ class AccountingService {
       // Return mock diagnostics data
       return {
         issues: [],
+        warnings: [],
+        success: true,
         status: 'healthy'
       };
     } catch (error) {
       console.error('Error running diagnostics:', error);
-      return null;
+      return {
+        issues: [],
+        warnings: [],
+        success: false,
+        status: 'error'
+      };
     }
   }
+
+  async getRecentJournalEntries(limit: number = 10) {
+    try {
+      const { data, error } = await supabase
+        .from('journal_entries')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching recent journal entries:', error);
+      return [];
+    }
+  }
+
 }
 
 export const accountingService = new AccountingService();

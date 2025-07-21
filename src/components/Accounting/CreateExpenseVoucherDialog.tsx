@@ -44,7 +44,7 @@ export const CreateExpenseVoucherDialog: React.FC<CreateExpenseVoucherDialogProp
     voucher_date: new Date().toISOString().split('T')[0],
     beneficiary_name: '',
     beneficiary_type: 'supplier' as const,
-    payment_method: 'cash' as const,
+    payment_method: 'cash' as 'cash' | 'bank_transfer' | 'check',
     bank_account_id: '',
     check_number: '',
     reference_number: '',
@@ -220,7 +220,7 @@ export const CreateExpenseVoucherDialog: React.FC<CreateExpenseVoucherDialogProp
               </div>
               <div>
                 <Label htmlFor="payment_method">طريقة الدفع</Label>
-                <Select value={formData.payment_method} onValueChange={(value: any) => setFormData({...formData, payment_method: value})}>
+                <Select value={formData.payment_method} onValueChange={(value: 'cash' | 'bank_transfer' | 'check') => setFormData({...formData, payment_method: value})}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -239,6 +239,17 @@ export const CreateExpenseVoucherDialog: React.FC<CreateExpenseVoucherDialogProp
                     value={formData.check_number}
                     onChange={(e) => setFormData({...formData, check_number: e.target.value})}
                     placeholder="رقم الشيك..."
+                  />
+                </div>
+              )}
+              {formData.payment_method === 'bank_transfer' && (
+                <div>
+                  <Label htmlFor="check_number">رقم التحويل</Label>
+                  <Input
+                    id="check_number"
+                    value={formData.check_number}
+                    onChange={(e) => setFormData({...formData, check_number: e.target.value})}
+                    placeholder="رقم التحويل..."
                   />
                 </div>
               )}
