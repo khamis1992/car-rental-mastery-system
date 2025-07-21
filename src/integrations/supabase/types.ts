@@ -1580,6 +1580,105 @@ export type Database = {
         }
         Relationships: []
       }
+      auto_billing_log: {
+        Row: {
+          billing_period_end: string
+          billing_period_start: string
+          created_at: string
+          created_by: string | null
+          error_message: string | null
+          execution_status: string
+          execution_time_ms: number | null
+          id: string
+          tenant_id: string
+          total_amount: number
+          total_invoices_generated: number
+        }
+        Insert: {
+          billing_period_end: string
+          billing_period_start: string
+          created_at?: string
+          created_by?: string | null
+          error_message?: string | null
+          execution_status?: string
+          execution_time_ms?: number | null
+          id?: string
+          tenant_id?: string
+          total_amount?: number
+          total_invoices_generated?: number
+        }
+        Update: {
+          billing_period_end?: string
+          billing_period_start?: string
+          created_at?: string
+          created_by?: string | null
+          error_message?: string | null
+          execution_status?: string
+          execution_time_ms?: number | null
+          id?: string
+          tenant_id?: string
+          total_amount?: number
+          total_invoices_generated?: number
+        }
+        Relationships: []
+      }
+      auto_billing_settings: {
+        Row: {
+          auto_send_invoices: boolean
+          auto_send_reminders: boolean
+          billing_day: number
+          billing_frequency: string
+          created_at: string
+          created_by: string | null
+          due_days: number
+          enabled: boolean
+          id: string
+          late_fee_amount: number | null
+          late_fee_enabled: boolean
+          late_fee_percentage: number | null
+          reminder_days_before: number
+          tax_rate: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          auto_send_invoices?: boolean
+          auto_send_reminders?: boolean
+          billing_day?: number
+          billing_frequency?: string
+          created_at?: string
+          created_by?: string | null
+          due_days?: number
+          enabled?: boolean
+          id?: string
+          late_fee_amount?: number | null
+          late_fee_enabled?: boolean
+          late_fee_percentage?: number | null
+          reminder_days_before?: number
+          tax_rate?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_send_invoices?: boolean
+          auto_send_reminders?: boolean
+          billing_day?: number
+          billing_frequency?: string
+          created_at?: string
+          created_by?: string | null
+          due_days?: number
+          enabled?: boolean
+          id?: string
+          late_fee_amount?: number | null
+          late_fee_enabled?: boolean
+          late_fee_percentage?: number | null
+          reminder_days_before?: number
+          tax_rate?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       automated_entry_executions: {
         Row: {
           created_at: string | null
@@ -2647,6 +2746,253 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      collection_records: {
+        Row: {
+          account_number: string | null
+          bank_name: string | null
+          check_number: string | null
+          collection_amount: number
+          collection_date: string
+          collection_location: string | null
+          collection_notes: string | null
+          collection_type: string
+          collector_id: string
+          created_at: string
+          id: string
+          payment_id: string
+          reference_number: string | null
+          tenant_id: string
+          updated_at: string
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          account_number?: string | null
+          bank_name?: string | null
+          check_number?: string | null
+          collection_amount: number
+          collection_date?: string
+          collection_location?: string | null
+          collection_notes?: string | null
+          collection_type: string
+          collector_id: string
+          created_at?: string
+          id?: string
+          payment_id: string
+          reference_number?: string | null
+          tenant_id?: string
+          updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          account_number?: string | null
+          bank_name?: string | null
+          check_number?: string | null
+          collection_amount?: number
+          collection_date?: string
+          collection_location?: string | null
+          collection_notes?: string | null
+          collection_type?: string
+          collector_id?: string
+          created_at?: string
+          id?: string
+          payment_id?: string
+          reference_number?: string | null
+          tenant_id?: string
+          updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_records_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collective_invoice_items: {
+        Row: {
+          additional_charges: number | null
+          collective_invoice_id: string
+          contract_id: string
+          created_at: string
+          customer_id: string
+          discount_amount: number | null
+          id: string
+          individual_invoice_id: string | null
+          rental_amount: number
+          rental_days: number
+          tax_amount: number | null
+          tenant_id: string
+          total_amount: number
+        }
+        Insert: {
+          additional_charges?: number | null
+          collective_invoice_id: string
+          contract_id: string
+          created_at?: string
+          customer_id: string
+          discount_amount?: number | null
+          id?: string
+          individual_invoice_id?: string | null
+          rental_amount: number
+          rental_days: number
+          tax_amount?: number | null
+          tenant_id?: string
+          total_amount: number
+        }
+        Update: {
+          additional_charges?: number | null
+          collective_invoice_id?: string
+          contract_id?: string
+          created_at?: string
+          customer_id?: string
+          discount_amount?: number | null
+          id?: string
+          individual_invoice_id?: string | null
+          rental_amount?: number
+          rental_days?: number
+          tax_amount?: number | null
+          tenant_id?: string
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collective_invoice_items_collective_invoice_id_fkey"
+            columns: ["collective_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "collective_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collective_invoice_items_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collective_invoice_items_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collective_invoice_items_individual_invoice_id_fkey"
+            columns: ["individual_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collective_invoice_payments: {
+        Row: {
+          allocation_amount: number
+          collective_invoice_id: string
+          created_at: string
+          id: string
+          payment_id: string
+          tenant_id: string
+        }
+        Insert: {
+          allocation_amount: number
+          collective_invoice_id: string
+          created_at?: string
+          id?: string
+          payment_id: string
+          tenant_id?: string
+        }
+        Update: {
+          allocation_amount?: number
+          collective_invoice_id?: string
+          created_at?: string
+          id?: string
+          payment_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collective_invoice_payments_collective_invoice_id_fkey"
+            columns: ["collective_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "collective_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collective_invoice_payments_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collective_invoices: {
+        Row: {
+          auto_generated: boolean | null
+          billing_period_end: string
+          billing_period_start: string
+          created_at: string
+          created_by: string | null
+          due_date: string
+          id: string
+          invoice_number: string
+          net_amount: number
+          notes: string | null
+          status: string
+          tax_amount: number
+          tenant_id: string
+          total_amount: number
+          total_contracts: number
+          updated_at: string
+        }
+        Insert: {
+          auto_generated?: boolean | null
+          billing_period_end: string
+          billing_period_start: string
+          created_at?: string
+          created_by?: string | null
+          due_date: string
+          id?: string
+          invoice_number: string
+          net_amount?: number
+          notes?: string | null
+          status?: string
+          tax_amount?: number
+          tenant_id?: string
+          total_amount?: number
+          total_contracts?: number
+          updated_at?: string
+        }
+        Update: {
+          auto_generated?: boolean | null
+          billing_period_end?: string
+          billing_period_start?: string
+          created_at?: string
+          created_by?: string | null
+          due_date?: string
+          id?: string
+          invoice_number?: string
+          net_amount?: number
+          notes?: string | null
+          status?: string
+          tax_amount?: number
+          tenant_id?: string
+          total_amount?: number
+          total_contracts?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       company_branding: {
         Row: {
@@ -6788,13 +7134,18 @@ export type Database = {
       }
       invoices: {
         Row: {
+          auto_generated: boolean | null
+          billing_period_end: string | null
+          billing_period_start: string | null
           contract_id: string
           created_at: string
           created_by: string | null
           customer_id: string
           discount_amount: number
+          discount_percentage: number | null
           due_date: string
           id: string
+          invoice_category: string | null
           invoice_date: string
           invoice_number: string
           invoice_type: string
@@ -6804,25 +7155,32 @@ export type Database = {
           outstanding_amount: number
           paid_amount: number
           paid_at: string | null
+          parent_invoice_id: string | null
           payment_method: string | null
           payment_terms: string | null
           sent_at: string | null
           status: string
           subtotal: number
           tax_amount: number
+          tax_rate: number | null
           tenant_id: string
           terms_and_conditions: string | null
           total_amount: number
           updated_at: string
         }
         Insert: {
+          auto_generated?: boolean | null
+          billing_period_end?: string | null
+          billing_period_start?: string | null
           contract_id: string
           created_at?: string
           created_by?: string | null
           customer_id: string
           discount_amount?: number
+          discount_percentage?: number | null
           due_date: string
           id?: string
+          invoice_category?: string | null
           invoice_date?: string
           invoice_number: string
           invoice_type?: string
@@ -6832,25 +7190,32 @@ export type Database = {
           outstanding_amount?: number
           paid_amount?: number
           paid_at?: string | null
+          parent_invoice_id?: string | null
           payment_method?: string | null
           payment_terms?: string | null
           sent_at?: string | null
           status?: string
           subtotal?: number
           tax_amount?: number
+          tax_rate?: number | null
           tenant_id: string
           terms_and_conditions?: string | null
           total_amount?: number
           updated_at?: string
         }
         Update: {
+          auto_generated?: boolean | null
+          billing_period_end?: string | null
+          billing_period_start?: string | null
           contract_id?: string
           created_at?: string
           created_by?: string | null
           customer_id?: string
           discount_amount?: number
+          discount_percentage?: number | null
           due_date?: string
           id?: string
+          invoice_category?: string | null
           invoice_date?: string
           invoice_number?: string
           invoice_type?: string
@@ -6860,12 +7225,14 @@ export type Database = {
           outstanding_amount?: number
           paid_amount?: number
           paid_at?: string | null
+          parent_invoice_id?: string | null
           payment_method?: string | null
           payment_terms?: string | null
           sent_at?: string | null
           status?: string
           subtotal?: number
           tax_amount?: number
+          tax_rate?: number | null
           tenant_id?: string
           terms_and_conditions?: string | null
           total_amount?: number
@@ -6891,6 +7258,13 @@ export type Database = {
             columns: ["journal_entry_id"]
             isOneToOne: false
             referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_parent_invoice_id_fkey"
+            columns: ["parent_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
             referencedColumns: ["id"]
           },
           {
@@ -7960,6 +8334,8 @@ export type Database = {
           auto_generated_invoice: boolean | null
           bank_name: string | null
           check_number: string | null
+          collected_by: string | null
+          collection_location: string | null
           contract_id: string
           created_at: string
           created_by: string | null
@@ -7968,6 +8344,7 @@ export type Database = {
           invoice_id: string
           journal_entry_id: string | null
           notes: string | null
+          payment_category: string | null
           payment_date: string
           payment_method: string
           payment_number: string
@@ -7976,12 +8353,16 @@ export type Database = {
           tenant_id: string
           transaction_reference: string | null
           updated_at: string
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           amount: number
           auto_generated_invoice?: boolean | null
           bank_name?: string | null
           check_number?: string | null
+          collected_by?: string | null
+          collection_location?: string | null
           contract_id: string
           created_at?: string
           created_by?: string | null
@@ -7990,6 +8371,7 @@ export type Database = {
           invoice_id: string
           journal_entry_id?: string | null
           notes?: string | null
+          payment_category?: string | null
           payment_date?: string
           payment_method?: string
           payment_number: string
@@ -7998,12 +8380,16 @@ export type Database = {
           tenant_id: string
           transaction_reference?: string | null
           updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           amount?: number
           auto_generated_invoice?: boolean | null
           bank_name?: string | null
           check_number?: string | null
+          collected_by?: string | null
+          collection_location?: string | null
           contract_id?: string
           created_at?: string
           created_by?: string | null
@@ -8012,6 +8398,7 @@ export type Database = {
           invoice_id?: string
           journal_entry_id?: string | null
           notes?: string | null
+          payment_category?: string | null
           payment_date?: string
           payment_method?: string
           payment_number?: string
@@ -8020,6 +8407,8 @@ export type Database = {
           tenant_id?: string
           transaction_reference?: string | null
           updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: [
           {
@@ -12268,6 +12657,10 @@ export type Database = {
       }
       generate_branch_code: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_collective_invoice: {
+        Args: { period_start: string; period_end: string; due_days?: number }
         Returns: string
       }
       generate_contract_number: {

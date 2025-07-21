@@ -27,6 +27,15 @@ export interface Invoice {
   notes?: string;
   terms_and_conditions?: string;
   
+  // New fields for enhanced invoicing
+  tax_rate?: number;
+  discount_percentage?: number;
+  invoice_category?: 'individual' | 'collective';
+  billing_period_start?: string;
+  billing_period_end?: string;
+  auto_generated?: boolean;
+  parent_invoice_id?: string;
+  
   // Metadata
   created_at: string;
   updated_at: string;
@@ -73,6 +82,13 @@ export interface Payment {
   created_at: string;
   updated_at: string;
   created_by?: string;
+  
+  // New fields for enhanced payment tracking
+  payment_category?: string;
+  collected_by?: string;
+  collection_location?: string;
+  verified_by?: string;
+  verified_at?: string;
 }
 
 export interface AdditionalCharge {
@@ -130,4 +146,141 @@ export interface PaymentFormData {
   bank_name?: string;
   check_number?: string;
   notes?: string;
+  payment_category?: string;
+  collection_location?: string;
+}
+
+// Collective Invoice Types
+export interface CollectiveInvoice {
+  id: string;
+  invoice_number: string;
+  billing_period_start: string;
+  billing_period_end: string;
+  total_contracts: number;
+  total_amount: number;
+  tax_amount: number;
+  net_amount: number;
+  due_date: string;
+  status: 'draft' | 'sent' | 'paid' | 'partially_paid' | 'overdue' | 'cancelled';
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  tenant_id: string;
+  notes?: string;
+  auto_generated?: boolean;
+  
+  // Relations
+  items?: CollectiveInvoiceItem[];
+  payments?: CollectiveInvoicePayment[];
+}
+
+export interface CollectiveInvoiceItem {
+  id: string;
+  collective_invoice_id: string;
+  contract_id: string;
+  customer_id: string;
+  individual_invoice_id?: string;
+  rental_amount: number;
+  additional_charges: number;
+  discount_amount: number;
+  tax_amount: number;
+  total_amount: number;
+  rental_days: number;
+  created_at: string;
+  tenant_id: string;
+  
+  // Relations
+  contract?: any;
+  customer?: any;
+  individual_invoice?: Invoice;
+}
+
+export interface CollectiveInvoicePayment {
+  id: string;
+  collective_invoice_id: string;
+  payment_id: string;
+  allocation_amount: number;
+  created_at: string;
+  tenant_id: string;
+  
+  // Relations
+  payment?: Payment;
+}
+
+export interface CollectionRecord {
+  id: string;
+  payment_id: string;
+  collection_type: 'cash' | 'bank_transfer' | 'check' | 'credit_card' | 'online';
+  collection_date: string;
+  collection_amount: number;
+  collector_id: string;
+  collection_location?: string;
+  bank_name?: string;
+  account_number?: string;
+  check_number?: string;
+  reference_number?: string;
+  collection_notes?: string;
+  verification_status: 'pending' | 'verified' | 'rejected';
+  verified_by?: string;
+  verified_at?: string;
+  created_at: string;
+  updated_at: string;
+  tenant_id: string;
+  
+  // Relations
+  payment?: Payment;
+}
+
+export interface AutoBillingSettings {
+  id: string;
+  tenant_id: string;
+  enabled: boolean;
+  billing_frequency: 'weekly' | 'monthly' | 'quarterly';
+  billing_day: number;
+  due_days: number;
+  auto_send_invoices: boolean;
+  auto_send_reminders: boolean;
+  reminder_days_before: number;
+  late_fee_enabled: boolean;
+  late_fee_amount: number;
+  late_fee_percentage: number;
+  tax_rate: number;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
+export interface AutoBillingLog {
+  id: string;
+  tenant_id: string;
+  billing_period_start: string;
+  billing_period_end: string;
+  total_invoices_generated: number;
+  total_amount: number;
+  execution_status: 'success' | 'failed' | 'partial';
+  error_message?: string;
+  execution_time_ms?: number;
+  created_at: string;
+  created_by?: string;
+}
+
+// Form Data Types
+export interface CollectiveInvoiceFormData {
+  billing_period_start: string;
+  billing_period_end: string;
+  due_days?: number;
+  notes?: string;
+}
+
+export interface CollectionRecordFormData {
+  payment_id: string;
+  collection_type: 'cash' | 'bank_transfer' | 'check' | 'credit_card' | 'online';
+  collection_date: string;
+  collection_amount: number;
+  collection_location?: string;
+  bank_name?: string;
+  account_number?: string;
+  check_number?: string;
+  reference_number?: string;
+  collection_notes?: string;
 }
