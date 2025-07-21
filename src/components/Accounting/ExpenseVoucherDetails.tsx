@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
-import { FileText, Print, Download } from 'lucide-react';
+import { FileText, Printer, Download } from 'lucide-react';
 import { expenseVoucherService, type ExpenseVoucher, type ExpenseVoucherItem } from '@/services/expenseVoucherService';
 import { toast } from 'sonner';
 
@@ -124,7 +124,7 @@ export const ExpenseVoucherDetails: React.FC<ExpenseVoucherDetailsProps> = ({
             <DialogTitle>تفاصيل سند الصرف - {voucher.voucher_number}</DialogTitle>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={handlePrint}>
-                <Print className="w-4 h-4 ml-2" />
+                <Printer className="w-4 h-4 ml-2" />
                 طباعة
               </Button>
               <Button variant="outline" size="sm" onClick={handleDownload}>
