@@ -87,12 +87,13 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSuccess, mode }
       return false;
     }
 
-    // التحقق من صحة رقم الهاتف الكويتي
-    const phoneRegex = /^(\+965|965|0)?[569][0-9]{7}$/;
-    if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
+    // التحقق من صحة رقم الهاتف الكويتي (تحسين الـ regex)
+    const cleanPhone = formData.phone.replace(/[\s\-\(\)]/g, '');
+    const phoneRegex = /^(\+965|965)?[5-9][0-9]{7}$/;
+    if (!phoneRegex.test(cleanPhone)) {
       toast({
         title: "خطأ في البيانات",
-        description: "رقم الهاتف غير صحيح",
+        description: "رقم الهاتف غير صحيح. يجب أن يبدأ بـ 5، 6، 7، 8، أو 9 ويتكون من 8 أرقام",
         variant: "destructive",
       });
       return false;
@@ -122,7 +123,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSuccess, mode }
         customer_type: customerType,
         name: formData.name.trim(),
         email: formData.email.trim() || null,
-        phone: formData.phone.replace(/\s/g, ''),
+        phone: formData.phone.replace(/[\s\-\(\)]/g, ''),
         national_id: formData.national_id.trim() || null,
         address: formData.address.trim() || null,
         city: formData.city.trim() || null,
@@ -216,19 +217,20 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSuccess, mode }
         if (error) {
           console.error('خطأ في إضافة العميل:', error);
           
+          let errorMessage = "فشل في إضافة العميل";
           if (error.code === '23505') {
-            toast({
-              title: "خطأ",
-              description: "رقم الهاتف أو البريد الإلكتروني مستخدم مسبقاً",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "خطأ",
-              description: "فشل في إضافة العميل",
-              variant: "destructive",
-            });
+            errorMessage = "رقم الهاتف أو البريد الإلكتروني مستخدم مسبقاً";
+          } else if (error.message?.includes('tenant')) {
+            errorMessage = "خطأ في تحديد المؤسسة. يرجى تسجيل الخروج والدخول مرة أخرى";
+          } else if (error.message?.includes('RLS')) {
+            errorMessage = "ليس لديك صلاحية لإضافة عملاء. يرجى التواصل مع المدير";
           }
+          
+          toast({
+            title: "خطأ",
+            description: errorMessage,
+            variant: "destructive",
+          });
           return;
         }
 

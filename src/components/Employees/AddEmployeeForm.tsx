@@ -129,7 +129,7 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     const requiredFields = ['first_name', 'last_name', 'position', 'department_id', 'salary'];
     
     requiredFields.forEach(field => {
-      if (!formData[field as keyof typeof formData]) {
+      if (!formData[field as keyof typeof formData]?.trim()) {
         errors[field] = true;
       }
     });
@@ -138,8 +138,18 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       errors['hire_date'] = true;
     }
 
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    // Validate email format if provided
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       errors['email'] = true;
+    }
+
+    // Validate phone format if provided (Kuwaiti phone numbers)
+    if (formData.phone) {
+      const cleanPhone = formData.phone.replace(/[\s\-\(\)]/g, '');
+      const phoneRegex = /^(\+965|965)?[5-9][0-9]{7}$/;
+      if (!phoneRegex.test(cleanPhone)) {
+        errors['phone'] = true;
+      }
     }
 
     setFieldErrors(errors);
@@ -169,12 +179,12 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       
       const employeeData = {
         employee_number: employeeNumberData,
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email || null,
-        phone: formData.phone || null,
-        national_id: formData.national_id || null,
-        position: formData.position,
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+        email: formData.email?.trim() || null,
+        phone: formData.phone ? formData.phone.replace(/[\s\-\(\)]/g, '') : null,
+        national_id: formData.national_id?.trim() || null,
+        position: formData.position.trim(),
         department: selectedDepartment?.department_name || null,
         department_id: formData.department_id || null,
         primary_cost_center_id: formData.primary_cost_center_id === 'none' ? null : formData.primary_cost_center_id || null,
@@ -182,12 +192,12 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         salary: parseFloat(formData.salary),
         hire_date: hireDate!.toISOString().split('T')[0],
         status: 'active' as const,
-        emergency_contact_name: formData.emergency_contact_name || null,
-        emergency_contact_phone: formData.emergency_contact_phone || null,
-        bank_account_number: formData.bank_account_number || null,
-        bank_name: formData.bank_name || null,
-        address: formData.address || null,
-        tenant_id: currentTenant?.id || ''
+        emergency_contact_name: formData.emergency_contact_name?.trim() || null,
+        emergency_contact_phone: formData.emergency_contact_phone?.trim() || null,
+        bank_account_number: formData.bank_account_number?.trim() || null,
+        bank_name: formData.bank_name?.trim() || null,
+        address: formData.address?.trim() || null,
+        tenant_id: null as any // Will be set by trigger
       };
 
       const { data, error } = await supabase
@@ -196,7 +206,18 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting employee:', error);
+        // Provide more specific error handling
+        if (error.message?.includes('tenant')) {
+          throw new Error('خطأ في تحديد المؤسسة. يرجى تسجيل الخروج والدخول مرة أخرى');
+        } else if (error.message?.includes('RLS')) {
+          throw new Error('ليس لديك صلاحية لإضافة موظفين. يرجى التواصل مع المدير');
+        } else if (error.code === '23505') {
+          throw new Error('هذا الموظف موجود مسبقاً في النظام');
+        }
+        throw error;
+      }
 
       // إنشاء سجل راتب تلقائياً للموظف الجديد
       try {
