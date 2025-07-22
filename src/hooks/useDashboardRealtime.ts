@@ -70,9 +70,9 @@ export function useDashboardRealtime() {
   const { currentTenant } = useTenant();
   
   const contractService = serviceContainer.getContractBusinessService();
-  const customerService = serviceContainer.getCustomerBusinessService();
   const vehicleService = serviceContainer.getVehicleBusinessService();
-  const financialService = serviceContainer.getFinancialBusinessService();
+  const paymentService = serviceContainer.getPaymentBusinessService();
+  const invoiceService = serviceContainer.getInvoiceBusinessService();
 
   // Load all dashboard stats
   const loadAllStats = useCallback(async () => {
@@ -85,16 +85,21 @@ export function useDashboardRealtime() {
       // Load contract stats
       const contractStats = await contractService.getContractStats();
       
-      // Load customer stats
-      const customers = await customerService.getCustomers();
-      const activeCustomers = customers.filter(c => c.status === 'active');
+      // Load customer stats (from contracts for now)
+      const contracts = await contractService.getAllContracts();
+      const uniqueCustomers = new Set(contracts.map(c => c.customer_id));
+      const activeContracts = contracts.filter(c => c.status === 'active');
       
       // Load vehicle stats
-      const vehicles = await vehicleService.getVehicles();
+      const vehicles = await vehicleService.getAllVehicles();
       const availableVehicles = vehicles.filter(v => v.status === 'available');
       
       // Load financial stats
-      const financialStats = await financialService.getFinancialSummary();
+      const payments = await paymentService.getRecentPayments(1000); // Get recent payments
+      const invoices = await invoiceService.getAllInvoices();
+      const totalRevenue = payments.reduce((sum, payment) => sum + payment.amount, 0);
+      const overdueInvoices = invoices.filter(inv => inv.status === 'overdue');
+      const pendingPayments = overdueInvoices.reduce((sum, inv) => sum + inv.total_amount, 0);
       
       setStats({
         contracts: {
@@ -106,8 +111,8 @@ export function useDashboardRealtime() {
           lastUpdated: new Date(),
         },
         customers: {
-          total: customers.length,
-          active: activeCustomers.length,
+          total: uniqueCustomers.size,
+          active: new Set(activeContracts.map(c => c.customer_id)).size,
           isUpdating: false,
           lastUpdated: new Date(),
         },
@@ -118,8 +123,8 @@ export function useDashboardRealtime() {
           lastUpdated: new Date(),
         },
         financials: {
-          totalRevenue: financialStats?.totalRevenue || 0,
-          pendingPayments: financialStats?.pendingPayments || 0,
+          totalRevenue,
+          pendingPayments,
           isUpdating: false,
           lastUpdated: new Date(),
         },
@@ -133,7 +138,7 @@ export function useDashboardRealtime() {
     } finally {
       setLoading(false);
     }
-  }, [currentTenant, contractService, customerService, vehicleService, financialService]);
+  }, [currentTenant, contractService, vehicleService, paymentService, invoiceService]);
 
   // Update specific section stats
   const updateSectionStats = useCallback(async (section: keyof DashboardStats) => {
@@ -166,13 +171,14 @@ export function useDashboardRealtime() {
           break;
           
         case 'customers':
-          const customers = await customerService.getCustomers();
-          const activeCustomers = customers.filter(c => c.status === 'active');
+          const contracts = await contractService.getAllContracts();
+          const uniqueCustomers = new Set(contracts.map(c => c.customer_id));
+          const activeContracts = contracts.filter(c => c.status === 'active');
           setStats(prev => ({
             ...prev,
             customers: {
-              total: customers.length,
-              active: activeCustomers.length,
+              total: uniqueCustomers.size,
+              active: new Set(activeContracts.map(c => c.customer_id)).size,
               isUpdating: false,
               lastUpdated: new Date(),
             },
@@ -180,7 +186,7 @@ export function useDashboardRealtime() {
           break;
           
         case 'vehicles':
-          const vehicles = await vehicleService.getVehicles();
+          const vehicles = await vehicleService.getAllVehicles();
           const availableVehicles = vehicles.filter(v => v.status === 'available');
           setStats(prev => ({
             ...prev,
@@ -194,12 +200,16 @@ export function useDashboardRealtime() {
           break;
           
         case 'financials':
-          const financialStats = await financialService.getFinancialSummary();
+          const payments = await paymentService.getRecentPayments(1000); // Get recent payments
+          const invoices = await invoiceService.getAllInvoices();
+          const totalRevenue = payments.reduce((sum, payment) => sum + payment.amount, 0);
+          const overdueInvoices = invoices.filter(inv => inv.status === 'overdue');
+          const pendingPayments = overdueInvoices.reduce((sum, inv) => sum + inv.total_amount, 0);
           setStats(prev => ({
             ...prev,
             financials: {
-              totalRevenue: financialStats?.totalRevenue || 0,
-              pendingPayments: financialStats?.pendingPayments || 0,
+              totalRevenue,
+              pendingPayments,
               isUpdating: false,
               lastUpdated: new Date(),
             },
@@ -217,7 +227,7 @@ export function useDashboardRealtime() {
         },
       }));
     }
-  }, [currentTenant, contractService, customerService, vehicleService, financialService]);
+  }, [currentTenant, contractService, vehicleService, paymentService, invoiceService]);
 
   // Set up real-time subscriptions
   useEffect(() => {
