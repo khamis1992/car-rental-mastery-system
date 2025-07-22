@@ -1,7 +1,10 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ReactNode } from "react";
+import { RealtimeIndicator } from "./RealtimeIndicator";
+import { cn } from "@/lib/utils";
 
 interface StatsCardProps {
   title: string;
@@ -15,9 +18,26 @@ interface StatsCardProps {
   actionText?: string;
   onActionClick?: () => void;
   className?: string;
+  isUpdating?: boolean;
+  isConnected?: boolean;
+  lastUpdated?: Date | null;
+  showRealtimeIndicator?: boolean;
 }
 
-const StatsCard = ({ title, value, subtitle, icon, trend, className = "", actionText, onActionClick }: StatsCardProps) => {
+const StatsCard = ({ 
+  title, 
+  value, 
+  subtitle, 
+  icon, 
+  trend, 
+  className = "", 
+  actionText, 
+  onActionClick,
+  isUpdating = false,
+  isConnected = true,
+  lastUpdated = null,
+  showRealtimeIndicator = false
+}: StatsCardProps) => {
   const getTrendColor = (type: string) => {
     switch (type) {
       case 'up': return 'bg-success text-success-foreground';
@@ -27,17 +47,31 @@ const StatsCard = ({ title, value, subtitle, icon, trend, className = "", action
   };
 
   return (
-    <Card className={`card-elegant hover:card-highlight transition-all duration-300 ${className}`}>
+    <Card className={cn(
+      `card-elegant hover:card-highlight transition-all duration-300 ${className}`,
+      isUpdating && "animate-pulse"
+    )}>
       <CardHeader className="space-y-0 pb-2 text-center">
         <div className="text-primary flex justify-center">
           {icon}
         </div>
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-center gap-2">
           {title}
+          {showRealtimeIndicator && (
+            <RealtimeIndicator 
+              isConnected={isConnected}
+              isUpdating={isUpdating}
+              lastUpdated={lastUpdated}
+              size="sm"
+            />
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="text-center">
-        <div className="text-2xl font-bold text-foreground mb-1">
+        <div className={cn(
+          "text-2xl font-bold text-foreground mb-1",
+          isUpdating && "animate-pulse"
+        )}>
           {value}
         </div>
         {subtitle && (
