@@ -52,7 +52,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 const coreBusinessItems = [
   { 
     title: "الرئيسية", 
-    url: "/dashboard", 
+    url: "/", 
     icon: Home 
   },
   { 
@@ -276,8 +276,8 @@ export function AppSidebar() {
   });
 
   const isActive = (path: string) => {
-    if (path === "/dashboard") {
-      return currentPath === "/dashboard";
+    if (path === "/") {
+      return currentPath === "/";
     }
     return currentPath.startsWith(path);
   };
