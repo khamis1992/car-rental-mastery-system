@@ -6,27 +6,27 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import { GlobalLoadingProvider } from "@/contexts/GlobalLoadingContext";
 import { EnhancedRealtimeProvider } from "@/contexts/EnhancedRealtimeContext";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
-import DashboardLayout from "@/layouts/DashboardLayout";
-import ContractsPage from "@/pages/ContractsPage";
-import VehiclesPage from "@/pages/VehiclesPage";
-import CustomersPage from "@/pages/CustomersPage";
-import InvoicesPage from "@/pages/InvoicesPage";
-import PaymentsPage from "@/pages/PaymentsPage";
-import EmployeesPage from "@/pages/EmployeesPage";
-import AttendancePage from "@/pages/AttendancePage";
-import SettingsPage from "@/pages/SettingsPage";
-import LoginPage from "@/pages/LoginPage";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { GuestRoute } from "@/components/auth/GuestRoute";
-import QuotationsPage from "@/pages/QuotationsPage";
-import AdditionalChargesPage from "@/pages/AdditionalChargesPage";
-import CostCentersPage from "@/pages/CostCentersPage";
-import BranchesPage from "@/pages/BranchesPage";
-import AccountingDashboard from "@/pages/AccountingDashboard";
-import TrafficViolationsPage from "@/pages/TrafficViolationsPage";
-import ChartOfAccountsPage from "@/pages/ChartOfAccountsPage";
-import JournalEntriesPage from "@/pages/JournalEntriesPage";
-import ReportsPage from "@/pages/ReportsPage";
+import DashboardLayout from "@/components/Layout/DashboardLayout";
+import Contracts from "@/pages/Contracts";
+import Fleet from "@/pages/Fleet";
+import Customers from "@/pages/Customers";
+import Invoicing from "@/pages/Invoicing";
+import Treasury from "@/pages/Treasury";
+import Employees from "@/pages/Employees";
+import Attendance from "@/pages/Attendance";
+import Settings from "@/pages/Settings";
+import Auth from "@/pages/Auth";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import GuestRoute from "@/components/GuestRoute";
+import Quotations from "@/pages/Quotations";
+import ExpenseManagement from "@/pages/ExpenseManagement";
+import CostCenters from "@/pages/CostCenters";
+import NotFound from "@/pages/NotFound";
+import Index from "@/pages/Index";
+import TrafficViolations from "@/pages/TrafficViolations";
+import ChartOfAccounts from "@/pages/ChartOfAccounts";
+import JournalEntries from "@/pages/JournalEntries";
+import FinancialReports from "@/pages/FinancialReports";
 
 // Create a single QueryClient instance
 const queryClient = new QueryClient({
@@ -61,7 +61,12 @@ function App() {
                   <Routes>
                     <Route path="/login" element={
                       <GuestRoute>
-                        <LoginPage />
+                        <Auth />
+                      </GuestRoute>
+                    } />
+                    <Route path="/auth" element={
+                      <GuestRoute>
+                        <Auth />
                       </GuestRoute>
                     } />
                     <Route path="/" element={
@@ -69,24 +74,25 @@ function App() {
                         <DashboardLayout />
                       </ProtectedRoute>
                     }>
-                      <Route index element={<AccountingDashboard />} />
-                      <Route path="contracts" element={<ContractsPage />} />
-                      <Route path="vehicles" element={<VehiclesPage />} />
-                      <Route path="customers" element={<CustomersPage />} />
-                      <Route path="invoices" element={<InvoicesPage />} />
-                      <Route path="payments" element={<PaymentsPage />} />
-                      <Route path="employees" element={<EmployeesPage />} />
-                      <Route path="attendance" element={<AttendancePage />} />
-                      <Route path="settings" element={<SettingsPage />} />
-                      <Route path="quotations" element={<QuotationsPage />} />
-                      <Route path="additional-charges" element={<AdditionalChargesPage />} />
-                      <Route path="cost-centers" element={<CostCentersPage />} />
-                      <Route path="branches" element={<BranchesPage />} />
-                      <Route path="traffic-violations" element={<TrafficViolationsPage />} />
-                      <Route path="chart-of-accounts" element={<ChartOfAccountsPage />} />
-                      <Route path="journal-entries" element={<JournalEntriesPage />} />
-                      <Route path="reports" element={<ReportsPage />} />
+                      <Route index element={<Index />} />
+                      <Route path="contracts" element={<Contracts />} />
+                      <Route path="vehicles" element={<Fleet />} />
+                      <Route path="customers" element={<Customers />} />
+                      <Route path="invoices" element={<Invoicing />} />
+                      <Route path="payments" element={<Treasury />} />
+                      <Route path="employees" element={<Employees />} />
+                      <Route path="attendance" element={<Attendance />} />
+                      <Route path="settings" element={<Settings />} />
+                      <Route path="quotations" element={<Quotations />} />
+                      <Route path="additional-charges" element={<ExpenseManagement />} />
+                      <Route path="cost-centers" element={<CostCenters />} />
+                      <Route path="branches" element={<NotFound />} />
+                      <Route path="traffic-violations" element={<TrafficViolations />} />
+                      <Route path="chart-of-accounts" element={<ChartOfAccounts />} />
+                      <Route path="journal-entries" element={<JournalEntries />} />
+                      <Route path="reports" element={<FinancialReports />} />
                     </Route>
+                    <Route path="*" element={<NotFound />} />
                   </Routes>
                 </BrowserRouter>
                 <Toaster 
