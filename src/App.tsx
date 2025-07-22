@@ -33,7 +33,7 @@ import TrafficViolations from "./pages/TrafficViolations";
 import Employees from "./pages/Employees";
 import Attendance from "./pages/Attendance";
 import Leaves from "./pages/Leaves";
-import Payroll from "./pages/Payroll";
+import { Payroll } from "./pages/Payroll";
 import Communications from "./pages/Communications";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
