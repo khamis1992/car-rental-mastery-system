@@ -17,6 +17,7 @@ import Customers from "./pages/Customers";
 import Fleet from "./pages/Fleet";
 import Quotations from "./pages/Quotations";
 import Contracts from "./pages/Contracts";
+import Suppliers from "./pages/Suppliers";
 import ChartOfAccounts from "./pages/ChartOfAccounts";
 import ChartOfAccountsSetupPage from "./pages/ChartOfAccountsSetup";
 import JournalEntries from "./pages/JournalEntries";
@@ -97,6 +98,7 @@ function AppRoutes() {
         <Route path="/fleet" element={<Fleet />} />
         <Route path="/quotations" element={<Quotations />} />
         <Route path="/contracts" element={<Contracts />} />
+        <Route path="/suppliers" element={<Suppliers />} />
         <Route path="/chart-of-accounts" element={<ChartOfAccounts />} />
         <Route path="/chart-of-accounts-setup" element={<ChartOfAccountsSetupPage />} />
         <Route path="/journal-entries" element={<JournalEntries />} />

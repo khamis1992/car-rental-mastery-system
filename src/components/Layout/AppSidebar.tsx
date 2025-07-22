@@ -25,7 +25,8 @@ import {
   Activity,
   Zap,
   Shield,
-  BookOpen
+  BookOpen,
+  Truck
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -77,6 +78,11 @@ const coreBusinessItems = [
 
 // المالية
 const financialItems = [
+  { 
+    title: "الموردين", 
+    url: "/suppliers", 
+    icon: Truck 
+  },
   { 
     title: "دليل الحسابات", 
     url: "/chart-of-accounts", 
