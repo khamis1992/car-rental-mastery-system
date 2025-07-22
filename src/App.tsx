@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
@@ -29,6 +28,7 @@ import TrafficViolations from "@/pages/TrafficViolations";
 import ChartOfAccounts from "@/pages/ChartOfAccounts";
 import JournalEntries from "@/pages/JournalEntries";
 import FinancialReports from "@/pages/FinancialReports";
+import Tenants from "@/pages/Tenants";
 
 // Create a single QueryClient instance
 const queryClient = new QueryClient({
@@ -94,6 +94,7 @@ function App() {
                         <Route path="chart-of-accounts" element={<ChartOfAccounts />} />
                         <Route path="journal-entries" element={<JournalEntries />} />
                         <Route path="reports" element={<FinancialReports />} />
+                        <Route path="tenants" element={<Tenants />} />
                       </Route>
                       <Route path="*" element={<NotFound />} />
                     </Routes>
