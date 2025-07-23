@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Calendar as CalendarIcon, Upload, QrCode, Barcode } from "lucide-react";
+import { Plus, Calendar as CalendarIcon, Upload, QrCode, Barcode, X } from "lucide-react";
 import { format } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -165,8 +165,16 @@ export function AssetFormDialog({ asset, trigger }: AssetFormDialogProps) {
         )}
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
-        <DialogHeader>
-          <DialogTitle className="text-right">
+        <DialogHeader className="relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute left-0 top-0 h-8 w-8 p-0 hover:bg-muted"
+            onClick={() => setOpen(false)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          <DialogTitle className="text-right pr-8">
             {asset?.id ? "تحديث الأصل الثابت" : "إضافة أصل ثابت جديد"}
           </DialogTitle>
         </DialogHeader>
