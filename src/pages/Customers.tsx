@@ -39,7 +39,8 @@ import {
   Phone,
   Mail,
   Loader2,
-  Upload
+  Upload,
+  Settings
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,6 +48,7 @@ import { useToast } from '@/hooks/use-toast';
 import CustomerForm from '@/components/Customers/CustomerForm';
 import CustomerDetailsDialog from '@/components/Customers/CustomerDetailsDialog';
 import CustomerCSVImportDialog from '@/components/Customers/CustomerCSVImportDialog';
+import CustomerDiagnostics from '@/components/Customers/CustomerDiagnostics';
 
 interface Customer {
   id: string;
@@ -79,6 +81,7 @@ const Customers = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [showCSVImportDialog, setShowCSVImportDialog] = useState(false);
+  const [showDiagnosticsDialog, setShowDiagnosticsDialog] = useState(false);
   const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
 
   const { profile } = useAuth();
@@ -240,6 +243,16 @@ const Customers = () => {
         
         {canAddCustomers && (
           <div className="flex items-center gap-3">
+            <Button 
+              variant="outline"
+              onClick={() => setShowDiagnosticsDialog(true)}
+              className="flex items-center gap-2"
+              size="sm"
+            >
+              <Settings className="w-4 h-4" />
+              تشخيص المشاكل
+            </Button>
+            
             <Button 
               variant="secondary"
               onClick={() => setShowCSVImportDialog(true)}
@@ -503,6 +516,21 @@ const Customers = () => {
         onOpenChange={setShowCSVImportDialog}
         onSuccess={fetchAllCustomers}
       />
+
+      {/* حوار تشخيص المشاكل */}
+      <Dialog open={showDiagnosticsDialog} onOpenChange={setShowDiagnosticsDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle>تشخيص مشاكل العملاء</DialogTitle>
+            <DialogDescription>
+              أدوات لتشخيص وإصلاح مشاكل إضافة العملاء
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto px-1">
+            <CustomerDiagnostics onClose={() => setShowDiagnosticsDialog(false)} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

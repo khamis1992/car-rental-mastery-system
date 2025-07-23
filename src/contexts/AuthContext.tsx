@@ -178,11 +178,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [fetchProfile]);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        console.error('خطأ في تسجيل الدخول:', error);
+        return { error };
+      }
+      
+      // تأخير قصير للسماح للجلسة بالاستقرار
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      return { error: null };
+    } catch (error) {
+      console.error('خطأ غير متوقع في تسجيل الدخول:', error);
+      return { error };
+    } finally {
+      setTimeout(() => setLoading(false), 500); // تأخير قصير لتجنب الوميض
+    }
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
@@ -202,7 +219,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      setLoading(true);
+      
+      // مسح البيانات المحلية أولاً
+      setProfile(null);
+      localStorage.removeItem('profile-cache');
+      
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('خطأ في تسجيل الخروج:', error);
+      }
+    } catch (error) {
+      console.error('خطأ غير متوقع في تسجيل الخروج:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const hasRole = (role: string): boolean => {

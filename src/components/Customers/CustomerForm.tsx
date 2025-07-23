@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useCustomerOperations } from '@/hooks/useCustomerOperations';
 import { useToast } from '@/hooks/use-toast';
 import { User, Building, Save, Loader, ChevronDown, ChevronUp } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -63,46 +63,34 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSuccess, mode }
 
   const { user } = useAuth();
   const { toast } = useToast();
+  const { addCustomer, updateCustomer, validateCustomerData, isLoading: operationLoading } = useCustomerOperations();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) {
-      toast({
-        title: "خطأ في البيانات",
-        description: "اسم العميل مطلوب",
-        variant: "destructive",
-      });
-      return false;
-    }
+    const customerData = {
+      customer_type: customerType,
+      name: formData.name.trim(),
+      email: formData.email.trim() || undefined,
+      phone: formData.phone.replace(/[\s\-\(\)]/g, ''),
+      national_id: formData.national_id.trim() || undefined,
+      address: formData.address.trim() || undefined,
+      city: formData.city.trim() || undefined,
+      country: formData.country,
+      company_contact_person: customerType === 'company' ? formData.company_contact_person.trim() : undefined,
+      company_registration_number: customerType === 'company' ? formData.company_registration_number.trim() || undefined : undefined,
+      tax_number: customerType === 'company' ? formData.tax_number.trim() || undefined : undefined,
+      notes: formData.notes.trim() || undefined,
+    };
 
-    if (!formData.phone.trim()) {
+    const validationErrors = validateCustomerData(customerData);
+    
+    if (validationErrors.length > 0) {
       toast({
         title: "خطأ في البيانات",
-        description: "رقم الهاتف مطلوب",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    // التحقق من صحة رقم الهاتف الكويتي (تحسين الـ regex)
-    const cleanPhone = formData.phone.replace(/[\s\-\(\)]/g, '');
-    const phoneRegex = /^(\+965|965)?[5-9][0-9]{7}$/;
-    if (!phoneRegex.test(cleanPhone)) {
-      toast({
-        title: "خطأ في البيانات",
-        description: "رقم الهاتف غير صحيح. يجب أن يبدأ بـ 5، 6، 7، 8، أو 9 ويتكون من 8 أرقام",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (customerType === 'company' && !formData.company_contact_person.trim()) {
-      toast({
-        title: "خطأ في البيانات",
-        description: "اسم الشخص المسؤول مطلوب للشركات",
+        description: validationErrors[0], // عرض أول خطأ
         variant: "destructive",
       });
       return false;
@@ -116,140 +104,30 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSuccess, mode }
     
     if (!validateForm()) return;
 
-    setLoading(true);
-    
+    const customerData = {
+      customer_type: customerType,
+      name: formData.name.trim(),
+      email: formData.email.trim() || undefined,
+      phone: formData.phone.replace(/[\s\-\(\)]/g, ''),
+      national_id: formData.national_id.trim() || undefined,
+      address: formData.address.trim() || undefined,
+      city: formData.city.trim() || undefined,
+      country: formData.country,
+      company_contact_person: customerType === 'company' ? formData.company_contact_person.trim() : undefined,
+      company_registration_number: customerType === 'company' ? formData.company_registration_number.trim() || undefined : undefined,
+      tax_number: customerType === 'company' ? formData.tax_number.trim() || undefined : undefined,
+      notes: formData.notes.trim() || undefined,
+    };
+
     try {
-      const customerData = {
-        customer_type: customerType,
-        name: formData.name.trim(),
-        email: formData.email.trim() || null,
-        phone: formData.phone.replace(/[\s\-\(\)]/g, ''),
-        national_id: formData.national_id.trim() || null,
-        address: formData.address.trim() || null,
-        city: formData.city.trim() || null,
-        country: formData.country,
-        company_contact_person: customerType === 'company' ? formData.company_contact_person.trim() : null,
-        company_registration_number: customerType === 'company' ? formData.company_registration_number.trim() || null : null,
-        tax_number: customerType === 'company' ? formData.tax_number.trim() || null : null,
-        notes: formData.notes.trim() || null,
-      };
-
       if (mode === 'edit' && customer?.id) {
-        const { error } = await supabase
-          .from('customers')
-          .update(customerData)
-          .eq('id', customer.id);
-
-        if (error) {
-          console.error('خطأ في تحديث العميل:', error);
-          
-          if (error.code === '23505') {
-            toast({
-              title: "خطأ",
-              description: "رقم الهاتف أو البريد الإلكتروني مستخدم مسبقاً",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "خطأ",
-              description: "فشل في تحديث العميل",
-              variant: "destructive",
-            });
-          }
-          return;
-        }
-
-        toast({
-          title: "تم بنجاح",
-          description: "تم تحديث العميل بنجاح",
-        });
+        await updateCustomer(customer.id, customerData);
       } else {
-        // إضافة عميل جديد
-        let customerNumber: string;
-
-        // محاولة توليد رقم العميل باستخدام الدالة
-        const { data: generatedNumber, error: numberError } = await supabase
-          .rpc('generate_customer_number');
-
-        if (numberError || !generatedNumber) {
-          console.warn('فشل في توليد رقم العميل باستخدام الدالة، جاري المحاولة بطريقة بديلة:', numberError);
-          
-          try {
-            const { data: lastCustomer, error: fetchError } = await supabase
-              .from('customers')
-              .select('customer_number')
-              .order('created_at', { ascending: false })
-              .limit(1);
-
-            if (fetchError) {
-              console.error('خطأ في جلب آخر رقم عميل:', fetchError);
-              const timestamp = Date.now().toString().slice(-6);
-              customerNumber = `CUS${timestamp}`;
-            } else {
-              let nextNumber = 1;
-              if (lastCustomer && lastCustomer.length > 0) {
-                const lastNumber = lastCustomer[0].customer_number;
-                const match = lastNumber.match(/CUS(\d+)/);
-                if (match) {
-                  nextNumber = parseInt(match[1]) + 1;
-                }
-              }
-              customerNumber = `CUS${nextNumber.toString().padStart(6, '0')}`;
-            }
-          } catch (fallbackError) {
-            console.error('فشل في الطريقة البديلة أيضاً:', fallbackError);
-            const timestamp = Date.now().toString().slice(-6);
-            customerNumber = `CUS${timestamp}`;
-          }
-        } else {
-          customerNumber = generatedNumber;
-        }
-
-        const { error } = await supabase
-          .from('customers')
-          .insert([{
-            ...customerData,
-            customer_number: customerNumber,
-            created_by: user?.id,
-            tenant_id: null as any // Will be set by trigger
-          }]);
-
-        if (error) {
-          console.error('خطأ في إضافة العميل:', error);
-          
-          let errorMessage = "فشل في إضافة العميل";
-          if (error.code === '23505') {
-            errorMessage = "رقم الهاتف أو البريد الإلكتروني مستخدم مسبقاً";
-          } else if (error.message?.includes('tenant')) {
-            errorMessage = "خطأ في تحديد المؤسسة. يرجى تسجيل الخروج والدخول مرة أخرى";
-          } else if (error.message?.includes('RLS')) {
-            errorMessage = "ليس لديك صلاحية لإضافة عملاء. يرجى التواصل مع المدير";
-          }
-          
-          toast({
-            title: "خطأ",
-            description: errorMessage,
-            variant: "destructive",
-          });
-          return;
-        }
-
-        toast({
-          title: "تم بنجاح",
-          description: "تم إضافة العميل بنجاح",
-        });
+        await addCustomer(customerData);
       }
-
       onSuccess();
     } catch (error) {
-      console.error('خطأ غير متوقع:', error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ غير متوقع",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      console.error('خطأ في العملية:', error);
     }
   };
 
@@ -418,15 +296,15 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSuccess, mode }
         <div className="flex justify-end gap-3 pt-3 border-t border-border/50">
           <Button
             type="submit"
-            disabled={loading}
+            disabled={loading || operationLoading}
             className="btn-primary flex items-center gap-2 min-w-[120px]"
           >
-            {loading ? (
+            {(loading || operationLoading) ? (
               <Loader className="w-4 h-4 animate-spin" />
             ) : (
               <Save className="w-4 h-4" />
             )}
-            {loading ? 
+            {(loading || operationLoading) ? 
               (mode === 'edit' ? 'جاري التحديث...' : 'جاري الحفظ...') : 
               (mode === 'edit' ? 'تحديث العميل' : 'حفظ العميل')
             }

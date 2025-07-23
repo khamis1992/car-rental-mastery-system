@@ -12808,6 +12808,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_customer_number_simple: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_data_isolation_report: {
         Args: Record<PropertyKey, never>
         Returns: Json
