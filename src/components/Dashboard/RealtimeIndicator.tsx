@@ -131,7 +131,7 @@ export const RealtimeIndicator: React.FC<RealtimeIndicatorProps> = ({
             onClick={() => isConnected && reconnect()}
           >
             {indicator.icon}
-            {size !== 'sm' && <span>{indicator.text}</span>}
+            
             {showDetails && stats.activeSubscriptions > 0 && (
               <span className="ml-1 text-xs">({stats.activeSubscriptions})</span>
             )}
