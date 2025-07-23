@@ -93,6 +93,27 @@ export function AssetFormDialog({ asset, trigger }: AssetFormDialogProps) {
 
   const saveAssetMutation = useMutation({
     mutationFn: async (data: AssetFormData) => {
+      console.log('🔧 بدء إنشاء الأصل الثابت...');
+      
+      // الحصول على tenant_id الحالي
+      let tenantId = null;
+      try {
+        const { data: currentTenantId, error: tenantError } = await supabase.rpc('get_current_tenant_id');
+        if (tenantError) {
+          console.error('❌ خطأ في الحصول على معرف المؤسسة:', tenantError);
+          throw new Error('فشل في تحديد المؤسسة الحالية');
+        }
+        tenantId = currentTenantId;
+        console.log('✅ تم الحصول على معرف المؤسسة:', tenantId);
+      } catch (error) {
+        console.error('❌ خطأ في استدعاء دالة get_current_tenant_id:', error);
+        throw new Error('لا يمكن تحديد المؤسسة الحالية');
+      }
+
+      if (!tenantId) {
+        throw new Error('معرف المؤسسة غير متاح');
+      }
+
       const assetData = {
         ...data,
         purchase_date: format(data.purchase_date, 'yyyy-MM-dd'),
@@ -101,8 +122,10 @@ export function AssetFormDialog({ asset, trigger }: AssetFormDialogProps) {
         status: 'active',
         book_value: data.purchase_cost - (data.purchase_cost * (data.depreciation_rate / 100)),
         accumulated_depreciation: 0,
-        tenant_id: 'default-tenant'
+        tenant_id: tenantId
       };
+
+      console.log('📋 بيانات الأصل المرسلة:', assetData);
 
       if (asset?.id) {
         const { data: updatedAsset, error } = await supabase

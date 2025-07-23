@@ -100,6 +100,7 @@ const CostCenterForm: React.FC<CostCenterFormProps> = ({
     }
 
     setLoading(true);
+    console.log('🔧 بدء إنشاء مركز التكلفة...');
     
     try {
       // Clean up empty string values for UUID fields
@@ -112,17 +113,22 @@ const CostCenterForm: React.FC<CostCenterFormProps> = ({
         description: formData.description || undefined
       };
 
+      console.log('📋 بيانات مركز التكلفة المرسلة:', cleanedData);
+
       if (costCenter) {
+        console.log('🔄 تحديث مركز التكلفة الحالي...');
         await costCenterService.updateCostCenter(costCenter.id, cleanedData);
         toast.success('تم تحديث مركز التكلفة بنجاح');
       } else {
-        await costCenterService.createCostCenter(cleanedData);
+        console.log('✨ إنشاء مركز تكلفة جديد...');
+        const result = await costCenterService.createCostCenter(cleanedData);
+        console.log('✅ تم إنشاء مركز التكلفة بنجاح:', result);
         toast.success('تم إنشاء مركز التكلفة بنجاح');
       }
 
       onSuccess();
     } catch (error: any) {
-      console.error('خطأ في حفظ مركز التكلفة:', error);
+      console.error('❌ خطأ في حفظ مركز التكلفة:', error);
       toast.error(error.message || 'فشل في حفظ مركز التكلفة');
     } finally {
       setLoading(false);
