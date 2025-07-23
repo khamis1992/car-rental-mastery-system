@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import { SearchDialog } from '@/components/Search/SearchDialog';
 
 const DashboardLayout: React.FC = () => {
   return (
@@ -25,6 +27,7 @@ const DashboardLayout: React.FC = () => {
           <Outlet />
         </ErrorBoundary>
       </main>
+      <SearchDialog />
     </div>
   );
 };
