@@ -84,7 +84,7 @@ function App() {
                             <Route index element={<Index />} />
                             <Route path="contracts" element={<Contracts />} />
                             <Route path="contracts/:contractId" element={<ContractStageRouter />} />
-                            <Route path="vehicles" element={<Fleet />} />
+                            <Route path="fleet" element={<Fleet />} />
                             <Route path="customers" element={<Customers />} />
                             <Route path="invoices" element={<Invoicing />} />
                             <Route path="payments" element={<Treasury />} />
