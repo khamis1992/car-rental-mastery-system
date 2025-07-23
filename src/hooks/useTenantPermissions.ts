@@ -42,7 +42,7 @@ export const useTenantPermissions = (): TenantPermissions => {
       try {
         const { data, error } = await supabase.rpc('get_user_tenant_context');
         if (!error && data) {
-          setSecureContext(data);
+          setSecureContext(data as unknown as UserTenantContext);
         }
       } catch (error) {
         console.error('Error fetching secure context:', error);
@@ -94,7 +94,7 @@ export const useTenantRoleCheck = () => {
       try {
         const { data, error } = await supabase.rpc('get_user_tenant_context');
         if (!error && data) {
-          setSecureContext(data);
+          setSecureContext(data as unknown as UserTenantContext);
         }
       } catch (error) {
         console.error('Error fetching secure context:', error);
