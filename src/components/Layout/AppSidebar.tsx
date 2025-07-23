@@ -397,9 +397,6 @@ export function AppSidebar() {
     <Sidebar className="border-l" side="right">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="bg-gradient-primary p-2 rounded-lg shadow-glow">
-            <div className="text-primary-foreground font-bold text-lg">🚗</div>
-          </div>
           {state === "expanded" && (
             <div className="flex-1">
               <h2 className="text-lg font-bold text-foreground">{currentTenant?.name || 'النظام'}</h2>
