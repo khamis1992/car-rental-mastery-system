@@ -62,6 +62,8 @@ export const useUnifiedRealtime = () => {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const healthCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const subscriptionCounterRef = useRef(0);
+  const isMountedRef = useRef(true);
+  const cleanupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Health check function
   const performHealthCheck = useCallback(async () => {
@@ -99,8 +101,13 @@ export const useUnifiedRealtime = () => {
     }
   }, []);
 
-  // Handle realtime events
+  // Handle realtime events with memory protection
   const handleRealtimeEvent = useCallback((table: string, event: 'INSERT' | 'UPDATE' | 'DELETE', payload: any) => {
+    if (!isMountedRef.current) {
+      console.warn('Ignoring realtime event on unmounted component');
+      return;
+    }
+    
     const realtimeEvent: RealtimeEvent = {
       table,
       event,
@@ -112,11 +119,13 @@ export const useUnifiedRealtime = () => {
     console.log('📡 Realtime event received:', realtimeEvent);
 
     setState(prev => {
+      if (!isMountedRef.current) return prev;
+      
       const newHistory = [realtimeEvent, ...prev.eventHistory.slice(0, MAX_HISTORY_SIZE - 1)];
       
       // Notify all active subscriptions for this table
       prev.subscriptions.forEach(subscription => {
-        if (subscription.table === table && subscription.isActive) {
+        if (subscription.table === table && subscription.isActive && isMountedRef.current) {
           try {
             subscription.callback(realtimeEvent);
           } catch (error) {
@@ -245,8 +254,13 @@ export const useUnifiedRealtime = () => {
     }, RECONNECT_DELAY);
   }, [setupConnection]);
 
-  // Subscribe to table changes
+  // Subscribe to table changes with memory leak protection
   const subscribe = useCallback((table: string, callback: (event: RealtimeEvent) => void): string => {
+    if (!isMountedRef.current) {
+      console.warn('Attempted to subscribe while component is unmounted');
+      return '';
+    }
+    
     const subscriptionId = `${table}_${++subscriptionCounterRef.current}`;
     
     setState(prev => {
@@ -268,11 +282,17 @@ export const useUnifiedRealtime = () => {
     return subscriptionId;
   }, []);
 
-  // Unsubscribe from table changes
+  // Unsubscribe from table changes with cleanup
   const unsubscribe = useCallback((subscriptionId: string) => {
     setState(prev => {
       const newSubscriptions = new Map(prev.subscriptions);
-      newSubscriptions.delete(subscriptionId);
+      const subscription = newSubscriptions.get(subscriptionId);
+      
+      if (subscription) {
+        // Mark as inactive first to prevent further callbacks
+        subscription.isActive = false;
+        newSubscriptions.delete(subscriptionId);
+      }
       
       return {
         ...prev,
@@ -307,8 +327,71 @@ export const useUnifiedRealtime = () => {
     return events.slice(0, limit);
   }, [state.eventHistory]);
 
+  // Enhanced memory cleanup function
+  const performMemoryCleanup = useCallback(() => {
+    console.log('🧹 Performing memory cleanup...');
+    
+    // Clear all timers
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+    if (healthCheckIntervalRef.current) {
+      clearInterval(healthCheckIntervalRef.current);
+      healthCheckIntervalRef.current = null;
+    }
+    if (cleanupTimeoutRef.current) {
+      clearTimeout(cleanupTimeoutRef.current);
+      cleanupTimeoutRef.current = null;
+    }
+    
+    // Clean up channel
+    if (channelRef.current) {
+      try {
+        supabase.removeChannel(channelRef.current);
+      } catch (error) {
+        console.warn('Error removing channel:', error);
+      }
+      channelRef.current = null;
+    }
+    
+    // Clear state if unmounted
+    if (!isMountedRef.current) {
+      setState({
+        isConnected: false,
+        connectionStatus: 'disconnected',
+        lastEvent: null,
+        subscriptions: new Map(),
+        health: {
+          isHealthy: false,
+          reconnectAttempts: 0
+        },
+        eventHistory: []
+      });
+    }
+  }, []);
+
+  // Schedule periodic cleanup of old events
+  const scheduleEventHistoryCleanup = useCallback(() => {
+    if (cleanupTimeoutRef.current) {
+      clearTimeout(cleanupTimeoutRef.current);
+    }
+    
+    cleanupTimeoutRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        setState(prev => ({
+          ...prev,
+          eventHistory: prev.eventHistory.slice(0, MAX_HISTORY_SIZE)
+        }));
+        scheduleEventHistoryCleanup(); // Schedule next cleanup
+      }
+    }, 60000); // Clean every minute
+  }, []);
+
   // Initialize connection and health checks
   useEffect(() => {
+    isMountedRef.current = true;
+    
     if (user && session && currentTenant) {
       setupConnection();
       
@@ -317,20 +400,16 @@ export const useUnifiedRealtime = () => {
       
       // Initial health check
       performHealthCheck();
+      
+      // Start event history cleanup
+      scheduleEventHistoryCleanup();
     }
 
     return () => {
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-      if (healthCheckIntervalRef.current) {
-        clearInterval(healthCheckIntervalRef.current);
-      }
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-      }
+      isMountedRef.current = false;
+      performMemoryCleanup();
     };
-  }, [user, session, currentTenant, setupConnection, performHealthCheck]);
+  }, [user, session, currentTenant, setupConnection, performHealthCheck, performMemoryCleanup, scheduleEventHistoryCleanup]);
 
   return {
     // Connection state

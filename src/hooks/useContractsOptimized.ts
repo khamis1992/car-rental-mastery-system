@@ -26,7 +26,7 @@ export const useContractsOptimized = () => {
   const { toast } = useToast();
   const { user, session, loading: authLoading } = useAuth();
 
-  // محسن: استخدام cache متقدم للعقود
+  // محسن: استخدام cache متقدم للعقود مع memory leak protection
   const cacheRef = useRef<ContractsCache>({
     contracts: new Map(),
     lastUpdated: new Map(),
@@ -35,6 +35,7 @@ export const useContractsOptimized = () => {
   const isMountedRef = useRef(true);
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
   const pendingUpdatesRef = useRef<Set<string>>(new Set());
+  const cleanupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const contractService = serviceContainer.getContractBusinessService();
   const quotationService = serviceContainer.getQuotationBusinessService();
@@ -350,20 +351,67 @@ export const useContractsOptimized = () => {
     }
   }, [authLoading, loadData]);
   
-  // تنظيف الموارد
-  useEffect(() => {
-    isMountedRef.current = true;
-    
-    return () => {
-      isMountedRef.current = false;
+  // Enhanced memory cleanup
+  const performMemoryCleanup = useCallback(() => {
+    if (!isMountedRef.current) {
+      // Clear all caches
+      cacheRef.current.contracts.clear();
+      cacheRef.current.lastUpdated.clear();
+      
+      // Clear pending operations
       pendingUpdatesRef.current.clear();
       
+      // Abort any pending requests
       abortControllersRef.current.forEach((controller) => {
         controller.abort();
       });
       abortControllersRef.current.clear();
-    };
+      
+      // Clear any scheduled cleanup
+      if (cleanupTimeoutRef.current) {
+        clearTimeout(cleanupTimeoutRef.current);
+        cleanupTimeoutRef.current = null;
+      }
+    }
   }, []);
+
+  // Schedule periodic memory cleanup
+  const scheduleMemoryCleanup = useCallback(() => {
+    if (cleanupTimeoutRef.current) {
+      clearTimeout(cleanupTimeoutRef.current);
+    }
+    
+    cleanupTimeoutRef.current = setTimeout(() => {
+      if (!isMountedRef.current) {
+        performMemoryCleanup();
+      } else {
+        // Clean old cache entries (older than 30 minutes)
+        const thirtyMinutesAgo = Date.now() - (30 * 60 * 1000);
+        const cache = cacheRef.current;
+        
+        for (const [key, timestamp] of cache.lastUpdated.entries()) {
+          if (timestamp < thirtyMinutesAgo) {
+            cache.contracts.delete(key);
+            cache.lastUpdated.delete(key);
+          }
+        }
+        
+        // Schedule next cleanup
+        scheduleMemoryCleanup();
+      }
+    }, 5 * 60 * 1000); // Every 5 minutes
+  }, [performMemoryCleanup]);
+
+  // تنظيف الموارد
+  useEffect(() => {
+    isMountedRef.current = true;
+    scheduleMemoryCleanup();
+    
+    return () => {
+      isMountedRef.current = false;
+      performMemoryCleanup();
+    };
+  }, [scheduleMemoryCleanup, performMemoryCleanup]);
 
   return {
     quotations,

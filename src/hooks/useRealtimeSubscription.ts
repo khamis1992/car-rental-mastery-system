@@ -21,36 +21,58 @@ export const useRealtimeSubscription = ({
 }: UseRealtimeSubscriptionOptions) => {
   const { subscribe, unsubscribe, isConnected } = useUnifiedRealtime();
   const subscriptionIdRef = useRef<string | null>(null);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
-    if (!enabled || !isConnected) {
+    isMountedRef.current = true;
+    
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!enabled || !isConnected || !isMountedRef.current) {
       return;
     }
 
-    // Create subscription
+    // Create subscription with memory leak protection
     const handleEvent = (event: RealtimeEvent) => {
+      if (!isMountedRef.current) {
+        console.warn('Ignoring event on unmounted subscription for table:', table);
+        return;
+      }
+      
       // Call general event handler
       if (onEvent) {
-        onEvent(event);
+        try {
+          onEvent(event);
+        } catch (error) {
+          console.error('Error in onEvent handler:', error);
+        }
       }
 
       // Call specific event handlers
-      switch (event.event) {
-        case 'INSERT':
-          if (onInsert && event.new) {
-            onInsert(event.new);
-          }
-          break;
-        case 'UPDATE':
-          if (onUpdate && event.new) {
-            onUpdate(event.new);
-          }
-          break;
-        case 'DELETE':
-          if (onDelete && event.old) {
-            onDelete(event.old);
-          }
-          break;
+      try {
+        switch (event.event) {
+          case 'INSERT':
+            if (onInsert && event.new) {
+              onInsert(event.new);
+            }
+            break;
+          case 'UPDATE':
+            if (onUpdate && event.new) {
+              onUpdate(event.new);
+            }
+            break;
+          case 'DELETE':
+            if (onDelete && event.old) {
+              onDelete(event.old);
+            }
+            break;
+        }
+      } catch (error) {
+        console.error('Error in specific event handler:', error);
       }
     };
 
