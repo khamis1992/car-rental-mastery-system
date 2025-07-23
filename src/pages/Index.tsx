@@ -23,13 +23,12 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { formatCurrencyKWD } from "@/lib/currency";
 import { useDashboardRealtime } from "@/hooks/useDashboardRealtime";
 import { Button } from "@/components/ui/button";
-import { useEnhancedRealtime } from "@/contexts/EnhancedRealtimeContext";
+
 
 const Index = () => {
   const navigate = useNavigate();
   const { currentTenant } = useTenant();
   const { stats, loading, error, isConnected, refreshStats } = useDashboardRealtime();
-  const { connectionStatus } = useEnhancedRealtime();
 
   return (
     <div className="container mx-auto px-6 py-8">
@@ -161,7 +160,7 @@ const Index = () => {
             <div className="flex flex-row-reverse items-center gap-3 justify-between">
               <div className="text-right">
                 <h3 className="font-medium text-warning mb-1">انقطع الاتصال بالتحديثات المباشرة</h3>
-                <p className="text-sm text-muted-foreground">قد لا تظهر بعض التحديثات تلقائياً. حالة الاتصال: {connectionStatus}</p>
+                <p className="text-sm text-muted-foreground">قد لا تظهر بعض التحديثات تلقائياً. الرجاء تحديث الصفحة.</p>
               </div>
               <Button 
                 variant="outline" 

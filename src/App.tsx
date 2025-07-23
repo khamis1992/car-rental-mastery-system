@@ -6,7 +6,7 @@ import { TenantProvider } from "@/contexts/TenantContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { GlobalLoadingProvider } from "@/contexts/GlobalLoadingContext";
-import { EnhancedRealtimeProvider } from "@/contexts/EnhancedRealtimeContext";
+
 import { SearchProvider } from "@/contexts/SearchContext";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { Layout } from "@/components/Layout/Layout";
@@ -62,8 +62,7 @@ function App() {
           <AuthProvider>
             <TenantProvider>
               <SettingsProvider>
-                <EnhancedRealtimeProvider>
-                  <NotificationProvider>
+                <NotificationProvider>
                     <SearchProvider>
                       <BrowserRouter>
                         <Routes>
@@ -113,8 +112,7 @@ function App() {
                         visibleToasts={5}
                       />
                     </SearchProvider>
-                  </NotificationProvider>
-                </EnhancedRealtimeProvider>
+                </NotificationProvider>
               </SettingsProvider>
             </TenantProvider>
           </AuthProvider>
