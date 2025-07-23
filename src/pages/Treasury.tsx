@@ -35,6 +35,8 @@ import { DateRange } from "react-day-picker";
 import { TreasuryTransactionForm } from "@/components/Treasury/TreasuryTransactionForm";
 import { BankAccountsTab } from "@/components/Treasury/BankAccountsTab";
 import BankReconciliation from "@/components/BankReconciliation/BankReconciliation";
+import { BankTransactionForm } from "@/components/Treasury/BankTransactionForm";
+import { BankTransactionsList } from "@/components/Treasury/BankTransactionsList";
 import { useToast } from "@/hooks/use-toast";
 
 const Treasury = () => {
@@ -439,7 +441,10 @@ const Treasury = () => {
 
         {/* تبويب الحسابات البنكية */}
         <TabsContent value="accounts">
-          <BankAccountsTab />
+          <div className="space-y-6">
+            <BankTransactionForm />
+            <BankTransactionsList />
+          </div>
         </TabsContent>
 
         {/* تبويب التسويات البنكية */}
