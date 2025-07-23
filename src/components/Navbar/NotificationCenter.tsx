@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Bell, X, Check, Trash2, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -5,22 +6,17 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { useNotifications } from '@/contexts/NotificationContext';
+import { useUnifiedNotifications } from '@/hooks/useUnifiedNotifications';
 import { cn } from '@/lib/utils';
 
 export const NotificationCenter = () => {
   const [open, setOpen] = useState(false);
   const { 
     notifications,
-    unreadCount,
-    markAsRead,
-    markAllAsRead,
-    deleteNotification
-  } = useNotifications();
-  
-  const criticalCount = notifications.filter(n => n.priority === 'urgent' || n.priority === 'high').length;
-  const urgentCount = notifications.filter(n => n.priority === 'urgent').length;
-  const highCount = notifications.filter(n => n.priority === 'high').length;
+    handleDismiss,
+    handleMarkAsRead,
+    stats
+  } = useUnifiedNotifications();
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -37,25 +33,29 @@ export const NotificationCenter = () => {
   };
 
   const getTimeAgo = (timeString: string) => {
-    // هذه دالة بسيطة لتحويل النص إلى وقت منطقي
     if (timeString === 'الآن') return 'الآن';
     if (timeString.includes('دقيقة')) return timeString;
     if (timeString.includes('ساعة')) return timeString;
     return timeString;
   };
 
+  const markAllAsRead = () => {
+    notifications
+      .filter(n => !n.read && n.source === 'notification')
+      .forEach(n => handleMarkAsRead(n));
+  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
-          {criticalCount > 0 && (
+          {stats.criticalCount > 0 && (
             <Badge 
               variant="destructive" 
               className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
             >
-              {criticalCount}
+              {stats.criticalCount}
             </Badge>
           )}
         </Button>
@@ -69,7 +69,7 @@ export const NotificationCenter = () => {
               الإشعارات
             </div>
             <div className="flex items-center gap-2">
-              {unreadCount > 0 && (
+              {stats.unread > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -88,22 +88,43 @@ export const NotificationCenter = () => {
         </SheetHeader>
 
         <div className="mt-6">
-          {/* إحصائيات سريعة */}
-          {criticalCount > 0 && (
+          {/* إحصائيات سريعة محسنة */}
+          {stats.criticalCount > 0 && (
             <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 mb-4">
               <div className="flex items-center gap-2 text-destructive">
                 <Bell className="w-4 h-4" />
                 <span className="font-medium text-sm">تنبيهات مهمة</span>
               </div>
-              <p className="text-xs text-destructive/80 mt-1">
-                {urgentCount > 0 && `${urgentCount} عاجل`}
-                {urgentCount > 0 && highCount > 0 && ' • '}
-                {highCount > 0 && `${highCount} مرتفع`}
-              </p>
+              <div className="text-xs text-destructive/80 mt-1 space-y-1">
+                {stats.urgent > 0 && <p>{stats.urgent} عاجل</p>}
+                {stats.high > 0 && <p>{stats.high} مرتفع</p>}
+                {stats.systemIssues > 0 && <p>{stats.systemIssues} مشاكل نظام</p>}
+              </div>
             </div>
           )}
 
-          <ScrollArea className="h-[calc(100vh-200px)]">
+          {/* مؤشر حالة الاتصال */}
+          <div className={cn(
+            "flex items-center gap-2 p-2 rounded-lg mb-4 text-xs",
+            stats.connectionHealthy 
+              ? "bg-green-500/10 text-green-600 border border-green-500/20"
+              : "bg-red-500/10 text-red-600 border border-red-500/20"
+          )}>
+            <div className={cn(
+              "w-2 h-2 rounded-full",
+              stats.connectionHealthy ? "bg-green-500" : "bg-red-500"
+            )} />
+            <span>
+              {stats.connectionHealthy ? 'متصل بالتحديثات المباشرة' : 'مشكلة في الاتصال المباشر'}
+            </span>
+            {stats.recentEvents > 0 && (
+              <Badge variant="secondary" className="ml-auto">
+                {stats.recentEvents} حدث حديث
+              </Badge>
+            )}
+          </div>
+
+          <ScrollArea className="h-[calc(100vh-300px)]">
             <div className="space-y-1">
               {notifications.length === 0 ? (
                 <div className="text-center py-8">
@@ -119,9 +140,10 @@ export const NotificationCenter = () => {
                     key={notification.id}
                     className={cn(
                       "p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer",
-                      !notification.read && "bg-primary/5 border-primary/20"
+                      !notification.read && "bg-primary/5 border-primary/20",
+                      notification.source === 'realtime' && "border-l-4 border-l-blue-500"
                     )}
-                    onClick={() => markAsRead(notification.id)}
+                    onClick={() => handleMarkAsRead(notification)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3 flex-1">
@@ -155,7 +177,8 @@ export const NotificationCenter = () => {
                                   "text-xs",
                                   notification.priority === 'urgent' && "border-destructive text-destructive",
                                   notification.priority === 'high' && "border-orange-500 text-orange-600",
-                                  notification.priority === 'medium' && "border-yellow-500 text-yellow-600"
+                                  notification.priority === 'medium' && "border-yellow-500 text-yellow-600",
+                                  notification.source === 'realtime' && "border-blue-500 text-blue-600"
                                 )}
                               >
                                 {notification.category}
@@ -166,7 +189,7 @@ export const NotificationCenter = () => {
                                 size="sm"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  deleteNotification(notification.id);
+                                  handleDismiss(notification);
                                 }}
                                 className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
                               >

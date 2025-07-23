@@ -1,7 +1,8 @@
+
 import { useState, useEffect, useCallback } from 'react';
-import { useEnhancedRealtime } from '@/contexts/EnhancedRealtimeContext';
 import { useTenant } from '@/contexts/TenantContext';
 import { serviceContainer } from '@/services/Container/ServiceContainer';
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 import { toast } from 'sonner';
 
 export interface DashboardStats {
@@ -66,7 +67,6 @@ export function useDashboardRealtime() {
   const [stats, setStats] = useState<DashboardStats>(initialStats);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isConnected, subscribeToTable, unsubscribeFromTable } = useEnhancedRealtime();
   const { currentTenant } = useTenant();
   
   const contractService = serviceContainer.getContractBusinessService();
@@ -95,7 +95,7 @@ export function useDashboardRealtime() {
       const availableVehicles = vehicles.filter(v => v.status === 'available');
       
       // Load financial stats
-      const payments = await paymentService.getRecentPayments(1000); // Get recent payments
+      const payments = await paymentService.getRecentPayments(1000);
       const invoices = await invoiceService.getAllInvoices();
       const totalRevenue = payments.reduce((sum, payment) => sum + payment.amount, 0);
       const overdueInvoices = invoices.filter(inv => inv.status === 'overdue');
@@ -144,7 +144,6 @@ export function useDashboardRealtime() {
   const updateSectionStats = useCallback(async (section: keyof DashboardStats) => {
     if (!currentTenant) return;
     
-    // Mark section as updating
     setStats(prev => ({
       ...prev,
       [section]: {
@@ -200,7 +199,7 @@ export function useDashboardRealtime() {
           break;
           
         case 'financials':
-          const payments = await paymentService.getRecentPayments(1000); // Get recent payments
+          const payments = await paymentService.getRecentPayments(1000);
           const invoices = await invoiceService.getAllInvoices();
           const totalRevenue = payments.reduce((sum, payment) => sum + payment.amount, 0);
           const overdueInvoices = invoices.filter(inv => inv.status === 'overdue');
@@ -218,7 +217,6 @@ export function useDashboardRealtime() {
       }
     } catch (err) {
       console.error(`Error updating ${section} stats:`, err);
-      // Reset updating state but keep old data
       setStats(prev => ({
         ...prev,
         [section]: {
@@ -229,56 +227,51 @@ export function useDashboardRealtime() {
     }
   }, [currentTenant, contractService, vehicleService, paymentService, invoiceService]);
 
-  // Set up real-time subscriptions
-  useEffect(() => {
-    if (!isConnected || !currentTenant) return;
-    
-    // Initial load
-    loadAllStats();
-    
-    // Subscribe to relevant tables
-    const contractsSubscriptionId = subscribeToTable('contracts', (event) => {
-      console.log('Dashboard detected contract change:', event);
+  // Set up realtime subscriptions using the unified system
+  useRealtimeSubscription({
+    table: 'contracts',
+    onEvent: () => {
+      console.log('📊 Contract change detected, updating stats');
       updateSectionStats('contracts');
-      
-      // If a contract with a payment was updated, also update financials
-      if (event.event === 'UPDATE' && 
-         (event.new?.payment_registered_at || event.new?.status === 'completed')) {
-        updateSectionStats('financials');
-      }
-    });
-    
-    const customersSubscriptionId = subscribeToTable('customers', () => {
-      updateSectionStats('customers');
-    });
-    
-    const vehiclesSubscriptionId = subscribeToTable('vehicles', () => {
+      updateSectionStats('customers'); // Customers are derived from contracts
+    }
+  });
+
+  useRealtimeSubscription({
+    table: 'vehicles',
+    onEvent: () => {
+      console.log('📊 Vehicle change detected, updating stats');
       updateSectionStats('vehicles');
-    });
-    
-    const paymentsSubscriptionId = subscribeToTable('payments', () => {
+    }
+  });
+
+  useRealtimeSubscription({
+    table: 'payments',
+    onEvent: () => {
+      console.log('📊 Payment change detected, updating stats');
       updateSectionStats('financials');
-    });
-    
-    const invoicesSubscriptionId = subscribeToTable('invoices', () => {
+    }
+  });
+
+  useRealtimeSubscription({
+    table: 'invoices',
+    onEvent: () => {
+      console.log('📊 Invoice change detected, updating stats');
       updateSectionStats('financials');
-    });
-    
-    // Cleanup subscriptions
-    return () => {
-      if (contractsSubscriptionId) unsubscribeFromTable(contractsSubscriptionId);
-      if (customersSubscriptionId) unsubscribeFromTable(customersSubscriptionId);
-      if (vehiclesSubscriptionId) unsubscribeFromTable(vehiclesSubscriptionId);
-      if (paymentsSubscriptionId) unsubscribeFromTable(paymentsSubscriptionId);
-      if (invoicesSubscriptionId) unsubscribeFromTable(invoicesSubscriptionId);
-    };
-  }, [isConnected, currentTenant, loadAllStats, updateSectionStats, subscribeToTable, unsubscribeFromTable]);
+    }
+  });
+
+  // Initialize data
+  useEffect(() => {
+    if (currentTenant) {
+      loadAllStats();
+    }
+  }, [currentTenant, loadAllStats]);
 
   return {
     stats,
     loading,
     error,
-    isConnected,
     refreshStats: loadAllStats,
     refreshSection: updateSectionStats,
   };

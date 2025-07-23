@@ -2,30 +2,29 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Loader2, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, RefreshCw, CheckCircle2, AlertCircle, Activity } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 
 interface RealtimeIndicatorProps {
-  isConnected: boolean;
-  isUpdating: boolean;
-  lastUpdated: Date | null;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
+  showDetails?: boolean;
 }
 
 export const RealtimeIndicator: React.FC<RealtimeIndicatorProps> = ({
-  isConnected,
-  isUpdating,
-  lastUpdated,
   className,
-  size = 'sm'
+  size = 'sm',
+  showDetails = false
 }) => {
+  const { isConnected, connectionStatus, health, stats, reconnect } = useUnifiedRealtime();
+
   // Format time since last update
   const getTimeSinceUpdate = () => {
-    if (!lastUpdated) return 'لم يتم التحديث بعد';
+    if (!health.lastPing) return 'لم يتم الفحص بعد';
     
     const now = new Date();
-    const diffMs = now.getTime() - lastUpdated.getTime();
+    const diffMs = now.getTime() - health.lastPing.getTime();
     const diffSec = Math.floor(diffMs / 1000);
     
     if (diffSec < 60) return `منذ ${diffSec} ثانية`;
@@ -36,37 +35,87 @@ export const RealtimeIndicator: React.FC<RealtimeIndicatorProps> = ({
 
   // Get icon and style based on status
   const getIndicator = () => {
-    if (isUpdating) {
-      return {
-        icon: <Loader2 className={cn("animate-spin", size === 'sm' ? "h-3 w-3" : "h-4 w-4")} />,
-        text: 'جاري التحديث...',
-        style: 'bg-primary/20 text-primary hover:bg-primary/30'
-      };
+    switch (connectionStatus) {
+      case 'connecting':
+      case 'reconnecting':
+        return {
+          icon: <Loader2 className={cn("animate-spin", size === 'sm' ? "h-3 w-3" : "h-4 w-4")} />,
+          text: connectionStatus === 'connecting' ? 'جاري الاتصال...' : 'جاري إعادة الاتصال...',
+          style: 'bg-primary/20 text-primary hover:bg-primary/30'
+        };
+      
+      case 'error':
+        return {
+          icon: <AlertCircle className={size === 'sm' ? "h-3 w-3" : "h-4 w-4"} />,
+          text: 'خطأ في الاتصال',
+          style: 'bg-destructive/20 text-destructive hover:bg-destructive/30'
+        };
+      
+      case 'connected':
+        const isHealthy = health.isHealthy && stats.isHealthy;
+        return {
+          icon: isHealthy 
+            ? <CheckCircle2 className={size === 'sm' ? "h-3 w-3" : "h-4 w-4"} />
+            : <Activity className={size === 'sm' ? "h-3 w-3" : "h-4 w-4"} />,
+          text: isHealthy ? getTimeSinceUpdate() : 'متصل - مشاكل في الأداء',
+          style: isHealthy 
+            ? 'bg-success/20 text-success hover:bg-success/30'
+            : 'bg-warning/20 text-warning hover:bg-warning/30'
+        };
+      
+      default:
+        return {
+          icon: <AlertCircle className={size === 'sm' ? "h-3 w-3" : "h-4 w-4"} />,
+          text: 'غير متصل',
+          style: 'bg-muted/20 text-muted-foreground hover:bg-muted/30'
+        };
     }
-    
-    if (!isConnected) {
-      return {
-        icon: <AlertCircle className={size === 'sm' ? "h-3 w-3" : "h-4 w-4"} />,
-        text: 'غير متصل',
-        style: 'bg-destructive/20 text-destructive hover:bg-destructive/30'
-      };
-    }
-    
-    const indicator = {
-      icon: <CheckCircle2 className={size === 'sm' ? "h-3 w-3" : "h-4 w-4"} />,
-      text: getTimeSinceUpdate(),
-      style: 'bg-success/20 text-success hover:bg-success/30'
-    };
-    
-    // If data is stale (more than 5 minutes old)
-    if (lastUpdated && (new Date().getTime() - lastUpdated.getTime()) > 5 * 60 * 1000) {
-      indicator.style = 'bg-warning/20 text-warning hover:bg-warning/30';
-    }
-    
-    return indicator;
   };
 
   const indicator = getIndicator();
+
+  const TooltipContent_Custom = () => (
+    <div className="text-center max-w-xs">
+      <p className="font-semibold mb-1">
+        نظام التحديث المباشر الموحد
+      </p>
+      <p className="text-xs mb-2">
+        الحالة: {indicator.text}
+      </p>
+      
+      {showDetails && (
+        <div className="space-y-1 text-xs">
+          <div className="flex justify-between">
+            <span>الاشتراكات النشطة:</span>
+            <span>{stats.activeSubscriptions}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>إجمالي الأحداث:</span>
+            <span>{stats.totalEvents}</span>
+          </div>
+          {health.latency && (
+            <div className="flex justify-between">
+              <span>زمن الاستجابة:</span>
+              <span>{health.latency}ms</span>
+            </div>
+          )}
+          {health.reconnectAttempts > 0 && (
+            <div className="flex justify-between text-warning">
+              <span>محاولات الاتصال:</span>
+              <span>{health.reconnectAttempts}</span>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {isConnected && (
+        <div className="flex items-center justify-center gap-1 mt-2 text-xs text-muted-foreground">
+          <RefreshCw className="h-3 w-3" />
+          <span>انقر للتحديث اليدوي</span>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <TooltipProvider>
@@ -79,31 +128,17 @@ export const RealtimeIndicator: React.FC<RealtimeIndicatorProps> = ({
               indicator.style,
               className
             )}
-            onClick={() => isConnected && window.location.reload()}
+            onClick={() => isConnected && reconnect()}
           >
             {indicator.icon}
             {size !== 'sm' && <span>{indicator.text}</span>}
+            {showDetails && stats.activeSubscriptions > 0 && (
+              <span className="ml-1 text-xs">({stats.activeSubscriptions})</span>
+            )}
           </Badge>
         </TooltipTrigger>
         <TooltipContent dir="rtl">
-          <div className="text-center">
-            <p className="font-semibold mb-1">
-              {isConnected ? 'متصل بالتحديثات المباشرة' : 'غير متصل بالتحديثات المباشرة'}
-            </p>
-            <p className="text-xs">
-              {isUpdating 
-                ? 'جاري تحديث البيانات...' 
-                : lastUpdated 
-                  ? `آخر تحديث: ${getTimeSinceUpdate()}` 
-                  : 'لم يتم التحديث بعد'}
-            </p>
-            {isConnected && (
-              <div className="flex items-center justify-center gap-1 mt-1 text-xs text-muted-foreground">
-                <RefreshCw className="h-3 w-3" />
-                <span>انقر للتحديث اليدوي</span>
-              </div>
-            )}
-          </div>
+          <TooltipContent_Custom />
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
