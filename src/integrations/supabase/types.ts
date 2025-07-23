@@ -10660,6 +10660,42 @@ export type Database = {
           },
         ]
       }
+      tenant_user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          role: Database["public"]["Enums"]["user_role"]
+          tenant_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          role: Database["public"]["Enums"]["user_role"]
+          tenant_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          role?: Database["public"]["Enums"]["user_role"]
+          tenant_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       tenant_users: {
         Row: {
           created_at: string | null
@@ -12333,6 +12369,17 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      check_tenant_roles: {
+        Args: { roles_param: string[] }
+        Returns: boolean
+      }
+      check_user_role: {
+        Args: {
+          user_id_param: string
+          role_param: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: boolean
+      }
       cleanup_duplicate_accounts: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -12888,6 +12935,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_secure_tenant_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_system_setting: {
         Args: { setting_key_param: string }
         Returns: Json
@@ -13120,6 +13171,10 @@ export type Database = {
           created_by_param: string
         }
         Returns: string
+      }
+      security_audit_report: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       setup_complete_chart_of_accounts: {
         Args: { tenant_id_param: string }

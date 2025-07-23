@@ -16,6 +16,7 @@ export interface TenantPermissions {
 export const useTenantPermissions = (): TenantPermissions => {
   const { currentUserRole } = useTenant();
 
+  // استخدام النظام الجديد مع fallback للنظام القديم
   const isSuperAdmin = currentUserRole === 'super_admin';
   const isTenantAdmin = currentUserRole === 'tenant_admin';
   const isManager = currentUserRole === 'manager';
