@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
@@ -32,6 +31,7 @@ import ChartOfAccounts from "@/pages/ChartOfAccounts";
 import JournalEntries from "@/pages/JournalEntries";
 import FinancialReports from "@/pages/FinancialReports";
 import Tenants from "@/pages/Tenants";
+import { ContractStageRouter } from "@/components/Contracts/ContractStageRouter";
 
 // Create a single QueryClient instance
 const queryClient = new QueryClient({
@@ -84,6 +84,7 @@ function App() {
                           }>
                             <Route index element={<Index />} />
                             <Route path="contracts" element={<Contracts />} />
+                            <Route path="contracts/:contractId" element={<ContractStageRouter />} />
                             <Route path="vehicles" element={<Fleet />} />
                             <Route path="customers" element={<Customers />} />
                             <Route path="invoices" element={<Invoicing />} />
