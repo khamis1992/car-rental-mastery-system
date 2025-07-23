@@ -12980,6 +12980,10 @@ export type Database = {
         }
         Returns: string
       }
+      get_optimized_dashboard_stats: {
+        Args: { tenant_id_param: string }
+        Returns: Json
+      }
       get_related_modules: {
         Args: { module_name: string; entity_id: string }
         Returns: {

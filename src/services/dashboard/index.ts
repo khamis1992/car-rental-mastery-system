@@ -15,7 +15,7 @@ export const dashboardService = {
       // استخدام RPC function محسنة للحصول على جميع الإحصائيات دفعة واحدة
       const { data, error } = await supabase.rpc('get_optimized_dashboard_stats', {
         tenant_id_param: tenantId
-      });
+      }) as { data: any, error: any };
 
       if (error) {
         console.error('Dashboard stats RPC error:', error);
@@ -23,14 +23,20 @@ export const dashboardService = {
         return await this.getDashboardStatsFallback(tenantId);
       }
 
-      return data || {
-        totalContracts: 0,
-        activeContracts: 0,
-        availableVehicles: 0,
-        monthlyRevenue: 0,
-        pendingPayments: 0,
-        expiringContracts: 0,
-      };
+      // تحويل البيانات من JSONB إلى DashboardStatsResponse
+      if (data && typeof data === 'object') {
+        return {
+          totalContracts: data.totalContracts || 0,
+          activeContracts: data.activeContracts || 0,
+          availableVehicles: data.availableVehicles || 0,
+          monthlyRevenue: data.monthlyRevenue || 0,
+          pendingPayments: data.pendingPayments || 0,
+          expiringContracts: data.expiringContracts || 0,
+        };
+      }
+
+      // Fallback إذا لم تكن البيانات بالشكل المتوقع
+      return await this.getDashboardStatsFallback(tenantId);
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
       return await this.getDashboardStatsFallback(tenantId);
