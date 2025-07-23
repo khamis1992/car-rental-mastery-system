@@ -3,12 +3,20 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Clock, Crown } from 'lucide-react';
 import { Tenant } from '@/types/tenant';
+import { useNavigate } from 'react-router-dom';
 
 interface TrialStatusAlertProps {
   tenant: Tenant;
 }
 
 const TrialStatusAlert: React.FC<TrialStatusAlertProps> = ({ tenant }) => {
+  const navigate = useNavigate();
+
+  const handleUpgradeClick = () => {
+    // انتقال إلى صفحة إدارة الاشتراكات
+    navigate('/billing?tab=subscriptions');
+  };
+
   if (tenant.status !== 'trial' || !tenant.trial_ends_at) {
     return null;
   }
@@ -39,7 +47,7 @@ const TrialStatusAlert: React.FC<TrialStatusAlertProps> = ({ tenant }) => {
               ({trialEndDate.toLocaleDateString('ar-SA')})
             </span>
           </div>
-          <Button size="sm" className="mr-4">
+          <Button size="sm" className="mr-4" onClick={handleUpgradeClick}>
             <Crown className="w-4 h-4 ml-2" />
             ترقية الاشتراك
           </Button>
