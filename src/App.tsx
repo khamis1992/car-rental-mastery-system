@@ -42,6 +42,7 @@ import { Payroll } from "@/pages/Payroll";
 import Communications from "@/pages/Communications";
 import Notifications from "@/pages/Notifications";
 import { ContractStageRouter } from "@/components/Contracts/ContractStageRouter";
+import CustomerTestPage from "@/pages/CustomerTestPage";
 
 // Create a single QueryClient instance
 const queryClient = new QueryClient({
@@ -125,6 +126,7 @@ function App() {
                             <Route path="communications" element={<Communications />} />
                             <Route path="notifications" element={<Notifications />} />
                             <Route path="tenants" element={<Tenants />} />
+                            <Route path="customer-test" element={<CustomerTestPage />} />
                           </Route>
                           <Route path="*" element={<NotFound />} />
                         </Routes>
