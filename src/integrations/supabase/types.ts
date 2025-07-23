@@ -12373,11 +12373,19 @@ export type Database = {
         Args: { roles_param: string[] }
         Returns: boolean
       }
+      check_user_multiple_roles: {
+        Args: { roles_param: string[] }
+        Returns: boolean
+      }
       check_user_role: {
         Args: {
           user_id_param: string
           role_param: Database["public"]["Enums"]["user_role"]
         }
+        Returns: boolean
+      }
+      check_user_role_secure: {
+        Args: { role_param: Database["public"]["Enums"]["user_role"] }
         Returns: boolean
       }
       cleanup_duplicate_accounts: {
@@ -12880,6 +12888,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
       get_customer_accounting_summary: {
         Args: {
           customer_id_param?: string
@@ -12961,6 +12973,10 @@ export type Database = {
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
+      }
+      get_user_tenant_context: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       hard_delete_tenant: {
         Args: { tenant_id_param: string; deletion_reason?: string }
