@@ -12329,6 +12329,10 @@ export type Database = {
         Args: { period_date: string }
         Returns: Json
       }
+      check_tenant_isolation_compliance: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       cleanup_duplicate_accounts: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -13141,6 +13145,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      test_tenant_data_isolation: {
+        Args: { test_tenant_id: string }
+        Returns: Json
+      }
       update_account_balances: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -13209,6 +13217,10 @@ export type Database = {
       validate_journal_entry_balance: {
         Args: { entry_id: string }
         Returns: boolean
+      }
+      validate_rls_policies: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       validate_tenant_access: {
         Args: { table_tenant_id: string }
