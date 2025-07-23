@@ -4,10 +4,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ChartOfAccount } from '@/types/accounting';
 import { generateNextSubAccountCode, validateAccountCode } from '@/utils/accountNumberGenerator';
+import { useUnifiedErrorHandling } from './useUnifiedErrorHandling';
 
 export const useAccountOperations = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  
+  const { execute, handleError } = useUnifiedErrorHandling({
+    context: 'عمليات الحسابات المحاسبية',
+    showToast: true,
+    loadingKey: 'account-operations'
+  });
 
   // Helper function to get existing sub-account codes
   const getExistingSubAccountCodes = async (parentAccount: ChartOfAccount): Promise<string[]> => {
@@ -55,15 +62,18 @@ export const useAccountOperations = () => {
   };
 
   const createSubAccount = async (accountData: Partial<ChartOfAccount>) => {
-    setLoading(true);
-    
-    try {
-      console.log('🚀 بدء عملية إنشاء الحساب الفرعي:', accountData);
+    // Basic validation
+    if (!accountData.parent_account_id) {
+      toast({
+        title: "خطأ في البيانات",
+        description: "يجب اختيار الحساب الأب",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      // Basic validation
-      if (!accountData.parent_account_id) {
-        throw new Error('يجب اختيار الحساب الأب');
-      }
+    return await execute(async () => {
+      console.log('🚀 بدء عملية إنشاء الحساب الفرعي:', accountData);
 
       // Get parent account details
       const { data: parentAccount, error: parentError } = await supabase
@@ -167,28 +177,7 @@ export const useAccountOperations = () => {
       });
 
       return newAccount;
-
-    } catch (error) {
-      console.error('💥 خطأ في إنشاء الحساب الفرعي:', error);
-      
-      let errorMessage = 'حدث خطأ غير متوقع';
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      }
-      
-      toast({
-        title: "خطأ في الإنشاء",
-        description: errorMessage,
-        variant: "destructive",
-      });
-
-      throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const updateAccount = async (accountId: string, updates: Partial<ChartOfAccount>) => {

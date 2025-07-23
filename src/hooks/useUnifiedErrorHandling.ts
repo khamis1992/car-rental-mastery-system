@@ -3,6 +3,7 @@ import { useErrorTracking } from './useErrorTracking';
 import { useRetry } from './useRetry';
 import { useGlobalLoading } from '@/contexts/GlobalLoadingContext';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UnifiedErrorOptions {
   context?: string;
@@ -39,6 +40,29 @@ export const useUnifiedErrorHandling = <T = any>(
     errorMessage
   } = defaultOptions;
 
+  // دالة للتحقق من حالة المصادقة مع تشخيص مفصل
+  const checkAuthenticationStatus = useCallback(async () => {
+    try {
+      const { data: userInfo } = await supabase.rpc('get_current_user_info');
+      console.log('تشخيص المصادقة:', userInfo);
+      
+      const info = userInfo as any;
+      
+      if (!info?.is_authenticated) {
+        throw new Error('المستخدم غير مصادق عليه. يرجى تسجيل الدخول أولاً.');
+      }
+      
+      if (!info?.tenant_id) {
+        throw new Error('لا يمكن تحديد المؤسسة. يرجى التواصل مع المدير.');
+      }
+      
+      return info;
+    } catch (error) {
+      console.error('خطأ في فحص المصادقة:', error);
+      throw error;
+    }
+  }, []);
+
   const handleError = useCallback((error: Error, options: UnifiedErrorOptions = {}) => {
     const opts = { ...defaultOptions, ...options };
     
@@ -63,6 +87,9 @@ export const useUnifiedErrorHandling = <T = any>(
         setLoading(loadingKey, true);
       }
       
+      // فحص المصادقة قبل تنفيذ العملية
+      await checkAuthenticationStatus();
+      
       const result = await operation();
       
       if (loadingKey) {
@@ -78,7 +105,7 @@ export const useUnifiedErrorHandling = <T = any>(
       handleError(error as Error);
       return null;
     }
-  }, [handleError, loadingKey, setLoading, successMessage]);
+  }, [handleError, loadingKey, setLoading, successMessage, checkAuthenticationStatus]);
 
   const executeWithRetry = useCallback(async (operation: () => Promise<T>): Promise<T | null> => {
     if (!enableRetry) {
@@ -107,7 +134,11 @@ export const useUnifiedErrorHandling = <T = any>(
       'ValidationError': 'خطأ في التحقق من البيانات',
       'PermissionError': 'ليس لديك صلاحية لهذا الإجراء',
       'NotFoundError': 'البيانات المطلوبة غير موجودة',
-      'AbortError': 'تم إلغاء العملية'
+      'AbortError': 'تم إلغاء العملية',
+      'المستخدم غير مصادق عليه': 'يرجى تسجيل الدخول أولاً',
+      'لا يمكن تحديد المؤسسة': 'خطأ في إعداد الحساب. يرجى التواصل مع المدير',
+      'new row violates row-level security': 'خطأ في الصلاحيات. يرجى التحقق من تسجيل الدخول',
+      'JWT expired': 'انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى'
     };
 
     for (const [key, message] of Object.entries(errorMessages)) {

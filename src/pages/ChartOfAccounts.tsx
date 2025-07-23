@@ -1,18 +1,20 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ChartOfAccountsTab } from '@/components/Accounting/ChartOfAccountsTab';
 import { ChartOfAccountsImportDialog } from '@/components/Accounting/ChartOfAccountsImportDialog';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, AlertTriangle } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Settings } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAccountStats } from '@/hooks/useAccountStats';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { DiagnosticPanel } from '@/components/ui/diagnostic-panel';
 
 const ChartOfAccounts = () => {
   const { stats, loading, error, refetch } = useAccountStats();
   const { toast } = useToast();
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
 
   const handleRefresh = async () => {
     try {
@@ -48,6 +50,14 @@ const ChartOfAccounts = () => {
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             تحديث
+          </Button>
+          <Button 
+            variant="outline" 
+            className="rtl-flex"
+            onClick={() => setShowDiagnostics(true)}
+          >
+            <Settings className="w-4 h-4" />
+            تشخيص النظام
           </Button>
           <ChartOfAccountsImportDialog 
             isOpen={false} 
@@ -128,6 +138,12 @@ const ChartOfAccounts = () => {
 
       {/* Main Chart of Accounts Table */}
       <ChartOfAccountsTab />
+      
+      {/* Diagnostic Panel */}
+      <DiagnosticPanel 
+        isOpen={showDiagnostics}
+        onClose={() => setShowDiagnostics(false)}
+      />
     </div>
   );
 };
