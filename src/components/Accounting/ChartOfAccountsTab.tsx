@@ -326,7 +326,6 @@ export const ChartOfAccountsTab = () => {
                             variant="ghost"
                             className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                             title="حذف الحساب"
-                            onClick={() => setAccountToDelete(account)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
