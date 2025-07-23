@@ -32,10 +32,15 @@ import {
 } from "@/components/ui/select";
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 import { DateRange } from "react-day-picker";
+import { TreasuryTransactionForm } from "@/components/Treasury/TreasuryTransactionForm";
+import { useToast } from "@/hooks/use-toast";
 
 const Treasury = () => {
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>();
   const [activeTab, setActiveTab] = useState("overview");
+  const [showTransactionForm, setShowTransactionForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   // بيانات وهمية للعرض
   const treasuryOverview = {
@@ -139,6 +144,32 @@ const Treasury = () => {
     );
   };
 
+  // معالج إنشاء معاملة جديدة
+  const handleCreateTransaction = async (data: any) => {
+    setIsSubmitting(true);
+    try {
+      // هنا ستكون منطق إرسال البيانات للخادم
+      console.log("إنشاء معاملة جديدة:", data);
+      
+      // محاكاة انتظار API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: "تم إنشاء المعاملة بنجاح",
+        description: `تم إضافة ${data.transaction_type === "deposit" ? "إيداع" : data.transaction_type === "withdrawal" ? "سحب" : "معاملة"} بمبلغ ${data.amount} د.ك`,
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ في إنشاء المعاملة",
+        description: "حدث خطأ أثناء إنشاء المعاملة، يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* العنوان الرئيسي */}
@@ -154,7 +185,7 @@ const Treasury = () => {
             <Download className="h-4 w-4 ml-2" />
             تصدير
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => setShowTransactionForm(true)}>
             <Plus className="h-4 w-4 ml-2" />
             معاملة جديدة
           </Button>
@@ -330,7 +361,7 @@ const Treasury = () => {
             <CardHeader>
               <div className="rtl-flex justify-between items-center">
                 <CardTitle className="rtl-title">سجل المعاملات النقدية</CardTitle>
-                <Button>
+                <Button onClick={() => setShowTransactionForm(true)}>
                   <Plus className="h-4 w-4 ml-2" />
                   معاملة جديدة
                 </Button>
@@ -435,6 +466,14 @@ const Treasury = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* نموذج المعاملة الجديدة */}
+      <TreasuryTransactionForm
+        open={showTransactionForm}
+        onOpenChange={setShowTransactionForm}
+        onSubmit={handleCreateTransaction}
+        isLoading={isSubmitting}
+      />
     </div>
   );
 };
