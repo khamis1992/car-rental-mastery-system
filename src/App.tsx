@@ -103,7 +103,7 @@ function App() {
                             <Route path="traffic-violations" element={<TrafficViolations />} />
                             <Route path="chart-of-accounts" element={<ChartOfAccounts />} />
                             <Route path="journal-entries" element={<JournalEntries />} />
-                            <Route path="reports" element={<FinancialReports />} />
+                            <Route path="financial-reports" element={<FinancialReports />} />
                             <Route path="fixed-assets" element={<FixedAssets />} />
                             <Route path="general-ledger" element={<GeneralLedger />} />
                             <Route path="budget-management" element={<BudgetManagement />} />
