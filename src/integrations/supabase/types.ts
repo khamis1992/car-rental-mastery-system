@@ -9737,6 +9737,48 @@ export type Database = {
           },
         ]
       }
+      security_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          message: string
+          resolved: boolean | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          tenant_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          message: string
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: string
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          message?: string
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       security_events: {
         Row: {
           event_type: string
@@ -12651,6 +12693,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      enhanced_security_monitor: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       evaluate_journal_entry_review: {
         Args: {
           entry_id: string
@@ -13122,6 +13168,10 @@ export type Database = {
         }
         Returns: Json
       }
+      quick_security_check: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       reopen_financial_period: {
         Args: {
           period_id_param: string
@@ -13189,6 +13239,10 @@ export type Database = {
         Returns: string
       }
       security_audit_report: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      security_maintenance_routine: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
