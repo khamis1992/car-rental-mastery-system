@@ -12218,6 +12218,10 @@ export type Database = {
         Args: { customer_id_param: string; analysis_date_param?: string }
         Returns: Json
       }
+      calculate_customer_aging_fast: {
+        Args: { customer_id_param: string }
+        Returns: Json
+      }
       calculate_financial_kpis: {
         Args: { for_date?: string }
         Returns: number
@@ -12770,6 +12774,10 @@ export type Database = {
       generate_violation_payment_number: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_account_balance_optimized: {
+        Args: { account_id_param: string; as_of_date?: string }
+        Returns: number
       }
       get_account_summary: {
         Args: {
