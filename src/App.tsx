@@ -38,6 +38,7 @@ import AccountingAutomation from "@/pages/AccountingAutomation";
 import AccountingValidation from "@/pages/AccountingValidation";
 import Maintenance from "@/pages/Maintenance";
 import Leaves from "@/pages/Leaves";
+import { Payroll } from "@/pages/Payroll";
 import { ContractStageRouter } from "@/components/Contracts/ContractStageRouter";
 
 // Create a single QueryClient instance
@@ -114,6 +115,7 @@ function App() {
                             <Route path="accounting-validation" element={<AccountingValidation />} />
                             <Route path="maintenance" element={<Maintenance />} />
                             <Route path="leaves" element={<Leaves />} />
+                            <Route path="payroll" element={<Payroll />} />
                             <Route path="tenants" element={<Tenants />} />
                           </Route>
                           <Route path="*" element={<NotFound />} />
