@@ -1,7 +1,51 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import type { ReceivedCheck, ReceivedCheckFormData } from '@/types/checks';
+
+interface ReceivedCheckFormData {
+  check_number: string;
+  drawer_name: string;
+  drawer_account?: string;
+  amount: number;
+  check_date: string;
+  received_date: string;
+  due_date?: string;
+  bank_name: string;
+  memo?: string;
+  reference_type?: string;
+  reference_id?: string;
+}
+
+interface ReceivedCheck {
+  id: string;
+  tenant_id: string;
+  check_number: string;
+  drawer_name: string;
+  drawer_account?: string;
+  amount: number;
+  check_date: string;
+  received_date: string;
+  due_date?: string;
+  bank_name: string;
+  status: string;
+  deposit_bank_account_id?: string;
+  deposited_at?: string;
+  cleared_at?: string;
+  bounced_at?: string;
+  bounce_reason?: string;
+  reference_type?: string;
+  reference_id?: string;
+  journal_entry_id?: string;
+  memo?: string;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  deposit_bank_account?: {
+    id: string;
+    account_name: string;
+    bank_name: string;
+  };
+}
 
 export function useReceivedChecks() {
   const [receivedChecks, setReceivedChecks] = useState<ReceivedCheck[]>([]);
@@ -40,10 +84,10 @@ export function useReceivedChecks() {
     try {
       const { error } = await supabase
         .from('received_checks')
-        .insert({
+        .insert([{
           ...data,
-          tenant_id: '', // Will be set by RLS
-        });
+          status: 'received',
+        }]);
 
       if (error) throw error;
 
@@ -64,18 +108,42 @@ export function useReceivedChecks() {
     }
   };
 
-  const updateReceivedCheckStatus = async (id: string, status: ReceivedCheck['status'], additionalData?: any) => {
+  const updateReceivedCheck = async (id: string, data: Partial<ReceivedCheckFormData>) => {
     try {
-      const updateData: any = { status };
+      const { error } = await supabase
+        .from('received_checks')
+        .update(data)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'تم بنجاح',
+        description: 'تم تحديث الشيك المستلم بنجاح',
+      });
+
+      await fetchReceivedChecks();
+      return true;
+    } catch (error: any) {
+      toast({
+        title: 'خطأ',
+        description: error.message || 'فشل في تحديث الشيك المستلم',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
+  const updateCheckStatus = async (id: string, status: string, data?: any) => {
+    try {
+      const updateData = { status, ...data };
       
-      if (status === 'deposited' && additionalData?.deposit_bank_account_id) {
-        updateData.deposit_bank_account_id = additionalData.deposit_bank_account_id;
+      if (status === 'deposited') {
         updateData.deposited_at = new Date().toISOString();
       } else if (status === 'cleared') {
         updateData.cleared_at = new Date().toISOString();
-      } else if (status === 'bounced' && additionalData?.bounce_reason) {
+      } else if (status === 'bounced') {
         updateData.bounced_at = new Date().toISOString();
-        updateData.bounce_reason = additionalData.bounce_reason;
       }
 
       const { error } = await supabase
@@ -136,7 +204,8 @@ export function useReceivedChecks() {
     receivedChecks,
     loading,
     createReceivedCheck,
-    updateReceivedCheckStatus,
+    updateReceivedCheck,
+    updateCheckStatus,
     deleteReceivedCheck,
     refetch: fetchReceivedChecks,
   };
