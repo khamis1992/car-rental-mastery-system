@@ -89,7 +89,7 @@ export class TenantSecurityMonitor {
     try {
       // محاولة الوصول للجدول بدون فلتر tenant_id للتحقق من RLS
       const { data, error } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .select('id, tenant_id')
         .limit(1);
 
@@ -162,7 +162,7 @@ export class TenantSecurityMonitor {
       for (const tableName of tablesToCheck) {
         // فحص وجود سجلات بدون tenant_id
         const { data: orphanedRecords } = await supabase
-          .from(tableName)
+          .from(tableName as any)
           .select('id')
           .is('tenant_id', null);
 
@@ -173,7 +173,7 @@ export class TenantSecurityMonitor {
 
         // فحص وجود سجلات تنتمي لمؤسسات أخرى (انتهاك محتمل)
         const { data: foreignRecords } = await supabase
-          .from(tableName)
+          .from(tableName as any)
           .select('id, tenant_id')
           .neq('tenant_id', tenantId);
 
