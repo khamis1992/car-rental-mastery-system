@@ -40,6 +40,7 @@ import Maintenance from "@/pages/Maintenance";
 import Leaves from "@/pages/Leaves";
 import { Payroll } from "@/pages/Payroll";
 import Communications from "@/pages/Communications";
+import Notifications from "@/pages/Notifications";
 import { ContractStageRouter } from "@/components/Contracts/ContractStageRouter";
 
 // Create a single QueryClient instance
@@ -118,6 +119,7 @@ function App() {
                             <Route path="leaves" element={<Leaves />} />
                             <Route path="payroll" element={<Payroll />} />
                             <Route path="communications" element={<Communications />} />
+                            <Route path="notifications" element={<Notifications />} />
                             <Route path="tenants" element={<Tenants />} />
                           </Route>
                           <Route path="*" element={<NotFound />} />
