@@ -20,30 +20,55 @@ export abstract class BaseRepository<T, K = string> implements IRepository<T, K>
   }
 
   async getAll(): Promise<T[]> {
+    const requiresTenantId = await this.tableHasTenantId();
     const tenantId = await this.getCurrentTenantId();
+    
+    // فحص أمني: التأكد من وجود tenant_id للجداول التي تتطلبه
+    if (requiresTenantId && !tenantId) {
+      throw new Error(`لا يمكن الوصول للبيانات - لم يتم العثور على سياق المؤسسة للجدول ${this.tableName}`);
+    }
     
     let query = supabase
       .from(this.tableName as any)
       .select('*');
 
-    // Add tenant filter for tables that have tenant_id
-    if (tenantId && await this.tableHasTenantId()) {
+    // إضافة فلتر المؤسسة للجداول التي تتطلبه
+    if (requiresTenantId && tenantId) {
       query = query.eq('tenant_id', tenantId);
     }
 
     const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) throw error;
+    
+    // فحص أمني إضافي: التأكد من أن جميع السجلات تنتمي للمؤسسة الصحيحة
+    if (requiresTenantId && data && tenantId) {
+      const invalidRecords = data.filter((record: any) => record.tenant_id !== tenantId);
+      if (invalidRecords.length > 0) {
+        console.error(`خطأ أمني في ${this.tableName}: عُثر على ${invalidRecords.length} سجلات من مؤسسات أخرى`);
+        throw new Error(`خطأ أمني: تم العثور على بيانات من مؤسسات أخرى في ${this.tableName}`);
+      }
+    }
+    
     return (data || []) as T[];
   }
 
-  // Check if table has tenant_id column
+  // فحص ما إذا كان الجدول يحتوي على عمود tenant_id - القائمة المحدثة
   private async tableHasTenantId(): Promise<boolean> {
     const tablesWithTenantId = [
-      'contracts', 'additional_charges', 'chart_of_accounts', 
-      'branches', 'cost_centers', 'attendance', 'quotations',
-      'employees', 'vehicles', 'customers', 'invoices', 'payments',
-      'checks', 'received_checks', 'checkbooks', 'bank_accounts'
+      'tenants', 'tenant_users', 'customers', 'contracts', 'vehicles', 'invoices', 'invoice_items',
+      'payments', 'expenses', 'employees', 'departments', 'office_locations', 'attendance',
+      'leaves', 'violations', 'violation_types', 'violation_payments', 'maintenance_requests',
+      'maintenance_categories', 'fuel_logs', 'vehicle_assignments', 'additional_charges',
+      'customer_history', 'employee_documents', 'leave_requests', 'user_activity_logs',
+      'notifications', 'contract_documents', 'payment_methods', 'expense_categories',
+      'document_templates', 'asset_depreciation', 'asset_assignments', 'asset_transfers',
+      'asset_maintenance', 'asset_valuations', 'chart_of_accounts', 'journal_entries',
+      'journal_entry_lines', 'journal_entry_details', 'financial_periods', 'bank_accounts',
+      'bank_transactions', 'bank_reconciliation', 'bank_reconciliation_imports',
+      'collective_invoices', 'collective_invoice_items', 'auto_billing_settings',
+      'auto_billing_log', 'advanced_kpis', 'kpi_targets', 'performance_benchmarks',
+      'kpi_calculations', 'accounting_templates', 'automated_entry_rules'
     ];
     return tablesWithTenantId.includes(this.tableName);
   }
@@ -71,13 +96,20 @@ export abstract class BaseRepository<T, K = string> implements IRepository<T, K>
     try {
       console.log(`BaseRepository(${this.tableName}): بدء إنشاء سجل جديد:`, data);
       
-      // Add tenant_id automatically for tables that require it
+      // التحقق من الحاجة لـ tenant_id وإضافته مع فحص أمني
       let insertData = { ...data } as any;
-      if (await this.tableHasTenantId()) {
+      const requiresTenantId = await this.tableHasTenantId();
+      
+      if (requiresTenantId) {
         const tenantId = await this.getCurrentTenantId();
-        if (tenantId) {
-          insertData.tenant_id = tenantId;
+        
+        // فحص أمني: رفض العملية إذا لم يتم العثور على tenant_id للجداول التي تتطلبه
+        if (!tenantId) {
+          throw new Error(`فشل في تحديد هوية المؤسسة - لا يمكن إنشاء سجل في جدول ${this.tableName}`);
         }
+        
+        insertData.tenant_id = tenantId;
+        console.log(`BaseRepository(${this.tableName}): تم إضافة tenant_id:`, tenantId);
       }
       
       const { data: result, error } = await supabase
@@ -89,6 +121,11 @@ export abstract class BaseRepository<T, K = string> implements IRepository<T, K>
       if (error) {
         console.error(`BaseRepository(${this.tableName}): خطأ في إنشاء السجل:`, error);
         throw error;
+      }
+      
+      // فحص أمني إضافي: التأكد من صحة البيانات المُرجعة
+      if (requiresTenantId && result && (result as any).tenant_id !== insertData.tenant_id) {
+        throw new Error(`خطأ أمني: تم إرجاع بيانات من مؤسسة مختلفة في جدول ${this.tableName}`);
       }
       
       console.log(`BaseRepository(${this.tableName}): تم إنشاء السجل بنجاح:`, result);

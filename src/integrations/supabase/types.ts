@@ -12880,6 +12880,10 @@ export type Database = {
           notes: string
         }[]
       }
+      get_safe_default_tenant_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_system_setting: {
         Args: { setting_key_param: string }
         Returns: Json
