@@ -153,27 +153,6 @@ const Index = () => {
         />
       </div>
 
-      {/* مؤشر حالة الاتصال بالتحديثات المباشرة */}
-      {!isConnected && (
-        <Card className="bg-warning/10 border-warning mb-4">
-          <CardContent className="p-4">
-            <div className="flex flex-row-reverse items-center gap-3 justify-between">
-              <div className="text-right">
-                <h3 className="font-medium text-warning mb-1">انقطع الاتصال بالتحديثات المباشرة</h3>
-                <p className="text-sm text-muted-foreground">قد لا تظهر بعض التحديثات تلقائياً. الرجاء تحديث الصفحة.</p>
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="border-warning text-warning hover:bg-warning/20"
-                onClick={() => window.location.reload()}
-              >
-                <RefreshCw className="w-4 h-4 ml-2" /> إعادة الاتصال
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };
