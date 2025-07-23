@@ -42,7 +42,8 @@ export abstract class BaseRepository<T, K = string> implements IRepository<T, K>
     const tablesWithTenantId = [
       'contracts', 'additional_charges', 'chart_of_accounts', 
       'branches', 'cost_centers', 'attendance', 'quotations',
-      'employees', 'vehicles', 'customers', 'invoices', 'payments'
+      'employees', 'vehicles', 'customers', 'invoices', 'payments',
+      'checks', 'received_checks', 'checkbooks', 'bank_accounts'
     ];
     return tablesWithTenantId.includes(this.tableName);
   }

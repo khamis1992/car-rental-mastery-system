@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Receipt, Calendar, DollarSign, User, Building2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { ReceivedChecksRepository } from '@/repositories/ReceivedChecksRepository';
 const receivedCheckSchema = z.object({
   check_number: z.string().min(1, "رقم الشيك مطلوب"),
   drawer_name: z.string().min(1, "اسم الساحب مطلوب"),
@@ -37,6 +38,7 @@ interface ReceivedCheckFormProps {
 export function ReceivedCheckForm({ receivedCheck, onSuccess }: ReceivedCheckFormProps) {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const receivedChecksRepository = new ReceivedChecksRepository();
 
   const form = useForm<ReceivedCheckFormData>({
     resolver: zodResolver(receivedCheckSchema),
@@ -74,11 +76,8 @@ export function ReceivedCheckForm({ receivedCheck, onSuccess }: ReceivedCheckFor
         success = !error;
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from('received_checks')
-          .insert([checkData]);
-        success = !error;
-        if (error) throw error;
+        await receivedChecksRepository.createReceivedCheck(data as any);
+        success = true;
       }
 
       if (success) {

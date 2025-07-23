@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ReceivedChecksRepository } from '@/repositories/ReceivedChecksRepository';
 
 interface ReceivedCheckFormData {
   check_number: string;
@@ -51,6 +52,7 @@ export function useReceivedChecks() {
   const [receivedChecks, setReceivedChecks] = useState<ReceivedCheck[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const receivedChecksRepository = new ReceivedChecksRepository();
 
   const fetchReceivedChecks = async () => {
     try {
@@ -82,14 +84,7 @@ export function useReceivedChecks() {
 
   const createReceivedCheck = async (data: ReceivedCheckFormData) => {
     try {
-      const { error } = await supabase
-        .from('received_checks')
-        .insert([{
-          ...data,
-          status: 'received',
-        }]);
-
-      if (error) throw error;
+      await receivedChecksRepository.createReceivedCheck(data);
 
       toast({
         title: 'تم بنجاح',

@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import type { CheckFormData } from '@/types/checks';
 import { useCheckbooks } from '@/hooks/useCheckbooks';
+import { ChecksRepository } from '@/repositories/ChecksRepository';
 
 const paidCheckSchema = z.object({
   checkbook_id: z.string().min(1, "دفتر الشيكات مطلوب"),
@@ -38,6 +39,7 @@ export function PaidCheckForm({ paidCheck, onSuccess }: PaidCheckFormProps) {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { checkbooks } = useCheckbooks();
+  const checksRepository = new ChecksRepository();
 
   const form = useForm<PaidCheckFormData>({
     resolver: zodResolver(paidCheckSchema),
@@ -102,11 +104,8 @@ export function PaidCheckForm({ paidCheck, onSuccess }: PaidCheckFormProps) {
         success = !error;
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from('checks')
-          .insert([checkData]);
-        success = !error;
-        if (error) throw error;
+        await checksRepository.createPaidCheck(data as CheckFormData, checkbookData.bank_account_id);
+        success = true;
 
         // تحديث عدد الشيكات المستخدمة في دفتر الشيكات
         if (success && selectedCheckbook) {

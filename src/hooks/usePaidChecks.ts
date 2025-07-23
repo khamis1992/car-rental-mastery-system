@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { CheckFormData } from '@/types/checks';
+import { ChecksRepository } from '@/repositories/ChecksRepository';
 
 interface PaidCheck {
   id: string;
@@ -31,6 +32,7 @@ export function usePaidChecks() {
   const [paidChecks, setPaidChecks] = useState<PaidCheck[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const checksRepository = new ChecksRepository();
 
   const fetchPaidChecks = async () => {
     try {
@@ -76,16 +78,7 @@ export function usePaidChecks() {
 
       if (checkbookError) throw checkbookError;
 
-      const { error } = await supabase
-        .from('checks')
-        .insert([{
-          ...data,
-          bank_account_id: checkbookData.bank_account_id,
-          check_type: 'personal',
-          currency: 'KWD',
-        }]);
-
-      if (error) throw error;
+      await checksRepository.createPaidCheck(data, checkbookData.bank_account_id);
 
       // تحديث عدد الشيكات المستخدمة في دفتر الشيكات
       if (data.checkbook_id) {
