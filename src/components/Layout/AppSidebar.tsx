@@ -188,6 +188,15 @@ const systemItems = [
   },
 ];
 
+// معلومات المؤسسة (للمدراء)
+const tenantInfoItems = [
+  { 
+    title: "معلومات المؤسسة", 
+    url: "/tenants", 
+    icon: Building2 
+  },
+];
+
 // إدارة النظام العام (لمديري النظام العام فقط)
 const superAdminItems = [
   { 
@@ -254,6 +263,7 @@ export function AppSidebar() {
     fleet: true,
     hr: true,
     system: true,
+    tenantinfo: false,
     superadmin: false,
   });
   
@@ -414,6 +424,7 @@ export function AppSidebar() {
             {renderMenuGroup(financialItems, "financial", "المالية", Calculator)}
             {renderMenuGroup(fleetManagementItems, "fleet", "إدارة الأسطول", Car)}
             {renderMenuGroup(filteredHrItems, "hr", "الموارد البشرية", UserCheck)}
+            {(currentUserRole === 'tenant_admin' || currentUserRole === 'manager') && renderMenuGroup(tenantInfoItems, "tenantinfo", "معلومات المؤسسة", Building)}
             {renderMenuGroup(systemItems, "system", "النظام", Settings)}
             {currentUserRole === 'super_admin' && renderMenuGroup(superAdminItems, "superadmin", "إدارة النظام العام", Crown)}
           </>
