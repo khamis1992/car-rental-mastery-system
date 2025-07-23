@@ -2421,7 +2421,7 @@ export type Database = {
           report_position?: number | null
           required_documentation?: string[] | null
           requires_cost_center?: boolean | null
-          tenant_id: string
+          tenant_id?: string
           updated_at?: string
           zakat_applicable?: boolean | null
         }
@@ -3473,7 +3473,7 @@ export type Database = {
           start_date: string
           status?: Database["public"]["Enums"]["contract_status"]
           tax_amount?: number | null
-          tenant_id: string
+          tenant_id?: string
           terms_and_conditions?: string | null
           total_amount: number
           updated_at?: string
@@ -4625,7 +4625,7 @@ export type Database = {
           rating?: number | null
           status?: Database["public"]["Enums"]["customer_status"]
           tax_number?: string | null
-          tenant_id: string
+          tenant_id?: string
           total_contracts?: number | null
           total_revenue?: number | null
           updated_at?: string
@@ -5282,7 +5282,7 @@ export type Database = {
           salary: number
           secondary_cost_center_id?: string | null
           status?: string
-          tenant_id: string
+          tenant_id?: string
           updated_at?: string
           user_id?: string | null
           work_location_id?: string | null
@@ -7198,7 +7198,7 @@ export type Database = {
           subtotal?: number
           tax_amount?: number
           tax_rate?: number | null
-          tenant_id: string
+          tenant_id?: string
           terms_and_conditions?: string | null
           total_amount?: number
           updated_at?: string
@@ -7477,7 +7477,7 @@ export type Database = {
           status?: string
           supporting_documents?: Json | null
           supporting_documents_complete?: boolean | null
-          tenant_id: string
+          tenant_id?: string
           total_credit?: number
           total_debit?: number
           updated_at?: string
@@ -8377,7 +8377,7 @@ export type Database = {
           payment_number: string
           receipt_url?: string | null
           status?: string
-          tenant_id: string
+          tenant_id?: string
           transaction_reference?: string | null
           updated_at?: string
           verified_at?: string | null
@@ -11713,7 +11713,7 @@ export type Database = {
           registration_expiry?: string | null
           residual_value?: number | null
           status?: Database["public"]["Enums"]["vehicle_status"]
-          tenant_id: string
+          tenant_id?: string
           transmission?: string | null
           updated_at?: string
           useful_life_years?: number | null
