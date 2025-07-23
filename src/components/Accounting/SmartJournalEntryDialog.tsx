@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus, Trash2, Lightbulb, Save, Zap } from 'lucide-react';
+import { CalendarIcon, Plus, Trash2, Lightbulb, Save, Zap, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -296,8 +296,16 @@ export const SmartJournalEntryDialog: React.FC<SmartJournalEntryDialogProps> = (
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="rtl-title flex items-center gap-2">
+        <DialogHeader className="relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute left-0 top-0 h-8 w-8 p-0 hover:bg-muted"
+            onClick={() => setOpen(false)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          <DialogTitle className="rtl-title flex items-center gap-2 pr-8">
             <Lightbulb className="w-5 h-5 text-yellow-500" />
             المحرر الذكي للقيود المحاسبية
           </DialogTitle>

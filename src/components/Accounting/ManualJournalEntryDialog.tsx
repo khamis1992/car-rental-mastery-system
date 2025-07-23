@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus, Trash2 } from 'lucide-react';
+import { CalendarIcon, Plus, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -223,8 +223,16 @@ export const ManualJournalEntryDialog: React.FC<ManualJournalEntryDialogProps> =
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="rtl-title">إنشاء قيد محاسبي يدوي</DialogTitle>
+        <DialogHeader className="relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute left-0 top-0 h-8 w-8 p-0 hover:bg-muted"
+            onClick={() => setOpen(false)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          <DialogTitle className="rtl-title pr-8">إنشاء قيد محاسبي يدوي</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6">
