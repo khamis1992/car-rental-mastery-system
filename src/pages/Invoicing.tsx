@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { downloadInvoicePDF } from '@/lib/invoice/invoicePDFService';
 import { useContractsOptimized } from '@/hooks/useContractsOptimized';
 import { useSaasInvoices, useCreateInvoice, useUpdateInvoiceStatus, useSaasPayments, useCreatePayment } from '@/hooks/useSaasData';
-import { InvoiceWithDetails, Payment } from '@/types/invoice';
+import { InvoiceWithDetails, Payment } from '@/types';
 
 // Updated to use Repository Pattern with Business Services
 
@@ -428,11 +428,12 @@ const Invoicing = () => {
           <PaymentsList
             payments={paymentsData.map(payment => ({
               ...payment,
+              invoice_id: payment.invoice_id || '', // إضافة invoice_id المطلوب
               payment_number: payment.payment_reference || `PAY-${payment.id.slice(0, 8)}`,
               contract_id: payment.subscription_id || '',
               customer_id: payment.tenant_id,
-              payment_method: payment.payment_method === 'credit_card' ? 'card' : payment.payment_method as 'bank_transfer' | 'cash' | 'check' | 'card' | 'online',
-              status: payment.status === 'canceled' ? 'cancelled' : payment.status as 'pending' | 'failed' | 'completed' | 'cancelled'
+              payment_method: payment.payment_method === 'credit_card' ? 'credit_card' : payment.payment_method,
+              status: payment.status === 'succeeded' ? 'succeeded' : payment.status === 'canceled' ? 'canceled' : payment.status
             }))}
             loading={loading}
             onRefresh={loadData}

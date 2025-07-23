@@ -274,8 +274,8 @@ export interface CreateInvoiceFormData {
 
 export interface SaasPayment {
   id: string;
-  invoice_id: string;
-  subscription_id: string;
+  invoice_id?: string; // جعلها اختيارية للتوافق
+  subscription_id?: string; // جعلها اختيارية للتوافق
   tenant_id: string;
   
   // معلومات الدفع
@@ -292,6 +292,7 @@ export interface SaasPayment {
   // معلومات الدفع الخارجي
   external_payment_id?: string;
   payment_reference?: string;
+  transaction_reference?: string; // إضافة للتوافق
   
   // تواريخ مهمة
   payment_date: string;
@@ -301,6 +302,18 @@ export interface SaasPayment {
   failure_reason?: string;
   gateway_response?: Record<string, any>;
   metadata?: Record<string, any>;
+  
+  // معلومات إضافية للتوافق
+  customer_name?: string;
+  customer_phone?: string;
+  customer_email?: string;
+  contract_number?: string;
+  vehicle_info?: string;
+  bank_name?: string;
+  check_number?: string;
+  notes?: string;
+  receipt_url?: string;
+  payment_number?: string; // إضافة للتوافق
   
   // معلومات Stripe
   stripe_payment_intent_id?: string;
@@ -330,11 +343,17 @@ export interface CreatePaymentFormData {
   payment_gateway?: PaymentGateway;
   external_payment_id?: string;
   payment_reference?: string;
+  transaction_reference?: string; // إضافة للتوافق
   payment_date?: string;
   description?: string;
   customer_name?: string;
   customer_email?: string;
   customer_phone?: string;
+  contract_number?: string;
+  vehicle_info?: string;
+  bank_name?: string;
+  check_number?: string;
+  notes?: string;
   expires_in_minutes?: number;
   metadata?: Record<string, any>;
 }
@@ -718,7 +737,7 @@ export interface SadadPayment {
   description?: string;
   
   // حالة SADAD
-  sadad_status: 'pending' | 'processing' | 'paid' | 'failed' | 'expired' | 'cancelled';
+  sadad_status: 'pending' | 'processing' | 'paid' | 'failed' | 'expired' | 'cancelled' | 'succeeded';
   
   // معلومات المعاملة
   sadad_transaction_id?: string;
@@ -733,12 +752,73 @@ export interface SadadPayment {
   created_by?: string;
 }
 
+export interface SadadSettings {
+  id?: string;
+  merchant_id: string;
+  merchant_key: string;
+  api_url: string;
+  is_sandbox: boolean;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface SadadSettingsFormData {
   merchant_id: string;
   merchant_key: string;
   api_url: string;
   is_sandbox: boolean;
   is_active: boolean;
+}
+
+export interface SadadWebhookEvent {
+  id: string;
+  type: string;
+  data: any;
+  event_type?: string;
+  created_at?: string;
+  sadad_transaction_id?: string;
+  event_data?: any;
+}
+
+export interface SadadTransactionLog {
+  id: string;
+  transaction_id: string;
+  status: string;
+  amount: number;
+  action?: string;
+  created_at?: string;
+  error_message?: string;
+  request_data?: any;
+  response_data?: any;
+}
+
+export interface SadadCreatePaymentRequest {
+  amount: number;
+  currency: string;
+  description: string;
+}
+
+export interface SadadCreatePaymentResponse {
+  payment_id: string;
+  payment_url: string;
+  status: string;
+}
+
+export interface SadadPaymentStatusResponse {
+  payment_id: string;
+  status: string;
+  amount: number;
+}
+
+export interface SadadStats {
+  total_payments: number;
+  total_amount: number;
+  success_rate: number;
+  successful_payments?: number;
+  pending_payments?: number;
+  failed_payments?: number;
+  average_payment_amount?: number;
 }
 
 /*

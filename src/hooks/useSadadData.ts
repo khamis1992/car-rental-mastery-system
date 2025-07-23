@@ -107,7 +107,7 @@ export const useUpdateSadadPaymentStatus = () => {
       id: string; 
       status: SaasPayment['status'];
       additionalData?: Partial<SadadPayment>;
-    }) => sadadService.updateSadadPaymentStatus(id, status, additionalData),
+    }) => sadadService.updateSadadPaymentStatus(id, status === 'canceled' ? 'cancelled' : status as 'pending' | 'processing' | 'paid' | 'failed' | 'expired' | 'cancelled' | 'succeeded', additionalData),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['sadad-payments'] });
       queryClient.invalidateQueries({ queryKey: ['sadad-payment', variables.id] });

@@ -10,12 +10,23 @@ export type {
   PaymentMethod,
   
   // مدفوعات SADAD
+  SadadPayment,
   SaasPayment,
   CreatePaymentFormData,
   
   // طلبات واستجابات API
   SadadPaymentRequest,
   SadadPaymentResponse,
+  
+  // إعدادات SADAD
+  SadadSettings,
+  SadadSettingsFormData,
+  SadadWebhookEvent,
+  SadadTransactionLog,
+  SadadCreatePaymentRequest,
+  SadadCreatePaymentResponse,
+  SadadPaymentStatusResponse,
+  SadadStats,
   
   // دوال التحقق
   isValidPaymentStatus,
@@ -27,77 +38,8 @@ export type {
   calculateTaxAmount,
 } from '@/types/unified-saas';
 
-// إضافة الأنواع المفقودة للتوافق مع المكونات الموجودة
-export type SadadPayment = any; // Temporary fix
-export type CreateSadadPaymentFormData = any; // Temporary fix
+// استيراد الأنواع أولاً
+import type { CreatePaymentFormData } from '@/types/unified-saas';
 
-// Missing exports for compatibility
-export interface SadadSettings {
-  id?: string;
-  merchant_id: string;
-  merchant_key: string;
-  api_url: string;
-  is_sandbox: boolean;
-  is_active: boolean;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface SadadWebhookEvent {
-  id: string;
-  type: string;
-  data: any;
-  event_type?: string;
-  created_at?: string;
-  sadad_transaction_id?: string;
-  event_data?: any;
-}
-
-export interface SadadTransactionLog {
-  id: string;
-  transaction_id: string;
-  status: string;
-  amount: number;
-  action?: string;
-  created_at?: string;
-  error_message?: string;
-  request_data?: any;
-  response_data?: any;
-}
-
-export interface SadadCreatePaymentRequest {
-  amount: number;
-  currency: string;
-  description: string;
-}
-
-export interface SadadCreatePaymentResponse {
-  payment_id: string;
-  payment_url: string;
-  status: string;
-}
-
-export interface SadadPaymentStatusResponse {
-  payment_id: string;
-  status: string;
-  amount: number;
-}
-
-export interface SadadStats {
-  total_payments: number;
-  total_amount: number;
-  success_rate: number;
-  successful_payments?: number;
-  pending_payments?: number;
-  failed_payments?: number;
-  average_payment_amount?: number;
-}
-
-// نوع إعدادات SADAD
-export interface SadadSettingsFormData {
-  merchant_id: string;
-  merchant_key: string;
-  api_url: string;
-  is_sandbox: boolean;
-  is_active: boolean;
-}
+// تصدير مباشر للتوافق مع المكونات الموجودة
+export type CreateSadadPaymentFormData = CreatePaymentFormData;

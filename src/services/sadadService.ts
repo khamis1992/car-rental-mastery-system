@@ -138,7 +138,7 @@ export class SadadService {
       .from('sadad_payments')
       .insert({
         tenant_id: tenantUser.tenant_id,
-        saas_invoice_id: paymentData.saas_invoice_id,
+        saas_invoice_id: paymentData.invoice_id,
         subscription_id: paymentData.subscription_id,
         amount: paymentData.amount,
         currency: paymentData.currency,

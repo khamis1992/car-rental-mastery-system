@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, Edit, Send, Download, MoreHorizontal } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { InvoiceWithDetails } from '@/types/invoice';
+import { InvoiceWithDetails } from '@/types';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
