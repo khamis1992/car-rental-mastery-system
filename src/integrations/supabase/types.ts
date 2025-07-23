@@ -12148,6 +12148,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      auto_generate_journal_entry_smart: {
+        Args: {
+          trigger_event: string
+          reference_id: string
+          reference_data: Json
+        }
+        Returns: string
+      }
       batch_post_journal_entries: {
         Args: { entry_ids: string[]; posted_by?: string }
         Returns: {
@@ -12192,6 +12200,10 @@ export type Database = {
       calculate_cash_flow: {
         Args: { start_date: string; end_date: string }
         Returns: Json
+      }
+      calculate_cash_ratio: {
+        Args: { tenant_id_param: string }
+        Returns: number
       }
       calculate_cost_center_actual_costs: {
         Args: { cost_center_id_param: string }
@@ -12269,8 +12281,16 @@ export type Database = {
         Args: { target_year: number; target_month: number }
         Returns: string
       }
+      calculate_monthly_revenue: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
       calculate_monthly_vehicle_depreciation: {
         Args: { target_month?: string }
+        Returns: number
+      }
+      calculate_outstanding_receivables: {
+        Args: { tenant_id_param: string }
         Returns: number
       }
       calculate_profitability_ratios: {
@@ -12299,6 +12319,10 @@ export type Database = {
       }
       check_contract_related_records: {
         Args: { contract_id_param: string }
+        Returns: Json
+      }
+      check_period_closure_readiness: {
+        Args: Record<PropertyKey, never>
         Returns: Json
       }
       check_period_status: {
@@ -12999,6 +13023,10 @@ export type Database = {
         Returns: Json
       }
       migrate_to_deferred_revenue_system: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      monitor_financial_kpis_smart: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
