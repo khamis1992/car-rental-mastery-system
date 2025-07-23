@@ -33,6 +33,7 @@ import FinancialReports from "@/pages/FinancialReports";
 import Tenants from "@/pages/Tenants";
 import FixedAssets from "@/pages/FixedAssets";
 import GeneralLedger from "@/pages/GeneralLedger";
+import BudgetManagement from "@/pages/BudgetManagement";
 import { ContractStageRouter } from "@/components/Contracts/ContractStageRouter";
 
 // Create a single QueryClient instance
@@ -103,6 +104,7 @@ function App() {
                             <Route path="reports" element={<FinancialReports />} />
                             <Route path="fixed-assets" element={<FixedAssets />} />
                             <Route path="general-ledger" element={<GeneralLedger />} />
+                            <Route path="budget-management" element={<BudgetManagement />} />
                             <Route path="tenants" element={<Tenants />} />
                           </Route>
                           <Route path="*" element={<NotFound />} />
