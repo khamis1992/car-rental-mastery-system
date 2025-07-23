@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TenantProvider } from "@/contexts/TenantContext";
+import { SettingsProvider } from "@/contexts/SettingsContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { GlobalLoadingProvider } from "@/contexts/GlobalLoadingContext";
 import { EnhancedRealtimeProvider } from "@/contexts/EnhancedRealtimeContext";
@@ -60,58 +61,60 @@ function App() {
         <GlobalLoadingProvider>
           <AuthProvider>
             <TenantProvider>
-              <EnhancedRealtimeProvider>
-                <NotificationProvider>
-                  <SearchProvider>
-                    <BrowserRouter>
-                      <Routes>
-                        <Route path="/login" element={
-                          <GuestRoute>
-                            <Auth />
-                          </GuestRoute>
-                        } />
-                        <Route path="/auth" element={
-                          <GuestRoute>
-                            <Auth />
-                          </GuestRoute>
-                        } />
-                        <Route path="/" element={
-                          <ProtectedRoute>
-                            <Layout />
-                          </ProtectedRoute>
-                        }>
-                          <Route index element={<Index />} />
-                          <Route path="contracts" element={<Contracts />} />
-                          <Route path="vehicles" element={<Fleet />} />
-                          <Route path="customers" element={<Customers />} />
-                          <Route path="invoices" element={<Invoicing />} />
-                          <Route path="payments" element={<Treasury />} />
-                          <Route path="employees" element={<Employees />} />
-                          <Route path="attendance" element={<Attendance />} />
-                          <Route path="settings" element={<Settings />} />
-                          <Route path="quotations" element={<Quotations />} />
-                          <Route path="additional-charges" element={<ExpenseManagement />} />
-                          <Route path="cost-centers" element={<CostCenters />} />
-                          <Route path="branches" element={<NotFound />} />
-                          <Route path="traffic-violations" element={<TrafficViolations />} />
-                          <Route path="chart-of-accounts" element={<ChartOfAccounts />} />
-                          <Route path="journal-entries" element={<JournalEntries />} />
-                          <Route path="reports" element={<FinancialReports />} />
-                          <Route path="tenants" element={<Tenants />} />
-                        </Route>
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </BrowserRouter>
-                    <Toaster 
-                      position="top-left" 
-                      dir="rtl"
-                      richColors
-                      expand={false}
-                      visibleToasts={5}
-                    />
-                  </SearchProvider>
-                </NotificationProvider>
-              </EnhancedRealtimeProvider>
+              <SettingsProvider>
+                <EnhancedRealtimeProvider>
+                  <NotificationProvider>
+                    <SearchProvider>
+                      <BrowserRouter>
+                        <Routes>
+                          <Route path="/login" element={
+                            <GuestRoute>
+                              <Auth />
+                            </GuestRoute>
+                          } />
+                          <Route path="/auth" element={
+                            <GuestRoute>
+                              <Auth />
+                            </GuestRoute>
+                          } />
+                          <Route path="/" element={
+                            <ProtectedRoute>
+                              <Layout />
+                            </ProtectedRoute>
+                          }>
+                            <Route index element={<Index />} />
+                            <Route path="contracts" element={<Contracts />} />
+                            <Route path="vehicles" element={<Fleet />} />
+                            <Route path="customers" element={<Customers />} />
+                            <Route path="invoices" element={<Invoicing />} />
+                            <Route path="payments" element={<Treasury />} />
+                            <Route path="employees" element={<Employees />} />
+                            <Route path="attendance" element={<Attendance />} />
+                            <Route path="settings" element={<Settings />} />
+                            <Route path="quotations" element={<Quotations />} />
+                            <Route path="additional-charges" element={<ExpenseManagement />} />
+                            <Route path="cost-centers" element={<CostCenters />} />
+                            <Route path="branches" element={<NotFound />} />
+                            <Route path="traffic-violations" element={<TrafficViolations />} />
+                            <Route path="chart-of-accounts" element={<ChartOfAccounts />} />
+                            <Route path="journal-entries" element={<JournalEntries />} />
+                            <Route path="reports" element={<FinancialReports />} />
+                            <Route path="tenants" element={<Tenants />} />
+                          </Route>
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </BrowserRouter>
+                      <Toaster 
+                        position="top-left" 
+                        dir="rtl"
+                        richColors
+                        expand={false}
+                        visibleToasts={5}
+                      />
+                    </SearchProvider>
+                  </NotificationProvider>
+                </EnhancedRealtimeProvider>
+              </SettingsProvider>
             </TenantProvider>
           </AuthProvider>
         </GlobalLoadingProvider>
