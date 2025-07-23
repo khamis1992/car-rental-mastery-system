@@ -38,7 +38,7 @@ interface UnifiedRealtimeState {
 }
 
 const MAX_HISTORY_SIZE = 100;
-const HEALTH_CHECK_INTERVAL = 30000; // 30 seconds
+const HEALTH_CHECK_INTERVAL = 60000; // 60 seconds
 const RECONNECT_DELAY = 5000; // 5 seconds
 const MAX_RECONNECT_ATTEMPTS = 5;
 
@@ -182,11 +182,13 @@ export const useUnifiedRealtime = () => {
             newState.isConnected = true;
             newState.connectionStatus = 'connected';
             newState.health.reconnectAttempts = 0;
-            toast.success('تم الاتصال بنظام التحديث المباشر الموحد');
           } else if (status === 'CLOSED') {
             newState.isConnected = false;
             newState.connectionStatus = 'disconnected';
-            scheduleReconnect();
+            // Only schedule reconnect if we had a previous successful connection
+            if (prev.isConnected) {
+              scheduleReconnect();
+            }
           } else if (status === 'CHANNEL_ERROR') {
             newState.connectionStatus = 'error';
             newState.health.reconnectAttempts += 1;
@@ -222,11 +224,19 @@ export const useUnifiedRealtime = () => {
 
     setState(prev => {
       if (prev.health.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-        toast.error('فشل في الاتصال بنظام التحديث المباشر بعد عدة محاولات');
+        console.log('🚨 Max reconnect attempts reached, stopping reconnection');
         return { ...prev, connectionStatus: 'error' };
       }
 
-      return { ...prev, connectionStatus: 'reconnecting' };
+      console.log(`🔄 Scheduling reconnect attempt ${prev.health.reconnectAttempts + 1}/${MAX_RECONNECT_ATTEMPTS}`);
+      return { 
+        ...prev, 
+        connectionStatus: 'reconnecting',
+        health: {
+          ...prev.health,
+          reconnectAttempts: prev.health.reconnectAttempts + 1
+        }
+      };
     });
 
     reconnectTimeoutRef.current = setTimeout(() => {
