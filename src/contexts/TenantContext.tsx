@@ -6,6 +6,7 @@ import { tenantIsolationService } from '@/services/BusinessServices/TenantIsolat
 import { tenantIsolationMiddleware } from '@/middleware/TenantIsolationMiddleware';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { handleError } from '@/utils/errorHandling';
 
 interface TenantContextType {
   currentTenant: Tenant | null;
@@ -16,6 +17,8 @@ interface TenantContextType {
   switchTenant: (tenantId: string) => Promise<void>;
   refreshTenant: () => Promise<void>;
   isWithinLimits: (resource: 'users' | 'vehicles' | 'contracts') => boolean;
+  debugInfo: any;
+  clearError: () => void;
 }
 
 const TenantContext = createContext<TenantContextType | undefined>(undefined);
@@ -29,48 +32,80 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
   const [currentUserRole, setCurrentUserRole] = useState<TenantUser['role'] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
   const { user, session } = useAuth();
   const tenantService = new TenantService();
 
-  // دالة للتحقق من صلاحية المؤسسة
+  // دالة لتنظيف الأخطاء
+  const clearError = () => {
+    setError(null);
+  };
+
+  // دالة محسنة للتحقق من صلاحية المؤسسة
   const isOrganizationValid = (tenant: Tenant): { valid: boolean; reason?: string } => {
-    if (tenant.status === 'active') {
-      return { valid: true };
-    }
-    
-    if (tenant.status === 'trial') {
-      if (tenant.trial_ends_at) {
-        const trialEndDate = new Date(tenant.trial_ends_at);
-        const now = new Date();
-        
-        if (now > trialEndDate) {
-          return { 
-            valid: false, 
-            reason: 'انتهت الفترة التجريبية لهذه المؤسسة. يرجى تجديد الاشتراك.' 
-          };
-        }
+    try {
+      if (!tenant) {
+        return { valid: false, reason: 'بيانات المؤسسة غير موجودة' };
       }
-      return { valid: true };
-    }
-    
-    if (tenant.status === 'suspended') {
+
+      if (tenant.status === 'active') {
+        return { valid: true };
+      }
+      
+      if (tenant.status === 'trial') {
+        if (tenant.trial_ends_at) {
+          const trialEndDate = new Date(tenant.trial_ends_at);
+          const now = new Date();
+          
+          if (now > trialEndDate) {
+            return { 
+              valid: false, 
+              reason: 'انتهت الفترة التجريبية لهذه المؤسسة. يرجى تجديد الاشتراك.' 
+            };
+          }
+        }
+        return { valid: true };
+      }
+      
+      if (tenant.status === 'suspended') {
+        return { 
+          valid: false, 
+          reason: 'تم تعليق هذه المؤسسة. يرجى التواصل مع الدعم الفني.' 
+        };
+      }
+      
+      if (tenant.status === 'cancelled') {
+        return { 
+          valid: false, 
+          reason: 'تم إلغاء هذه المؤسسة. يرجى التواصل مع مدير النظام.' 
+        };
+      }
+      
       return { 
         valid: false, 
-        reason: 'تم تعليق هذه المؤسسة. يرجى التواصل مع الدعم الفني.' 
+        reason: `حالة المؤسسة غير صحيحة: ${tenant.status}` 
       };
+    } catch (err) {
+      console.error('❌ خطأ في فحص صلاحية المؤسسة:', err);
+      return { valid: false, reason: 'خطأ في فحص صلاحية المؤسسة' };
     }
-    
-    if (tenant.status === 'cancelled') {
-      return { 
-        valid: false, 
-        reason: 'تم إلغاء هذه المؤسسة. يرجى التواصل مع مدير النظام.' 
-      };
+  };
+
+  // دالة محسنة للحصول على معلومات التشخيص
+  const getDebugInfo = async () => {
+    try {
+      const { data: debugData, error: debugError } = await supabase.rpc('debug_user_tenant_status');
+      
+      if (debugError) {
+        console.warn('⚠️ تعذر الحصول على معلومات التشخيص:', debugError);
+        return null;
+      }
+
+      return debugData;
+    } catch (error) {
+      console.warn('⚠️ خطأ في الحصول على معلومات التشخيص:', error);
+      return null;
     }
-    
-    return { 
-      valid: false, 
-      reason: `حالة المؤسسة غير صحيحة: ${tenant.status}` 
-    };
   };
 
   const loadTenant = async () => {
@@ -79,6 +114,8 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
       setCurrentTenant(null);
       setCurrentUserRole(null);
       setLoading(false);
+      setError(null);
+      setDebugInfo(null);
       tenantIsolationMiddleware.reset();
       return;
     }
@@ -89,6 +126,8 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
       setCurrentTenant(null);
       setCurrentUserRole('super_admin');
       setLoading(false);
+      setError(null);
+      setDebugInfo({ userType: 'super_admin', skipTenantLoad: true });
       tenantIsolationMiddleware.reset();
       return;
     }
@@ -99,14 +138,47 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
 
       console.log('🔄 بدء تحميل بيانات المؤسسة للمستخدم:', user.email);
 
-      // الحصول على بيانات المؤسسة والدور
+      // الحصول على معلومات التشخيص
+      const debug = await getDebugInfo();
+      setDebugInfo(debug);
+
+      // التحقق من اتصال قاعدة البيانات
+      const { error: connectionError } = await supabase
+        .from('tenants')
+        .select('id')
+        .limit(1);
+
+      if (connectionError) {
+        throw new Error(`خطأ في الاتصال بقاعدة البيانات: ${connectionError.message}`);
+      }
+
+      // الحصول على بيانات المؤسسة والدور مع validation محسن
       const { data: tenantUser, error: tenantUserError } = await supabase
         .from('tenant_users')
         .select(`
           tenant_id,
           role,
           status,
-          tenant:tenants(*)
+          tenant:tenants!inner(
+            id,
+            name,
+            slug,
+            status,
+            subscription_plan,
+            subscription_status,
+            trial_ends_at,
+            max_users,
+            max_vehicles,
+            max_contracts,
+            contact_email,
+            contact_phone,
+            city,
+            country,
+            timezone,
+            currency,
+            created_at,
+            updated_at
+          )
         `)
         .eq('user_id', user.id)
         .eq('status', 'active')
@@ -114,53 +186,60 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
 
       if (tenantUserError) {
         console.error('❌ خطأ في البحث عن المؤسسة:', tenantUserError);
-        throw tenantUserError;
+        const errorResult = handleError(tenantUserError, 'loadTenant');
+        if (errorResult.shouldLog) {
+          throw new Error(`فشل في البحث عن المؤسسة: ${tenantUserError.message}`);
+        }
+        return;
       }
 
-      if (!tenantUser) {
+      if (!tenantUser || !tenantUser.tenant) {
         console.warn('⚠️ لم يتم العثور على مؤسسة للمستخدم');
-        setError('لم يتم العثور على مؤسسة مرتبطة بهذا المستخدم');
+        setError('لم يتم العثور على مؤسسة مرتبطة بهذا المستخدم. يرجى التواصل مع مدير النظام.');
         setCurrentTenant(null);
         setCurrentUserRole(null);
         tenantIsolationMiddleware.reset();
         return;
       }
 
-      if (tenantUser && tenantUser.tenant) {
-        const tenant = tenantUser.tenant as Tenant;
-        console.log('✅ تم العثور على المؤسسة:', tenant.name, '- ID:', tenant.id);
-        
-        // التحقق من صلاحية المؤسسة
-        const isValidTenant = isOrganizationValid(tenant);
-        if (!isValidTenant.valid) {
-          console.warn('⚠️ المؤسسة غير صالحة:', isValidTenant.reason);
-          setError(isValidTenant.reason);
-          setCurrentTenant(null);
-          setCurrentUserRole(null);
-          tenantIsolationMiddleware.reset();
-          return;
-        }
-        
-        // تحديث حالة المؤسسة
-        setCurrentTenant(tenant);
-        setCurrentUserRole(tenantUser.role as TenantUser['role']);
-        
-        // تفعيل middleware العزل للمؤسسة
-        await tenantIsolationMiddleware.setCurrentTenant(tenant.id);
-        console.log('✅ تم تحميل بيانات المؤسسة بنجاح - المؤسسة الحالية:', tenant.name);
-        
-        // تنظيف أي أخطاء سابقة
-        setError(null);
-      } else {
-        console.warn('⚠️ المستخدم غير مرتبط بأي مؤسسة');
+      const tenant = tenantUser.tenant as Tenant;
+      console.log('✅ تم العثور على المؤسسة:', tenant.name, '- ID:', tenant.id);
+      
+      // التحقق من صلاحية المؤسسة
+      const isValidTenant = isOrganizationValid(tenant);
+      if (!isValidTenant.valid) {
+        console.warn('⚠️ المؤسسة غير صالحة:', isValidTenant.reason);
+        setError(isValidTenant.reason || 'المؤسسة غير صالحة');
         setCurrentTenant(null);
         setCurrentUserRole(null);
-        setError('المستخدم غير مرتبط بأي مؤسسة نشطة');
         tenantIsolationMiddleware.reset();
+        return;
       }
+      
+      // تحديث حالة المؤسسة
+      setCurrentTenant(tenant);
+      setCurrentUserRole(tenantUser.role as TenantUser['role']);
+      
+      // تفعيل middleware العزل للمؤسسة
+      try {
+        await tenantIsolationMiddleware.setCurrentTenant(tenant.id);
+        console.log('✅ تم تحميل بيانات المؤسسة بنجاح - المؤسسة الحالية:', tenant.name);
+      } catch (middlewareError) {
+        console.warn('⚠️ تحذير: خطأ في تفعيل middleware العزل:', middlewareError);
+        // نتجاهل خطأ middleware ونكمل
+      }
+      
+      // تنظيف أي أخطاء سابقة
+      setError(null);
+      
     } catch (err: any) {
       console.error('❌ خطأ في تحميل بيانات المؤسسة:', err);
-      setError(err.message || 'فشل في تحميل بيانات المؤسسة');
+      const errorResult = handleError(err, 'loadTenant');
+      
+      if (errorResult.shouldLog) {
+        setError(errorResult.message || err.message || 'فشل في تحميل بيانات المؤسسة');
+      }
+      
       setCurrentTenant(null);
       setCurrentUserRole(null);
       tenantIsolationMiddleware.reset();
@@ -179,7 +258,26 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
         .from('tenant_users')
         .select(`
           role,
-          tenant:tenants(*)
+          tenant:tenants!inner(
+            id,
+            name,
+            slug,
+            status,
+            subscription_plan,
+            subscription_status,
+            trial_ends_at,
+            max_users,
+            max_vehicles,
+            max_contracts,
+            contact_email,
+            contact_phone,
+            city,
+            country,
+            timezone,
+            currency,
+            created_at,
+            updated_at
+          )
         `)
         .eq('user_id', user?.id)
         .eq('tenant_id', tenantId)
@@ -189,22 +287,38 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
       const success = !error && !!tenantUser && !!tenantUser.tenant;
 
       // تسجيل محاولة تبديل المؤسسة للمراقبة
-      await tenantIsolationService.logAccess(
-        tenantId,
-        'tenant_switch',
-        'switch_tenant',
-        success
-      );
+      try {
+        await tenantIsolationService.logAccess(
+          tenantId,
+          'tenant_switch',
+          'switch_tenant',
+          success
+        );
+      } catch (logError) {
+        console.warn('⚠️ تعذر تسجيل محاولة تبديل المؤسسة:', logError);
+      }
 
       if (error) throw error;
 
       if (tenantUser && tenantUser.tenant) {
         const tenant = tenantUser.tenant as Tenant;
+        
+        // التحقق من صلاحية المؤسسة الجديدة
+        const isValidTenant = isOrganizationValid(tenant);
+        if (!isValidTenant.valid) {
+          setError(isValidTenant.reason || 'المؤسسة غير صالحة');
+          return;
+        }
+        
         setCurrentTenant(tenant);
         setCurrentUserRole(tenantUser.role as TenantUser['role']);
         
         // تفعيل middleware العزل للمؤسسة الجديدة
-        await tenantIsolationMiddleware.setCurrentTenant(tenant.id);
+        try {
+          await tenantIsolationMiddleware.setCurrentTenant(tenant.id);
+        } catch (middlewareError) {
+          console.warn('⚠️ تحذير: خطأ في تفعيل middleware العزل:', middlewareError);
+        }
         
         // Store selected tenant in localStorage for persistence
         localStorage.setItem('selectedTenantId', tenantId);
@@ -213,7 +327,8 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
       }
     } catch (err: any) {
       console.error('❌ خطأ في تبديل المؤسسة:', err);
-      setError(err.message || 'فشل في تبديل المؤسسة');
+      const errorResult = handleError(err, 'switchTenant');
+      setError(errorResult.message || err.message || 'فشل في تبديل المؤسسة');
     } finally {
       setLoading(false);
     }
@@ -226,7 +341,22 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
 
   const isWithinLimits = (resource: 'users' | 'vehicles' | 'contracts'): boolean => {
     if (!currentTenant) return false;
-    return true; // TODO: Implement proper limit checking
+    
+    try {
+      switch (resource) {
+        case 'users':
+          return true; // TODO: Implement proper user limit checking
+        case 'vehicles':
+          return true; // TODO: Implement proper vehicle limit checking
+        case 'contracts':
+          return true; // TODO: Implement proper contract limit checking
+        default:
+          return false;
+      }
+    } catch (error) {
+      console.warn('⚠️ خطأ في فحص الحدود:', error);
+      return false;
+    }
   };
 
   useEffect(() => {
@@ -243,6 +373,8 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
     switchTenant,
     refreshTenant,
     isWithinLimits,
+    debugInfo,
+    clearError,
   };
 
   return <TenantContext.Provider value={value}>{children}</TenantContext.Provider>;
