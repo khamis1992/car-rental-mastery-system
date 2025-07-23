@@ -65,7 +65,7 @@ export const RealtimeIndicator: React.FC<RealtimeIndicatorProps> = ({
       
       default:
         return {
-          icon: <AlertCircle className={size === 'sm' ? "h-3 w-3" : "h-4 w-4"} />,
+          icon: null,
           text: 'غير متصل',
           style: 'bg-muted/20 text-muted-foreground hover:bg-muted/30'
         };
