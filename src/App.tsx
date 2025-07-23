@@ -102,6 +102,7 @@ function App() {
                             <Route path="cost-centers" element={<CostCenters />} />
                             <Route path="branches" element={<NotFound />} />
                             <Route path="traffic-violations" element={<TrafficViolations />} />
+                            <Route path="violations" element={<TrafficViolations />} />
                             <Route path="chart-of-accounts" element={<ChartOfAccounts />} />
                             <Route path="journal-entries" element={<JournalEntries />} />
                             <Route path="financial-reports" element={<FinancialReports />} />
