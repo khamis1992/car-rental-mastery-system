@@ -18,12 +18,17 @@ import { useSecureTenantData } from '@/hooks/useSecureTenantData';
 import { EmployeeDetailsDialog } from '@/components/Employees/EmployeeDetailsDialog';
 import { Employee } from '@/types/hr';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { useToast } from '@/hooks/use-toast';
+import { useUnifiedErrorHandling } from '@/hooks/useUnifiedErrorHandling';
+import { UnifiedErrorDisplay } from '@/components/common/UnifiedErrorDisplay';
 
 const EmployeesPage: React.FC = () => {
   const { useSecureEmployees } = useSecureTenantData();
   const { data: employees = [], isLoading, error, refetch } = useSecureEmployees();
-  const { toast } = useToast();
+  const { execute, handleError } = useUnifiedErrorHandling({
+    context: 'employees',
+    showToast: true,
+    loadingKey: 'employees-operations'
+  });
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -45,68 +50,33 @@ const EmployeesPage: React.FC = () => {
   });
 
   const handleViewDetails = (employee: Employee) => {
-    try {
+    execute(async () => {
       console.log('🔍 EmployeesPage: عرض تفاصيل الموظف:', employee.id, employee.first_name, employee.last_name);
       
       // التحقق من وجود البيانات المطلوبة
       if (!employee.id) {
-        console.error('❌ EmployeesPage: معرف الموظف مفقود');
-        toast({
-          title: "خطأ",
-          description: "معرف الموظف مفقود",
-          variant: "destructive",
-        });
-        return;
+        throw new Error('معرف الموظف مفقود');
       }
 
       setSelectedEmployee(employee);
       setIsDetailsDialogOpen(true);
-    } catch (error) {
-      console.error('❌ EmployeesPage: خطأ في عرض تفاصيل الموظف:', error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ أثناء عرض تفاصيل الموظف",
-        variant: "destructive",
-      });
-    }
+    });
   };
 
   const handleEditEmployee = (employee: Employee) => {
-    try {
+    execute(async () => {
       console.log('🔧 EmployeesPage: تعديل الموظف:', employee.id);
       // TODO: تنفيذ منطق التعديل
-      toast({
-        title: "قيد التطوير",
-        description: "خاصية تعديل الموظف قيد التطوير",
-        variant: "default",
-      });
-    } catch (error) {
-      console.error('❌ EmployeesPage: خطأ في تعديل الموظف:', error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ أثناء تعديل الموظف",
-        variant: "destructive",
-      });
-    }
+      throw new Error('خاصية تعديل الموظف قيد التطوير');
+    });
   };
 
   const handleDeleteEmployee = (employee: Employee) => {
-    try {
+    execute(async () => {
       console.log('🗑️ EmployeesPage: حذف الموظف:', employee.id);
       // TODO: تنفيذ منطق الحذف
-      toast({
-        title: "قيد التطوير",
-        description: "خاصية حذف الموظف قيد التطوير",
-        variant: "default",
-      });
-    } catch (error) {
-      console.error('❌ EmployeesPage: خطأ في حذف الموظف:', error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ أثناء حذف الموظف",
-        variant: "destructive",
-      });
-    }
+      throw new Error('خاصية حذف الموظف قيد التطوير');
+    });
   };
 
   const getStatusBadge = (status: string) => {
@@ -126,27 +96,14 @@ const EmployeesPage: React.FC = () => {
     console.error('❌ EmployeesPage: خطأ في تحميل الموظفين:', error);
     return (
       <div className="p-6">
-        <Card className="border-destructive/50 bg-destructive/5">
-          <CardHeader>
-            <CardTitle className="rtl-title flex items-center gap-2 text-destructive">
-              <AlertCircle className="w-5 h-5" />
-              خطأ في تحميل الموظفين
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              {error.message || 'حدث خطأ غير متوقع'}
-            </p>
-            <Button 
-              onClick={() => refetch()} 
-              variant="outline"
-              className="rtl-flex"
-            >
-              <Search className="w-4 h-4" />
-              إعادة المحاولة
-            </Button>
-          </CardContent>
-        </Card>
+        <UnifiedErrorDisplay
+          error={error}
+          title="خطأ في تحميل الموظفين"
+          onRetry={() => refetch()}
+          showRetry={true}
+          showDetails={true}
+          context="employees"
+        />
       </div>
     );
   }

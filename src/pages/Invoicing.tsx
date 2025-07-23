@@ -8,7 +8,8 @@ import { InvoiceForm } from '@/components/Invoicing/InvoiceForm';
 import { InvoicesList } from '@/components/Invoicing/InvoicesList';
 import { PaymentForm } from '@/components/Invoicing/PaymentForm';
 import { PaymentsList } from '@/components/Invoicing/PaymentsList';
-import { useToast } from '@/hooks/use-toast';
+import { useUnifiedErrorHandling } from '@/hooks/useUnifiedErrorHandling';
+import { UnifiedErrorDisplay } from '@/components/common/UnifiedErrorDisplay';
 import { downloadInvoicePDF } from '@/lib/invoice/invoicePDFService';
 import { useContractsOptimized } from '@/hooks/useContractsOptimized';
 import { useSaasInvoices, useCreateInvoice, useUpdateInvoiceStatus, useSaasPayments, useCreatePayment } from '@/hooks/useSaasData';
@@ -32,7 +33,13 @@ const Invoicing = () => {
     totalAmount: 0,
     monthlyAmount: 0,
   });
-  const { toast } = useToast();
+  const { execute, executeWithRetry, handleError } = useUnifiedErrorHandling({
+    context: 'invoicing',
+    showToast: true,
+    enableRetry: true,
+    maxRetries: 3,
+    loadingKey: 'invoicing-operations'
+  });
   
   const { contracts, customers } = useContractsOptimized();
   
@@ -105,16 +112,10 @@ const Invoicing = () => {
   };
 
   const loadStats = async () => {
-    try {
+    await executeWithRetry(async () => {
       const stats = await invoiceService.getInvoiceStats();
       setInvoiceStats(stats);
-    } catch (error: any) {
-      toast({
-        title: 'خطأ في تحميل الإحصائيات',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
+    });
   };
 
   const loadPayments = async () => {
@@ -123,16 +124,10 @@ const Invoicing = () => {
   };
 
   const loadPaymentStats = async () => {
-    try {
+    await executeWithRetry(async () => {
       const stats = await paymentService.getPaymentStats();
       setPaymentStats(stats);
-    } catch (error: any) {
-      toast({
-        title: 'خطأ في تحميل إحصائيات المدفوعات',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
+    });
   };
 
   const loadData = async () => {
@@ -162,31 +157,19 @@ const Invoicing = () => {
   };
 
   const handleSendInvoice = async (id: string) => {
-    try {
+    await executeWithRetry(async () => {
       await invoiceService.updateInvoiceStatus(id, 'sent');
-      toast({
-        title: 'تم بنجاح',
-        description: 'تم إرسال الفاتورة بنجاح',
-      });
-      loadData();
-    } catch (error: any) {
-      toast({
-        title: 'خطأ',
-        description: error.message || 'حدث خطأ أثناء إرسال الفاتورة',
-        variant: 'destructive',
-      });
-    }
+      await loadData();
+      return 'تم إرسال الفاتورة بنجاح';
+    });
   };
 
   const handleDownloadInvoice = async (id: string) => {
-    try {
+    await execute(async () => {
       const invoice = await invoiceService.getInvoiceById(id);
-      if (!invoice) return;
-
-      toast({
-        title: "جاري إنشاء PDF...",
-        description: "يرجى الانتظار أثناء إنشاء ملف PDF",
-      });
+      if (!invoice) {
+        throw new Error('الفاتورة غير موجودة');
+      }
 
       // Convert SaasInvoice to Invoice format for PDF generation
       const invoiceForPDF = {
@@ -216,43 +199,19 @@ const Invoicing = () => {
       await downloadInvoicePDF(
         invoiceForPDF,
         `invoice_${invoice.invoice_number}.pdf`,
-        { includeTerms: true, includeNotes: true },
-        (step, progress) => {
-          toast({
-            title: "جاري المعالجة",
-            description: `${step} - ${progress}%`,
-          });
-        }
+        { includeTerms: true, includeNotes: true }
       );
       
-      toast({
-        title: "تم بنجاح",
-        description: "تم تحميل ملف PDF بنجاح",
-      });
-    } catch (error: any) {
-      toast({
-        title: "خطأ",
-        description: error.message || "حدث خطأ أثناء تحميل الفاتورة",
-        variant: "destructive",
-      });
-    }
+      return 'تم تحميل ملف PDF بنجاح';
+    });
   };
 
   const handleStatusChange = async (id: string, status: string) => {
-    try {
+    await executeWithRetry(async () => {
       await invoiceService.updateInvoiceStatus(id, status as any);
-      toast({
-        title: 'تم بنجاح',
-        description: 'تم تحديث حالة الفاتورة بنجاح',
-      });
-      loadData();
-    } catch (error: any) {
-      toast({
-        title: 'خطأ',
-        description: error.message || 'حدث خطأ أثناء تحديث الفاتورة',
-        variant: 'destructive',
-      });
-    }
+      await loadData();
+      return 'تم تحديث حالة الفاتورة بنجاح';
+    });
   };
 
   const handleAddPayment = (invoice: any) => {
@@ -271,20 +230,11 @@ const Invoicing = () => {
   };
 
   const handlePaymentStatusChange = async (id: string, status: string) => {
-    try {
+    await executeWithRetry(async () => {
       await paymentService.updatePaymentStatus(id, status as any);
-      toast({
-        title: 'تم بنجاح',
-        description: 'تم تحديث حالة الدفعة بنجاح',
-      });
-      loadData();
-    } catch (error: any) {
-      toast({
-        title: 'خطأ',
-        description: error.message || 'حدث خطأ أثناء تحديث الدفعة',
-        variant: 'destructive',
-      });
-    }
+      await loadData();
+      return 'تم تحديث حالة الدفعة بنجاح';
+    });
   };
 
   const formatCurrency = (amount: number) => {

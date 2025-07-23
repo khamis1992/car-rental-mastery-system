@@ -8,7 +8,7 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import { GlobalLoadingProvider } from "@/contexts/GlobalLoadingContext";
 
 import { SearchProvider } from "@/contexts/SearchContext";
-import ErrorBoundary from "@/components/common/ErrorBoundary";
+import { UnifiedErrorBoundary } from "@/components/common";
 import { Layout } from "@/components/Layout/Layout";
 import Contracts from "@/pages/Contracts";
 import Fleet from "@/pages/Fleet";
@@ -66,7 +66,11 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <ErrorBoundary>
+    <UnifiedErrorBoundary 
+      context="application"
+      showDetails={false}
+      showHome={true}
+    >
       <QueryClientProvider client={queryClient}>
         <GlobalLoadingProvider>
           <AuthProvider>
@@ -139,7 +143,7 @@ function App() {
           </AuthProvider>
         </GlobalLoadingProvider>
       </QueryClientProvider>
-    </ErrorBoundary>
+    </UnifiedErrorBoundary>
   );
 }
 
