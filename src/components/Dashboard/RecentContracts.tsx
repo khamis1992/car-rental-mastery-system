@@ -70,14 +70,9 @@ const RecentContracts: React.FC<RecentContractsProps> = ({
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-semibold text-foreground rtl-title flex items-center gap-2">
           العقود الحديثة
-          {isConnected && (
-            <RealtimeIndicator 
-              isConnected={isConnected}
-              isUpdating={isUpdating}
-              lastUpdated={lastUpdated}
-              size="sm"
-            />
-          )}
+          <RealtimeIndicator 
+            size="sm"
+          />
         </CardTitle>
         <Button 
           variant="outline" 

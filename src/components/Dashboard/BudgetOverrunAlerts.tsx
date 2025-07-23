@@ -54,14 +54,9 @@ export const BudgetOverrunAlerts: React.FC<BudgetOverrunAlertsProps> = ({
         <CardTitle className="text-lg font-semibold text-foreground rtl-title flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
           تنبيهات تجاوز الميزانية
-          {isConnected && (
-            <RealtimeIndicator 
-              isConnected={isConnected}
-              isUpdating={isUpdating}
-              lastUpdated={lastUpdated}
-              size="sm"
-            />
-          )}
+          <RealtimeIndicator 
+            size="sm"
+          />
         </CardTitle>
         <Button
           variant="outline"

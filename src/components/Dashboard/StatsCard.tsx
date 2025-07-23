@@ -59,9 +59,6 @@ const StatsCard = ({
           {title}
           {showRealtimeIndicator && (
             <RealtimeIndicator 
-              isConnected={isConnected}
-              isUpdating={isUpdating}
-              lastUpdated={lastUpdated}
               size="sm"
             />
           )}

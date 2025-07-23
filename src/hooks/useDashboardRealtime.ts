@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTenant } from '@/contexts/TenantContext';
 import { serviceContainer } from '@/services/Container/ServiceContainer';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
+import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { toast } from 'sonner';
 
 export interface DashboardStats {
@@ -68,6 +69,7 @@ export function useDashboardRealtime() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { currentTenant } = useTenant();
+  const { isConnected } = useUnifiedRealtime();
   
   const contractService = serviceContainer.getContractBusinessService();
   const vehicleService = serviceContainer.getVehicleBusinessService();
@@ -272,6 +274,7 @@ export function useDashboardRealtime() {
     stats,
     loading,
     error,
+    isConnected,
     refreshStats: loadAllStats,
     refreshSection: updateSectionStats,
   };

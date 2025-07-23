@@ -45,9 +45,6 @@ const Index = () => {
         </div>
         <div className="flex items-center gap-2">
           <RealtimeIndicator 
-            isConnected={isConnected}
-            isUpdating={loading}
-            lastUpdated={stats.contracts.lastUpdated}
             size="md"
           />
           {!loading && (

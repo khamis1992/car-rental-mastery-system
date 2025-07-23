@@ -39,14 +39,9 @@ const FleetOverview: React.FC<FleetOverviewProps> = ({
           نظرة عامة على الأسطول
           {isUpdating && <RefreshCw className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
         </CardTitle>
-        {isConnected && (
-          <RealtimeIndicator 
-            isConnected={isConnected}
-            isUpdating={isUpdating}
-            lastUpdated={lastUpdated}
-            size="sm"
-          />
-        )}
+        <RealtimeIndicator 
+          size="sm"
+        />
       </CardHeader>
       <CardContent className={`space-y-4 ${isUpdating ? 'animate-pulse' : ''}`}>
         <div className="space-y-2">
