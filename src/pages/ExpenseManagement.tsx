@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Layout } from "@/components/Layout/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -22,8 +21,7 @@ export default function ExpenseManagement() {
   const [activeTab, setActiveTab] = useState("vouchers");
 
   return (
-    <Layout>
-      <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
         {/* الرأس */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -300,7 +298,6 @@ export default function ExpenseManagement() {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
-    </Layout>
+    </div>
   );
 }

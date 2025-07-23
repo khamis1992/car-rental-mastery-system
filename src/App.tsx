@@ -9,7 +9,7 @@ import { GlobalLoadingProvider } from "@/contexts/GlobalLoadingContext";
 import { EnhancedRealtimeProvider } from "@/contexts/EnhancedRealtimeContext";
 import { SearchProvider } from "@/contexts/SearchContext";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
-import DashboardLayout from "@/components/Layout/DashboardLayout";
+import { Layout } from "@/components/Layout/Layout";
 import Contracts from "@/pages/Contracts";
 import Fleet from "@/pages/Fleet";
 import Customers from "@/pages/Customers";
@@ -77,7 +77,7 @@ function App() {
                         } />
                         <Route path="/" element={
                           <ProtectedRoute>
-                            <DashboardLayout />
+                            <Layout />
                           </ProtectedRoute>
                         }>
                           <Route index element={<Index />} />
