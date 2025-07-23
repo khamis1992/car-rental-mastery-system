@@ -33,6 +33,8 @@ import {
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 import { DateRange } from "react-day-picker";
 import { TreasuryTransactionForm } from "@/components/Treasury/TreasuryTransactionForm";
+import { BankAccountsTab } from "@/components/Treasury/BankAccountsTab";
+import BankReconciliation from "@/components/BankReconciliation/BankReconciliation";
 import { useToast } from "@/hooks/use-toast";
 
 const Treasury = () => {
@@ -435,25 +437,14 @@ const Treasury = () => {
           </Card>
         </TabsContent>
 
-        {/* باقي التبويبات ستكون فارغة للآن */}
+        {/* تبويب الحسابات البنكية */}
         <TabsContent value="accounts">
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">إدارة الحسابات البنكية</h3>
-              <p className="text-muted-foreground">قريباً...</p>
-            </CardContent>
-          </Card>
+          <BankAccountsTab />
         </TabsContent>
 
+        {/* تبويب التسويات البنكية */}
         <TabsContent value="reconciliation">
-          <Card>
-            <CardContent className="p-8 text-center">
-              <CheckCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">التسويات البنكية</h3>
-              <p className="text-muted-foreground">قريباً...</p>
-            </CardContent>
-          </Card>
+          <BankReconciliation />
         </TabsContent>
 
         <TabsContent value="reports">
