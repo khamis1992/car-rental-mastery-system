@@ -12079,26 +12079,7 @@ export type Database = {
       }
     }
     Views: {
-      cost_center_report_secure: {
-        Row: {
-          actual_spent: number | null
-          budget_amount: number | null
-          budget_utilization_percentage: number | null
-          contract_count: number | null
-          cost_center_code: string | null
-          cost_center_name: string | null
-          cost_center_type: string | null
-          department_name: string | null
-          employee_count: number | null
-          hierarchy_path: string | null
-          id: string | null
-          level: number | null
-          manager_name: string | null
-          variance: number | null
-          vehicle_count: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       add_specialized_rental_accounts: {
