@@ -34,6 +34,17 @@
 - دالة قيود المدفوعات
 - دالة قيود الحضور
 
+## الملفات الجديدة المدمجة
+
+### 📂 مجلد الملفات المدمجة
+تم إنشاء الملفات المدمجة في: `docs/master-migrations/`
+
+### ✅ الملفات المتوفرة
+- `master-001-create-essential-indexes.sql` - جميع الفهارس الأساسية
+- `master-002-security-functions.sql` - دوال الأمان والأدوار
+- `master-003-accounting-functions.sql` - الدوال المحاسبية الشاملة  
+- `migration-deployment-script.sh` - سكريبت النشر الآلي
+
 ## الملفات المستبعدة
 
 ### ملفات الفهارس (تم دمجها في master-001)
@@ -64,18 +75,22 @@
 
 ## خطوات التطبيق
 
-### 1. النسخ الاحتياطي
+### 1. الطريقة الآلية (مستحسنة)
 ```bash
-# إنشاء نسخة احتياطية من قاعدة البيانات
-pg_dump your_database > backup_before_consolidation.sql
+# تشغيل سكريبت النشر الآلي
+chmod +x docs/master-migrations/migration-deployment-script.sh
+DATABASE_URL="your_database_url" ./docs/master-migrations/migration-deployment-script.sh
 ```
 
-### 2. تطبيق الملفات الجديدة
+### 2. الطريقة اليدوية
 ```bash
+# النسخ الاحتياطي
+pg_dump your_database > backup_before_consolidation.sql
+
 # تطبيق ملفات الـ master بالترتيب
-psql -d your_database -f master-001-create-essential-indexes.sql
-psql -d your_database -f master-002-security-functions.sql
-psql -d your_database -f master-003-accounting-functions.sql
+psql -d your_database -f docs/master-migrations/master-001-create-essential-indexes.sql
+psql -d your_database -f docs/master-migrations/master-002-security-functions.sql
+psql -d your_database -f docs/master-migrations/master-003-accounting-functions.sql
 ```
 
 ### 3. التحقق من التطبيق
