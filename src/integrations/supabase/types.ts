@@ -12098,6 +12098,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      auto_create_rental_invoice: {
+        Args: { contract_id_param: string }
+        Returns: string
+      }
       auto_distribute_costs: {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -12148,7 +12152,7 @@ export type Database = {
         Returns: number
       }
       calculate_budget_variance: {
-        Args: { budget_id: string }
+        Args: { budget_id_param: string }
         Returns: undefined
       }
       calculate_cash_flow: {
@@ -12284,7 +12288,7 @@ export type Database = {
         Returns: Json
       }
       check_period_status: {
-        Args: { check_date: string }
+        Args: { period_date: string }
         Returns: Json
       }
       check_system_health: {
@@ -12351,10 +12355,6 @@ export type Database = {
         Args: { tenant_id_param: string }
         Returns: number
       }
-      complete_liabilities_equity_revenue_expenses: {
-        Args: { target_tenant_id: string }
-        Returns: number
-      }
       convert_currency: {
         Args: {
           p_amount: number
@@ -12370,6 +12370,14 @@ export type Database = {
         Returns: number
       }
       copy_default_chart_of_accounts: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
+      copy_default_company_branding: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
+      copy_default_cost_centers: {
         Args: { tenant_id_param: string }
         Returns: number
       }
@@ -12436,7 +12444,9 @@ export type Database = {
         Returns: number
       }
       create_contract_accounting_entry: {
-        Args: { contract_id: string; contract_data: Json }
+        Args:
+          | { contract_data: Json }
+          | { contract_id: string; contract_data: Json }
         Returns: string
       }
       create_contract_customer_accounting_entry: {
@@ -12932,6 +12942,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_invoice_stats: {
+        Args: { tenant_id_param: string }
+        Returns: Json
+      }
       get_next_document_number: {
         Args: {
           p_tenant_id: string
@@ -13072,6 +13086,14 @@ export type Database = {
         Args: { tenant_id_param: string }
         Returns: boolean
       }
+      log_payment_activity: {
+        Args: {
+          payment_id_param: string
+          activity_type_param: string
+          activity_data_param?: Json
+        }
+        Returns: undefined
+      }
       log_tenant_access: {
         Args: {
           p_tenant_id: string
@@ -13131,8 +13153,10 @@ export type Database = {
         Returns: undefined
       }
       mark_contract_deleted: {
-        Args: { contract_id_param: string; reason?: string }
-        Returns: Json
+        Args:
+          | { contract_id_param: string }
+          | { contract_id_param: string; reason?: string }
+        Returns: undefined
       }
       migrate_account_balances: {
         Args: Record<PropertyKey, never>
@@ -13261,10 +13285,6 @@ export type Database = {
         Args: { tenant_id_param: string }
         Returns: boolean
       }
-      setup_comprehensive_chart_of_accounts: {
-        Args: { tenant_id_param: string }
-        Returns: number
-      }
       setup_default_role_permissions: {
         Args: { _tenant_id: string }
         Returns: undefined
@@ -13357,6 +13377,10 @@ export type Database = {
       validate_journal_entry_balance: {
         Args: { entry_id: string }
         Returns: boolean
+      }
+      validate_payment_amount: {
+        Args: { invoice_id_param: string; payment_amount_param: number }
+        Returns: Json
       }
       validate_rls_policies: {
         Args: Record<PropertyKey, never>
