@@ -12344,7 +12344,7 @@ export type Database = {
         Returns: number
       }
       complete_liabilities_equity_revenue_expenses: {
-        Args: { tenant_id_param: string }
+        Args: { target_tenant_id: string }
         Returns: number
       }
       convert_currency: {
@@ -12436,7 +12436,9 @@ export type Database = {
         Returns: number
       }
       create_contract_accounting_entry: {
-        Args: { contract_id: string; contract_data: Json }
+        Args:
+          | { contract_data: Json }
+          | { contract_id: string; contract_data: Json }
         Returns: string
       }
       create_contract_customer_accounting_entry: {
@@ -13258,7 +13260,7 @@ export type Database = {
         Returns: boolean
       }
       setup_comprehensive_chart_of_accounts: {
-        Args: { tenant_id_param: string }
+        Args: { target_tenant_id: string }
         Returns: number
       }
       setup_default_role_permissions: {
