@@ -12287,6 +12287,10 @@ export type Database = {
         Args: { period_date: string }
         Returns: Json
       }
+      check_system_health: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       check_tenant_isolation_compliance: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -12317,6 +12321,10 @@ export type Database = {
       cleanup_duplicate_accounts: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      cleanup_old_audit_logs: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       cleanup_orphaned_journal_entries: {
         Args: Record<PropertyKey, never>
@@ -13156,6 +13164,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      process_automated_accounting_entries: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       process_automated_accounting_event: {
         Args: {
           p_event_type: string
@@ -13363,6 +13375,10 @@ export type Database = {
       validate_tenant_access: {
         Args: { table_tenant_id: string }
         Returns: boolean
+      }
+      validate_tenant_data_integrity: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       validate_tenant_isolation_integrity: {
         Args: Record<PropertyKey, never>
