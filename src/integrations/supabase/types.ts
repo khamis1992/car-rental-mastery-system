@@ -13044,8 +13044,15 @@ export type Database = {
         Args: { tenant_id_param: string; deletion_reason?: string }
         Returns: Json
       }
+      has_any_role: {
+        Args: {
+          user_id_param: string
+          roles_param: Database["public"]["Enums"]["user_role"][]
+        }
+        Returns: boolean
+      }
       has_any_tenant_role: {
-        Args: { _roles: string[] }
+        Args: { roles_param: string[] }
         Returns: boolean
       }
       has_existing_accounting_entry: {
@@ -13066,8 +13073,8 @@ export type Database = {
       }
       has_role: {
         Args: {
-          _user_id: string
-          _role: Database["public"]["Enums"]["user_role"]
+          user_id_param: string
+          role_param: Database["public"]["Enums"]["user_role"]
         }
         Returns: boolean
       }
