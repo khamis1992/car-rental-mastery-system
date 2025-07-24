@@ -13178,11 +13178,16 @@ export type Database = {
           | {
               activity_type: string
               activity_description: string
+              additional_data?: Json
+            }
+          | {
+              activity_type: string
+              activity_description: string
               related_entity_type?: string
               related_entity_id?: string
             }
           | { activity_type: string; description: string }
-        Returns: undefined
+        Returns: string
       }
       mark_contract_deleted: {
         Args:
