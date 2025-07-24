@@ -12375,7 +12375,7 @@ export type Database = {
       }
       copy_default_company_branding: {
         Args: { tenant_id_param: string }
-        Returns: number
+        Returns: undefined
       }
       copy_default_cost_centers: {
         Args: { tenant_id_param: string }
@@ -13149,7 +13149,7 @@ export type Database = {
               ip_address_param?: string
               user_agent_param?: string
             }
-          | { activity_type: string; activity_description: string }
+          | { activity_type: string; description: string }
         Returns: undefined
       }
       mark_contract_deleted: {
