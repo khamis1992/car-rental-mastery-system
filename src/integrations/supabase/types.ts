@@ -13164,6 +13164,7 @@ export type Database = {
               p_description?: string
               p_details?: Json
             }
+          | { transaction_data: Json }
         Returns: string
       }
       log_user_activity: {
