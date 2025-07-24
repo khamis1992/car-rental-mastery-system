@@ -12189,7 +12189,7 @@ export type Database = {
         Returns: Json
       }
       calculate_financial_kpis: {
-        Args: { for_date?: string }
+        Args: { for_date: string }
         Returns: number
       }
       calculate_financial_metrics: {
@@ -12373,14 +12373,6 @@ export type Database = {
         Args: { tenant_id_param: string }
         Returns: number
       }
-      copy_default_company_branding: {
-        Args: { tenant_id_param: string }
-        Returns: number
-      }
-      copy_default_cost_centers: {
-        Args: { tenant_id_param: string }
-        Returns: number
-      }
       copy_default_financial_periods: {
         Args: { target_tenant_id: string }
         Returns: number
@@ -12444,9 +12436,7 @@ export type Database = {
         Returns: number
       }
       create_contract_accounting_entry: {
-        Args:
-          | { contract_data: Json }
-          | { contract_id: string; contract_data: Json }
+        Args: { contract_id: string; contract_data: Json }
         Returns: string
       }
       create_contract_customer_accounting_entry: {
