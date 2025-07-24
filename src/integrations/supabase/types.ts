@@ -12355,6 +12355,10 @@ export type Database = {
         Args: { tenant_id_param: string }
         Returns: number
       }
+      complete_liabilities_equity_revenue_expenses: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
       convert_currency: {
         Args: {
           p_amount: number
@@ -13285,6 +13289,10 @@ export type Database = {
         Args: { tenant_id_param: string }
         Returns: boolean
       }
+      setup_comprehensive_chart_of_accounts: {
+        Args: { tenant_id_param: string }
+        Returns: number
+      }
       setup_default_role_permissions: {
         Args: { _tenant_id: string }
         Returns: undefined
@@ -13306,8 +13314,8 @@ export type Database = {
         Returns: Json
       }
       update_account_balances: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
+        Args: Record<PropertyKey, never> | { journal_entry_id_param: string }
+        Returns: undefined
       }
       update_all_cost_center_costs: {
         Args: Record<PropertyKey, never>
