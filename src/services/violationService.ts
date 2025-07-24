@@ -1,16 +1,16 @@
 import { supabase } from '@/integrations/supabase/client';
-import { TrafficViolation, ViolationType, ViolationPayment, ViolationWithDetails, ViolationStats, ViolationReportData } from '@/types/violation';
-
-import { supabase } from '@/integrations/supabase/client';
+import { TrafficViolation, ViolationType, ViolationPayment, ViolationWithDetails, ViolationStats, ViolationReportData, ViolationHistory } from '@/types/violation';
 
 export const violationService = {
   // Get violation history
-  getViolationHistory: async (violationId: string) => {
+  getViolationHistory: async (violationId: string): Promise<ViolationHistory[]> => {
     try {
       // Mock implementation - replace with actual history tracking
       return [
         {
           id: '1',
+          violation_id: violationId,
+          action_type: 'created',
           description: 'تم إنشاء المخالفة',
           created_at: new Date().toISOString()
         }
