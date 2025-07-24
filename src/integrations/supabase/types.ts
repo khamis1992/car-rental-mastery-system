@@ -2475,21 +2475,7 @@ export type Database = {
             foreignKeyName: "chart_of_accounts_cost_center_id_fkey"
             columns: ["cost_center_id"]
             isOneToOne: false
-            referencedRelation: "cost_center_report"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chart_of_accounts_cost_center_id_fkey"
-            columns: ["cost_center_id"]
-            isOneToOne: false
             referencedRelation: "cost_centers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chart_of_accounts_default_cost_center_id_fkey"
-            columns: ["default_cost_center_id"]
-            isOneToOne: false
-            referencedRelation: "cost_center_report"
             referencedColumns: ["id"]
           },
           {
@@ -3533,13 +3519,6 @@ export type Database = {
             foreignKeyName: "contracts_cost_center_id_fkey"
             columns: ["cost_center_id"]
             isOneToOne: false
-            referencedRelation: "cost_center_report"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contracts_cost_center_id_fkey"
-            columns: ["cost_center_id"]
-            isOneToOne: false
             referencedRelation: "cost_centers"
             referencedColumns: ["id"]
           },
@@ -3625,13 +3604,6 @@ export type Database = {
             foreignKeyName: "cost_center_allocations_cost_center_id_fkey"
             columns: ["cost_center_id"]
             isOneToOne: false
-            referencedRelation: "cost_center_report"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cost_center_allocations_cost_center_id_fkey"
-            columns: ["cost_center_id"]
-            isOneToOne: false
             referencedRelation: "cost_centers"
             referencedColumns: ["id"]
           },
@@ -3681,13 +3653,6 @@ export type Database = {
           threshold_percentage?: number
         }
         Relationships: [
-          {
-            foreignKeyName: "cost_center_budget_alerts_cost_center_id_fkey"
-            columns: ["cost_center_id"]
-            isOneToOne: false
-            referencedRelation: "cost_center_report"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "cost_center_budget_alerts_cost_center_id_fkey"
             columns: ["cost_center_id"]
@@ -3796,13 +3761,6 @@ export type Database = {
             foreignKeyName: "cost_center_budgets_cost_center_id_fkey"
             columns: ["cost_center_id"]
             isOneToOne: false
-            referencedRelation: "cost_center_report"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cost_center_budgets_cost_center_id_fkey"
-            columns: ["cost_center_id"]
-            isOneToOne: false
             referencedRelation: "cost_centers"
             referencedColumns: ["id"]
           },
@@ -3847,13 +3805,6 @@ export type Database = {
           previous_values?: Json | null
         }
         Relationships: [
-          {
-            foreignKeyName: "cost_center_history_cost_center_id_fkey"
-            columns: ["cost_center_id"]
-            isOneToOne: false
-            referencedRelation: "cost_center_report"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "cost_center_history_cost_center_id_fkey"
             columns: ["cost_center_id"]
@@ -4009,13 +3960,6 @@ export type Database = {
             columns: ["manager_id"]
             isOneToOne: false
             referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cost_centers_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "cost_center_report"
             referencedColumns: ["id"]
           },
           {
@@ -5335,21 +5279,7 @@ export type Database = {
             foreignKeyName: "employees_primary_cost_center_id_fkey"
             columns: ["primary_cost_center_id"]
             isOneToOne: false
-            referencedRelation: "cost_center_report"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employees_primary_cost_center_id_fkey"
-            columns: ["primary_cost_center_id"]
-            isOneToOne: false
             referencedRelation: "cost_centers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employees_secondary_cost_center_id_fkey"
-            columns: ["secondary_cost_center_id"]
-            isOneToOne: false
-            referencedRelation: "cost_center_report"
             referencedColumns: ["id"]
           },
           {
@@ -5708,13 +5638,6 @@ export type Database = {
             foreignKeyName: "fk_expense_templates_cost_center"
             columns: ["default_cost_center_id"]
             isOneToOne: false
-            referencedRelation: "cost_center_report"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_expense_templates_cost_center"
-            columns: ["default_cost_center_id"]
-            isOneToOne: false
             referencedRelation: "cost_centers"
             referencedColumns: ["id"]
           },
@@ -5872,13 +5795,6 @@ export type Database = {
             columns: ["bank_account_id"]
             isOneToOne: false
             referencedRelation: "bank_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_expense_vouchers_cost_center"
-            columns: ["cost_center_id"]
-            isOneToOne: false
-            referencedRelation: "cost_center_report"
             referencedColumns: ["id"]
           },
           {
@@ -7720,13 +7636,6 @@ export type Database = {
             foreignKeyName: "journal_entry_cost_center_allocations_cost_center_id_fkey"
             columns: ["cost_center_id"]
             isOneToOne: false
-            referencedRelation: "cost_center_report"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "journal_entry_cost_center_allocations_cost_center_id_fkey"
-            columns: ["cost_center_id"]
-            isOneToOne: false
             referencedRelation: "cost_centers"
             referencedColumns: ["id"]
           },
@@ -7830,13 +7739,6 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "chart_of_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "journal_entry_lines_cost_center_id_fkey"
-            columns: ["cost_center_id"]
-            isOneToOne: false
-            referencedRelation: "cost_center_report"
             referencedColumns: ["id"]
           },
           {
@@ -11868,13 +11770,6 @@ export type Database = {
             foreignKeyName: "vehicles_cost_center_id_fkey"
             columns: ["cost_center_id"]
             isOneToOne: false
-            referencedRelation: "cost_center_report"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vehicles_cost_center_id_fkey"
-            columns: ["cost_center_id"]
-            isOneToOne: false
             referencedRelation: "cost_centers"
             referencedColumns: ["id"]
           },
@@ -12184,7 +12079,7 @@ export type Database = {
       }
     }
     Views: {
-      cost_center_report: {
+      cost_center_report_secure: {
         Row: {
           actual_spent: number | null
           budget_amount: number | null
@@ -12937,6 +12832,26 @@ export type Database = {
       get_accounting_entries_summary: {
         Args: { filters?: Json }
         Returns: Json
+      }
+      get_cost_center_report: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          cost_center_code: string
+          cost_center_name: string
+          cost_center_type: string
+          level: number
+          hierarchy_path: string
+          budget_amount: number
+          actual_spent: number
+          variance: number
+          budget_utilization_percentage: number
+          department_name: string
+          manager_name: string
+          employee_count: number
+          contract_count: number
+          vehicle_count: number
+        }[]
       }
       get_cost_center_setting: {
         Args: { setting_key_param: string }
