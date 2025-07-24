@@ -12288,7 +12288,7 @@ export type Database = {
         Returns: Json
       }
       check_period_status: {
-        Args: { period_date: string }
+        Args: { check_date: string }
         Returns: Json
       }
       check_system_health: {
@@ -13152,6 +13152,12 @@ export type Database = {
               action_description_param?: string
               ip_address_param?: string
               user_agent_param?: string
+            }
+          | {
+              activity_type: string
+              activity_description: string
+              related_entity_type?: string
+              related_entity_id?: string
             }
           | { activity_type: string; description: string }
         Returns: undefined
