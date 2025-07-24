@@ -12370,15 +12370,15 @@ export type Database = {
         Returns: number
       }
       copy_default_chart_of_accounts: {
-        Args: { target_tenant_id: string }
+        Args: { tenant_id_param: string }
         Returns: number
       }
       copy_default_company_branding: {
-        Args: { target_tenant_id: string }
-        Returns: undefined
+        Args: { tenant_id_param: string }
+        Returns: number
       }
       copy_default_cost_centers: {
-        Args: { target_tenant_id: string }
+        Args: { tenant_id_param: string }
         Returns: number
       }
       copy_default_financial_periods: {
