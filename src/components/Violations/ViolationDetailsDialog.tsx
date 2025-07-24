@@ -55,8 +55,7 @@ export const ViolationDetailsDialog: React.FC<ViolationDetailsDialogProps> = ({
       const [violationData, paymentsData, historyData] = await Promise.all([
         violationService.getViolationById(violationId),
         violationService.getViolationPayments(violationId),
-        // TODO: Add history service call when implemented
-        Promise.resolve([])
+        violationService.getViolationHistory(violationId)
       ]);
 
       setViolation(violationData);

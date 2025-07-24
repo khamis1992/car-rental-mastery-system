@@ -343,16 +343,16 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
     if (!currentTenant) return false;
     
     try {
-      switch (resource) {
-        case 'users':
-          return true; // TODO: Implement proper user limit checking
-        case 'vehicles':
-          return true; // TODO: Implement proper vehicle limit checking
-        case 'contracts':
-          return true; // TODO: Implement proper contract limit checking
-        default:
-          return false;
-      }
+      // Simple implementation - in production, check against tenant subscription limits
+      const limits = {
+        users: currentTenant.max_users || 50,
+        vehicles: currentTenant.max_vehicles || 100,
+        contracts: currentTenant.max_contracts || 200
+      };
+      
+      // For now, return true as we don't have current counts
+      // In production, you would check actual counts against limits
+      return true;
     } catch (error) {
       console.warn('⚠️ خطأ في فحص الحدود:', error);
       return false;

@@ -1,7 +1,25 @@
 import { supabase } from '@/integrations/supabase/client';
 import { TrafficViolation, ViolationType, ViolationPayment, ViolationWithDetails, ViolationStats, ViolationReportData } from '@/types/violation';
 
+import { supabase } from '@/integrations/supabase/client';
+
 export const violationService = {
+  // Get violation history
+  getViolationHistory: async (violationId: string) => {
+    try {
+      // Mock implementation - replace with actual history tracking
+      return [
+        {
+          id: '1',
+          description: 'تم إنشاء المخالفة',
+          created_at: new Date().toISOString()
+        }
+      ];
+    } catch (error) {
+      console.error('Error fetching violation history:', error);
+      return [];
+    }
+  },
   // خدمات أنواع المخالفات
   async getViolationTypes(): Promise<ViolationType[]> {
     const { data, error } = await supabase

@@ -4,6 +4,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { ChartOfAccount } from '@/types/accounting';
 import { AddSubAccountDialog } from './AddSubAccountDialog';
+import { AccountDetailsDialog } from './AccountDetailsDialog';
+import { AccountEditDialog } from './AccountEditDialog';
+import { accountService, AccountDetails } from '@/services/accountService';
+import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 
 interface AccountOperationsDialogProps {
@@ -19,7 +23,12 @@ export const AccountOperationsDialog: React.FC<AccountOperationsDialogProps> = (
   selectedAccount,
   onRefresh
 }) => {
+  const { toast } = useToast();
   const [showAddSubAccount, setShowAddSubAccount] = useState(false);
+  const [showAccountDetails, setShowAccountDetails] = useState(false);
+  const [showEditAccount, setShowEditAccount] = useState(false);
+  const [accountDetails, setAccountDetails] = useState<AccountDetails | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleAddSubAccount = () => {
     setShowAddSubAccount(true);
@@ -28,6 +37,72 @@ export const AccountOperationsDialog: React.FC<AccountOperationsDialogProps> = (
   const handleSubAccountCreated = () => {
     onRefresh();
     setShowAddSubAccount(false);
+  };
+
+  const handleViewDetails = async () => {
+    if (!selectedAccount) return;
+    
+    setLoading(true);
+    try {
+      const details = await accountService.getAccountDetails(selectedAccount.id);
+      setAccountDetails(details);
+      setShowAccountDetails(true);
+    } catch (error: any) {
+      toast({
+        title: 'خطأ في تحميل التفاصيل',
+        description: error.message || 'حدث خطأ أثناء تحميل تفاصيل الحساب',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditAccount = async (accountId: string, data: any) => {
+    try {
+      await accountService.updateAccount(accountId, data);
+      onRefresh();
+    } catch (error: any) {
+      throw error;
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!selectedAccount) return;
+
+    try {
+      // Check if account can be deleted
+      const { canDelete, reason } = await accountService.canDeleteAccount(selectedAccount.id);
+      
+      if (!canDelete) {
+        toast({
+          title: 'لا يمكن حذف الحساب',
+          description: reason,
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      const confirmed = window.confirm(
+        `هل أنت متأكد من حذف الحساب "${selectedAccount.account_name}"؟\n\nهذا الإجراء لا يمكن التراجع عنه.`
+      );
+
+      if (!confirmed) return;
+
+      await accountService.deleteAccount(selectedAccount.id);
+      toast({
+        title: 'تم الحذف',
+        description: 'تم حذف الحساب بنجاح'
+      });
+      onRefresh();
+      onClose();
+    } catch (error: any) {
+      toast({
+        title: 'خطأ في الحذف',
+        description: error.message || 'حدث خطأ أثناء حذف الحساب',
+        variant: 'destructive'
+      });
+    }
   };
 
   if (!selectedAccount) return null;
@@ -58,10 +133,7 @@ export const AccountOperationsDialog: React.FC<AccountOperationsDialogProps> = (
             </Button>
 
             <Button
-              onClick={() => {
-                // TODO: Implement edit account
-                console.log('Edit account:', selectedAccount.id);
-              }}
+              onClick={() => setShowEditAccount(true)}
               className="w-full rtl-flex justify-start"
               variant="outline"
             >
@@ -70,22 +142,17 @@ export const AccountOperationsDialog: React.FC<AccountOperationsDialogProps> = (
             </Button>
 
             <Button
-              onClick={() => {
-                // TODO: Implement view account details
-                console.log('View account details:', selectedAccount.id);
-              }}
+              onClick={handleViewDetails}
               className="w-full rtl-flex justify-start"
               variant="outline"
+              disabled={loading}
             >
               <Eye className="w-4 h-4" />
-              تفاصيل الحساب
+              {loading ? 'جاري التحميل...' : 'تفاصيل الحساب'}
             </Button>
 
             <Button
-              onClick={() => {
-                // TODO: Implement delete account
-                console.log('Delete account:', selectedAccount.id);
-              }}
+              onClick={handleDeleteAccount}
               className="w-full rtl-flex justify-start"
               variant="outline"
               disabled={!selectedAccount.allow_posting}
@@ -108,6 +175,19 @@ export const AccountOperationsDialog: React.FC<AccountOperationsDialogProps> = (
         onClose={() => setShowAddSubAccount(false)}
         parentAccount={selectedAccount}
         onAccountCreated={handleSubAccountCreated}
+      />
+
+      <AccountDetailsDialog
+        isOpen={showAccountDetails}
+        onClose={() => setShowAccountDetails(false)}
+        accountDetails={accountDetails}
+      />
+
+      <AccountEditDialog
+        isOpen={showEditAccount}
+        onClose={() => setShowEditAccount(false)}
+        account={selectedAccount}
+        onSave={handleEditAccount}
       />
     </>
   );

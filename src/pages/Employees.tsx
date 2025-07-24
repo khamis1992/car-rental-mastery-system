@@ -16,10 +16,12 @@ import {
 } from 'lucide-react';
 import { useSecureTenantData } from '@/hooks/useSecureTenantData';
 import { EmployeeDetailsDialog } from '@/components/Employees/EmployeeDetailsDialog';
+import { EmployeeEditDialog } from '@/components/Employees/EmployeeEditDialog';
 import { Employee } from '@/types/hr';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useUnifiedErrorHandling } from '@/hooks/useUnifiedErrorHandling';
 import { UnifiedErrorDisplay } from '@/components/common/UnifiedErrorDisplay';
+import { supabase } from '@/integrations/supabase/client';
 
 const EmployeesPage: React.FC = () => {
   const { useSecureEmployees } = useSecureTenantData();
@@ -33,6 +35,7 @@ const EmployeesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   console.log('🔍 EmployeesPage: تم تحميل', employees?.length || 0, 'موظف');
 
@@ -64,18 +67,30 @@ const EmployeesPage: React.FC = () => {
   };
 
   const handleEditEmployee = (employee: Employee) => {
-    execute(async () => {
-      console.log('🔧 EmployeesPage: تعديل الموظف:', employee.id);
-      // TODO: تنفيذ منطق التعديل
-      throw new Error('خاصية تعديل الموظف قيد التطوير');
-    });
+    console.log('🔧 EmployeesPage: تعديل الموظف:', employee.id);
+    setSelectedEmployee(employee);
+    setIsEditDialogOpen(true);
   };
 
   const handleDeleteEmployee = (employee: Employee) => {
     execute(async () => {
       console.log('🗑️ EmployeesPage: حذف الموظف:', employee.id);
-      // TODO: تنفيذ منطق الحذف
-      throw new Error('خاصية حذف الموظف قيد التطوير');
+      
+      const confirmed = window.confirm(
+        `هل أنت متأكد من حذف الموظف "${employee.first_name} ${employee.last_name}"؟\n\nهذا الإجراء لا يمكن التراجع عنه.`
+      );
+
+      if (!confirmed) return;
+
+      const { error } = await supabase
+        .from('employees')
+        .delete()
+        .eq('id', employee.id);
+
+      if (error) throw error;
+
+      // Refresh the data
+      refetch();
     });
   };
 
@@ -262,6 +277,20 @@ const EmployeesPage: React.FC = () => {
           onOpenChange={setIsDetailsDialogOpen}
           onEditClick={handleEditEmployee}
           onDeleteClick={handleDeleteEmployee}
+        />
+      )}
+
+      {/* Employee Edit Dialog */}
+      {selectedEmployee && (
+        <EmployeeEditDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          employee={selectedEmployee}
+          onSuccess={() => {
+            refetch();
+            setIsEditDialogOpen(false);
+            setSelectedEmployee(null);
+          }}
         />
       )}
     </div>

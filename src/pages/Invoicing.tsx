@@ -147,13 +147,13 @@ const Invoicing = () => {
   };
 
   const handleViewInvoice = (id: string) => {
-    // TODO: Implement invoice details dialog
-    console.log('View invoice:', id);
+    // Navigate to invoice details - implementation would depend on routing setup
+    window.open(`/invoices/${id}`, '_blank');
   };
 
   const handleEditInvoice = (id: string) => {
-    // TODO: Implement invoice editing
-    console.log('Edit invoice:', id);
+    // Navigate to invoice edit - implementation would depend on routing setup  
+    window.location.href = `/invoices/${id}/edit`;
   };
 
   const handleSendInvoice = async (id: string) => {
