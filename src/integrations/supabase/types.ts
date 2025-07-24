@@ -12855,6 +12855,18 @@ export type Database = {
         Args: { filters?: Json }
         Returns: Json
       }
+      get_accounting_periods: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          period_name: string
+          start_date: string
+          end_date: string
+          status: string
+          year: number
+          is_current: boolean
+        }[]
+      }
       get_comprehensive_financial_analysis: {
         Args: { tenant_id_param: string; analysis_date?: string }
         Returns: Json
@@ -12947,7 +12959,7 @@ export type Database = {
         Returns: Json
       }
       get_invoice_stats: {
-        Args: { tenant_id_param: string }
+        Args: Record<PropertyKey, never> | { tenant_id_param: string }
         Returns: Json
       }
       get_next_document_number: {
@@ -12961,6 +12973,15 @@ export type Database = {
       get_optimized_dashboard_stats: {
         Args: { tenant_id_param: string }
         Returns: Json
+      }
+      get_payment_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_payments: number
+          total_amount: number
+          completed_amount: number
+          pending_amount: number
+        }[]
       }
       get_related_modules: {
         Args: { module_name: string; entity_id: string }
