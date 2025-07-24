@@ -12379,7 +12379,7 @@ export type Database = {
       }
       copy_default_company_branding: {
         Args: { tenant_id_param: string }
-        Returns: undefined
+        Returns: number
       }
       copy_default_cost_centers: {
         Args: { tenant_id_param: string }
