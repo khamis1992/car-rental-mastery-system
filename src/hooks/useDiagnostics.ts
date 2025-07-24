@@ -34,12 +34,14 @@ export const useDiagnostics = () => {
       
       if (isAuthenticated) {
         try {
-          // استخدام الدالة الجديدة للحصول على معلومات المستخدم
+          // استخدام الدالة المحسنة للحصول على معلومات المستخدم
           const { data: userInfo, error } = await supabase.rpc('get_current_user_info');
           
           if (error) {
             errors.push(`خطأ في جلب معلومات المستخدم: ${error.message}`);
+            console.error('❌ User info error:', error);
           } else {
+            console.log('✅ User info retrieved:', userInfo);
             const info = userInfo as any;
             tenantId = info?.tenant_id || null;
             
@@ -48,28 +50,47 @@ export const useDiagnostics = () => {
             }
             
             if (!tenantId) {
-              errors.push('لا يمكن تحديد معرف المؤسسة');
+              errors.push('لا يمكن تحديد معرف المؤسسة - ستقوم بإنشاء مستخدم اختبار');
+              
+              // محاولة إنشاء مستخدم اختبار للتطوير
+              try {
+                const { data: testResult } = await supabase.rpc('create_default_test_user');
+                console.log('🧪 Test user creation result:', testResult);
+                
+                const testResultData = testResult as any;
+                if (testResultData?.success) {
+                  tenantId = testResultData.tenant_id;
+                  errors.push('تم إنشاء مستخدم اختبار - يرجى تحديث الصفحة');
+                }
+              } catch (testError) {
+                console.error('❌ Failed to create test user:', testError);
+                errors.push('فشل في إنشاء مستخدم اختبار');
+              }
             }
           }
           
-          // فحص الصلاحيات
+          // فحص الصلاحيات من جدول tenant_users
           try {
-            const { data: rolesData, error: rolesError } = await supabase
-              .from('tenant_user_roles')
-              .select('role')
-              .eq('user_id', userId)
-              .eq('is_active', true);
+            const { data: userRoles, error: rolesError } = await supabase
+              .from('tenant_users')
+              .select('role, status, tenant_id')
+              .eq('user_id', userId);
               
             if (rolesError) {
               errors.push(`خطأ في جلب الصلاحيات: ${rolesError.message}`);
+              console.error('❌ Roles error:', rolesError);
             } else {
-              permissions = rolesData?.map(r => r.role) || [];
+              console.log('✅ User roles:', userRoles);
+              permissions = userRoles
+                ?.filter(r => r.status === 'active')
+                ?.map(r => r.role) || [];
               
               if (permissions.length === 0) {
                 errors.push('المستخدم لا يملك أي صلاحيات مُعينة');
               }
             }
           } catch (permError) {
+            console.error('❌ Permission check error:', permError);
             errors.push('خطأ في فحص الصلاحيات');
           }
           
@@ -77,25 +98,31 @@ export const useDiagnostics = () => {
           try {
             const { data: accountsTest, error: accountsError } = await supabase
               .from('chart_of_accounts')
-              .select('id')
-              .limit(1);
+              .select('id, account_name')
+              .limit(3);
               
             if (accountsError) {
               errors.push(`خطأ في الوصول لجدول الحسابات: ${accountsError.message}`);
+              console.error('❌ Chart of accounts error:', accountsError);
               
               if (accountsError.message.includes('row-level security')) {
                 errors.push('سياسات الأمان تمنع الوصول للحسابات');
               }
+            } else {
+              console.log('✅ Chart of accounts accessible:', accountsTest?.length || 0, 'accounts found');
             }
           } catch (accessError) {
+            console.error('❌ Chart access error:', accessError);
             errors.push('فشل في اختبار الوصول لجدول الحسابات');
           }
           
         } catch (generalError) {
-          errors.push('خطأ عام في فحص المصادقة');
+          console.error('❌ General auth error:', generalError);
+          errors.push(`خطأ عام في فحص المصادقة: ${generalError instanceof Error ? generalError.message : 'خطأ غير معروف'}`);
         }
       } else {
-        errors.push('المستخدم غير مصادق عليه');
+        errors.push('المستخدم غير مصادق عليه - يرجى تسجيل الدخول');
+        console.warn('⚠️ User not authenticated');
       }
       
       const result: DiagnosticResult = {

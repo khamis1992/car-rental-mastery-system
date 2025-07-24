@@ -12567,6 +12567,10 @@ export type Database = {
         Args: { tenant_id_param: string }
         Returns: number
       }
+      create_default_test_user: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       create_depreciation_entries: {
         Args: Record<PropertyKey, never>
         Returns: number
