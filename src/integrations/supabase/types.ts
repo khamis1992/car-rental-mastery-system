@@ -13272,7 +13272,7 @@ export type Database = {
         Returns: boolean
       }
       setup_comprehensive_chart_of_accounts: {
-        Args: { target_tenant_id: string }
+        Args: { tenant_id_param: string }
         Returns: number
       }
       setup_default_role_permissions: {
