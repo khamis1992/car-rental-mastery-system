@@ -12255,6 +12255,10 @@ export type Database = {
         Args: { tenant_id_param: string }
         Returns: number
       }
+      calculate_profit_loss: {
+        Args: { start_date: string; end_date: string }
+        Returns: Json
+      }
       calculate_profitability_ratios: {
         Args: {
           tenant_id_param: string
@@ -12867,6 +12871,10 @@ export type Database = {
           is_current: boolean
         }[]
       }
+      get_balance_sheet_data: {
+        Args: { as_of_date?: string }
+        Returns: Json
+      }
       get_comprehensive_financial_analysis: {
         Args: { tenant_id_param: string; analysis_date?: string }
         Returns: Json
@@ -13175,7 +13183,6 @@ export type Database = {
               ip_address_param?: string
               user_agent_param?: string
             }
-          | { activity_type: string; activity_description: string }
           | {
               activity_type: string
               activity_description: string
@@ -13187,7 +13194,8 @@ export type Database = {
               related_entity_type?: string
               related_entity_id?: string
             }
-        Returns: undefined
+          | { activity_type: string; description?: string }
+        Returns: string
       }
       mark_contract_deleted: {
         Args:
