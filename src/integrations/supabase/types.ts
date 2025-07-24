@@ -12196,6 +12196,10 @@ export type Database = {
         Args: { start_date?: string; end_date?: string }
         Returns: Json
       }
+      calculate_financial_ratios: {
+        Args: { tenant_id_param: string }
+        Returns: Json
+      }
       calculate_financial_variance: {
         Args: {
           tenant_id_param: string
@@ -12837,6 +12841,10 @@ export type Database = {
         Args: { filters?: Json }
         Returns: Json
       }
+      get_comprehensive_financial_analysis: {
+        Args: { tenant_id_param: string; analysis_date?: string }
+        Returns: Json
+      }
       get_cost_center_report: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -12971,6 +12979,10 @@ export type Database = {
           credit_balance: number
         }[]
       }
+      get_user_notifications: {
+        Args: { user_id_param: string; limit_param?: number }
+        Returns: Json
+      }
       get_user_permissions: {
         Args: { _user_id: string; _tenant_id: string }
         Returns: {
@@ -12985,6 +12997,10 @@ export type Database = {
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
+      }
+      get_user_settings: {
+        Args: { user_id_param: string }
+        Returns: Json
       }
       get_user_tenant_context: {
         Args: Record<PropertyKey, never>
