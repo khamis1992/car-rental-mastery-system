@@ -12541,6 +12541,10 @@ export type Database = {
         Args: { email_param: string; role_param: string }
         Returns: Json
       }
+      create_vehicle_accounting_entry: {
+        Args: { vehicle_data: Json }
+        Returns: string
+      }
       create_vehicle_asset: {
         Args: { vehicle_id: string; vehicle_data: Json }
         Returns: string
@@ -12800,6 +12804,21 @@ export type Database = {
         Args: { account_id_param: string; as_of_date?: string }
         Returns: number
       }
+      get_account_statement: {
+        Args: {
+          account_id_param: string
+          start_date_param: string
+          end_date_param: string
+        }
+        Returns: {
+          entry_date: string
+          entry_number: string
+          description: string
+          debit_amount: number
+          credit_amount: number
+          balance: number
+        }[]
+      }
       get_account_summary: {
         Args: {
           account_id_param: string
@@ -12865,6 +12884,15 @@ export type Database = {
       get_customer_current_balance: {
         Args: { customer_id_param: string }
         Returns: number
+      }
+      get_financial_report: {
+        Args: {
+          tenant_id_param: string
+          report_type: string
+          start_date: string
+          end_date: string
+        }
+        Returns: Json
       }
       get_financial_summary: {
         Args: {
@@ -13115,6 +13143,10 @@ export type Database = {
           p_reference_id: string
           p_event_data: Json
         }
+        Returns: Json
+      }
+      process_batch_entries: {
+        Args: { entries_data: Json }
         Returns: Json
       }
       quick_security_check: {
