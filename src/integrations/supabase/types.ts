@@ -12082,6 +12082,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: {
+        Args: { invitation_token_param: string; password_param: string }
+        Returns: Json
+      }
       add_specialized_rental_accounts: {
         Args: { tenant_id_param: string }
         Returns: number
@@ -12093,6 +12097,14 @@ export type Database = {
       apply_comprehensive_default_chart: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      assign_user_role: {
+        Args: {
+          user_id_param: string
+          role_param: string
+          assigned_by_param?: string
+        }
+        Returns: boolean
       }
       audit_orphaned_entries: {
         Args: Record<PropertyKey, never>
@@ -12192,6 +12204,14 @@ export type Database = {
         Args: { customer_id_param: string }
         Returns: Json
       }
+      calculate_employee_overtime: {
+        Args: {
+          employee_id_param: string
+          period_start: string
+          period_end: string
+        }
+        Returns: Json
+      }
       calculate_financial_kpis: {
         Args: { for_date: string }
         Returns: number
@@ -12224,6 +12244,10 @@ export type Database = {
       }
       calculate_installment_summary: {
         Args: { tenant_id_param: string }
+        Returns: Json
+      }
+      calculate_kpi_performance: {
+        Args: { kpi_code_param: string; calculation_date?: string }
         Returns: Json
       }
       calculate_liquidity_ratios: {
@@ -12337,6 +12361,10 @@ export type Database = {
       cleanup_orphaned_journal_entries: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      close_accounting_period: {
+        Args: { period_id: string }
+        Returns: boolean
       }
       close_financial_period: {
         Args: {
@@ -12480,6 +12508,10 @@ export type Database = {
       create_depreciation_journal_entries: {
         Args: { target_month?: string }
         Returns: number
+      }
+      create_employee_profile: {
+        Args: { employee_data: Json; user_id_param?: string }
+        Returns: string
       }
       create_final_chart_of_accounts: {
         Args: { tenant_id_param: string }
@@ -12741,6 +12773,10 @@ export type Database = {
       generate_employee_number: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      generate_financial_reports: {
+        Args: { report_period_start: string; report_period_end: string }
+        Returns: Json
       }
       generate_financial_summary: {
         Args: { as_of_date?: string }
@@ -13012,6 +13048,10 @@ export type Database = {
         Args: { setting_key_param: string }
         Returns: Json
       }
+      get_tenant_financial_summary: {
+        Args: { tenant_id_param: string }
+        Returns: Json
+      }
       get_tenant_theme: {
         Args: { p_tenant_id?: string }
         Returns: Json
@@ -13240,8 +13280,24 @@ export type Database = {
         Args: { entries_data: Json }
         Returns: Json
       }
+      process_contract_renewal: {
+        Args: { contract_id_param: string; renewal_data: Json }
+        Returns: string
+      }
+      process_invoice_payment: {
+        Args: { payment_data: Json }
+        Returns: string
+      }
       quick_security_check: {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      reconcile_bank_account: {
+        Args: {
+          bank_account_id_param: string
+          statement_balance: number
+          statement_date: string
+        }
         Returns: Json
       }
       reopen_financial_period: {
@@ -13411,12 +13467,24 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      validate_accounting_period: {
+        Args: { period_start: string; period_end: string }
+        Returns: boolean
+      }
       validate_chart_consistency: {
         Args: { tenant_id_param: string }
         Returns: Json
       }
       validate_chart_of_accounts: {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      validate_contract_dates: {
+        Args: {
+          start_date_param: string
+          end_date_param: string
+          vehicle_id_param?: string
+        }
         Returns: Json
       }
       validate_journal_entry_accounts: {
