@@ -12468,7 +12468,9 @@ export type Database = {
         Returns: undefined
       }
       create_invoice_accounting_entry: {
-        Args: { invoice_id: string; invoice_data: Json }
+        Args:
+          | { invoice_data: Json }
+          | { invoice_id: string; invoice_data: Json }
         Returns: string
       }
       create_invoice_customer_accounting_entry: {
@@ -12500,7 +12502,9 @@ export type Database = {
         Returns: string
       }
       create_payment_accounting_entry: {
-        Args: { payment_id: string; payment_data: Json }
+        Args:
+          | { payment_data: Json }
+          | { payment_id: string; payment_data: Json }
         Returns: string
       }
       create_payment_customer_accounting_entry: {
@@ -12862,6 +12866,14 @@ export type Database = {
         Args: { customer_id_param: string }
         Returns: number
       }
+      get_financial_summary: {
+        Args: {
+          tenant_id_param: string
+          start_date_param?: string
+          end_date_param?: string
+        }
+        Returns: Json
+      }
       get_general_ledger_entries_enhanced: {
         Args: {
           account_id_param: string
@@ -12920,6 +12932,16 @@ export type Database = {
       get_tenant_theme: {
         Args: { p_tenant_id?: string }
         Returns: Json
+      }
+      get_trial_balance: {
+        Args: { tenant_id_param: string; as_of_date?: string }
+        Returns: {
+          account_code: string
+          account_name: string
+          account_type: string
+          debit_balance: number
+          credit_balance: number
+        }[]
       }
       get_user_permissions: {
         Args: { _user_id: string; _tenant_id: string }
@@ -13198,8 +13220,8 @@ export type Database = {
         Returns: number
       }
       setup_tenant_default_accounting_data: {
-        Args: { target_tenant_id: string }
-        Returns: Json
+        Args: { tenant_id_param: string }
+        Returns: number
       }
       test_accounting_data_isolation: {
         Args: Record<PropertyKey, never>
