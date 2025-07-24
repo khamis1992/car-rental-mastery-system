@@ -154,29 +154,6 @@ const Index = () => {
         />
       </div>
 
-      {/* أدوات التشخيص والإصلاح */}
-      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-8 animate-fade-in">
-        <Card>
-          <CardHeader>
-            <CardTitle className="rtl-title flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              تشخيص النظام
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              أدوات شاملة لتشخيص وإصلاح مشاكل المصادقة والأذونات
-            </p>
-            <Button 
-              onClick={() => navigate('/diagnostics')}
-              className="rtl-flex"
-            >
-              <Shield className="h-4 w-4 me-2" />
-              فتح أدوات التشخيص
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
 
     </div>
   );
