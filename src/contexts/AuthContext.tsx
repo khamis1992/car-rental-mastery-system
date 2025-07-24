@@ -22,11 +22,15 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   isSaasAdmin: boolean;
+  sessionValid: boolean;
+  sessionTimeRemaining: number;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   hasRole: (role: string) => boolean;
   checkSaasAdmin: () => boolean;
+  refreshSession: () => Promise<boolean>;
+  forceSessionRefresh: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,6 +49,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSaasAdmin, setIsSaasAdmin] = useState(false);
+  const [sessionValid, setSessionValid] = useState(true);
+  const [sessionTimeRemaining, setSessionTimeRemaining] = useState(0);
   
 
   const fetchProfile = useCallback(async (userId: string, retryCount = 0): Promise<Profile | null> => {
@@ -245,6 +251,91 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return user?.email === 'admin@admin.com';
   }, [user]);
 
+  // دالة تحديث الجلسة
+  const refreshSession = useCallback(async (): Promise<boolean> => {
+    try {
+      console.log('🔄 محاولة تحديث الجلسة...');
+      const { data, error } = await supabase.auth.refreshSession();
+      
+      if (error) {
+        console.error('❌ فشل في تحديث الجلسة:', error);
+        setSessionValid(false);
+        return false;
+      }
+      
+      if (data.session) {
+        console.log('✅ تم تحديث الجلسة بنجاح');
+        setSession(data.session);
+        setUser(data.session.user);
+        setSessionValid(true);
+        
+        // تحديث النشاط في قاعدة البيانات
+        try {
+          await supabase.rpc('update_user_last_activity');
+        } catch (updateError) {
+          console.warn('⚠️ تعذر تحديث آخر نشاط:', updateError);
+        }
+        
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('💥 خطأ في تحديث الجلسة:', error);
+      setSessionValid(false);
+      return false;
+    }
+  }, []);
+
+  // دالة إجبار تحديث الجلسة
+  const forceSessionRefresh = useCallback(async (): Promise<void> => {
+    console.log('🔃 إجبار تحديث الجلسة...');
+    const success = await refreshSession();
+    
+    if (!success && session) {
+      console.warn('⚠️ فشل تحديث الجلسة - قد تحتاج لتسجيل الدخول مجدداً');
+      // يمكن إضافة منطق إضافي هنا مثل إعادة التوجيه لصفحة تسجيل الدخول
+    }
+  }, [refreshSession, session]);
+
+  // مراقبة انتهاء صلاحية الجلسة
+  useEffect(() => {
+    if (!session) {
+      setSessionValid(false);
+      setSessionTimeRemaining(0);
+      return;
+    }
+
+    const checkSessionValidity = () => {
+      const now = Date.now() / 1000;
+      const expiresAt = session.expires_at || 0;
+      const timeRemaining = Math.max(0, expiresAt - now);
+      
+      setSessionTimeRemaining(timeRemaining);
+      setSessionValid(timeRemaining > 0);
+      
+      // إذا كانت الجلسة ستنتهي خلال 5 دقائق، حاول تحديثها تلقائياً
+      if (timeRemaining > 0 && timeRemaining < 300 && timeRemaining > 60) {
+        console.log('🕐 الجلسة ستنتهي قريباً، محاولة التحديث التلقائي...');
+        refreshSession();
+      }
+      
+      // إذا انتهت الجلسة
+      if (timeRemaining <= 0) {
+        console.log('⏰ انتهت صلاحية الجلسة');
+        setSessionValid(false);
+      }
+    };
+
+    // فحص أولي
+    checkSessionValidity();
+    
+    // فحص دوري كل دقيقة
+    const interval = setInterval(checkSessionValidity, 60000);
+    
+    return () => clearInterval(interval);
+  }, [session, refreshSession]);
+
   // تحديث حالة SaaS admin عند تغيير المستخدم
   useEffect(() => {
     const saasAdminStatus = checkSaasAdmin();
@@ -258,11 +349,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loading,
     isAuthenticated: !!user,
     isSaasAdmin,
+    sessionValid,
+    sessionTimeRemaining,
     signIn,
     signUp,
     signOut,
     hasRole,
     checkSaasAdmin,
+    refreshSession,
+    forceSessionRefresh,
   };
 
   return (

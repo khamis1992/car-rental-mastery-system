@@ -4,12 +4,24 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useDiagnostics } from '@/hooks/useDiagnostics';
-import { AlertCircle, CheckCircle, RefreshCw, User, Building, Shield, Clock } from 'lucide-react';
+import { AlertCircle, CheckCircle, RefreshCw, User, Building, Shield, Clock, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const DiagnosticDashboard: React.FC = () => {
   const { diagnosticResult, loading, runDiagnostics, clearDiagnostics } = useDiagnostics();
-  const { user, session } = useAuth();
+  const { user, session, refreshSession, forceSessionRefresh, sessionTimeRemaining } = useAuth();
+
+  const formatTimeRemaining = (seconds: number): string => {
+    if (seconds <= 0) return 'منتهية';
+    
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    if (hours > 0) {
+      return `${hours} ساعة و ${minutes} دقيقة`;
+    }
+    return `${minutes} دقيقة`;
+  };
 
   const getStatusIcon = (hasError: boolean) => {
     return hasError ? (
@@ -56,6 +68,16 @@ export const DiagnosticDashboard: React.FC = () => {
           {diagnosticResult && (
             <Button variant="outline" onClick={clearDiagnostics}>
               مسح النتائج
+            </Button>
+          )}
+          {session && (
+            <Button 
+              variant="secondary" 
+              onClick={forceSessionRefresh}
+              className="rtl-flex"
+            >
+              <RefreshCw className="h-4 w-4" />
+              تحديث الجلسة
             </Button>
           )}
         </div>
@@ -184,30 +206,78 @@ export const DiagnosticDashboard: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Current Session Info */}
-            {session && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg rtl-title">معلومات الجلسة الحالية</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
+            {/* Enhanced Session Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg rtl-title flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  معلومات الجلسة المحسنة
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {session ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="font-medium">البريد الإلكتروني: </span>
                       {user?.email || 'غير متوفر'}
                     </div>
                     <div>
-                      <span className="font-medium">تاريخ الإنشاء: </span>
-                      {user?.created_at ? new Date(user.created_at).toLocaleString('ar-KW') : 'غير متوفر'}
+                      <span className="font-medium">الوقت المتبقي: </span>
+                      <span className={sessionTimeRemaining < 300 ? 'text-destructive font-medium' : ''}>
+                        {formatTimeRemaining(sessionTimeRemaining)}
+                      </span>
                     </div>
                     <div>
                       <span className="font-medium">انتهاء الجلسة: </span>
-                      {session.expires_at ? new Date(session.expires_at * 1000).toLocaleString('ar-KW') : 'غير متوفر'}
+                      {diagnosticResult?.sessionInfo.expiresAt ? 
+                        new Date(diagnosticResult.sessionInfo.expiresAt).toLocaleString('ar-KW') : 
+                        'غير متوفر'
+                      }
+                    </div>
+                    <div>
+                      <span className="font-medium">يمكن التحديث: </span>
+                      <Badge variant={diagnosticResult?.sessionInfo.canRefresh ? "secondary" : "outline"}>
+                        {diagnosticResult?.sessionInfo.canRefresh ? 'نعم' : 'لا'}
+                      </Badge>
+                    </div>
+                    <div>
+                      <span className="font-medium">آخر تحديث: </span>
+                      {diagnosticResult?.sessionInfo.lastRefresh ? 
+                        new Date(diagnosticResult.sessionInfo.lastRefresh).toLocaleString('ar-KW') : 
+                        'غير متوفر'
+                      }
                     </div>
                     <div>
                       <span className="font-medium">نوع المصادقة: </span>
                       {session.token_type || 'bearer'}
                     </div>
+                  </div>
+                ) : (
+                  <div className="text-center text-muted-foreground">
+                    لا توجد جلسة نشطة
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Warnings */}
+            {diagnosticResult.warnings.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg rtl-title text-yellow-600 flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5" />
+                    التحذيرات ({diagnosticResult.warnings.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {diagnosticResult.warnings.map((warning, index) => (
+                      <div key={index} className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div className="text-sm text-yellow-800">
+                          {warning}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>

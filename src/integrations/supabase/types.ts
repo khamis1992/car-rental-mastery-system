@@ -13326,6 +13326,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_user_last_activity: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       validate_account_structure: {
         Args: {
           p_tenant_id: string

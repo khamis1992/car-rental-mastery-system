@@ -7,19 +7,27 @@ interface DiagnosticResult {
   userId: string | null;
   tenantId: string | null;
   sessionValid: boolean;
+  sessionInfo: {
+    expiresAt: string | null;
+    timeRemaining: number;
+    canRefresh: boolean;
+    lastRefresh: string | null;
+  };
   permissions: string[];
   timestamp: Date;
   errors: string[];
+  warnings: string[];
 }
 
 export const useDiagnostics = () => {
   const [diagnosticResult, setDiagnosticResult] = useState<DiagnosticResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const { user, session } = useAuth();
+  const { user, session, sessionValid, sessionTimeRemaining } = useAuth();
 
   const runDiagnostics = useCallback(async (): Promise<DiagnosticResult> => {
     setLoading(true);
     const errors: string[] = [];
+    const warnings: string[] = [];
     
     try {
       console.log('🔍 بدء التشخيص الشامل...');
@@ -27,7 +35,24 @@ export const useDiagnostics = () => {
       // فحص المصادقة الأساسي
       const isAuthenticated = !!user && !!session;
       const userId = user?.id || null;
-      const sessionValid = !!session && new Date(session.expires_at || 0) > new Date();
+      const currentSessionValid = !!session && new Date((session.expires_at || 0) * 1000) > new Date();
+      
+      // معلومات الجلسة المحسنة
+      const sessionInfo = {
+        expiresAt: session?.expires_at ? new Date((session.expires_at || 0) * 1000).toISOString() : null,
+        timeRemaining: sessionTimeRemaining || 0,
+        canRefresh: currentSessionValid && sessionTimeRemaining < 3600, // يمكن التحديث إذا تبقى أقل من ساعة
+        lastRefresh: session?.refresh_token ? new Date().toISOString() : null
+      };
+      
+      // إضافة تحذيرات الجلسة
+      if (sessionInfo.timeRemaining < 300 && sessionInfo.timeRemaining > 0) {
+        warnings.push('الجلسة ستنتهي خلال 5 دقائق');
+      } else if (sessionInfo.timeRemaining <= 0) {
+        errors.push('انتهت صلاحية الجلسة');
+      } else if (sessionInfo.timeRemaining < 1800) {
+        warnings.push('الجلسة ستنتهي قريباً');
+      }
       
       let tenantId: string | null = null;
       let permissions: string[] = [];
@@ -129,10 +154,12 @@ export const useDiagnostics = () => {
         isAuthenticated,
         userId,
         tenantId,
-        sessionValid,
+        sessionValid: currentSessionValid,
+        sessionInfo,
         permissions,
         timestamp: new Date(),
-        errors
+        errors,
+        warnings
       };
       
       setDiagnosticResult(result);
@@ -147,9 +174,16 @@ export const useDiagnostics = () => {
         userId: null,
         tenantId: null,
         sessionValid: false,
+        sessionInfo: {
+          expiresAt: null,
+          timeRemaining: 0,
+          canRefresh: false,
+          lastRefresh: null
+        },
         permissions: [],
         timestamp: new Date(),
-        errors: [`خطأ عام في التشخيص: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`]
+        errors: [`خطأ عام في التشخيص: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`],
+        warnings: []
       };
       
       setDiagnosticResult(result);
