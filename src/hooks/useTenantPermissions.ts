@@ -36,16 +36,18 @@ export const useTenantPermissions = (): TenantPermissions => {
   const { currentUserRole } = useTenant();
   const [secureContext, setSecureContext] = useState<UserTenantContext | null>(null);
 
-  // جلب السياق الآمن من النظام الجديد
+  // جلب السياق الآمن من النظام المحدث
   useEffect(() => {
     const fetchSecureContext = async () => {
       try {
         const { data, error } = await supabase.rpc('get_user_tenant_context');
         if (!error && data) {
           setSecureContext(data as unknown as UserTenantContext);
+        } else if (error) {
+          console.warn('تحذير أمني: فشل في جلب السياق الآمن:', error);
         }
       } catch (error) {
-        console.error('Error fetching secure context:', error);
+        console.error('خطأ في جلب السياق الآمن:', error);
       }
     };
 

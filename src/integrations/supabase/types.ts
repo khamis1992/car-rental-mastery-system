@@ -12419,6 +12419,10 @@ export type Database = {
         Args: { roles_param: string[] }
         Returns: boolean
       }
+      check_user_permission: {
+        Args: { required_permission: string }
+        Returns: boolean
+      }
       check_user_role: {
         Args: {
           user_id_param: string
@@ -13264,6 +13268,14 @@ export type Database = {
           created_by_param: string
         }
         Returns: string
+      }
+      secure_tenant_operation: {
+        Args: {
+          operation_type: string
+          table_name: string
+          required_role?: string
+        }
+        Returns: boolean
       }
       security_audit_report: {
         Args: Record<PropertyKey, never>
