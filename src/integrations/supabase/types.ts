@@ -13137,7 +13137,7 @@ export type Database = {
               ip_address_param?: string
               user_agent_param?: string
             }
-          | { activity_type: string; description: string }
+          | { activity_type: string; activity_description: string }
         Returns: undefined
       }
       mark_contract_deleted: {
