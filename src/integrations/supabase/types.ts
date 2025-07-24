@@ -12284,7 +12284,7 @@ export type Database = {
         Returns: Json
       }
       check_period_status: {
-        Args: { period_date: string }
+        Args: { check_date: string }
         Returns: Json
       }
       check_system_health: {
