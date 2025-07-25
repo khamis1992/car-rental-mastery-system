@@ -3368,10 +3368,13 @@ export type Database = {
       }
       contracts: {
         Row: {
+          activated_at: string | null
           actual_end_date: string | null
           actual_start_date: string | null
+          cancelled_at: string | null
           company_signature: string | null
           company_signed_at: string | null
+          completed_at: string | null
           contract_number: string
           contract_type: Database["public"]["Enums"]["contract_type"]
           cost_center_id: string | null
@@ -3417,10 +3420,13 @@ export type Database = {
           vehicle_id: string
         }
         Insert: {
+          activated_at?: string | null
           actual_end_date?: string | null
           actual_start_date?: string | null
+          cancelled_at?: string | null
           company_signature?: string | null
           company_signed_at?: string | null
+          completed_at?: string | null
           contract_number: string
           contract_type: Database["public"]["Enums"]["contract_type"]
           cost_center_id?: string | null
@@ -3466,10 +3472,13 @@ export type Database = {
           vehicle_id: string
         }
         Update: {
+          activated_at?: string | null
           actual_end_date?: string | null
           actual_start_date?: string | null
+          cancelled_at?: string | null
           company_signature?: string | null
           company_signed_at?: string | null
+          completed_at?: string | null
           contract_number?: string
           contract_type?: Database["public"]["Enums"]["contract_type"]
           cost_center_id?: string | null
@@ -8246,10 +8255,12 @@ export type Database = {
           invoice_id: string
           journal_entry_id: string | null
           notes: string | null
+          paid_at: string | null
           payment_category: string | null
           payment_date: string
           payment_method: string
           payment_number: string
+          payment_reference: string | null
           receipt_url: string | null
           status: string
           tenant_id: string
@@ -8273,10 +8284,12 @@ export type Database = {
           invoice_id: string
           journal_entry_id?: string | null
           notes?: string | null
+          paid_at?: string | null
           payment_category?: string | null
           payment_date?: string
           payment_method?: string
           payment_number: string
+          payment_reference?: string | null
           receipt_url?: string | null
           status?: string
           tenant_id?: string
@@ -8300,10 +8313,12 @@ export type Database = {
           invoice_id?: string
           journal_entry_id?: string | null
           notes?: string | null
+          paid_at?: string | null
           payment_category?: string | null
           payment_date?: string
           payment_method?: string
           payment_number?: string
+          payment_reference?: string | null
           receipt_url?: string | null
           status?: string
           tenant_id?: string
@@ -11611,6 +11626,7 @@ export type Database = {
           asset_code_hierarchy: string | null
           asset_id: string | null
           asset_sequence_number: number | null
+          available_from: string | null
           body_type: string | null
           color: string
           cost_center_id: string | null
@@ -11629,6 +11645,7 @@ export type Database = {
           insurance_type: string | null
           last_maintenance_date: string | null
           license_plate: string
+          maintenance_start: string | null
           make: string
           max_daily_rate: number | null
           mileage: number | null
@@ -11643,6 +11660,7 @@ export type Database = {
           purchase_cost: number | null
           purchase_date: string | null
           registration_expiry: string | null
+          rented_at: string | null
           residual_value: number | null
           status: Database["public"]["Enums"]["vehicle_status"]
           tenant_id: string
@@ -11659,6 +11677,7 @@ export type Database = {
           asset_code_hierarchy?: string | null
           asset_id?: string | null
           asset_sequence_number?: number | null
+          available_from?: string | null
           body_type?: string | null
           color: string
           cost_center_id?: string | null
@@ -11677,6 +11696,7 @@ export type Database = {
           insurance_type?: string | null
           last_maintenance_date?: string | null
           license_plate: string
+          maintenance_start?: string | null
           make: string
           max_daily_rate?: number | null
           mileage?: number | null
@@ -11691,6 +11711,7 @@ export type Database = {
           purchase_cost?: number | null
           purchase_date?: string | null
           registration_expiry?: string | null
+          rented_at?: string | null
           residual_value?: number | null
           status?: Database["public"]["Enums"]["vehicle_status"]
           tenant_id?: string
@@ -11707,6 +11728,7 @@ export type Database = {
           asset_code_hierarchy?: string | null
           asset_id?: string | null
           asset_sequence_number?: number | null
+          available_from?: string | null
           body_type?: string | null
           color?: string
           cost_center_id?: string | null
@@ -11725,6 +11747,7 @@ export type Database = {
           insurance_type?: string | null
           last_maintenance_date?: string | null
           license_plate?: string
+          maintenance_start?: string | null
           make?: string
           max_daily_rate?: number | null
           mileage?: number | null
@@ -11739,6 +11762,7 @@ export type Database = {
           purchase_cost?: number | null
           purchase_date?: string | null
           registration_expiry?: string | null
+          rented_at?: string | null
           residual_value?: number | null
           status?: Database["public"]["Enums"]["vehicle_status"]
           tenant_id?: string
