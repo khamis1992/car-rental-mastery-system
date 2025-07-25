@@ -13234,8 +13234,8 @@ export type Database = {
               related_entity_type?: string
               related_entity_id?: string
             }
-          | { activity_type: string; description?: string }
-        Returns: string
+          | { activity_type: string; details?: string }
+        Returns: undefined
       }
       mark_contract_deleted: {
         Args:
