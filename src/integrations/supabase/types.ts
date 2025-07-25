@@ -13321,6 +13321,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      reprocess_single_payment: {
+        Args: { payment_id_param: string }
+        Returns: boolean
+      }
       restore_cancelled_tenant: {
         Args: { tenant_id_param: string; restore_reason?: string }
         Returns: Json
