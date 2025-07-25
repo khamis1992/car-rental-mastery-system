@@ -27,6 +27,38 @@ export const useCustomerOperations = () => {
     loadingKey: 'customer-operations'
   });
 
+  const validateCustomerData = useCallback((data: CustomerData): string[] => {
+    const errors: string[] = [];
+
+    if (!data.name?.trim()) {
+      errors.push('اسم العميل مطلوب');
+    }
+
+    if (!data.phone?.trim()) {
+      errors.push('رقم الهاتف مطلوب');
+    } else {
+      // التحقق من صحة رقم الهاتف الكويتي
+      const cleanPhone = data.phone.replace(/[\s\-\(\)]/g, '');
+      const phoneRegex = /^(\+965|965)?[5-9][0-9]{7}$/;
+      if (!phoneRegex.test(cleanPhone)) {
+        errors.push('رقم الهاتف غير صحيح. يجب أن يبدأ بـ 5، 6، 7، 8، أو 9 ويتكون من 8 أرقام');
+      }
+    }
+
+    if (data.customer_type === 'company' && !data.company_contact_person?.trim()) {
+      errors.push('اسم الشخص المسؤول مطلوب للشركات');
+    }
+
+    if (data.email && data.email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(data.email)) {
+        errors.push('البريد الإلكتروني غير صحيح');
+      }
+    }
+
+    return errors;
+  }, []);
+
   const addCustomer = useCallback(async (customerData: CustomerData) => {
     return execute(async () => {
       // التحقق من المصادقة أولاً
@@ -34,45 +66,38 @@ export const useCustomerOperations = () => {
         throw new Error('يجب تسجيل الدخول أولاً');
       }
 
-      // محاولة توليد رقم العميل
-      let customerNumber: string;
-      try {
-        const { data: generatedNumber, error: numberError } = await supabase
-          .rpc('generate_customer_number_simple');
-
-        if (numberError || !generatedNumber) {
-          console.warn('فشل في توليد رقم العميل، استخدام رقم احتياطي:', numberError);
-          const timestamp = Date.now().toString().slice(-6);
-          customerNumber = `CUS${timestamp}`;
-        } else {
-          customerNumber = generatedNumber;
-        }
-      } catch (error) {
-        console.warn('خطأ في توليد رقم العميل، استخدام رقم احتياطي:', error);
-        const timestamp = Date.now().toString().slice(-6);
-        customerNumber = `CUS${timestamp}`;
+      // التحقق من صحة البيانات قبل الإرسال
+      const validationErrors = validateCustomerData(customerData);
+      if (validationErrors.length > 0) {
+        throw new Error(`خطأ في البيانات: ${validationErrors.join(', ')}`);
       }
 
-      // الحصول على معرف المؤسسة الحالية
-      const { data: tenantData, error: tenantError } = await supabase
-        .rpc('get_current_tenant_id');
+      // تنظيف البيانات - إزالة المسافات الزائدة والقيم الفارغة
+      const cleanedData = {
+        customer_type: customerData.customer_type,
+        name: customerData.name?.trim(),
+        phone: customerData.phone?.trim(),
+        ...(customerData.email?.trim() && { email: customerData.email.trim() }),
+        ...(customerData.address?.trim() && { address: customerData.address.trim() }),
+        ...(customerData.city?.trim() && { city: customerData.city.trim() }),
+        ...(customerData.country?.trim() && { country: customerData.country.trim() }),
+        ...(customerData.national_id?.trim() && { national_id: customerData.national_id.trim() }),
+        ...(customerData.customer_type === 'company' && customerData.company_contact_person?.trim() && { 
+          company_contact_person: customerData.company_contact_person.trim() 
+        }),
+        ...(customerData.customer_type === 'company' && customerData.company_registration_number?.trim() && { 
+          company_registration_number: customerData.company_registration_number.trim() 
+        }),
+        ...(customerData.tax_number?.trim() && { tax_number: customerData.tax_number.trim() }),
+        ...(customerData.notes?.trim() && { notes: customerData.notes.trim() }),
+      };
 
-      if (tenantError || !tenantData) {
-        console.error('❌ خطأ في الحصول على معرف المؤسسة:', tenantError);
-        throw new Error('فشل في تحديد المؤسسة الحالية. يرجى تسجيل الخروج والدخول مرة أخرى');
-      }
+      console.log('✅ إدراج العميل بالبيانات المنظفة:', cleanedData);
 
-      console.log('✅ معرف المؤسسة للعميل الجديد:', tenantData);
-
-      // إدخال العميل الجديد
+      // إدراج العميل الجديد - دع trigger يتولى tenant_id ورقم العميل
       const { data, error } = await supabase
         .from('customers')
-        .insert([{
-          ...customerData,
-          customer_number: customerNumber,
-          tenant_id: tenantData,
-          created_by: user.id
-        }])
+        .insert([cleanedData as any])
         .select()
         .single();
 
@@ -92,26 +117,59 @@ export const useCustomerOperations = () => {
           } else if (error.details?.includes('email') || error.message?.includes('email')) {
             throw new Error('البريد الإلكتروني مستخدم مسبقاً من قبل عميل آخر');
           } else if (error.details?.includes('customer_number') || error.message?.includes('customer_number')) {
-            console.warn('رقم العميل مكرر - محاولة إعادة توليد رقم جديد');
             throw new Error('رقم العميل مكرر. يرجى المحاولة مرة أخرى');
+          } else if (error.details?.includes('national_id') || error.message?.includes('national_id')) {
+            throw new Error('الرقم المدني مستخدم مسبقاً من قبل عميل آخر');
           } else {
-            throw new Error('البيانات المدخلة مستخدمة مسبقاً. يرجى التحقق من رقم الهاتف والبريد الإلكتروني');
+            throw new Error('البيانات المدخلة مستخدمة مسبقاً. يرجى التحقق من البيانات');
           }
-        } else if (error.message?.includes('tenant') || error.message?.includes('معرف المؤسسة')) {
-          throw new Error('خطأ في تحديد المؤسسة. يرجى تسجيل الخروج والدخول مرة أخرى');
-        } else if (error.message?.includes('RLS') || error.message?.includes('row-level security')) {
-          throw new Error('ليس لديك صلاحية لإضافة عملاء. يرجى التواصل مع المدير');
-        } else if (error.message?.includes('JWT') || error.message?.includes('مصادقة')) {
-          throw new Error('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
-        } else {
-          throw new Error(`فشل في إضافة العميل: ${error.message}`);
         }
+        
+        // معالجة الأخطاء من التحقق المخصص (triggers)
+        if (error.message?.includes('يجب تسجيل الدخول لإضافة عميل')) {
+          throw new Error('يجب تسجيل الدخول لإضافة عميل');
+        }
+        
+        if (error.message?.includes('لا يمكن تحديد المؤسسة الحالية')) {
+          throw new Error('لا يمكن تحديد المؤسسة الحالية. تأكد من ربط المستخدم بمؤسسة صالحة.');
+        }
+        
+        if (error.message?.includes('اسم العميل مطلوب')) {
+          throw new Error('اسم العميل مطلوب');
+        }
+        
+        if (error.message?.includes('نوع العميل مطلوب')) {
+          throw new Error('نوع العميل مطلوب');
+        }
+        
+        if (error.message?.includes('اسم الشركة مطلوب')) {
+          throw new Error('اسم الشركة مطلوب للعملاء من نوع شركة');
+        }
+
+        if (error.message?.includes('رقم الهاتف غير صالح')) {
+          throw new Error('رقم الهاتف غير صالح');
+        }
+
+        if (error.message?.includes('البريد الإلكتروني غير صالح')) {
+          throw new Error('البريد الإلكتروني غير صالح');
+        }
+        
+        if (error.message?.includes('RLS') || error.message?.includes('row-level security')) {
+          throw new Error('ليس لديك صلاحية لإضافة عملاء. يرجى التواصل مع المدير');
+        }
+        
+        if (error.message?.includes('JWT') || error.message?.includes('مصادقة')) {
+          throw new Error('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
+        }
+        
+        throw new Error(error.message || 'فشل في إضافة العميل');
       }
 
+      console.log('✅ تم إضافة العميل بنجاح:', data);
       toast.success('تم إضافة العميل بنجاح');
       return data;
     });
-  }, [execute, user]);
+  }, [execute, user, validateCustomerData]);
 
   const updateCustomer = useCallback(async (customerId: string, customerData: CustomerData) => {
     return execute(async () => {
@@ -186,38 +244,6 @@ export const useCustomerOperations = () => {
     });
   }, [execute]);
 
-  const validateCustomerData = useCallback((data: CustomerData): string[] => {
-    const errors: string[] = [];
-
-    if (!data.name?.trim()) {
-      errors.push('اسم العميل مطلوب');
-    }
-
-    if (!data.phone?.trim()) {
-      errors.push('رقم الهاتف مطلوب');
-    } else {
-      // التحقق من صحة رقم الهاتف الكويتي
-      const cleanPhone = data.phone.replace(/[\s\-\(\)]/g, '');
-      const phoneRegex = /^(\+965|965)?[5-9][0-9]{7}$/;
-      if (!phoneRegex.test(cleanPhone)) {
-        errors.push('رقم الهاتف غير صحيح. يجب أن يبدأ بـ 5، 6، 7، 8، أو 9 ويتكون من 8 أرقام');
-      }
-    }
-
-    if (data.customer_type === 'company' && !data.company_contact_person?.trim()) {
-      errors.push('اسم الشخص المسؤول مطلوب للشركات');
-    }
-
-    if (data.email && data.email.trim()) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(data.email)) {
-        errors.push('البريد الإلكتروني غير صحيح');
-      }
-    }
-
-    return errors;
-  }, []);
-
   const testCustomerAccess = useCallback(async () => {
     return execute(async () => {
       // اختبار قراءة العملاء
@@ -249,15 +275,6 @@ export const useCustomerOperations = () => {
       // اختبار إدراج عميل تجريبي (دون حفظ فعلي)
       let insertTestResult = 'غير مختبر';
       try {
-        const testData = {
-          customer_type: 'individual' as const,
-          name: 'اختبار',
-          phone: '50000000',
-          customer_number: 'TEST001',
-          tenant_id: tenantId,
-          created_by: user?.id
-        };
-        
         // نجرب التحقق من البيانات فقط دون إدراج فعلي
         if (tenantId && user?.id) {
           insertTestResult = 'ممكن - البيانات المطلوبة متوفرة';
