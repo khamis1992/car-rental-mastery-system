@@ -13434,6 +13434,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      test_security_functions: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       test_tenant_data_isolation: {
         Args: { test_tenant_id: string }
         Returns: Json
