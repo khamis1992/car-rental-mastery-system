@@ -77,9 +77,26 @@ export const useCustomerOperations = () => {
         .single();
 
       if (error) {
-        // معالجة أخطاء محددة للعملاء
+        console.error('❌ خطأ في إضافة العميل:', error);
+        console.error('❌ تفاصيل الخطأ:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        
+        // معالجة أخطاء التكرار المحددة
         if (error.code === '23505') {
-          throw new Error('رقم الهاتف أو البريد الإلكتروني مستخدم مسبقاً');
+          if (error.details?.includes('phone') || error.message?.includes('phone')) {
+            throw new Error('رقم الهاتف مستخدم مسبقاً من قبل عميل آخر');
+          } else if (error.details?.includes('email') || error.message?.includes('email')) {
+            throw new Error('البريد الإلكتروني مستخدم مسبقاً من قبل عميل آخر');
+          } else if (error.details?.includes('customer_number') || error.message?.includes('customer_number')) {
+            console.warn('رقم العميل مكرر - محاولة إعادة توليد رقم جديد');
+            throw new Error('رقم العميل مكرر. يرجى المحاولة مرة أخرى');
+          } else {
+            throw new Error('البيانات المدخلة مستخدمة مسبقاً. يرجى التحقق من رقم الهاتف والبريد الإلكتروني');
+          }
         } else if (error.message?.includes('tenant') || error.message?.includes('معرف المؤسسة')) {
           throw new Error('خطأ في تحديد المؤسسة. يرجى تسجيل الخروج والدخول مرة أخرى');
         } else if (error.message?.includes('RLS') || error.message?.includes('row-level security')) {
