@@ -191,7 +191,7 @@ export class BudgetService {
     try {
       // استدعاء دالة حساب التباين
       const { error: calcError } = await supabase.rpc('calculate_budget_variance', {
-        budget_id: budgetId
+        budget_id_param: budgetId
       });
 
       if (calcError) {

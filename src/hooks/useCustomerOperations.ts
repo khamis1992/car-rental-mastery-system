@@ -53,12 +53,24 @@ export const useCustomerOperations = () => {
         customerNumber = `CUS${timestamp}`;
       }
 
+      // الحصول على معرف المؤسسة الحالية
+      const { data: tenantData, error: tenantError } = await supabase
+        .rpc('get_current_tenant_id');
+
+      if (tenantError || !tenantData) {
+        console.error('❌ خطأ في الحصول على معرف المؤسسة:', tenantError);
+        throw new Error('فشل في تحديد المؤسسة الحالية. يرجى تسجيل الخروج والدخول مرة أخرى');
+      }
+
+      console.log('✅ معرف المؤسسة للعميل الجديد:', tenantData);
+
       // إدخال العميل الجديد
       const { data, error } = await supabase
         .from('customers')
         .insert([{
           ...customerData,
           customer_number: customerNumber,
+          tenant_id: tenantData,
           created_by: user.id
         }])
         .select()
@@ -209,14 +221,47 @@ export const useCustomerOperations = () => {
         console.warn('خطأ في دالة توليد رقم العميل:', numberError);
       }
 
+      // اختبار الحصول على معرف المؤسسة
+      const { data: tenantId, error: tenantError } = await supabase
+        .rpc('get_current_tenant_id');
+
+      if (tenantError) {
+        console.warn('خطأ في الحصول على معرف المؤسسة:', tenantError);
+      }
+
+      // اختبار إدراج عميل تجريبي (دون حفظ فعلي)
+      let insertTestResult = 'غير مختبر';
+      try {
+        const testData = {
+          customer_type: 'individual' as const,
+          name: 'اختبار',
+          phone: '50000000',
+          customer_number: 'TEST001',
+          tenant_id: tenantId,
+          created_by: user?.id
+        };
+        
+        // نجرب التحقق من البيانات فقط دون إدراج فعلي
+        if (tenantId && user?.id) {
+          insertTestResult = 'ممكن - البيانات المطلوبة متوفرة';
+        } else {
+          insertTestResult = 'غير ممكن - بيانات مفقودة';
+        }
+      } catch (error) {
+        insertTestResult = `خطأ: ${error}`;
+      }
+
       return {
         canRead: !readError,
         canGenerateNumber: !numberError,
+        canGetTenantId: !tenantError,
         customerCount: readTest?.length || 0,
-        generatedNumber: numberTest || 'غير متاح'
+        generatedNumber: numberTest || 'غير متاح',
+        tenantId: tenantId || 'غير متاح',
+        insertTest: insertTestResult
       };
     });
-  }, [execute]);
+  }, [execute, user]);
 
   return {
     addCustomer,
