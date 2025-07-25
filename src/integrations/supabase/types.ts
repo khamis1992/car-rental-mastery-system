@@ -12663,6 +12663,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      diagnose_user_tenant_issues: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       enhanced_security_monitor: {
         Args: Record<PropertyKey, never>
         Returns: Json

@@ -19,6 +19,8 @@ interface TenantContextType {
   isWithinLimits: (resource: 'users' | 'vehicles' | 'contracts') => boolean;
   debugInfo: any;
   clearError: () => void;
+  forceRefresh: () => Promise<void>;
+  retryConnection: () => Promise<void>;
 }
 
 const TenantContext = createContext<TenantContextType | undefined>(undefined);
@@ -33,7 +35,7 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>(null);
-  const { user, session } = useAuth();
+  const { user, session, sessionValid, refreshSession } = useAuth();
   const tenantService = new TenantService();
 
   // دالة لتنظيف الأخطاء
@@ -117,6 +119,14 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
       setError(null);
       setDebugInfo(null);
       tenantIsolationMiddleware.reset();
+      return;
+    }
+
+    // التحقق من صحة الجلسة
+    if (!sessionValid) {
+      console.log('🔒 الجلسة غير صالحة - تخطي تحميل بيانات المؤسسة');
+      setError('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
+      setLoading(false);
       return;
     }
 
@@ -339,6 +349,32 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
     await loadTenant();
   };
 
+  // دالة إجبار التحديث مع تحديث الجلسة
+  const forceRefresh = async () => {
+    console.log('🔃 إجبار تحديث شامل...');
+    try {
+      setLoading(true);
+      
+      // محاولة تحديث الجلسة أولاً
+      if (refreshSession) {
+        const sessionRefreshed = await refreshSession();
+        console.log('🔑 نتيجة تحديث الجلسة:', sessionRefreshed);
+      }
+      
+      // ثم إعادة تحميل بيانات المؤسسة
+      await loadTenant();
+    } catch (error) {
+      console.error('❌ خطأ في التحديث الشامل:', error);
+    }
+  };
+
+  // دالة إعادة المحاولة للاتصال
+  const retryConnection = async () => {
+    console.log('🔄 إعادة محاولة الاتصال...');
+    setError(null);
+    await forceRefresh();
+  };
+
   const isWithinLimits = (resource: 'users' | 'vehicles' | 'contracts'): boolean => {
     if (!currentTenant) return false;
     
@@ -362,7 +398,7 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
   useEffect(() => {
     console.log('🔄 تغيير في حالة المصادقة - إعادة تحميل بيانات المؤسسة');
     loadTenant();
-  }, [user, session]);
+  }, [user, session, sessionValid]);
 
   const value: TenantContextType = {
     currentTenant,
@@ -375,6 +411,8 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
     isWithinLimits,
     debugInfo,
     clearError,
+    forceRefresh,
+    retryConnection,
   };
 
   return <TenantContext.Provider value={value}>{children}</TenantContext.Provider>;
